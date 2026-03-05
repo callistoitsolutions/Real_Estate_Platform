@@ -6,15 +6,11 @@
             <!-- Page Header -->
             <div class="page-header">
                 <div class="page-header-content">
-                    <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
-                    <p class="page-subtitle">Welcome back! Here's what's happening with your properties today.</p>
+                    <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Pg Co living Property Listings</h1>
                     <div class="page-actions">
-                        <button class="btn-primary-custom">
-                            <i class="fas fa-plus-circle"></i> Add Property
-                        </button>
-                        <button class="btn-primary-custom" style="background: transparent; border: 2px solid white; color: white;">
-                            <i class="fas fa-download"></i> Export
-                        </button>
+                        <a href="{% url "pg_coliving" %}"><button class="btn-primary-custom">
+                            <i class="fas fa-plus-circle"></i> Add Pg Co living (Rent) Property
+                        </button></a>
                     </div>
                 </div>
             </div>
@@ -414,8 +410,8 @@
     
     <script>
 
-        $("#Admin_Dashboard").addClass("active");
-
+        $("#Rent").addClass("active");
+        
         // Sidebar Toggle for Desktop and Mobile
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');

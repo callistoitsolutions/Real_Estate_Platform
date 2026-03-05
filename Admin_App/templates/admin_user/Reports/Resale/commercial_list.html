@@ -6,20 +6,17 @@
             <!-- Page Header -->
             <div class="page-header">
                 <div class="page-header-content">
-                    <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
-                    <p class="page-subtitle">Welcome back! Here's what's happening with your properties today.</p>
+                    <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Sell Commercial Property Listings</h1>
                     <div class="page-actions">
-                        <button class="btn-primary-custom">
-                            <i class="fas fa-plus-circle"></i> Add Property
-                        </button>
-                        <button class="btn-primary-custom" style="background: transparent; border: 2px solid white; color: white;">
-                            <i class="fas fa-download"></i> Export
-                        </button>
+                        <a href="{% url "commercial_resale" %}"><button class="btn-primary-custom">
+                            <i class="fas fa-plus-circle"></i> Add Resale (Commercial) Property
+                        </button></a>
                     </div>
                 </div>
             </div>
 
             <!-- Statistics Cards -->
+
             <div class="stats-grid">
                 <div class="stat-card primary">
                     <div class="stat-icon primary">
@@ -87,6 +84,7 @@
                     </span>
                 </div>
             </div>
+
 
             <!-- Analytics Section with Charts -->
             <div class="analytics-section">
@@ -414,8 +412,8 @@
     
     <script>
 
-        $("#Admin_Dashboard").addClass("active");
-
+        $("#Resale").addClass("active");
+        
         // Sidebar Toggle for Desktop and Mobile
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');

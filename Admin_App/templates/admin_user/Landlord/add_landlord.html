@@ -843,9 +843,9 @@
     <div class="form-header">
       <div class="form-title">
         <i class="fas fa-edit"></i>
-        Sell Plot/Land
+        Add Landlord
       </div>
-      <button class="btn-back" onclick="history.back();">
+      <button  class="btn-back" onclick="history.back();">
         <i class="fas fa-arrow-left"></i>
         Back to List
       </button>
@@ -856,321 +856,92 @@
 
       <div class="form-section">
         <div class="section-header">
-          <i class="fas fa-info-circle"></i>
-          Plot/Land Details
+          <i class="fas fa-house-user"></i>
+          Landlord Details
         </div>
         <div class="section-body">
           <div class="row">
 
-            <div class="form-group mt-2">
-              <label class="form-label">Plot Title <span class="required">*</span></label>
-              <input type="text" class="form-control" id="plot_title" placeholder="e.g., Prime Residential Plot"
-                required>
-            </div>
 
-            <div class="col-md-4">
-              <div class="form-group mt-2">
-                <label class="form-label">Plot Area (sq.ft) <span class="required">*</span></label>
-                <input type="number" class="form-control" id="plot_area" placeholder="e.g., 2000" required>
-              </div>
-            </div>
-
-            <div class="col-md-4">
-              <div class="form-group mt-2">
-                <label class="form-label">Road Facing <span class="required">*</span></label>
-                <select class="form-select" id="plot_road_facing" required>
-                  <option value="">Select</option>
-                  <option value="main">Main Road</option>
-                  <option value="internal">Internal Road</option>
-                  <option value="corner">Corner Plot</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-md-4">
-              <div class="form-group mt-2">
-                <label class="form-label">Corner Plot?</label>
-                <select class="form-select" id="plot_corner">
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="form-group mt-2">
-            <label class="form-label">Fencing Done?</label>
-            <div class="radio-group">
-              <label class="radio-option">
-                <input type="radio" name="plot_fencing" value="no"> No
-              </label>
-              <label class="radio-option">
-                <input type="radio" name="plot_fencing" value="yes"> Yes
-              </label>
-            </div>
-          </div>
-
-          <div class="form-group mt-2">
-            <label class="form-label">Sanctioning Authority</label>
-            <input type="text" class="form-control" id="plot_authority" placeholder="e.g., MHADA, CIDCO">
-          </div>
-
-        </div>
-      </div>
-
-
-
-      <div class="form-section">
-        <div class="section-header">
-          <i class="fas fa-ruler-combined"></i>
-          Pricing
-        </div>
-        <div class="section-body">
-          <div class="row">
-            <div class="col-md-6 mt-2">
+            <div class="col-md-4 mt-2">
               <div class="form-group">
-                <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
-                <input type="number" class="form-control" id="plot_price" placeholder="e.g., 3000000" required>
+                <label class="form-label">Name <span class="required">*</span></label>
+                <input type="text" class="form-control" id="agri_village" placeholder="Enter Name" required>
               </div>
             </div>
-            <div class="col-md-6 mt-2">
+
+            <div class="col-md-4 mt-2">
               <div class="form-group">
-                <label class="form-label">Price per Sq.ft (₹)</label>
-                <input type="number" class="form-control" id="plot_price_per_sqft" placeholder="Auto-calculated"
-                  readonly>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="section-header">
-          <i class="fas fa-shield-halved"></i>
-          Ownership & Legal Details
-        </div>
-        <div class="section-body">
-          <div class="row">
-            <div class="col-md-6 mt-2">
-
-              <div class="form-group mt-2">
-                <label class="form-label">Ownership Type <span class="required">*</span></label>
-                <select class="form-select" id="plot_ownership" required>
-                  <option value="">Select</option>
-                  <option value="freehold">Freehold</option>
-                  <option value="leasehold">Leasehold</option>
-                </select>
-              </div>
-
-            </div>
-
-            <div class="col-md-6 ">
-
-              <div class="form-group mt-2">
-                <label class="form-label">No. of Owners <span class="required">*</span></label>
-                <select class="form-select" id="plot_num_owners" required>
-                  <option value="">Select</option>
-                  <option value="1">Single Owner</option>
-                  <option value="2">2 Owners</option>
-                  <option value="3+">3+ Owners</option>
-                </select>
-              </div>
-
-            </div>
-
-          </div>
-
-          <div class="row">
-            <div class="col-md-12">
-
-              <div class="form-group mt-2">
-                <label class="form-label">Loan on Property? <span class="required">*</span></label>
-                <div class="radio-group">
-                  <label class="radio-option">
-                    <input type="radio" name="plot_loan" value="no" required> No
-                  </label>
-                  <label class="radio-option">
-                    <input type="radio" name="plot_loan" value="yes"> Yes
-                  </label>
-                </div>
+                <label class="form-label">Email Address <span class="required">*</span></label>
+                <input type="text" class="form-control" id="agri_taluka" placeholder="Enter Email Address" required>
               </div>
             </div>
 
-            <div class="conditional-section mt-2" id="plot_loan_amount_section" style="display: none;">
+            <div class="col-md-4 mt-2">
               <div class="form-group">
-                <label class="form-label">Loan Amount (₹)</label>
-                <input type="number" class="form-control" id="plot_loan_amount" placeholder="e.g., 1000000">
+                <label class="form-label">Phone Number <span class="required">*</span></label>
+                <input type="text" class="form-control" id="agri_district" placeholder="Enter Phone Number" required>
               </div>
             </div>
+            
+
+
           </div>
 
           <div class="row">
-            <div class="form-group mt-2">
-              <label class="form-label">Any Legal Dispute? <span class="required">*</span></label>
-              <div class="radio-group">
-                <label class="radio-option">
-                  <input type="radio" name="plot_dispute" value="no" required> No
-                </label>
-                <label class="radio-option">
-                  <input type="radio" name="plot_dispute" value="yes"> Yes
-                </label>
-              </div>
-            </div>
-
-            <div class="conditional-section mt-2" id="plot_dispute_details_section" style="display: none;">
+            <div class="col-md-4 mt-2">
               <div class="form-group">
-                <label class="form-label">Dispute Description</label>
-                <textarea class="form-control" id="plot_dispute_details"
-                  placeholder="Describe the legal dispute"></textarea>
+                <label class="form-label">State <span class="required">*</span></label>
+                <input type="text" class="form-control" id="agri_district" placeholder="Enter State" required>
               </div>
             </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-12">
-
-              <div class="form-group mt-2">
-                <label class="form-label">Government Tax Paid? <span class="required">*</span></label>
-                <div class="radio-group">
-                  <label class="radio-option">
-                    <input type="radio" name="plot_tax" value="yes" required> Yes - Paid
-                  </label>
-                  <label class="radio-option">
-                    <input type="radio" name="plot_tax" value="no"> No - Pending
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="conditional-section mt-2" id="plot_tax_amount_section" style="display: none;">
-              <div class="form-group">
-                <label class="form-label">Pending Tax Amount (₹)</label>
-                <input type="number" class="form-control" id="plot_tax_amount" placeholder="e.g., 30000">
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section">
-          <div class="section-header">
-            <i class="fas fa-images"></i>
-            Property Images
-          </div>
-          <div class="image-upload-area" id="uploadArea">
-            <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*"
-              style="display: none;">
-            <div class="upload-icon">
-              <i class="fas fa-cloud-upload-alt"></i>
-            </div>
-            <div class="upload-text">Click or Drag Images Here</div>
-            <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG)</div>
-          </div>
-          <div class="image-preview" id="imagePreview"></div>
-
-        </div>
-
-        <div class="row">
-          <div class="col-md-6 mt-2">
-            <div class="form-group">
-              <label class="form-label">
-                <i class="fa-solid fa-file"></i> Upload Encumberance Certificate <span class="required">*</span>
-              </label>
-
-              <input type="file" name="property_images" accept="pdf/*">
-            </div>
-          </div>
-
-          <div class="col-md-6 mt-2">
-            <div class="form-group">
-              <label class="form-label">
-                <i class="fa-solid fa-camera"></i> Upload Video on Social Media <span class="required">*</span>
-              </label>
-
-              <input type="file" name="property_images" accept="video/*">
-            </div>
-          </div>
-
-
-
-        </div>
-        <br>
-
-
-        <div class="form-section">
-          <div class="section-header">
-            <i class="fas fa-location-dot"></i>
-            Address
-          </div>
-          <div class="row">
-            <div class="col-md-6 mt-2">
+            <div class="col-md-4 mt-2">
               <div class="form-group">
                 <label class="form-label">City <span class="required">*</span></label>
-                <input type="text" class="form-control" id="plot_city" placeholder="e.g., Mumbai" required>
+                <input type="text" class="form-control" id="agri_district" placeholder="Enter City" required>
               </div>
             </div>
-            <div class="col-md-6 mt-2">
+            <div class="col-md-4 mt-2">
               <div class="form-group">
-                <label class="form-label">Locality <span class="required">*</span></label>
-                <input type="text" class="form-control" id="plot_locality" placeholder="e.g., Panvel" required>
+                <label class="form-label">Address <span class="required">*</span></label>
+                <textarea class="form-control" placeholder="Enter Address"></textarea>
               </div>
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Complete Address <span class="required">*</span></label>
-            <textarea class="form-control" id="plot_address" placeholder="Complete address" required></textarea>
-          </div>
-
-
-        </div>
-
-        <div class="form-section">
-          <div class="section-header">
-            <i class="fas fa-user"></i>
-            Owner Contact Information
-          </div>
           <div class="row">
             <div class="col-md-4 mt-2">
               <div class="form-group">
-                <label class="form-label">Owner Name <span class="required">*</span></label>
-                <input type="text" class="form-control" id="plot_owner_name" placeholder="Full name" required>
+                <label class="form-label">Password <span class="required">*</span></label>
+                <input type="password" class="form-control" id="agri_district" placeholder="Enter Password" required>
               </div>
             </div>
             <div class="col-md-4 mt-2">
               <div class="form-group">
-                <label class="form-label">Owner Contact <span class="required">*</span></label>
-                <input type="tel" class="form-control" id="plot_owner_contact" placeholder="10-digit mobile"
-                  pattern="[0-9]{10}" required>
+                <label class="form-label">Confirm Password <span class="required">*</span></label>
+                <input type="text" class="form-control" id="agri_district" placeholder="Enter Confirm Password" required>
               </div>
             </div>
             <div class="col-md-4 mt-2">
               <div class="form-group">
-                <label class="form-label">Email <span class="required">*</span></label>
-                <input type="email" class="form-control" id="plot_owner_email" placeholder="email@example.com" required>
+                <label class="form-label">Profile Picture <span class="required">*</span></label>
+                <input type="file" class="form-control" id="agri_district" placeholder="Enter Confirm Password" required>
               </div>
             </div>
+
           </div>
 
-          <div class="form-group mt-2">
-            <label class="form-label">Residential Status <span class="required">*</span></label>
-            <div class="radio-group">
-              <label class="radio-option">
-                <input type="radio" name="plot_residency" value="resident" required> Resident
-              </label>
-              <label class="radio-option">
-                <input type="radio" name="plot_residency" value="nri"> NRI
-              </label>
+          <div class="row">
+            <div class="col-md-4 mt-2">
+              <div class="form-group">
+                <label class="form-label">Role <span class="required">*</span></label>
+                <input type="text" class="form-control" id="agri_district" placeholder="Enter Password" required value="Landlord" disabled>
+              </div>
             </div>
-          </div>
 
+          </div>
 
         </div>
-
       </div>
 
       <div class="form-footer">
@@ -1189,8 +960,17 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+        window.onload = function() {
+            if (CKEDITOR.instances.resale_agricultural_desc) {
+                CKEDITOR.instances.resale_agricultural_desc.destroy();
+            }
+            CKEDITOR.replace('resale_agricultural_desc');
+        };
+</script>
 
-  $("#Resale").addClass("active");
+<script>
+
+  $("#Teams").addClass("active");
   
   // Sidebar Toggle for Desktop and Mobile
   function toggleSidebar() {
@@ -1362,29 +1142,37 @@
   }
 
 
-  // PLOT FORM
+  // AGRICULTURAL FORM
 
-  // Plot Loan
-  document.querySelectorAll('input[name="plot_loan"]').forEach(radio => {
+  // Agricultural Loan
+  document.querySelectorAll('input[name="agri_loan"]').forEach(radio => {
     radio.addEventListener('change', function () {
-      document.getElementById('plot_loan_amount_section').style.display =
+      document.getElementById('agri_loan_amount_section').style.display =
         (this.value === 'yes') ? 'block' : 'none';
     });
   });
 
-  // Plot Dispute
-  document.querySelectorAll('input[name="plot_dispute"]').forEach(radio => {
+  // Agricultural Tenants
+  document.querySelectorAll('input[name="agri_tenants"]').forEach(radio => {
     radio.addEventListener('change', function () {
-      document.getElementById('plot_dispute_details_section').style.display =
+      document.getElementById('agri_tenant_details_section').style.display =
         (this.value === 'yes') ? 'block' : 'none';
     });
   });
 
-  // Plot Tax (shows when value is 'no')
-  document.querySelectorAll('input[name="plot_tax"]').forEach(radio => {
+  // Agricultural Dispute
+  document.querySelectorAll('input[name="agri_dispute"]').forEach(radio => {
     radio.addEventListener('change', function () {
-      document.getElementById('plot_tax_amount_section').style.display =
-        (this.value === 'no') ? 'block' : 'none';
+      document.getElementById('agri_dispute_details_section').style.display =
+        (this.value === 'yes') ? 'block' : 'none';
+    });
+  });
+
+  // Agricultural Tax Due
+  document.querySelectorAll('input[name="agri_tax_due"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+      document.getElementById('agri_tax_amount_section').style.display =
+        (this.value === 'yes') ? 'block' : 'none';
     });
   });
 

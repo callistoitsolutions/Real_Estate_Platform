@@ -2,7 +2,7 @@
 # Create your views here.
 from django.shortcuts import render
 from django.contrib import messages
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,HttpResponse
 from Main_App .models import *
 from Admin_App .models import *
 from seo .models import *
@@ -26,6 +26,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from datetime import datetime, timedelta
 from datetime import date
+import json
+from Admin_App.models import *
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import traceback
 
 # Create your views here.
 
@@ -37,27 +42,50 @@ from itertools import chain
 
 
 
+@csrf_exempt
 def Adminlogin(request):
-    return render(request,"home_page/Adminlogin.html")
+    session_id = request.session.get('Admin_id')
+    user_type = request.session.get('user_type')
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            email = data['email']
+            password = data['password']
+            
+            if Admin_Login.objects.filter(email=email, password=password):
 
-    
+                obj = Admin_Login.objects.get(email=email, password=password)
+                
+                request.session['Admin_id'] = str(obj.id)
+                request.session['user_type'] = str('Admin')
 
-def adminprocess(request):
- 
-    if request.method =='POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-      
-        if Admin_Login.objects.filter(email=email,password=password):
-            print("------------------")
-      
-            return redirect("admin_page")
+                send_data = {'status':1,'msg':'Login Successful...'}
+            else:
+                send_data = {'status':0,'msg':'Invalid Credentials'}
+        except:
+            print(traceback.format_exc())
+            send_data = {'status':0 , 'msg':'Something went wrong','error':traceback.format_exc()}
+        return JsonResponse(send_data)
+    else:
+        if session_id and user_type == "Admin":
+            return redirect('admin_page')
         else:
-         return render(request,'home_page/Adminlogin.html')
+            return render(request,'home_page/Adminlogin.html')
+        
 
 
+############### Views start for admin logout ########################
 
+@csrf_exempt
+def Admin_Logout(request):
+    try:
+        del request.session['Admin_id']
+        del request.session['user_type']
+        return JsonResponse({"status":"1",'msg': 'Logout Successfully '})
+    except:
+        print(traceback.format_exc())
 
+############### Views end for admin logout ###########################
 
 
 

@@ -13,6 +13,10 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 <style>
 :root{
 --primary: #0066FF;
@@ -540,8 +544,7 @@ body {
     {% endif %}
 
     <!-- Login Form -->
-    <form method="POST" action="{% url 'adminprocess' %}" id="loginForm">
-      {% csrf_token %}
+    <form method="POST">
 
       <!-- Email Field -->
       <div class="form-floating">
@@ -550,7 +553,7 @@ body {
           type="email" 
           name="email" 
           class="form-control" 
-          id="emailInput" 
+          id="email" 
           placeholder="admin@callisto.com"
           required
           autocomplete="email"
@@ -565,7 +568,7 @@ body {
           type="password" 
           name="password" 
           class="form-control" 
-          id="passwordInput" 
+          id="password" 
           placeholder="Password"
           required
           autocomplete="current-password"
@@ -585,7 +588,7 @@ body {
       </div>
 
       <!-- Submit Button -->
-      <button type="submit" class="btn-login">
+      <button type="button" class="btn-login" onclick="Admin_Login(this)">
         <i class="bi bi-box-arrow-in-right me-2"></i>
         Login to Dashboard
       </button>
@@ -625,54 +628,61 @@ function togglePassword() {
     toggleIcon.classList.add('bi-eye-fill');
   }
 }
-
-// Form Validation
-const loginForm = document.getElementById('loginForm');
-loginForm.addEventListener('submit', function(e) {
-  const email = document.getElementById('emailInput').value.trim();
-  const password = document.getElementById('passwordInput').value.trim();
-  
-  if (!email || !password) {
-    e.preventDefault();
-    alert('Please fill in all fields');
-    return false;
-  }
-  
-  // Email validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    e.preventDefault();
-    alert('Please enter a valid email address');
-    return false;
-  }
-});
-
-// Enter key submit
-document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') {
-    loginForm.submit();
-  }
-});
-
-// Auto-focus on email field
-window.addEventListener('load', function() {
-  document.getElementById('emailInput').focus();
-});
-
-// Prevent multiple form submissions
-let isSubmitting = false;
-loginForm.addEventListener('submit', function(e) {
-  if (isSubmitting) {
-    e.preventDefault();
-    return false;
-  }
-  isSubmitting = true;
-  
-  // Re-enable after 3 seconds (in case of error)
-  setTimeout(() => {
-    isSubmitting = false;
-  }, 3000);
-});
 </script>
+
+{% comment %} Ajax and Jquery for admin login {% endcomment %}
+
+
+      <script>
+        function Admin_Login(_this){
+            var email = $("#email").val();
+            var password = $("#password").val();
+            if (email == "")
+            {
+                alert("Please Enter Email Address");
+            }
+            else if(password == "")
+            {
+                alert("Please Enter Password");
+            }
+             else
+            {
+                _this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`;
+                
+                $.ajax({
+                    method:"POST",
+                    url : "{% url 'Adminlogin' %}",
+                    data:JSON.stringify({
+                    "email":email,
+                    "password":password
+                    }),
+                    success : function (response){
+                    $(_this).prop("disabled", false);
+                        _this.innerHTML = `Login to Dashboard`;
+                    if (response.status == '1'){
+                        window.location.href ="{% url 'admin_page' %}";
+                    }
+                    else
+                    {
+                        swal( 
+                        {
+                            content: {
+                                element: "div",
+                                attributes: {
+                                    innerHTML: '<span style="font-weight:bold; color:red;font-size:20px;">' + response.msg + '</span>'
+                                }
+                            },
+
+                            icon: "warning",
+                            closeOnClickOutside: false,
+                        }) 
+                    }
+        
+                    }
+                });
+            }
+        }
+      </script>
+
 </body>
 </html>

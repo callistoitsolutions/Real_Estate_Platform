@@ -53,8 +53,12 @@ urlpatterns = [
    # path("dashboard/user/", views.user_dashboard, name="user_dashboard"),
     path("dashboard/admin/", views.admin_dashboard, name="admin_dashboard"),
     path('Adminlogin', views.Adminlogin,name="Adminlogin"),
+
+    ############## urls for admin logout ########################
+
+    path('Admin_Logout',views.Admin_Logout,name='Admin_Logout'),
   
-    path('adminprocess', views.adminprocess,name="adminprocess"),
+    
     
   
     path("categories/", views.category_list, name="category_list"),

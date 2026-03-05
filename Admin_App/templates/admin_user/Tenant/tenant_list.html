@@ -6,134 +6,19 @@
             <!-- Page Header -->
             <div class="page-header">
                 <div class="page-header-content">
-                    <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
-                    <p class="page-subtitle">Welcome back! Here's what's happening with your properties today.</p>
+                    <h1 class="page-title"><i class="fas fa-user-friends"></i> Tenants Listings</h1>
                     <div class="page-actions">
-                        <button class="btn-primary-custom">
-                            <i class="fas fa-plus-circle"></i> Add Property
+                        <a href="{% url "Add_Tenant" %}"><button class="btn-primary-custom">
+                            <i class="fas fa-plus-circle"></i> Add Tenant
+                        </button></a>
+                        <button class="btn-primary-custom" style="background: transparent; border: 2px solid white; color: white;" data-toggle="modal" data-target="#exampleModalCenter">
+                            <i class="fas fa-download"></i> Import Excel
                         </button>
-                        <button class="btn-primary-custom" style="background: transparent; border: 2px solid white; color: white;">
-                            <i class="fas fa-download"></i> Export
-                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Statistics Cards -->
-            <div class="stats-grid">
-                <div class="stat-card primary">
-                    <div class="stat-icon primary">
-                        <i class="fas fa-home"></i>
-                    </div>
-                    <div class="stat-value">48</div>
-                    <div class="stat-label">Total Properties</div>
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +12%
-                    </span>
-                </div>
-
-                <div class="stat-card success">
-                    <div class="stat-icon success">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div class="stat-value">32</div>
-                    <div class="stat-label">Residential</div>
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +8%
-                    </span>
-                </div>
-
-                <div class="stat-card warning">
-                    <div class="stat-icon warning">
-                        <i class="fas fa-briefcase"></i>
-                    </div>
-                    <div class="stat-value">12</div>
-                    <div class="stat-label">Commercial</div>
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +5%
-                    </span>
-                </div>
-
-                <div class="stat-card info">
-                    <div class="stat-icon info">
-                        <i class="fas fa-bed"></i>
-                    </div>
-                    <div class="stat-value">4</div>
-                    <div class="stat-label">PG/Co-living</div>
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +15%
-                    </span>
-                </div>
-
-                <div class="stat-card danger">
-                    <div class="stat-icon danger" style="background: var(--success-gradient);">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-value">42</div>
-                    <div class="stat-label">Active Listings</div>
-                    <span class="stat-change positive">
-                        <i class="fas fa-chart-line"></i> Good
-                    </span>
-                </div>
-
-                <div class="stat-card success">
-                    <div class="stat-icon success" style="background: var(--dark-gradient);">
-                        <i class="fas fa-rupee-sign"></i>
-                    </div>
-                    <div class="stat-value">₹12.5L</div>
-                    <div class="stat-label">Monthly Revenue</div>
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +20%
-                    </span>
-                </div>
-            </div>
-
-            <!-- Analytics Section with Charts -->
-            <div class="analytics-section">
-                <!-- Pie Chart - Property Distribution -->
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Property Distribution</h3>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="propertyPieChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Bar Chart - Monthly Rental Income -->
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Monthly Rental Income</h3>
-                        <div class="chart-filters">
-                            <button class="filter-btn active">2026</button>
-                            <button class="filter-btn">2025</button>
-                        </div>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="rentalIncomeChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Doughnut Chart - Occupancy Status -->
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Occupancy Status</h3>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="occupancyDoughnutChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Bar Chart - Rent Range Distribution -->
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Rent Range Distribution</h3>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="rentRangeChart"></canvas>
-                    </div>
-                </div>
-            </div>
+           
 
             <!-- Quick Stats Section -->
             <div class="quick-stats">
@@ -410,12 +295,61 @@
         </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Import Excel</h5>
+            
+        </div>
+        <div class="modal-body">
+            <div class="row">
+            
+            
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="form-label">Upload Tenant Data Excel File <span class="required" style="color:red;">*</span></label>
+                <input type="file" class="form-control" id="agri_district" placeholder="Enter Confirm Password" required onchange="checkSelectedFileSize(this)" accept=".xlsx">
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" style="background-color:#667eea;">Upload</button>
+        </div>
+        </div>
+    </div>
+    </div>
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
 
-        $("#Admin_Dashboard").addClass("active");
+        $("#Teams").addClass("active");
 
+        // Function to check upload file type
+
+        function checkSelectedFileSize(_this)
+		{
+			var ext_arr = ['xlsx'];
+			var f = _this.files[0];
+			var sizeInMb = f.size/1024;
+			var sizeLimit= 1024*2;
+			var filename = f.name;
+			var ext = (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename) : undefined;
+			
+			if (!ext_arr.includes(ext[0]))
+			{
+				alert("Please Upload only .xlsx file");
+				_this.value = '';
+				return false;
+			}
+		}
+        
         // Sidebar Toggle for Desktop and Mobile
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
