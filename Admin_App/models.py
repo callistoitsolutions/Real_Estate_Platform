@@ -246,3 +246,17 @@ class Admin_Login(models.Model):
 
     def __str__(self):
         return str(self.email)+"-"+self.password+""
+
+################ Models start for ameneties details ########################
+class Ameneties_Details(models.Model):
+   
+    amenties_icon = models.CharField(max_length=200,blank=True,null=True)
+    amenties_name = models.CharField(max_length=200,blank=True,null=True)
+    amenties_date = models.DateField(blank=True,null=True)
+    amenties_time = models.TimeField(blank=True,null=True)
+
+    def __str__(self):
+        return str(self.amenties_name)+"-"+self.amenties_icon
+
+########### Models end for ameneties details ###############################
+    
