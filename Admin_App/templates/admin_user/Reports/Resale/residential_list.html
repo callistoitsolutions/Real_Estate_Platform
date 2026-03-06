@@ -11,6 +11,9 @@
                         <a href="{% url "residential_resale" %}"><button class="btn-primary-custom">
                             <i class="fas fa-plus-circle"></i> Add Resale (Residential) Property
                         </button></a>
+                        <button class="btn-primary-custom" style="background: transparent; border: 2px solid white; color: white;" data-toggle="modal" data-target="#exampleModalCenter">
+                            <i class="fas fa-download"></i> Import Excel
+                        </button>
                     </div>
                 </div>
             </div>
@@ -408,12 +411,60 @@
         </div>
     </div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Import Excel</h5>
+            
+        </div>
+        <div class="modal-body">
+            <div class="row">
+            
+            
+            <div class="col-md-12">
+              <div class="form-group">
+                <label class="form-label">Upload Resale(Residential) Data Excel File <span class="required" style="color:red;">*</span></label>
+                <input type="file" class="form-control" id="agri_district" placeholder="Enter Confirm Password" required onchange="checkSelectedFileSize(this)" accept=".xlsx">
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" style="background-color:#667eea;">Upload</button>
+        </div>
+        </div>
+    </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     
     <script>
 
         $("#Resale").addClass("active");
+
+        // Function to check upload file type
+
+        function checkSelectedFileSize(_this)
+		{
+			var ext_arr = ['xlsx'];
+			var f = _this.files[0];
+			var sizeInMb = f.size/1024;
+			var sizeLimit= 1024*2;
+			var filename = f.name;
+			var ext = (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename) : undefined;
+			
+			if (!ext_arr.includes(ext[0]))
+			{
+				alert("Please Upload only .xlsx file");
+				_this.value = '';
+				return false;
+			}
+		}
 
         // Sidebar Toggle for Desktop and Mobile
         function toggleSidebar() {
