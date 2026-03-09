@@ -11,3 +11,7 @@ admin.site.register(Admin_Login)
 ######### Register Ameneties Details Model #####################
 
 admin.site.register(Ameneties_Details)
+
+########### Register User Details Table/Modal ###############
+
+admin.site.register(User_Details)
