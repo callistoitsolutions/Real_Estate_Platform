@@ -12,6 +12,7 @@ from django.http import JsonResponse
 from datetime import datetime
 from openpyxl import load_workbook
 from django.template.loader import render_to_string
+import traceback
 
 # Create your views here.
 
@@ -218,7 +219,7 @@ def Ameneties_List(request):
 
         ameneties_obj = Ameneties_Details.objects.all().order_by('-id')
         ameneties_obj_count = Ameneties_Details.objects.all().count()
-        
+
         rendered = render_to_string("admin_user/render_to_string/R_Ameneties/r_t_s_ameneties.html",{'ameneties_obj':ameneties_obj,'ameneties_obj_count':ameneties_obj_count})
 
         context = {'admin_obj':admin_obj,'ameneties_list':rendered}
@@ -244,68 +245,19 @@ def Ameneties_Ajax(request):
         return JsonResponse({"status":"1", "msg" : f"Ameneties Details added successfully"})
 
     # UPDATE MODE
-    # else:
-        # try:
-        #     withdraw = WithdrawDetails.objects.get(id=data['id'])
-        # except WithdrawDetails.DoesNotExist:
-        #     return JsonResponse({'status': '0', 'msg': 'Withdraw Details not found'})
+    else:
+        try:
+            ameneties = Ameneties_Details.objects.get(id=data['id'])
+        except Ameneties_Details.DoesNotExist:
+            return JsonResponse({'status': '0', 'msg': 'Ameneties Details not found'})
 
-        # member = MemberDetails.objects.get(user_id=data['fk_member'])
-        
-        # if data['withdraw_status'] == "Done":
-        #     if withdraw.is_withdraw == False:
-        #         try:
-                    
-                    
-        #             withdraw.is_withdraw = True
-                    
 
-                    
-        #             # STEP 2: DEDUCT withdrawal ONLY from activation
-        #             # if member.user_activation >= withdraw_amount:
-        #             #     member.user_activation -= withdraw_amount  #  DEDUCT ONLY!
-                        
-        #             #     super_amount = float(getattr(super_admin, 'super_total_amount', 0) or 0)
-        #             #     super_admin.super_total_amount = super_amount - withdraw_amount
-                        
-        #             #     super_admin.save()
-        #             #     member.save()
-        #             #     withdraw.is_withdraw = True
-                        
-        #             #     print(f"COMPLETE: Remaining activation ₹{member.user_activation}")
-        #             #     print(f"EARNINGS KEPT: Match=₹{member.user_total_match}, Level=₹{member.user_total_level_amount}")
-        #             # else:
-        #             #     return JsonResponse({
-        #             #         'status': '0', 
-        #             #         'msg': f'Insufficient: ₹{member.user_activation:.2f}'
-        #             #     })
-        #         except (ValueError, TypeError) as e:
-        #             print(f"Error: {e}")
-        #             return JsonResponse({'status': '0', 'msg': 'Invalid amount'})
+        # Update withdraw fields (unchanged)
+        for key, value in data.items():
+            setattr(ameneties, key, value)
 
-        # # Donation logic (unchanged)
-        # if withdraw.donation_paid == False:
-        #     DonationDetails.objects.create(
-        #         donor_id=withdraw.fk_member.user_id,
-        #         donor_name=withdraw.fk_member.user_name,
-        #         donor_email=withdraw.fk_member.user_email,
-        #         donor_phone=withdraw.fk_member.user_phone,
-        #         donor_address=withdraw.fk_member.user_address,
-        #         donation_amount=data['donation_amount'],
-        #         donation_payment_mode="UPI",
-        #         donation_status="Done",
-        #         donation_date=datetime.today(),
-        #         donation_time=datetime.now()
-        #     )
-        #     withdraw.donation_paid = True
-
-        # # Update withdraw fields (unchanged)
-        # for key, value in data.items():
-        #     if key != 'fk_member':
-        #         setattr(withdraw, key, value)
-
-        # withdraw.save()
-        # return JsonResponse({"status":"1", "msg" : f"Withdraw updated successfully"})
+        ameneties.save()
+        return JsonResponse({"status":"1", "msg" : f"Ameneties Details updated successfully"})
 
 ############ Views end for ajax for add/update ameneties #########################
 
@@ -314,30 +266,78 @@ def Ameneties_Ajax(request):
 
 @csrf_exempt
 def Ameneties_Data(request):
+
     if request.method == 'POST':
-        data=request.POST.dict()
-        data['ameneties_file'] = request.FILES.get('ameneties_file')
-        wb = load_workbook(data['ameneties_file'])
+
+        excel_file = request.FILES.get('ameneties_file')
+
+        wb = load_workbook(excel_file)
         sheet = wb.active
+
         for row in sheet.iter_rows(min_row=2, values_only=True):
+
             amenties_icon = row[0]
             amenties_name = row[1]
 
             if not amenties_icon or not amenties_name:
                 continue
 
-            Ameneties_Details.objects.create(
-                amenties_icon=amenties_icon,
-                amenties_name=amenties_name,
-                amenties_date=datetime.today(),
-                amenties_time=datetime.now()
+            Ameneties_Details.objects.update_or_create(
+                amenties_name=amenties_name,  # condition to check existing
+                defaults={
+                    "amenties_icon": amenties_icon,
+                    "amenties_date": datetime.today(),
+                    "amenties_time": datetime.now()
+                }
             )
 
-        return JsonResponse({"status":"1", "msg" : "Data Uploaded Successfully..."})
-    else:
-        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+        return JsonResponse({
+            "status": "1",
+            "msg": "Data Uploaded / Updated Successfully..."
+        })
+
+    return JsonResponse({
+        "status": "0",
+        "msg": "Something went wrong..."
+    })
 
 ############## Views end for upload ameneties date via excel #######################
+
+
+########### Views start for delete ameneties data #########################
+
+@csrf_exempt
+def Delete_Ameneties(request):
+    try:
+        try:
+            ameneties_id = request.POST.get('ameneties_id')
+            Ameneties_Details.objects.filter(id=ameneties_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Ameneties details deleted successfully...'}) 
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+
+############ Views end for delete ameneties data ############################
+
+
+########## Views start for update ameneties data ####################
+
+def Update_Ameneties(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        ameneties = Ameneties_Details.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'ameneties':ameneties}
+        return render(request,'admin_user/Ameneties/update_ameneties.html',context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+########### Views end for update ameneties data #####################
 
 
 ############  Views start for rental property list ########################
