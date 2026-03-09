@@ -259,4 +259,26 @@ class Ameneties_Details(models.Model):
         return str(self.amenties_name)+"-"+self.amenties_icon
 
 ########### Models end for ameneties details ###############################
+
+
+############### Models start for user details model ############################
+
+class User_Details(models.Model):
+   
+    user_name = models.CharField(max_length=200,blank=True,null=True)
+    user_email = models.CharField(max_length=200,blank=True,null=True)
+    user_phone = models.CharField(max_length=200,blank=True,null=True)
+    user_state = models.CharField(max_length=200,blank=True,null=True)
+    user_city = models.CharField(max_length=200,blank=True,null=True)
+    user_address = models.TextField(blank=True,null=True)
+
+    user_password = models.CharField(max_length=200,blank=True,null=True)
+    user_profile = models.ImageField(upload_to="Profile/", blank=True, null=True)
+    user_role = models.CharField(max_length=200,blank=True,null=True)
+
+    user_register_date = models.DateField(blank=True,null=True)
+    user_register_time = models.TimeField(blank=True,null=True)
+
+    def __str__(self):
+        return str(self.user_name)+"-"+self.user_role
     
