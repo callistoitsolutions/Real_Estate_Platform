@@ -573,14 +573,14 @@ def Rm_Data(request):
                 continue
 
             User_Details.objects.update_or_create(
-                user_phone=user_phone,   # unique identifier
+                user_phone=user_phone,
+                user_role = user_role,   # unique identifier
                 defaults={
                     "user_name": user_name,
                     "user_email": user_email,
                     "user_state": user_state,
                     "user_city": user_city,
                     "user_address": user_address,
-                    "user_role": user_role,
                     "user_profile": user_profile,
                     "user_password": user_password,
                     "user_register_date": datetime.today(),
@@ -749,14 +749,14 @@ def Landlord_Data(request):
                 continue
 
             User_Details.objects.update_or_create(
-                user_phone=user_phone,   # unique identifier
+                user_phone=user_phone, 
+                user_role=user_role,  # unique identifier
                 defaults={
                     "user_name": user_name,
                     "user_email": user_email,
                     "user_state": user_state,
                     "user_city": user_city,
                     "user_address": user_address,
-                    "user_role": user_role,
                     "user_profile": user_profile,
                     "user_password": user_password,
                     "user_register_date": datetime.today(),
@@ -819,7 +819,15 @@ def Tenant_List(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
-        context = {'admin_obj':admin_obj}
+
+        tenant_obj = User_Details.objects.filter(user_role="Tenant").order_by('-id')
+        tenant_obj_count = User_Details.objects.filter(user_role="Tenant").count()
+
+        rendered = render_to_string("admin_user/render_to_string/R_Tenant/r_t_s_tenant.html",{'tenant_obj':tenant_obj,'tenant_obj_count':tenant_obj_count,'Role':'Tenant'})
+
+
+        context = {'admin_obj':admin_obj,'tenants_list':rendered}
+        
         return render(request,'admin_user/Tenant/tenant_list.html',context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -839,6 +847,103 @@ def Add_Tenant(request):
         return render(request,'home_page/Adminlogin.html')
 
 ######## Views end for add tenants ##########################
+
+
+########## Views start for upload tenant data functionality via excel ##############
+
+@csrf_exempt
+def Tenant_Data(request):
+    if request.method == 'POST':
+
+        excel_file = request.FILES.get('tenant_file')
+
+        if not excel_file:
+            return JsonResponse({"status": "0", "msg": "Excel file not found"})
+
+        wb = load_workbook(excel_file)
+        sheet = wb.active
+
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+
+            user_name = row[0]
+            user_email = row[1]
+            user_phone = row[2]
+            user_state = row[3]
+            user_city = row[4]
+            user_address = row[5]
+            user_password = row[6]
+            user_profile = row[7]
+            user_role = row[8]
+
+            if user_password is not None:
+                user_password = str(user_password).split(".")[0]
+
+            if user_phone is not None:
+                user_phone = str(user_phone).split(".")[0]
+
+            if not user_phone:
+                continue
+
+            User_Details.objects.update_or_create(
+                user_phone=user_phone, 
+                user_role=user_role,  # unique identifier
+                defaults={
+                    "user_name": user_name,
+                    "user_email": user_email,
+                    "user_state": user_state,
+                    "user_city": user_city,
+                    "user_address": user_address,
+                    "user_profile": user_profile,
+                    "user_password": user_password,
+                    "user_register_date": datetime.today(),
+                    "user_register_time": datetime.now()
+                }
+            )
+
+        return JsonResponse({
+            "status": "1",
+            "msg": "Data Uploaded / Updated Successfully..."
+        })
+
+    return JsonResponse({
+        "status": "0",
+        "msg": "Invalid Request"
+    })
+
+######### Views end for upload tenant data functionality via excel ####################
+
+
+########### Views start for delete tenant details #######################
+
+@csrf_exempt
+def Delete_Tenant(request):
+    try:
+        try:
+            tenant_id = request.POST.get('tenant_id')
+            User_Details.objects.filter(id=tenant_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Tenant details deleted successfully...'}) 
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+
+########### Views end for delete tenant details ############################
+
+
+############ Views start for update tenant details ###################
+
+def Update_Tenant(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        tenant = User_Details.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'tenant':tenant}
+        return render(request,'admin_user/Tenant/update_tenant.html',context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
 
 
 ############### Views start for display buyers list ####################
