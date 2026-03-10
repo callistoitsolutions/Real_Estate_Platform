@@ -111,6 +111,18 @@ urlpatterns = [
 
     path('Add_Tenant',views.Add_Tenant,name="Add_Tenant"),
 
+    ############ urls for upload tenant data functionality via excel ##############
+
+    path('Tenant_Data',views.Tenant_Data,name="Tenant_Data"),
+
+    ########### urls for delete tenant details ############################
+
+    path('Delete_Tenant',views.Delete_Tenant,name='Delete_Tenant'),
+
+    ########### urls for update tenant details ####################
+
+    path('Update_Tenant/<int:id>',views.Update_Tenant,name='Update_Tenant'),
+
     ############## urls for display buyers list #####################
 
     path('Buyer_List',views.Buyer_List,name="Buyer_List"),
