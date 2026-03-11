@@ -151,6 +151,19 @@ urlpatterns = [
 
     path('Add_Agent',views.Add_Agent,name="Add_Agent"),
 
+    ######### urls for upload agent data functionality via excel ################
+
+    path('Agent_Data',views.Agent_Data,name="Agent_Data"),
+
+    ######### urls for delete agent ########################
+
+    path('Delete_Agent',views.Delete_Agent,name='Delete_Agent'),
+
+    ############ urls for update agent details #####################
+
+    path('Update_Agent/<int:id>',views.Update_Agent,name='Update_Agent'),
+
+
     ########### urls for display agency list ##############
 
     path('Agency_List',views.Agency_List,name="Agency_List"),
