@@ -1087,7 +1087,14 @@ def Agent_List(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
-        context = {'admin_obj':admin_obj}
+
+        agent_obj = User_Details.objects.filter(user_role="Agent").order_by('-id')
+        agent_obj_count = User_Details.objects.filter(user_role="Agent").count()
+
+        rendered = render_to_string("admin_user/render_to_string/R_Agent/r_t_s_agent.html",{'agent_obj':agent_obj,'agent_obj_count':agent_obj_count,'Role':'Agent'})
+
+
+        context = {'admin_obj':admin_obj,'agent_list':rendered}
         return render(request,'admin_user/Agent/agent_list.html',context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -1107,6 +1114,110 @@ def Add_Agent(request):
         return render(request,'home_page/Adminlogin.html')
 
 ############## Views end for add agents #######################
+
+
+########## Views start for upload agent data functionality via excel ###############
+
+@csrf_exempt
+def Agent_Data(request):
+    if request.method == 'POST':
+
+        excel_file = request.FILES.get('agent_file')
+
+        if not excel_file:
+            return JsonResponse({"status": "0", "msg": "Excel file not found"})
+
+        wb = load_workbook(excel_file)
+        sheet = wb.active
+
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+
+            user_name = row[0]
+            user_email = row[1]
+            user_phone = row[2]
+            user_state = row[3]
+            user_city = row[4]
+            user_address = row[5]
+            user_password = row[6]
+            user_agency_name = row[7]
+            user_license_number = row[8]
+            user_profile = row[9]
+            user_role = row[10]
+
+            if user_password is not None:
+                user_password = str(user_password).split(".")[0]
+
+            if user_phone is not None:
+                user_phone = str(user_phone).split(".")[0]
+
+            if not user_phone:
+                continue
+
+            User_Details.objects.update_or_create(
+                user_phone=user_phone, 
+                user_role=user_role,  # unique identifier
+                defaults={
+                    "user_name": user_name,
+                    "user_email": user_email,
+                    "user_state": user_state,
+                    "user_city": user_city,
+                    "user_address": user_address,
+                    "user_profile": user_profile,
+                    "user_password": user_password,
+                    "user_agency_name": user_agency_name,
+                    "user_license_number": user_license_number,
+                    "user_register_date": datetime.today(),
+                    "user_register_time": datetime.now()
+                }
+            )
+
+        return JsonResponse({
+            "status": "1",
+            "msg": "Data Uploaded / Updated Successfully..."
+        })
+
+    return JsonResponse({
+        "status": "0",
+        "msg": "Invalid Request"
+    })
+
+########### Views end for upload agent data functionaity via excel #####################
+
+
+############# Views start for delete agent ##############################
+
+@csrf_exempt
+def Delete_Agent(request):
+    try:
+        try:
+            agent_id = request.POST.get('agent_id')
+            User_Details.objects.filter(id=agent_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Agent details deleted successfully...'}) 
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+
+########## Views ennd for delete agent ###################################
+
+
+########### Views start for update agent details ################
+
+def Update_Agent(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        agent = User_Details.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'agent':agent}
+        
+        return render(request,'admin_user/Agent/update_agent.html',context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+########## Views end for update agent details #####################
 
 
 ########## Views start for display agency list #########################
