@@ -261,6 +261,21 @@ class Ameneties_Details(models.Model):
 ########### Models end for ameneties details ###############################
 
 
+########### Models start for services type details of vendors ######################
+
+class Service_Type_Details(models.Model):
+   
+    service_id = models.CharField(max_length=200,blank=True,null=True)
+    service_name = models.CharField(max_length=200,blank=True,null=True)
+    service_upload_date = models.DateField(blank=True,null=True)
+    service_upload_time = models.TimeField(blank=True,null=True)
+
+    def __str__(self):
+        return str(self.service_id)+"-"+self.service_name
+    
+############## Models end for service type details of vendors ##########################
+
+
 ############### Models start for user details model ############################
 
 class User_Details(models.Model):
@@ -278,6 +293,16 @@ class User_Details(models.Model):
 
     user_agency_name = models.CharField(max_length=200,blank=True,null=True)
     user_license_number = models.CharField(max_length=200,blank=True,null=True)
+
+    user_service_type = models.CharField(max_length=200,blank=True,null=True)
+    user_company_name = models.CharField(max_length=200,blank=True,null=True)
+    user_pan_number = models.CharField(max_length=200,blank=True,null=True)
+    user_gstin_number = models.CharField(max_length=200,blank=True,null=True)
+
+    user_operational_scope = models.CharField(max_length=10,default='all',null=True,blank=True)
+
+    # This will store the comma-separated list of states or "ALL_INDIA"
+    selected_regions = models.TextField(null=True, blank=True)
 
     user_register_date = models.DateField(blank=True,null=True)
     user_register_time = models.TimeField(blank=True,null=True)
