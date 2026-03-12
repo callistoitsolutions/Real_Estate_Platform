@@ -37,6 +37,18 @@ urlpatterns = [
 
      path('Update_Ameneties/<int:id>',views.Update_Ameneties,name='Update_Ameneties'),
 
+     ########## urls of vendor services list ####################
+
+     path('Services_List',views.Services_List,name="Services_List"),
+
+     ########## urls for ajax for add/update service types ######################
+
+     path('Services_Ajax',views.Services_Ajax,name="Services_Ajax"),
+
+     ########### urls for upload service type details via excel ################
+
+     path('Services_Data',views.Services_Data,name="Services_Data"),
+
      ############# urls for rental property list ########################
 
      path('residential_list',views.residential_list,name="residential_list"),
@@ -191,6 +203,19 @@ urlpatterns = [
     ########### urls for add vendors ####################
 
     path('Add_Vendor',views.Add_Vendor,name="Add_Vendor"),
+
+    ########## urls for upload vendor data functionality via excel ###################
+
+    path('Vendor_Data',views.Vendor_Data,name="Vendor_Data"),
+
+    ############ urls for delete vendor #########################
+
+    path('Delete_Vendor',views.Delete_Vendor,name='Delete_Vendor'),
+
+    ################ urls for update vendor #####################
+
+    path('Update_Vendor/<int:id>',views.Update_Vendor,name='Update_Vendor'),
+
      
 
      
