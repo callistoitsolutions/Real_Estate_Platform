@@ -310,3 +310,567 @@ class User_Details(models.Model):
     def __str__(self):
         return str(self.user_name)+"-"+self.user_role
     
+from django.utils import timezone
+class RentalResidentialProperty(models.Model):
+
+    # -------------------------
+    # Basic Information
+    # -------------------------
+
+    property_title = models.CharField(max_length=255, blank=True, null=True)
+    property_purpose = models.CharField(max_length=50, blank=True, null=True)
+    property_type = models.CharField(max_length=100, blank=True, null=True)
+    bhk_type = models.CharField(max_length=50, blank=True, null=True)
+    renting_option = models.CharField(max_length=50, blank=True, null=True)
+    furnishing_status = models.CharField(max_length=50, blank=True, null=True)
+    available_for = models.CharField(max_length=50, blank=True, null=True)
+
+    built_up_area = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    bathrooms = models.IntegerField(blank=True, null=True)
+    balconies = models.IntegerField(blank=True, null=True)
+
+    floor_number = models.CharField(max_length=50, blank=True, null=True)
+    total_floors = models.IntegerField(blank=True, null=True)
+
+    facing = models.CharField(max_length=50, blank=True, null=True)
+
+    # -------------------------
+    # Property Details
+    # -------------------------
+
+    zone = models.CharField(max_length=50, blank=True, null=True)
+    ownership_type = models.CharField(max_length=50, blank=True, null=True)
+    construction_status = models.CharField(max_length=50, blank=True, null=True)
+    property_age = models.CharField(max_length=50, blank=True, null=True)
+
+    carpet_area = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    plot_area = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    building_name = models.CharField(max_length=200, blank=True, null=True)
+
+    # -------------------------
+    # Availability
+    # -------------------------
+
+    possession_status = models.CharField(max_length=50, blank=True, null=True)
+
+    available_from = models.DateField(blank=True, null=True)
+
+    lease_duration = models.CharField(max_length=50, blank=True, null=True)
+
+    brokerage = models.CharField(max_length=10, blank=True, null=True)
+
+    brokerage_percentage = models.CharField(max_length=20, blank=True, null=True)
+
+    manual_brokerage = models.CharField(max_length=20, blank=True, null=True)
+
+    # -------------------------
+    # Pricing
+    # -------------------------
+
+    monthly_rent = models.BigIntegerField(blank=True, null=True)
+
+    security_deposit = models.BigIntegerField(blank=True, null=True)
+
+    maintenance_type = models.CharField(max_length=50, blank=True, null=True)
+
+    maintenance_amount = models.BigIntegerField(blank=True, null=True)
+
+    expected_price = models.BigIntegerField(blank=True, null=True)
+
+    # -------------------------
+    # Location
+    # -------------------------
+
+    address = models.TextField(blank=True, null=True)
+
+    city = models.CharField(max_length=150, blank=True, null=True)
+
+    locality = models.CharField(max_length=150, blank=True, null=True)
+
+    state = models.CharField(max_length=150, blank=True, null=True)
+
+    pincode = models.CharField(max_length=10, blank=True, null=True)
+
+    road_connectivity = models.CharField(max_length=150, blank=True, null=True)
+
+    # -------------------------
+    # Amenities
+    # -------------------------
+
+    amenities = models.TextField(blank=True, null=True)
+
+    # -------------------------
+    # Description
+    # -------------------------
+
+    description = models.TextField(blank=True, null=True)
+
+    rent_residential_desc = models.TextField(blank=True, null=True)
+
+    # -------------------------
+    # Images
+    # -------------------------
+
+    image1 = models.ImageField(upload_to="residential_rent/", blank=True, null=True)
+    image2 = models.ImageField(upload_to="residential_rent/", blank=True, null=True)
+    image3 = models.ImageField(upload_to="residential_rent/", blank=True, null=True)
+    image4 = models.ImageField(upload_to="residential_rent/", blank=True, null=True)
+    image5 = models.ImageField(upload_to="residential_rent/", blank=True, null=True)
+    image6 = models.ImageField(upload_to="residential_rent/", blank=True, null=True)
+    image7 = models.ImageField(upload_to="residential_rent/", blank=True, null=True)
+    image8 = models.ImageField(upload_to="residential_rent/", blank=True, null=True)
+    image9 = models.ImageField(upload_to="residential_rent/", blank=True, null=True)
+    image10 = models.ImageField(upload_to="residential_rent/", blank=True, null=True)
+
+    # -------------------------
+    # Owner Details
+    # -------------------------
+
+    owner_name = models.CharField(max_length=150, blank=True, null=True)
+
+    contact_number = models.CharField(max_length=15, blank=True, null=True)
+
+    email = models.EmailField(blank=True, null=True)
+
+    alternate_contact = models.CharField(max_length=15, blank=True, null=True)
+
+    # -------------------------
+    # Uploaded By (User / Admin)
+    # -------------------------
+
+    #uploaded_by_id = models.IntegerField(blank=True, null=True)
+
+    uploaded_by_name = models.CharField(max_length=150, blank=True, null=True)
+
+    uploaded_by_email = models.CharField(max_length=150, blank=True, null=True)
+
+    uploaded_by_contact = models.CharField(max_length=20, blank=True, null=True)
+
+    uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
+
+    # -------------------------
+    # System
+    # -------------------------
+    
+    
+    
+
+    #created_at = models.DateTimeField(auto_now_add=True)
+   # from django.utils import timezone
+
+    #created_at = models.DateTimeField(auto_now_add=True, default=timezone.now)
+
+    def __str__(self):
+        return str(self.property_title)
+    
+    
+    
+    
+    
+class CommercialRentalProperty(models.Model):
+
+    # -----------------------------
+    # BASIC INFORMATION
+    # -----------------------------
+
+    PROPERTY_TYPE_CHOICES = [
+        ('office-space', 'Office Space'),
+        ('shop', 'Shop/Showroom'),
+        ('warehouse', 'Warehouse/Godown'),
+        ('industrial', 'Industrial Building'),
+        ('land', 'Commercial Land'),
+    ]
+
+    POSSESSION_STATUS = [
+        ('ready-to-move', 'Ready to Move'),
+        ('under-construction', 'Under Construction'),
+    ]
+
+    ZONE_TYPE = [
+        ('industrial', 'Industrial'),
+        ('commercial', 'Commercial'),
+        ('residential', 'Residential'),
+        ('special-economic', 'Special Economic Zone'),
+    ]
+
+    LOCATION_HUB = [
+        ('it-park', 'IT Park'),
+        ('business-district', 'Business District'),
+        ('mall', 'Shopping Mall'),
+        ('standalone', 'Standalone'),
+    ]
+
+    PROPERTY_CONDITION = [
+        ('bare-shell', 'Bare Shell'),
+        ('warm-shell', 'Warm Shell'),
+        ('fitted', 'Fitted'),
+        ('furnished', 'Furnished'),
+    ]
+
+    OWNERSHIP_TYPE = [
+        ('freehold', 'Freehold'),
+        ('leasehold', 'Leasehold'),
+        ('co-operative', 'Co-operative Society'),
+    ]
+
+    CONSTRUCTION_STATUS = [
+        ('new', 'New Construction'),
+        ('resale', 'Resale'),
+    ]
+
+    AGE_OF_PROPERTY = [
+        ('0-1', '0-1 Year'),
+        ('1-3', '1-3 Years'),
+        ('3-5', '3-5 Years'),
+        ('5-10', '5-10 Years'),
+        ('10+', '10+ Years'),
+    ]
+
+    BROKERAGE_CHOICES = [
+        ('Yes', 'Yes'),
+        ('No', 'No')
+    ]
+
+    FLOORING_TYPE = [
+        ('marble', 'Marble'),
+        ('vitrified', 'Vitrified Tiles'),
+        ('granite', 'Granite'),
+        ('wooden', 'Wooden'),
+        ('ceramic', 'Ceramic Tiles'),
+    ]
+
+    property_title = models.CharField(max_length=200, blank=True, null=True)
+
+    property_type = models.CharField(max_length=50, choices=PROPERTY_TYPE_CHOICES)
+
+    city = models.CharField(max_length=100)
+    area_locality = models.CharField(max_length=200)
+    property_address = models.TextField()
+
+    building_name = models.CharField(max_length=200)
+
+    possession_status = models.CharField(max_length=50, choices=POSSESSION_STATUS)
+
+    available_from = models.DateField(blank=True, null=True)
+
+    age_of_property = models.CharField(max_length=20, choices=AGE_OF_PROPERTY)
+
+    zone_type = models.CharField(max_length=50, choices=ZONE_TYPE, blank=True, null=True)
+
+    location_hub = models.CharField(max_length=50, choices=LOCATION_HUB, blank=True, null=True)
+
+    property_condition = models.CharField(max_length=50, choices=PROPERTY_CONDITION)
+
+    ownership_type = models.CharField(max_length=50, choices=OWNERSHIP_TYPE)
+
+    construction_status = models.CharField(max_length=20, choices=CONSTRUCTION_STATUS, blank=True, null=True)
+
+
+    # -----------------------------
+    # AREA & PRICING
+    # -----------------------------
+
+    builtup_area = models.IntegerField()
+
+    carpet_area = models.IntegerField(blank=True, null=True)
+
+    expected_rent = models.IntegerField()
+
+    security_deposit = models.IntegerField(blank=True, null=True)
+
+    maintenance_charges = models.IntegerField(blank=True, null=True)
+
+    negotiable = models.BooleanField(default=False)
+
+    brokerage = models.CharField(max_length=5, choices=BROKERAGE_CHOICES, blank=True, null=True)
+
+    brokerage_percentage = models.CharField(max_length=20, blank=True, null=True)
+
+    manual_brokerage = models.CharField(max_length=50, blank=True, null=True)
+
+
+    # -----------------------------
+    # UTILITIES
+    # -----------------------------
+
+    dg_ups_included = models.BooleanField(default=False)
+
+    electricity_included = models.BooleanField(default=False)
+
+    water_included = models.BooleanField(default=False)
+
+    lockin_period = models.IntegerField(blank=True, null=True)
+
+    rent_increase = models.FloatField(blank=True, null=True)
+
+
+    # -----------------------------
+    # BUILDING DETAILS
+    # -----------------------------
+
+    total_floors = models.IntegerField(blank=True, null=True)
+
+    your_floor = models.IntegerField(blank=True, null=True)
+
+    staircases = models.IntegerField(blank=True, null=True)
+
+    passenger_lifts = models.IntegerField(default=0)
+
+    service_lifts = models.IntegerField(default=0)
+
+    private_parking = models.IntegerField(default=0)
+
+
+    # -----------------------------
+    # OFFICE FACILITIES
+    # -----------------------------
+
+    min_seats = models.IntegerField(blank=True, null=True)
+
+    max_seats = models.IntegerField(blank=True, null=True)
+
+    cabins = models.IntegerField(blank=True, null=True)
+
+    meeting_rooms = models.IntegerField(blank=True, null=True)
+
+    private_washroom = models.IntegerField(default=0)
+
+    public_washroom = models.IntegerField(default=0)
+
+    flooring_type = models.CharField(max_length=50, choices=FLOORING_TYPE, blank=True, null=True)
+
+
+    # -----------------------------
+    # MEDIA
+    # -----------------------------
+
+    property_images = models.ImageField(upload_to='commercial_rent/images/', blank=True, null=True)
+
+    floor_plan = models.ImageField(upload_to='commercial_rent/floorplan/', blank=True, null=True)
+
+    video = models.FileField(upload_to='commercial_rent/videos/', blank=True, null=True)
+
+
+    # -----------------------------
+    # NEARBY FACILITIES
+    # -----------------------------
+
+    metro_station = models.CharField(max_length=200, blank=True, null=True)
+
+    bus_stop = models.CharField(max_length=200, blank=True, null=True)
+
+    restaurants = models.CharField(max_length=200, blank=True, null=True)
+
+    banks = models.CharField(max_length=200, blank=True, null=True)
+
+
+    # -----------------------------
+    # AMENITIES
+    # -----------------------------
+
+    parking = models.BooleanField(default=False)
+
+    security = models.BooleanField(default=False)
+
+    ac = models.BooleanField(default=False)
+
+    power_backup = models.BooleanField(default=False)
+
+    cafeteria = models.BooleanField(default=False)
+
+    conference_room = models.BooleanField(default=False)
+
+    fire_safety = models.BooleanField(default=False)
+
+    cctv = models.BooleanField(default=False)
+
+
+    # -----------------------------
+    # OWNER CONTACT
+    # -----------------------------
+
+    owner_name = models.CharField(max_length=100)
+
+    contact_number = models.CharField(max_length=20)
+
+    email = models.EmailField()
+
+    alternate_contact = models.CharField(max_length=20, blank=True, null=True)
+
+
+    # -----------------------------
+    # LISTING UPLOADED BY
+    # -----------------------------
+
+    uploaded_by_name = models.CharField(max_length=100, blank=True, null=True)
+
+    uploaded_by_email = models.EmailField(blank=True, null=True)
+
+    uploaded_by_contact = models.CharField(max_length=20, blank=True, null=True)
+
+    uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
+    # -----------------------------
+    # META
+    # -----------------------------
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+    def __str__(self):
+        return f"{self.property_type} - {self.city}"
+    
+    
+
+
+############### Models End for Rental Commercial Property  model ############################
+
+############### Models Starts for Rental PG_COLIVING Property  model ############################ same in this this teh rental proeprty listing model so as per add the user role in ths also and give me the view of like this residenital view for data submit  
+
+
+
+
+
+class PGColivingProperty(models.Model):
+
+    # ---------------- BASIC INFORMATION ----------------
+    city = models.CharField(max_length=100)
+    building_name = models.CharField(max_length=200, blank=True, null=True)
+    locality = models.CharField(max_length=200)
+
+    pg_name = models.CharField(max_length=200)
+    property_address = models.TextField()
+
+    total_beds = models.IntegerField()
+
+    PG_FOR = [
+        ('boys', 'Boys'),
+        ('girls', 'Girls'),
+        ('co-living', 'Co-living'),
+    ]
+    pg_for = models.CharField(max_length=20, choices=PG_FOR)
+
+    FURNISHING_TYPE = [
+        ('unfurnished', 'Unfurnished'),
+        ('semi-furnished', 'Semi-Furnished'),
+        ('fully-furnished', 'Fully Furnished'),
+    ]
+    furnishing_type = models.CharField(max_length=20, choices=FURNISHING_TYPE)
+
+    BEST_FOR = [
+        ('students', 'Students'),
+        ('working', 'Working Professionals'),
+        ('family', 'Family'),
+    ]
+    best_suited_for = models.CharField(max_length=30, choices=BEST_FOR, blank=True, null=True)
+
+    # ---------------- ROOM DETAILS ----------------
+    ROOM_TYPE = [
+        ('single', 'Single Occupancy'),
+        ('double', 'Double Sharing'),
+        ('triple', 'Triple Sharing'),
+        ('quad', '4+ Sharing'),
+    ]
+    room_type = models.CharField(max_length=20, choices=ROOM_TYPE)
+
+    room_total_beds = models.IntegerField()
+
+    rent = models.IntegerField()
+
+    security_deposit = models.IntegerField()
+
+    brokerage = models.BooleanField(default=False)
+    brokerage_percentage = models.CharField(max_length=20, blank=True, null=True)
+    manual_brokerage = models.CharField(max_length=20, blank=True, null=True)
+
+    # ---------------- ROOM FACILITIES ----------------
+    attached_bathroom = models.BooleanField(default=False)
+    balcony = models.BooleanField(default=False)
+    ac = models.BooleanField(default=False)
+    wardrobe = models.BooleanField(default=False)
+    study_table = models.BooleanField(default=False)
+    wifi_room = models.BooleanField(default=False)
+
+    # ---------------- MEALS ----------------
+    meals_available = models.BooleanField(default=False)
+
+    meal_offerings = models.CharField(max_length=100, blank=True, null=True)
+
+    MEAL_SPECIALITY = [
+        ('veg', 'Veg'),
+        ('nonveg', 'Non-Veg'),
+        ('jain', 'Jain'),
+    ]
+    meal_speciality = models.CharField(max_length=50, blank=True, null=True)
+
+    # ---------------- STAY RULES ----------------
+    notice_period = models.IntegerField(blank=True, null=True)
+    lockin_period = models.IntegerField(blank=True, null=True)
+    minimum_stay = models.IntegerField()
+
+    available_from = models.DateField()
+
+    # ---------------- PROPERTY MANAGEMENT ----------------
+    PROPERTY_MANAGED_BY = [
+        ('self', 'Self'),
+        ('family', 'Family'),
+        ('caretaker', 'Caretaker'),
+        ('company', 'Management Company'),
+    ]
+    property_managed_by = models.CharField(max_length=20, choices=PROPERTY_MANAGED_BY, blank=True, null=True)
+
+    manager_stays = models.BooleanField(default=False)
+
+    # ---------------- COMMON AREA ----------------
+    tv = models.BooleanField(default=False)
+    refrigerator = models.BooleanField(default=False)
+    washing_machine = models.BooleanField(default=False)
+    kitchen = models.BooleanField(default=False)
+    lounge = models.BooleanField(default=False)
+
+    # ---------------- PG RULES ----------------
+    non_veg_allowed = models.BooleanField(default=False)
+    opposite_sex_allowed = models.BooleanField(default=False)
+    any_time_allowed = models.BooleanField(default=False)
+    visitors_allowed = models.BooleanField(default=False)
+    guardian_allowed = models.BooleanField(default=False)
+    drinking_allowed = models.BooleanField(default=False)
+    smoking_allowed = models.BooleanField(default=False)
+
+    # ---------------- NEARBY FACILITIES ----------------
+    colleges_nearby = models.CharField(max_length=200, blank=True, null=True)
+    offices_nearby = models.CharField(max_length=200, blank=True, null=True)
+    transport_nearby = models.CharField(max_length=200, blank=True, null=True)
+    markets_nearby = models.CharField(max_length=200, blank=True, null=True)
+
+    # ---------------- AMENITIES ----------------
+    security_24x7 = models.BooleanField(default=False)
+    power_backup = models.BooleanField(default=False)
+    parking = models.BooleanField(default=False)
+    gym = models.BooleanField(default=False)
+    laundry = models.BooleanField(default=False)
+    housekeeping = models.BooleanField(default=False)
+    wifi = models.BooleanField(default=False)
+    cctv = models.BooleanField(default=False)
+
+    # ---------------- MEDIA ----------------
+    floor_plan = models.ImageField(upload_to='pg/floorplans/', blank=True, null=True)
+    video = models.FileField(upload_to='pg/videos/', blank=True, null=True)
+
+    # ---------------- OWNER CONTACT ----------------
+    owner_name = models.CharField(max_length=100)
+    contact_number = models.CharField(max_length=20)
+    email = models.EmailField()
+    alternate_contact = models.CharField(max_length=20, blank=True, null=True)
+
+    # ---------------- UPLOADED BY ----------------
+    uploaded_by_name = models.CharField(max_length=100, blank=True, null=True)
+    uploaded_by_email = models.EmailField(blank=True, null=True)
+    uploaded_by_contact = models.CharField(max_length=20, blank=True, null=True)
+    uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.pg_name

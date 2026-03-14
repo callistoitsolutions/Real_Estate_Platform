@@ -1,0 +1,616 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<style>
+.page-wrap   { max-width:1200px; margin:0 auto; padding:24px; }
+
+/* ── Header ── */
+.pg-header {
+    background: linear-gradient(135deg,#DC2626,#7F1D1D);
+    border-radius:16px; padding:26px 32px; margin-bottom:28px;
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:16px;
+    box-shadow:0 8px 32px rgba(220,38,38,.25);
+}
+.pg-header h1 { color:#fff; font-size:21px; font-weight:700; margin:0; }
+.pg-header p  { color:rgba(255,255,255,.7); margin:4px 0 0; font-size:13px; }
+.btn-back {
+    display:flex; align-items:center; gap:8px;
+    padding:9px 20px; background:rgba(255,255,255,.15);
+    color:#fff; border:1px solid rgba(255,255,255,.3);
+    border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
+    transition:background .2s;
+}
+.btn-back:hover { background:rgba(255,255,255,.25); color:#fff; text-decoration:none; }
+
+/* ── Section Cards ── */
+.card { background:#fff; border-radius:14px; box-shadow:0 2px 16px rgba(0,0,0,.07); margin-bottom:24px; overflow:hidden; }
+.card-head {
+    background:linear-gradient(135deg,#f8fafc,#f1f5f9);
+    border-bottom:2px solid #e2e8f0;
+    padding:15px 24px; display:flex; align-items:center; gap:12px;
+}
+.card-icon {
+    width:36px; height:36px; border-radius:8px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; color:#fff;
+}
+.card-head h3 { margin:0; font-size:15px; font-weight:700; color:#1e293b; }
+.card-body { padding:24px; }
+
+/* ── Grid ── */
+.fg { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:20px; }
+.fg .full { grid-column:1/-1; }
+.fgroup { display:flex; flex-direction:column; gap:6px; }
+.flabel {
+    font-size:11px; font-weight:700; color:#64748b;
+    text-transform:uppercase; letter-spacing:.6px;
+}
+.flabel .r { color:#DC2626; }
+.fc {
+    padding:10px 14px; border:1.5px solid #e2e8f0;
+    border-radius:8px; font-size:13px; color:#1e293b;
+    background:#fafafa; outline:none; transition:all .2s;
+}
+.fc:focus { border-color:#DC2626; background:#fff; box-shadow:0 0 0 3px rgba(220,38,38,.08); }
+textarea.fc { resize:vertical; min-height:80px; }
+
+/* ── Bool buttons ── */
+.brow { display:flex; gap:8px; }
+.bbtn {
+    flex:1; padding:9px 10px; border:1.5px solid #e2e8f0;
+    border-radius:8px; font-size:12px; font-weight:600;
+    text-align:center; cursor:pointer; background:#fafafa;
+    color:#64748b; transition:all .2s; user-select:none;
+}
+.bbtn.yes.on { background:#F0FDF4; border-color:#16A34A; color:#16A34A; }
+.bbtn.no.on  { background:#FEF2F2; border-color:#DC2626; color:#DC2626; }
+
+/* ── Amenity checkboxes ── */
+.amen-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:10px; }
+.amen-item {
+    display:flex; align-items:center; gap:10px;
+    padding:12px 14px; border:1.5px solid #e2e8f0;
+    border-radius:10px; cursor:pointer; background:#fafafa;
+    transition:all .2s; user-select:none;
+}
+.amen-item:hover,.amen-item.on { border-color:#DC2626; background:#FFF1F2; }
+.amen-item input { display:none; }
+.abox {
+    width:20px; height:20px; border:2px solid #cbd5e1;
+    border-radius:5px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; color:transparent; transition:all .2s;
+}
+.amen-item.on .abox { background:#DC2626; border-color:#DC2626; color:#fff; }
+.aname { font-size:13px; font-weight:500; color:#374151; }
+
+/* ── Image upload box ── */
+.img-box {
+    border:2px dashed #fecaca; border-radius:10px;
+    padding:20px; text-align:center; cursor:pointer;
+    background:#fffafa; transition:all .2s;
+}
+.img-box:hover { border-color:#DC2626; background:#FFF1F2; }
+.img-box i { font-size:1.6rem; color:#DC2626; }
+.img-box p { margin:6px 0 0; font-size:12px; color:#64748b; }
+.img-preview { width:100%; max-height:150px; object-fit:cover; border-radius:8px; margin-top:10px; }
+
+/* ── Sticky submit bar ── */
+.submit-bar {
+    background:#fff; border-radius:14px;
+    padding:20px 24px; margin-bottom:24px;
+    box-shadow:0 2px 16px rgba(0,0,0,.07);
+    display:flex; justify-content:flex-end; gap:12px;
+    position:sticky; bottom:20px;
+}
+.btn-cancel {
+    padding:11px 28px; background:#f1f5f9; color:#64748b;
+    border:none; border-radius:8px; font-size:14px; font-weight:600;
+    cursor:pointer; text-decoration:none; transition:background .2s;
+}
+.btn-cancel:hover { background:#e2e8f0; }
+.btn-save {
+    padding:11px 32px;
+    background:linear-gradient(135deg,#DC2626,#991B1B);
+    color:#fff; border:none; border-radius:8px;
+    font-size:14px; font-weight:700; cursor:pointer;
+    box-shadow:0 4px 14px rgba(220,38,38,.35); transition:all .2s;
+}
+.btn-save:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(220,38,38,.45); }
+
+@media(max-width:768px){
+    .page-wrap { padding:16px; }
+    .fg { grid-template-columns:1fr; }
+    .amen-grid { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+
+<div class="main-content">
+<div class="page-wrap">
+
+<!-- Page Header -->
+<div class="pg-header">
+    <div>
+        <h1><i class="fas fa-edit"></i>&nbsp; Edit Commercial Property</h1>
+        <p>ID #{{ prop.id }} &nbsp;·&nbsp; {{ prop.property_title|default:"Untitled" }}</p>
+    </div>
+    <a href="{% url 'commercial_list' %}" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Back to List
+    </a>
+</div>
+
+<form method="POST" enctype="multipart/form-data">
+{% csrf_token %}
+
+<!-- ①  BASIC INFORMATION -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#DC2626,#991B1B)"><i class="fas fa-building"></i></div>
+        <h3>Basic Information</h3>
+    </div>
+    <div class="card-body">
+        <div class="fg">
+
+            <div class="fgroup full">
+                <label class="flabel">Property Title</label>
+                <input type="text" name="property_title" class="fc"
+                       value="{{ prop.property_title|default:'' }}"
+                       placeholder="e.g. Premium Office Space in MIHAN">
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Property Type <span class="r">*</span></label>
+                <select name="property_type" class="fc">
+                    <option value="office-space"   {% if prop.property_type == 'office-space'   %}selected{% endif %}>Office Space</option>
+                    <option value="shop"           {% if prop.property_type == 'shop'           %}selected{% endif %}>Shop / Showroom</option>
+                    <option value="warehouse"      {% if prop.property_type == 'warehouse'      %}selected{% endif %}>Warehouse / Godown</option>
+                    <option value="industrial"     {% if prop.property_type == 'industrial'     %}selected{% endif %}>Industrial Building</option>
+                    <option value="land"           {% if prop.property_type == 'land'           %}selected{% endif %}>Commercial Land</option>
+                </select>
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">City <span class="r">*</span></label>
+                <input type="text" name="city" class="fc" value="{{ prop.city|default:'' }}" placeholder="e.g. Nagpur">
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Area / Locality <span class="r">*</span></label>
+                <input type="text" name="area_locality" class="fc" value="{{ prop.area_locality|default:'' }}" placeholder="e.g. MIHAN">
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Building Name <span class="r">*</span></label>
+                <input type="text" name="building_name" class="fc" value="{{ prop.building_name|default:'' }}" placeholder="e.g. TechPark Tower">
+            </div>
+
+            <div class="fgroup full">
+                <label class="flabel">Property Address <span class="r">*</span></label>
+                <textarea name="property_address" class="fc" placeholder="Full address…">{{ prop.property_address|default:'' }}</textarea>
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Possession Status <span class="r">*</span></label>
+                <select name="possession_status" class="fc">
+                    <option value="ready-to-move"      {% if prop.possession_status == 'ready-to-move'      %}selected{% endif %}>Ready to Move</option>
+                    <option value="under-construction" {% if prop.possession_status == 'under-construction' %}selected{% endif %}>Under Construction</option>
+                </select>
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Available From</label>
+                <input type="date" name="available_from" class="fc" value="{{ prop.available_from|date:'Y-m-d'|default:'' }}">
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Age of Property <span class="r">*</span></label>
+                <select name="age_of_property" class="fc">
+                    <option value="0-1"  {% if prop.age_of_property == '0-1'  %}selected{% endif %}>0–1 Year</option>
+                    <option value="1-3"  {% if prop.age_of_property == '1-3'  %}selected{% endif %}>1–3 Years</option>
+                    <option value="3-5"  {% if prop.age_of_property == '3-5'  %}selected{% endif %}>3–5 Years</option>
+                    <option value="5-10" {% if prop.age_of_property == '5-10' %}selected{% endif %}>5–10 Years</option>
+                    <option value="10+"  {% if prop.age_of_property == '10+'  %}selected{% endif %}>10+ Years</option>
+                </select>
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Zone Type</label>
+                <select name="zone_type" class="fc">
+                    <option value="">— Select —</option>
+                    <option value="industrial"       {% if prop.zone_type == 'industrial'       %}selected{% endif %}>Industrial</option>
+                    <option value="commercial"       {% if prop.zone_type == 'commercial'       %}selected{% endif %}>Commercial</option>
+                    <option value="residential"      {% if prop.zone_type == 'residential'      %}selected{% endif %}>Residential</option>
+                    <option value="special-economic" {% if prop.zone_type == 'special-economic' %}selected{% endif %}>Special Economic Zone</option>
+                </select>
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Location Hub</label>
+                <select name="location_hub" class="fc">
+                    <option value="">— Select —</option>
+                    <option value="it-park"           {% if prop.location_hub == 'it-park'           %}selected{% endif %}>IT Park</option>
+                    <option value="business-district" {% if prop.location_hub == 'business-district' %}selected{% endif %}>Business District</option>
+                    <option value="mall"              {% if prop.location_hub == 'mall'              %}selected{% endif %}>Shopping Mall</option>
+                    <option value="standalone"        {% if prop.location_hub == 'standalone'        %}selected{% endif %}>Standalone</option>
+                </select>
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Property Condition <span class="r">*</span></label>
+                <select name="property_condition" class="fc">
+                    <option value="bare-shell" {% if prop.property_condition == 'bare-shell' %}selected{% endif %}>Bare Shell</option>
+                    <option value="warm-shell" {% if prop.property_condition == 'warm-shell' %}selected{% endif %}>Warm Shell</option>
+                    <option value="fitted"     {% if prop.property_condition == 'fitted'     %}selected{% endif %}>Fitted</option>
+                    <option value="furnished"  {% if prop.property_condition == 'furnished'  %}selected{% endif %}>Furnished</option>
+                </select>
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Ownership Type <span class="r">*</span></label>
+                <select name="ownership_type" class="fc">
+                    <option value="freehold"     {% if prop.ownership_type == 'freehold'     %}selected{% endif %}>Freehold</option>
+                    <option value="leasehold"    {% if prop.ownership_type == 'leasehold'    %}selected{% endif %}>Leasehold</option>
+                    <option value="co-operative" {% if prop.ownership_type == 'co-operative' %}selected{% endif %}>Co-operative Society</option>
+                </select>
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Construction Status</label>
+                <select name="construction_status" class="fc">
+                    <option value="">— Select —</option>
+                    <option value="new"    {% if prop.construction_status == 'new'    %}selected{% endif %}>New Construction</option>
+                    <option value="resale" {% if prop.construction_status == 'resale' %}selected{% endif %}>Resale</option>
+                </select>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ②  AREA & PRICING -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#D97706,#78350F)"><i class="fas fa-rupee-sign"></i></div>
+        <h3>Area &amp; Pricing</h3>
+    </div>
+    <div class="card-body">
+        <div class="fg">
+
+            <div class="fgroup">
+                <label class="flabel">Builtup Area (sq.ft) <span class="r">*</span></label>
+                <input type="number" name="builtup_area" class="fc" value="{{ prop.builtup_area|default:'' }}" placeholder="e.g. 2000">
+            </div>
+            <div class="fgroup">
+                <label class="flabel">Carpet Area (sq.ft)</label>
+                <input type="number" name="carpet_area" class="fc" value="{{ prop.carpet_area|default:'' }}" placeholder="e.g. 1800">
+            </div>
+            <div class="fgroup">
+                <label class="flabel">Expected Rent (₹/month) <span class="r">*</span></label>
+                <input type="number" name="expected_rent" class="fc" value="{{ prop.expected_rent|default:'' }}" placeholder="e.g. 75000">
+            </div>
+            <div class="fgroup">
+                <label class="flabel">Security Deposit (₹)</label>
+                <input type="number" name="security_deposit" class="fc" value="{{ prop.security_deposit|default:'' }}" placeholder="e.g. 225000">
+            </div>
+            <div class="fgroup">
+                <label class="flabel">Maintenance Charges (₹)</label>
+                <input type="number" name="maintenance_charges" class="fc" value="{{ prop.maintenance_charges|default:'' }}" placeholder="e.g. 5000">
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Rent Negotiable</label>
+                <div class="brow">
+                    <div class="bbtn yes {% if prop.negotiable %}on{% endif %}" onclick="setBool('negotiable',true,this)">✔ Yes</div>
+                    <div class="bbtn no {% if not prop.negotiable %}on{% endif %}" onclick="setBool('negotiable',false,this)">✘ No</div>
+                </div>
+                <input type="hidden" name="negotiable" id="negotiable" value="{{ prop.negotiable }}">
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Brokerage</label>
+                <select name="brokerage" class="fc">
+                    <option value="">— Select —</option>
+                    <option value="Yes" {% if prop.brokerage == 'Yes' %}selected{% endif %}>Yes</option>
+                    <option value="No"  {% if prop.brokerage == 'No'  %}selected{% endif %}>No</option>
+                </select>
+            </div>
+            <div class="fgroup">
+                <label class="flabel">Brokerage %</label>
+                <input type="text" name="brokerage_percentage" class="fc" value="{{ prop.brokerage_percentage|default:'' }}" placeholder="e.g. 2">
+            </div>
+            <div class="fgroup">
+                <label class="flabel">Manual Brokerage (₹)</label>
+                <input type="text" name="manual_brokerage" class="fc" value="{{ prop.manual_brokerage|default:'' }}" placeholder="e.g. 15000">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ③  UTILITIES & LEASE -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#0891B2,#0C4A6E)"><i class="fas fa-bolt"></i></div>
+        <h3>Utilities &amp; Lease Terms</h3>
+    </div>
+    <div class="card-body">
+        <div class="fg">
+
+            <div class="fgroup">
+                <label class="flabel">DG / UPS Included</label>
+                <div class="brow">
+                    <div class="bbtn yes {% if prop.dg_ups_included %}on{% endif %}" onclick="setBool('dg_ups_included',true,this)">✔ Yes</div>
+                    <div class="bbtn no {% if not prop.dg_ups_included %}on{% endif %}" onclick="setBool('dg_ups_included',false,this)">✘ No</div>
+                </div>
+                <input type="hidden" name="dg_ups_included" id="dg_ups_included" value="{{ prop.dg_ups_included }}">
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Electricity Included</label>
+                <div class="brow">
+                    <div class="bbtn yes {% if prop.electricity_included %}on{% endif %}" onclick="setBool('electricity_included',true,this)">✔ Yes</div>
+                    <div class="bbtn no {% if not prop.electricity_included %}on{% endif %}" onclick="setBool('electricity_included',false,this)">✘ No</div>
+                </div>
+                <input type="hidden" name="electricity_included" id="electricity_included" value="{{ prop.electricity_included }}">
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Water Included</label>
+                <div class="brow">
+                    <div class="bbtn yes {% if prop.water_included %}on{% endif %}" onclick="setBool('water_included',true,this)">✔ Yes</div>
+                    <div class="bbtn no {% if not prop.water_included %}on{% endif %}" onclick="setBool('water_included',false,this)">✘ No</div>
+                </div>
+                <input type="hidden" name="water_included" id="water_included" value="{{ prop.water_included }}">
+            </div>
+
+            <div class="fgroup">
+                <label class="flabel">Lock-in Period (months)</label>
+                <input type="number" name="lockin_period" class="fc" value="{{ prop.lockin_period|default:'' }}" placeholder="e.g. 11">
+            </div>
+            <div class="fgroup">
+                <label class="flabel">Rent Increase % / year</label>
+                <input type="number" step="0.1" name="rent_increase" class="fc" value="{{ prop.rent_increase|default:'' }}" placeholder="e.g. 5.0">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ④  BUILDING DETAILS -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#7C3AED,#4C1D95)"><i class="fas fa-layer-group"></i></div>
+        <h3>Building Details</h3>
+    </div>
+    <div class="card-body">
+        <div class="fg">
+            <div class="fgroup"><label class="flabel">Total Floors</label><input type="number" name="total_floors" class="fc" value="{{ prop.total_floors|default:'' }}" placeholder="e.g. 10"></div>
+            <div class="fgroup"><label class="flabel">Your Floor</label><input type="number" name="your_floor" class="fc" value="{{ prop.your_floor|default:'' }}" placeholder="e.g. 5"></div>
+            <div class="fgroup"><label class="flabel">Staircases</label><input type="number" name="staircases" class="fc" value="{{ prop.staircases|default:'' }}" placeholder="e.g. 2"></div>
+            <div class="fgroup"><label class="flabel">Passenger Lifts</label><input type="number" name="passenger_lifts" class="fc" value="{{ prop.passenger_lifts|default:'0' }}"></div>
+            <div class="fgroup"><label class="flabel">Service Lifts</label><input type="number" name="service_lifts" class="fc" value="{{ prop.service_lifts|default:'0' }}"></div>
+            <div class="fgroup"><label class="flabel">Private Parking Slots</label><input type="number" name="private_parking" class="fc" value="{{ prop.private_parking|default:'0' }}"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ⑤  OFFICE FACILITIES -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#059669,#064E3B)"><i class="fas fa-chair"></i></div>
+        <h3>Office Facilities</h3>
+    </div>
+    <div class="card-body">
+        <div class="fg">
+            <div class="fgroup"><label class="flabel">Min Seats</label><input type="number" name="min_seats" class="fc" value="{{ prop.min_seats|default:'' }}" placeholder="e.g. 20"></div>
+            <div class="fgroup"><label class="flabel">Max Seats</label><input type="number" name="max_seats" class="fc" value="{{ prop.max_seats|default:'' }}" placeholder="e.g. 100"></div>
+            <div class="fgroup"><label class="flabel">Cabins</label><input type="number" name="cabins" class="fc" value="{{ prop.cabins|default:'' }}" placeholder="e.g. 10"></div>
+            <div class="fgroup"><label class="flabel">Meeting Rooms</label><input type="number" name="meeting_rooms" class="fc" value="{{ prop.meeting_rooms|default:'' }}" placeholder="e.g. 3"></div>
+            <div class="fgroup"><label class="flabel">Private Washrooms</label><input type="number" name="private_washroom" class="fc" value="{{ prop.private_washroom|default:'0' }}"></div>
+            <div class="fgroup"><label class="flabel">Public Washrooms</label><input type="number" name="public_washroom" class="fc" value="{{ prop.public_washroom|default:'0' }}"></div>
+            <div class="fgroup">
+                <label class="flabel">Flooring Type</label>
+                <select name="flooring_type" class="fc">
+                    <option value="">— Select —</option>
+                    <option value="marble"    {% if prop.flooring_type == 'marble'    %}selected{% endif %}>Marble</option>
+                    <option value="vitrified" {% if prop.flooring_type == 'vitrified' %}selected{% endif %}>Vitrified Tiles</option>
+                    <option value="granite"   {% if prop.flooring_type == 'granite'   %}selected{% endif %}>Granite</option>
+                    <option value="wooden"    {% if prop.flooring_type == 'wooden'    %}selected{% endif %}>Wooden</option>
+                    <option value="ceramic"   {% if prop.flooring_type == 'ceramic'   %}selected{% endif %}>Ceramic Tiles</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ⑥  AMENITIES -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#F59E0B,#78350F)"><i class="fas fa-star"></i></div>
+        <h3>Amenities</h3>
+    </div>
+    <div class="card-body">
+        <div class="amen-grid">
+            {% with alist="parking|car|Parking,security|shield-alt|Security,ac|snowflake|Air Conditioning,power_backup|plug|Power Backup,cafeteria|utensils|Cafeteria,conference_room|users|Conference Room,fire_safety|fire-extinguisher|Fire Safety,cctv|video|CCTV" %}{% endwith %}
+
+            <label class="amen-item {% if prop.parking %}on{% endif %}" onclick="toggleAmen(event,this)">
+                <input type="checkbox" name="parking" {% if prop.parking %}checked{% endif %}>
+                <div class="abox">✔</div><i class="fas fa-car" style="color:#DC2626;width:16px"></i><span class="aname">Parking</span>
+            </label>
+            <label class="amen-item {% if prop.security %}on{% endif %}" onclick="toggleAmen(event,this)">
+                <input type="checkbox" name="security" {% if prop.security %}checked{% endif %}>
+                <div class="abox">✔</div><i class="fas fa-shield-alt" style="color:#DC2626;width:16px"></i><span class="aname">Security</span>
+            </label>
+            <label class="amen-item {% if prop.ac %}on{% endif %}" onclick="toggleAmen(event,this)">
+                <input type="checkbox" name="ac" {% if prop.ac %}checked{% endif %}>
+                <div class="abox">✔</div><i class="fas fa-snowflake" style="color:#DC2626;width:16px"></i><span class="aname">Air Conditioning</span>
+            </label>
+            <label class="amen-item {% if prop.power_backup %}on{% endif %}" onclick="toggleAmen(event,this)">
+                <input type="checkbox" name="power_backup" {% if prop.power_backup %}checked{% endif %}>
+                <div class="abox">✔</div><i class="fas fa-plug" style="color:#DC2626;width:16px"></i><span class="aname">Power Backup</span>
+            </label>
+            <label class="amen-item {% if prop.cafeteria %}on{% endif %}" onclick="toggleAmen(event,this)">
+                <input type="checkbox" name="cafeteria" {% if prop.cafeteria %}checked{% endif %}>
+                <div class="abox">✔</div><i class="fas fa-utensils" style="color:#DC2626;width:16px"></i><span class="aname">Cafeteria</span>
+            </label>
+            <label class="amen-item {% if prop.conference_room %}on{% endif %}" onclick="toggleAmen(event,this)">
+                <input type="checkbox" name="conference_room" {% if prop.conference_room %}checked{% endif %}>
+                <div class="abox">✔</div><i class="fas fa-users" style="color:#DC2626;width:16px"></i><span class="aname">Conference Room</span>
+            </label>
+            <label class="amen-item {% if prop.fire_safety %}on{% endif %}" onclick="toggleAmen(event,this)">
+                <input type="checkbox" name="fire_safety" {% if prop.fire_safety %}checked{% endif %}>
+                <div class="abox">✔</div><i class="fas fa-fire-extinguisher" style="color:#DC2626;width:16px"></i><span class="aname">Fire Safety</span>
+            </label>
+            <label class="amen-item {% if prop.cctv %}on{% endif %}" onclick="toggleAmen(event,this)">
+                <input type="checkbox" name="cctv" {% if prop.cctv %}checked{% endif %}>
+                <div class="abox">✔</div><i class="fas fa-video" style="color:#DC2626;width:16px"></i><span class="aname">CCTV</span>
+            </label>
+        </div>
+    </div>
+</div>
+
+<!-- ⑦  NEARBY -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#0EA5E9,#0C4A6E)"><i class="fas fa-map-marker-alt"></i></div>
+        <h3>Nearby Facilities</h3>
+    </div>
+    <div class="card-body">
+        <div class="fg">
+            <div class="fgroup"><label class="flabel">Metro Station</label><input type="text" name="metro_station" class="fc" value="{{ prop.metro_station|default:'' }}" placeholder="e.g. MIHAN Metro 500m"></div>
+            <div class="fgroup"><label class="flabel">Bus Stop</label><input type="text" name="bus_stop" class="fc" value="{{ prop.bus_stop|default:'' }}" placeholder="e.g. Bus Stop 200m"></div>
+            <div class="fgroup"><label class="flabel">Restaurants</label><input type="text" name="restaurants" class="fc" value="{{ prop.restaurants|default:'' }}" placeholder="e.g. Food Court nearby"></div>
+            <div class="fgroup"><label class="flabel">Banks</label><input type="text" name="banks" class="fc" value="{{ prop.banks|default:'' }}" placeholder="e.g. HDFC Bank 300m"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ⑧  MEDIA -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#EC4899,#831843)"><i class="fas fa-images"></i></div>
+        <h3>Media</h3>
+    </div>
+    <div class="card-body">
+        <div class="fg">
+            <!-- Property Image -->
+            <div class="fgroup">
+                <label class="flabel">Property Image</label>
+                <div class="img-box" onclick="document.getElementById('fi_img').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to upload / replace image</p>
+                    {% if prop.property_images %}
+                        <img src="{{ prop.property_images.url }}" class="img-preview" id="cur_img">
+                    {% endif %}
+                </div>
+                <input type="file" id="fi_img" name="property_images" accept="image/*" style="display:none"
+                       onchange="previewFile(this,'prev_img','cur_img')">
+                <div id="prev_img"></div>
+            </div>
+            <!-- Floor Plan -->
+            <div class="fgroup">
+                <label class="flabel">Floor Plan</label>
+                <div class="img-box" onclick="document.getElementById('fi_fp').click()">
+                    <i class="fas fa-map"></i>
+                    <p>Click to upload / replace floor plan</p>
+                    {% if prop.floor_plan %}
+                        <img src="{{ prop.floor_plan.url }}" class="img-preview" id="cur_fp">
+                    {% endif %}
+                </div>
+                <input type="file" id="fi_fp" name="floor_plan" accept="image/*" style="display:none"
+                       onchange="previewFile(this,'prev_fp','cur_fp')">
+                <div id="prev_fp"></div>
+            </div>
+            <!-- Video -->
+            <div class="fgroup">
+                <label class="flabel">Video</label>
+                <div class="img-box" onclick="document.getElementById('fi_vid').click()">
+                    <i class="fas fa-video"></i>
+                    <p>Click to upload / replace video</p>
+                    {% if prop.video %}
+                        <p style="margin-top:8px;color:#16A34A;font-size:12px;"><i class="fas fa-check-circle"></i> Video already uploaded</p>
+                    {% endif %}
+                </div>
+                <input type="file" id="fi_vid" name="video" accept="video/*" style="display:none">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ⑨  OWNER -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#6366F1,#3730A3)"><i class="fas fa-user-tie"></i></div>
+        <h3>Owner Details</h3>
+    </div>
+    <div class="card-body">
+        <div class="fg">
+            <div class="fgroup"><label class="flabel">Owner Name <span class="r">*</span></label><input type="text" name="owner_name" class="fc" value="{{ prop.owner_name|default:'' }}" placeholder="Full name"></div>
+            <div class="fgroup"><label class="flabel">Contact Number <span class="r">*</span></label><input type="text" name="contact_number" class="fc" value="{{ prop.contact_number|default:'' }}" placeholder="10-digit mobile"></div>
+            <div class="fgroup"><label class="flabel">Email <span class="r">*</span></label><input type="email" name="email" class="fc" value="{{ prop.email|default:'' }}" placeholder="owner@example.com"></div>
+            <div class="fgroup"><label class="flabel">Alternate Contact</label><input type="text" name="alternate_contact" class="fc" value="{{ prop.alternate_contact|default:'' }}" placeholder="Optional"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ⑩  UPLOADED BY -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#64748B,#1E293B)"><i class="fas fa-upload"></i></div>
+        <h3>Uploaded By</h3>
+    </div>
+    <div class="card-body">
+        <div class="fg">
+            <div class="fgroup"><label class="flabel">Name</label><input type="text" name="uploaded_by_name" class="fc" value="{{ prop.uploaded_by_name|default:'' }}"></div>
+            <div class="fgroup"><label class="flabel">Email</label><input type="email" name="uploaded_by_email" class="fc" value="{{ prop.uploaded_by_email|default:'' }}"></div>
+            <div class="fgroup"><label class="flabel">Contact</label><input type="text" name="uploaded_by_contact" class="fc" value="{{ prop.uploaded_by_contact|default:'' }}"></div>
+            <div class="fgroup">
+                <label class="flabel">Role</label>
+                <select name="uploaded_by_role" class="fc">
+                    <option value="">— Select —</option>
+                    <option value="Admin" {% if prop.uploaded_by_role == 'Admin' %}selected{% endif %}>Admin</option>
+                    <option value="Agent" {% if prop.uploaded_by_role == 'Agent' %}selected{% endif %}>Agent</option>
+                    <option value="Owner" {% if prop.uploaded_by_role == 'Owner' %}selected{% endif %}>Owner</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Submit Bar -->
+<div class="submit-bar">
+    <a href="{% url 'commercial_list' %}" class="btn-cancel">Cancel</a>
+    <button type="submit" class="btn-save"><i class="fas fa-save"></i>&nbsp; Save Changes</button>
+</div>
+
+</form>
+</div>
+</div>
+
+<script>
+function setBool(id, val, btn) {
+    document.getElementById(id).value = val;
+    btn.closest('.brow').querySelectorAll('.bbtn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+}
+
+function toggleAmen(e, label) {
+    e.preventDefault();
+    label.classList.toggle('on');
+    const cb = label.querySelector('input[type=checkbox]');
+    cb.checked = !cb.checked;
+}
+
+function previewFile(input, previewBoxId, existingId) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        document.getElementById(previewBoxId).innerHTML =
+            `<img src="${e.target.result}" class="img-preview" style="margin-top:10px;">`;
+        const ex = document.getElementById(existingId);
+        if (ex) ex.style.display = 'none';
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+</script>

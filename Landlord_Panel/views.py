@@ -605,3 +605,11 @@ def pg_property_list(request):
     }
     return render(request, "landlord/pg_list.html", context)
 
+
+
+
+
+
+
+
+

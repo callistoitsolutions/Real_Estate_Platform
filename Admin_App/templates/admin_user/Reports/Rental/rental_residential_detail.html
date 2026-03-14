@@ -1,0 +1,457 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">
+                <i class="fas fa-eye"></i> Property Detail
+            </h1>
+            <div class="page-actions">
+                <a href="{% url 'rental_residential_edit' property.id %}">
+                    <button class="btn-primary-custom">
+                        <i class="fas fa-edit"></i> Edit Property
+                    </button>
+                </a>
+                <a href="{% url 'residential_list' %}">
+                    <button class="btn-primary-custom" style="background: transparent; border: 2px solid white; color: white;">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </button>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sub-header info bar -->
+    <div style="background:#fff; border-bottom:1px solid #eee; padding:10px 28px; display:flex; align-items:center; gap:10px; font-size:13px; color:#666; flex-wrap:wrap;">
+        <i class="fas fa-home" style="color:#667eea;"></i>
+        <span>{{ property.property_title }}</span>
+        <span style="color:#ccc;">|</span>
+        <span>ID: <strong style="color:#333;">#{{ property.id }}</strong></span>
+        <span style="color:#ccc;">|</span>
+        <span>{{ property.property_type }} &bull; {{ property.bhk_type }}</span>
+        <span style="color:#ccc;">|</span>
+        <span>{{ property.locality }}, {{ property.city }}</span>
+        <span style="color:#ccc;">|</span>
+        <span>Listed on {{ property.created_at|date:"d M Y" }}</span>
+    </div>
+
+    <!-- Content -->
+    <div style="padding: 24px 28px 40px;">
+
+        <!-- ===== BASIC PROPERTY DETAILS ===== -->
+        <div class="card" style="border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:24px; overflow:hidden; background:#fff;">
+            <div class="card-header" style="background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:14px 24px; display:flex; align-items:center; gap:10px; font-size:15px; font-weight:600;">
+                <i class="fas fa-home"></i> Basic Property Details
+            </div>
+            <div class="card-body" style="padding:24px;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:16px;">
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Property Title</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.property_title|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Property Type</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.property_type|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">BHK Type</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.bhk_type|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Furnishing Status</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.furnishing_status|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Property Age</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.property_age|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Floor Number</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.floor_number|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Total Floors</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.total_floors|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Builtup Area</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.builtup_area|default:"—" }} sq.ft</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Carpet Area</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.carpet_area|default:"—" }} sq.ft</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Balconies</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.balconies|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Bathrooms</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.bathrooms|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Parking</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.parking|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Facing</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.facing|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Availability Status</span>
+                        <span style="font-size:14px; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">
+                            {% if property.availability_status == 'Inactive' %}
+                                <span style="display:inline-block; padding:3px 10px; background:#f8d7da; color:#721c24; border-radius:20px; font-size:12px; font-weight:600;">Inactive</span>
+                            {% else %}
+                                <span style="display:inline-block; padding:3px 10px; background:#d4edda; color:#155724; border-radius:20px; font-size:12px; font-weight:600;">{{ property.availability_status }}</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Available From</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.available_from|date:"d M Y"|default:"—" }}</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== RENTAL PRICING ===== -->
+        <div class="card" style="border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:24px; overflow:hidden; background:#fff;">
+            <div class="card-header" style="background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:14px 24px; display:flex; align-items:center; gap:10px; font-size:15px; font-weight:600;">
+                <i class="fas fa-rupee-sign"></i> Rental Pricing
+            </div>
+            <div class="card-body" style="padding:24px;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:16px;">
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Monthly Rent</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #28a745;">₹{{ property.monthly_rent|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Security Deposit</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">₹{{ property.security_deposit|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Maintenance Charges</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{% if property.maintenance_charges %}₹{{ property.maintenance_charges }}{% else %}—{% endif %}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Electricity Charge</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.electricity_charge|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Water Charge</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.water_charge|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Rent Negotiable</span>
+                        <span style="font-size:14px; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">
+                            {% if property.rent_negotiable %}
+                                <span style="color:#28a745; font-weight:600;">Yes</span>
+                            {% else %}
+                                <span style="color:#dc3545; font-weight:600;">No</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Brokerage</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.brokerage|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Brokerage Percentage</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.brokerage_percentage|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Manual Brokerage</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.manual_brokerage|default:"—" }}</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TENANT PREFERENCE ===== -->
+        <div class="card" style="border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:24px; overflow:hidden; background:#fff;">
+            <div class="card-header" style="background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:14px 24px; display:flex; align-items:center; gap:10px; font-size:15px; font-weight:600;">
+                <i class="fas fa-users"></i> Tenant Preference
+            </div>
+            <div class="card-body" style="padding:24px;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:16px;">
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Preferred Tenant</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.preferred_tenant|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Pets Allowed</span>
+                        <span style="font-size:14px; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">
+                            {% if property.pets_allowed %}
+                                <span style="color:#28a745; font-weight:600;">Yes</span>
+                            {% else %}
+                                <span style="color:#dc3545; font-weight:600;">No</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Food Preference</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.food_preference|default:"—" }}</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ADDRESS ===== -->
+        <div class="card" style="border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:24px; overflow:hidden; background:#fff;">
+            <div class="card-header" style="background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:14px 24px; display:flex; align-items:center; gap:10px; font-size:15px; font-weight:600;">
+                <i class="fas fa-map-marker-alt"></i> Address
+            </div>
+            <div class="card-body" style="padding:24px;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:16px;">
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">City</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.city|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Locality</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.locality|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Pincode</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.pincode|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px; grid-column: 1 / -1;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Full Address</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.address|default:"—" }}</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PROPERTY DESCRIPTION ===== -->
+        <div class="card" style="border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:24px; overflow:hidden; background:#fff;">
+            <div class="card-header" style="background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:14px 24px; display:flex; align-items:center; gap:10px; font-size:15px; font-weight:600;">
+                <i class="fas fa-align-left"></i> Property Description
+            </div>
+            <div class="card-body" style="padding:24px;">
+                <p style="line-height:1.8; color:#555; font-size:14px; background:#f8f9fc; padding:16px; border-radius:8px; border-left:3px solid #667eea; margin:0;">
+                    {{ property.property_description|default:"No description provided." }}
+                </p>
+            </div>
+        </div>
+
+        <!-- ===== PROPERTY IMAGES ===== -->
+        <div class="card" style="border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:24px; overflow:hidden; background:#fff;">
+            <div class="card-header" style="background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:14px 24px; display:flex; align-items:center; gap:10px; font-size:15px; font-weight:600;">
+                <i class="fas fa-images"></i> Property Images
+            </div>
+            <div class="card-body" style="padding:24px;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:12px;">
+                    {% if property.image1 %}<img src="{{ property.image1.url }}" alt="Image 1" style="width:100%;height:140px;object-fit:cover;border-radius:8px;border:2px solid #eee;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)';this.style.borderColor='#667eea'" onmouseout="this.style.transform='scale(1)';this.style.borderColor='#eee'">{% endif %}
+                    {% if property.image2 %}<img src="{{ property.image2.url }}" alt="Image 2" style="width:100%;height:140px;object-fit:cover;border-radius:8px;border:2px solid #eee;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)';this.style.borderColor='#667eea'" onmouseout="this.style.transform='scale(1)';this.style.borderColor='#eee'">{% endif %}
+                    {% if property.image3 %}<img src="{{ property.image3.url }}" alt="Image 3" style="width:100%;height:140px;object-fit:cover;border-radius:8px;border:2px solid #eee;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)';this.style.borderColor='#667eea'" onmouseout="this.style.transform='scale(1)';this.style.borderColor='#eee'">{% endif %}
+                    {% if property.image4 %}<img src="{{ property.image4.url }}" alt="Image 4" style="width:100%;height:140px;object-fit:cover;border-radius:8px;border:2px solid #eee;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)';this.style.borderColor='#667eea'" onmouseout="this.style.transform='scale(1)';this.style.borderColor='#eee'">{% endif %}
+                    {% if property.image5 %}<img src="{{ property.image5.url }}" alt="Image 5" style="width:100%;height:140px;object-fit:cover;border-radius:8px;border:2px solid #eee;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)';this.style.borderColor='#667eea'" onmouseout="this.style.transform='scale(1)';this.style.borderColor='#eee'">{% endif %}
+                    {% if property.image6 %}<img src="{{ property.image6.url }}" alt="Image 6" style="width:100%;height:140px;object-fit:cover;border-radius:8px;border:2px solid #eee;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)';this.style.borderColor='#667eea'" onmouseout="this.style.transform='scale(1)';this.style.borderColor='#eee'">{% endif %}
+                    {% if property.image7 %}<img src="{{ property.image7.url }}" alt="Image 7" style="width:100%;height:140px;object-fit:cover;border-radius:8px;border:2px solid #eee;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)';this.style.borderColor='#667eea'" onmouseout="this.style.transform='scale(1)';this.style.borderColor='#eee'">{% endif %}
+                    {% if property.image8 %}<img src="{{ property.image8.url }}" alt="Image 8" style="width:100%;height:140px;object-fit:cover;border-radius:8px;border:2px solid #eee;cursor:pointer;transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.03)';this.style.borderColor='#667eea'" onmouseout="this.style.transform='scale(1)';this.style.borderColor='#eee'">{% endif %}
+                    {% if not property.image1 and not property.image2 and not property.image3 %}
+                        <p style="color:#888; font-size:14px; padding:20px 0;">No images uploaded.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== DOCUMENTS & VIDEO ===== -->
+        <div class="card" style="border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:24px; overflow:hidden; background:#fff;">
+            <div class="card-header" style="background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:14px 24px; display:flex; align-items:center; gap:10px; font-size:15px; font-weight:600;">
+                <i class="fas fa-paperclip"></i> Documents & Video
+            </div>
+            <div class="card-body" style="padding:24px; display:flex; gap:16px; flex-wrap:wrap; align-items:center;">
+                {% if property.property_video %}
+                    <a href="{{ property.property_video.url }}" target="_blank"
+                       style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+                        <i class="fas fa-video"></i> View Video
+                    </a>
+                {% else %}
+                    <span style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:#f8f9fc; color:#888; border-radius:8px; font-size:13px; border:1px dashed #ddd;">
+                        <i class="fas fa-video"></i> No video uploaded
+                    </span>
+                {% endif %}
+                {% if property.property_document %}
+                    <a href="{{ property.property_document.url }}" target="_blank"
+                       style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+                        <i class="fas fa-file-alt"></i> View Document
+                    </a>
+                {% else %}
+                    <span style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:#f8f9fc; color:#888; border-radius:8px; font-size:13px; border:1px dashed #ddd;">
+                        <i class="fas fa-file-alt"></i> No document uploaded
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ===== OWNER DETAILS ===== -->
+        <div class="card" style="border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:24px; overflow:hidden; background:#fff;">
+            <div class="card-header" style="background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:14px 24px; display:flex; align-items:center; gap:10px; font-size:15px; font-weight:600;">
+                <i class="fas fa-user-tie"></i> Owner Details
+            </div>
+            <div class="card-body" style="padding:24px;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:16px;">
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Owner Name</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.owner_name|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Owner Contact</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.owner_contact|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Owner Email</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.owner_email|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Residency Status</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.residency_status|default:"—" }}</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== LISTING UPLOADED BY ===== -->
+        <div class="card" style="border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:24px; overflow:hidden; background:#fff;">
+            <div class="card-header" style="background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:14px 24px; display:flex; align-items:center; gap:10px; font-size:15px; font-weight:600;">
+                <i class="fas fa-upload"></i> Listing Uploaded By
+            </div>
+            <div class="card-body" style="padding:24px;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:16px;">
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Name</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.uploaded_by_name|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Email</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.uploaded_by_email|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Contact</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.uploaded_by_contact|default:"—" }}</span>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        <span style="font-size:11px; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.5px;">Created At</span>
+                        <span style="font-size:14px; color:#333; font-weight:500; padding:8px 12px; background:#f8f9fc; border-radius:6px; border-left:3px solid #667eea;">{{ property.created_at|date:"d M Y, h:i A" }}</span>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+    $("#Rent").addClass("active");
+
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (window.innerWidth <= 768) {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        } else {
+            sidebar.classList.toggle('collapsed');
+        }
+    }
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    function toggleSubmenu(event, element) {
+        event.preventDefault();
+        event.stopPropagation();
+        const submenu = element.nextElementSibling;
+        document.querySelectorAll('.submenu').forEach(sub => { if (sub !== submenu) sub.classList.remove('active'); });
+        document.querySelectorAll('.menu-link').forEach(link => { if (link !== element) link.classList.remove('dropdown-open'); });
+        submenu.classList.toggle('active');
+        element.classList.toggle('dropdown-open');
+        return false;
+    }
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 768) {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.submenu-link').forEach(link => {
+            link.addEventListener('click', function () {
+                if (window.innerWidth <= 768) setTimeout(() => closeSidebar(), 200);
+            });
+        });
+        document.querySelectorAll('.menu-link').forEach(link => {
+            if (!link.hasAttribute('onclick')) {
+                link.addEventListener('click', function () {
+                    if (window.innerWidth <= 768) setTimeout(() => closeSidebar(), 200);
+                });
+            }
+        });
+    });
+    document.getElementById('sidebar').addEventListener('transitionend', function () {
+        if (this.classList.contains('active')) document.body.style.overflow = 'hidden';
+    });
+
+</script>
+
+</body>
+</html>

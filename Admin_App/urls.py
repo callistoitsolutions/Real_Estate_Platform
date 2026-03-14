@@ -51,8 +51,9 @@ urlpatterns = [
 
      ############# urls for rental property list ########################
 
-     path('residential_list',views.residential_list,name="residential_list"),
+    # path('residential_list',views.residential_list,name="residential_list"),
      path('commercial_list',views.commercial_list,name="commercial_list"),
+      
      path('pg_list',views.pg_list,name="pg_list"),
 
      path('residential_resale',views.residential_resale,name="residential_resale"),
@@ -299,7 +300,46 @@ urlpatterns = [
     path('plans/add/', views.plan_add, name='plan_add'),
     path('plans/edit/<int:pid>/', views.plan_edit, name='plan_edit'),
     path('addons/add/', views.addon_create, name='addon_create'),
+    
+    path('addons/add/', views.addon_create, name='addon_create'),
+    
+    
+ 
+    #path('rental_list', views.rental_list, name='rental_list'),
+    # Admin_App/urls.py
+
+    # ... your existing urls ...
+    path('residential_list/', views.rental_list, name='residential_list'),
+
+    path('rental_residential_add', views.rental_residential_add, name='rental_residential_add'),
+    path('rental/residential/view/<int:pk>/', views.rental_residential_view, name='rental_residential_view'),
+    path('rental/residential/edit/<int:pk>/', views.rental_residential_edit, name='rental_residential_edit'),
+  #  path('rental/residential/toggle/<int:pk>/', views.rental_residential_toggle, name='rental_residential_toggle'),
+  #  path('rental/residential/delete/<int:pk>/', views.rental_residential_delete, name='rental_residential_delete'),
+  
+  
+   path('residential_import_excel', views.import_residential_excel, name='import_residential_excel'),
+   path('residential_download_template/', views.download_residential_template, name='download_residential_template'),
+   
+   
+   
+    path('Admin_App/commercial/import-excel/', views.import_commercial_excel, name='import_commercial_excel'),
+    path('Admin_App/commercial/download-template/', views.download_commercial_template, name='download_commercial_template'),
+    
+   # path('commercial/list/',           views.commercial_list,   name='commercial_list'),
+    path('commercial/view/<int:pk>/',  views.commercial_view,   name='commercial_view'),
+    path('commercial/edit/<int:pk>/',  views.commercial_edit,   name='commercial_edit'),
+    path('commercial/delete/<int:pk>/',views.commercial_delete, name='commercial_delete'),
+    path('commercial_rental_add', views.commercial_rental_add, name='commercial_rental_add'),
+
+
+    path('Admin_App/pg/import-excel/',       views.import_pg_excel,       name='import_pg_excel'),
+    path('Admin_App/pg/download-template/',  views.download_pg_template,  name='download_pg_template'),
+    
+    path('Admin_App/pg/delete/<int:pk>/', views.pg_delete, name='pg_delete'),
+
 ]
+
 
 
  

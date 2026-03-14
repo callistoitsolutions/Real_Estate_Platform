@@ -876,6 +876,19 @@
             </div>
 
             <div class="col-md-4">
+  <div class="form-group mt-2">
+    <label class="form-label"> Plot Type <span class="required">*</span></label>
+    <select class="form-select" id="resale_plot_type" name="resale_plot_type" required>
+      <option value="">Select</option>
+     
+      <option value="open_plot">Open Plot</option>
+      <option value="residential_plot">Residential Plot</option>
+      <option value="commercial_plot">Commercial Plot</option>
+    </select>
+  </div>
+</div>
+
+            <div class="col-md-4">
               <div class="form-group mt-2">
                 <label class="form-label">Road Facing <span class="required">*</span></label>
                 <select class="form-select" id="plot_road_facing" required>
@@ -896,6 +909,16 @@
                 </select>
               </div>
             </div>
+
+             <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-calendar"></i>
+                            Available From
+                        </label>
+                        <input type="date" class="form-control" name="available_from">
+                    </div>
+                </div>
 
           </div>
 
@@ -941,6 +964,57 @@
                   readonly>
               </div>
             </div>
+
+
+
+            <div class="col-md-6 mt-2">
+                    
+                    <div class="form-group">
+        <label class="form-label">
+            <i class="fas fa-handshake"></i>
+            Brokerage
+        </label>
+        <select class="form-select" name="brokerage" id="brokerageSelect">
+            <option value="">Select Option</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select>
+    </div>
+                </div>
+
+
+                <div class="col-md-4 mt-2" id="brokerageSection" style="display:none;">
+    <div class="form-group">
+        <label class="form-label">
+            <i class="fas fa-percent"></i>
+            Brokerage Percentage
+        </label>
+
+        <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
+            <option value="">Select Brokerage</option>
+            <option value="1%">1%</option>
+            <option value="1.5%">1.5%</option>
+            <option value="2%">2%</option>
+            <option value="Negotiable">Negotiable</option>
+            <option value="Manual">Enter Manually</option>
+        </select>
+
+    </div>
+</div>
+
+
+<div class="col-md-4 mt-2" id="manualBrokerage" style="display:none;">
+    <div class="form-group">
+        <label class="form-label">
+            <i class="fas fa-edit"></i>
+            Enter Brokerage
+        </label>
+
+        <input type="text" class="form-control" name="manual_brokerage" placeholder="Enter Brokerage e.g. 2.5%">
+    </div>
+</div>
+
+
           </div>
         </div>
       </div>
@@ -1171,6 +1245,68 @@
 
         </div>
 
+            <div class="form-section">
+    <div class="section-header">
+        <i class="fas fa-upload"></i>
+        Listing Uploaded By
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-user"></i> Name
+                </label>
+                <input type="text" class="form-control"
+                       name="uploaded_by_name"
+                       value="{{ uploader_name }}"
+                       readonly>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-envelope"></i> Email
+                </label>
+                <input type="email" class="form-control"
+                       name="uploaded_by_email"
+                       value="{{ uploader_email }}"
+                       readonly>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-phone"></i> Contact
+                </label>
+                <input type="text" class="form-control"
+                       name="uploaded_by_contact"
+                       value="{{ uploader_phone }}"
+                       readonly>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-user-tag"></i> Role
+                </label>
+                <input type="text" class="form-control"
+                       name="uploaded_by_role"
+                       value="{{ uploader_role }}"
+                       readonly>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+
       </div>
 
       <div class="form-footer">
@@ -1391,6 +1527,45 @@
 
 
 
+
+</script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const brokerageSelect = document.getElementById("brokerageSelect");
+    const brokerageSection = document.getElementById("brokerageSection");
+
+    const brokeragePercentage = document.getElementById("brokeragePercentage");
+    const manualBrokerage = document.getElementById("manualBrokerage");
+
+
+    // Show brokerage percentage section
+    brokerageSelect.addEventListener("change", function () {
+
+        if (this.value === "Yes") {
+            brokerageSection.style.display = "block";
+        } else {
+            brokerageSection.style.display = "none";
+            manualBrokerage.style.display = "none";
+        }
+
+    });
+
+
+    // Show manual brokerage input
+    brokeragePercentage.addEventListener("change", function () {
+
+        if (this.value === "Manual") {
+            manualBrokerage.style.display = "block";
+        } else {
+            manualBrokerage.style.display = "none";
+        }
+
+    });
+
+});
 
 </script>
 
