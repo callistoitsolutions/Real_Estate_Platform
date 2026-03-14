@@ -31,6 +31,7 @@ from Admin_App.models import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import traceback
+from django.urls import reverse
 
 # Create your views here.
 
@@ -153,53 +154,40 @@ def signup_view(request):
     return redirect('dashboard12')
 
 
+@csrf_exempt
 def login_view(request):
-    next_url = request.GET.get('next') or request.POST.get('next') or None
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            user_email = data['user_email']
+            user_password = data['user_password']
+            user_role = data.get('user_role') 
+            
+            user_qs = User_Details.objects.filter(user_email=user_email, user_password=user_password, user_role=user_role)
+            
+            if user_qs.exists():
+                user_obj = user_qs.first()
+                
+                # --- SESSION LOGIC ---
+                # Note: Logging in a new person will overwrite these session keys
+                request.session['User_id'] = str(user_obj.id)
+                request.session['user_type'] = user_role
+                
+                if user_role == "Relationship Manager":
+                    url = reverse('rm_dashboard')
+                        
+                return JsonResponse({'status': 1, 'msg': f'{user_role} Login Successful', 'redirect_url': url})
 
-    if request.method == 'GET':
-        new_key = CaptchaStore.generate_key()
-        captcha_img = captcha_image_url(new_key)
-        return render(request, 'home_page/login.html', {
-            'captcha_key': new_key,
-            'captcha_img': captcha_img,
-            'next': next_url,
-        })
+            return JsonResponse({'status': 0, 'msg': 'Invalid Credentials or Role Selection'})
 
-    user_captcha = request.POST.get('captcha')
-    captcha_key = request.POST.get('captcha_key')
-    try:
-        captcha_obj = CaptchaStore.objects.get(hashkey=captcha_key)
-    except CaptchaStore.DoesNotExist:
-        messages.error(request, "Captcha expired.")
-        return redirect('login')
-
-    if captcha_obj.response != (user_captcha or "").lower():
-        messages.error(request, "Invalid captcha.")
-        captcha_obj.delete()
-        return redirect('login')
-
-    email = request.POST['email']
-    password = request.POST['password']
-
-    try:
-        u = CustomUser.objects.get(email=email)
-    except CustomUser.DoesNotExist:
-        messages.error(request, "Invalid credentials.")
-        captcha_obj.delete()
-        return redirect('login')
-
-    user = authenticate(request, username=u.username, password=password)
-    if user:
-        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        captcha_obj.delete()
-        if next_url:
-            if url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
-                return redirect(next_url)
-        return redirect('dashboard12')
-
-    messages.error(request, "Wrong password.")
-    captcha_obj.delete()
-    return redirect('login')
+        except Exception:
+            print(traceback.format_exc())
+            return JsonResponse({'status': 0, 'msg': 'Something went wrong'})
+    
+    # --- UPDATED GET LOGIC ---
+    # We remove the auto-redirect here so that the login page 
+    # is ALWAYS accessible for new users to log in.
+    return render(request, 'home_page/login.html')
 
 
 # ---------------- DASHBOARD ----------------
