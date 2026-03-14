@@ -13,6 +13,10 @@
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
   <style>
     :root {
       --bg-dark: #0d1117;
@@ -203,7 +207,7 @@
       <input type="hidden" name="captcha_key" value="{{ captcha_key }}"> {% endcomment %}
 
       <!-- Login -->
-      <button type="submit" class="btn-login mt-2">Login</button>
+      <button type="button" class="btn-login mt-2" onclick="User_Login(this)">Login</button>
 
       <div class="text-center mt-3">
         <a href="{% url 'signup' %}?next={{ next|default:'' }}">New to Rentify? Create Account</a>
@@ -232,5 +236,73 @@
   </script>
 
 </body>
+
+{% comment %} Ajax and Jquery for user login {% endcomment %}
+
+
+      <script>
+        function User_Login(_this){
+            var user_email = $("#user_email").val();
+            var user_password = $("#user_password").val();
+            var user_role = $("#user_role").val();
+            if (user_email == "")
+            {
+                alert("Please Enter Email Address");
+            }
+            else if(user_password == "")
+            {
+                alert("Please Enter Password");
+            }
+            else if(user_role == "SelectRole")
+            {
+                alert("Please Select Role");
+            }
+             else
+            {
+                _this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`;
+                
+                $.ajax({
+                    method:"POST",
+                    url : "{% url 'login' %}",
+                    contentType: "application/json",
+                    data:JSON.stringify({
+                    "user_email":user_email,
+                    "user_password":user_password,
+                    "user_role":user_role,
+                    }),
+                    success : function (response){
+                    $(_this).prop("disabled", false);
+                        _this.innerHTML = `Login`;
+                        if (response.status == '1'){
+                            var win = window.open(response.redirect_url, '_blank');
+                          if (win) {
+                              win.focus();
+                          } else {
+                              // If browser blocks popup, fallback to same tab
+                              window.location.href = response.redirect_url;
+                          }
+                      }
+                    else
+                    {
+                        swal( 
+                        {
+                            content: {
+                                element: "div",
+                                attributes: {
+                                    innerHTML: '<span style="font-weight:bold; color:red;font-size:20px;">' + response.msg + '</span>'
+                                }
+                            },
+
+                            icon: "warning",
+                            closeOnClickOutside: false,
+                        }) 
+                    }
+        
+                    }
+                });
+            }
+        }
+      </script>
+
 
 </html>
