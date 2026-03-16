@@ -175,7 +175,10 @@ def login_view(request):
                 
                 if user_role == "Relationship Manager":
                     url = reverse('rm_dashboard')
-                        
+                
+                if user_role == "Landlord":
+                    url = reverse('landlord_dashboard')
+
                 return JsonResponse({'status': 1, 'msg': f'{user_role} Login Successful', 'redirect_url': url})
 
             return JsonResponse({'status': 0, 'msg': 'Invalid Credentials or Role Selection'})
