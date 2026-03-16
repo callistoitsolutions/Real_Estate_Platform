@@ -1,5 +1,5 @@
 # referrals/views.py
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404,HttpResponse
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import AffiliateLink, ReferralConversion, CommissionPayout
@@ -7,6 +7,10 @@ from .utils import make_code, calculate_commission_for
 from django.views.decorators.http import require_POST
 from decimal import Decimal
 from django.db import models
+from Admin_App.models import *
+from django.views.decorators.csrf import csrf_exempt
+import traceback
+
 
 def referral_redirect(request, code):
     """
@@ -65,10 +69,40 @@ def admin_create_affiliate_link(request):
     link = request.scheme + '://' + request.get_host() + aff.get_target_url()
     return JsonResponse({'ok': True, 'code': aff.code, 'link': link})
 
-@login_required
+
 def rm_dashboard(request):
-    links = AffiliateLink.objects.filter(owner=request.user).order_by('-created_at')
-    return render(request, 'rm_panel/rm_dashboard.html', {'links': links})
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Relationship Manager":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "rm_panel/rm_dashboard.html", context)
+
+
+############### Views start for user logout #####################
+
+@csrf_exempt
+def User_Logout(request):
+    try:
+        del request.session['User_id']
+        del request.session['user_type']
+        return JsonResponse({"status":"1",'msg': 'Logout Successfully '})
+    except:
+        print(traceback.format_exc())
+
+######### Views end for user logout #############################
+
 
 @login_required
 def user_affiliate_links(request):
