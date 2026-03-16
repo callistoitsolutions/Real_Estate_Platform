@@ -8,6 +8,11 @@ urlpatterns = [
       ##########urls for Lanlord#####
    
     path('rm_dashboard',views.rm_dashboard,name="rm_dashboard"),
+
+
+    ############# urls for user logout ######################
+
+    path('User_Logout',views.User_Logout,name="User_Logout"),
       
     path('affilate_page',views.affilate_page,name="affilate_page"),
     
