@@ -309,6 +309,8 @@ class User_Details(models.Model):
 
     def __str__(self):
         return str(self.user_name)+"-"+self.user_role
+
+        
     
 from django.utils import timezone
 class RentalResidentialProperty(models.Model):

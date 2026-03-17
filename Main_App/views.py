@@ -191,6 +191,9 @@ def login_view(request):
                 if user_role == "Buyer":
                     url = reverse('Buyer_Dashboard')
 
+                if user_role == "Agency/Builder":
+                    url = reverse('Agency_Dashboard')
+
                 return JsonResponse({'status': 1, 'msg': f'{user_role} Login Successful', 'redirect_url': url})
 
             return JsonResponse({'status': 0, 'msg': 'Invalid Credentials or Role Selection'})

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tenant Dashboard | PropertyHub</title>
+    <title>Agency Dashboard | PropertyHub</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -33,15 +33,15 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     
-  <style>
+    <style>
         :root {
-            /* Theme: Modern Rose & Midnight Charcoal */
-            --primary-gradient: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%); /* Rose/Coral */
+            /* Agency Theme: Classic Gold & Deep Espresso */
+            --primary-gradient: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%); /* Gold to Bronze */
             --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%); /* Emerald */
             --danger-gradient: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); /* Red */
-            --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); /* Amber */
-            --info-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); /* Blue */
-            --dark-gradient: linear-gradient(135deg, #27272a 0%, #18181b 100%); /* Charcoal */
+            --warning-gradient: linear-gradient(135deg, #f97316 0%, #ea580c 100%); /* Orange */
+            --info-gradient: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); /* Ocean */
+            --dark-gradient: linear-gradient(135deg, #292524 0%, #0c0a09 100%); /* Espresso/Stone */
             --sidebar-width: 280px;
             --sidebar-collapsed-width: 80px;
             --topbar-height: 70px;
@@ -55,7 +55,7 @@
 
         html, body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%); /* Warm light gray background */
             overflow-x: hidden;
             width: 100%;
             height: 100%;
@@ -88,11 +88,11 @@
             top: 0;
             width: var(--sidebar-width);
             height: 100vh;
-            background: linear-gradient(180deg, #18181b 0%, #09090b 100%); /* Midnight Charcoal */
+            background: linear-gradient(180deg, #1c1917 0%, #0c0a09 100%); /* Deep Espresso */
             padding: 20px 0;
             transition: all 0.3s ease;
             z-index: 999;
-            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15);
             overflow-y: auto;
             overflow-x: hidden;
         }
@@ -110,7 +110,7 @@
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(212, 175, 55, 0.3); /* Hint of gold on scrollbar */
             border-radius: 10px;
         }
 
@@ -134,12 +134,14 @@
             justify-content: center;
             font-size: 1.5rem;
             flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(202, 138, 4, 0.3);
         }
 
         .sidebar-brand-text {
             font-size: 1.5rem;
             font-weight: 700;
             white-space: nowrap;
+            letter-spacing: 0.5px;
         }
 
         .sidebar.collapsed .sidebar-brand-text {
@@ -154,10 +156,10 @@
 
         .menu-section-title {
             padding: 15px 25px 10px;
-            color: #fda4af; /* Light rose accent */
+            color: #fcd34d; /* Soft gold accent */
             font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             font-weight: 600;
             transition: all 0.3s ease;
         }
@@ -177,7 +179,7 @@
             display: flex;
             align-items: center;
             padding: 15px 25px;
-            color: #cbd5e1;
+            color: #d6d3d1;
             text-decoration: none;
             transition: all 0.3s ease;
             position: relative;
@@ -186,8 +188,8 @@
         }
 
         .menu-link:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fef3c7;
         }
 
         .menu-link.active {
@@ -224,7 +226,7 @@
 
         .menu-badge {
             margin-left: auto;
-            background: #ef4444;
+            background: #dc2626; 
             color: white;
             padding: 3px 8px;
             border-radius: 10px;
@@ -268,7 +270,7 @@
             display: flex;
             align-items: center;
             padding: 12px 25px 12px 65px;
-            color: #94a3b8;
+            color: #a8a29e;
             text-decoration: none;
             font-size: 0.9rem;
             transition: all 0.3s ease;
@@ -280,7 +282,7 @@
         }
 
         .submenu-link.active {
-            color: #f43f5e; /* Rose active state */
+            color: #ca8a04; /* Gold active state */
         }
 
         /* Top Bar */
@@ -314,7 +316,7 @@
             width: 40px;
             height: 40px;
             border: none;
-            background: #f8fafc;
+            background: #f5f5f4;
             border-radius: 10px;
             cursor: pointer;
             display: flex;
@@ -323,7 +325,7 @@
             transition: all 0.3s ease;
             font-size: 1.2rem;
             flex-shrink: 0;
-            color: #64748b;
+            color: #57534e;
         }
 
         .toggle-sidebar:hover {
@@ -339,18 +341,18 @@
         .topbar-search input {
             width: 100%;
             padding: 10px 40px 10px 15px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #e7e5e4;
             border-radius: 12px;
             font-size: 0.9rem;
             transition: all 0.3s ease;
-            background: #f8fafc;
+            background: #f5f5f4;
         }
 
         .topbar-search input:focus {
             outline: none;
-            border-color: #f43f5e;
+            border-color: #ca8a04;
             background: white;
-            box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1);
+            box-shadow: 0 0 0 4px rgba(202, 138, 4, 0.1);
         }
 
         .topbar-search i {
@@ -358,7 +360,7 @@
             right: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #94a3b8;
+            color: #a8a29e;
         }
 
         .topbar-right {
@@ -373,14 +375,14 @@
             width: 40px;
             height: 40px;
             border-radius: 10px;
-            background: #f8fafc;
+            background: #f5f5f4;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
             flex-shrink: 0;
-            color: #64748b;
+            color: #57534e;
         }
 
         .topbar-icon:hover {
@@ -394,7 +396,7 @@
             right: -5px;
             width: 18px;
             height: 18px;
-            background: #ef4444;
+            background: #dc2626;
             border-radius: 50%;
             color: white;
             font-size: 0.65rem;
@@ -416,7 +418,7 @@
         }
 
         .user-profile:hover {
-            background: #f8fafc;
+            background: #f5f5f4;
         }
 
         .user-avatar {
@@ -441,13 +443,13 @@
         .user-name {
             font-weight: 600;
             font-size: 0.9rem;
-            color: #1e293b;
+            color: #292524;
             white-space: nowrap;
         }
 
         .user-role {
             font-size: 0.7rem;
-            color: #64748b;
+            color: #78716c;
             white-space: nowrap;
         }
 
@@ -523,7 +525,7 @@
 
         .btn-primary-custom {
             background: white;
-            color: #f43f5e;
+            color: #ca8a04;
             padding: 10px 25px;
             border-radius: 12px;
             border: none;
@@ -558,7 +560,7 @@
             background: white;
             border-radius: 18px;
             padding: 25px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -568,7 +570,7 @@
 
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
         }
 
         .stat-card::before {
@@ -596,7 +598,7 @@
             font-size: 1.8rem;
             color: white;
             margin-bottom: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
 
         .stat-icon.primary { background: var(--primary-gradient); }
@@ -608,14 +610,14 @@
         .stat-value {
             font-size: 2rem;
             font-weight: 800;
-            color: #2d3748;
+            color: #292524;
             margin-bottom: 5px;
             word-break: break-word;
         }
 
         .stat-label {
             font-size: 0.85rem;
-            color: #718096;
+            color: #78716c;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -633,8 +635,8 @@
         }
 
         .stat-change.positive {
-            background: #ffe4e6;
-            color: #e11d48;
+            background: #fef3c7;
+            color: #b45309;
         }
 
         .stat-change.negative {
@@ -655,7 +657,7 @@
             background: white;
             border-radius: 18px;
             padding: 25px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
             width: 100%;
             overflow: hidden;
         }
@@ -672,7 +674,7 @@
         .chart-title {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #2d3748;
+            color: #292524;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -687,11 +689,11 @@
 
         .filter-btn {
             padding: 6px 16px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #e7e5e4;
             background: white;
             border-radius: 10px;
             font-weight: 500;
-            color: #4a5568;
+            color: #57534e;
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 0.85rem;
@@ -715,7 +717,7 @@
             background: white;
             border-radius: 18px;
             padding: 25px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
             margin-bottom: 25px;
             width: 100%;
             overflow: hidden;
@@ -724,7 +726,7 @@
         .quick-stats-title {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #2d3748;
+            color: #292524;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -743,7 +745,7 @@
             text-align: center;
             padding: 20px;
             border-radius: 15px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%);
             transition: all 0.3s ease;
             width: 100%;
         }
@@ -761,14 +763,14 @@
         .stat-item-value {
             font-size: 1.8rem;
             font-weight: 700;
-            color: #2d3748;
+            color: #292524;
             margin-bottom: 5px;
             word-wrap: break-word;
         }
 
         .stat-item-label {
             font-size: 0.85rem;
-            color: #718096;
+            color: #78716c;
             font-weight: 500;
         }
 
@@ -777,7 +779,7 @@
             background: white;
             border-radius: 18px;
             padding: 25px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
             width: 100%;
             overflow: hidden;
         }
@@ -794,7 +796,7 @@
         .section-title {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #2d3748;
+            color: #292524;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -815,8 +817,8 @@
         }
 
         .properties-table thead th {
-            background: #f7fafc;
-            color: #4a5568;
+            background: #f5f5f4;
+            color: #57534e;
             padding: 15px;
             font-weight: 600;
             font-size: 0.85rem;
@@ -842,7 +844,7 @@
 
         .properties-table tbody tr:hover {
             transform: scale(1.005);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         }
 
         .properties-table tbody td {
@@ -869,14 +871,14 @@
 
         .property-title {
             font-weight: 600;
-            color: #2d3748;
+            color: #292524;
             margin-bottom: 5px;
             font-size: 0.95rem;
         }
 
         .property-subtitle {
             font-size: 0.8rem;
-            color: #718096;
+            color: #78716c;
         }
 
         .badge {
@@ -889,17 +891,17 @@
         }
 
         .badge-residential {
-            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%); /* Rose */
+            background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%); /* Gold */
             color: white;
         }
 
         .badge-commercial {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); /* Blue */
+            background: linear-gradient(135deg, #292524 0%, #0c0a09 100%); /* Slate */
             color: white;
         }
 
         .badge-pg {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* Emerald */
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); /* Orange */
             color: white;
         }
 
@@ -926,14 +928,14 @@
 
         .price-tag {
             font-weight: 700;
-            color: #2d3748;
+            color: #292524;
             font-size: 1rem;
             white-space: nowrap;
         }
 
         .price-period {
             font-size: 0.75rem;
-            color: #718096;
+            color: #78716c;
         }
 
         .action-buttons {
@@ -957,23 +959,23 @@
         }
 
         .btn-view {
-            background: #ffe4e6;
-            color: #e11d48;
+            background: #fef3c7;
+            color: #ca8a04;
         }
 
         .btn-view:hover {
-            background: #e11d48;
+            background: #ca8a04;
             color: white;
             transform: translateY(-2px);
         }
 
         .btn-edit {
-            background: #fef3c7;
-            color: #92400e;
+            background: #e0f2fe;
+            color: #0369a1;
         }
 
         .btn-edit:hover {
-            background: #92400e;
+            background: #0369a1;
             color: white;
             transform: translateY(-2px);
         }
@@ -1261,7 +1263,7 @@
         }
         
         .dt-button{
-            background: #f43f5e; /* Rose Primary */
+            background: #ca8a04; /* Agency Primary - Gold */
             color: white;
             border: none;
             padding: 6px 12px;
@@ -1271,7 +1273,7 @@
         }
 
         .dt-button:hover{
-            background: #e11d48; /* Hover Darker Rose */
+            background: #a16207; /* Hover Darker Gold */
         }
 
         /* HEADER LAYOUT */
@@ -1293,7 +1295,7 @@
         }
 
         .dataTables_length select{
-            border:1px solid #ddd;
+            border:1px solid #e7e5e4;
             padding:5px 8px;
             border-radius:6px;
             outline:none;
@@ -1306,7 +1308,7 @@
         }
 
         .dataTables_filter input{
-            border:1px solid #ddd;
+            border:1px solid #e7e5e4;
             padding:6px 10px;
             border-radius:6px;
             outline:none;
@@ -1320,7 +1322,7 @@
 
         /* PAGINATION BUTTONS */
         .dataTables_paginate .paginate_button{
-            background:#f1f3f6;
+            background:#f5f5f4;
             border:none !important;
             border-radius:6px;
             padding:6px 10px;
@@ -1330,13 +1332,13 @@
 
         /* HOVER */
         .dataTables_paginate .paginate_button:hover{
-            background: #f43f5e; /* Rose Primary */
+            background: #ca8a04; /* Agency Primary */
             color:#fff !important;
         }
 
         /* ACTIVE PAGE */
         .dataTables_paginate .current{
-            background: #f43f5e !important; /* Rose Primary */
+            background: #ca8a04 !important; /* Agency Primary */
             color:white !important;
         }
 
@@ -1344,7 +1346,7 @@
         .dataTables_info{
             margin-top:12px;
             font-size:13px;
-            color:#666;
+            color:#78716c;
         }
         
         /* SEARCH BOX RIGHT SIDE */
@@ -1353,7 +1355,7 @@
         }
 
         .dataTables_filter input{
-            border:1px solid #ddd;
+            border:1px solid #e7e5e4;
             padding:6px 10px;
             border-radius:6px;
             outline:none;
@@ -1362,12 +1364,12 @@
 
         /* HOVER EFFECT */
         .dataTables_filter input:hover{
-            border:1px solid #000;
+            border:1px solid #1c1917;
         }
 
         /* CLICK / FOCUS EFFECT */
         .dataTables_filter input:focus{
-            border:1px solid #f43f5e; /* Rose Primary */
+            border:1px solid #ca8a04; /* Agency Primary */
             box-shadow:none;
         }
 </style>
@@ -1390,12 +1392,42 @@
             <li class="menu-section-title" style="color:white;">MAIN MENU</li>
             
             <li class="menu-item">
-                <a href="{% url "Tenant_Dashboard" %}" class="menu-link" id="Tenant_Dashboard">
+                <a href="{% url "Agency_Dashboard" %}" class="menu-link" id="Agency_Dashboard">
                     <i class="fas fa-tachometer-alt menu-icon"></i>
                     <span class="menu-text" style="color:white;">Dashboard</span>
                 </a>
             </li>
 
+
+            <li class="menu-section-title" style="color:white;">PROPERTY DETAILS</li>
+
+            <li class="menu-item">
+                <a  class="menu-link" onclick="toggleSubmenu(event, this)" id="Rent">
+                    <i class="fas fa-key menu-icon"></i>
+                    <span class="menu-text" style="color:white;">Rental Properties</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <ul class="submenu">
+                    <li><a href="{% url "residential_list" %}" class="submenu-link" style="color:white;" id="Rent_Resident">Residential</a></li>
+                    <li><a href="{% url "commercial_list" %}" class="submenu-link" style="color:white;">Commercial</a></li>
+                    <li><a href="{% url "pg_list" %}" class="submenu-link" style="color:white;">PG/Co-living</a></li>
+                </ul>
+            </li>
+
+            <li class="menu-item">
+                <a href="javascript:void(0)" class="menu-link" onclick="toggleSubmenu(event, this)" id="Resale">
+                    <i class="fas fa-building menu-icon"></i>
+                    <span class="menu-text" style="color:white;">Resale Properties</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <ul class="submenu">
+                    <li><a href="{% url "residential_resale_list" %}" class="submenu-link" style="color:white;">Residential</a></li>
+                    <li><a href="{% url "commercial_resale_list" %}" class="submenu-link" style="color:white;">Commercial</a></li>
+                    <li><a href="{% url "plot_resale_list" %}" class="submenu-link" style="color:white;">Plot/Land</a></li>
+                    <li><a href="{% url "industrial_resale_list" %}" class="submenu-link" style="color:white;">Industrial</a></li>
+                    <li><a href="{% url "agricultural_resale_list" %}" class="submenu-link" style="color:white;">Agricultural</a></li>
+                </ul>
+            </li>
 
 
             <li class="menu-section-title">SETTINGS</li>
@@ -1460,7 +1492,7 @@
             </div>
         </div>
 
-{% comment %} Ajax Jquery and Javascript for tenant Logout {% endcomment %}
+{% comment %} Ajax Jquery and Javascript for agency/builder Logout {% endcomment %}
 
 <script>
 
@@ -1469,7 +1501,7 @@
     {
         swal({
             title: "LOGOUT",
-            text: "Are you sure, you want to logout from tenant panel ?",
+            text: "Are you sure, you want to logout from agency/builder panel ?",
             icon: "warning",
             buttons: ["No", "Yes"],	
             closeOnClickOutside: false,

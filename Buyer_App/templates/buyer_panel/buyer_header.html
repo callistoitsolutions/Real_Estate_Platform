@@ -1390,115 +1390,14 @@
             <li class="menu-section-title" style="color:white;">MAIN MENU</li>
             
             <li class="menu-item">
-                <a href="{% url "admin_page" %}" class="menu-link" id="Admin_Dashboard">
+                <a href="{% url "Buyer_Dashboard" %}" class="menu-link" id="Buyer_Dashboard">
                     <i class="fas fa-tachometer-alt menu-icon"></i>
                     <span class="menu-text" style="color:white;">Dashboard</span>
                 </a>
             </li>
 
-            <li class="menu-section-title" style="color:white;">ADD SECTION DETAILS</li>
+            
 
-            <li class="menu-item">
-                <a href="{% url "Ameneties_List" %}" class="menu-link" id="Ameneties">
-                    <i class="fas fa-drafting-compass menu-icon"></i>
-                    <span class="menu-text" style="color:white;">Ameneties</span>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="{% url "Services_List" %}" class="menu-link" id="Services">
-                    <i class="fas fa-gear menu-icon"></i>
-                    <span class="menu-text" style="color:white;">Services(Vendors)</span>
-                </a>
-            </li>
-
-            <li class="menu-section-title" style="color:white;">PROPERTY DETAILS</li>
-
-            <li class="menu-item">
-                <a  class="menu-link" onclick="toggleSubmenu(event, this)" id="Rent">
-                    <i class="fas fa-key menu-icon"></i>
-                    <span class="menu-text" style="color:white;">Rental Properties</span>
-                    <i class="fas fa-chevron-down dropdown-icon"></i>
-                </a>
-                <ul class="submenu">
-                    <li><a href="{% url "residential_list" %}" class="submenu-link" style="color:white;" id="Rent_Resident">Residential</a></li>
-                    <li><a href="{% url "commercial_list" %}" class="submenu-link" style="color:white;">Commercial</a></li>
-                    <li><a href="{% url "pg_list" %}" class="submenu-link" style="color:white;">PG/Co-living</a></li>
-                </ul>
-            </li>
-
-            <li class="menu-item">
-                <a href="javascript:void(0)" class="menu-link" onclick="toggleSubmenu(event, this)" id="Resale">
-                    <i class="fas fa-building menu-icon"></i>
-                    <span class="menu-text" style="color:white;">Resale Properties</span>
-                    <i class="fas fa-chevron-down dropdown-icon"></i>
-                </a>
-                <ul class="submenu">
-                    <li><a href="{% url "residential_resale_list" %}" class="submenu-link" style="color:white;">Residential</a></li>
-                    <li><a href="{% url "commercial_resale_list" %}" class="submenu-link" style="color:white;">Commercial</a></li>
-                    <li><a href="{% url "plot_resale_list" %}" class="submenu-link" style="color:white;">Plot/Land</a></li>
-                    <li><a href="{% url "industrial_resale_list" %}" class="submenu-link" style="color:white;">Industrial</a></li>
-                    <li><a href="{% url "agricultural_resale_list" %}" class="submenu-link" style="color:white;">Agricultural</a></li>
-                </ul>
-            </li>
-
-            <li class="menu-section-title" style="color:white;">MANAGEMENT</li>
-
-            <li class="menu-item">
-                <a href="javascript:void(0)" class="menu-link" onclick="toggleSubmenu(event, this)" id="Teams">
-                    <i class="fas fa-users menu-icon"></i>
-                    <span class="menu-text" style="color:white;">Teams</span>
-                    <i class="fas fa-chevron-down dropdown-icon"></i>
-                </a>
-                <ul class="submenu">
-                    <li><a href="{% url "rm_list" %}" class="submenu-link" style="color:white;">Relationship Manager(RM)</a></li>
-                    <li><a href="{% url "Landlord_List" %}" class="submenu-link" style="color:white;">Landlords</a></li>
-                    <li><a href="{% url "Tenant_List" %}" class="submenu-link" style="color:white;">Tenants</a></li>
-                    <li><a href="{% url "Buyer_List" %}" class="submenu-link" style="color:white;">Buyers</a></li>
-                    <li><a href="{% url "Agent_List" %}" class="submenu-link" style="color:white;">Agents</a></li>
-                    <li><a href="{% url "Agency_List" %}" class="submenu-link" style="color:white;">Agencies/Builder</a></li>
-                    <li><a href="{% url "Vendor_List" %}" class="submenu-link" style="color:white;">Vendors</a></li>
-                </ul>
-            </li>
-
-
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-file-invoice-dollar menu-icon"></i>
-                    <span class="menu-text">Payments</span>
-                    <span class="menu-badge">3</span>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-file-contract menu-icon"></i>
-                    <span class="menu-text">Agreements</span>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-tools menu-icon"></i>
-                    <span class="menu-text">Maintenance</span>
-                </a>
-            </li>
-
-            <li class="menu-section-title">ANALYTICS</li>
-
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-chart-line menu-icon"></i>
-                    <span class="menu-text">Reports</span>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-chart-pie menu-icon"></i>
-                    <span class="menu-text">Analytics</span>
-                </a>
-            </li>
 
             <li class="menu-section-title">SETTINGS</li>
 
@@ -1562,7 +1461,7 @@
             </div>
         </div>
 
-{% comment %} Ajax Jquery and Javascript for tenant Logout {% endcomment %}
+{% comment %} Ajax Jquery and Javascript for buyer Logout {% endcomment %}
 
 <script>
 
@@ -1571,7 +1470,7 @@
     {
         swal({
             title: "LOGOUT",
-            text: "Are you sure, you want to logout from tenant panel ?",
+            text: "Are you sure, you want to logout from buyer panel ?",
             icon: "warning",
             buttons: ["No", "Yes"],	
             closeOnClickOutside: false,

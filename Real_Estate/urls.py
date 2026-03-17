@@ -34,6 +34,7 @@ urlpatterns = [
     path('Vendors/',include('Vendors.urls')),
     path('Tenant_Panel/',include('Tenant_App.urls')),
     path('Buyer_Panel/',include('Buyer_App.urls')),
+    path('Agency_Panel/',include('Agency_App.urls')),
     path('seo/',include('seo.urls')),
     path('captcha/', include('captcha.urls')),
 #path('api/', include(finance_router.urls)),

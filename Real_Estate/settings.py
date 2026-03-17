@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'RM_Dashboard',
     'Tenant_App',
     'Buyer_App',
+    'Agency_App',
     'seo',
     'ckeditor',
     'ckeditor_uploader',
