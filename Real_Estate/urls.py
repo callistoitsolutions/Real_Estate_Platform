@@ -32,6 +32,8 @@ urlpatterns = [
     path('Agent_Dashboard/',include('Agent_Dashboard.urls')),
     path('RM_Dashboard/',include('RM_Dashboard.urls')),
     path('Vendors/',include('Vendors.urls')),
+    path('Tenant_Panel/',include('Tenant_App.urls')),
+    path('Buyer_Panel/',include('Buyer_App.urls')),
     path('seo/',include('seo.urls')),
     path('captcha/', include('captcha.urls')),
 #path('api/', include(finance_router.urls)),

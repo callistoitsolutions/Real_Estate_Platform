@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Landlord Dashboard | PropertyHub</title>
+    <title>Buyer Dashboard | PropertyHub</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -33,15 +33,15 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     
-    <style>
+<style>
         :root {
-            /* Landlord Theme: Emerald Green & Slate */
-            --primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%); /* Emerald Green */
-            --success-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); /* Royal Blue */
+            /* Buyer Theme: Vibrant Magenta & Deep Slate */
+            --primary-gradient: linear-gradient(135deg, #d946ef 0%, #c026d3 100%); /* Magenta/Fuchsia */
+            --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%); /* Emerald */
             --danger-gradient: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); /* Red */
             --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); /* Amber */
-            --info-gradient: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); /* Cyan */
-            --dark-gradient: linear-gradient(135deg, #334155 0%, #0f172a 100%); /* Slate */
+            --info-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); /* Sky Blue */
+            --dark-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); /* Deep Slate */
             --sidebar-width: 280px;
             --sidebar-collapsed-width: 80px;
             --topbar-height: 70px;
@@ -55,7 +55,7 @@
 
         html, body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             overflow-x: hidden;
             width: 100%;
             height: 100%;
@@ -88,7 +88,7 @@
             top: 0;
             width: var(--sidebar-width);
             height: 100vh;
-            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); /* Dark Slate */
+            background: linear-gradient(180deg, #0f172a 0%, #020617 100%); /* Ultra Dark Slate */
             padding: 20px 0;
             transition: all 0.3s ease;
             z-index: 999;
@@ -154,7 +154,7 @@
 
         .menu-section-title {
             padding: 15px 25px 10px;
-            color: #6ee7b7; /* Light emerald accent */
+            color: #f0abfc; /* Light Magenta accent */
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -177,7 +177,7 @@
             display: flex;
             align-items: center;
             padding: 15px 25px;
-            color: #cbd5e1; /* Light slate text */
+            color: #cbd5e1;
             text-decoration: none;
             transition: all 0.3s ease;
             position: relative;
@@ -224,7 +224,7 @@
 
         .menu-badge {
             margin-left: auto;
-            background: #ef4444;
+            background: #f59e0b; /* Amber badge */
             color: white;
             padding: 3px 8px;
             border-radius: 10px;
@@ -280,7 +280,7 @@
         }
 
         .submenu-link.active {
-            color: #10b981; /* Emerald active state */
+            color: #d946ef; /* Magenta active state */
         }
 
         /* Top Bar */
@@ -348,9 +348,9 @@
 
         .topbar-search input:focus {
             outline: none;
-            border-color: #10b981;
+            border-color: #d946ef;
             background: white;
-            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 0 4px rgba(217, 70, 239, 0.1);
         }
 
         .topbar-search i {
@@ -523,7 +523,7 @@
 
         .btn-primary-custom {
             background: white;
-            color: #10b981;
+            color: #d946ef;
             padding: 10px 25px;
             border-radius: 12px;
             border: none;
@@ -608,14 +608,14 @@
         .stat-value {
             font-size: 2rem;
             font-weight: 800;
-            color: #2d3748;
+            color: #1e293b;
             margin-bottom: 5px;
             word-break: break-word;
         }
 
         .stat-label {
             font-size: 0.85rem;
-            color: #718096;
+            color: #64748b;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -633,8 +633,8 @@
         }
 
         .stat-change.positive {
-            background: #d1fae5;
-            color: #065f46;
+            background: #fae8ff;
+            color: #c026d3;
         }
 
         .stat-change.negative {
@@ -672,7 +672,7 @@
         .chart-title {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #2d3748;
+            color: #1e293b;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -724,7 +724,7 @@
         .quick-stats-title {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #2d3748;
+            color: #1e293b;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
@@ -761,14 +761,14 @@
         .stat-item-value {
             font-size: 1.8rem;
             font-weight: 700;
-            color: #2d3748;
+            color: #1e293b;
             margin-bottom: 5px;
             word-wrap: break-word;
         }
 
         .stat-item-label {
             font-size: 0.85rem;
-            color: #718096;
+            color: #64748b;
             font-weight: 500;
         }
 
@@ -794,7 +794,7 @@
         .section-title {
             font-size: 1.3rem;
             font-weight: 700;
-            color: #2d3748;
+            color: #1e293b;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -815,8 +815,8 @@
         }
 
         .properties-table thead th {
-            background: #f7fafc;
-            color: #4a5568;
+            background: #f8fafc;
+            color: #475569;
             padding: 15px;
             font-weight: 600;
             font-size: 0.85rem;
@@ -869,14 +869,14 @@
 
         .property-title {
             font-weight: 600;
-            color: #2d3748;
+            color: #1e293b;
             margin-bottom: 5px;
             font-size: 0.95rem;
         }
 
         .property-subtitle {
             font-size: 0.8rem;
-            color: #718096;
+            color: #64748b;
         }
 
         .badge {
@@ -889,12 +889,12 @@
         }
 
         .badge-residential {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* Emerald */
+            background: linear-gradient(135deg, #d946ef 0%, #c026d3 100%); /* Magenta */
             color: white;
         }
 
         .badge-commercial {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); /* Blue */
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%); /* Emerald */
             color: white;
         }
 
@@ -926,14 +926,14 @@
 
         .price-tag {
             font-weight: 700;
-            color: #2d3748;
+            color: #1e293b;
             font-size: 1rem;
             white-space: nowrap;
         }
 
         .price-period {
             font-size: 0.75rem;
-            color: #718096;
+            color: #64748b;
         }
 
         .action-buttons {
@@ -957,23 +957,23 @@
         }
 
         .btn-view {
-            background: #dbeafe;
-            color: #1e40af;
+            background: #fae8ff;
+            color: #d946ef;
         }
 
         .btn-view:hover {
-            background: #1e40af;
+            background: #d946ef;
             color: white;
             transform: translateY(-2px);
         }
 
         .btn-edit {
             background: #fef3c7;
-            color: #92400e;
+            color: #d97706;
         }
 
         .btn-edit:hover {
-            background: #92400e;
+            background: #d97706;
             color: white;
             transform: translateY(-2px);
         }
@@ -1259,114 +1259,116 @@
                 height: 200px;
             }
         }
+        
         .dt-button{
-        background: #10b981; /* Landlord Primary */
-        color:white;
-        border:none;
-        padding:6px 12px;
-        border-radius:6px;
-        margin-right:5px;
-        cursor:pointer;
+            background: #d946ef; /* Buyer Primary - Magenta */
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            margin-right: 5px;
+            cursor: pointer;
         }
 
         .dt-button:hover{
-        background:#059669;
+            background: #c026d3; /* Hover Darker Magenta */
         }
 
         /* HEADER LAYOUT */
         .table-header{
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        margin-bottom:15px;
-        flex-wrap:wrap;
-        gap:10px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:15px;
+            flex-wrap:wrap;
+            gap:10px;
         }
 
         /* RECORDS PER PAGE */
         .dataTables_length{
-        display:flex;
-        align-items:center;
-        gap:8px;
-        font-size:14px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            font-size:14px;
         }
 
         .dataTables_length select{
-        border:1px solid #ddd;
-        padding:5px 8px;
-        border-radius:6px;
-        outline:none;
-        cursor:pointer;
+            border:1px solid #e2e8f0;
+            padding:5px 8px;
+            border-radius:6px;
+            outline:none;
+            cursor:pointer;
         }
 
         /* SEARCH BOX RIGHT SIDE */
         .dataTables_filter{
-        margin-left:auto;
+            margin-left:auto;
         }
 
         .dataTables_filter input{
-        border:1px solid #ddd;
-        padding:6px 10px;
-        border-radius:6px;
-        outline:none;
+            border:1px solid #e2e8f0;
+            padding:6px 10px;
+            border-radius:6px;
+            outline:none;
         }
 
         /* PAGINATION AREA */
         .dataTables_paginate{
-        margin-top:15px;
-        text-align:right;
+            margin-top:15px;
+            text-align:right;
         }
 
         /* PAGINATION BUTTONS */
         .dataTables_paginate .paginate_button{
-        background:#f1f3f6;
-        border:none !important;
-        border-radius:6px;
-        padding:6px 10px;
-        margin:3px;
-        cursor:pointer;
+            background:#f1f5f9;
+            border:none !important;
+            border-radius:6px;
+            padding:6px 10px;
+            margin:3px;
+            cursor:pointer;
         }
 
         /* HOVER */
         .dataTables_paginate .paginate_button:hover{
-        background: #10b981; /* Landlord Primary */
-        color:#fff !important;
+            background: #d946ef; /* Buyer Primary */
+            color:#fff !important;
         }
 
         /* ACTIVE PAGE */
         .dataTables_paginate .current{
-        background: #10b981 !important; /* Landlord Primary */
-        color:white !important;
+            background: #d946ef !important; /* Buyer Primary */
+            color:white !important;
         }
 
         /* TABLE INFO TEXT */
         .dataTables_info{
-        margin-top:12px;
-        font-size:13px;
-        color:#666;
+            margin-top:12px;
+            font-size:13px;
+            color:#64748b;
         }
-                /* SEARCH BOX RIGHT SIDE */
+        
+        /* SEARCH BOX RIGHT SIDE */
         .dataTables_filter{
-        margin-left:auto;
+            margin-left:auto;
         }
 
         .dataTables_filter input{
-        border:1px solid #ddd;
-        padding:6px 10px;
-        border-radius:6px;
-        outline:none;
-        transition:0.2s;
+            border:1px solid #e2e8f0;
+            padding:6px 10px;
+            border-radius:6px;
+            outline:none;
+            transition:0.2s;
         }
 
         /* HOVER EFFECT */
         .dataTables_filter input:hover{
-        border:1px solid #000;
+            border:1px solid #0f172a;
         }
 
         /* CLICK / FOCUS EFFECT */
         .dataTables_filter input:focus{
-        border:1px solid #10b981; /* Landlord Primary */
-        box-shadow:none;
+            border:1px solid #d946ef; /* Buyer Primary */
+            box-shadow:none;
         }
 </style>
 </head>
@@ -1560,7 +1562,7 @@
             </div>
         </div>
 
-{% comment %} Ajax Jquery and Javascript for landlord Logout {% endcomment %}
+{% comment %} Ajax Jquery and Javascript for tenant Logout {% endcomment %}
 
 <script>
 
@@ -1569,7 +1571,7 @@
     {
         swal({
             title: "LOGOUT",
-            text: "Are you sure, you want to logout from landlord panel ?",
+            text: "Are you sure, you want to logout from tenant panel ?",
             icon: "warning",
             buttons: ["No", "Yes"],	
             closeOnClickOutside: false,

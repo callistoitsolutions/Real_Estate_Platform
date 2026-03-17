@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'CRM_Panel',
     'Agent_Dashboard',
     'RM_Dashboard',
+    'Tenant_App',
+    'Buyer_App',
     'seo',
     'ckeditor',
     'ckeditor_uploader',

@@ -1,1092 +1,744 @@
-<!DOCTYPE html>
-<html lang="en">
+{% include "vendors_module/vendor_header.html" %}
 {% load static %}
-<!-- Mirrored from adminlte.io/themes/v3/ by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 09 May 2025 06:58:50 GMT -->
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin | Dashboard</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&amp;display=fallback">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="{% static 'assets1/plugins/fontawesome-free/css/all.min.css' %}">
-  <!-- Ionicons -->
-  <link rel="stylesheet" href="{% static 'assets1/code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' %}">
-  <!-- Tempusdominus Bootstrap 4 -->
-  <link rel="stylesheet" href="{% static 'assets1/plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
-  <!-- iCheck -->
-  <link rel="stylesheet" href="{% static 'assets1/plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
-  <!-- JQVMap -->
-  <link rel="stylesheet" href="{% static 'assets1/plugins/jqvmap/jqvmap.min.css' %}">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="{% static 'assets1/dist/css/adminlte.min2167.css' %}">
-  <!-- overlayScrollbars -->
-  <link rel="stylesheet" href="{% static 'assets1/plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
-  <!-- Daterange picker -->
-  <link rel="stylesheet" href="{% static 'assets1/plugins/daterangepicker/daterangepicker.css' %}">
-  <!-- summernote -->
-  <link rel="stylesheet" href="{% static 'assets1/plugins/summernote/summernote-bs4.min.css' %}">
-<script data-cfasync="false" nonce="1ad5697d-e76a-43b1-83c4-8ee8a59786b7">
-  try{(function(w,d){!function(bz,bA,bB,bC){if(bz.zaraz)console.error
-    ("zaraz is loaded twice");
-    else{bz[bB]=bz[bB]||{};bz[bB].executed=[];bz.
-    zaraz={deferred:[],listeners:[]};bz.zaraz._v="5853";bz.zaraz._n="1ad5697d-e76a-43b1-83c4-8ee8a59786b7";
-    bz.zaraz.q=[];bz.zaraz._f=function(bD){return async function(){var bE=Array.prototype.slice.call(arguments);
-      bz.zaraz.q.push({m:bD,a:bE})}};for(const bF of["track","set","debug"])bz.zaraz[bF]=bz.zaraz._f(bF);bz.zaraz.init=()=>
-      {var bG=bA.getElementsByTagName(bC)[0],bH=bA.createElement(bC),bI=bA.getElementsByTagName("title")
-      [0];bI&&(bz[bB].t=bA.getElementsByTagName("title")[0].text);bz[bB].x=Math.random();bz[bB].w=bz.screen.width;bz[bB]
-      .h=bz.screen.height;bz[bB].j=bz.innerHeight;bz[bB].e=bz.innerWidth;bz[bB].l=bz.location.href;bz[bB].r=bA.referrer;bz[bB].k=bz.screen.colorDepth;bz[bB].n=bA.characterSet;bz[bB].o=(new Date).getTimezoneOffset();if(bz.dataLayer)for(const bJ of Object.entries(Object.entries(dataLayer).reduce(((bK,bL)=>({...bK[1],...bL[1]})),{})))zaraz.set(bJ[0],bJ[1],{scope:"page"});bz[bB].q=[];for(;bz.zaraz.q.length;){const bM=bz.zaraz.q.shift();bz[bB].q.push(bM)}bH.defer=!0;for(const bN of[localStorage,sessionStorage])Object.keys(bN||{}).filter((bP=>bP.startsWith("_zaraz_"))).forEach((bO=>{try{bz[bB]["z_"+bO.slice(7)]=JSON.parse(bN.getItem(bO))}catch{bz[bB]["z_"+bO.slice(7)]=bN.getItem(bO)}}));bH.referrerPolicy="origin";bH.src="../../cdn-cgi/zaraz/sd0d9.js?z="+btoa(encodeURIComponent(JSON.stringify(bz[bB])));bG.parentNode.insertBefore(bH,bG)};["complete","interactive"].includes(bA.readyState)?zaraz.init():bz.addEventListener("DOMContentLoaded",zaraz.init)}}(w,d,"zarazData","script");window.zaraz._p=async dq=>new Promise((dr=>{if(dq){dq.e&&dq.e.forEach((ds=>{try{const dt=d.querySelector("script[nonce]"),du=dt?.nonce||dt?.getAttribute("nonce"),dv=d.createElement("script");du&&(dv.nonce=du);dv.innerHTML=ds;dv.onload=()=>{d.head.removeChild(dv)};d.head.appendChild(dv)}catch(dw){console.error(`Error executing script: ${ds}\n`,dw)}}));Promise.allSettled((dq.f||[]).map((dx=>fetch(dx[0],dx[1]))))}dr()}));zaraz._p({"e":["(function(w,d){})(window,document)"]});})(window,document)}catch(e){throw fetch("/cdn-cgi/zaraz/t"),e;};</script></head>
-<body class="hold-transition sidebar-mini layout-fixed">
-<div class="wrapper">
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Vendor Dashboard</h1>
+                    <p class="page-subtitle">Welcome back! Here's what's happening with your properties today.</p>
+                    <div class="page-actions">
+                        <button class="btn-primary-custom">
+                            <i class="fas fa-plus-circle"></i> Add Property
+                        </button>
+                        <button class="btn-primary-custom" style="background: transparent; border: 2px solid white; color: white;">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-  <!-- Preloader -->
-  <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__shake" src="{% static 'assets1/dist/img/AdminLTELogo.png' %}" alt="AdminLTELogo">
-  </div>
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-icon primary">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="stat-value">48</div>
+                    <div class="stat-label">Total Properties</div>
+                    <span class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +12%
+                    </span>
+                </div>
 
-  <!-- Navbar -->
-  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-    <!-- Left navbar links -->
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-      </li>
-     
-    </ul>
+                <div class="stat-card success">
+                    <div class="stat-icon success">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="stat-value">32</div>
+                    <div class="stat-label">Residential</div>
+                    <span class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +8%
+                    </span>
+                </div>
 
-    <!-- Right navbar links -->
-    <ul class="navbar-nav ml-auto">
-      <!-- Navbar Search -->
-     
+                <div class="stat-card warning">
+                    <div class="stat-icon warning">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Commercial</div>
+                    <span class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +5%
+                    </span>
+                </div>
 
-      <!-- Messages Dropdown Menu -->
-   
-      <!-- Notifications Dropdown Menu -->
+                <div class="stat-card info">
+                    <div class="stat-icon info">
+                        <i class="fas fa-bed"></i>
+                    </div>
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">PG/Co-living</div>
+                    <span class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +15%
+                    </span>
+                </div>
+
+                <div class="stat-card danger">
+                    <div class="stat-icon danger" style="background: var(--success-gradient);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value">42</div>
+                    <div class="stat-label">Active Listings</div>
+                    <span class="stat-change positive">
+                        <i class="fas fa-chart-line"></i> Good
+                    </span>
+                </div>
+
+                <div class="stat-card success">
+                    <div class="stat-icon success" style="background: var(--dark-gradient);">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="stat-value">₹12.5L</div>
+                    <div class="stat-label">Monthly Revenue</div>
+                    <span class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +20%
+                    </span>
+                </div>
+            </div>
+
+            <!-- Analytics Section with Charts -->
+            <div class="analytics-section">
+                <!-- Pie Chart - Property Distribution -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Property Distribution</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="propertyPieChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Bar Chart - Monthly Rental Income -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Monthly Rental Income</h3>
+                        <div class="chart-filters">
+                            <button class="filter-btn active">2026</button>
+                            <button class="filter-btn">2025</button>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="rentalIncomeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Doughnut Chart - Occupancy Status -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Occupancy Status</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="occupancyDoughnutChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Bar Chart - Rent Range Distribution -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Rent Range Distribution</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="rentRangeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats Section -->
+            <div class="quick-stats">
+                <h3 class="quick-stats-title"><i class="fas fa-chart-line"></i> Performance Insights</h3>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-item-icon" style="color: #10b981;">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-item-value">38</div>
+                        <div class="stat-item-label">Total Tenants</div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-item-icon" style="color: #3b82f6;">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-item-value">95%</div>
+                        <div class="stat-item-label">Collection Rate</div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-item-icon" style="color: #f59e0b;">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-item-value">3</div>
+                        <div class="stat-item-label">Pending Payments</div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-item-icon" style="color: #8b5cf6;">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="stat-item-value">5</div>
+                        <div class="stat-item-label">Maintenance Req</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Properties Table -->
+            <div class="properties-section">
+                <div class="section-header">
+                    <h3 class="section-title"><i class="fas fa-list"></i> Recent Property Listings</h3>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="properties-table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Details</th>
+                                <th>Type</th>
+                                <th>Location</th>
+                                <th>Monthly Rent</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300&h=200&fit=crop" alt="Property" class="property-image">
+                                </td>
+                                <td>
+                                    <div class="property-title">Luxurious 3BHK Apartment</div>
+                                    <div class="property-subtitle">Apartment • 3 BHK</div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-residential">Residential</span>
+                                </td>
+                                <td>
+                                    <i class="fas fa-map-marker-alt" style="color: #667eea;"></i>
+                                    Dharampeth, Nagpur
+                                </td>
+                                <td>
+                                    <div class="price-tag">₹25,000</div>
+                                    <div class="price-period">/month</div>
+                                </td>
+                                <td>
+                                    <span class="status-badge active">
+                                        <i class="fas fa-circle" style="font-size: 0.4rem;"></i> Active
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-action btn-view" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn-action btn-edit" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-action btn-toggle" title="Toggle">
+                                            <i class="fas fa-power-off"></i>
+                                        </button>
+                                        <button class="btn-action btn-delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=300&h=200&fit=crop" alt="Property" class="property-image">
+                                </td>
+                                <td>
+                                    <div class="property-title">Premium Office Space</div>
+                                    <div class="property-subtitle">Commercial • 2000 sq.ft</div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-commercial">Commercial</span>
+                                </td>
+                                <td>
+                                    <i class="fas fa-map-marker-alt" style="color: #667eea;"></i>
+                                    MIHAN, Nagpur
+                                </td>
+                                <td>
+                                    <div class="price-tag">₹50,000</div>
+                                    <div class="price-period">/month</div>
+                                </td>
+                                <td>
+                                    <span class="status-badge active">
+                                        <i class="fas fa-circle" style="font-size: 0.4rem;"></i> Active
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-action btn-view" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn-action btn-edit" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-action btn-toggle" title="Toggle">
+                                            <i class="fas fa-power-off"></i>
+                                        </button>
+                                        <button class="btn-action btn-delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&h=200&fit=crop" alt="Property" class="property-image">
+                                </td>
+                                <td>
+                                    <div class="property-title">Modern Girls PG Accommodation</div>
+                                    <div class="property-subtitle">PG • Double/Triple Sharing</div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-pg">PG</span>
+                                </td>
+                                <td>
+                                    <i class="fas fa-map-marker-alt" style="color: #667eea;"></i>
+                                    Sadar, Nagpur
+                                </td>
+                                <td>
+                                    <div class="price-tag">₹8,000</div>
+                                    <div class="price-period">/month</div>
+                                </td>
+                                <td>
+                                    <span class="status-badge active">
+                                        <i class="fas fa-circle" style="font-size: 0.4rem;"></i> Active
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-action btn-view" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn-action btn-edit" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-action btn-toggle" title="Toggle">
+                                            <i class="fas fa-power-off"></i>
+                                        </button>
+                                        <button class="btn-action btn-delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=300&h=200&fit=crop" alt="Property" class="property-image">
+                                </td>
+                                <td>
+                                    <div class="property-title">Spacious 2BHK Flat</div>
+                                    <div class="property-subtitle">Apartment • 2 BHK</div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-residential">Residential</span>
+                                </td>
+                                <td>
+                                    <i class="fas fa-map-marker-alt" style="color: #667eea;"></i>
+                                    Kamptee, Nagpur
+                                </td>
+                                <td>
+                                    <div class="price-tag">₹15,000</div>
+                                    <div class="price-period">/month</div>
+                                </td>
+                                <td>
+                                    <span class="status-badge inactive">
+                                        <i class="fas fa-circle" style="font-size: 0.4rem;"></i> Inactive
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-action btn-view" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn-action btn-edit" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-action btn-toggle" title="Toggle">
+                                            <i class="fas fa-power-off"></i>
+                                        </button>
+                                        <button class="btn-action btn-delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&h=200&fit=crop" alt="Property" class="property-image">
+                                </td>
+                                <td>
+                                    <div class="property-title">Co-working Office Space</div>
+                                    <div class="property-subtitle">Commercial • 1500 sq.ft</div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-commercial">Commercial</span>
+                                </td>
+                                <td>
+                                    <i class="fas fa-map-marker-alt" style="color: #667eea;"></i>
+                                    Sitabuldi, Nagpur
+                                </td>
+                                <td>
+                                    <div class="price-tag">₹35,000</div>
+                                    <div class="price-period">/month</div>
+                                </td>
+                                <td>
+                                    <span class="status-badge active">
+                                        <i class="fas fa-circle" style="font-size: 0.4rem;"></i> Active
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-action btn-view" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn-action btn-edit" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-action btn-toggle" title="Toggle">
+                                            <i class="fas fa-power-off"></i>
+                                        </button>
+                                        <button class="btn-action btn-delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
-      <li class="nav-item">
-  <a class="nav-link text-danger" href="" role="button">
-    <i class="fas fa-sign-out-alt"></i> Logout
-  </a>
-</li>
+    <script>
 
-    </ul>
-  </nav>
-  <!-- /.navbar -->
+        $("#Admin_Dashboard").addClass("active");
 
-  <!-- Main Sidebar Container -->
-  <aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <!-- Brand Logo -->
-  <a href="{% url 'vendors_Dashboard' %}" class="brand-link">
-      <img src="{% static 'assets1/dist/img/rentlogo.jpg' %}" alt="AdminLTE Logo"  style="height:60px; width:80px;">
-      <span class="brand-text font-weight-light"></span>
-    </a>
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <!-- Sidebar user panel (optional) -->
-      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-        <div class="image">
-       
-        </div>
-        <div class="info">
-          
-        </div>
-      </div>
+        // Sidebar Toggle for Desktop and Mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const windowWidth = window.innerWidth;
 
-   
+            if (windowWidth <= 768) {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        }
 
-      <!-- Sidebar Menu -->
-      <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <!-- Add icons to the links using the .nav-icon class
-               with font-awesome or any other icon font library -->
-          <li class="nav-item menu-open">
-      <a href="{% url 'vendors_Dashboard' %}" class="nav-link active">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Vendor Dashboard
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-           
-          </li>
-         
-         
-         
-                
+        // Close Sidebar (Mobile)
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
 
-
-
-
-          
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-edit"></i>
-              <p>
-            Vendors Registration
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-             
-              <li class="nav-item">
-                <a href="{% url 'vendor_registration' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                   <p>Register Vendor </p>
-                </a>
-              </li>
-
-                <li class="nav-item">
-                <a href="{% url 'vendor_directory'  %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                   <p>Vendor Directory</p>
-                </a>
-              </li>
-
-               <li class="nav-item">
-                <a href="" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                   <p>Vendor Profile</p>
-                </a>
-              </li>
-
-               <li class="nav-item">
-                <a href="{% url 'all_links'  %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                   <p>All Page</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a href="{% url 'admin_vendor_performance' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                   <p>Vendor Performance</p>
-                </a>
-              </li>
-
-                <li class="nav-item">
-                <a href="{% url 'property_list' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                   <p> Property list</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'pg_coliving_landlord' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                   <p>PG_Co_Living Property</p>
-                </a>
-              </li>
-
-               <li class="nav-item">
-                <a href="{% url 'add_pg_property' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                   <p>PG_Co_Living Property form</p>
-                </a>
-              </li>
-
-               <li class="nav-item">
-                <a href="{% url 'pg_property_list' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                   <p>PG_Co_Living Property List</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a href="{% url 'delete_confirmation' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                   <p>Delete Property Confirmation</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a href="{% url 'residential_landlord_edit' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                   <p>Edit Property Form</p>
-                </a>
-              </li>
-             
-            </ul>
-          </li>
-
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-table"></i>
-              <p>
-                Property 	Inquiry Module
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="{% url 'residential_inquiries' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Residential Property Inquiry</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'commercial_table' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Commercial Property Reports</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'pg_co_table' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>PG_Coliving Property Reports</p>
-                </a>
-              </li>
-            </ul>
+        // Submenu Toggle - FIXED VERSION FOR MOBILE
+        function toggleSubmenu(event, element) {
+            event.preventDefault();
+            event.stopPropagation();
             
-             <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-table"></i>
-              <p>
-               Boosting and Enquiry
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="{% url 'enquiry_create' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Enquiry Form</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'enquiry_list' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Enquiry List</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'boost_listing_create' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Add Boost Listing</p>
-                </a>
-              </li>
+            const submenu = element.nextElementSibling;
+            const allSubmenus = document.querySelectorAll('.submenu');
+            const allDropdownLinks = document.querySelectorAll('.menu-link');
+            
+            allSubmenus.forEach(sub => {
+                if (sub !== submenu) {
+                    sub.classList.remove('active');
+                }
+            });
 
-              <li class="nav-item">
-                <a href="{% url 'boost_listing_list' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p> Boost Listing</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-         
-          
-              <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon far fa-plus-square"></i>
-              <p>
-           Subscription Module
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-             
-               
-                 
-             
-              <li class="nav-item">
-                <a href="{% url 'Subscription_Upgrade_Form' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Subscription Upgrade Form</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'seo_meta_tag_list' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>SEO  Meta Tag List </p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'add_blog' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Add Blog Post</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'blog_list' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Blog Reports</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'dynamic_page_edit' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Dynamic Page Editor</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="../examples/pace.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Pace</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="../examples/blank.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Blank Page</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="../../starter.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Starter Page</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-       
-         
-        
-         
-        
-        
-            <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon far fa-plus-square"></i>
-              <p>
-           Payment Module
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-             
-               
-                 
-             
-              <li class="nav-item">
-                <a href="{% url 'Commission_Hold_Release' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Commission Hold/Release Form</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'seo_meta_tag_list' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>SEO  Meta Tag List </p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'add_blog' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Add Blog Post</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'blog_list' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Blog Reports</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'dynamic_page_edit' %}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Dynamic Page Editor</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="../examples/pace.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Pace</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="../examples/blank.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Blank Page</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="../../starter.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Starter Page</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-       
-         
-       
-        
-          
-          
-         
-        
-         
-        
-         
-         
-         
-        
-        </ul>
-      </nav>
-      <!-- /.sidebar-menu -->
-    </div>
-    <!-- /.sidebar -->
-  </aside>
+            allDropdownLinks.forEach(link => {
+                if (link !== element) {
+                    link.classList.remove('dropdown-open');
+                }
+            });
+            
+            submenu.classList.toggle('active');
+            element.classList.toggle('dropdown-open');
+            
+            return false;
+        }
 
-  <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
-    <div class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1 class="m-0">Dashboard</h1>
-          </div><!-- /.col -->
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
-              <li class="breadcrumb-item active">Dashboard</li>
-            </ol>
-          </div><!-- /.col -->
-        </div><!-- /.row -->
-      </div><!-- /.container-fluid -->
-    </div>
-    <!-- /.content-header -->
+        // PIE CHART - Property Distribution
+        const pieCtx = document.getElementById('propertyPieChart').getContext('2d');
+        const propertyPieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Residential', 'Commercial', 'PG/Co-living'],
+                datasets: [{
+                    data: [32, 12, 4],
+                    backgroundColor: [
+                        'rgba(102, 126, 234, 0.8)',
+                        'rgba(245, 87, 108, 0.8)',
+                        'rgba(79, 172, 254, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(102, 126, 234, 1)',
+                        'rgba(245, 87, 108, 1)',
+                        'rgba(79, 172, 254, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                family: 'Poppins',
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed + ' properties';
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
-    <!-- Main content -->
-    <section class="content">
-      <div class="container-fluid">
-        <!-- Small boxes (Stat box) -->
-        <div class="row">
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-info">
-              <div class="inner">
-                <h3>150</h3>
+        // BAR CHART - Monthly Rental Income
+        const barCtx = document.getElementById('rentalIncomeChart').getContext('2d');
+        const rentalIncomeChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Rental Income (₹L)',
+                    data: [9.5, 10.2, 11.5, 10.8, 11.8, 12.2, 12.5, 13.0, 11.9, 12.3, 12.8, 12.5],
+                    backgroundColor: 'rgba(102, 126, 234, 0.7)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#f3f4f6'
+                        },
+                        ticks: {
+                            font: {
+                                size: 10
+                            },
+                            callback: function(value) {
+                                return '₹' + value + 'L';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
-                <p>New Orders</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-bag"></i>
-              </div>
-              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- ./col -->
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-success">
-              <div class="inner">
-                <h3>53<sup style="font-size: 20px">%</sup></h3>
+        // DOUGHNUT CHART - Occupancy Status
+        const doughnutCtx = document.getElementById('occupancyDoughnutChart').getContext('2d');
+        const occupancyDoughnutChart = new Chart(doughnutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Occupied', 'Vacant', 'Under Maintenance'],
+                datasets: [{
+                    data: [38, 6, 4],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(251, 191, 36, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(251, 191, 36, 1)',
+                        'rgba(239, 68, 68, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                family: 'Poppins',
+                                size: 11
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed + ' properties';
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
-                <p>Bounce Rate</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-stats-bars"></i>
-              </div>
-              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- ./col -->
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-warning">
-              <div class="inner">
-                <h3>44</h3>
+        // BAR CHART - Rent Range Distribution
+        const rentCtx = document.getElementById('rentRangeChart').getContext('2d');
+        const rentRangeChart = new Chart(rentCtx, {
+            type: 'bar',
+            data: {
+                labels: ['<10K', '10-20K', '20-30K', '30-40K', '40-50K', '>50K'],
+                datasets: [{
+                    label: 'Properties',
+                    data: [8, 14, 12, 8, 4, 2],
+                    backgroundColor: [
+                        'rgba(102, 126, 234, 0.7)',
+                        'rgba(79, 172, 254, 0.7)',
+                        'rgba(67, 233, 123, 0.7)',
+                        'rgba(250, 112, 154, 0.7)',
+                        'rgba(251, 191, 36, 0.7)',
+                        'rgba(139, 92, 246, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(102, 126, 234, 1)',
+                        'rgba(79, 172, 254, 1)',
+                        'rgba(67, 233, 123, 1)',
+                        'rgba(250, 112, 154, 1)',
+                        'rgba(251, 191, 36, 1)',
+                        'rgba(139, 92, 246, 1)'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#f3f4f6'
+                        },
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
-                <p>User Registrations</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-person-add"></i>
-              </div>
-              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- ./col -->
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-danger">
-              <div class="inner">
-                <h3>65</h3>
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
 
-                <p>Unique Visitors</p>
-              </div>
-              <div class="icon">
-                <i class="ion ion-pie-graph"></i>
-              </div>
-              <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- ./col -->
-        </div>
-        <!-- /.row -->
-        <!-- Main row -->
-        <div class="row">
-          <!-- Left col -->
-          <section class="col-lg-7 connectedSortable">
-            <!-- Custom tabs (Charts with tabs)-->
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">
-                  <i class="fas fa-chart-pie mr-1"></i>
-                  Sales
-                </h3>
-                <div class="card-tools">
-                  <ul class="nav nav-pills ml-auto">
-                    <li class="nav-item">
-                      <a class="nav-link active" href="#revenue-chart" data-toggle="tab">Area</a>
-                    </li>
-                    <li class="nav-item">
-                      <a class="nav-link" href="#sales-chart" data-toggle="tab">Donut</a>
-                    </li>
-                  </ul>
-                </div>
-              </div><!-- /.card-header -->
-              <div class="card-body">
-                <div class="tab-content p-0">
-                  <!-- Morris chart - Sales -->
-                  <div class="chart tab-pane active" id="revenue-chart"
-                       style="position: relative; height: 300px;">
-                      <canvas id="revenue-chart-canvas" height="300" style="height: 300px;"></canvas>
-                   </div>
-                  <div class="chart tab-pane" id="sales-chart" style="position: relative; height: 300px;">
-                    <canvas id="sales-chart-canvas" height="300" style="height: 300px;"></canvas>
-                  </div>
-                </div>
-              </div><!-- /.card-body -->
-            </div>
-            <!-- /.card -->
+        // Close sidebar on window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const windowWidth = window.innerWidth;
 
-            <!-- DIRECT CHAT -->
-            <div class="card direct-chat direct-chat-primary">
-              <div class="card-header">
-                <h3 class="card-title">Direct Chat</h3>
+            if (windowWidth > 768) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
 
-                <div class="card-tools">
-                  <span title="3 New Messages" class="badge badge-primary">3</span>
-                  <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                  <button type="button" class="btn btn-tool" title="Contacts" data-widget="chat-pane-toggle">
-                    <i class="fas fa-comments"></i>
-                  </button>
-                  <button type="button" class="btn btn-tool" data-card-widget="remove">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <!-- Conversations are loaded here -->
-                <div class="direct-chat-messages">
-                  <!-- Message. Default to the left -->
-                  <div class="direct-chat-msg">
-                    <div class="direct-chat-infos clearfix">
-                      <span class="direct-chat-name float-left">Alexander Pierce</span>
-                      <span class="direct-chat-timestamp float-right">23 Jan 2:00 pm</span>
-                    </div>
-                    <!-- /.direct-chat-infos -->
-                    <img class="direct-chat-img" src="dist/img/user1-128x128.jpg" alt="message user image">
-                    <!-- /.direct-chat-img -->
-                    <div class="direct-chat-text">
-                      Is this template really for free? That's unbelievable!
-                    </div>
-                    <!-- /.direct-chat-text -->
-                  </div>
-                  <!-- /.direct-chat-msg -->
+        // Handle clicks on submenu links and regular menu links
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.submenu-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 768) {
+                        setTimeout(() => {
+                            closeSidebar();
+                        }, 200);
+                    }
+                });
+            });
 
-                  <!-- Message to the right -->
-                  <div class="direct-chat-msg right">
-                    <div class="direct-chat-infos clearfix">
-                      <span class="direct-chat-name float-right">Sarah Bullock</span>
-                      <span class="direct-chat-timestamp float-left">23 Jan 2:05 pm</span>
-                    </div>
-                    <!-- /.direct-chat-infos -->
-                    <img class="direct-chat-img" src="dist/img/user3-128x128.jpg" alt="message user image">
-                    <!-- /.direct-chat-img -->
-                    <div class="direct-chat-text">
-                      You better believe it!
-                    </div>
-                    <!-- /.direct-chat-text -->
-                  </div>
-                  <!-- /.direct-chat-msg -->
+            document.querySelectorAll('.menu-link').forEach(link => {
+                if (!link.hasAttribute('onclick')) {
+                    link.addEventListener('click', function(e) {
+                        if (window.innerWidth <= 768) {
+                            setTimeout(() => {
+                                closeSidebar();
+                            }, 200);
+                        }
+                    });
+                }
+            });
+        });
 
-                  <!-- Message. Default to the left -->
-                  <div class="direct-chat-msg">
-                    <div class="direct-chat-infos clearfix">
-                      <span class="direct-chat-name float-left">Alexander Pierce</span>
-                      <span class="direct-chat-timestamp float-right">23 Jan 5:37 pm</span>
-                    </div>
-                    <!-- /.direct-chat-infos -->
-                    <img class="direct-chat-img" src="dist/img/user1-128x128.jpg" alt="message user image">
-                    <!-- /.direct-chat-img -->
-                    <div class="direct-chat-text">
-                      Working with AdminLTE on a great new app! Wanna join?
-                    </div>
-                    <!-- /.direct-chat-text -->
-                  </div>
-                  <!-- /.direct-chat-msg -->
+        // Prevent body scroll when sidebar is open on mobile
+        document.getElementById('sidebar').addEventListener('transitionend', function() {
+            if (this.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            }
+        });
+    </script>
 
-                  <!-- Message to the right -->
-                  <div class="direct-chat-msg right">
-                    <div class="direct-chat-infos clearfix">
-                      <span class="direct-chat-name float-right">Sarah Bullock</span>
-                      <span class="direct-chat-timestamp float-left">23 Jan 6:10 pm</span>
-                    </div>
-                    <!-- /.direct-chat-infos -->
-                    <img class="direct-chat-img" src="dist/img/user3-128x128.jpg" alt="message user image">
-                    <!-- /.direct-chat-img -->
-                    <div class="direct-chat-text">
-                      I would love to.
-                    </div>
-                    <!-- /.direct-chat-text -->
-                  </div>
-                  <!-- /.direct-chat-msg -->
-
-                </div>
-                <!--/.direct-chat-messages-->
-
-                <!-- Contacts are loaded here -->
-                <div class="direct-chat-contacts">
-                  <ul class="contacts-list">
-                    <li>
-                      <a href="#">
-                        <img class="contacts-list-img" src="dist/img/user1-128x128.jpg" alt="User Avatar">
-
-                        <div class="contacts-list-info">
-                          <span class="contacts-list-name">
-                            Count Dracula
-                            <small class="contacts-list-date float-right">2/28/2015</small>
-                          </span>
-                          <span class="contacts-list-msg">How have you been? I was...</span>
-                        </div>
-                        <!-- /.contacts-list-info -->
-                      </a>
-                    </li>
-                    <!-- End Contact Item -->
-                    <li>
-                      <a href="#">
-                        <img class="contacts-list-img" src="dist/img/user7-128x128.jpg" alt="User Avatar">
-
-                        <div class="contacts-list-info">
-                          <span class="contacts-list-name">
-                            Sarah Doe
-                            <small class="contacts-list-date float-right">2/23/2015</small>
-                          </span>
-                          <span class="contacts-list-msg">I will be waiting for...</span>
-                        </div>
-                        <!-- /.contacts-list-info -->
-                      </a>
-                    </li>
-                    <!-- End Contact Item -->
-                    <li>
-                      <a href="#">
-                        <img class="contacts-list-img" src="dist/img/user3-128x128.jpg" alt="User Avatar">
-
-                        <div class="contacts-list-info">
-                          <span class="contacts-list-name">
-                            Nadia Jolie
-                            <small class="contacts-list-date float-right">2/20/2015</small>
-                          </span>
-                          <span class="contacts-list-msg">I'll call you back at...</span>
-                        </div>
-                        <!-- /.contacts-list-info -->
-                      </a>
-                    </li>
-                    <!-- End Contact Item -->
-                    <li>
-                      <a href="#">
-                        <img class="contacts-list-img" src="dist/img/user5-128x128.jpg" alt="User Avatar">
-
-                        <div class="contacts-list-info">
-                          <span class="contacts-list-name">
-                            Nora S. Vans
-                            <small class="contacts-list-date float-right">2/10/2015</small>
-                          </span>
-                          <span class="contacts-list-msg">Where is your new...</span>
-                        </div>
-                        <!-- /.contacts-list-info -->
-                      </a>
-                    </li>
-                    <!-- End Contact Item -->
-                    <li>
-                      <a href="#">
-                        <img class="contacts-list-img" src="dist/img/user6-128x128.jpg" alt="User Avatar">
-
-                        <div class="contacts-list-info">
-                          <span class="contacts-list-name">
-                            John K.
-                            <small class="contacts-list-date float-right">1/27/2015</small>
-                          </span>
-                          <span class="contacts-list-msg">Can I take a look at...</span>
-                        </div>
-                        <!-- /.contacts-list-info -->
-                      </a>
-                    </li>
-                    <!-- End Contact Item -->
-                    <li>
-                      <a href="#">
-                        <img class="contacts-list-img" src="dist/img/user8-128x128.jpg" alt="User Avatar">
-
-                        <div class="contacts-list-info">
-                          <span class="contacts-list-name">
-                            Kenneth M.
-                            <small class="contacts-list-date float-right">1/4/2015</small>
-                          </span>
-                          <span class="contacts-list-msg">Never mind I found...</span>
-                        </div>
-                        <!-- /.contacts-list-info -->
-                      </a>
-                    </li>
-                    <!-- End Contact Item -->
-                  </ul>
-                  <!-- /.contacts-list -->
-                </div>
-                <!-- /.direct-chat-pane -->
-              </div>
-              <!-- /.card-body -->
-              <div class="card-footer">
-                <form action="#" method="post">
-                  <div class="input-group">
-                    <input type="text" name="message" placeholder="Type Message ..." class="form-control">
-                    <span class="input-group-append">
-                      <button type="button" class="btn btn-primary">Send</button>
-                    </span>
-                  </div>
-                </form>
-              </div>
-              <!-- /.card-footer-->
-            </div>
-            <!--/.direct-chat -->
-
-            <!-- TO DO List -->
-            <div class="card">
-              <div class="card-header">
-                <h3 class="card-title">
-                  <i class="ion ion-clipboard mr-1"></i>
-                  To Do List
-                </h3>
-
-                <div class="card-tools">
-                  <ul class="pagination pagination-sm">
-                    <li class="page-item"><a href="#" class="page-link">&laquo;</a></li>
-                    <li class="page-item"><a href="#" class="page-link">1</a></li>
-                    <li class="page-item"><a href="#" class="page-link">2</a></li>
-                    <li class="page-item"><a href="#" class="page-link">3</a></li>
-                    <li class="page-item"><a href="#" class="page-link">&raquo;</a></li>
-                  </ul>
-                </div>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <ul class="todo-list" data-widget="todo-list">
-                  <li>
-                    <!-- drag handle -->
-                    <span class="handle">
-                      <i class="fas fa-ellipsis-v"></i>
-                      <i class="fas fa-ellipsis-v"></i>
-                    </span>
-                    <!-- checkbox -->
-                    <div  class="icheck-primary d-inline ml-2">
-                      <input type="checkbox" value="" name="todo1" id="todoCheck1">
-                      <label for="todoCheck1"></label>
-                    </div>
-                    <!-- todo text -->
-                    <span class="text">Design a nice theme</span>
-                    <!-- Emphasis label -->
-                    <small class="badge badge-danger"><i class="far fa-clock"></i> 2 mins</small>
-                    <!-- General tools such as edit or delete-->
-                    <div class="tools">
-                      <i class="fas fa-edit"></i>
-                      <i class="fas fa-trash-o"></i>
-                    </div>
-                  </li>
-                  <li>
-                    <span class="handle">
-                      <i class="fas fa-ellipsis-v"></i>
-                      <i class="fas fa-ellipsis-v"></i>
-                    </span>
-                    <div  class="icheck-primary d-inline ml-2">
-                      <input type="checkbox" value="" name="todo2" id="todoCheck2" checked>
-                      <label for="todoCheck2"></label>
-                    </div>
-                    <span class="text">Make the theme responsive</span>
-                    <small class="badge badge-info"><i class="far fa-clock"></i> 4 hours</small>
-                    <div class="tools">
-                      <i class="fas fa-edit"></i>
-                      <i class="fas fa-trash-o"></i>
-                    </div>
-                  </li>
-                  <li>
-                    <span class="handle">
-                      <i class="fas fa-ellipsis-v"></i>
-                      <i class="fas fa-ellipsis-v"></i>
-                    </span>
-                    <div  class="icheck-primary d-inline ml-2">
-                      <input type="checkbox" value="" name="todo3" id="todoCheck3">
-                      <label for="todoCheck3"></label>
-                    </div>
-                    <span class="text">Let theme shine like a star</span>
-                    <small class="badge badge-warning"><i class="far fa-clock"></i> 1 day</small>
-                    <div class="tools">
-                      <i class="fas fa-edit"></i>
-                      <i class="fas fa-trash-o"></i>
-                    </div>
-                  </li>
-                  <li>
-                    <span class="handle">
-                      <i class="fas fa-ellipsis-v"></i>
-                      <i class="fas fa-ellipsis-v"></i>
-                    </span>
-                    <div  class="icheck-primary d-inline ml-2">
-                      <input type="checkbox" value="" name="todo4" id="todoCheck4">
-                      <label for="todoCheck4"></label>
-                    </div>
-                    <span class="text">Let theme shine like a star</span>
-                    <small class="badge badge-success"><i class="far fa-clock"></i> 3 days</small>
-                    <div class="tools">
-                      <i class="fas fa-edit"></i>
-                      <i class="fas fa-trash-o"></i>
-                    </div>
-                  </li>
-                  <li>
-                    <span class="handle">
-                      <i class="fas fa-ellipsis-v"></i>
-                      <i class="fas fa-ellipsis-v"></i>
-                    </span>
-                    <div  class="icheck-primary d-inline ml-2">
-                      <input type="checkbox" value="" name="todo5" id="todoCheck5">
-                      <label for="todoCheck5"></label>
-                    </div>
-                    <span class="text">Check your messages and notifications</span>
-                    <small class="badge badge-primary"><i class="far fa-clock"></i> 1 week</small>
-                    <div class="tools">
-                      <i class="fas fa-edit"></i>
-                      <i class="fas fa-trash-o"></i>
-                    </div>
-                  </li>
-                  <li>
-                    <span class="handle">
-                      <i class="fas fa-ellipsis-v"></i>
-                      <i class="fas fa-ellipsis-v"></i>
-                    </span>
-                    <div  class="icheck-primary d-inline ml-2">
-                      <input type="checkbox" value="" name="todo6" id="todoCheck6">
-                      <label for="todoCheck6"></label>
-                    </div>
-                    <span class="text">Let theme shine like a star</span>
-                    <small class="badge badge-secondary"><i class="far fa-clock"></i> 1 month</small>
-                    <div class="tools">
-                      <i class="fas fa-edit"></i>
-                      <i class="fas fa-trash-o"></i>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-              <!-- /.card-body -->
-              <div class="card-footer clearfix">
-                <button type="button" class="btn btn-primary float-right"><i class="fas fa-plus"></i> Add item</button>
-              </div>
-            </div>
-            <!-- /.card -->
-          </section>
-          <!-- /.Left col -->
-          <!-- right col (We are only adding the ID to make the widgets sortable)-->
-          <section class="col-lg-5 connectedSortable">
-
-            <!-- Map card -->
-            <div class="card bg-gradient-primary">
-              <div class="card-header border-0">
-                <h3 class="card-title">
-                  <i class="fas fa-map-marker-alt mr-1"></i>
-                  Visitors
-                </h3>
-                <!-- card tools -->
-                <div class="card-tools">
-                  <button type="button" class="btn btn-primary btn-sm daterange" title="Date range">
-                    <i class="far fa-calendar-alt"></i>
-                  </button>
-                  <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse" title="Collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                </div>
-                <!-- /.card-tools -->
-              </div>
-              <div class="card-body">
-                <div id="world-map" style="height: 250px; width: 100%;"></div>
-              </div>
-              <!-- /.card-body-->
-              <div class="card-footer bg-transparent">
-                <div class="row">
-                  <div class="col-4 text-center">
-                    <div id="sparkline-1"></div>
-                    <div class="text-white">Visitors</div>
-                  </div>
-                  <!-- ./col -->
-                  <div class="col-4 text-center">
-                    <div id="sparkline-2"></div>
-                    <div class="text-white">Online</div>
-                  </div>
-                  <!-- ./col -->
-                  <div class="col-4 text-center">
-                    <div id="sparkline-3"></div>
-                    <div class="text-white">Sales</div>
-                  </div>
-                  <!-- ./col -->
-                </div>
-                <!-- /.row -->
-              </div>
-            </div>
-            <!-- /.card -->
-
-            <!-- solid sales graph -->
-            <div class="card bg-gradient-info">
-              <div class="card-header border-0">
-                <h3 class="card-title">
-                  <i class="fas fa-th mr-1"></i>
-                  Sales Graph
-                </h3>
-
-                <div class="card-tools">
-                  <button type="button" class="btn bg-info btn-sm" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                  <button type="button" class="btn bg-info btn-sm" data-card-widget="remove">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="card-body">
-                <canvas class="chart" id="line-chart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-              </div>
-              <!-- /.card-body -->
-              <div class="card-footer bg-transparent">
-                <div class="row">
-                  <div class="col-4 text-center">
-                    <input type="text" class="knob" data-readonly="true" value="20" data-width="60" data-height="60"
-                           data-fgColor="#39CCCC">
-
-                    <div class="text-white">Mail-Orders</div>
-                  </div>
-                  <!-- ./col -->
-                  <div class="col-4 text-center">
-                    <input type="text" class="knob" data-readonly="true" value="50" data-width="60" data-height="60"
-                           data-fgColor="#39CCCC">
-
-                    <div class="text-white">Online</div>
-                  </div>
-                  <!-- ./col -->
-                  <div class="col-4 text-center">
-                    <input type="text" class="knob" data-readonly="true" value="30" data-width="60" data-height="60"
-                           data-fgColor="#39CCCC">
-
-                    <div class="text-white">In-Store</div>
-                  </div>
-                  <!-- ./col -->
-                </div>
-                <!-- /.row -->
-              </div>
-              <!-- /.card-footer -->
-            </div>
-            <!-- /.card -->
-
-            <!-- Calendar -->
-            <div class="card bg-gradient-success">
-              <div class="card-header border-0">
-
-                <h3 class="card-title">
-                  <i class="far fa-calendar-alt"></i>
-                  Calendar
-                </h3>
-                <!-- tools card -->
-                <div class="card-tools">
-                  <!-- button with a dropdown -->
-                  <div class="btn-group">
-                    <button type="button" class="btn btn-success btn-sm dropdown-toggle" data-toggle="dropdown" data-offset="-52">
-                      <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="dropdown-menu" role="menu">
-                      <a href="#" class="dropdown-item">Add new event</a>
-                      <a href="#" class="dropdown-item">Clear events</a>
-                      <div class="dropdown-divider"></div>
-                      <a href="#" class="dropdown-item">View calendar</a>
-                    </div>
-                  </div>
-                  <button type="button" class="btn btn-success btn-sm" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                  </button>
-                  <button type="button" class="btn btn-success btn-sm" data-card-widget="remove">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-                <!-- /. tools -->
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body pt-0">
-                <!--The calendar -->
-                <div id="calendar" style="width: 100%"></div>
-              </div>
-              <!-- /.card-body -->
-            </div>
-            <!-- /.card -->
-          </section>
-          <!-- right col -->
-        </div>
-        <!-- /.row (main row) -->
-      </div><!-- /.container-fluid -->
-    </section>
-    <!-- /.content -->
-  </div>
-  <!-- /.content-wrapper -->
-  <footer class="main-footer">
-    <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io/">AdminLTE.io</a>.</strong>
-    All rights reserved.
-    <div class="float-right d-none d-sm-inline-block">
-      <b>Version</b> 3.2.0
-    </div>
-  </footer>
-
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Control sidebar content goes here -->
-  </aside>
-  <!-- /.control-sidebar -->
-</div>
-<!-- ./wrapper -->
-
-<!-- jQuery -->
-<script src="{% static 'assets1/plugins/jquery/jquery.min.js' %}"></script>
-<!-- jQuery UI 1.11.4 -->
-<script src="{% static 'assets1/plugins/jquery-ui/jquery-ui.min.js' %}"></script>
-<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
-<script>
-  $.widget.bridge('uibutton', $.ui.button)
-</script>
-<!-- Bootstrap 4 -->
-<script src="{% static 'assets1/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-<!-- ChartJS -->
-<script src="{% static 'assets1/plugins/chart.js/Chart.min.js' %}"></script>
-<!-- Sparkline -->
-<script src="{% static 'assets1/plugins/sparklines/sparkline.js' %}"></script>
-<!-- JQVMap -->
-<script src="{% static 'assets1/plugins/jqvmap/jquery.vmap.min.js' %}"></script>
-<script src="{% static 'assets1/plugins/jqvmap/maps/jquery.vmap.usa.js' %}"></script>
-<!-- jQuery Knob Chart -->
-<script src="{% static 'assets1/plugins/jquery-knob/jquery.knob.min.js' %}"></script>
-<!-- daterangepicker -->
-<script src="{% static 'assets1/plugins/moment/moment.min.js' %}"></script>
-<script src="{% static 'assets1/plugins/daterangepicker/daterangepicker.js' %}"></script>
-<!-- Tempusdominus Bootstrap 4 -->
-<script src="{% static 'assets1/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
-<!-- Summernote -->
-<script src="{% static 'assets1/plugins/summernote/summernote-bs4.min.js' %}"></script>
-<!-- overlayScrollbars -->
-<script src="{% static 'assets1/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
-<!-- AdminLTE App -->
-<script src="{% static 'assets1/dist/js/adminlte2167.js' %}"></script>
-<!-- AdminLTE for demo purposes -->
-<script src="{% static 'assets1/dist/js/demo.js' %}"></script>
-<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-<script src="{% static 'assets1/dist/js/pages/dashboard.js' %}"></script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"93cf52141bdcc1ba","version":"2025.4.0-1-g37f21b1","serverTiming":{"name":{"cfExtPri":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}},"token":"2437d112162f4ec4b63c3ca0eb38fb20","b":1}' crossorigin="anonymous"></script>
 </body>
-
-<!-- Mirrored from adminlte.io/themes/v3/ by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 09 May 2025 06:59:14 GMT -->
 </html>

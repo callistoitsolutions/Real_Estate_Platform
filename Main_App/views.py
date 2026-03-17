@@ -178,6 +178,18 @@ def login_view(request):
                 
                 if user_role == "Landlord":
                     url = reverse('landlord_dashboard')
+                
+                if user_role == "Agent":
+                    url = reverse('agent_dashboard')
+
+                if user_role == "Vendor":
+                    url = reverse('vendors_Dashboard')
+
+                if user_role == "Tenant":
+                    url = reverse('Tenant_Dashboard')
+
+                if user_role == "Buyer":
+                    url = reverse('Buyer_Dashboard')
 
                 return JsonResponse({'status': 1, 'msg': f'{user_role} Login Successful', 'redirect_url': url})
 
