@@ -43,6 +43,376 @@ from itertools import chain
 
 
 
+
+
+
+def portalpage(request):
+    hero = HeroSection.objects.filter(is_active=True).first()
+    blogs = Blog.objects.all().order_by("-date_posted")
+    faqs = FAQ.objects.all().order_by('-created_at')
+
+    # ✅ CORRECT FUNCTION CALL
+    residential = list(get_featured_queryset(ResidentialProperty))
+    commercial = list(get_featured_queryset(CommercialProperty))
+    pg = list(get_featured_queryset(PGProperty))
+
+    # Combine
+    all_props = (
+        [{"data": prop, "type": "Residential"} for prop in residential] +
+        [{"data": prop, "type": "Commercial"} for prop in commercial] +
+        [{"data": prop, "type": "PG"} for prop in pg]
+    )
+
+    random.shuffle(all_props)
+    featured_props = all_props[:6]
+
+    props = sorted(
+        chain(residential, commercial, pg),
+        key=lambda x: getattr(x, 'created_at', None),
+        reverse=True
+    )
+
+    context = {
+        "featured_props": featured_props,
+        "props": props,
+        "hero": hero,
+        "blogs": blogs,
+        "faqs": faqs,
+    }
+
+    return render(request, "home_page/portalpage.html", context)
+
+
+
+
+
+
+import re
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  MAIN VIEW
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+
+
+
+
+
+def listings_view(request):
+    listing_type = request.GET.get('type',     'rent').strip()
+    category     = request.GET.get('category', 'residential').strip()
+    bhk          = request.GET.get('bhk',      '').strip()
+    budget       = request.GET.get('budget',   '').strip()
+    furnishing   = request.GET.get('furnishing','').strip()
+    area         = request.GET.get('area',     '').strip()
+    sort         = request.GET.get('sort',     'relevant').strip()
+
+    # Normalize BHK: "2BHK" → "2 BHK"
+    bhk = re.sub(r'(\d)(BHK)', r'\1 \2', bhk)
+    bhk = re.sub(r'(\d)(RK)',  r'\1 \2', bhk)
+
+    properties  = []
+    page_title  = 'Properties'
+
+    # ── RENT → RESIDENTIAL ───────────────────────────────────────────────────
+    if listing_type == 'rent' and category == 'residential':
+        page_title = 'Flats & Houses for Rent'
+        qs = RentalResidentialProperty.objects.all()
+
+        if bhk:
+            qs = qs.filter(bhk_type__icontains=bhk)
+        if budget:
+            low, high = _parse_rent_budget(budget)
+            if low  is not None: qs = qs.filter(monthly_rent__gte=low)
+            if high is not None: qs = qs.filter(monthly_rent__lte=high)
+        if furnishing:
+            qs = qs.filter(furnishing_status__icontains=furnishing)
+        if area:
+            qs = qs.filter(Q(locality__icontains=area) | Q(city__icontains=area))
+
+        qs = _sort_qs(qs, sort, 'monthly_rent')
+        for p in qs:
+            properties.append(_normalize_rental(p))
+
+    # ── RENT → COMMERCIAL ────────────────────────────────────────────────────
+    elif listing_type == 'rent' and category == 'commercial':
+        page_title = 'Commercial Spaces for Rent'
+        qs = CommercialRentalProperty.objects.all()
+
+        if area:
+            qs = qs.filter(Q(area_locality__icontains=area) | Q(city__icontains=area))
+        if budget:
+            low, high = _parse_rent_budget(budget)
+            if low  is not None: qs = qs.filter(expected_rent__gte=low)
+            if high is not None: qs = qs.filter(expected_rent__lte=high)
+
+        qs = _sort_qs(qs, sort, 'expected_rent')
+        for p in qs:
+            properties.append(_normalize_commercial_rental(p))
+
+    # ── RENT → PG / CO-LIVING ────────────────────────────────────────────────
+    elif listing_type == 'rent' and category == 'pg':
+        page_title = 'PG & Co-living Spaces'
+        qs = PGColivingProperty.objects.all()
+
+        if area:
+            qs = qs.filter(Q(locality__icontains=area) | Q(city__icontains=area))
+        if budget:
+            low, high = _parse_rent_budget(budget)
+            if low  is not None: qs = qs.filter(rent__gte=low)
+            if high is not None: qs = qs.filter(rent__lte=high)
+        if furnishing:
+            qs = qs.filter(furnishing_type__icontains=furnishing)
+
+        qs = _sort_qs(qs, sort, 'rent')
+        for p in qs:
+            properties.append(_normalize_pg(p))
+
+    # ── SALE → RESIDENTIAL ───────────────────────────────────────────────────
+    elif listing_type == 'sale' and category == 'residential':
+        page_title = 'Flats & Houses for Sale'
+        qs = ResaleResidentialProperty.objects.all()
+
+        if bhk:
+            qs = qs.filter(bhk__icontains=bhk)
+        if budget:
+            low, high = _parse_sale_budget(budget)
+            if low  is not None: qs = qs.filter(expected_price__gte=low)
+            if high is not None: qs = qs.filter(expected_price__lte=high)
+        if furnishing:
+            qs = qs.filter(furnishing_type__icontains=furnishing)
+        if area:
+            qs = qs.filter(Q(locality__icontains=area) | Q(city__icontains=area))
+
+        qs = _sort_qs(qs, sort, 'expected_price')
+        for p in qs:
+            properties.append(_normalize_resale(p))
+
+    # ── SALE → COMMERCIAL ────────────────────────────────────────────────────
+    elif listing_type == 'sale' and category == 'commercial':
+        page_title = 'Commercial Properties for Sale'
+        qs = CommercialResaleProperty.objects.filter(is_active=True)
+
+        if area:
+            qs = qs.filter(Q(locality__icontains=area) | Q(city__icontains=area))
+        if budget:
+            low, high = _parse_sale_budget(budget)
+            if low  is not None: qs = qs.filter(expected_price__gte=low)
+            if high is not None: qs = qs.filter(expected_price__lte=high)
+
+        qs = _sort_qs(qs, sort, 'expected_price')
+        for p in qs:
+            properties.append(_normalize_commercial_resale(p))
+
+    # ── SALE → PLOT / AGRICULTURE / INDUSTRIAL (models pending) ─────────────
+    elif listing_type == 'sale' and category in ('plot', 'agriculture', 'industrial'):
+        page_title = f'{category.title()} Properties for Sale'
+        # These models don't exist yet — show empty with friendly message
+        properties = []
+
+    # ── CONTEXT ──────────────────────────────────────────────────────────────
+    context = {
+        'properties':         properties,
+        'listing_type':       listing_type,
+        'category':           category,
+        'page_title':         page_title,
+        'total':              len(properties),
+        'current_bhk':        bhk,
+        'current_budget':     budget,
+        'current_furnishing': furnishing,
+        'current_area':       area,
+        'current_sort':       sort,
+    }
+    return render(request, 'home_page/listingpage.html', context)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  SORT HELPER
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _sort_qs(qs, sort, price_field):
+    if sort == 'newest':
+        return qs.order_by('-id')
+    elif sort == 'price-asc':
+        return qs.order_by(price_field)
+    elif sort == 'price-desc':
+        return qs.order_by(f'-{price_field}')
+    return qs
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  NORMALIZERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _initials(name):
+    return ''.join([w[0] for w in (name or 'UN').split() if w])[:2].upper()
+
+
+def _normalize_rental(p):
+    rent = p.monthly_rent or 0
+    return {
+        'id':             p.pk,
+        'title':          p.property_title or 'Rental Property',
+        'listing_type':   'rent',
+        'category':       'residential',
+        'price_display':  f'₹{rent:,}/mo',
+        'price_num':      rent,
+        'area':           f'{p.built_up_area} sqft' if p.built_up_area else '—',
+        'beds':           p.bhk_type or '—',
+        'baths':          p.bathrooms or 0,
+        'floor':          f'{p.floor_number}/{p.total_floors}' if p.floor_number else '—',
+        'location':       f'{p.locality}, {p.city}' if p.locality and p.city else (p.city or '—'),
+        'furnished':      p.furnishing_status or '—',
+        'available':      str(p.available_from) if p.available_from else 'Available Now',
+        'owner':          p.owner_name or 'Owner',
+        'owner_initials': _initials(p.owner_name),
+        'owner_role':     p.uploaded_by_role or 'Owner',
+        'phone':          p.contact_number or '',
+        'is_new':         False,
+        'badges':         [],
+        'emoji':          '🏠',
+    }
+
+
+def _normalize_commercial_rental(p):
+    rent = p.expected_rent or 0
+    return {
+        'id':             p.pk,
+        'title':          p.property_title or p.property_type or 'Commercial Space',
+        'listing_type':   'rent',
+        'category':       'commercial',
+        'price_display':  f'₹{rent:,}/mo',
+        'price_num':      rent,
+        'area':           f'{p.builtup_area} sqft' if p.builtup_area else '—',
+        'beds':           '—',
+        'baths':          p.private_washroom or 0,
+        'floor':          f'{p.your_floor}/{p.total_floors}' if p.your_floor else '—',
+        'location':       f'{p.area_locality}, {p.city}' if p.area_locality and p.city else (p.city or '—'),
+        'furnished':      p.property_condition or '—',
+        'available':      str(p.available_from) if p.available_from else 'Available Now',
+        'owner':          p.owner_name or 'Owner',
+        'owner_initials': _initials(p.owner_name),
+        'owner_role':     p.uploaded_by_role or 'Owner',
+        'phone':          p.contact_number or '',
+        'is_new':         False,
+        'badges':         ['commercial'],
+        'emoji':          '🏗',
+    }
+
+
+def _normalize_pg(p):
+    rent = p.rent or 0
+    return {
+        'id':             p.pk,
+        'title':          p.pg_name or 'PG / Co-living',
+        'listing_type':   'rent',
+        'category':       'pg',
+        'price_display':  f'₹{rent:,}/mo',
+        'price_num':      rent,
+        'area':           '—',
+        'beds':           p.room_type or '—',
+        'baths':          0,
+        'floor':          '—',
+        'location':       f'{p.locality}, {p.city}' if p.locality and p.city else (p.city or '—'),
+        'furnished':      p.furnishing_type or '—',
+        'available':      str(p.available_from) if p.available_from else 'Available Now',
+        'owner':          p.owner_name or 'Owner',
+        'owner_initials': _initials(p.owner_name),
+        'owner_role':     p.uploaded_by_role or 'Owner',
+        'phone':          p.contact_number or '',
+        'is_new':         False,
+        'badges':         ['pg'],
+        'emoji':          '🏡',
+    }
+
+
+def _normalize_resale(p):
+    price = int(p.expected_price) if p.expected_price else 0
+    crore = price / 10_000_000
+    lakh  = price / 100_000
+    price_display = f'₹{crore:.2f} Cr' if crore >= 1 else f'₹{lakh:.1f} L'
+    return {
+        'id':             p.pk,
+        'title':          p.title or 'Resale Property',
+        'listing_type':   'sale',
+        'category':       'residential',
+        'price_display':  price_display,
+        'price_num':      price,
+        'area':           f'{p.builtup_area} sqft' if p.builtup_area else '—',
+        'beds':           p.bhk or '—',
+        'baths':          p.bathrooms or 0,
+        'floor':          f'{p.floor_no}/{p.total_floors}' if p.floor_no else '—',
+        'location':       f'{p.locality}, {p.city}' if p.locality and p.city else (p.city or '—'),
+        'furnished':      p.furnishing_type or '—',
+        'available':      str(p.available_from) if p.available_from else 'Available Now',
+        'owner':          p.owner_name or 'Owner',
+        'owner_initials': _initials(p.owner_name),
+        'owner_role':     p.uploaded_by_role or 'Owner',
+        'phone':          p.owner_contact or '',
+        'is_new':         False,
+        'badges':         ['sale'],
+        'emoji':          '🏘',
+    }
+
+
+def _normalize_commercial_resale(p):
+    price = int(p.expected_price) if p.expected_price else 0
+    crore = price / 10_000_000
+    lakh  = price / 100_000
+    price_display = f'₹{crore:.2f} Cr' if crore >= 1 else f'₹{lakh:.1f} L'
+    return {
+        'id':             p.pk,
+        'title':          p.title or 'Commercial Property',
+        'listing_type':   'sale',
+        'category':       'commercial',
+        'price_display':  price_display,
+        'price_num':      price,
+        'area':           f'{p.builtup_area} sqft' if p.builtup_area else '—',
+        'beds':           '—',
+        'baths':          0,
+        'floor':          '—',
+        'location':       f'{p.locality}, {p.city}' if p.locality and p.city else (p.city or '—'),
+        'furnished':      p.property_condition or '—',
+        'available':      str(p.available_from) if p.available_from else 'Available Now',
+        'owner':          p.owner_name or 'Owner',
+        'owner_initials': _initials(p.owner_name),
+        'owner_role':     p.uploaded_by_role or 'Owner',
+        'phone':          p.owner_contact or '',
+        'is_new':         False,
+        'badges':         ['commercial', 'sale'],
+        'emoji':          '🏗',
+    }
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  BUDGET PARSERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _parse_rent_budget(budget):
+    MAP = {
+        'Under ₹10K':  (None,  10000),
+        '₹10K–20K':    (10000, 20000),
+        '₹20K–35K':    (20000, 35000),
+        'Under ₹8K':   (None,   8000),
+        '₹8K–15K':     (8000,  15000),
+        '₹15K–25K':    (15000, 25000),
+        '₹25K–40K':    (25000, 40000),
+        '₹40K+':       (40000,  None),
+    }
+    return MAP.get(budget, (None, None))
+
+
+def _parse_sale_budget(budget):
+    MAP = {
+        'Under ₹30L':  (None,        3_000_000),
+        '₹30L–60L':    (3_000_000,   6_000_000),
+        '₹60L+':       (6_000_000,   None),
+    }
+    return MAP.get(budget, (None, None))
+
 @csrf_exempt
 def Adminlogin(request):
     session_id = request.session.get('Admin_id')

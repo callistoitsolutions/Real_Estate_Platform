@@ -318,8 +318,9 @@ urlpatterns = [
   #  path('rental/residential/delete/<int:pk>/', views.rental_residential_delete, name='rental_residential_delete'),
   
   
-   path('residential_import_excel', views.import_residential_excel, name='import_residential_excel'),
-   path('residential_download_template/', views.download_residential_template, name='download_residential_template'),
+    path('residential_import_excel/', views.import_residential_excel, name='import_residential_excel'),
+
+    path('residential_download_template/', views.download_residential_template, name='download_residential_template'),
    
    
    

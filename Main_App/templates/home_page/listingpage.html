@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Flats & Houses for Rent in Nagpur — PropCRM
+
+     {% if listing_type == 'sale' %}Flats & Houses for Sale{% elif listing_type == 'commercial' %}Commercial Properties{% else %}Flats & Houses for Rent{% endif %}
+  in Nagpur — PropCRM
+</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+:root{--pr:#f97316;--pr2:#ea580c;--sec:#0f172a;--muted:#64748b;--border:#e2e8f0;--bg:#f8fafc;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e293b;}
+.nav{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:500;box-shadow:0 1px 8px rgba(0,0,0,.06);}
+.nav-inner{max-width:1300px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:16px;height:60px;}
+.logo{font-weight:900;font-size:1.2rem;color:var(--sec);text-decoration:none;}
+.logo span{color:var(--pr);}
+.nav-links{display:flex;gap:2px;margin-left:16px;}
+.nl{padding:6px 12px;border-radius:7px;font-size:.82rem;font-weight:600;color:var(--muted);text-decoration:none;transition:.2s;}
+.nl:hover{background:#f1f5f9;color:var(--sec);}.nl.active{color:var(--pr);}
+.nav-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.btn{padding:7px 16px;border-radius:8px;font-weight:700;font-size:.81rem;cursor:pointer;border:none;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.btn-pr{background:var(--pr);color:white;}.btn-pr:hover{background:var(--pr2);}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--sec);}
+.btn-outline:hover{border-color:var(--pr);color:var(--pr);}
+
+/* SEARCH BAR */
+.search-bar{background:white;border-bottom:1px solid var(--border);padding:14px 20px;}
+.sb-inner{max-width:1300px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.sb-field{display:flex;flex-direction:column;gap:2px;}
+.sb-label{font-size:.6rem;font-weight:700;color:var(--muted);text-transform:uppercase;}
+.sb-sel{background:white;border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.82rem;font-weight:600;color:var(--sec);cursor:pointer;min-width:130px;}
+.sb-sel:focus{outline:none;border-color:var(--pr);}
+.sb-inp{background:white;border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.82rem;color:var(--sec);min-width:200px;}
+.sb-inp:focus{outline:none;border-color:var(--pr);}
+.sb-search-btn{background:var(--pr);color:white;border:none;border-radius:8px;padding:9px 20px;font-weight:700;font-size:.83rem;cursor:pointer;white-space:nowrap;}
+
+/* LAYOUT */
+.page-layout{max-width:1300px;margin:0 auto;padding:20px;display:grid;grid-template-columns:280px 1fr;gap:20px;}
+
+/* FILTER SIDEBAR */
+.filter-sidebar{background:white;border-radius:14px;border:1px solid var(--border);padding:20px;height:fit-content;position:sticky;top:80px;}
+.fs-title{font-size:.86rem;font-weight:800;color:var(--sec);margin-bottom:16px;display:flex;justify-content:space-between;}
+.fs-clear{font-size:.74rem;font-weight:600;color:var(--pr);cursor:pointer;}
+.filter-group{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+.filter-group:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.fg-title{font-size:.76rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
+.filter-btn{padding:7px 13px;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;
+  border:1.5px solid var(--border);background:white;color:var(--muted);transition:.2s;margin:3px;}
+.filter-btn:hover,.filter-btn.active{background:var(--pr);color:white;border-color:var(--pr);}
+.range-input{width:100%;accent-color:var(--pr);cursor:pointer;}
+.range-labels{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:4px;}
+.checkbox-item{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:.81rem;}
+.checkbox-item input{accent-color:var(--pr);width:15px;height:15px;}
+
+/* RESULTS AREA */
+.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+.rh-count{font-size:.88rem;font-weight:700;color:var(--sec);}
+.rh-count span{color:var(--pr);}
+.rh-sort{display:flex;align-items:center;gap:8px;}
+.sort-select{background:white;border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.8rem;font-weight:600;color:var(--sec);cursor:pointer;}
+.view-toggle{display:flex;gap:4px;}
+.vt-btn{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);background:white;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.8rem;transition:.2s;}
+.vt-btn.active{background:var(--pr);color:white;border-color:var(--pr);}
+
+/* PROP CARDS GRID */
+.listings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.listings-grid.list-view{grid-template-columns:1fr;}
+
+/* PROPERTY CARD */
+.pcard{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;transition:.3s;cursor:pointer;text-decoration:none;color:inherit;display:block;}
+.pcard:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.09);color:inherit;}
+.pc-img{height:180px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.pc-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.5rem;}
+.pc-badges{position:absolute;top:10px;left:10px;display:flex;gap:4px;flex-wrap:wrap;}
+.badge{font-size:.62rem;font-weight:800;padding:3px 8px;border-radius:6px;}
+.b-feat{background:#f59e0b;color:white;}.b-verif{background:#10b981;color:white;}
+.b-excl{background:#7c3aed;color:white;}.b-new{background:#3b82f6;color:white;}
+.b-rent{background:rgba(255,255,255,.9);color:#0f172a;}.b-sale{background:var(--pr);color:white;}
+.pc-save{position:absolute;top:10px;right:10px;width:32px;height:32px;
+  background:rgba(255,255,255,.9);border-radius:50%;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;transition:.2s;font-size:.85rem;border:none;}
+.pc-price-tag{position:absolute;bottom:10px;left:10px;
+  background:rgba(15,23,42,.85);backdrop-filter:blur(8px);
+  color:white;padding:4px 10px;border-radius:7px;font-size:.88rem;font-weight:900;}
+.pc-body{padding:14px;}
+.pc-title{font-size:.9rem;font-weight:800;color:var(--sec);margin-bottom:3px;}
+.pc-addr{font-size:.74rem;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:4px;}
+.pc-specs{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
+.spec{font-size:.74rem;color:#475569;display:flex;align-items:center;gap:4px;font-weight:600;}
+.spec i{color:var(--muted);font-size:.7rem;}
+.pc-tags{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;}
+.pt{font-size:.66rem;font-weight:600;padding:2px 8px;border-radius:5px;background:#f1f5f9;color:#475569;}
+.pc-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--border);}
+.pc-agent{display:flex;align-items:center;gap:7px;}
+.pa-av{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:800;color:white;}
+.pa-name{font-size:.7rem;font-weight:700;color:var(--sec);}
+.pa-role{font-size:.6rem;color:var(--muted);}
+.pc-contact-btns{display:flex;gap:5px;}
+.cb{padding:5px 10px;border-radius:7px;font-size:.72rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;transition:.2s;display:flex;align-items:center;gap:4px;}
+.cb:hover{border-color:var(--pr);color:var(--pr);}
+.cb.wa:hover{border-color:#25d366;color:#25d366;}
+
+/* PAGINATION */
+.pagination{display:flex;justify-content:center;gap:6px;margin-top:28px;flex-wrap:wrap;}
+.pg-btn{width:36px;height:36px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.82rem;font-weight:700;transition:.2s;}
+.pg-btn:hover{border-color:var(--pr);color:var(--pr);}
+.pg-btn.active{background:var(--pr);color:white;border-color:var(--pr);}
+
+/* LIST VIEW CARD */
+.listings-grid.list-view .pcard{display:grid;grid-template-columns:260px 1fr;}
+.listings-grid.list-view .pc-img{height:100%;min-height:160px;}
+
+/* APPLIED FILTERS */
+.applied-filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+.af-label{font-size:.74rem;color:var(--muted);font-weight:700;}
+.af-tag{font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:6px;
+  background:#fef3c7;color:#92400e;border:1px solid #fcd34d;display:flex;align-items:center;gap:5px;cursor:pointer;}
+.af-tag:hover{background:#fde68a;}
+
+@media(max-width:1024px){.page-layout{grid-template-columns:1fr;}.filter-sidebar{display:none;}}
+@media(max-width:768px){.listings-grid{grid-template-columns:1fr;}.listings-grid.list-view{grid-template-columns:1fr;}.listings-grid.list-view .pcard{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+
+
+   
+
+<!-- NAV — unchanged -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="logo">🏠 Prop<span>CRM</span></a>
+    <div class="nav-links">
+      <a href="/listings/?type=rent"       class="nl {% if listing_type == 'rent' %}active{% endif %}">For Rent</a>
+      <a href="/listings/?type=sale"       class="nl {% if listing_type == 'sale' %}active{% endif %}">For Sale</a>
+      <a href="/listings/?type=commercial" class="nl {% if listing_type == 'commercial' %}active{% endif %}">Commercial</a>
+    </div>
+    <div class="nav-right">
+      <a href="/add-listing/" class="btn btn-outline"><i class="fas fa-plus"></i> Post Property</a>
+      <a href="#" class="btn btn-pr"><i class="fas fa-sign-in-alt"></i> Login</a>
+    </div>
+  </div>
+</nav>
+
+<!-- SEARCH BAR — values pre-filled from GET params -->
+<div class="search-bar">
+  <div class="sb-inner">
+    <div class="sb-field">
+      <div class="sb-label">Location</div>
+      <input type="text" class="sb-inp" id="loc-inp"
+             placeholder="Area, Locality..."
+             value="{{ current_area|default:'Nagpur' }}">
+    </div>
+    <div class="sb-field">
+      <div class="sb-label">Property Type</div>
+      <select class="sb-sel" id="type-sel">
+        <option {% if not current_bhk %}selected{% endif %}>Any BHK</option>
+        <option {% if current_bhk == '1bhk' %}selected{% endif %}>1 BHK</option>
+        <option {% if current_bhk == '2bhk' %}selected{% endif %}>2 BHK</option>
+        <option {% if current_bhk == '3bhk' %}selected{% endif %}>3 BHK</option>
+        <option {% if current_bhk == '4bhk' %}selected{% endif %}>4 BHK+</option>
+      </select>
+    </div>
+    <div class="sb-field">
+      <div class="sb-label">{% if listing_type == 'sale' %}Max Price{% else %}Max Rent{% endif %}</div>
+      <select class="sb-sel" id="budget-sel">
+        {% if listing_type == 'sale' %}
+        <option {% if not current_budget %}selected{% endif %}>Any Budget</option>
+        <option {% if current_budget == 'Under ₹30L' %}selected{% endif %}>Under ₹30L</option>
+        <option {% if current_budget == '₹30L–60L' %}selected{% endif %}>₹30L–60L</option>
+        <option {% if current_budget == '₹60L+' %}selected{% endif %}>₹60L+</option>
+        {% else %}
+        <option {% if not current_budget %}selected{% endif %}>Any Budget</option>
+        <option {% if current_budget == 'Under ₹8K' %}selected{% endif %}>Under ₹8K</option>
+        <option {% if current_budget == '₹8K–15K' %}selected{% endif %}>₹8K–15K</option>
+        <option {% if current_budget == '₹15K–25K' %}selected{% endif %}>₹15K–25K</option>
+        <option {% if current_budget == '₹25K–40K' %}selected{% endif %}>₹25K–40K</option>
+        <option {% if current_budget == '₹40K+' %}selected{% endif %}>₹40K+</option>
+        {% endif %}
+      </select>
+    </div>
+    <div class="sb-field">
+      <div class="sb-label">Furnishing</div>
+      <select class="sb-sel" id="furn-sel">
+        <option {% if not current_furnishing %}selected{% endif %}>Any</option>
+        <option {% if current_furnishing == 'Fully Furnished' %}selected{% endif %}>Fully Furnished</option>
+        <option {% if current_furnishing == 'Semi Furnished' %}selected{% endif %}>Semi Furnished</option>
+        <option {% if current_furnishing == 'Unfurnished' %}selected{% endif %}>Unfurnished</option>
+      </select>
+    </div>
+    <button class="sb-search-btn" onclick="applySearchBar()">
+      <i class="fas fa-search" style="margin-right:6px;"></i> Search
+    </button>
+    <button class="btn btn-outline" style="font-size:.8rem;padding:7px 14px;"
+            onclick="window.location.href='/listings/?type={{ listing_type }}'">
+      <i class="fas fa-times"></i> Reset
+    </button>
+  </div>
+</div>
+
+<!-- PAGE LAYOUT — sidebar unchanged -->
+<div class="page-layout">
+  <div class="filter-sidebar">
+    <!-- paste your entire sidebar HTML here unchanged -->
+    <!-- only change the Apply Filters button onclick: -->
+    <div class="fs-title">Filters <span class="fs-clear" onclick="resetFilters()">Clear All</span></div>
+
+    <div class="filter-group">
+      <div class="fg-title">BHK Type</div>
+      <div>
+        <button class="filter-btn" onclick="toggleFilter(this,'bhk','1bhk')">1 BHK</button>
+        <button class="filter-btn" onclick="toggleFilter(this,'bhk','2bhk')">2 BHK</button>
+        <button class="filter-btn" onclick="toggleFilter(this,'bhk','3bhk')">3 BHK</button>
+        <button class="filter-btn" onclick="toggleFilter(this,'bhk','4bhk')">4 BHK+</button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="fg-title">Budget Range (₹/month)</div>
+      <input type="range" class="range-input" id="budgetRange"
+             min="5000" max="100000" value="50000" step="1000"
+             oninput="updateBudget(this)">
+      <div class="range-labels">
+        <span>₹5,000</span><span id="budgetVal">Up to ₹50,000</span>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="fg-title">Area / Locality</div>
+      <div>
+        <button class="filter-btn" onclick="toggleFilter(this,'area','dharampeth')">Dharampeth</button>
+        <button class="filter-btn" onclick="toggleFilter(this,'area','civil-lines')">Civil Lines</button>
+        <button class="filter-btn" onclick="toggleFilter(this,'area','wardha')">Wardha Rd</button>
+        <button class="filter-btn" onclick="toggleFilter(this,'area','sitabuldi')">Sitabuldi</button>
+        <button class="filter-btn" onclick="toggleFilter(this,'area','manewada')">Manewada</button>
+        <button class="filter-btn" onclick="toggleFilter(this,'area','sadar')">Sadar</button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="fg-title">Furnishing Status</div>
+      <div>
+        <button class="filter-btn" onclick="toggleFilter(this,'furn','semi')">Semi Furnished</button>
+        <button class="filter-btn" onclick="toggleFilter(this,'furn','full')">Fully Furnished</button>
+        <button class="filter-btn" onclick="toggleFilter(this,'furn','un')">Unfurnished</button>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="fg-title">Property Status</div>
+      <label class="checkbox-item"><input type="checkbox" checked id="f-verified"> ✅ Verified Only</label>
+      <label class="checkbox-item"><input type="checkbox" id="f-featured"> ⭐ Featured Only</label>
+      <label class="checkbox-item"><input type="checkbox" id="f-owner"> Owner Properties Only</label>
+      <label class="checkbox-item"><input type="checkbox" id="f-pet"> Pet Friendly</label>
+    </div>
+
+    <div class="filter-group">
+      <div class="fg-title">Amenities</div>
+      <label class="checkbox-item"><input type="checkbox" checked> Lift</label>
+      <label class="checkbox-item"><input type="checkbox"> Gym</label>
+      <label class="checkbox-item"><input type="checkbox"> Swimming Pool</label>
+      <label class="checkbox-item"><input type="checkbox"> Power Backup</label>
+      <label class="checkbox-item"><input type="checkbox"> Parking</label>
+    </div>
+
+    <button class="btn btn-pr" style="width:100%;justify-content:center;margin-top:8px;"
+            onclick="applyFilters()">
+      <i class="fas fa-filter me-1"></i> Apply Filters
+    </button>
+  </div>
+
+  <!-- RESULTS -->
+  <div>
+    <div style="font-size:.76rem;color:var(--muted);margin-bottom:14px;">
+      <a href="/" style="color:var(--pr);text-decoration:none;">Home</a> &rsaquo;
+      {% if listing_type == 'sale' %}Sale{% elif listing_type == 'commercial' %}Commercial{% else %}Rent{% endif %}
+      &rsaquo; Nagpur
+    </div>
+
+    <!-- applied filter chips — built from active GET params -->
+    <div class="applied-filters" id="appliedFilters">
+      <span class="af-label">Applied:</span>
+      <div class="af-tag">
+        {% if listing_type == 'sale' %}For Sale{% elif listing_type == 'commercial' %}Commercial{% else %}For Rent{% endif %}
+        <i class="fas fa-times" style="font-size:.6rem;"></i>
+      </div>
+      {% if current_bhk %}
+      <div class="af-tag" id="chip-bhk">
+        {{ current_bhk|upper }}
+        <i class="fas fa-times" style="font-size:.6rem;" onclick="removeParam('bhk')"></i>
+      </div>
+      {% endif %}
+      {% if current_area %}
+      <div class="af-tag" id="chip-area">
+        {{ current_area }}
+        <i class="fas fa-times" style="font-size:.6rem;" onclick="removeParam('area')"></i>
+      </div>
+      {% endif %}
+      {% if current_budget %}
+      <div class="af-tag" id="chip-budget">
+        {{ current_budget }}
+        <i class="fas fa-times" style="font-size:.6rem;" onclick="removeParam('budget')"></i>
+      </div>
+      {% endif %}
+      {% if current_furnishing %}
+      <div class="af-tag" id="chip-furn">
+        {{ current_furnishing }}
+        <i class="fas fa-times" style="font-size:.6rem;" onclick="removeParam('furnishing')"></i>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- results header -->
+    <div class="results-header">
+      <div class="rh-count">
+        Showing <span id="resultCount">{{ total }}</span> properties
+        {% if listing_type == 'sale' %}for sale{% elif listing_type == 'commercial' %}commercial{% else %}for rent{% endif %}
+        in <strong>Nagpur</strong>
+      </div>
+      <div class="rh-sort">
+        <select class="sort-select" onchange="sortRedirect(this.value)">
+          <option value="relevant"  {% if current_sort == 'relevant'   %}selected{% endif %}>Most Relevant</option>
+          <option value="newest"    {% if current_sort == 'newest'     %}selected{% endif %}>Newest First</option>
+          <option value="price-asc" {% if current_sort == 'price-asc'  %}selected{% endif %}>Price: Low to High</option>
+          <option value="price-desc"{% if current_sort == 'price-desc' %}selected{% endif %}>Price: High to Low</option>
+        </select>
+        <div class="view-toggle">
+          <button class="vt-btn active" id="gridViewBtn" onclick="setView('grid',this)"><i class="fas fa-th"></i></button>
+          <button class="vt-btn"        id="listViewBtn" onclick="setView('list',this)"><i class="fas fa-list"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTINGS GRID — rendered by Django -->
+    <div class="listings-grid" id="listingsGrid">
+      {% for p in properties %}
+      <a href="/listing/{{ p.listing_type }}/{{ p.id }}/" class="pcard">
+        <div class="pc-img">
+          <div class="pc-img-placeholder"
+               style="background:linear-gradient(135deg,#dbeafe,#bfdbfe);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.5rem;">
+            {% if p.listing_type == 'sale' %}🏘{% elif p.listing_type == 'commercial-rent' or p.listing_type == 'commercial-sale' %}🏗{% else %}🏠{% endif %}
+          </div>
+          <div class="pc-badges">
+            {% for badge in p.badges %}
+              {% if badge == 'featured' %}<span class="badge b-feat">⭐ Featured</span>{% endif %}
+              {% if badge == 'verified' %}<span class="badge b-verif">✅ Verified</span>{% endif %}
+              {% if badge == 'sale'     %}<span class="badge b-sale">For Sale</span>{% endif %}
+              {% if badge == 'commercial' %}<span class="badge b-excl">🏗 Commercial</span>{% endif %}
+            {% endfor %}
+            {% if p.is_new %}<span class="badge b-new">🆕 New</span>{% endif %}
+          </div>
+          <button class="pc-save"
+                  onclick="event.preventDefault();toggleSave({{ p.id }},this)">
+            <i class="far fa-heart" style="color:#ef4444;"></i>
+          </button>
+          <div class="pc-price-tag">{{ p.price_display }}</div>
+        </div>
+        <div class="pc-body">
+          <div class="pc-title">{{ p.title }}</div>
+          <div class="pc-addr">
+            <i class="fas fa-map-marker-alt" style="color:#f97316;font-size:.7rem;"></i>
+            {{ p.location }}
+          </div>
+          <div class="pc-specs">
+            {% if p.beds and p.beds != '—' %}
+            <div class="spec"><i class="fas fa-bed"></i> {{ p.beds }}</div>
+            {% endif %}
+            <div class="spec"><i class="fas fa-vector-square"></i> {{ p.area }}</div>
+            {% if p.baths %}
+            <div class="spec"><i class="fas fa-bath"></i> {{ p.baths }} Bath</div>
+            {% endif %}
+            <div class="spec"><i class="fas fa-layer-group"></i> {{ p.floor }} Floor</div>
+          </div>
+          <div class="pc-tags">
+            <span class="pt">{{ p.furnished }}</span>
+            <span class="pt">{{ p.available }}</span>
+            {% if p.is_new %}
+            <span class="pt" style="background:#dbeafe;color:#1e40af;">Just Listed</span>
+            {% endif %}
+          </div>
+          <div class="pc-footer">
+            <div class="pc-agent">
+              <div class="pa-av"
+                   style="background:#f97316;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:800;color:white;">
+                {{ p.owner|slice:":2"|upper }}
+              </div>
+              <div>
+                <div class="pa-name">{{ p.owner }}</div>
+                <div class="pa-role">{{ p.owner_role }}</div>
+              </div>
+            </div>
+            <div class="pc-contact-btns">
+              <button class="cb"
+                      onclick="event.preventDefault();contactListing('{{ p.phone }}')">
+                <i class="fas fa-phone"></i> Call
+              </button>
+              <button class="cb wa"
+                      onclick="event.preventDefault();waListing('{{ p.phone }}')">
+                <i class="fab fa-whatsapp"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </a>
+      {% empty %}
+      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#64748b;">
+        <i class="fas fa-search" style="font-size:2rem;margin-bottom:12px;display:block;"></i>
+        <div style="font-size:.92rem;font-weight:700;">No properties found matching your criteria.</div>
+        <div style="font-size:.78rem;margin-top:6px;">Try adjusting your filters.</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- PAGINATION — unchanged -->
+    <div class="pagination">
+      <button class="pg-btn"><i class="fas fa-chevron-left"></i></button>
+      <button class="pg-btn active">1</button>
+      <button class="pg-btn">2</button>
+      <button class="pg-btn">3</button>
+      <button class="pg-btn"><i class="fas fa-chevron-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script>
+// ── Active filters state (sidebar buttons) ──────────────────────────────────
+const activeFilters = {
+  bhk:   '{{ current_bhk }}',
+  area:  '{{ current_area }}',
+  furn:  '{{ current_furnishing }}',
+  budget:'{{ current_budget }}',
+};
+
+function toggleFilter(btn, type, val) {
+  btn.classList.toggle('active');
+  activeFilters[type] = btn.classList.contains('active') ? val : '';
+}
+
+function updateBudget(el) {
+  document.getElementById('budgetVal').textContent =
+    'Up to ₹' + parseInt(el.value).toLocaleString('en-IN');
+}
+
+// ── Redirect helpers ─────────────────────────────────────────────────────────
+function buildURL(overrides = {}) {
+  const params = new URLSearchParams();
+  params.set('type', '{{ listing_type }}');
+  const base = {
+    bhk:       activeFilters.bhk       || '{{ current_bhk }}',
+    budget:    activeFilters.budget    || '{{ current_budget }}',
+    furnishing:activeFilters.furn      || '{{ current_furnishing }}',
+    area:      activeFilters.area      || '{{ current_area }}',
+    sort:      '{{ current_sort }}',
+    ...overrides,
+  };
+  Object.entries(base).forEach(([k, v]) => { if (v) params.set(k, v); });
+  return '/listings/?' + params.toString();
+}
+
+function applyFilters() {
+  window.location.href = buildURL();
+}
+
+function applySearchBar() {
+  const area = document.getElementById('loc-inp').value;
+  const bhk  = document.getElementById('type-sel').value;
+  const bud  = document.getElementById('budget-sel').value;
+  const furn = document.getElementById('furn-sel').value;
+  window.location.href = buildURL({
+    area:       area !== 'Nagpur' ? area : '',
+    bhk:        bhk  !== 'Any BHK' ? bhk : '',
+    budget:     bud  !== 'Any Budget' ? bud : '',
+    furnishing: furn !== 'Any' ? furn : '',
+  });
+}
+
+function resetFilters() {
+  window.location.href = '/listings/?type={{ listing_type }}';
+}
+
+function removeParam(key) {
+  const params = new URLSearchParams(window.location.search);
+  params.delete(key);
+  window.location.href = '/listings/?' + params.toString();
+}
+
+function sortRedirect(val) {
+  window.location.href = buildURL({ sort: val });
+}
+
+// ── UI helpers (no network, instant) ─────────────────────────────────────────
+function setView(v, btn) {
+  document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const grid = document.getElementById('listingsGrid');
+  grid.classList.toggle('list-view', v === 'list');
+}
+
+function toggleSave(id, btn) {
+  btn.classList.toggle('saved');
+  const i = btn.querySelector('i');
+  i.className = btn.classList.contains('saved') ? 'fas fa-heart' : 'far fa-heart';
+}
+
+function contactListing(phone) {
+  Swal.fire({
+    title: 'Contact Owner',
+    html: `<div style="text-align:center;padding:8px;">
+      <div style="font-size:1.1rem;font-weight:900;color:#f97316;">📞 ${phone || 'N/A'}</div>
+      <div style="font-size:.74rem;color:#64748b;margin-top:6px;">PropCRM Verified · Available 9AM–7PM</div>
+    </div>`,
+    background: '#fff', color: '#1e293b',
+    confirmButtonColor: '#f97316', confirmButtonText: 'Call Now',
+  });
+}
+
+function waListing(phone) {
+  if (phone) window.open(`https://wa.me/91${phone}`, '_blank');
+  else Swal.fire({ icon: 'info', title: 'No WhatsApp number available',
+                   background: '#fff', timer: 1400, showConfirmButton: false });
+}
+</script>
+</body>
+</html>

@@ -631,55 +631,60 @@
         document.getElementById('import-result').style.display = 'none';
     }
 
-    function submitImport() {
-        const fileInput = document.getElementById('rental_file');
-        if (!fileInput.files || !fileInput.files[0]) {
-            Swal.fire('No File', 'Please select an Excel file to upload.', 'warning');
-            return;
-        }
+   function submitImport() {
+    const fileInput = document.getElementById('rental_file');
+    if (!fileInput.files || !fileInput.files[0]) {
+        Swal.fire('No File', 'Please select an Excel file to upload.', 'warning');
+        return;
+    }
 
-        const formData = new FormData();
-        formData.append('rental_file', fileInput.files[0]);
-        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    const formData = new FormData();
+    formData.append('rental_file', fileInput.files[0]);
+    // ✅ Removed duplicate csrfmiddlewaretoken from FormData
 
-        // Show progress
-        document.getElementById('import-progress').style.display = 'block';
-        document.getElementById('import-result').style.display = 'none';
-        document.getElementById('upload-btn').disabled = true;
-        document.getElementById('upload-btn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing...';
+    // Show progress
+    document.getElementById('import-progress').style.display = 'block';
+    document.getElementById('import-result').style.display = 'none';
+    document.getElementById('upload-btn').disabled = true;
+    document.getElementById('upload-btn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing...';
 
-        // Fake progress animation
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress = Math.min(progress + 10, 85);
-            document.getElementById('progress-bar').style.width = progress + '%';
-        }, 200);
+    // Fake progress animation
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress = Math.min(progress + 10, 85);
+        document.getElementById('progress-bar').style.width = progress + '%';
+    }, 200);
 
-        fetch("{% url 'import_residential_excel' %}", {
-            method: 'POST',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            clearInterval(interval);
-            document.getElementById('progress-bar').style.width = '100%';
+    fetch("{% url 'import_residential_excel' %}", {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        // ✅ Do NOT set Content-Type manually — browser sets it with boundary for FormData
+        body: formData
+    })
+    .then(res => {
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);  // ✅ Catches 403, 500 etc.
+        return res.json();
+    })
+    .then(data => {
+        clearInterval(interval);
+        document.getElementById('progress-bar').style.width = '100%';
 
-            setTimeout(() => {
-                document.getElementById('import-progress').style.display = 'none';
-                document.getElementById('upload-btn').disabled = false;
-                document.getElementById('upload-btn').innerHTML = '<i class="fas fa-upload"></i> Import Data';
-                showImportResult(data);
-            }, 400);
-        })
-        .catch(err => {
-            clearInterval(interval);
+        setTimeout(() => {
             document.getElementById('import-progress').style.display = 'none';
             document.getElementById('upload-btn').disabled = false;
             document.getElementById('upload-btn').innerHTML = '<i class="fas fa-upload"></i> Import Data';
-            Swal.fire('Error', 'An unexpected error occurred. Please try again.', 'error');
-        });
-    }
+            showImportResult(data);
+        }, 400);
+    })
+    .catch(err => {
+        clearInterval(interval);
+        document.getElementById('import-progress').style.display = 'none';
+        document.getElementById('upload-btn').disabled = false;
+        document.getElementById('upload-btn').innerHTML = '<i class="fas fa-upload"></i> Import Data';
+        console.error('Import error:', err);
+        Swal.fire('Error', `Upload failed: ${err.message}`, 'error'); // ✅ Shows actual error
+    });
+}
 
     function showImportResult(data) {
         const resultDiv = document.getElementById('import-result');
@@ -730,9 +735,10 @@
     }
 
 </script>
+<!-- ✅ CORRECT — remove BS5, keep only jQuery + BS4 -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>

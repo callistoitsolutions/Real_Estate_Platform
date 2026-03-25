@@ -1139,7 +1139,7 @@ class ResalePropertyImage(models.Model):
 ############## Models Start for Resale Commericial  Property  model ############################ 
 
 
-class CommercialProperty(models.Model):
+class CommercialResaleProperty(models.Model):
 
     # ── Basic Information ──────────────────────────────
     PROPERTY_TYPE_CHOICES = [
@@ -1275,7 +1275,7 @@ class CommercialProperty(models.Model):
 
 # ── Separate model for multiple property images ──────────────────
 class CommercialPropertyImage(models.Model):
-    property   = models.ForeignKey(CommercialProperty, on_delete=models.CASCADE, related_name='images')
+    property   = models.ForeignKey(CommercialResaleProperty, on_delete=models.CASCADE, related_name='images')
     image      = models.ImageField(upload_to='commercial/images/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 

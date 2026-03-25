@@ -8,6 +8,7 @@ urlpatterns = [
       ##########urls for Lanlord#####
    
     path('',views.index,name="index"),
+    path('portalpage',views.portalpage,name="portalpage"),
     
     path('signup/', views.signup_view, name='signup'),
     
@@ -135,6 +136,26 @@ urlpatterns = [
     path("create_ad", views.create_ad, name="create_ad"),
     path("list/", views.sponsored_ad_list_view, name="list_ads"),
     path('ads/<slug:slug>/', views.sponsored_ad_detail_view, name='ad_detail'),
+    
+    
+    
+    ##############Start URL Section Property Listing Page##########################
+    
+    
+    path('listingpage/', views.listings_view, name='listings'),
+    # your_app/urls.py
+
+   # path('listings/', views.listings_view, name='listings'),
+
+   
+  
+
+    
+    
+    
+    
+    
+      ##############End URL SectionProperty Listing Page##########################
 ]
 
     

@@ -14,6 +14,11 @@ from openpyxl import load_workbook
 from django.template.loader import render_to_string
 import traceback
 import json
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.db.models import Q
+from django.core.paginator import Paginator  # ← ADD THIS
+import csv
 
 # Create your views here.
 
@@ -2749,7 +2754,7 @@ def addon_create(request):
 # --- Add-On List View ---
 
 
-
+#######################
 
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -2921,11 +2926,7 @@ def rental_residential_add(request):
 
 
 
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.db.models import Q
-from django.core.paginator import Paginator  # ← ADD THIS
-import csv
+
 
 def rental_list(request):
 
@@ -3039,8 +3040,15 @@ from django.shortcuts import redirect
 
 
 
+
 # ─────────────────────────────────────────────
 #  Helper: safe type conversions
+# ─────────────────────────────────────────────
+
+
+
+# ─────────────────────────────────────────────
+#  Helper converters
 # ─────────────────────────────────────────────
 
 def _str(val):
@@ -3052,22 +3060,23 @@ def _str(val):
 
 def _int(val):
     try:
-        return int(val)
+        return int(float(str(val).strip()))
     except (TypeError, ValueError):
         return None
 
 
 def _decimal(val):
     try:
-        from decimal import Decimal
-        return Decimal(str(val).strip())
+        cleaned = str(val).replace(",", "").replace("₹", "").strip()
+        return Decimal(cleaned)
     except Exception:
         return None
 
 
 def _bigint(val):
     try:
-        return int(float(str(val).strip()))
+        cleaned = str(val).replace(",", "").replace("₹", "").strip()
+        return int(float(cleaned))
     except (TypeError, ValueError):
         return None
 
@@ -3077,79 +3086,85 @@ def _date(val):
         return None
     if isinstance(val, (date, datetime)):
         return val.date() if isinstance(val, datetime) else val
-    try:
-        return datetime.strptime(str(val).strip(), "%Y-%m-%d").date()
-    except ValueError:
+    for fmt in ("%Y-%m-%d", "%d-%m-%Y", "%d/%m/%Y"):
         try:
-            return datetime.strptime(str(val).strip(), "%d-%m-%Y").date()
+            return datetime.strptime(str(val).strip(), fmt).date()
         except ValueError:
-            return None
+            continue
+    return None
 
 
 # ─────────────────────────────────────────────
 #  Column → model field mapping
-#  Order must match the Excel template columns
 # ─────────────────────────────────────────────
 
-COLUMN_MAP = [
-    # (excel_col_name,          model_field,            converter)
-    ("property_title",          "property_title",       _str),
-    ("property_purpose",        "property_purpose",     _str),
-    ("property_type",           "property_type",        _str),
-    ("bhk_type",                "bhk_type",             _str),
-    ("renting_option",          "renting_option",       _str),
-    ("furnishing_status",       "furnishing_status",    _str),
-    ("available_for",           "available_for",        _str),
-    ("built_up_area",           "built_up_area",        _decimal),
-    ("bathrooms",               "bathrooms",            _int),
-    ("balconies",               "balconies",            _int),
-    ("floor_number",            "floor_number",         _str),
-    ("total_floors",            "total_floors",         _int),
-    ("facing",                  "facing",               _str),
-    ("zone",                    "zone",                 _str),
-    ("ownership_type",          "ownership_type",       _str),
-    ("construction_status",     "construction_status",  _str),
-    ("property_age",            "property_age",         _str),
-    ("carpet_area",             "carpet_area",          _decimal),
-    ("plot_area",               "plot_area",            _decimal),
-    ("building_name",           "building_name",        _str),
-    ("possession_status",       "possession_status",    _str),
-    ("available_from",          "available_from",       _date),
-    ("lease_duration",          "lease_duration",       _str),
-    ("brokerage",               "brokerage",            _str),
-    ("brokerage_percentage",    "brokerage_percentage", _str),
-    ("manual_brokerage",        "manual_brokerage",     _str),
-    ("monthly_rent",            "monthly_rent",         _bigint),
-    ("security_deposit",        "security_deposit",     _bigint),
-    ("maintenance_type",        "maintenance_type",     _str),
-    ("maintenance_amount",      "maintenance_amount",   _bigint),
-    ("expected_price",          "expected_price",       _bigint),
-    ("address",                 "address",              _str),
-    ("city",                    "city",                 _str),
-    ("locality",                "locality",             _str),
-    ("state",                   "state",                _str),
-    ("pincode",                 "pincode",              _str),
-    ("road_connectivity",       "road_connectivity",    _str),
-    ("amenities",               "amenities",            _str),
-    ("description",             "description",          _str),
-    ("rent_residential_desc",   "rent_residential_desc",_str),
-    ("owner_name",              "owner_name",           _str),
-    ("contact_number",          "contact_number",       _str),
-    ("email",                   "email",                _str),
-    ("alternate_contact",       "alternate_contact",    _str),
-    ("uploaded_by_name",        "uploaded_by_name",     _str),
-    ("uploaded_by_email",       "uploaded_by_email",    _str),
-    ("uploaded_by_contact",     "uploaded_by_contact",  _str),
-    ("uploaded_by_role",        "uploaded_by_role",     _str),
-]
+def _email(val):
+    if val is None:
+        return None
+    s = str(val).strip()
+    if not s or '@' not in s:
+        return None
+    return s
 
 
-# ─────────────────────────────────────────────
-#  Main import view
-# ─────────────────────────────────────────────
 
+
+@csrf_exempt
 @require_POST
 def import_residential_excel(request):
+
+    # ✅ Defined INSIDE the function — PG COLUMN_MAP cannot override this
+    RESIDENTIAL_COLUMN_MAP = [
+        ("property_title", "property_title", _str),
+        ("property_purpose", "property_purpose", _str),
+        ("property_type", "property_type", _str),
+        ("bhk_type", "bhk_type", _str),
+        ("renting_option", "renting_option", _str),
+        ("furnishing_status", "furnishing_status", _str),
+        ("available_for", "available_for", _str),
+        ("built_up_area", "built_up_area", _decimal),
+        ("bathrooms", "bathrooms", _int),
+        ("balconies", "balconies", _int),
+        ("floor_number", "floor_number", _str),
+        ("total_floors", "total_floors", _int),
+        ("facing", "facing", _str),
+        ("zone", "zone", _str),
+        ("ownership_type", "ownership_type", _str),
+        ("construction_status", "construction_status", _str),
+        ("property_age", "property_age", _str),
+        ("carpet_area", "carpet_area", _decimal),
+        ("plot_area", "plot_area", _decimal),
+        ("building_name", "building_name", _str),
+        ("possession_status", "possession_status", _str),
+        ("available_from", "available_from", _date),
+        ("lease_duration", "lease_duration", _str),
+        ("brokerage", "brokerage", _str),
+        ("brokerage_percentage", "brokerage_percentage", _str),
+        ("manual_brokerage", "manual_brokerage", _str),
+        ("monthly_rent", "monthly_rent", _bigint),
+        ("security_deposit", "security_deposit", _bigint),
+        ("maintenance_type", "maintenance_type", _str),
+        ("maintenance_amount", "maintenance_amount", _bigint),
+        ("expected_price", "expected_price", _bigint),
+        ("address", "address", _str),
+        ("city", "city", _str),
+        ("locality", "locality", _str),
+        ("state", "state", _str),
+        ("pincode", "pincode", _str),
+        ("road_connectivity", "road_connectivity", _str),
+        ("amenities", "amenities", _str),
+        ("description", "description", _str),
+        ("rent_residential_desc", "rent_residential_desc", _str),
+        ("owner_name", "owner_name", _str),
+        ("contact_number", "contact_number", _str),
+        ("email", "email", _email),
+        ("alternate_contact", "alternate_contact", _str),
+        ("uploaded_by_name", "uploaded_by_name", _str),
+        ("uploaded_by_email", "uploaded_by_email", _str),
+        ("uploaded_by_contact", "uploaded_by_contact", _str),
+        ("uploaded_by_role", "uploaded_by_role", _str),
+    ]
+
     excel_file = request.FILES.get("rental_file")
 
     if not excel_file:
@@ -3164,36 +3179,40 @@ def import_residential_excel(request):
     except Exception as e:
         return JsonResponse({"status": "error", "message": f"Could not open file: {e}"}, status=400)
 
-    # Build header → column-index map from row 1
+    # ── Read headers ──
     headers = {}
-    for col_idx, cell in enumerate(next(ws.iter_rows(min_row=1, max_row=1)), 1):
-        if cell.value:
-            headers[str(cell.value).strip()] = col_idx
+    first_row = next(ws.iter_rows(min_row=1, max_row=1))
+    for col_idx, cell in enumerate(first_row, 1):
+        if cell.value is not None:
+            key = str(cell.value).strip().lower().replace(" ", "_")
+            headers[key] = col_idx
 
-    # Validate that required columns exist
-    missing = [cm[0] for cm in COLUMN_MAP if cm[0] not in headers]
+    print("=" * 60)
+    print("HEADERS FROM EXCEL:", list(headers.keys()))
+    missing = [cm[0] for cm in RESIDENTIAL_COLUMN_MAP if cm[0].lower() not in headers]
+    print("MISSING COLUMNS   :", missing)
+    print("=" * 60)
+
     if missing:
         return JsonResponse({
             "status": "error",
-            "message": f"Missing columns in Excel: {', '.join(missing[:10])}{'...' if len(missing) > 10 else ''}"
+            "message": f"Missing columns: {', '.join(missing)}"
         }, status=400)
 
     created_count = 0
     error_rows = []
 
     for row_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
-        # Skip completely empty rows
+
         if all(v is None or str(v).strip() == "" for v in row):
             continue
 
         obj_fields = {}
         row_error = None
 
-        for excel_col, model_field, converter in COLUMN_MAP:
-            col_idx = headers.get(excel_col)
-            if col_idx is None:
-                continue
-            raw_val = row[col_idx - 1] if col_idx - 1 < len(row) else None
+        for excel_col, model_field, converter in RESIDENTIAL_COLUMN_MAP:
+            col_idx = headers.get(excel_col.lower())
+            raw_val = row[col_idx - 1] if (col_idx and col_idx - 1 < len(row)) else None
             try:
                 obj_fields[model_field] = converter(raw_val)
             except Exception as e:
@@ -3205,121 +3224,73 @@ def import_residential_excel(request):
             continue
 
         try:
-            RentalResidentialProperty.objects.create(**obj_fields)
+            obj = RentalResidentialProperty(**obj_fields)
+            obj.save()
             created_count += 1
         except Exception as e:
+            print(f"❌ DB ERROR ROW {row_idx}:", e)
             error_rows.append(f"Row {row_idx}: DB error — {e}")
 
     wb.close()
 
-    response_data = {
+    return JsonResponse({
         "status": "success",
-        "message": f"Import complete. {created_count} record(s) imported successfully.",
+        "message": f"{created_count} records imported, {len(error_rows)} errors",
         "created": created_count,
-        "errors": error_rows,
         "error_count": len(error_rows),
-    }
+        "errors": error_rows,
+    })
 
-    if error_rows:
-        response_data["message"] += f" {len(error_rows)} row(s) had errors (see 'errors' list)."
-
-    return JsonResponse(response_data)
+from django.views.decorators.http import require_POST
 
 
-# ─────────────────────────────────────────────
-#  Download blank template view
-# ─────────────────────────────────────────────
+
 
 def download_residential_template(request):
-    """
-    Serves the blank Excel template for users to fill in.
-    Place the template file at: your_app/static/templates/rental_residential_import_template.xlsx
-    OR generate it on-the-fly (code below generates it dynamically).
-    """
-    from openpyxl import Workbook
-    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-    from openpyxl.utils import get_column_letter
+    import openpyxl
+    from django.http import HttpResponse
 
-    wb = Workbook()
+    wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Rental Residential"
+    ws.title = "Residential Properties"
 
-    columns = [cm[0] for cm in COLUMN_MAP]
+    # ✅ Exact headers matching COLUMN_MAP
+    headers = [
+        "property_title", "property_purpose", "property_type", "bhk_type",
+        "renting_option", "furnishing_status", "available_for", "built_up_area",
+        "bathrooms", "balconies", "floor_number", "total_floors", "facing",
+        "zone", "ownership_type", "construction_status", "property_age",
+        "carpet_area", "plot_area", "building_name", "possession_status",
+        "available_from", "lease_duration", "brokerage", "brokerage_percentage",
+        "manual_brokerage", "monthly_rent", "security_deposit", "maintenance_type",
+        "maintenance_amount", "expected_price", "address", "city", "locality",
+        "state", "pincode", "road_connectivity", "amenities", "description",
+        "rent_residential_desc", "owner_name", "contact_number", "email",
+        "alternate_contact", "uploaded_by_name", "uploaded_by_email",
+        "uploaded_by_contact", "uploaded_by_role"
+    ]
 
-    header_fill = PatternFill("solid", start_color="4F46E5", end_color="4F46E5")
-    header_font = Font(bold=True, color="FFFFFF", name="Arial", size=10)
-    header_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    thin_border = Border(
-        left=Side(style='thin', color='CCCCCC'),
-        right=Side(style='thin', color='CCCCCC'),
-        top=Side(style='thin', color='CCCCCC'),
-        bottom=Side(style='thin', color='CCCCCC'),
-    )
+    from openpyxl.styles import Font, PatternFill, Alignment
+    header_font = Font(name="Arial", bold=True, color="FFFFFF", size=10)
+    header_fill = PatternFill("solid", start_color="4F46E5")
+    header_align = Alignment(horizontal="center", vertical="center")
 
-    for col_idx, col_name in enumerate(columns, 1):
-        cell = ws.cell(row=1, column=col_idx, value=col_name)
+    for col_idx, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_idx, value=header)
         cell.font = header_font
         cell.fill = header_fill
         cell.alignment = header_align
-        cell.border = thin_border
-        ws.column_dimensions[get_column_letter(col_idx)].width = max(18, len(col_name) + 4)
+        ws.column_dimensions[openpyxl.utils.get_column_letter(col_idx)].width = 20
 
-    ws.row_dimensions[1].height = 35
     ws.freeze_panes = "A2"
 
-    # Instructions sheet
-    ws2 = wb.create_sheet("Instructions")
-    ws2.column_dimensions["A"].width = 28
-    ws2.column_dimensions["B"].width = 60
-    ws2.column_dimensions["C"].width = 20
-
-    notes = {
-        "property_type": "Apartment / Independent House / Villa / Flat / Studio",
-        "bhk_type": "1 BHK / 2 BHK / 3 BHK / 4 BHK / Studio",
-        "furnishing_status": "Fully Furnished / Semi Furnished / Unfurnished",
-        "available_for": "Family / Bachelor / Any",
-        "facing": "North / South / East / West / North-East / South-West etc.",
-        "property_purpose": "Rent / Lease",
-        "brokerage": "Yes / No",
-        "maintenance_type": "Monthly / Quarterly / Yearly / None",
-        "available_from": "YYYY-MM-DD (e.g. 2025-04-01)",
-        "built_up_area": "Numeric sq.ft",
-        "monthly_rent": "Numeric INR (e.g. 15000)",
-    }
-    type_map = {
-        "built_up_area": "Decimal", "carpet_area": "Decimal", "plot_area": "Decimal",
-        "monthly_rent": "Integer", "security_deposit": "Integer",
-        "maintenance_amount": "Integer", "expected_price": "Integer",
-        "bathrooms": "Integer", "balconies": "Integer",
-        "total_floors": "Integer", "available_from": "Date (YYYY-MM-DD)",
-    }
-
-    ws2.cell(row=1, column=1, value="Column Instructions").font = Font(bold=True, size=13, color="4F46E5")
-    for ci, h in enumerate(["Column Name", "Valid Values / Notes", "Data Type"], 1):
-        c = ws2.cell(row=2, column=ci, value=h)
-        c.font = Font(bold=True, color="FFFFFF", name="Arial")
-        c.fill = PatternFill("solid", start_color="4F46E5", end_color="4F46E5")
-
-    for ri, col_name in enumerate(columns, 3):
-        ws2.cell(row=ri, column=1, value=col_name).font = Font(bold=True, size=9)
-        ws2.cell(row=ri, column=2, value=notes.get(col_name, "Free text"))
-        ws2.cell(row=ri, column=3, value=type_map.get(col_name, "Text"))
-
-    ws2.freeze_panes = "A3"
-
-    buffer = io.BytesIO()
-    wb.save(buffer)
-    buffer.seek(0)
-
+    # ── Send as download ──
     response = HttpResponse(
-        buffer.getvalue(),
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    response["Content-Disposition"] = 'attachment; filename="rental_residential_import_template.xlsx"'
+    response['Content-Disposition'] = 'attachment; filename="rental_residential_template.xlsx"'
+    wb.save(response)
     return response
-
-
-
 
 
 
@@ -4468,7 +4439,7 @@ def add_commercial_property(request):
     # ── Step 2: Handle POST (form submission) ──────────
     if request.method == "POST":
 
-        prop = CommercialProperty(
+        prop = CommercialResaleProperty(
 
             # ── Basic Information ──────────────────────
             title               = request.POST.get('title'),
@@ -4605,7 +4576,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Avg, Count
-from .models import CommercialProperty
+from .models import CommercialResaleProperty
 
 
 # ── DEBUG TEST VIEW ──────────────────────────────────────────
@@ -4726,7 +4697,7 @@ def import_commercial_data(request):
             continue
 
         try:
-            CommercialProperty.objects.create(
+            CommercialResaleProperty.objects.create(
                 title                 = val(row[0]),
                 property_type         = val(row[1],  'office').lower(),
                 zone_type             = val(row[2],  'commercial').lower(),
@@ -4811,12 +4782,12 @@ def toggle_commercial_property(request):
     if request.method == 'POST':
         prop_id = request.POST.get('prop_id')
         try:
-            prop = CommercialProperty.objects.get(id=prop_id)
+            prop = CommercialResaleProperty.objects.get(id=prop_id)
             prop.is_active = not prop.is_active
             prop.save()
             status = 'Active' if prop.is_active else 'Inactive'
             return JsonResponse({'status': '1', 'msg': f'Property marked as {status}.'})
-        except CommercialProperty.DoesNotExist:
+        except CommercialResaleProperty.DoesNotExist:
             return JsonResponse({'status': '0', 'msg': 'Property not found.'})
     return JsonResponse({'status': '0', 'msg': 'Invalid request.'})
 
@@ -4827,10 +4798,10 @@ def delete_commercial_property(request):
     if request.method == 'POST':
         prop_id = request.POST.get('prop_id')
         try:
-            prop = CommercialProperty.objects.get(id=prop_id)
+            prop = CommercialResaleProperty.objects.get(id=prop_id)
             prop.delete()
             return JsonResponse({'status': '1', 'msg': 'Property deleted successfully.'})
-        except CommercialProperty.DoesNotExist:
+        except CommercialResaleProperty.DoesNotExist:
             return JsonResponse({'status': '0', 'msg': 'Property not found.'})
     return JsonResponse({'status': '0', 'msg': 'Invalid request.'})
 
