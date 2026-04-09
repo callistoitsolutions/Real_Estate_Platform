@@ -891,204 +891,142 @@ class PGColivingProperty(models.Model):
 
 
 
+# choices.py  (or top of models.py)
+
 PROPERTY_TYPE_CHOICES = [
     ('apartment', 'Apartment'),
     ('house', 'Independent House/Villa'),
     ('floor', 'Independent Floor'),
     ('plot', 'Plot/Land'),
 ]
-
 ZONE_CHOICES = [
-    ('north', 'North Zone'),
-    ('south', 'South Zone'),
-    ('east', 'East Zone'),
-    ('west', 'West Zone'),
-    ('central', 'Central Zone'),
+    ('north', 'North Zone'), ('south', 'South Zone'),
+    ('east', 'East Zone'),   ('west', 'West Zone'), ('central', 'Central Zone'),
 ]
-
 SOCIETY_TYPE_CHOICES = [
-    ('gated', 'Gated Community'),
-    ('open', 'Open Society'),
-    ('cooperative', 'Co-operative Housing'),
-    ('apartment', 'Apartment Complex'),
+    ('gated', 'Gated Community'), ('open', 'Open Society'),
+    ('cooperative', 'Co-operative Housing'), ('apartment', 'Apartment Complex'),
 ]
-
 WATER_TYPE_CHOICES = [
-    ('municipal', 'Municipal Corporation'),
-    ('borewell', 'Borewell'),
-    ('both', 'Both'),
+    ('municipal', 'Municipal Corporation'), ('borewell', 'Borewell'), ('both', 'Both'),
 ]
-
 FURNISHING_CHOICES = [
-    ('unfurnished', 'Unfurnished'),
-    ('semi', 'Semi-Furnished'),
-    ('fully', 'Fully Furnished'),
+    ('unfurnished', 'Unfurnished'), ('semi', 'Semi-Furnished'), ('fully', 'Fully Furnished'),
 ]
-
 AGE_CHOICES = [
-    ('0-1', '0-1 Year'),
-    ('1-3', '1-3 Years'),
-    ('3-5', '3-5 Years'),
-    ('5-10', '5-10 Years'),
-    ('10+', '10+ Years'),
+    ('0-1', '0-1 Year'), ('1-3', '1-3 Years'), ('3-5', '3-5 Years'),
+    ('5-10', '5-10 Years'), ('10+', '10+ Years'),
 ]
-
 FACING_CHOICES = [
-    ('North', 'North'),
-    ('South', 'South'),
-    ('East', 'East'),
-    ('West', 'West'),
-    ('North-East', 'North-East'),
-    ('North-West', 'North-West'),
-    ('South-East', 'South-East'),
-    ('South-West', 'South-West'),
+    ('North','North'), ('South','South'), ('East','East'), ('West','West'),
+    ('North-East','North-East'), ('North-West','North-West'),
+    ('South-East','South-East'), ('South-West','South-West'),
 ]
-
 BHK_CHOICES = [
-    ('1rk', '1 RK'),
-    ('1bhk', '1 BHK'),
-    ('2bhk', '2 BHK'),
-    ('3bhk', '3 BHK'),
-    ('4bhk', '4 BHK'),
-    ('5+bhk', '5+ BHK'),
+    ('1rk','1 RK'), ('1bhk','1 BHK'), ('2bhk','2 BHK'),
+    ('3bhk','3 BHK'), ('4bhk','4 BHK'), ('5+bhk','5+ BHK'),
 ]
-
 OWNERSHIP_TYPE_CHOICES = [
-    ('freehold', 'Freehold'),
-    ('leasehold', 'Leasehold'),
-    ('cooperative', 'Co-operative'),
-    ('poa', 'Power of Attorney'),
+    ('freehold','Freehold'), ('leasehold','Leasehold'),
+    ('cooperative','Co-operative'), ('poa','Power of Attorney'),
 ]
-
 NUM_OWNERS_CHOICES = [
-    ('1', 'Single Owner'),
-    ('2', '2 Owners'),
-    ('3', '3 Owners'),
-    ('4+', '4+ Owners'),
+    ('1','Single Owner'), ('2','2 Owners'), ('3','3 Owners'), ('4+','4+ Owners'),
 ]
-
-NEGOTIABLE_CHOICES = [
-    ('yes', 'Yes'),
-    ('no', 'No - Fixed'),
-]
-
-BROKERAGE_CHOICES = [
-    ('Yes', 'Yes'),
-    ('No', 'No'),
-]
-
+NEGOTIABLE_CHOICES    = [('yes','Yes'), ('no','No - Fixed')]
+BROKERAGE_CHOICES     = [('Yes','Yes'), ('No','No')]
 BROKERAGE_PERCENTAGE_CHOICES = [
-    ('1%', '1%'),
-    ('1.5%', '1.5%'),
-    ('2%', '2%'),
-    ('Negotiable', 'Negotiable'),
-    ('Manual', 'Enter Manually'),
+    ('1%','1%'), ('1.5%','1.5%'), ('2%','2%'),
+    ('Negotiable','Negotiable'), ('Manual','Enter Manually'),
 ]
-
 RESIDENTIAL_STATUS_CHOICES = [
-    ('resident', 'Resident'),
-    ('nri', 'NRI'),
-    ('pio', 'PIO'),
+    ('resident','Resident'), ('nri','NRI'), ('pio','PIO'),
 ]
-
 UPLOADER_ROLE_CHOICES = [
-    ('admin', 'Admin'),
-    ('agent', 'Agent'),
-    ('staff', 'Staff'),
-    ('owner', 'Owner'),
+    ('admin','Admin'), ('agent','Agent'), ('staff','Staff'), ('owner','Owner'),
 ]
 
-
-# ─────────────────────────────────────────────
-#  Main Model
-# ─────────────────────────────────────────────
 
 class ResaleResidentialProperty(models.Model):
 
     # ── Basic Information ──────────────────────────────────
-    title           = models.CharField(max_length=255)
-    property_type   = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES)
-    zone            = models.CharField(max_length=20, choices=ZONE_CHOICES)
-    society_type    = models.CharField(max_length=20, choices=SOCIETY_TYPE_CHOICES)
-    water_type      = models.CharField(max_length=20, choices=WATER_TYPE_CHOICES)
-    furnishing_type = models.CharField(max_length=20, choices=FURNISHING_CHOICES)
-    age_of_property = models.CharField(max_length=10, choices=AGE_CHOICES)
-    facing          = models.CharField(max_length=15, choices=FACING_CHOICES)
-    available_from  = models.DateField(null=True, blank=True)
+    title            = models.CharField(max_length=255)          # hidden field in form ✓
+    property_type    = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES)
+    zone             = models.CharField(max_length=20, choices=ZONE_CHOICES)
+    society_type     = models.CharField(max_length=20, choices=SOCIETY_TYPE_CHOICES)
+    water_type       = models.CharField(max_length=20, choices=WATER_TYPE_CHOICES)
+    furnishing_type  = models.CharField(max_length=20, choices=FURNISHING_CHOICES)
+    age_of_property  = models.CharField(max_length=10, choices=AGE_CHOICES)
+    facing           = models.CharField(max_length=15, choices=FACING_CHOICES)
+    available_from   = models.DateField(null=True, blank=True)
 
     # ── Property Configuration ─────────────────────────────
-    bhk             = models.CharField(max_length=10, choices=BHK_CHOICES)
-    bathrooms       = models.PositiveIntegerField(default=1)
-    balconies       = models.PositiveIntegerField(default=0)
-    covered_parking = models.PositiveIntegerField(default=0)
-    open_parking    = models.PositiveIntegerField(default=0)
+    bhk              = models.CharField(max_length=10, choices=BHK_CHOICES)
+    bathrooms        = models.PositiveIntegerField(default=1)
+    balconies        = models.PositiveIntegerField(default=0)
+    covered_parking  = models.PositiveIntegerField(default=0)
+    open_parking     = models.PositiveIntegerField(default=0)
 
     # ── Property Measurements ──────────────────────────────
-    builtup_area    = models.DecimalField(max_digits=10, decimal_places=2)
-    carpet_area     = models.DecimalField(max_digits=10, decimal_places=2)
-    plot_area       = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    floor_no        = models.PositiveIntegerField()
-    total_floors    = models.PositiveIntegerField()
+    builtup_area     = models.DecimalField(max_digits=10, decimal_places=2)
+    carpet_area      = models.DecimalField(max_digits=10, decimal_places=2)
+    plot_area        = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    floor_no         = models.PositiveIntegerField()
+    total_floors     = models.PositiveIntegerField()
 
-    # ── Ownership & Legal Details ──────────────────────────
-    ownership_type      = models.CharField(max_length=20, choices=OWNERSHIP_TYPE_CHOICES)
-    num_owners          = models.CharField(max_length=5, choices=NUM_OWNERS_CHOICES)
+    # ── Ownership & Legal ──────────────────────────────────
+    ownership_type       = models.CharField(max_length=20, choices=OWNERSHIP_TYPE_CHOICES)
+    num_owners           = models.CharField(max_length=5, choices=NUM_OWNERS_CHOICES)
 
-    has_loan            = models.BooleanField(default=False)
-    loan_amount         = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
+    # FIX: was BooleanField — use CharField to match 'yes'/'no' from radio buttons
+    has_loan             = models.CharField(max_length=3, default='no')
+    loan_amount          = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
 
-    has_tenants         = models.BooleanField(default=False)
-    tenant_details      = models.TextField(blank=True, null=True)
+    has_tenants          = models.CharField(max_length=3, default='no')
+    tenant_details       = models.TextField(blank=True, null=True)
 
-    has_legal_dispute   = models.BooleanField(default=False)
-    dispute_details     = models.TextField(blank=True, null=True)
+    has_legal_dispute    = models.CharField(max_length=3, default='no')
+    dispute_details      = models.TextField(blank=True, null=True)
 
-    has_tax_due         = models.BooleanField(default=False)
-    pending_tax_amount  = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    has_tax_due          = models.CharField(max_length=3, default='no')
+    pending_tax_amount   = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
-    # ── Pricing Details ────────────────────────────────────
-    expected_price      = models.DecimalField(max_digits=14, decimal_places=2)
-    price_per_sqft      = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    is_negotiable       = models.CharField(max_length=5, choices=NEGOTIABLE_CHOICES, default='yes')
+    # ── Pricing ────────────────────────────────────────────
+    expected_price       = models.DecimalField(max_digits=14, decimal_places=2)
+    price_per_sqft       = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    is_negotiable        = models.CharField(max_length=5, choices=NEGOTIABLE_CHOICES, default='yes')
 
     brokerage            = models.CharField(max_length=5, choices=BROKERAGE_CHOICES, blank=True, null=True)
     brokerage_percentage = models.CharField(max_length=20, choices=BROKERAGE_PERCENTAGE_CHOICES, blank=True, null=True)
     manual_brokerage     = models.CharField(max_length=20, blank=True, null=True)
 
-    description         = models.TextField()
+    description          = models.TextField()
 
     # ── Media ──────────────────────────────────────────────
-    # Multiple images handled via separate model below (ResalePropertyImage)
-    floor_plan          = models.ImageField(upload_to='properties/floor_plans/', null=True, blank=True)
-    property_video      = models.FileField(upload_to='properties/videos/', null=True, blank=True)
+    floor_plan           = models.ImageField(upload_to='properties/floor_plans/', null=True, blank=True)
+    property_video       = models.FileField(upload_to='properties/videos/', null=True, blank=True)
 
-    # ── Nearby Facilities (stored as comma-separated values) ──
-    # Options: schools, hospitals, transport, shopping
-    nearby_facilities   = models.CharField(max_length=255, blank=True, null=True,
-                            help_text="Comma-separated: schools, hospitals, transport, shopping")
-
-    # ── Property Amenities (stored as comma-separated values) ──
-    # Options: gym, pool, garden, playground, security, power, lift, clubhouse
-    amenities           = models.CharField(max_length=255, blank=True, null=True,
-                            help_text="Comma-separated: gym, pool, garden, playground, security, power, lift, clubhouse")
+    # ── Facilities & Amenities ─────────────────────────────
+    nearby_facilities    = models.CharField(max_length=255, blank=True, null=True)
+    amenities            = models.CharField(max_length=255, blank=True, null=True)
 
     # ── Address ────────────────────────────────────────────
-    city            = models.CharField(max_length=100)
-    locality        = models.CharField(max_length=150)
-    building_name   = models.CharField(max_length=200, blank=True, null=True)
-    complete_address = models.TextField()
+    city                 = models.CharField(max_length=100)
+    locality             = models.CharField(max_length=150)
+    building_name        = models.CharField(max_length=200, blank=True, null=True)
+    complete_address     = models.TextField()
 
-    # ── Owner Contact Information ──────────────────────────
-    owner_name          = models.CharField(max_length=150)
-    owner_contact       = models.CharField(max_length=10)
-    owner_email         = models.EmailField()
-    residential_status  = models.CharField(max_length=10, choices=RESIDENTIAL_STATUS_CHOICES)
+    # ── Owner ──────────────────────────────────────────────
+    owner_name           = models.CharField(max_length=150)
+    owner_contact        = models.CharField(max_length=10)
+    owner_email          = models.EmailField()
+    residential_status   = models.CharField(max_length=10, choices=RESIDENTIAL_STATUS_CHOICES)
 
-    # ── Listing Uploaded By ────────────────────────────────
-    uploaded_by_name    = models.CharField(max_length=150, blank=True, null=True)
-    uploaded_by_email   = models.EmailField(blank=True, null=True)
-    uploaded_by_contact = models.CharField(max_length=15, blank=True, null=True)
-    uploaded_by_role    = models.CharField(max_length=20, choices=UPLOADER_ROLE_CHOICES, blank=True, null=True)
+    # ── Uploaded By ────────────────────────────────────────
+    uploaded_by_name     = models.CharField(max_length=150, blank=True, null=True)
+    uploaded_by_email    = models.EmailField(blank=True, null=True)
+    uploaded_by_contact  = models.CharField(max_length=15, blank=True, null=True)
+    uploaded_by_role     = models.CharField(max_length=20, choices=UPLOADER_ROLE_CHOICES, blank=True, null=True)
 
     # ── Timestamps ─────────────────────────────────────────
     created_at  = models.DateTimeField(auto_now_add=True)
@@ -1103,16 +1041,12 @@ class ResaleResidentialProperty(models.Model):
         return f"{self.title} - {self.city} ({self.bhk})"
 
     def save(self, *args, **kwargs):
-        """Auto-calculate price_per_sqft before saving."""
         if self.expected_price and self.builtup_area and self.builtup_area > 0:
-            self.price_per_sqft = round(self.expected_price / self.builtup_area, 2)
+            self.price_per_sqft = round(float(self.expected_price) / float(self.builtup_area), 2)
         super().save(*args, **kwargs)
 
 
-# ─────────────────────────────────────────────
-#  Related Model: Multiple Property Images
-# ─────────────────────────────────────────────
-
+# ── Separate model for multiple property images ────────
 class ResalePropertyImage(models.Model):
     property    = models.ForeignKey(
                     ResaleResidentialProperty,
@@ -1121,10 +1055,6 @@ class ResalePropertyImage(models.Model):
                   )
     image       = models.ImageField(upload_to='properties/images/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name        = 'Property Image'
-        verbose_name_plural = 'Property Images'
 
     def __str__(self):
         return f"Image for {self.property.title}"

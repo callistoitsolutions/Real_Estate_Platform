@@ -1070,6 +1070,13 @@ def residential_resale_list(request):
 
 ########### Views start for resale commercial property list ######################
 
+
+
+from django.shortcuts import render
+from django.db.models import Count, Avg
+from django.utils import timezone
+import json
+
 def commercial_resale_list(request):
 
     # ── Session check ─────────────────────────────────────
@@ -1099,72 +1106,87 @@ def commercial_resale_list(request):
     props = CommercialProperty.objects.all().order_by('-id')
 
     # ── Stat cards ─────────────────────────────────────────
-    total_properties    = props.count()
-    active_properties   = props.filter(is_active=True).count()
-    inactive_properties = props.filter(is_active=False).count()
-    office_count        = props.filter(property_type='office').count()
-    shop_count          = props.filter(property_type='shop').count()
-    warehouse_count     = props.filter(property_type='warehouse').count()
-    industrial_count    = props.filter(property_type='industrial').count()
-    avg_price           = props.aggregate(Avg('expected_price'))['expected_price__avg']
+    total_properties = props.count()
+
+    office_count     = props.filter(property_type='office-space').count()
+    shop_count       = props.filter(property_type='shop').count()
+    warehouse_count  = props.filter(property_type='warehouse').count()
+    industrial_count = props.filter(property_type='industrial').count()
+    land_count       = props.filter(property_type='land').count()
+
+    # ✅ FIXED (use correct field)
+    avg_price = props.aggregate(
+        Avg('expected_rent')
+    )['expected_rent__avg']
 
     # ── Chart 1: Property Type Pie ─────────────────────────
     type_map = {
-        'office'    : 'Office Space',
-        'shop'      : 'Shop/Showroom',
-        'warehouse' : 'Warehouse',
-        'industrial': 'Industrial',
-        'land'      : 'Land',
+        'office-space': 'Office Space',
+        'shop'        : 'Shop/Showroom',
+        'warehouse'   : 'Warehouse',
+        'industrial'  : 'Industrial',
+        'land'        : 'Land',
     }
-    type_qs     = props.values('property_type').annotate(count=Count('id'))
-    type_labels = [type_map.get(x['property_type'], x['property_type']) for x in type_qs]
-    type_data   = [x['count'] for x in type_qs]
 
-    # ── Chart 2: Properties Added Per Month (current year) ─
-    from django.utils import timezone
+    type_qs = props.values('property_type').annotate(count=Count('id'))
+
+    type_labels = [
+        type_map.get(x['property_type'], x['property_type'])
+        for x in type_qs
+    ]
+    type_data = [x['count'] for x in type_qs]
+
+    # ── Chart 2: Monthly Data (Current Year) ───────────────
     current_year = timezone.now().year
     monthly_data = [0] * 12
-    for x in props.filter(created_at__year=current_year)\
-                  .values('created_at__month')\
-                  .annotate(count=Count('id')):
+
+    monthly_qs = props.filter(
+        created_at__year=current_year
+    ).values('created_at__month').annotate(count=Count('id'))
+
+    for x in monthly_qs:
         monthly_data[x['created_at__month'] - 1] = x['count']
 
-    # ── Chart 3: Zone Distribution Bar ────────────────────
+    # ── Chart 3: Zone Distribution ─────────────────────────
     zone_map = {
-        'industrial' : 'Industrial',
-        'commercial' : 'Commercial',
-        'residential': 'Residential',
-        'sez'        : 'SEZ',
+        'industrial'      : 'Industrial',
+        'commercial'      : 'Commercial',
+        'residential'     : 'Residential',
+        'special-economic': 'SEZ',
     }
-    zone_qs     = props.values('zone_type').annotate(count=Count('id'))
-    zone_labels = [zone_map.get(x['zone_type'], x['zone_type']) for x in zone_qs]
-    zone_data   = [x['count'] for x in zone_qs]
+
+    zone_qs = props.values('zone_type').annotate(count=Count('id'))
+
+    zone_labels = [
+        zone_map.get(x['zone_type'], x['zone_type'])
+        for x in zone_qs
+    ]
+    zone_data = [x['count'] for x in zone_qs]
 
     # ── Context ────────────────────────────────────────────
     context = {
-        # session objects (used by your base template / header)
-        'admin_obj'          : admin_obj,
-        'user_obj'           : user_obj,
+        # user/session
+        'admin_obj': admin_obj,
+        'user_obj' : user_obj,
 
-        # table data
-        'commercial_list'    : props,
+        # table
+        'commercial_list': props,
 
-        # stat cards
-        'total_properties'   : total_properties,
-        'active_properties'  : active_properties,
-        'inactive_properties': inactive_properties,
-        'office_count'       : office_count,
-        'shop_count'         : shop_count,
-        'warehouse_count'    : warehouse_count,
-        'industrial_count'   : industrial_count,
-        'avg_price'          : avg_price,
+        # stats
+        'total_properties': total_properties,
+        'office_count'    : office_count,
+        'shop_count'      : shop_count,
+        'warehouse_count' : warehouse_count,
+        'industrial_count': industrial_count,
+        'land_count'      : land_count,
+        'avg_price'       : avg_price,
 
         # charts
-        'chart_type_labels'  : json.dumps(type_labels),
-        'chart_type_data'    : json.dumps(type_data),
-        'chart_monthly_data' : json.dumps(monthly_data),
-        'chart_zone_labels'  : json.dumps(zone_labels),
-        'chart_zone_data'    : json.dumps(zone_data),
+        'chart_type_labels' : json.dumps(type_labels),
+        'chart_type_data'   : json.dumps(type_data),
+        'chart_monthly_data': json.dumps(monthly_data),
+        'chart_zone_labels' : json.dumps(zone_labels),
+        'chart_zone_data'   : json.dumps(zone_data),
     }
 
     return render(request, 'admin_user/Reports/Resale/commercial_list.html', context)
@@ -2926,6 +2948,12 @@ def rental_residential_add(request):
 
 
 
+import csv
+import json
+from django.db.models import Count, Avg, Max, Min, Q
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from django.http import HttpResponse
 
 
 def rental_list(request):
@@ -2937,6 +2965,7 @@ def rental_list(request):
     admin_obj = Admin_Login.objects.get(id=session_id)
     search_query = request.GET.get('search', '').strip()
 
+    # ── Base queryset ──
     try:
         properties = RentalResidentialProperty.objects.all().order_by('-id')
         print("✅ STEP 1 - properties count:", properties.count())
@@ -2944,6 +2973,7 @@ def rental_list(request):
         print("❌ STEP 1 FAILED:", e)
         properties = RentalResidentialProperty.objects.none()
 
+    # ── Search filter ──
     if search_query:
         try:
             properties = properties.filter(
@@ -2960,6 +2990,7 @@ def rental_list(request):
             print("❌ STEP 2 FAILED:", e)
             properties = RentalResidentialProperty.objects.none()
 
+    # ── CSV Download ──
     if request.GET.get('download') == 'csv':
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="rental_properties.csv"'
@@ -3001,6 +3032,7 @@ def rental_list(request):
             ])
         return response
 
+    # ── Pagination ──
     try:
         paginator = Paginator(properties, 10)
         page_number = request.GET.get('page', 1)
@@ -3012,18 +3044,161 @@ def rental_list(request):
 
     total_count = properties.count()
     print("✅ STEP 4 - total_count:", total_count)
-    print("✅ STEP 5 - rendering template with page_obj:", page_obj)
 
+    # ════════════════════════════════════════════════
+    # STATS — computed on the FULL unfiltered queryset
+    # so cards/charts always show global numbers
+    # ════════════════════════════════════════════════
+    all_props = RentalResidentialProperty.objects.all()
+
+    # ── Summary stat cards ──
+    active_count = all_props.exclude(
+        possession_status__isnull=True
+    ).exclude(possession_status='').count()
+
+    furnished_count = all_props.filter(
+        furnishing_status__iexact='Furnished'
+    ).count()
+
+    available_count = all_props.filter(
+        possession_status__iexact='Ready to Move'
+    ).count()
+
+    city_count = all_props.exclude(
+        city__isnull=True
+    ).exclude(city='').values('city').distinct().count()
+
+    # ── Rent aggregates (ignore nulls) ──
+    rent_stats = all_props.exclude(
+        monthly_rent__isnull=True
+    ).aggregate(
+        avg_rent=Avg('monthly_rent'),
+        max_rent=Max('monthly_rent'),
+        min_rent=Min('monthly_rent'),
+    )
+    avg_rent   = rent_stats['avg_rent']
+    max_rent   = rent_stats['max_rent']
+    min_rent   = rent_stats['min_rent']
+
+    # ── Deposit average ──
+    deposit_stats = all_props.exclude(
+        security_deposit__isnull=True
+    ).aggregate(avg_deposit=Avg('security_deposit'))
+    avg_deposit = deposit_stats['avg_deposit']
+
+    # ── Average built-up area ──
+    area_stats = all_props.exclude(
+        built_up_area__isnull=True
+    ).aggregate(avg_area=Avg('built_up_area'))
+    avg_area = area_stats['avg_area']
+
+    # ── With owner info ──
+    with_owner_count = all_props.exclude(
+        owner_name__isnull=True
+    ).exclude(owner_name='').count()
+
+    # ── With at least one image ──
+    with_images_count = all_props.exclude(
+        image1__isnull=True
+    ).exclude(image1='').count()
+
+    # ════════════════════════════════════════════════
+    # CHART DATA
+    # ════════════════════════════════════════════════
+
+    # ── Chart 1: BHK Distribution (Doughnut) ──
+    bhk_qs = (
+        all_props
+        .exclude(bhk_type__isnull=True)
+        .exclude(bhk_type='')
+        .values('bhk_type')
+        .annotate(count=Count('id'))
+        .order_by('-count')
+    )
+    bhk_labels = json.dumps([item['bhk_type'] for item in bhk_qs])
+    bhk_data   = json.dumps([item['count']    for item in bhk_qs])
+
+    # ── Chart 2: Rent Range Distribution (Bar) ──
+    # Bucket properties into rent brackets
+    rent_buckets = [
+        ('Under ₹5k',    0,      5000),
+        ('₹5k–10k',      5000,   10000),
+        ('₹10k–20k',     10000,  20000),
+        ('₹20k–30k',     20000,  30000),
+        ('₹30k–50k',     30000,  50000),
+        ('₹50k–1L',      50000,  100000),
+        ('Above ₹1L',    100000, 999999999),
+    ]
+    rent_range_labels = json.dumps([b[0] for b in rent_buckets])
+    rent_range_data   = json.dumps([
+        all_props.filter(
+            monthly_rent__gte=lo,
+            monthly_rent__lt=hi
+        ).count()
+        for _, lo, hi in rent_buckets
+    ])
+
+    # ── Chart 3: Furnishing Status (Doughnut) ──
+    furnish_qs = (
+        all_props
+        .exclude(furnishing_status__isnull=True)
+        .exclude(furnishing_status='')
+        .values('furnishing_status')
+        .annotate(count=Count('id'))
+        .order_by('-count')
+    )
+    furnishing_labels = json.dumps([item['furnishing_status'] for item in furnish_qs])
+    furnishing_data   = json.dumps([item['count']             for item in furnish_qs])
+
+    # ── Chart 4: Property Type (Bar) ──
+    prop_type_qs = (
+        all_props
+        .exclude(property_type__isnull=True)
+        .exclude(property_type='')
+        .values('property_type')
+        .annotate(count=Count('id'))
+        .order_by('-count')
+    )
+    prop_type_labels = json.dumps([item['property_type'] for item in prop_type_qs])
+    prop_type_data   = json.dumps([item['count']         for item in prop_type_qs])
+
+    # ════════════════════════════════════════════════
+    # CONTEXT
+    # ════════════════════════════════════════════════
     context = {
+        # Auth
         'admin_obj': admin_obj,
+
+        # Table
         'page_obj': page_obj,
         'search_query': search_query,
         'total_count': total_count,
+
+        # Stat cards
+        'active_count':      active_count,
+        'furnished_count':   furnished_count,
+        'available_count':   available_count,
+        'city_count':        city_count,
+        'avg_rent':          avg_rent,
+        'max_rent':          max_rent,
+        'min_rent':          min_rent,
+        'avg_deposit':       avg_deposit,
+        'avg_area':          avg_area,
+        'with_owner_count':  with_owner_count,
+        'with_images_count': with_images_count,
+
+        # Chart data (JSON strings — safe to dump into JS variables)
+        'bhk_labels':         bhk_labels,
+        'bhk_data':           bhk_data,
+        'rent_range_labels':  rent_range_labels,
+        'rent_range_data':    rent_range_data,
+        'furnishing_labels':  furnishing_labels,
+        'furnishing_data':    furnishing_data,
+        'prop_type_labels':   prop_type_labels,
+        'prop_type_data':     prop_type_data,
     }
 
-    print("✅ STEP 6 - context keys:", list(context.keys()))
-    print("✅ STEP 7 - page_obj in context:", context['page_obj'])
-
+    print("✅ STEP 5 - context keys:", list(context.keys()))
     return render(request, 'admin_user/Reports/Rental/rental_list.html', context)
 
 import os

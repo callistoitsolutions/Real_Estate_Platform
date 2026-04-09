@@ -869,7 +869,7 @@
         <div class="section-body">
             <div class="row">
 
-                <div class="form-group mt-2">
+                <div class="form-group mt-2" hidden>
                     <label class="form-label">Property Title <span class="required">*</span></label>
                     <input type="text" class="form-control" id="res_title" name="title"
                         placeholder="e.g., Spacious 3BHK Apartment in Prime Location" required>
@@ -1316,42 +1316,43 @@
     <!-- ═══════════════════════════════════════════
          SECTION 6: Property Images
     ════════════════════════════════════════════ -->
-    <div class="form-section">
-        <div class="section-header">
-            <i class="fas fa-images"></i>
-            Property Images
-        </div>
-        <div class="image-upload-area" id="uploadArea">
-            <input type="file" id="imageInput" name="property_images" multiple accept="image/*"
-                style="display: none;">
-            <div class="upload-icon">
-                <i class="fas fa-cloud-upload-alt"></i>
-            </div>
-            <div class="upload-text">Click or Drag Images Here</div>
-            <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG)</div>
-        </div>
-        <div class="image-preview" id="imagePreview"></div>
+  <!-- Section 6: Property Images -->
+<div class="form-section">
+    <div class="section-header">
+        <i class="fas fa-images"></i>
+        Property Images
+    </div>
+    <div class="image-upload-area" id="uploadArea">
+        <input type="file" id="imageInput" name="property_images" multiple accept="image/*"
+            style="display: none;">
+        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+        <div class="upload-text">Click or Drag Images Here</div>
+        <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG)</div>
+    </div>
+    <div class="image-preview" id="imagePreview"></div>
 
-        <div class="row mt-2">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fa-solid fa-camera"></i> Upload Floor Plan <span class="required">*</span>
-                    </label>
-                    <input type="file" name="floor_plan" accept="image/*">
-                </div>
-            </div>
+    <!-- Hidden container that holds actual File objects for form submission -->
+    <div id="fileListContainer"></div>
 
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fa-solid fa-camera"></i> Upload Video on Social Media <span class="required">*</span>
-                    </label>
-                    <input type="file" name="property_video" accept="video/*">
-                </div>
+    <div class="row mt-2">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fa-solid fa-camera"></i> Upload Floor Plan <span class="required">*</span>
+                </label>
+                <input type="file" name="floor_plan" accept="image/*">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fa-solid fa-camera"></i> Upload Video
+                </label>
+                <input type="file" name="property_video" accept="video/*">
             </div>
         </div>
     </div>
+</div>
 
     <!-- ═══════════════════════════════════════════
          SECTION 7: Nearby Facilities & Amenities
@@ -1566,44 +1567,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    const brokerageSelect = document.getElementById("brokerageSelect");
-    const brokerageSection = document.getElementById("brokerageSection");
-
-    const brokeragePercentage = document.getElementById("brokeragePercentage");
-    const manualBrokerage = document.getElementById("manualBrokerage");
-
-
-    // Show brokerage percentage section
-    brokerageSelect.addEventListener("change", function () {
-
-        if (this.value === "Yes") {
-            brokerageSection.style.display = "block";
-        } else {
-            brokerageSection.style.display = "none";
-            manualBrokerage.style.display = "none";
-        }
-
-    });
-
-
-    // Show manual brokerage input
-    brokeragePercentage.addEventListener("change", function () {
-
-        if (this.value === "Manual") {
-            manualBrokerage.style.display = "block";
-        } else {
-            manualBrokerage.style.display = "none";
-        }
-
-    });
-
-});
-
-</script>
-<script>
     window.onload = function () {
         if (CKEDITOR.instances.resale_residential_desc) {
             CKEDITOR.instances.resale_residential_desc.destroy();
@@ -1613,15 +1576,13 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script>
-
     $("#Resale").addClass("active");
 
-    // Sidebar Toggle for Desktop and Mobile
+    // ── Sidebar Toggle ───────────────────────────────────────
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
         const windowWidth = window.innerWidth;
-
         if (windowWidth <= 768) {
             sidebar.classList.toggle('active');
             overlay.classList.toggle('active');
@@ -1631,7 +1592,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Close Sidebar (Mobile)
     function closeSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -1640,36 +1600,21 @@ document.addEventListener("DOMContentLoaded", function () {
         document.body.style.overflow = '';
     }
 
-    // Submenu Toggle - FIXED VERSION FOR MOBILE
     function toggleSubmenu(event, element) {
         event.preventDefault();
         event.stopPropagation();
-
         const submenu = element.nextElementSibling;
-        const allSubmenus = document.querySelectorAll('.submenu');
-        const allDropdownLinks = document.querySelectorAll('.menu-link');
-
-        allSubmenus.forEach(sub => {
-            if (sub !== submenu) {
-                sub.classList.remove('active');
-            }
+        document.querySelectorAll('.submenu').forEach(sub => {
+            if (sub !== submenu) sub.classList.remove('active');
         });
-
-        allDropdownLinks.forEach(link => {
-            if (link !== element) {
-                link.classList.remove('dropdown-open');
-            }
+        document.querySelectorAll('.menu-link').forEach(link => {
+            if (link !== element) link.classList.remove('dropdown-open');
         });
-
         submenu.classList.toggle('active');
         element.classList.toggle('dropdown-open');
-
         return false;
     }
 
-
-
-    // Filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -1677,152 +1622,170 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Close sidebar on window resize
     window.addEventListener('resize', function () {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
-        const windowWidth = window.innerWidth;
-
-        if (windowWidth > 768) {
+        if (window.innerWidth > 768) {
             sidebar.classList.remove('active');
             overlay.classList.remove('active');
             document.body.style.overflow = '';
         }
     });
 
-    // Handle clicks on submenu links and regular menu links
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.submenu-link').forEach(link => {
-            link.addEventListener('click', function (e) {
-                if (window.innerWidth <= 768) {
-                    setTimeout(() => {
-                        closeSidebar();
-                    }, 200);
-                }
-            });
-        });
-
-        document.querySelectorAll('.menu-link').forEach(link => {
-            if (!link.hasAttribute('onclick')) {
-                link.addEventListener('click', function (e) {
-                    if (window.innerWidth <= 768) {
-                        setTimeout(() => {
-                            closeSidebar();
-                        }, 200);
-                    }
-                });
-            }
-        });
-    });
-
-    // Prevent body scroll when sidebar is open on mobile
     document.getElementById('sidebar').addEventListener('transitionend', function () {
         if (this.classList.contains('active')) {
             document.body.style.overflow = 'hidden';
         }
     });
 
-    // Image Upload Functionality
-    const uploadArea = document.getElementById('uploadArea');
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
-    let selectedFiles = [];
 
-    uploadArea.addEventListener('click', () => imageInput.click());
+    document.addEventListener("DOMContentLoaded", function () {
 
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.classList.add('dragover');
-    });
-
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.classList.remove('dragover');
-    });
-
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-        handleFiles(e.dataTransfer.files);
-    });
-
-    imageInput.addEventListener('change', (e) => {
-        handleFiles(e.target.files);
-    });
-
-    function handleFiles(files) {
-        const fileArray = Array.from(files);
-        if (selectedFiles.length + fileArray.length > 10) {
-            alert('Maximum 10 images allowed');
-            return;
-        }
-
-        fileArray.forEach(file => {
-            if (file.type.startsWith('image/')) {
-                selectedFiles.push(file);
-                displayImage(file);
+        // ── Sidebar submenu/menu links (mobile close) ────────
+        document.querySelectorAll('.submenu-link').forEach(link => {
+            link.addEventListener('click', function () {
+                if (window.innerWidth <= 768) setTimeout(() => closeSidebar(), 200);
+            });
+        });
+        document.querySelectorAll('.menu-link').forEach(link => {
+            if (!link.hasAttribute('onclick')) {
+                link.addEventListener('click', function () {
+                    if (window.innerWidth <= 768) setTimeout(() => closeSidebar(), 200);
+                });
             }
         });
-    }
 
-    function displayImage(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const div = document.createElement('div');
-            div.className = 'preview-item';
-            div.innerHTML = `
+
+        // ── Brokerage Toggle ─────────────────────────────────
+        const brokerageSelect     = document.getElementById("brokerageSelect");
+        const brokerageSection    = document.getElementById("brokerageSection");
+        const brokeragePercentage = document.getElementById("brokeragePercentage");
+        const manualBrokerage     = document.getElementById("manualBrokerage");
+
+        brokerageSelect.addEventListener("change", function () {
+            if (this.value === "Yes") {
+                brokerageSection.style.display = "block";
+            } else {
+                brokerageSection.style.display = "none";
+                manualBrokerage.style.display  = "none";
+            }
+        });
+
+        brokeragePercentage.addEventListener("change", function () {
+            manualBrokerage.style.display = (this.value === "Manual") ? "block" : "none";
+        });
+
+
+        // ── Multi-Image Upload ───────────────────────────────
+        const uploadArea   = document.getElementById('uploadArea');
+        const imageInput   = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        let selectedFiles  = [];
+
+        uploadArea.addEventListener('click', () => imageInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+        imageInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            const fileArray = Array.from(files);
+            if (selectedFiles.length + fileArray.length > 10) {
+                alert('Maximum 10 images allowed');
+                return;
+            }
+            fileArray.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    selectedFiles.push(file);
+                    displayImage(file);
+                }
+            });
+            syncFileInput();
+        }
+
+        function displayImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.dataset.fileName = file.name;
+                div.innerHTML = `
                     <img src="${e.target.result}" alt="Preview">
-                    <button type="button" class="remove-image" onclick="removeImage(this, '${file.name}')">
+                    <button type="button" class="remove-image"
+                        onclick="removeImage(this, '${file.name}')">
                         <i class="fas fa-times"></i>
-                    </button>
-                `;
-            imagePreview.appendChild(div);
+                    </button>`;
+                imagePreview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // exposed globally so the inline onclick can find it
+        window.removeImage = function(button, fileName) {
+            selectedFiles = selectedFiles.filter(f => f.name !== fileName);
+            button.closest('.preview-item').remove();
+            syncFileInput();
         };
-        reader.readAsDataURL(file);
-    }
 
-    function removeImage(button, fileName) {
-        selectedFiles = selectedFiles.filter(file => file.name !== fileName);
-        button.parentElement.remove();
-    }
+        function syncFileInput() {
+            // Keeps the actual <input type="file"> in sync so Django receives all files
+            const dt = new DataTransfer();
+            selectedFiles.forEach(f => dt.items.add(f));
+            imageInput.files = dt.files;
+        }
 
-    // RESIDENTIAL FORM
 
-    // Residential Loan
-    document.querySelectorAll('input[name="res_loan"]').forEach(radio => {
-        radio.addEventListener('change', function () {
-            document.getElementById('res_loan_amount_section').style.display =
-                (this.value === 'yes') ? 'block' : 'none';
+        // ── RESIDENTIAL Legal Section Toggles ───────────────
+        //    These name values match the HTML: has_loan, has_tenants,
+        //    has_legal_dispute, has_tax_due
+
+        // Loan on Property
+        document.querySelectorAll('input[name="has_loan"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('res_loan_amount_section').style.display =
+                    (this.value === 'yes') ? 'block' : 'none';
+            });
         });
-    });
 
-    // Tenants
-    document.querySelectorAll('input[name="res_tenants"]').forEach(radio => {
-        radio.addEventListener('change', function () {
-            document.getElementById('res_tenant_details_section').style.display =
-                (this.value === 'yes') ? 'block' : 'none';
+        // Existing Tenants
+        document.querySelectorAll('input[name="has_tenants"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('res_tenant_details_section').style.display =
+                    (this.value === 'yes') ? 'block' : 'none';
+            });
         });
-    });
 
-    // Dispute
-    document.querySelectorAll('input[name="res_dispute"]').forEach(radio => {
-        radio.addEventListener('change', function () {
-            document.getElementById('res_dispute_details_section').style.display =
-                (this.value === 'yes') ? 'block' : 'none';
+        // Legal Dispute
+        document.querySelectorAll('input[name="has_legal_dispute"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('res_dispute_details_section').style.display =
+                    (this.value === 'yes') ? 'block' : 'none';
+            });
         });
-    });
 
-    // Tax Due
-    document.querySelectorAll('input[name="res_tax_due"]').forEach(radio => {
-        radio.addEventListener('change', function () {
-            document.getElementById('res_tax_amount_section').style.display =
-                (this.value === 'yes') ? 'block' : 'none';
+        // Government Tax Dues
+        document.querySelectorAll('input[name="has_tax_due"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('res_tax_amount_section').style.display =
+                    (this.value === 'yes') ? 'block' : 'none';
+            });
         });
-    });
 
-
+    }); // end DOMContentLoaded
 
 </script>
 
 </body>
-
 </html>

@@ -1575,3 +1575,54 @@ def sponsored_ad_detail_view(request, slug):
     return render(request, "home_page/ad_detail.html", {"ad": ad, "seo": seo_page})
 
 
+
+#######################Start View Section For Rental Listing#################################
+
+
+def rent_residential(request):
+
+    return render(request, "Listing_Form/Rental_Property/rent_residential.html")
+
+
+
+def rent_commercial(request):
+
+    return render(request, "Listing_Form/Rental_Property/rent_commercial.html")
+
+def rent_pg_coliving(request):
+
+    return render(request, "Listing_Form/Rental_Property/rent_pg_coliving.html")
+
+
+#######################End View Section For Rental Listing#################################
+
+
+
+#######################Start View Section For Resale Listing#################################
+
+
+def residential_resale_form(request):
+
+    return render(request, "Listing_Form/Resale_Property/residential_resale_form.html")
+
+
+
+def resale_commercial_form(request):
+
+    return render(request, "Listing_Form/Resale_Property/resale_commercial_form.html")
+
+def resale_agricultural_form(request):
+
+    return render(request, "Listing_Form/Resale_Property/resale_agricultural_form.html")
+
+
+def resale_plot_form(request):
+
+    return render(request, "Listing_Form/Resale_Property/resale_plot_form.html")
+
+def resale_industrial_form(request):
+
+    return render(request, "Listing_Form/Resale_Property/resale_industrial_form.html")
+
+
+#######################End View Section For Resale Listing#################################

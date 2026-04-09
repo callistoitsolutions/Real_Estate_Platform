@@ -148,15 +148,29 @@ urlpatterns = [
    # path('listings/', views.listings_view, name='listings'),
 
    
-  
+
+
+    # ================= RENTAL LISTING =================
+    path('rent/residential/', views.rent_residential, name='rent_residential'),
+    path('rent/commercial/', views.rent_commercial, name='rent_commercial'),
+    path('rent/pg-coliving/', views.rent_pg_coliving, name='rent_pg_coliving'),
+
+    # ================= RESALE LISTING =================
+    path('resale/residential/', views.residential_resale_form, name='residential_resale_form'),
+    path('resale/commercial/', views.resale_commercial_form, name='resale_commercial_form'),
+    path('resale/agricultural/', views.resale_agricultural_form, name='resale_agricultural_form'),
+    path('resale/plot/', views.resale_plot_form, name='resale_plot_form'),
+    path('resale/industrial/', views.resale_industrial_form, name='resale_industrial_form'),
+
+]
 
     
     
     
     
     
-      ##############End URL SectionProperty Listing Page##########################
-]
+    
+
 
     
 

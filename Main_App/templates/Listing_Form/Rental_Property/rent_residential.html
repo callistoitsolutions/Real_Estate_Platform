@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Post Rental Residential Property — PropCRM</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+:root{
+  --pr:#f97316;--pr2:#ea580c;--sec:#0f172a;--dark:#020617;
+  --muted:#64748b;--border:#e2e8f0;--card:#fff;--bg:#f8fafc;
+  --success:#10b981;--info:#3b82f6;--warn:#f59e0b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e293b;}
+
+/* NAV */
+.topnav{background:var(--dark);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.4);}
+.logo{font-weight:900;font-size:1.2rem;color:#fff;text-decoration:none;display:flex;align-items:center;gap:6px;}
+.logo span{color:var(--pr);}
+.nav-chip{font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(249,115,22,.15);color:var(--pr);border:1px solid rgba(249,115,22,.3);}
+.nav-back{margin-left:auto;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.6);text-decoration:none;display:flex;align-items:center;gap:5px;}
+.nav-back:hover{color:var(--pr);}
+
+/* PAGE LAYOUT */
+.page-wrap{max-width:1220px;margin:0 auto;padding:28px 20px 60px;display:grid;grid-template-columns:1fr 320px;gap:24px;}
+
+/* PAGE HEADER */
+.page-head{grid-column:1/-1;margin-bottom:4px;}
+.page-head h1{font-size:1.4rem;font-weight:900;color:var(--sec);}
+.page-head p{font-size:.82rem;color:var(--muted);margin-top:4px;}
+
+/* STEPPER */
+.stepper{grid-column:1/-1;display:flex;align-items:center;gap:0;margin-bottom:8px;}
+.step-item{display:flex;align-items:center;flex:1;}
+.step-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:.78rem;font-weight:900;flex-shrink:0;border:2px solid var(--border);background:white;color:var(--muted);transition:.3s;}
+.step-circle.active{background:var(--pr);color:white;border-color:var(--pr);}
+.step-circle.done{background:var(--success);color:white;border-color:var(--success);}
+.step-label{font-size:.72rem;font-weight:700;margin-left:8px;color:var(--muted);transition:.3s;}
+.step-label.active{color:var(--pr);}
+.step-label.done{color:var(--success);}
+.step-line{flex:1;height:2px;background:var(--border);margin:0 10px;}
+.step-line.done{background:var(--success);}
+
+/* CARD */
+.form-card{background:white;border-radius:16px;border:1px solid var(--border);
+  padding:28px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.card-head{margin-bottom:22px;}
+.card-head h2{font-size:1.05rem;font-weight:900;color:var(--sec);display:flex;align-items:center;gap:8px;}
+.card-head p{font-size:.78rem;color:var(--muted);margin-top:5px;}
+
+/* SECTION DIVIDER */
+.section-divider{display:flex;align-items:center;gap:10px;margin:24px 0 16px;}
+.sd-line{flex:1;height:1px;background:var(--border);}
+.sd-label{font-size:.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;
+  background:white;padding:0 10px;}
+
+/* FORM GRID */
+.fg{display:grid;gap:16px;}
+.fg-2{grid-template-columns:1fr 1fr;}
+.fg-3{grid-template-columns:1fr 1fr 1fr;}
+.fg-4{grid-template-columns:1fr 1fr 1fr 1fr;}
+
+/* FORM FIELDS */
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:.76rem;font-weight:700;color:#374151;}
+.field label .req{color:#ef4444;margin-left:2px;}
+.field label .opt{font-size:.66rem;color:var(--muted);font-weight:400;margin-left:4px;}
+.field input,.field select,.field textarea{
+  background:var(--bg);border:1.5px solid var(--border);border-radius:9px;
+  padding:9px 13px;font-size:.84rem;color:var(--sec);transition:.2s;width:100%;}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--pr);background:white;box-shadow:0 0 0 3px rgba(249,115,22,.08);}
+.field textarea{resize:vertical;min-height:90px;line-height:1.5;}
+.field .help{font-size:.68rem;color:var(--muted);margin-top:2px;}
+.field .prefix-wrap{position:relative;}
+.field .prefix-wrap .prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  font-size:.82rem;font-weight:700;color:var(--muted);}
+.field .prefix-wrap input{padding-left:28px;}
+
+/* TOGGLE BUTTONS */
+.toggle-group{display:flex;flex-wrap:wrap;gap:8px;}
+.tgl{padding:8px 14px;border-radius:9px;font-size:.78rem;font-weight:700;cursor:pointer;
+  border:1.5px solid var(--border);background:white;color:var(--muted);transition:.2s;user-select:none;}
+.tgl:hover{border-color:var(--pr);color:var(--pr);}
+.tgl.active{background:var(--pr);color:white;border-color:var(--pr);}
+.tgl.sm{padding:6px 11px;font-size:.73rem;}
+
+/* CHECKBOX GRID */
+.check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.check-item{display:flex;align-items:center;gap:8px;padding:9px 12px;
+  background:var(--bg);border:1.5px solid var(--border);border-radius:9px;cursor:pointer;transition:.2s;}
+.check-item:hover{border-color:var(--pr);}
+.check-item input{accent-color:var(--pr);width:15px;height:15px;flex-shrink:0;}
+.check-item label{font-size:.78rem;font-weight:600;color:#374151;cursor:pointer;}
+.check-item.selected{background:#fff7ed;border-color:var(--pr);}
+
+/* PHOTO UPLOAD */
+.photo-drop{border:2px dashed var(--border);border-radius:14px;padding:40px 20px;
+  text-align:center;cursor:pointer;transition:.2s;background:var(--bg);}
+.photo-drop:hover{border-color:var(--pr);background:#fff7ed;}
+.photo-drop input{display:none;}
+.photo-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;}
+.photo-thumb{width:90px;height:80px;border-radius:9px;border:1.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:var(--bg);
+  position:relative;overflow:hidden;}
+.photo-thumb .remove-photo{position:absolute;top:3px;right:3px;width:18px;height:18px;
+  background:rgba(239,68,68,.9);color:white;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:.5rem;cursor:pointer;border:none;}
+
+/* REVIEW BOX */
+.review-box{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;}
+.rb-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:.8rem;}
+.rb-row:last-child{border-bottom:none;}
+.rb-label{color:var(--muted);font-weight:600;}
+.rb-val{font-weight:800;color:var(--sec);}
+
+/* NAVIGATION BTNS */
+.step-nav{display:flex;justify-content:space-between;margin-top:24px;gap:12px;}
+.btn{padding:10px 22px;border-radius:10px;font-weight:800;font-size:.85rem;
+  cursor:pointer;border:none;transition:.2s;display:inline-flex;align-items:center;gap:7px;}
+.btn-pr{background:var(--pr);color:white;}
+.btn-pr:hover{background:var(--pr2);transform:translateY(-1px);}
+.btn-sec{background:white;color:var(--sec);border:1.5px solid var(--border);}
+.btn-sec:hover{border-color:var(--pr);color:var(--pr);}
+.btn-lg{padding:13px 28px;font-size:.9rem;}
+
+/* SIDEBAR */
+.sidebar{display:flex;flex-direction:column;gap:16px;}
+
+/* LIVE PREVIEW CARD */
+.preview-card{background:var(--dark);border-radius:14px;padding:18px;color:white;}
+.pc-head{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.pc-mock{background:white;border-radius:10px;overflow:hidden;}
+.pcm-img{height:120px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+  display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;}
+.pcm-badges{position:absolute;top:8px;left:8px;display:flex;gap:4px;}
+.pcm-badge{font-size:.58rem;font-weight:800;padding:2px 7px;border-radius:5px;}
+.b-rent{background:rgba(255,255,255,.9);color:#0f172a;}
+.b-new{background:#3b82f6;color:white;}
+.pcm-price{position:absolute;bottom:8px;left:8px;background:rgba(15,23,42,.85);
+  color:white;font-size:.82rem;font-weight:900;padding:3px 9px;border-radius:6px;}
+.pcm-body{padding:12px;}
+.pcm-title{font-size:.84rem;font-weight:800;color:#0f172a;margin-bottom:3px;}
+.pcm-loc{font-size:.7rem;color:#64748b;margin-bottom:8px;}
+.pcm-specs{display:flex;gap:10px;font-size:.7rem;color:#475569;font-weight:600;}
+
+/* CHECKLIST */
+.checklist-card{background:white;border-radius:14px;border:1px solid var(--border);padding:16px;}
+.cl-title{font-size:.8rem;font-weight:800;color:var(--sec);margin-bottom:10px;}
+.cl-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.76rem;color:var(--muted);}
+.cl-item i{font-size:.72rem;width:16px;}
+.cl-item.done{color:var(--success);}
+.cl-item.done i{color:var(--success);}
+
+/* INFO CARDS */
+.info-card{background:white;border-radius:14px;border:1px solid var(--border);padding:14px;}
+.ic-title{font-size:.76rem;font-weight:800;color:var(--sec);margin-bottom:8px;}
+.ic-item{font-size:.73rem;color:#475569;padding:4px 0;display:flex;align-items:flex-start;gap:6px;}
+.ic-item i{color:var(--pr);font-size:.7rem;margin-top:2px;flex-shrink:0;}
+
+/* STEP DISPLAY */
+.step-content{display:none;}
+.step-content.active{display:block;}
+
+/* BADGE */
+.form-badge{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;
+  padding:4px 10px;border-radius:6px;}
+.fb-rent{background:#dbeafe;color:#1e40af;}
+.fb-residential{background:#dcfce7;color:#166534;}
+
+/* INLINE STATUS */
+.inline-status{padding:11px 14px;border-radius:9px;font-size:.78rem;font-weight:700;
+  display:flex;align-items:center;gap:8px;}
+.is-info{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+.is-warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+.is-success{background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;}
+
+@media(max-width:1024px){.page-wrap{grid-template-columns:1fr;}.sidebar{display:none;}}
+@media(max-width:768px){.fg-2,.fg-3,.fg-4{grid-template-columns:1fr;}.check-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.check-grid{grid-template-columns:1fr;}.stepper{gap:4px;}.step-label{display:none;}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topnav">
+  <a href="index.html" class="logo">🏠 Prop<span>CRM</span></a>
+  <span class="nav-chip">📋 Post Property</span>
+  <span class="form-badge fb-rent" style="margin-left:8px;">🏠 Rental</span>
+  <span class="form-badge fb-residential" style="margin-left:4px;">🏘 Residential</span>
+  <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> Back to Portal</a>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- PAGE HEADER -->
+  <div class="page-head">
+    <h1>📝 Post Rental Residential Property — FREE</h1>
+    <p>Fill 4 simple steps · Goes live instantly · Get leads from 87+ RMs &amp; portal users</p>
+  </div>
+
+  <!-- STEPPER -->
+  <div class="stepper" id="stepper">
+    <div class="step-item">
+      <div class="step-circle active" id="sc1">1</div>
+      <div class="step-label active" id="sl1">Basic Info</div>
+    </div>
+    <div class="step-line" id="line1"></div>
+    <div class="step-item">
+      <div class="step-circle" id="sc2">2</div>
+      <div class="step-label" id="sl2">Rent Details</div>
+    </div>
+    <div class="step-line" id="line2"></div>
+    <div class="step-item">
+      <div class="step-circle" id="sc3">3</div>
+      <div class="step-label" id="sl3">Amenities</div>
+    </div>
+    <div class="step-line" id="line3"></div>
+    <div class="step-item">
+      <div class="step-circle" id="sc4">4</div>
+      <div class="step-label" id="sl4">Photos &amp; Publish</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════ STEP 1 ════════════════════ -->
+  <div class="step-content active" id="step1">
+  <div class="form-card">
+    <div class="card-head">
+      <h2><i class="fas fa-map-marker-alt" style="color:var(--pr);"></i> Step 1 — Basic Property Information</h2>
+      <p>Tell us what type of residential property you are listing for rent and where it is located.</p>
+    </div>
+
+    <!-- LISTING TYPE -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Listing Type</div><div class="sd-line"></div></div>
+    <div class="fg fg-2" style="margin-bottom:16px;">
+
+      <!-- property_purpose — matches Form 1 exactly, Rent only -->
+      <div class="field">
+        <label>Property Purpose <span class="req">*</span></label>
+        <select name="property_purpose" required>
+          <option value="">Select Purpose</option>
+          <option value="rent">Rent</option>
+        </select>
+      </div>
+
+      <!-- property_type — matches Form 1 exactly -->
+      <div class="field">
+        <label>Property Type <span class="req">*</span></label>
+        <select name="property_type" required>
+          <option value="">Select Property Type</option>
+          <option value="Apartment">Apartment</option>
+          <option value="Independent House">Independent House</option>
+          <option value="Villa">Villa</option>
+          <option value="Duplex">Duplex</option>
+          <option value="Penthouse">Penthouse</option>
+          <option value="Studio Apartment">Studio Apartment</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg fg-2" style="margin-bottom:16px;">
+      <!-- bhk_type — matches Form 1 exactly -->
+      <div class="field">
+        <label>BHK Type <span class="req">*</span></label>
+        <select name="bhk_type" required>
+          <option value="">Select BHK</option>
+          <option value="1 RK">1 RK</option>
+          <option value="1 BHK">1 BHK</option>
+          <option value="2 BHK">2 BHK</option>
+          <option value="3 BHK">3 BHK</option>
+          <option value="4 BHK">4 BHK</option>
+          <option value="5+ BHK">5+ BHK</option>
+        </select>
+      </div>
+
+      <!-- renting_option — matches Form 1 exactly -->
+      <div class="field">
+        <label>Renting Option <span class="req">*</span></label>
+        <select name="renting_option" required>
+          <option value="">Select Option</option>
+          <option value="Full Property">Full Property</option>
+          <option value="Single Room">Single Room</option>
+          <option value="Shared Room">Shared Room</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- PROPERTY IDENTITY -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Property Identity</div><div class="sd-line"></div></div>
+    <div class="fg fg-2">
+      <!-- property_title — matches Form 1 (visible here, not hidden) -->
+      <div class="field">
+        <label>Property Title <span class="req">*</span></label>
+        <input type="text" name="property_title" id="propTitle" placeholder="e.g., Luxurious 3BHK Apartment in Prime Location" oninput="updatePreview()">
+        <div class="help">Will appear as the main headline on your listing</div>
+      </div>
+
+      <!-- building_name — matches Form 1 exactly -->
+      <div class="field">
+        <label>Building / Society Name <span class="opt">(Optional)</span></label>
+        <input type="text" name="building_name" placeholder="e.g., Green Valley Apartments">
+      </div>
+    </div>
+
+    <!-- PROPERTY STRUCTURE -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Property Structure</div><div class="sd-line"></div></div>
+    <div class="fg fg-2">
+      <!-- built_up_area — matches Form 1 exactly -->
+      <div class="field">
+        <label>Built-up Area (sq.ft) <span class="req">*</span></label>
+        <input type="number" name="built_up_area" placeholder="e.g., 1200" required>
+      </div>
+
+      <!-- carpet_area — matches Form 1 exactly -->
+      <div class="field">
+        <label>Carpet Area (sq.ft) <span class="opt">(Optional)</span></label>
+        <input type="number" name="carpet_area" id="carpetArea" placeholder="e.g., 950" oninput="updatePreview()">
+      </div>
+    </div>
+    <div class="fg fg-2" style="margin-top:16px;">
+      <!-- plot_area — matches Form 1 exactly -->
+      <div class="field">
+        <label>Plot Area (sq.ft) <span class="opt">(Optional)</span></label>
+        <input type="number" name="plot_area" placeholder="e.g., 1500">
+      </div>
+
+      <!-- floor_number — matches Form 1 exactly -->
+      <div class="field">
+        <label>Floor Number <span class="req">*</span></label>
+        <select name="floor_number" required>
+          <option value="">— Select —</option>
+          <option value="Ground">Ground</option>
+          <option value="1st Floor">1st Floor</option>
+          <option value="2nd Floor">2nd Floor</option>
+          <option value="3rd Floor">3rd Floor</option>
+          <option value="4th Floor">4th Floor</option>
+          <option value="5th Floor">5th Floor</option>
+          <option value="6th Floor">6th Floor</option>
+          <option value="7th Floor">7th Floor</option>
+          <option value="8th+ Floor">8th+ Floor</option>
+          <option value="Penthouse / Top Floor">Penthouse / Top Floor</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg fg-3" style="margin-top:16px;">
+      <!-- total_floors — matches Form 1 exactly -->
+      <div class="field">
+        <label>Total Floors in Building <span class="req">*</span></label>
+        <input type="number" name="total_floors" placeholder="e.g., 10">
+      </div>
+
+      <!-- bathrooms — matches Form 1 exactly -->
+      <div class="field">
+        <label>Bathrooms <span class="req">*</span></label>
+        <input type="number" name="bathrooms" placeholder="e.g., 2" required>
+      </div>
+
+      <!-- balconies — matches Form 1 exactly -->
+      <div class="field">
+        <label>Balconies <span class="opt">(Optional)</span></label>
+        <input type="number" name="balconies" placeholder="e.g., 1">
+      </div>
+    </div>
+
+    <!-- PROPERTY DETAILS -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Property Details</div><div class="sd-line"></div></div>
+    <div class="fg fg-2">
+      <!-- facing — matches Form 1 exactly -->
+      <div class="field">
+        <label>Facing Direction <span class="opt">(Optional)</span></label>
+        <select name="facing">
+          <option value="">Select Direction</option>
+          <option value="North">North</option>
+          <option value="South">South</option>
+          <option value="East">East</option>
+          <option value="West">West</option>
+          <option value="North-East">North-East</option>
+          <option value="North-West">North-West</option>
+          <option value="South-East">South-East</option>
+          <option value="South-West">South-West</option>
+        </select>
+      </div>
+
+      <!-- zone — matches Form 1 exactly -->
+      <div class="field">
+        <label>Zone <span class="opt">(Optional)</span></label>
+        <select name="zone">
+          <option value="">Select Zone</option>
+          <option value="North">North</option>
+          <option value="South">South</option>
+          <option value="East">East</option>
+          <option value="West">West</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg fg-2" style="margin-top:16px;">
+      <!-- ownership_type — matches Form 1 exactly -->
+      <div class="field">
+        <label>Ownership Type <span class="opt">(Optional)</span></label>
+        <select name="ownership_type">
+          <option value="">Select Ownership</option>
+          <option value="Freehold">Freehold</option>
+          <option value="Leasehold">Leasehold</option>
+          <option value="Co-operative Society">Co-operative Society</option>
+        </select>
+      </div>
+
+      <!-- construction_status — matches Form 1 exactly -->
+      <div class="field">
+        <label>Construction Status <span class="opt">(Optional)</span></label>
+        <select name="construction_status">
+          <option value="">Select Status</option>
+          <option value="New Construction">New Construction</option>
+          <option value="Resale">Resale</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg fg-2" style="margin-top:16px;">
+      <!-- property_age — matches Form 1 exactly -->
+      <div class="field">
+        <label>Property Age <span class="opt">(Optional)</span></label>
+        <select name="property_age">
+          <option value="">Select Age</option>
+          <option value="0-1 Year">0-1 Year</option>
+          <option value="1-3 Years">1-3 Years</option>
+          <option value="3-5 Years">3-5 Years</option>
+          <option value="5-10 Years">5-10 Years</option>
+          <option value="10+ Years">10+ Years</option>
+        </select>
+      </div>
+
+      <!-- furnishing_status — matches Form 1 exactly -->
+      <div class="field">
+        <label>Furnishing Status <span class="req">*</span></label>
+        <select name="furnishing_status" required>
+          <option value="">Select Status</option>
+          <option value="Fully Furnished">Fully Furnished</option>
+          <option value="Semi Furnished">Semi Furnished</option>
+          <option value="Unfurnished">Unfurnished</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg fg-2" style="margin-top:16px;">
+      <!-- available_for — matches Form 1 exactly -->
+      <div class="field">
+        <label>Available For <span class="req">*</span></label>
+        <select name="available_for" required>
+          <option value="">Select Option</option>
+          <option value="Family">Family</option>
+          <option value="Bachelor">Bachelor</option>
+          <option value="Both">Both (Family &amp; Bachelor)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- LOCATION DETAILS -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Location Details</div><div class="sd-line"></div></div>
+    <div class="fg">
+      <!-- address — matches Form 1 exactly -->
+      <div class="field">
+        <label>Complete Address <span class="req">*</span></label>
+        <textarea name="address" placeholder="Enter complete property address" required></textarea>
+      </div>
+    </div>
+    <div class="fg fg-2" style="margin-top:16px;">
+      <!-- city — matches Form 1 exactly -->
+      <div class="field">
+        <label>City <span class="req">*</span></label>
+        <input type="text" name="city" placeholder="e.g., Nagpur" value="Nagpur" required style="background:#f0fdf4;color:var(--success);font-weight:700;">
+      </div>
+
+      <!-- locality — matches Form 1 exactly -->
+      <div class="field">
+        <label>Locality / Area <span class="req">*</span></label>
+        <input type="text" name="locality" id="locality" placeholder="e.g., Dharampeth" required oninput="updatePreview()">
+      </div>
+    </div>
+    <div class="fg fg-3" style="margin-top:16px;">
+      <!-- state — matches Form 1 exactly -->
+      <div class="field">
+        <label>State <span class="req">*</span></label>
+        <input type="text" name="state" placeholder="e.g., Maharashtra" value="Maharashtra" required>
+      </div>
+
+      <!-- pincode — matches Form 1 exactly -->
+      <div class="field">
+        <label>Pincode <span class="req">*</span></label>
+        <input type="text" name="pincode" placeholder="e.g., 440010" maxlength="6" required>
+      </div>
+
+      <!-- road_connectivity — matches Form 1 exactly -->
+      <div class="field">
+        <label>Road Connectivity <span class="req">*</span></label>
+        <input type="text" name="road_connectivity" placeholder="e.g., Under 2km" required>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <div></div>
+      <button class="btn btn-pr" onclick="goToStep(2)">Next — Rent Details <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+  </div>
+
+  <!-- ════════════════════ STEP 2 ════════════════════ -->
+  <div class="step-content" id="step2">
+  <div class="form-card">
+    <div class="card-head">
+      <h2><i class="fas fa-rupee-sign" style="color:var(--pr);"></i> Step 2 — Rent Details &amp; Pricing</h2>
+      <p>Enter all rental pricing, deposit, and lease terms for this residential property.</p>
+    </div>
+
+    <!-- PRICING DETAILS -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Pricing Details</div><div class="sd-line"></div></div>
+    <div class="fg fg-2">
+      <!-- monthly_rent — matches Form 1 exactly -->
+      <div class="field">
+        <label>Monthly Rent (₹) <span class="req">*</span></label>
+        <div class="prefix-wrap">
+          <span class="prefix">₹</span>
+          <input type="number" name="monthly_rent" id="monthlyRent" placeholder="e.g., 25000" required oninput="updatePreview()">
+        </div>
+      </div>
+
+      <!-- security_deposit — matches Form 1 exactly -->
+      <div class="field">
+        <label>Security Deposit (₹) <span class="req">*</span></label>
+        <div class="prefix-wrap">
+          <span class="prefix">₹</span>
+          <input type="number" name="security_deposit" placeholder="e.g., 50000" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- maintenance_type — matches Form 1 (radio: Included in Rent / Extra) -->
+    <div class="fg" style="margin-top:16px;">
+      <div class="field">
+        <label>Maintenance Charges</label>
+        <div style="display:flex;gap:20px;margin-top:6px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;cursor:pointer;">
+            <input type="radio" name="maintenance_type" value="Included in Rent" checked style="accent-color:var(--pr);"> Included in Rent
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;cursor:pointer;">
+            <input type="radio" name="maintenance_type" value="Extra" style="accent-color:var(--pr);"> Extra Charges
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- maintenance_amount — matches Form 1 exactly -->
+    <div class="fg fg-2" style="margin-top:16px;">
+      <div class="field">
+        <label>Maintenance Amount (₹) <span class="opt">(Optional)</span></label>
+        <div class="prefix-wrap">
+          <span class="prefix">₹</span>
+          <input type="number" name="maintenance_amount" placeholder="e.g., 2000">
+        </div>
+      </div>
+    </div>
+
+    <!-- AVAILABILITY DETAILS -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Availability Details</div><div class="sd-line"></div></div>
+    <div class="fg fg-2">
+      <!-- possession_status — matches Form 1 exactly -->
+      <div class="field">
+        <label>Possession Status <span class="opt">(Optional)</span></label>
+        <select name="possession_status">
+          <option value="">Select Status</option>
+          <option value="Ready to Move">Ready to Move</option>
+          <option value="Under Construction">Under Construction</option>
+        </select>
+      </div>
+
+      <!-- available_from — matches Form 1 exactly (date input) -->
+      <div class="field">
+        <label>Available From <span class="opt">(Optional)</span></label>
+        <input type="date" name="available_from">
+      </div>
+    </div>
+
+    <!-- lease_duration — matches Form 1 exactly -->
+    <div class="fg fg-2" style="margin-top:16px;">
+      <div class="field">
+        <label>Lease Duration <span class="opt">(Optional)</span></label>
+        <select name="lease_duration">
+          <option value="">Select Duration</option>
+          <option value="6 Months">6 Months</option>
+          <option value="11 Months">11 Months</option>
+          <option value="1 Year">1 Year</option>
+          <option value="2 Years">2 Years</option>
+        </select>
+      </div>
+
+      <!-- brokerage — matches Form 1 exactly with same JS show/hide logic -->
+      <div class="field">
+        <label>Brokerage <span class="opt">(Optional)</span></label>
+        <select name="brokerage" id="brokerageSelect">
+          <option value="">Select Option</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- brokerage_percentage — hidden by default, shown when brokerage = Yes (matches Form 1) -->
+    <div class="fg fg-2" style="margin-top:16px;" id="brokerageSection" style="display:none;">
+      <div class="field">
+        <label>Brokerage Percentage <span class="opt">(Optional)</span></label>
+        <select name="brokerage_percentage" id="brokeragePercentage">
+          <option value="">Select Brokerage</option>
+          <option value="1%">1%</option>
+          <option value="1.5%">1.5%</option>
+          <option value="2%">2%</option>
+          <option value="Negotiable">Negotiable</option>
+          <option value="Manual">Enter Manually</option>
+        </select>
+      </div>
+
+      <!-- manual_brokerage — hidden by default, shown when brokerage_percentage = Manual (matches Form 1) -->
+      <div class="field" id="manualBrokerage" style="display:none;">
+        <label>Enter Brokerage <span class="opt">(Optional)</span></label>
+        <input type="text" name="manual_brokerage" placeholder="Enter Brokerage e.g. 2.5%">
+      </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Property Description</div><div class="sd-line"></div></div>
+
+    <!-- description — matches Form 1 "Property Summary" textarea -->
+    <div class="fg" style="margin-bottom:16px;">
+      <div class="field">
+        <label>Property Summary <span class="req">*</span></label>
+        <textarea name="description" rows="5" placeholder="Describe your property in detail - highlight key features, nearby landmarks, and what makes it special..." required oninput="updateChecklist()"></textarea>
+        <div class="help">Min 80 characters recommended for better leads.</div>
+      </div>
+    </div>
+
+    <!-- rent_residential_desc — matches Form 1 "Detailed Description" (rich text / CKEditor field) -->
+    <div class="fg">
+      <div class="field">
+        <label>Detailed Description <span class="req">*</span></label>
+        <textarea name="rent_residential_desc" id="rent_residential_desc" rows="6" placeholder="Describe your property in detail - highlight key features, nearby landmarks, and what makes it special..." required></textarea>
+      </div>
+    </div>
+
+    <!-- OWNER / CONTACT DETAILS -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Contact Information</div><div class="sd-line"></div></div>
+    <div class="fg fg-2">
+      <!-- owner_name — matches Form 1 exactly -->
+      <div class="field">
+        <label>Owner Name <span class="req">*</span></label>
+        <input type="text" name="owner_name" id="ownerName" placeholder="Enter your full name" required oninput="updatePreview()">
+      </div>
+
+      <!-- contact_number — matches Form 1 exactly -->
+      <div class="field">
+        <label>Contact Number <span class="req">*</span></label>
+        <input type="tel" name="contact_number" placeholder="e.g., +91 9876543210" required>
+      </div>
+    </div>
+    <div class="fg fg-2" style="margin-top:16px;">
+      <!-- email — matches Form 1 exactly -->
+      <div class="field">
+        <label>Email Address <span class="req">*</span></label>
+        <input type="email" name="email" placeholder="your.email@example.com" required>
+      </div>
+
+      <!-- alternate_contact — matches Form 1 exactly -->
+      <div class="field">
+        <label>Alternate Contact <span class="opt">(Optional)</span></label>
+        <input type="tel" name="alternate_contact" placeholder="e.g., +91 9876543210">
+      </div>
+    </div>
+
+    <!-- LISTING UPLOADED BY — matches Form 1 exactly (read-only, from session) -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Listing Uploaded By</div><div class="sd-line"></div></div>
+    <div class="fg fg-4">
+      <div class="field">
+        <label>Name</label>
+        <input type="text" name="uploaded_by_name" value="{{ uploader_name }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="uploaded_by_email" value="{{ uploader_email }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;">
+      </div>
+      <div class="field">
+        <label>Contact</label>
+        <input type="tel" name="uploaded_by_contact" value="{{ uploader_phone }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;">
+      </div>
+      <div class="field">
+        <label>Role</label>
+        <input type="text" name="uploaded_by_role" value="{{ uploader_role }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;">
+      </div>
+    </div>
+    <div class="inline-status is-info" style="margin-top:4px;margin-bottom:8px;">
+      <i class="fas fa-info-circle"></i>
+      <span style="font-size:.76rem;">These fields are auto-filled from your login session.</span>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-sec" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="btn btn-pr" onclick="goToStep(3)">Next — Amenities <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+  </div>
+
+  <!-- ════════════════════ STEP 3 ════════════════════ -->
+  <div class="step-content" id="step3">
+  <div class="form-card">
+    <div class="card-head">
+      <h2><i class="fas fa-star" style="color:var(--pr);"></i> Step 3 — Amenities &amp; Features</h2>
+      <p>Select all available amenities — this boosts your listing's visibility and trust score.</p>
+    </div>
+
+    <!-- amenities[] — matches Form 1 exactly, same values -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Amenities &amp; Features</div><div class="sd-line"></div></div>
+    <div class="check-grid">
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="Car Parking" onchange="checkToggle(this)"> <label><i class="fas fa-car" style="color:var(--pr);font-size:12px;"></i> Car Parking</label></label>
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="Lift" onchange="checkToggle(this)"> <label><i class="fas fa-arrow-up" style="color:var(--pr);font-size:12px;"></i> Lift/Elevator</label></label>
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="Power Backup" onchange="checkToggle(this)"> <label><i class="fas fa-bolt" style="color:var(--pr);font-size:12px;"></i> Power Backup</label></label>
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="Security" onchange="checkToggle(this)"> <label><i class="fas fa-shield-alt" style="color:var(--pr);font-size:12px;"></i> 24x7 Security</label></label>
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="Gym" onchange="checkToggle(this)"> <label><i class="fas fa-dumbbell" style="color:var(--pr);font-size:12px;"></i> Gym/Fitness</label></label>
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="Swimming Pool" onchange="checkToggle(this)"> <label><i class="fas fa-swimming-pool" style="color:var(--pr);font-size:12px;"></i> Swimming Pool</label></label>
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="WiFi" onchange="checkToggle(this)"> <label><i class="fas fa-wifi" style="color:var(--pr);font-size:12px;"></i> WiFi</label></label>
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="CCTV" onchange="checkToggle(this)"> <label><i class="fas fa-video" style="color:var(--pr);font-size:12px;"></i> CCTV</label></label>
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="Children Play Area" onchange="checkToggle(this)"> <label><i class="fas fa-child" style="color:var(--pr);font-size:12px;"></i> Play Area</label></label>
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="Garden" onchange="checkToggle(this)"> <label><i class="fas fa-tree" style="color:var(--pr);font-size:12px;"></i> Garden/Park</label></label>
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="Club House" onchange="checkToggle(this)"> <label><i class="fas fa-building" style="color:var(--pr);font-size:12px;"></i> Club House</label></label>
+      <label class="check-item"><input type="checkbox" name="amenities[]" value="Water Supply" onchange="checkToggle(this)"> <label><i class="fas fa-tint" style="color:var(--pr);font-size:12px;"></i> 24x7 Water</label></label>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-sec" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="btn btn-pr" onclick="goToStep(4)">Next — Photos &amp; Publish <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+  </div>
+
+  <!-- ════════════════════ STEP 4 ════════════════════ -->
+  <div class="step-content" id="step4">
+  <div class="form-card">
+    <div class="card-head">
+      <h2><i class="fas fa-camera" style="color:var(--pr);"></i> Step 4 — Photos &amp; Publish</h2>
+      <p>Listings with photos get <strong>5× more enquiries</strong>. Add at least 3 photos.</p>
+    </div>
+
+    <!-- property_images[] — matches Form 1 exactly (name, multiple, accept) -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Property Images</div><div class="sd-line"></div></div>
+    <div class="photo-drop" onclick="document.getElementById('imageInput').click()">
+      <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" onchange="handlePhotos(event)">
+      <div style="font-size:2.5rem;margin-bottom:10px;">📷</div>
+      <div style="font-size:.9rem;font-weight:700;color:var(--sec);">Click to Upload Photos or Drag &amp; Drop</div>
+      <div style="font-size:.76rem;color:var(--muted);margin-top:4px;">JPG, PNG · Max 10 photos</div>
+    </div>
+    <div class="photo-preview" id="imagePreview"></div>
+
+    <!-- REVIEW BOX -->
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">📋 Final Review Before Publishing</div><div class="sd-line"></div></div>
+    <div class="review-box">
+      <div class="rb-row"><span class="rb-label">Property Title</span><span class="rb-val" id="rv-title">—</span></div>
+      <div class="rb-row"><span class="rb-label">Location</span><span class="rb-val" id="rv-location">—</span></div>
+      <div class="rb-row"><span class="rb-label">Monthly Rent</span><span class="rb-val" id="rv-rent">—</span></div>
+      <div class="rb-row"><span class="rb-label">Built-up Area</span><span class="rb-val" id="rv-area">—</span></div>
+      <div class="rb-row"><span class="rb-label">Listing Type</span><span class="rb-val">Rental · Residential</span></div>
+    </div>
+
+    <div class="inline-status is-success" style="margin-bottom:14px;">
+      <i class="fas fa-rocket"></i>
+      <div>
+        <div style="font-weight:800;font-size:.82rem;">🚀 What Happens After You Publish?</div>
+        <div style="font-size:.74rem;margin-top:4px;line-height:1.7;">
+          ✅ Listing goes live instantly on PropCRM portal<br>
+          ✅ Visible to 50,000+ tenants &amp; buyers in Nagpur<br>
+          ✅ Assigned to a dedicated RM who will help close the deal<br>
+          ✅ WhatsApp notifications for every new enquiry<br>
+          ✅ Listing valid for 30 days — easy renewal from dashboard
+        </div>
+      </div>
+    </div>
+
+    <!-- TERMS -->
+    <div style="margin-bottom:16px;">
+      <label class="check-item" style="background:#fffbeb;border-color:#fcd34d;">
+        <input type="checkbox" id="agreeTerms" style="accent-color:var(--pr);width:15px;height:15px;">
+        <label for="agreeTerms" style="font-size:.78rem;font-weight:600;color:#92400e;cursor:pointer;">
+          I agree to PropCRM <a href="#" style="color:var(--pr);">Terms of Service</a> and confirm this is a genuine rental residential listing.
+        </label>
+      </label>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-sec" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+      <button class="btn btn-pr btn-lg" onclick="publishListing()">
+        <i class="fas fa-rocket"></i> 🚀 Submit Listing
+      </button>
+    </div>
+  </div>
+  </div>
+
+  <!-- ════════════════════ SIDEBAR ════════════════════ -->
+  <div class="sidebar">
+
+    <!-- LIVE PREVIEW -->
+    <div class="preview-card">
+      <div class="pc-head"><i class="fas fa-eye"></i> Live Preview — Portal Card</div>
+      <div class="pc-mock">
+        <div class="pcm-img">
+          🏠
+          <div class="pcm-badges">
+            <span class="pcm-badge b-rent">FOR RENT</span>
+            <span class="pcm-badge b-new">🆕 New</span>
+          </div>
+          <div class="pcm-price" id="previewPrice">₹ — /mo</div>
+        </div>
+        <div class="pcm-body">
+          <div class="pcm-title" id="previewTitle">Your Property Title</div>
+          <div class="pcm-loc" id="previewLoc"><i class="fas fa-map-marker-alt" style="color:#f97316;"></i> Area, Nagpur</div>
+          <div class="pcm-specs">
+            <span id="prevArea">— sqft</span>
+            <span>Residential</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:10px;text-align:center;">Will appear in search results &amp; featured section</div>
+    </div>
+
+    <!-- CHECKLIST -->
+    <div class="checklist-card">
+      <div class="cl-title">📋 Listing Checklist</div>
+      <div class="cl-item" id="cl-title"><i class="fas fa-circle"></i> Property title added</div>
+      <div class="cl-item" id="cl-location"><i class="fas fa-circle"></i> Location selected</div>
+      <div class="cl-item" id="cl-price"><i class="fas fa-circle"></i> Monthly rent entered</div>
+      <div class="cl-item" id="cl-desc"><i class="fas fa-circle"></i> Description written</div>
+      <div class="cl-item" id="cl-owner"><i class="fas fa-circle"></i> Owner details added</div>
+      <div class="cl-item" id="cl-photos"><i class="fas fa-circle"></i> Photos uploaded</div>
+    </div>
+
+    <!-- PRO TIPS -->
+    <div class="info-card">
+      <div class="ic-title">💡 Pro Tips for Faster Leads</div>
+      <div class="ic-item"><i class="fas fa-camera"></i> Add 8+ clear photos — 5× more enquiries</div>
+      <div class="ic-item"><i class="fas fa-pencil-alt"></i> Write 150+ word description</div>
+      <div class="ic-item"><i class="fas fa-shield-alt"></i> Request PropCRM Verification for 6× trust</div>
+      <div class="ic-item"><i class="fas fa-map-pin"></i> Add Google Maps link for better search rank</div>
+      <div class="ic-item"><i class="fas fa-rupee-sign"></i> Price competitively — compare nearby listings</div>
+    </div>
+  </div>
+
+</div><!-- end page-wrap -->
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script>
+let currentStep = 1;
+
+/* ── STEPPER ── */
+function goToStep(n) {
+  document.getElementById('step' + currentStep).classList.remove('active');
+  document.getElementById('step' + n).classList.add('active');
+  for (let i = 1; i <= 4; i++) {
+    const sc = document.getElementById('sc' + i);
+    const sl = document.getElementById('sl' + i);
+    const line = document.getElementById('line' + i);
+    sc.className = 'step-circle'; sl.className = 'step-label';
+    if (line) line.className = 'step-line';
+    if (i < n) {
+      sc.classList.add('done'); sl.classList.add('done');
+      sc.innerHTML = '<i class="fas fa-check" style="font-size:.6rem;"></i>';
+      if (line) line.classList.add('done');
+    } else if (i === n) {
+      sc.classList.add('active'); sl.classList.add('active'); sc.textContent = i;
+    } else {
+      sc.textContent = i;
+    }
+  }
+  currentStep = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  updateReview();
+}
+
+/* ── BROKERAGE SHOW/HIDE — same logic as Form 1 ── */
+document.addEventListener('DOMContentLoaded', function () {
+  const brokerageSelect = document.getElementById('brokerageSelect');
+  const brokerageSection = document.getElementById('brokerageSection');
+  const brokeragePercentage = document.getElementById('brokeragePercentage');
+  const manualBrokerage = document.getElementById('manualBrokerage');
+
+  // Show brokerage percentage section when Yes is selected
+  brokerageSelect.addEventListener('change', function () {
+    if (this.value === 'Yes') {
+      brokerageSection.style.display = 'grid';
+    } else {
+      brokerageSection.style.display = 'none';
+      manualBrokerage.style.display = 'none';
+    }
+  });
+
+  // Show manual input when Manual is selected
+  brokeragePercentage.addEventListener('change', function () {
+    if (this.value === 'Manual') {
+      manualBrokerage.style.display = 'flex';
+    } else {
+      manualBrokerage.style.display = 'none';
+    }
+  });
+});
+
+/* ── CHECKBOX TOGGLE ── */
+function checkToggle(cb) {
+  const item = cb.closest('.check-item');
+  if (cb.checked) item.classList.add('selected');
+  else item.classList.remove('selected');
+}
+
+/* ── LIVE PREVIEW UPDATE ── */
+function updatePreview() {
+  const title = document.getElementById('propTitle')?.value || 'Your Property Title';
+  const loc   = document.getElementById('locality')?.value  || 'Area';
+  const rent  = document.getElementById('monthlyRent')?.value;
+  const area  = document.getElementById('carpetArea')?.value;
+
+  document.getElementById('previewTitle').textContent = title;
+  document.getElementById('previewLoc').innerHTML =
+    '<i class="fas fa-map-marker-alt" style="color:#f97316;"></i> ' + (loc || 'Area') + ', Nagpur';
+  document.getElementById('previewPrice').textContent =
+    rent ? '₹' + parseInt(rent).toLocaleString('en-IN') + '/mo' : '₹ — /mo';
+  document.getElementById('prevArea').textContent = area ? area + ' sqft' : '— sqft';
+
+  // Checklist updates
+  setCheck('cl-title',    title && title !== 'Your Property Title');
+  setCheck('cl-location', !!loc);
+  setCheck('cl-price',    !!rent);
+}
+
+function updateChecklist() {
+  const desc = document.getElementById('rent_residential_desc')?.value || '';
+  setCheck('cl-desc', desc.length >= 80);
+}
+
+function setCheck(id, done) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'cl-item' + (done ? ' done' : '');
+  el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+}
+
+/* ── REVIEW UPDATE ── */
+function updateReview() {
+  const title = document.getElementById('propTitle')?.value   || '—';
+  const loc   = document.getElementById('locality')?.value    || '—';
+  const rent  = document.getElementById('monthlyRent')?.value;
+  const area  = document.getElementById('carpetArea')?.value;
+  document.getElementById('rv-title').textContent    = title;
+  document.getElementById('rv-location').textContent = (loc || '—') + ', Nagpur';
+  document.getElementById('rv-rent').textContent     = rent ? '₹' + parseInt(rent).toLocaleString('en-IN') + '/month' : '—';
+  document.getElementById('rv-area').textContent     = area ? area + ' sqft' : '—';
+}
+
+/* ── PHOTO UPLOAD — uses same name as Form 1: property_images[] ── */
+function handlePhotos(e) {
+  const files = Array.from(e.target.files).slice(0, 10);
+  const prev  = document.getElementById('imagePreview');
+  prev.innerHTML = '';
+  files.forEach(f => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const th = document.createElement('div');
+      th.className = 'photo-thumb';
+      th.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">
+        <button class="remove-photo" type="button" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>`;
+      prev.appendChild(th);
+    };
+    reader.readAsDataURL(f);
+  });
+  setCheck('cl-photos', files.length > 0);
+}
+
+/* ── PUBLISH / SUBMIT ── */
+function publishListing() {
+  if (!document.getElementById('agreeTerms').checked) {
+    Swal.fire({ icon: 'warning', title: 'Agreement Required',
+      text: 'Please agree to PropCRM Terms of Service before publishing.',
+      background: '#fff', color: '#1e293b', confirmButtonColor: '#f97316' });
+    return;
+  }
+  const title = document.getElementById('propTitle')?.value;
+  const rent  = document.getElementById('monthlyRent')?.value;
+  if (!title || !rent) {
+    Swal.fire({ icon: 'error', title: 'Required Fields Missing',
+      text: 'Please fill in the Property Title and Monthly Rent before publishing.',
+      background: '#fff', color: '#1e293b', confirmButtonColor: '#f97316' });
+    return;
+  }
+  Swal.fire({
+    icon: 'success', title: '🎉 Listing Submitted!',
+    html: `<div style="text-align:center;">
+      <div style="font-size:.9rem;font-weight:700;margin-bottom:8px;">"${title}" is now LIVE on PropCRM!</div>
+      <div style="font-size:.78rem;color:#64748b;">Visible to 50,000+ tenants · RM assigned · WhatsApp alerts enabled</div>
+    </div>`,
+    background: '#fff', color: '#1e293b', confirmButtonColor: '#f97316', confirmButtonText: 'View Portal →'
+  }).then(() => { window.location.href = 'index.html'; });
+}
+</script>
+</body>
+</html>
