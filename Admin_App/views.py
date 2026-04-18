@@ -190,7 +190,8 @@ def residential(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
-        context = {'admin_obj':admin_obj}
+        ameneties_obj = Ameneties_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj}
         return render(request,"admin_user/residential.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -200,7 +201,8 @@ def commercial(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
-        context = {'admin_obj':admin_obj}
+        ameneties_obj = Ameneties_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj}
         return render(request,"admin_user/commercial.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -210,7 +212,8 @@ def pg_coliving(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
-        context = {'admin_obj':admin_obj}
+        ameneties_obj = Ameneties_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj}
         return render(request,"admin_user/pg_coliving.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -343,6 +346,26 @@ def Update_Ameneties(request,id):
         return render(request,'home_page/Adminlogin.html')
 
 ########### Views end for update ameneties data #####################
+
+
+############# Views start for nearby facilities list #####################
+
+def Facilities_List(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        # ameneties_obj = Ameneties_Details.objects.all().order_by('-id')
+        # ameneties_obj_count = Ameneties_Details.objects.all().count()
+
+        # rendered = render_to_string("admin_user/render_to_string/R_Ameneties/r_t_s_ameneties.html",{'ameneties_obj':ameneties_obj,'ameneties_obj_count':ameneties_obj_count})
+
+        context = {'admin_obj':admin_obj}
+        return render(request,"admin_user/Nearby_Facility/facilities_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############ Views end for nearby facilities list ##########################
 
 
 ########## Views start for vendor services list ########################
@@ -932,7 +955,8 @@ def residential_resale(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
-        context = {'admin_obj':admin_obj}
+        ameneties_obj = Ameneties_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj}
         return render(request,"admin_user/Resale/residential_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -942,7 +966,8 @@ def commercial_resale(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
-        context = {'admin_obj':admin_obj}
+        ameneties_obj = Ameneties_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj}
         return render(request,"admin_user/Resale/commercial_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')

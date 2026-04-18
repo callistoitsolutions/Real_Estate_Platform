@@ -37,6 +37,10 @@ urlpatterns = [
 
      path('Update_Ameneties/<int:id>',views.Update_Ameneties,name='Update_Ameneties'),
 
+     ########### urls for nearby facilities list ########################
+
+     path('Facilities_List',views.Facilities_List,name="Facilities_List"),
+
      ########## urls of vendor services list ####################
 
      path('Services_List',views.Services_List,name="Services_List"),

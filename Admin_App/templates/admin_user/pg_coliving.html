@@ -1450,50 +1450,36 @@
   </div>
 
   <div class="form-section">
-    <div class="section-header">
-      <i class="fa-solid fa-check-circle"></i>
-      Amenities
-    </div>
-    <div class="section-body">
-      <div class="row mt-2">
-        <div class="amenities-grid">
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input">
-            <label class="form-check-label">24x7 Security</label>
-          </label>
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input">
-            <label class="form-check-label">Power Backup</label>
-          </label>
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input">
-            <label class="form-check-label">Parking</label>
-          </label>
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input">
-            <label class="form-check-label">Gym</label>
-          </label>
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input">
-            <label class="form-check-label">Laundry</label>
-          </label>
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input">
-            <label class="form-check-label">Housekeeping</label>
-          </label>
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input">
-            <label class="form-check-label">Wi-Fi</label>
-          </label>
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input">
-            <label class="form-check-label">CCTV</label>
-          </label>
+        <div class="section-header">
+            <i class="fas fa-star"></i>
+            Amenities & Features
         </div>
-      </div>
+        <div class="section-body">
+            <label class="form-label">
+                <i class="fas fa-star"></i>
+                Ameneties <span class="required-star" style="color:red;">*</span>
+            </label>
+            <br>    
+            <div class="checkbox-group">
+                
+                {% for ameneties in ameneties_obj %}
+
+                    <div class="checkbox-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="amenities[]" value="{{ameneties.amenties_name}}" id="parking">
+                            <label class="form-check-label" for="parking">
+                                <i class="{{ameneties.amenties_icon}}"></i> {{ameneties.amenties_name}}
+                            </label>
+                        </div>
+                    </div>
+
+                {% endfor %}
+               
+               
+            </div>
+        </div>
     </div>
 
-  </div>
 
    <div class="form-section">
         <div class="section-header">
