@@ -1305,33 +1305,40 @@
         </div>
         <br>
 
-        <div class="form-section">
+        <div class="form-section facility-theme">
         <div class="section-header">
-            <i class="fas fa-star"></i>
+            <i class="fas fa-map-marker-alt"></i>
             Nearby Facilities
         </div>
         <div class="section-body">
-            <label class="form-label">
-                <i class="fas fa-star"></i>
-                Nearby Facilities <span class="required-star" style="color:red;">*</span>
-            </label>
-            <br>    
-            <div class="checkbox-group">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Nearby Facilities <span class="required-star" style="color:red;">*</span>
+                </label>
                 
-                {% for facilities in facilities_obj %}
+                <div class="selection-summary">
+                    <span class="text-muted small" style="font-weight:bold;">Total Facilities Selected:</span>
+                    <input type="text" id="facilityCounter" value="0" readonly 
+                        class="counter-box blue-theme"
+                        style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #bae6fd; font-weight: bold; background: #f0f9ff; color: #0369a1;">
+                </div>
 
+            </div>
+
+            <div class="checkbox-group">
+                {% for facilities in facilities_obj %}
                     <div class="checkbox-item">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="amenities[]" value="{{facilities.facilities_name}}" id="parking">
-                            <label class="form-check-label" for="parking">
+                            <input class="form-check-input facility-checkbox" type="checkbox" name="facilities[]" 
+                                value="{{facilities.facilities_name}}" id="facility_{{ forloop.counter }}">
+                            
+                            <label class="form-check-label" for="facility_{{ forloop.counter }}">
                                 <i class="{{facilities.facilities_icon}}"></i> {{facilities.facilities_name}}
                             </label>
                         </div>
                     </div>
-
                 {% endfor %}
-               
-               
             </div>
         </div>
     </div>
@@ -1342,27 +1349,32 @@
             Amenities & Features
         </div>
         <div class="section-body">
-            <label class="form-label">
-                <i class="fas fa-star"></i>
-                Ameneties <span class="required-star" style="color:red;">*</span>
-            </label>
-            <br>    
-            <div class="checkbox-group">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0">
+                    <i class="fas fa-star"></i>
+                    Amenities <span class="required-star" style="color:red;">*</span>
+                </label>
                 
-                {% for ameneties in ameneties_obj %}
+                <div class="selection-summary">
+                    <span class="text-muted small" style="font-weight:bold;">Total Ameneties Selected:</span>
+                    <input type="text" id="amenityCounter" value="0" readonly 
+                        style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #ddd; font-weight: bold; background: #f8f9fa;">
+                </div>
+            </div>
 
+            <div class="checkbox-group">
+                {% for ameneties in ameneties_obj %}
                     <div class="checkbox-item">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="amenities[]" value="{{ameneties.amenties_name}}" id="parking">
-                            <label class="form-check-label" for="parking">
+                            <input class="form-check-input amenity-checkbox" type="checkbox" name="amenities[]" 
+                                value="{{ameneties.amenties_name}}" id="amenity_{{ forloop.counter }}">
+                            
+                            <label class="form-check-label" for="amenity_{{ forloop.counter }}">
                                 <i class="{{ameneties.amenties_icon}}"></i> {{ameneties.amenties_name}}
                             </label>
                         </div>
                     </div>
-
                 {% endfor %}
-               
-               
             </div>
         </div>
     </div>
@@ -1517,6 +1529,64 @@
 
 <!-- ── SweetAlert2 CDN (place before closing </body>) ── -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+        $(document).ready(function() {
+            // Function to update the count
+            function updateAmenityCount() {
+                // Count how many checkboxes with name "amenities[]" are checked
+                var totalSelected = $('input[name="amenities[]"]:checked').length;
+                
+                // Update the textbox value
+                $('#amenityCounter').val(totalSelected);
+                
+                // Optional: Change background color if selections are made
+                if(totalSelected > 0) {
+                    $('#amenityCounter').css('background-color', '#fff3e0');
+                    $('#amenityCounter').css('border-color', '#e85d04');
+                } else {
+                    $('#amenityCounter').css('background-color', '#f8f9fa');
+                    $('#amenityCounter').css('border-color', '#ddd');
+                }
+            }
+
+            // Listen for changes on any amenity checkbox
+            $(document).on('change', 'input[name="amenities[]"]', function() {
+                updateAmenityCount();
+            });
+
+            // Run on page load in case some are pre-selected (useful for Edit pages)
+            updateAmenityCount();
+        });
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            function updateFacilityCount() {
+                // Count how many checkboxes with name "facilities[]" are checked
+                var total = $('input[name="facilities[]"]:checked').length;
+                
+                // Update the facility counter value
+                var $counter = $('#facilityCounter');
+                $counter.val(total);
+                
+                // Toggle the active blue styling
+                if(total > 0) {
+                    $counter.addClass('active-blue');
+                } else {
+                    $counter.removeClass('active-blue');
+                }
+            }
+
+            // Listen for changes specifically on facilities checkboxes
+            $(document).on('change', 'input[name="facilities[]"]', function() {
+                updateFacilityCount();
+            });
+
+            // Initialize on page load (important if editing an existing property)
+            updateFacilityCount();
+        });
+    </script>
 
 <script>
 // ── SweetAlert on form submit (AJAX) ──────────────────
