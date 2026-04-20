@@ -31,7 +31,7 @@
 
         <!-- TABLE SCROLL AREA -->
         <div class="table-responsive">
-            {{ameneties_list}}
+            {{facilities_list}}
         </div>
 
     </div>
@@ -113,9 +113,9 @@
 
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label class="form-label">Upload Ameneties Data Excel File <span class="required"
+                            <label class="form-label">Upload Facilities Data Excel File <span class="required"
                                     style="color:red;">*</span></label>
-                            <input type="file" class="form-control" id="ameneties_file" name="ameneties_file"
+                            <input type="file" class="form-control" id="facilities_file" name="facilities_file"
                                 placeholder="Enter Confirm Password" required onchange="checkSelectedFileSize(this)"
                                 accept=".xlsx">
                         </div>
@@ -126,7 +126,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" style="background-color:#667eea;"
-                    onclick="Import_Ameneties_Data(this)">Upload</button>
+                    onclick="Import_Facilities_Data(this)">Upload</button>
             </div>
         </div>
     </div>
@@ -504,31 +504,31 @@
 
 <script>
 
-    {% comment %} Ajax and Jquery to add amenities {% endcomment %}
+    {% comment %} Ajax and Jquery to add facilities {% endcomment %}
 
 
-    function Add_Ameneties(_this) {
-        var amenties_icon = $("#amenties_icon").val();
-        var amenties_name = $("#amenties_name").val();
+    function Add_Facilities(_this) {
+        var facilities_icon = $("#facilities_icon").val();
+        var facilities_name = $("#facilities_name").val();
 
-        if (amenties_icon == '') {
-            alert("Please Enter Ameneties Icon");
+        if (facilities_icon == '') {
+            alert("Please Enter Facilities Icon");
         }
-        else if (amenties_name == '') {
-            alert("Please Enter Ameneties Name");
+        else if (facilities_name == '') {
+            alert("Please Enter Facilities Name");
         }
         else {
             var fd = new FormData();
             fd.append('id', '');
-            fd.append('amenties_icon', amenties_icon);
-            fd.append('amenties_name', amenties_name);
+            fd.append('facilities_icon', facilities_icon);
+            fd.append('facilities_name', facilities_name);
 
             $(_this).prop("disabled", true);
             _this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Adding...`;
 
             $.ajax({
                 method: "POST",
-                url: "{% url 'Ameneties_Ajax' %}",
+                url: "{% url 'Facilities_Ajax' %}",
                 enctype: "multipart/form-data",
                 processData: false,
                 contentType: false,
@@ -537,7 +537,7 @@
                 mode: 'same-origin',
                 success: function (response) {
                     $(_this).prop("disabled", false);
-                    _this.innerHTML = `<i class="fas fa-add mr-1"></i> Add Ameneties`;
+                    _this.innerHTML = `<i class="fas fa-add mr-1"></i> Add Facilities`;
 
                     if (response.status == '1') {
                         swal({
@@ -547,7 +547,7 @@
                             confirmButtonText: 'OK',
                         }).then((result) => {
                             if (result) {
-                                window.location.href = "{% url 'Ameneties_List' %}"
+                                window.location.href = "{% url 'Facilities_List' %}"
                             }
                         })
                     } else {
@@ -567,13 +567,13 @@
 
 <script>
 
-    {% comment %} Ajax and Jquery to upload amenities data {% endcomment %}
+    {% comment %} Ajax and Jquery to upload facilities data {% endcomment %}
 
-    function Import_Ameneties_Data(_this) {
+    function Import_Facilities_Data(_this) {
 
-        var ameneties_file = $("#ameneties_file")[0].files;
+        var facilities_file = $("#facilities_file")[0].files;
 
-        if (ameneties_file.length == 0) {
+        if (facilities_file.length == 0) {
             alert("Please Upload Excel File");
 
         }
@@ -581,13 +581,13 @@
 
         else {
             var fd = new FormData();
-            fd.append('ameneties_file', ameneties_file[0]);
+            fd.append('facilities_file', facilities_file[0]);
 
             $(_this).prop("disabled", true);
             _this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`;
             $.ajax({
                 method: "POST",
-                url: "{% url 'Ameneties_Data' %}",
+                url: "{% url 'Facilities_Data' %}",
                 enctype: "mutipart/form_data",
                 processData: false,
                 contentType: false,
@@ -607,7 +607,7 @@
                             confirmButtonText: 'Thank You!',
                         }).then((result) => {
                             if (result) {
-                                window.location.href = "{% url 'Ameneties_List' %}"
+                                window.location.href = "{% url 'Facilities_List' %}"
                             }
                         })
                     }
@@ -628,16 +628,16 @@
 </script>
 
 
-{% comment %} Ajax Jquery and Javascript for delete ameneties {% endcomment %}
+{% comment %} Ajax Jquery and Javascript for delete facilities {% endcomment %}
 
 <script>
 
 
-    function Delete_Ameneties(ameneties_id)
+    function Delete_Facilities(facilities_id)
     {
         swal({
             title: "DELETE",
-            text: "Are you sure, you want to delete the ameneties detail ?",
+            text: "Are you sure, you want to delete the facilities detail ?",
             icon: "warning",
             buttons: ["No", "Yes"],	
             closeOnClickOutside: false,
@@ -648,8 +648,8 @@
             {	
                 $.ajax({
                     type:"POST",
-                    url: "{% url 'Delete_Ameneties' %}",
-                    data: {'ameneties_id' : ameneties_id},
+                    url: "{% url 'Delete_Facilities' %}",
+                    data: {'facilities_id' : facilities_id},
                     success: function (response) 
                     {
                         if (response.status == '1'){

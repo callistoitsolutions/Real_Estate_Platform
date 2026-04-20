@@ -1516,6 +1516,38 @@
     </div>
 
 
+    <div class="form-section">
+        <div class="section-header">
+            <i class="fas fa-star"></i>
+            Nearby Facilities
+        </div>
+        <div class="section-body">
+            <label class="form-label">
+                <i class="fas fa-star"></i>
+                Nearby Facilities <span class="required-star" style="color:red;">*</span>
+            </label>
+            <br>    
+            <div class="checkbox-group">
+                
+                {% for facilities in facilities_obj %}
+
+                    <div class="checkbox-item">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="amenities[]" value="{{facilities.facilities_name}}" id="parking">
+                            <label class="form-check-label" for="parking">
+                                <i class="{{facilities.facilities_icon}}"></i> {{facilities.facilities_name}}
+                            </label>
+                        </div>
+                    </div>
+
+                {% endfor %}
+               
+               
+            </div>
+        </div>
+    </div>
+
+
 
 
    <div class="form-section">

@@ -263,6 +263,21 @@ class Ameneties_Details(models.Model):
 ########### Models end for ameneties details ###############################
 
 
+############ Models starts for nearby facilities details #######################
+
+class Facilities_Details(models.Model):
+   
+    facilities_icon = models.CharField(max_length=200,blank=True,null=True)
+    facilities_name = models.CharField(max_length=200,blank=True,null=True)
+    facilities_date = models.DateField(blank=True,null=True)
+    facilities_time = models.TimeField(blank=True,null=True)
+
+    def __str__(self):
+        return str(self.facilities_name)+"-"+self.facilities_icon
+    
+############### Views end for nearby facilities details #############################
+
+
 ########### Models start for services type details of vendors ######################
 
 class Service_Type_Details(models.Model):

@@ -41,6 +41,22 @@ urlpatterns = [
 
      path('Facilities_List',views.Facilities_List,name="Facilities_List"),
 
+     ############# urls for ajax for add/update nearby facilities ##################
+
+     path('Facilities_Ajax',views.Facilities_Ajax,name="Facilities_Ajax"),
+
+     ############# urls for upload facilities data via excel ################
+
+     path('Facilities_Data',views.Facilities_Data,name="Facilities_Data"),
+
+     ############## urls for delete facilities data ####################
+
+     path('Delete_Facilities',views.Delete_Facilities,name='Delete_Facilities'),
+
+     ############## urls for update facilities data #######################
+
+     path('Update_Facilities/<int:id>',views.Update_Facilities,name='Update_Facilities'),
+
      ########## urls of vendor services list ####################
 
      path('Services_List',views.Services_List,name="Services_List"),
