@@ -2305,9 +2305,11 @@ def Vendor_Data(request):
         wb = load_workbook(excel_file)
         sheet = wb.active
 
-        # We start from row 2 to skip headers
         for row in sheet.iter_rows(min_row=2, values_only=True):
-            # Basic Fields
+            # 1. ADD SAFETY CHECK: Ensure the row has at least 14 columns
+            if len(row) < 14:
+                continue  # Skip rows that don't have all the new vendor fields
+
             user_name = row[0]
             user_email = row[1]
             user_phone = row[2]
@@ -2315,9 +2317,8 @@ def Vendor_Data(request):
             user_city = row[4]
             user_address = row[5]
             user_password = row[6]
-            # Confirm Password is row[7], we skip it
             
-            # New Vendor Fields (Matching the Excel I generated)
+            # New Vendor Fields
             user_service_type = row[8]
             user_company_name = row[9]
             user_pan_number = row[10]
@@ -2325,7 +2326,7 @@ def Vendor_Data(request):
             user_role = row[12]
             operational_areas = row[13]
 
-            # Cleaning numeric strings (Phone/Password often come as floats from Excel)
+            # Cleaning numeric strings
             if user_password is not None:
                 user_password = str(user_password).split(".")[0]
 
