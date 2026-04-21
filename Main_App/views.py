@@ -1580,18 +1580,29 @@ def sponsored_ad_detail_view(request, slug):
 
 
 def rent_residential(request):
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
 
-    return render(request, "Listing_Form/Rental_Property/rent_residential.html")
+    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+    return render(request, "Listing_Form/Rental_Property/rent_residential.html",context)
 
 
 
 def rent_commercial(request):
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
 
-    return render(request, "Listing_Form/Rental_Property/rent_commercial.html")
+    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+    return render(request, "Listing_Form/Rental_Property/rent_commercial.html",context)
 
 def rent_pg_coliving(request):
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
 
-    return render(request, "Listing_Form/Rental_Property/rent_pg_coliving.html")
+    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+    return render(request, "Listing_Form/Rental_Property/rent_pg_coliving.html",context)
 
 
 #######################End View Section For Rental Listing#################################
@@ -1602,14 +1613,22 @@ def rent_pg_coliving(request):
 
 
 def residential_resale_form(request):
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
 
-    return render(request, "Listing_Form/Resale_Property/residential_resale_form.html")
+    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+    return render(request, "Listing_Form/Resale_Property/residential_resale_form.html",context)
 
 
 
 def resale_commercial_form(request):
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
 
-    return render(request, "Listing_Form/Resale_Property/resale_commercial_form.html")
+    context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+    return render(request, "Listing_Form/Resale_Property/resale_commercial_form.html",context)
 
 def resale_agricultural_form(request):
 

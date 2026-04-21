@@ -547,37 +547,25 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
 
     <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Amenities</div><div class="sd-line"></div></div>
     <div class="check-grid">
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="24x7 Security" onchange="checkToggle(this)"><label><i class="fas fa-shield-alt" style="color:var(--pr);font-size:12px;"></i> 24x7 Security</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Power Backup" onchange="checkToggle(this)"><label><i class="fas fa-bolt" style="color:var(--pr);font-size:12px;"></i> Power Backup</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Parking" onchange="checkToggle(this)"><label><i class="fas fa-car" style="color:var(--pr);font-size:12px;"></i> Parking</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Gym" onchange="checkToggle(this)"><label><i class="fas fa-dumbbell" style="color:var(--pr);font-size:12px;"></i> Gym</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Laundry" onchange="checkToggle(this)"><label><i class="fas fa-tshirt" style="color:var(--pr);font-size:12px;"></i> Laundry</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Housekeeping" onchange="checkToggle(this)"><label><i class="fas fa-broom" style="color:var(--pr);font-size:12px;"></i> Housekeeping</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Wi-Fi" onchange="checkToggle(this)"><label><i class="fas fa-wifi" style="color:var(--pr);font-size:12px;"></i> Wi-Fi</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="CCTV" onchange="checkToggle(this)"><label><i class="fas fa-video" style="color:var(--pr);font-size:12px;"></i> CCTV</label></label>
+
+        {% for amenities in ameneties_obj %}
+
+          <label class="check-item"><input type="checkbox" name="amenities[]" value="{{amenities.amenties_name}}" onchange="checkToggle(this)"> <label><i class="{{amenities.amenties_icon}}" style="color:var(--pr);font-size:12px;"></i> {{amenities.amenties_name}}</label></label>
+
+        {% endfor %}
+
     </div>
 
     <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Nearby Facilities</div><div class="sd-line"></div></div>
-    <div class="fg fg-2">
-      <div class="field">
-        <label>Colleges/Universities Nearby <span class="opt">(Optional)</span></label>
-        <input type="text" name="colleges_nearby" placeholder="Enter nearby colleges">
+      <div class="check-grid">
+        
+        {% for facilities in facilities_obj %}
+
+          <label class="check-item"><input type="checkbox" name="facilities[]" value="{{facilities.facilities_name}}" onchange="checkToggle(this)"> <label><i class="{{facilities.facilities_icon}}" style="color:var(--pr);font-size:12px;"></i> {{facilities.facilities_name}}</label></label>
+
+        {% endfor %}
+        
       </div>
-      <div class="field">
-        <label>IT Parks/Offices Nearby <span class="opt">(Optional)</span></label>
-        <input type="text" name="it_parks_nearby" placeholder="Enter nearby IT parks or offices">
-      </div>
-    </div>
-    <div class="fg fg-2" style="margin-top:16px;">
-      <div class="field">
-        <label>Metro/Bus Stops <span class="opt">(Optional)</span></label>
-        <input type="text" name="transport_nearby" placeholder="Enter nearby public transport">
-      </div>
-      <div class="field">
-        <label>Markets/Malls <span class="opt">(Optional)</span></label>
-        <input type="text" name="markets_nearby" placeholder="Enter nearby shopping areas">
-      </div>
-    </div>
 
     <div class="step-nav">
       <button class="btn btn-sec" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
