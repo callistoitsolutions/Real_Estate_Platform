@@ -190,8 +190,11 @@ def residential(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
+
         ameneties_obj = Ameneties_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj}
+        facilities_obj = Facilities_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
         return render(request,"admin_user/residential.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -201,8 +204,11 @@ def commercial(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
+
         ameneties_obj = Ameneties_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj}
+        facilities_obj = Facilities_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
         return render(request,"admin_user/commercial.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -212,8 +218,11 @@ def pg_coliving(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
+
         ameneties_obj = Ameneties_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj}
+        facilities_obj = Facilities_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
         return render(request,"admin_user/pg_coliving.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -355,17 +364,125 @@ def Facilities_List(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        # ameneties_obj = Ameneties_Details.objects.all().order_by('-id')
-        # ameneties_obj_count = Ameneties_Details.objects.all().count()
+        facilities_obj = Facilities_Details.objects.all().order_by('-id')
+        facilities_obj_count = Facilities_Details.objects.all().count()
 
-        # rendered = render_to_string("admin_user/render_to_string/R_Ameneties/r_t_s_ameneties.html",{'ameneties_obj':ameneties_obj,'ameneties_obj_count':ameneties_obj_count})
+        rendered = render_to_string("admin_user/render_to_string/R_Facilities/r_t_s_facilities.html",{'facilities_obj':facilities_obj,'facilities_obj_count':facilities_obj_count})
 
-        context = {'admin_obj':admin_obj}
+        context = {'admin_obj':admin_obj,'facilities_list':rendered}
         return render(request,"admin_user/Nearby_Facility/facilities_list.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
 
 ############ Views end for nearby facilities list ##########################
+
+
+############# Views start for ajax for add/update nearby facilities ##############
+
+@csrf_exempt
+def Facilities_Ajax(request):
+    data = request.POST.dict()
+
+    if data.get('id') == "":
+        data.pop("id", None)         
+        data['facilities_date'] = datetime.today()
+        data['facilities_time'] = datetime.now()
+        Facilities_Details.objects.create(**data)
+        return JsonResponse({"status":"1", "msg" : f"Nearby Facilities Details added successfully"})
+
+    # UPDATE MODE
+    else:
+        try:
+            facilities = Facilities_Details.objects.get(id=data['id'])
+        except Facilities_Details.DoesNotExist:
+            return JsonResponse({'status': '0', 'msg': 'Facilities Details not found'})
+
+
+        # Update withdraw fields (unchanged)
+        for key, value in data.items():
+            setattr(facilities, key, value)
+
+        facilities.save()
+        return JsonResponse({"status":"1", "msg" : f"Nearby Facilities Details updated successfully"})
+
+############# Views end for ajax for add/update nearby facilities #################
+
+
+########### Views start for upload facilities data via excel ######################
+
+@csrf_exempt
+def Facilities_Data(request):
+    if request.method == 'POST':
+
+        excel_file = request.FILES.get('facilities_file')
+
+        wb = load_workbook(excel_file)
+        sheet = wb.active
+
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+
+            facilities_icon = row[0]
+            facilities_name = row[1]
+
+            if not facilities_icon or not facilities_name:
+                continue
+
+            Facilities_Details.objects.update_or_create(
+                facilities_name=facilities_name,  # condition to check existing
+                defaults={
+                    "facilities_icon": facilities_icon,
+                    "facilities_date": datetime.today(),
+                    "facilities_time": datetime.now()
+                }
+            )
+
+        return JsonResponse({
+            "status": "1",
+            "msg": "Data Uploaded / Updated Successfully..."
+        })
+
+    return JsonResponse({
+        "status": "0",
+        "msg": "Something went wrong..."
+    })
+
+########### Views end for upload facilities data via excel ########################
+
+
+############# Views start for delete facilities data ######################
+
+@csrf_exempt
+def Delete_Facilities(request):
+    try:
+        try:
+            facilities_id = request.POST.get('facilities_id')
+            Facilities_Details.objects.filter(id=facilities_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Facilities details deleted successfully...'}) 
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+
+############# Views end for delete facilities data ###########################
+
+
+############### Views start for update facilities data ########################
+
+def Update_Facilities(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        facilities = Facilities_Details.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'facilities':facilities}
+        return render(request,'admin_user/Nearby_Facility/update_facilities.html',context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############## Views end for update facilities data #########################
 
 
 ########## Views start for vendor services list ########################
@@ -955,8 +1072,11 @@ def residential_resale(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
+
         ameneties_obj = Ameneties_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj}
+        facilities_obj = Facilities_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
         return render(request,"admin_user/Resale/residential_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -966,8 +1086,11 @@ def commercial_resale(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
+
         ameneties_obj = Ameneties_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj}
+        facilities_obj = Facilities_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
         return render(request,"admin_user/Resale/commercial_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')

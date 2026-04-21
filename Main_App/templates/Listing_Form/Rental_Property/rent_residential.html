@@ -217,7 +217,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
     <div class="step-line" id="line2"></div>
     <div class="step-item">
       <div class="step-circle" id="sc3">3</div>
-      <div class="step-label" id="sl3">Amenities</div>
+      <div class="step-label" id="sl3">Amenities & Nearby Facilities</div>
     </div>
     <div class="step-line" id="line3"></div>
     <div class="step-item">
@@ -710,34 +710,41 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 
   <!-- ════════════════════ STEP 3 ════════════════════ -->
   <div class="step-content" id="step3">
-  <div class="form-card">
-    <div class="card-head">
-      <h2><i class="fas fa-star" style="color:var(--pr);"></i> Step 3 — Amenities &amp; Features</h2>
-      <p>Select all available amenities — this boosts your listing's visibility and trust score.</p>
-    </div>
+    <div class="form-card">
+      <div class="card-head">
+        <h2><i class="fas fa-star" style="color:var(--pr);"></i> Step 3 — Amenities &amp; Features</h2>
+        <p>Select all available amenities — this boosts your listing's visibility and trust score.</p>
+      </div>
 
-    <!-- amenities[] — matches Form 1 exactly, same values -->
-    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Amenities &amp; Features</div><div class="sd-line"></div></div>
-    <div class="check-grid">
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Car Parking" onchange="checkToggle(this)"> <label><i class="fas fa-car" style="color:var(--pr);font-size:12px;"></i> Car Parking</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Lift" onchange="checkToggle(this)"> <label><i class="fas fa-arrow-up" style="color:var(--pr);font-size:12px;"></i> Lift/Elevator</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Power Backup" onchange="checkToggle(this)"> <label><i class="fas fa-bolt" style="color:var(--pr);font-size:12px;"></i> Power Backup</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Security" onchange="checkToggle(this)"> <label><i class="fas fa-shield-alt" style="color:var(--pr);font-size:12px;"></i> 24x7 Security</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Gym" onchange="checkToggle(this)"> <label><i class="fas fa-dumbbell" style="color:var(--pr);font-size:12px;"></i> Gym/Fitness</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Swimming Pool" onchange="checkToggle(this)"> <label><i class="fas fa-swimming-pool" style="color:var(--pr);font-size:12px;"></i> Swimming Pool</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="WiFi" onchange="checkToggle(this)"> <label><i class="fas fa-wifi" style="color:var(--pr);font-size:12px;"></i> WiFi</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="CCTV" onchange="checkToggle(this)"> <label><i class="fas fa-video" style="color:var(--pr);font-size:12px;"></i> CCTV</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Children Play Area" onchange="checkToggle(this)"> <label><i class="fas fa-child" style="color:var(--pr);font-size:12px;"></i> Play Area</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Garden" onchange="checkToggle(this)"> <label><i class="fas fa-tree" style="color:var(--pr);font-size:12px;"></i> Garden/Park</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Club House" onchange="checkToggle(this)"> <label><i class="fas fa-building" style="color:var(--pr);font-size:12px;"></i> Club House</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Water Supply" onchange="checkToggle(this)"> <label><i class="fas fa-tint" style="color:var(--pr);font-size:12px;"></i> 24x7 Water</label></label>
-    </div>
+      <!-- amenities[] — matches Form 1 exactly, same values -->
+      <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Amenities &amp; Features</div><div class="sd-line"></div></div>
+      <div class="check-grid">
+        
+        {% for amenities in ameneties_obj %}
 
-    <div class="step-nav">
-      <button class="btn btn-sec" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
-      <button class="btn btn-pr" onclick="goToStep(4)">Next — Photos &amp; Publish <i class="fas fa-arrow-right"></i></button>
+          <label class="check-item"><input type="checkbox" name="amenities[]" value="{{amenities.amenties_name}}" onchange="checkToggle(this)"> <label><i class="{{amenities.amenties_icon}}" style="color:var(--pr);font-size:12px;"></i> {{amenities.amenties_name}}</label></label>
+
+        {% endfor %}
+        
+      </div>
+
+
+      <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Nearby Facilities</div><div class="sd-line"></div></div>
+      <div class="check-grid">
+        
+        {% for facilities in facilities_obj %}
+
+          <label class="check-item"><input type="checkbox" name="facilities[]" value="{{facilities.facilities_name}}" onchange="checkToggle(this)"> <label><i class="{{facilities.facilities_icon}}" style="color:var(--pr);font-size:12px;"></i> {{facilities.facilities_name}}</label></label>
+
+        {% endfor %}
+        
+      </div>
+
+      <div class="step-nav">
+        <button class="btn btn-sec" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+        <button class="btn btn-pr" onclick="goToStep(4)">Next — Photos &amp; Publish <i class="fas fa-arrow-right"></i></button>
+      </div>
     </div>
-  </div>
   </div>
 
   <!-- ════════════════════ STEP 4 ════════════════════ -->

@@ -570,10 +570,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
         <div class="field">
             <label>Nearby Facilities</label>
             <div class="check-grid">
-                <label class="check-item"><input type="checkbox" name="nearby_facilities" value="metro" onchange="checkToggle(this)"> <label><i class="fas fa-train" style="color:var(--pr);font-size:12px;"></i> Metro Stations</label></label>
-                <label class="check-item"><input type="checkbox" name="nearby_facilities" value="bus" onchange="checkToggle(this)"> <label><i class="fas fa-bus" style="color:var(--pr);font-size:12px;"></i> Bus Stops</label></label>
-                <label class="check-item"><input type="checkbox" name="nearby_facilities" value="restaurants" onchange="checkToggle(this)"> <label><i class="fas fa-utensils" style="color:var(--pr);font-size:12px;"></i> Restaurants/Cafes</label></label>
-                <label class="check-item"><input type="checkbox" name="nearby_facilities" value="banks" onchange="checkToggle(this)"> <label><i class="fas fa-university" style="color:var(--pr);font-size:12px;"></i> Banks/ATMs</label></label>
+
+                {% for facilities in facilities_obj %}
+
+                  <label class="check-item"><input type="checkbox" name="facilities[]" value="{{facilities.facilities_name}}" onchange="checkToggle(this)"> <label><i class="{{facilities.facilities_icon}}" style="color:var(--pr);font-size:12px;"></i> {{facilities.facilities_name}}</label></label>
+
+                {% endfor %}
+                
             </div>
         </div>
     </div>
@@ -582,14 +585,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
         <div class="field">
             <label>Property Amenities</label>
             <div class="check-grid">
-                <label class="check-item"><input type="checkbox" name="amenities" value="parking" onchange="checkToggle(this)"> <label><i class="fas fa-car" style="color:var(--pr);font-size:12px;"></i> Parking</label></label>
-                <label class="check-item"><input type="checkbox" name="amenities" value="security" onchange="checkToggle(this)"> <label><i class="fas fa-shield-alt" style="color:var(--pr);font-size:12px;"></i> Security</label></label>
-                <label class="check-item"><input type="checkbox" name="amenities" value="ac" onchange="checkToggle(this)"> <label><i class="fas fa-snowflake" style="color:var(--pr);font-size:12px;"></i> AC</label></label>
-                <label class="check-item"><input type="checkbox" name="amenities" value="power" onchange="checkToggle(this)"> <label><i class="fas fa-bolt" style="color:var(--pr);font-size:12px;"></i> Power Backup</label></label>
-                <label class="check-item"><input type="checkbox" name="amenities" value="cafeteria" onchange="checkToggle(this)"> <label><i class="fas fa-coffee" style="color:var(--pr);font-size:12px;"></i> Cafeteria</label></label>
-                <label class="check-item"><input type="checkbox" name="amenities" value="conference" onchange="checkToggle(this)"> <label><i class="fas fa-users" style="color:var(--pr);font-size:12px;"></i> Conference Room</label></label>
-                <label class="check-item"><input type="checkbox" name="amenities" value="fire" onchange="checkToggle(this)"> <label><i class="fas fa-fire-extinguisher" style="color:var(--pr);font-size:12px;"></i> Fire Safety</label></label>
-                <label class="check-item"><input type="checkbox" name="amenities" value="cctv" onchange="checkToggle(this)"> <label><i class="fas fa-video" style="color:var(--pr);font-size:12px;"></i> CCTV</label></label>
+
+                {% for amenities in ameneties_obj %}
+
+                  <label class="check-item"><input type="checkbox" name="amenities[]" value="{{amenities.amenties_name}}" onchange="checkToggle(this)"> <label><i class="{{amenities.amenties_icon}}" style="color:var(--pr);font-size:12px;"></i> {{amenities.amenties_name}}</label></label>
+
+                {% endfor %}
+                
             </div>
         </div>
     </div>

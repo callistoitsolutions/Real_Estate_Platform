@@ -633,19 +633,25 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
 
     <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Amenities</div><div class="sd-line"></div></div>
     <div class="check-grid">
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Parking" onchange="checkToggle(this)"><label><i class="fas fa-car" style="color:var(--pr);font-size:12px;"></i> Parking</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Security" onchange="checkToggle(this)"><label><i class="fas fa-shield-alt" style="color:var(--pr);font-size:12px;"></i> Security</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="AC" onchange="checkToggle(this)"><label><i class="fas fa-snowflake" style="color:var(--pr);font-size:12px;"></i> AC</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Power Backup" onchange="checkToggle(this)"><label><i class="fas fa-bolt" style="color:var(--pr);font-size:12px;"></i> Power Backup</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Cafeteria" onchange="checkToggle(this)"><label><i class="fas fa-utensils" style="color:var(--pr);font-size:12px;"></i> Cafeteria</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Conference Room" onchange="checkToggle(this)"><label><i class="fas fa-chalkboard" style="color:var(--pr);font-size:12px;"></i> Conference Room</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Fire Safety" onchange="checkToggle(this)"><label><i class="fas fa-fire-extinguisher" style="color:var(--pr);font-size:12px;"></i> Fire Safety</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="CCTV" onchange="checkToggle(this)"><label><i class="fas fa-video" style="color:var(--pr);font-size:12px;"></i> CCTV</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="WiFi" onchange="checkToggle(this)"><label><i class="fas fa-wifi" style="color:var(--pr);font-size:12px;"></i> WiFi</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Lift" onchange="checkToggle(this)"><label><i class="fas fa-arrow-up" style="color:var(--pr);font-size:12px;"></i> Lift / Elevator</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Reception" onchange="checkToggle(this)"><label><i class="fas fa-concierge-bell" style="color:var(--pr);font-size:12px;"></i> Reception</label></label>
-      <label class="check-item"><input type="checkbox" name="amenities[]" value="Pantry" onchange="checkToggle(this)"><label><i class="fas fa-coffee" style="color:var(--pr);font-size:12px;"></i> Pantry</label></label>
+
+        {% for amenities in ameneties_obj %}
+
+          <label class="check-item"><input type="checkbox" name="amenities[]" value="{{amenities.amenties_name}}" onchange="checkToggle(this)"> <label><i class="{{amenities.amenties_icon}}" style="color:var(--pr);font-size:12px;"></i> {{amenities.amenties_name}}</label></label>
+
+        {% endfor %}
+     
     </div>
+
+    <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Nearby Facilities</div><div class="sd-line"></div></div>
+      <div class="check-grid">
+        
+        {% for facilities in facilities_obj %}
+
+          <label class="check-item"><input type="checkbox" name="facilities[]" value="{{facilities.facilities_name}}" onchange="checkToggle(this)"> <label><i class="{{facilities.facilities_icon}}" style="color:var(--pr);font-size:12px;"></i> {{facilities.facilities_name}}</label></label>
+
+        {% endfor %}
+        
+      </div>
 
     <div class="step-nav">
       <button class="btn btn-sec" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
