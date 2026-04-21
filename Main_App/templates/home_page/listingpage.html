@@ -340,7 +340,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
     <!-- LISTINGS GRID — rendered by Django -->
     <div class="listings-grid" id="listingsGrid">
       {% for p in properties %}
-      <a href="/listing/{{ p.listing_type }}/{{ p.id }}/" class="pcard">
+      <a href="/listing/{{ p.listing_type }}/{{ p.category }}/{{ p.id }}/" class="pcard">
         <div class="pc-img">
           <div class="pc-img-placeholder"
                style="background:linear-gradient(135deg,#dbeafe,#bfdbfe);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.5rem;">

@@ -99,6 +99,28 @@ import re
 
 
 
+def property_detail_view(request, listing_type, category, pk):
+    # Fetch based on category to handle multiple models
+    if listing_type == 'rent':
+        if category == 'residential':
+            obj = get_object_or_404(RentalResidentialProperty, pk=pk)
+            p = _normalize_rental(obj)
+        elif category == 'commercial':
+            obj = get_object_or_404(CommercialRentalProperty, pk=pk)
+            p = _normalize_commercial_rental(obj)
+        elif category == 'pg':
+            obj = get_object_or_404(PGColivingProperty, pk=pk)
+            p = _normalize_pg(obj)
+            
+    elif listing_type == 'sale':
+        if category == 'residential':
+            obj = get_object_or_404(ResaleResidentialProperty, pk=pk)
+            p = _normalize_resale(obj)
+        elif category == 'commercial':
+            obj = get_object_or_404(CommercialResaleProperty, pk=pk)
+            p = _normalize_commercial_resale(obj)
+
+    return render(request, 'home_page/property_detail.html', {'p': p, 'original': obj})
 
 
 def listings_view(request):

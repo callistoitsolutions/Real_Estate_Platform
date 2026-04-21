@@ -1,25 +1,239 @@
-<h2>{{ listing.title }}</h2>
-<p>{{ listing.description }}</p>
-{% if owner_visible %}
-  <div class="alert alert-success">
-    <b>Owner Name: </b> {{ listing.owner_name }}<br>
-    <b>Owner Mobile: </b> {{ listing.owner_mobile }}
-  </div>
-{% else %}
-  <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#viewOwnerModal">View Owner Details</button>
-  <!-- Modal for Visitor Details form -->
-  <div class="modal fade" id="viewOwnerModal" tabindex="-1">
-    <div class="modal-dialog">
-      <form method="post" class="modal-content">
-        {% csrf_token %}
-        <div class="modal-header">View Owner Details</div>
-        <div class="modal-body">
-          <div class="mb-3"><input class="form-control" name="name" placeholder="Your Name" required></div>
-          <div class="mb-3"><input class="form-control" name="mobile" placeholder="Your Mobile" required></div>
-          <div class="form-check mb-3"><input class="form-check-input" type="checkbox" name="consent" required> <label class="form-check-label">Accept Terms to View Mobile/Name</label></div>
-        </div>
-        <div class="modal-footer"><button class="btn btn-primary">Submit &amp; Reveal</button></div>
-      </form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>{{ p.title }} — PropCRM</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<style>
+:root{--pr:#f97316;--pr2:#ea580c;--sec:#0f172a;--muted:#64748b;--border:#e2e8f0;--bg:#f8fafc;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e293b;}
+.nav{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:500;box-shadow:0 1px 8px rgba(0,0,0,.06);}
+.nav-inner{max-width:1300px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:16px;height:60px;}
+.logo{font-weight:900;font-size:1.2rem;color:var(--sec);text-decoration:none;}
+.logo span{color:var(--pr);}
+.nav-right{margin-left:auto;display:flex;gap:8px;}
+.btn{padding:7px 16px;border-radius:8px;font-weight:700;font-size:.81rem;cursor:pointer;border:none;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.btn-pr{background:var(--pr);color:white;}.btn-pr:hover{background:var(--pr2);}
+.btn-outline{background:white;border:1.5px solid var(--border);color:var(--sec);}
+
+/* GALLERY */
+.gallery{max-width:1300px;margin:20px auto;padding:0 20px;display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:220px 220px;gap:10px;}
+.gal-main{grid-row:1/3;border-radius:16px 0 0 16px;overflow:hidden;cursor:pointer;position:relative;}
+.gal-cell{border-radius:4px;overflow:hidden;cursor:pointer;position:relative;}
+.gal-cell:nth-child(3){border-radius:0 16px 0 0;}
+.gal-cell:nth-child(5){border-radius:0 0 16px 0;}
+.gal-img{width:100%;height:100%;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:3rem;transition:.3s;}
+.gal-img:hover{transform:scale(1.03);}
+.gal-count{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.65);color:white;padding:5px 12px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;}
+.gal-badges{position:absolute;top:14px;left:14px;display:flex;gap:6px;flex-wrap:wrap;}
+.badge{font-size:.65rem;font-weight:800;padding:3px 9px;border-radius:6px;}
+.b-feat{background:#f59e0b;color:white;}.b-verif{background:#10b981;color:white;}
+
+/* BREADCRUMB */
+.breadcrumb-bar{max-width:1300px;margin:0 auto;padding:12px 20px 0;font-size:.75rem;color:var(--muted);}
+.breadcrumb-bar a{color:var(--pr);text-decoration:none;}
+
+/* DETAIL LAYOUT */
+.detail-layout{max-width:1300px;margin:0 auto;padding:16px 20px 40px;display:grid;grid-template-columns:1fr 340px;gap:24px;}
+.detail-section{background:white;border-radius:14px;border:1px solid var(--border);padding:22px;margin-bottom:16px;}
+.ds-title{font-size:.92rem;font-weight:800;color:var(--sec);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+
+/* LEFT PANEL CONTENT */
+.detail-title{font-size:1.5rem;font-weight:900;color:var(--sec);margin-bottom:6px;}
+.detail-addr{font-size:.84rem;color:var(--muted);display:flex;align-items:center;gap:5px;margin-bottom:14px;}
+.detail-price{font-size:2rem;font-weight:900;color:var(--pr);}
+.spec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0;}
+.sg-item{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
+.sg-val{font-size:.9rem;font-weight:800;color:var(--sec);}
+.sg-lbl{font-size:.67rem;color:var(--muted);}
+.amenity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.amenity-item{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bg);border-radius:9px;font-size:.8rem;font-weight:600;color:#475569;}
+.amenity-item i{color:var(--pr);width:14px;}
+
+/* RIGHT PANEL */
+.contact-card{background:white;border-radius:16px;border:1px solid var(--border);padding:22px;position:sticky;top:80px;}
+.cc-price{font-size:1.8rem;font-weight:900;color:var(--pr);}
+.co-av{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white;}
+.contact-btn{width:100%;padding:13px;border-radius:11px;font-size:.9rem;font-weight:800;cursor:pointer;border:none;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.ef-input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;font-size:.83rem;margin-bottom:10px;}
+
+/* SIMILAR PROPERTIES GRID */
+.similar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px;}
+.sim-card{background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:.2s;text-decoration:none;color:inherit;}
+.sim-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08);color:inherit;}
+.sim-img{height:130px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;background:#f1f5f9;}
+.sim-body{padding:12px;}
+.sim-price{font-size:.88rem;font-weight:900;color:var(--pr);}
+.sim-title{font-size:.8rem;font-weight:700;color:var(--sec);margin-top:3px;}
+.sim-loc{font-size:.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+@media(max-width:1024px){.detail-layout{grid-template-columns:1fr;}.gallery{grid-template-columns:1fr;grid-template-rows:300px;}.gal-cell{display:none;}.spec-grid{grid-template-columns:repeat(2,1fr);}.similar-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:768px){.similar-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="logo">🏠 Prop<span>CRM</span></a>
+    <div style="font-size:.78rem;color:var(--muted);margin-left:8px;">/ {{ category|title }} / Nagpur / {{ p.location }}</div>
+    <div class="nav-right">
+      <button class="btn btn-outline" onclick="shareListing()"><i class="fas fa-share-alt"></i> Share</button>
+      <button class="btn btn-outline" id="saveBtn" onclick="saveListing()"><i class="far fa-heart"></i> Save</button>
+      <a href="/add-listing/" class="btn btn-pr"><i class="fas fa-plus"></i> Post Property</a>
     </div>
   </div>
-{% endif %}
+</nav>
+
+<div class="breadcrumb-bar">
+  <a href="/">Home</a> &rsaquo; <a href="/listings/?type={{ listing_type }}">{{ listing_type|title }}</a> &rsaquo; <a href="#">Nagpur</a> &rsaquo; {{ p.location }}
+</div>
+
+<div class="gallery">
+  <div class="gal-main">
+    <div class="gal-img" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe);height:100%;">{% if category == 'commercial' %}🏗{% elif listing_type == 'sale' %}🏘{% else %}🏠{% endif %}</div>
+    <div class="gal-badges">
+      {% if original.is_featured or original.featured %}<span class="badge b-feat">⭐ Featured</span>{% endif %}
+      <span class="badge b-verif">✅ PropCRM Verified</span>
+    </div>
+    <div class="gal-count" onclick="viewAllPhotos()">📷 View All 12 Photos</div>
+  </div>
+  <div class="gal-cell"><div class="gal-img" style="background:#e0f2fe;">🛋</div></div>
+  <div class="gal-cell"><div class="gal-img" style="background:#dcfce7;">🍳</div></div>
+  <div class="gal-cell"><div class="gal-img" style="background:#fef3c7;">🛏</div></div>
+  <div class="gal-cell"><div class="gal-img" style="background:#ede9fe;">🚿</div></div>
+</div>
+
+<div class="detail-layout">
+  <div>
+    <div class="detail-section">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div style="flex:1;">
+          <div class="d-flex gap-2 mb-2">
+            {% if original.is_featured %}<span class="badge b-feat">⭐ Featured</span>{% endif %}
+            <span class="badge" style="background:#dbeafe;color:#1e40af;">FOR {{ listing_type|upper }}</span>
+          </div>
+          <div class="detail-title">{{ p.title }}</div>
+          <div class="detail-addr"><i class="fas fa-map-marker-alt" style="color:var(--pr);"></i> {{ p.location }}</div>
+        </div>
+        <div class="text-end">
+          <div class="detail-price">{{ p.price_display }}{% if listing_type == 'rent' %}<span style="font-size:1rem;font-weight:400;color:var(--muted);">/mo</span>{% endif %}</div>
+          <div class="small text-muted">Maintenance: ₹{{ original.maintenance|default:"0" }}/mo</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="spec-grid">
+        <div class="sg-item"><div class="sg-ico">🛏</div><div class="sg-val">{{ p.beds|default:"—" }}</div><div class="sg-lbl">Bedrooms</div></div>
+        <div class="sg-item"><div class="sg-ico">🚿</div><div class="sg-val">{{ p.baths|default:"—" }}</div><div class="sg-lbl">Bathrooms</div></div>
+        <div class="sg-item"><div class="sg-ico">📐</div><div class="sg-val">{{ p.area }}</div><div class="sg-lbl">Area</div></div>
+        <div class="sg-item"><div class="sg-ico">🏢</div><div class="sg-val">{{ p.floor|default:"—" }}</div><div class="sg-lbl">Floor</div></div>
+        <div class="sg-item"><div class="sg-ico">🛋</div><div class="sg-val">{{ p.furnished }}</div><div class="sg-lbl">Furnishing</div></div>
+        <div class="sg-item"><div class="sg-ico">🚗</div><div class="sg-val">1 Covered</div><div class="sg-lbl">Parking</div></div>
+        <div class="sg-item"><div class="sg-ico">🧭</div><div class="sg-val">East</div><div class="sg-lbl">Facing</div></div>
+        <div class="sg-item"><div class="sg-ico">🏗</div><div class="sg-val">New</div><div class="sg-lbl">Age</div></div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="ds-title"><i class="fas fa-align-left" style="color:var(--pr);"></i> About This Property</div>
+      <div style="font-size:.85rem;color:#475569;line-height:1.8;">
+        {{ original.description|default:"No detailed description provided."|linebreaks }}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="ds-title"><i class="fas fa-star" style="color:var(--pr);"></i> Amenities</div>
+      <div class="amenity-grid">
+        <div class="amenity-item"><i class="fas fa-elevator"></i> Lift</div>
+        <div class="amenity-item"><i class="fas fa-bolt"></i> Power Backup</div>
+        <div class="amenity-item"><i class="fas fa-shield-alt"></i> Security</div>
+        <div class="amenity-item"><i class="fas fa-car"></i> Parking</div>
+        <div class="amenity-item"><i class="fas fa-water"></i> 24hr Water</div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size:1rem;font-weight:800;color:var(--sec);margin-bottom:14px;">Similar Properties You May Like</div>
+      <div class="similar-grid">
+        {% for sp in similar %}
+        <a href="/listing/{{ sp.listing_type }}/{{ sp.category }}/{{ sp.id }}/" class="sim-card">
+          <div class="sim-img">
+            {% if sp.category == 'commercial' %}🏗{% elif sp.listing_type == 'sale' %}🏘{% else %}🏠{% endif %}
+          </div>
+          <div class="sim-body">
+            <div class="sim-price">{{ sp.price_display }}</div>
+            <div class="sim-title">{{ sp.title|truncatechars:25 }}</div>
+            <div class="sim-loc"><i class="fas fa-map-marker-alt" style="color:var(--pr);font-size:.65rem;"></i> {{ sp.location }}</div>
+          </div>
+        </a>
+        {% empty %}
+        <div style="grid-column:1/-1; background:white; border-radius:12px; padding:30px; text-align:center; border: 1px dashed var(--border);">
+            <div style="font-size:2rem; margin-bottom:10px;">🏠</div>
+            <div class="fw-bold small text-muted">No similar properties found in this area.</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <aside>
+    <div class="contact-card">
+      <div class="cc-price">{{ p.price_display }}</div>
+      <div class="cc-owner">
+        <div class="co-av" style="background:var(--pr);">{{ p.owner|slice:":2"|upper }}</div>
+        <div>
+          <div class="fw-bold small">{{ p.owner }}</div>
+          <div class="small text-muted" style="font-size:.7rem;">{{ p.owner_role }}</div>
+          <div class="co-verified" style="font-size:.65rem;background:#dcfce7;color:#166534;padding:2px 6px;border-radius:4px;">✅ Verified Owner</div>
+        </div>
+      </div>
+      
+      <button class="contact-btn btn-pr" onclick="callOwner('{{ p.phone }}')"><i class="fas fa-phone"></i> Call Now</button>
+      <button class="contact-btn" style="background:#25d366;color:white;" onclick="window.open('https://wa.me/91{{ p.phone }}')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+
+      <div class="mt-4">
+        <div class="fw-bold small mb-2">Send Enquiry</div>
+        <input type="text" class="ef-input" placeholder="Your Name">
+        <input type="tel" class="ef-input" placeholder="Phone Number">
+        <button class="btn btn-dark w-100 btn-sm py-2" onclick="sendEnquiry()">Send Enquiry</button>
+      </div>
+    </div>
+
+    <div class="detail-section mt-3 p-3">
+      <div class="small text-muted fw-bold mb-2">MANAGED BY PROPCRM</div>
+      <div class="d-flex align-items-center gap-2">
+        <div style="width:40px;height:40px;background:linear-gradient(135deg,#7c3aed,#f97316);border-radius:8px;"></div>
+        <div>
+          <div class="fw-bold small">PropCRM Assistant</div>
+          <div class="text-muted" style="font-size:.65rem;">Assigned Relationship Manager</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function callOwner(phone) {
+  Swal.fire({ title: 'Contact Details', html: `<h2 class="text-primary mt-3">📞 ${phone}</h2>`, confirmButtonColor: '#f97316' });
+}
+function sendEnquiry() {
+  Swal.fire({ icon: 'success', title: 'Enquiry Sent!', text: 'Owner will contact you soon.', confirmButtonColor: '#f97316' });
+}
+function saveListing() {
+  const btn = document.getElementById('saveBtn');
+  btn.innerHTML = '<i class="fas fa-heart text-danger"></i> Saved';
+  Swal.fire({ icon: 'success', title: 'Saved!', timer: 1000, showConfirmButton: false });
+}
+function shareListing() {
+  Swal.fire({ title: 'Share Link', text: window.location.href, confirmButtonColor: '#f97316' });
+}
+</script>
+</body>
+</html>

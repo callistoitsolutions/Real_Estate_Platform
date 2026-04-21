@@ -1,496 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
-{% load static %}
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Property Details - TheProperty Bootstrap Template</title>
-  <meta name="description" content="">
-  <meta name="keywords" content="">
-
-  <!-- Favicons -->
-  <link href="{% static "assets/img/favicon.png" %}" rel="icon">
-  <link href="{% static "assets/img/apple-touch-icon.png" %}" rel="apple-touch-icon">
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-
-  <!-- Vendor CSS Files -->
-  <link href="{% static "assets/vendor/bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/bootstrap-icons/bootstrap-icons.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/aos/aos.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/glightbox/css/glightbox.min.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/swiper/swiper-bundle.min.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/drift-zoom/drift-basic.css" %}" rel="stylesheet">
-
-  <!-- Main CSS File -->
-  <link href="{% static "assets/css/main.css" %}" rel="stylesheet">
-
-
-
-  <style>
-/* Carousel image animation */
-.property-gallery .carousel-inner img {
-  transition: transform 0.5s ease, filter 0.5s ease;
-}
-.property-gallery .carousel-inner img:hover {
-  transform: scale(1.03);
-  filter: brightness(1.05);
-}
-
-/* Enquire Now button style */
-.enquire-btn {
-  background: linear-gradient(45deg, #388e3c, #66bb6a);
-  color: white;
-  border: none;
-  transition: background 0.3s ease, transform 0.3s ease;
-}
-.enquire-btn:hover {
-  background: linear-gradient(45deg, #66bb6a, #388e3c);
-  transform: scale(1.05);
-}
-
-/* Contact form button style */
-.contact-form button {
-  background: #007bff;
-  color: white;
-  border: none;
-  transition: background 0.3s ease, transform 0.3s ease;
-}
-.contact-form button:hover {
-  background: #0056b3;
-  transform: scale(1.05);
-}
-
-/* Property overview price badge */
-.price-badge {
-  padding: 10px;
-  border-radius: 6px;
-  background: linear-gradient(45deg, #388e3c, #66bb6a);
-  color: white;
-  font-weight: bold;
-  transition: background 0.3s ease, transform 0.3s ease;
-}
-.price-badge:hover {
-  background: linear-gradient(45deg, #66bb6a, #388e3c);
-  transform: scale(1.05);
-}
-
-/* Amenities styling */
-.amenity {
-  background: #f0f0f0;
-  padding: 6px 12px;
-  border-radius: 20px;
-  margin: 4px;
-  transition: background 0.3s ease, transform 0.3s ease;
-}
-.amenity:hover {
-  background: #66bb6a;
-  color: white;
-  transform: scale(1.1);
-}
-
-/* Agent contact button */
-.btn-info {
-  transition: background 0.3s ease, transform 0.3s ease;
-}
-.btn-info:hover {
-  background: #0177cc;
-  transform: scale(1.05);
-}
-
-</style>
-  <!-- =======================================================
-  * Template Name: TheProperty
-  * Template URL: https://bootstrapmade.com/theproperty-bootstrap-real-estate-template/
-  * Updated: Aug 05 2025 with Bootstrap v5.3.7
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>{{ p.title }} — PropCRM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root{--pr:#f97316;--pr2:#ea580c;--sec:#0f172a;--muted:#64748b;--border:#e2e8f0;--bg:#f8fafc;}
+        body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:#1e293b;}
+        .nav{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:500;box-shadow:0 1px 8px rgba(0,0,0,.06);}
+        .nav-inner{max-width:1300px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:16px;height:60px;}
+        .logo{font-weight:900;font-size:1.2rem;color:var(--sec);text-decoration:none;}
+        .logo span{color:var(--pr);}
+        .btn-pr{background:var(--pr);color:white;}.btn-pr:hover{background:var(--pr2);}
+        .gallery{max-width:1300px;margin:20px auto;padding:0 20px;display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:220px 220px;gap:10px;}
+        .gal-main{grid-row:1/3;border-radius:16px 0 0 16px;overflow:hidden;position:relative;background:#e2e8f0;}
+        .gal-cell{border-radius:4px;overflow:hidden;background:#f1f5f9;}
+        .gal-img{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;transition:.3s;}
+        .detail-layout{max-width:1300px;margin:0 auto;padding:16px 20px 40px;display:grid;grid-template-columns:1fr 340px;gap:24px;}
+        .detail-section{background:white;border-radius:14px;border:1px solid var(--border);padding:22px;margin-bottom:16px;}
+        .spec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0;}
+        .sg-item{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
+        .sg-val{font-size:.9rem;font-weight:800;}
+        .contact-card{background:white;border-radius:16px;border:1px solid var(--border);padding:22px;position:sticky;top:80px;}
+        .badge{font-size:.65rem;font-weight:800;padding:3px 9px;border-radius:6px;}
+        .b-feat{background:#f59e0b;color:white;}.b-verif{background:#10b981;color:white;}
+    </style>
 </head>
+<body>
 
-<body class="property-details-page">
-
-  <header id="header" class="header d-flex align-items-center fixed-top">
-    <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
-
-      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
-        <!-- Uncomment the line below if you also wish to use an image logo -->
-        <!-- <img src="assets/img/logo.webp" alt=""> -->
-        <h1 class="sitename">TheProperty</h1>
-      </a>
-
-      <nav id="navmenu" class="navmenu">
-        <ul>
-          <li><a href="{% url 'index'  %}">Home</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="properties.html">Properties</a></li>
-          <li><a href="services.html">Services</a></li>
-          <li><a href="agents.html">Agents</a></li>
-          <li><a href="blog.html">Blog</a></li>
-          <li class="dropdown"><a href="#"><span>More Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="property-details.html" class="active">Property Details</a></li>
-              <li><a href="service-details.html">Service Details</a></li>
-              <li><a href="agent-profile.html">Agent Profile</a></li>
-              <li><a href="blog-details.html">Blog Details</a></li>
-              <li><a href="terms.html">Terms</a></li>
-              <li><a href="privacy.html">Privacy</a></li>
-              <li><a href="404.html">404</a></li>
-            </ul>
-          </li>
-
-          <li class="dropdown"><a href="#"><span>Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="#">Dropdown 1</a></li>
-              <li class="dropdown"><a href="#"><span>Deep Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                <ul>
-                  <li><a href="#">Deep Dropdown 1</a></li>
-                  <li><a href="#">Deep Dropdown 2</a></li>
-                  <li><a href="#">Deep Dropdown 3</a></li>
-                  <li><a href="#">Deep Dropdown 4</a></li>
-                  <li><a href="#">Deep Dropdown 5</a></li>
-                </ul>
-              </li>
-              <li><a href="#">Dropdown 2</a></li>
-              <li><a href="#">Dropdown 3</a></li>
-              <li><a href="#">Dropdown 4</a></li>
-            </ul>
-          </li>
-          <li><a href="contact.html">Contact</a></li>
-        </ul>
-        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-      </nav>
-
-      <a class="btn-getstarted" href="properties.html">Get Started</a>
-
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="/" class="logo">🏠 Prop<span>CRM</span></a>
+        <div class="ms-auto">
+            <button class="btn btn-outline-secondary btn-sm" onclick="shareListing()"><i class="fas fa-share-alt"></i> Share</button>
+        </div>
     </div>
-  </header>
+</nav>
 
-  <main class="main">
-
-    <!-- Page Title -->
-    <div class="page-title">
-      <div class="heading">
-        <div class="container">
-          <div class="row d-flex justify-content-center text-center">
-            <div class="col-lg-8">
-              <h1 class="heading-title">Property Details</h1>
-              <p class="mb-0">
-                Odio et unde deleniti. Deserunt numquam exercitationem. Officiis quo
-                odio sint voluptas consequatur ut a odio voluptatem. Sit dolorum
-                debitis veritatis natus dolores. Quasi ratione sint. Sit quaerat
-                ipsum dolorem.
-              </p>
-            </div>
-          </div>
+<div class="gallery">
+    <div class="gal-main">
+        <div class="gal-img">
+            {% if category == 'commercial' %}🏗{% elif listing_type == 'sale' %}🏘{% else %}🏠{% endif %}
         </div>
-      </div>
-      <nav class="breadcrumbs">
-        <div class="container">
-          <ol>
-            <li><a href="{% url 'index' %}">Home</a></li>
-            <li class="current">Property Details</li>
-          </ol>
+        <div class="position-absolute top-0 start-0 p-3 d-flex gap-2">
+            {% if original.is_featured %}<span class="badge b-feat">⭐ Featured</span>{% endif %}
+            <span class="badge b-verif">✅ Verified</span>
         </div>
-      </nav>
-    </div><!-- End Page Title -->
-
-    <!-- Property Details Section -->
- 
-
-    <!-- Bootstrap Carousel + Animated Buttons Style -->
-
-
-<section id="property-details" class="property-details section">
-  <div class="container" data-aos="fade-up" data-aos-delay="100">
-    <div class="row gy-4">
-
-      <!-- Left Column: Gallery + Details -->
-      <div class="col-lg-8">
-
-        <!-- Property Header -->
-        <div class="property-header bg-white rounded shadow-sm p-4 mb-4">
-          <h2>{{ property.title }}</h2>
-          <h5 class="text-secondary mb-2">{{ property.address }}</h5>
-
-          <!-- Badges -->
-          <div class="mb-2">
-            {% if property.verified %}
-              <span class="badge bg-success">Verified</span>
-            {% endif %}
-            {% if property.featured %}
-              <span class="badge bg-warning text-dark">Featured</span>
-            {% endif %}
-            {% if property.exclusive %}
-              <span class="badge bg-primary">Exclusive</span>
-            {% endif %}
-          </div>
-
-          <span class="badge price-badge fs-5 mb-3">₹ {{ property.rent|intcomma }}/month</span>
-          <p>
-            <b>Built Up:</b> {{ property.built_up_area }} sq.ft &nbsp;|&nbsp;
-            <b>Floor:</b> {{ property.floor }}/{{ property.total_floors }} &nbsp;|&nbsp;
-            <b>Available:</b> {{ property.available_from|date:"M d, Y" }}
-          </p>
-          <p>
-            <b>Deposit:</b> ₹ {{ property.deposit|intcomma }} &nbsp;
-            <b>Furnishing:</b> {{ property.furnishing }}
-          </p>
-        </div>
-
-        <!-- Property Gallery Carousel -->
-        <div id="propertyGalleryCarousel" class="carousel slide property-gallery mb-4" data-bs-ride="carousel">
-          <div class="carousel-inner">
-            {% for img in property.images.all %}
-              <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <img src="{{ img.image.url }}" class="d-block w-100 rounded" alt="{{ img.alt_text }}">
-              </div>
-            {% endfor %}
-          </div>
-          <button class="carousel-control-prev" type="button" data-bs-target="#propertyGalleryCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#propertyGalleryCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-          </button>
-        </div>
-
-        <!-- About Property -->
-        <div class="property-description bg-white p-3 rounded shadow-sm mb-4">
-          <h3>About This Property</h3>
-          <p>{{ property.description }}</p>
-        </div>
-
-        <!-- Amenities -->
-        {% if amenities %}
-        <div class="property-amenities bg-white p-3 rounded shadow-sm mb-4">
-          <h4 class="section-title">Amenities & Features</h4>
-          <div class="d-flex flex-wrap">
-            {% for amenity in amenities %}
-              <span class="amenity">{{ amenity }}</span>
-            {% endfor %}
-          </div>
-        </div>
-        {% endif %}
-
-        <!-- Map -->
-        {% if property.latitude and property.longitude %}
-        <div class="property-map bg-white p-3 rounded shadow-sm">
-          <h4 class="section-title">Location</h4>
-          <iframe src="https://www.google.com/maps?q={{ property.latitude }},{{ property.longitude }}&output=embed"
-                  width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-        </div>
-        {% endif %}
-      </div>
-
-      <!-- Right Column: Overview + Inquiry Form -->
-      <div class="col-lg-4">
-
-        <!-- Property Overview -->
-        <div class="property-overview bg-white p-3 rounded shadow-sm sticky-top">
-
-          <!-- Agent Info -->
-          <div class="agent-info p-3 rounded shadow-sm mb-4">
-            <div class="d-flex align-items-center">
-              <img src="{{ property.agent.photo.url }}" alt="{{ property.agent.name }}" class="rounded-circle me-2" style="width:60px;height:60px;">
-              <div>
-                <h5 id="agent-name" style="filter:blur(3px);">{{ property.agent.name }}</h5>
-                <p class="text-muted mb-0">{{ property.agent.designation }}</p>
-              </div>
-            </div>
-            <div class="mt-2">
-              <b>Contact:</b> <span id="hidden-contact">*******</span>
-              <button class="btn btn-info btn-sm ms-2" onclick="revealContact('{{ property.agent.phone }}')">Show</button><br>
-              <b>Email:</b> <span id="hidden-email">*******</span>
-            </div>
-          </div>
-
-          <!-- Inquiry Form -->
-          <div class="contact-form">
-            <h5>Schedule a Tour / Inquiry</h5>
-            <form method="POST">
-              {% csrf_token %}
-              <input type="text" name="name" class="form-control mb-2" placeholder="Your Name" required>
-              <input type="email" name="email" class="form-control mb-2" placeholder="Your Email" required>
-              <input type="tel" name="phone" class="form-control mb-2" placeholder="Your Phone" required>
-              <textarea name="message" class="form-control mb-2" placeholder="Your Message"></textarea>
-              <button type="submit" class="btn btn-primary w-100">Submit Inquiry</button>
-            </form>
-          </div>
-
-        </div>
-      </div>
     </div>
-  </div>
-</section>
+    <div class="gal-cell"><div class="gal-img">🛋</div></div>
+    <div class="gal-cell"><div class="gal-img">🍳</div></div>
+    <div class="gal-cell"><div class="gal-img">🛏</div></div>
+    <div class="gal-cell"><div class="gal-img">🚿</div></div>
+</div>
 
-<script>
-function revealContact(phone) {
-    document.getElementById('hidden-contact').innerText = phone;
-    document.getElementById('agent-name').style.filter = 'none';
-}
-</script>
-
-
-<script>
-function revealContact(){
-  document.getElementById('hidden-contact').innerText='+91-9876543210';
-  document.getElementById('hidden-email').innerText='owner@rentquick.com';
-}
-</script>
-
-
-  </main>
-
-  <footer id="footer" class="footer position-relative">
-
-    <div class="container">
-      <div class="row gy-5">
-
-        <div class="col-lg-4">
-          <div class="footer-content">
-            <a href="index.html" class="logo d-flex align-items-center mb-4">
-              <span class="sitename">TheProperty</span>
-            </a>
-            <p class="mb-4">Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae. Donec velit neque auctor sit amet aliquam vel ullamcorper sit amet ligula.</p>
-
-            <div class="newsletter-form">
-              <h5>Stay Updated</h5>
-              <form action="forms/newsletter.php" method="post" class="php-email-form">
-                <div class="input-group">
-                  <input type="email" name="email" class="form-control" placeholder="Enter your email" required="">
-                  <button type="submit" class="btn-subscribe">
-                    <i class="bi bi-send"></i>
-                  </button>
+<div class="detail-layout">
+    <div>
+        <div class="detail-section">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="h3 fw-bold mb-1">{{ p.title }}</h1>
+                    <p class="text-muted small"><i class="fas fa-map-marker-alt text-warning"></i> {{ p.location }}</p>
                 </div>
-                <div class="loading">Loading</div>
-                <div class="error-message"></div>
-                <div class="sent-message">Thank you for subscribing!</div>
-              </form>
+                <div class="text-end">
+                    <div class="h2 fw-black text-primary mb-0">{{ p.price_display }}</div>
+                    <p class="small text-muted">{% if listing_type == 'rent' %}per month{% else %}Total Price{% endif %}</p>
+                </div>
             </div>
-          </div>
         </div>
 
-        <div class="col-lg-2 col-6">
-          <div class="footer-links">
-            <h4>Company</h4>
-            <ul>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> About</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Careers</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Press</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Blog</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Contact</a></li>
-            </ul>
-          </div>
+        <div class="detail-section">
+            <div class="spec-grid">
+                <div class="sg-item"><div class="sg-ico">🛏</div><div class="sg-val">{{ p.beds|default:"—" }}</div><div class="sg-lbl">Bedrooms</div></div>
+                <div class="sg-item"><div class="sg-ico">🚿</div><div class="sg-val">{{ p.baths|default:"—" }}</div><div class="sg-lbl">Bathrooms</div></div>
+                <div class="sg-item"><div class="sg-ico">📐</div><div class="sg-val">{{ p.area }}</div><div class="sg-lbl">Area</div></div>
+                <div class="sg-item"><div class="sg-ico">🛋</div><div class="sg-val">{{ p.furnished }}</div><div class="sg-lbl">Furnishing</div></div>
+            </div>
         </div>
 
-        <div class="col-lg-2 col-6">
-          <div class="footer-links">
-            <h4>Solutions</h4>
-            <ul>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Digital Strategy</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Cloud Computing</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Data Analytics</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> AI Solutions</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Cybersecurity</a></li>
-            </ul>
-          </div>
+        <div class="detail-section">
+            <h5 class="fw-bold mb-3">About This Property</h5>
+            <p class="text-secondary" style="line-height: 1.7;">{{ original.description|default:"No description provided for this property."|linebreaks }}</p>
         </div>
-
-        <div class="col-lg-4">
-          <div class="footer-contact">
-            <h4>Get in Touch</h4>
-            <div class="contact-item">
-              <div class="contact-icon">
-                <i class="bi bi-geo-alt"></i>
-              </div>
-              <div class="contact-info">
-                <p>2847 Maple Avenue<br>Los Angeles, CA 90210<br>United States</p>
-              </div>
-            </div>
-
-            <div class="contact-item">
-              <div class="contact-icon">
-                <i class="bi bi-telephone"></i>
-              </div>
-              <div class="contact-info">
-                <p>+1 (555) 987-6543</p>
-              </div>
-            </div>
-
-            <div class="contact-item">
-              <div class="contact-icon">
-                <i class="bi bi-envelope"></i>
-              </div>
-              <div class="contact-info">
-                <p>contact@example.com</p>
-              </div>
-            </div>
-
-            <div class="social-links">
-              <a href="#"><i class="bi bi-facebook"></i></a>
-              <a href="#"><i class="bi bi-twitter-x"></i></a>
-              <a href="#"><i class="bi bi-linkedin"></i></a>
-              <a href="#"><i class="bi bi-youtube"></i></a>
-              <a href="#"><i class="bi bi-github"></i></a>
-            </div>
-          </div>
-        </div>
-
-      </div>
     </div>
 
-    <div class="footer-bottom">
-      <div class="container">
-        <div class="row align-items-center">
-          <div class="col-lg-6">
-            <div class="copyright">
-              <p>© <span>Copyright</span> <strong class="px-1 sitename">MyWebsite</strong> <span>All Rights Reserved</span></p>
+    <div>
+        <div class="contact-card">
+            <div class="h3 fw-bold text-primary">{{ p.price_display }}</div>
+            <hr>
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="bg-primary text-white rounded-3 p-2 fw-bold">{{ p.owner|slice:":2"|upper }}</div>
+                <div>
+                    <div class="fw-bold">{{ p.owner }}</div>
+                    <div class="small text-muted">{{ p.owner_role }}</div>
+                </div>
             </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="footer-bottom-links">
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
-              <a href="#">Cookie Policy</a>
+
+            <button class="btn btn-pr w-100 py-3 mb-2 fw-bold" onclick="callOwner('{{ p.phone }}')">
+                <i class="fas fa-phone-alt me-2"></i> Call Owner
+            </button>
+            <button class="btn btn-success w-100 py-3 mb-4 fw-bold" onclick="window.open('https://wa.me/91{{ p.phone }}')">
+                <i class="fab fa-whatsapp me-2"></i> WhatsApp
+            </button>
+
+            <div class="bg-light p-3 rounded-3 small">
+                <p class="mb-0 text-muted">Property ID: #CRM{{ original.id }}</p>
+                <p class="mb-0 text-muted">Posted on: {{ original.created_at|date:"d M Y"|default:"Recently" }}</p>
             </div>
-            <div class="credits">
-              <!-- All the links in the footer should remain intact. -->
-              <!-- You can delete the links only if you've purchased the pro version. -->
-              <!-- Licensing information: https://bootstrapmade.com/license/ -->
-              <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-              Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-            </div>
-          </div>
         </div>
-      </div>
     </div>
+</div>
 
-  </footer>
-
-  <!-- Scroll Top -->
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-  <!-- Preloader -->
-  <div id="preloader"></div>
-
-  <!-- Vendor JS Files -->
-  <script src="{% static "assets/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
-  <script src="{% static "assets/vendor/php-email-form/validate.js" %}"></script>
-  <script src="{% static "assets/vendor/aos/aos.js" %}"></script>
-  <script src="{% static "assets/vendor/purecounter/purecounter_vanilla.js" %}"></script>
-  <script src="{% static "assets/vendor/glightbox/js/glightbox.min.js" %}"></script>
-  <script src="{% static "assets/vendor/swiper/swiper-bundle.min.js" %}"></script>
-  <script src="{% static "assets/vendor/drift-zoom/Drift.min.js" %}"></script>
-
-  <!-- Main JS File -->
-  <script src="{% static "assets/js/main.js" %}"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function callOwner(phone) {
+        Swal.fire({
+            title: 'Contact Owner',
+            html: `<div class="py-3"><h2 class="text-primary fw-bold">📞 ${phone}</h2><p class="text-muted">Mention PropCRM when calling.</p></div>`,
+            confirmButtonColor: '#f97316'
+        });
+    }
+</script>
 </body>
-
 </html>
