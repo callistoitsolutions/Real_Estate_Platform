@@ -5,7 +5,7 @@ from Admin_App.models import *
 
 ############# Views start for tenant dashboard ##########################
 
-def Tenant_Dashboard(request):
+def tenant_Dashboard(request):
     # 1. Retrieve identity from browser session
     user_id = request.session.get('User_id')
     user_role = request.session.get('user_type')
@@ -25,3 +25,27 @@ def Tenant_Dashboard(request):
     return render(request, "tenant_panel/tenant_dashboard.html", context)
 
 ############ Views end for tenant dashboard ################################
+
+
+############ Views start for update tenant profile ##########################
+
+def Update_Profile_Tenant(request):
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Tenant":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "tenant_panel/Profile/tenant_profile.html", context)
+
+########### Views end for update tenant profile ##############################

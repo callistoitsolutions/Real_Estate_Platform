@@ -14,6 +14,10 @@ urlpatterns = [
 
     path('User_Logout',views.User_Logout,name="User_Logout"),
 
+    ############ urls for update rm profile #######################
+
+    path('Update_Profile_Rm',views.Update_Profile_Rm,name='Update_Profile_Rm'),
+
     ########### urls for rental forms list for RM #######################
 
     path('residential_rm_list',views.residential_rm_list,name="residential_rm_list"),

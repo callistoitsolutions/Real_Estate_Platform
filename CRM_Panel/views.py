@@ -13,6 +13,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import render,redirect
 from CRM_Panel .models import *
+from Admin_App.models import *
 
 # Create your views here.
 
@@ -65,7 +66,13 @@ def auto_lead_list(request):
 
 
 def crm_dashboard(request):
-    return render(request,"crm/crm_dashboard.html") 
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        context = {'admin_obj':admin_obj}
+        return render(request,"crm/crm_dashboard.html",context) 
+    else:
+        return render(request,'home_page/Adminlogin.html')
 
 
 def manual_lead_list(request):

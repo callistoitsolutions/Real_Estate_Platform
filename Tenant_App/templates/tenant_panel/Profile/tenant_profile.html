@@ -1,13 +1,8 @@
-{% include "admin_user/admin_header.html" %}
+{% include "tenant_panel/tenant_header.html" %}
 {% load static %}
 
 <style>
-  :root {
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    --sidebar-width: 280px;
-    --topbar-height: 70px;
-  }
+  
 
   /* --- Original Layout Styles --- */
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -41,8 +36,8 @@
   .form-steps { display: flex; justify-content: space-between; margin-bottom: 40px; position: relative; max-width: 500px; margin-left: auto; margin-right: auto; }
   .form-steps::before { content: ""; position: absolute; top: 22px; left: 0; right: 0; height: 3px; background: #e9ecef; z-index: 1; }
   .step-indicator { position: relative; z-index: 2; background: white; width: 45px; height: 45px; border-radius: 50%; border: 3px solid #e9ecef; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #adb5bd; transition: all 0.3s ease; }
-  .step-indicator.active { border-color: #667eea; color: #667eea; box-shadow: 0 0 10px rgba(102,126,234,0.2); }
-  .step-indicator.completed { background: #667eea; border-color: #667eea; color: white; }
+  .step-indicator.active { border-color: #f43f5e; color: #f43f5e; box-shadow: 0 0 10px rgba(102,126,234,0.2); }
+  .step-indicator.completed { background: #f43f5e; border-color: #f43f5e; color: white; }
   
   .step-content { display: none; }
   .step-content.active { display: block; animation: fadeIn 0.4s ease; }
@@ -64,7 +59,7 @@
   <div class="form-container">
     <div class="form-header">
       <div class="form-title">
-        <i class="fas fa-edit"></i> Update Tenant
+        <i class="fas fa-edit"></i> Update Profile
       </div>
       <button class="btn-back" onclick="history.back();">
         <i class="fas fa-arrow-left"></i> Back to List
@@ -87,15 +82,15 @@
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Name <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_name" name="user_name" required value="{{tenant.user_name}}">
+                <input type="text" class="form-control" id="user_name" name="user_name" required value="{{user_obj.user_name}}">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Email Address <span style="color:red;">*</span></label>
-                <input type="email" class="form-control" id="user_email" name="user_email" required value="{{tenant.user_email}}">
+                <input type="email" class="form-control" id="user_email" name="user_email" required value="{{user_obj.user_email}}">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Phone Number <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_phone" name="user_phone" maxlength="10" required value="{{tenant.user_phone}}">
+                <input type="text" class="form-control" id="user_phone" name="user_phone" maxlength="10" required value="{{user_obj.user_phone}}">
               </div>
             </div>
           </div>
@@ -109,15 +104,15 @@
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">State <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_state" name="user_state" required value="{{tenant.user_state}}">
+                <input type="text" class="form-control" id="user_state" name="user_state" required value="{{user_obj.user_state}}">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">City <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_city" name="user_city" required value="{{tenant.user_city}}">
+                <input type="text" class="form-control" id="user_city" name="user_city" required value="{{user_obj.user_city}}">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Address <span style="color:red;">*</span></label>
-                <textarea class="form-control" id="user_address" name="user_address" required>{{tenant.user_address}}</textarea>
+                <textarea class="form-control" id="user_address" name="user_address" required>{{user_obj.user_address}}</textarea>
               </div>
             </div>
           </div>
@@ -131,24 +126,24 @@
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Password <span style="color:red;">*</span></label>
-                <input type="password" class="form-control" id="user_password" name="user_password" required value="{{tenant.user_password}}">
+                <input type="password" class="form-control" id="user_password" name="user_password" required value="{{user_obj.user_password}}">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Confirm Password <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_com_password" name="user_com_password" required value="{{tenant.user_password}}">
+                <input type="text" class="form-control" id="user_com_password" name="user_com_password" required value="{{user_obj.user_password}}">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Profile Picture</label>
                 <input type="file" class="form-control" id="user_profile" name="user_profile">
-                {% if tenant.user_profile %}
-                  <div class="mt-2"><a href="{{tenant.user_profile.url}}" target="_blank">View Current Image</a></div>
+                {% if user_obj.user_profile %}
+                  <div class="mt-2"><a href="{{user_obj.user_profile.url}}" target="_blank">View Current Image</a></div>
                 {% endif %}
               </div>
             </div>
             <div class="row mt-3">
               <div class="col-md-4">
                 <label class="form-label">Role</label>
-                <input type="text" class="form-control" value="{{tenant.user_role}}" disabled id="user_role">
+                <input type="text" class="form-control" value="{{user_obj.user_role}}" disabled id="user_role">
               </div>
             </div>
           </div>
@@ -158,7 +153,7 @@
       <div class="form-footer">
         <button type="button" class="btn-reset" id="prevBtn" onclick="moveStep(-1)" style="display:none;">Previous</button>
         <button type="button" class="btn-submit" id="nextBtn" onclick="moveStep(1)">Next <i class="fas fa-arrow-right"></i></button>
-        <button type="button" class="btn-submit" id="submitBtn" onclick="Update_Tenant(this)" style="display:none;"><i class="fas fa-save mr-1"></i> Update Tenant</button>
+        <button type="button" class="btn-submit" id="submitBtn" onclick="Update_Profile(this)" style="display:none;"><i class="fas fa-save mr-1"></i> Update Profile</button>
       </div>
     </form>
   </div>
@@ -169,7 +164,7 @@
 
 <script>
 
-  $("#Teams").addClass("active");
+  $("#Profile").addClass("active");
 
   // Sidebar Toggle for Desktop and Mobile
   function toggleSidebar() {
@@ -326,7 +321,7 @@
   });
 
   // Ajax Update Logic
-  function Update_Tenant(_this) {
+  function Update_Profile(_this) {
     var user_name = $("#user_name").val();
     var user_email = $("#user_email").val();
     var user_phone = $("#user_phone").val();
@@ -344,7 +339,7 @@
     }
 
     var fd = new FormData();
-    fd.append('id', '{{tenant.id}}');
+    fd.append('id', '{{user_obj.id}}');
     fd.append('user_name', user_name);
     fd.append('user_email', user_email);
     fd.append('user_phone', user_phone);
@@ -368,7 +363,7 @@
         $(_this).prop("disabled", false).html(`<i class="fas fa-save mr-1"></i> Update Tenant`);
         if (response.status == '1') {
           swal("Success!", response.msg, "success").then(() => {
-            window.location.href = "{% url 'Tenant_List' %}";
+            window.location.href = "{% url 'Tenant_App:tenant_Dashboard' %}";
           });
         } else {
           swal("Error", response.msg, "error");

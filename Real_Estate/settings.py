@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'Tenant_App',
     'Buyer_App',
     'Agency_App',
+    'Vendors',
     'seo',
     'ckeditor',
     'ckeditor_uploader',
