@@ -329,7 +329,8 @@ class User_Details(models.Model):
 
         
     
-from django.utils import timezone
+
+
 class RentalResidentialProperty(models.Model):
 
     # -------------------------
@@ -415,10 +416,12 @@ class RentalResidentialProperty(models.Model):
     road_connectivity = models.CharField(max_length=150, blank=True, null=True)
 
     # -------------------------
-    # Amenities
+    # Amenities & Facilities (NEW)
     # -------------------------
 
     amenities = models.TextField(blank=True, null=True)
+    
+    facilities = models.TextField(blank=True, null=True)  # ← NEW FIELD ADDED
 
     # -------------------------
     # Description
@@ -459,8 +462,6 @@ class RentalResidentialProperty(models.Model):
     # Uploaded By (User / Admin)
     # -------------------------
 
-    #uploaded_by_id = models.IntegerField(blank=True, null=True)
-
     uploaded_by_name = models.CharField(max_length=150, blank=True, null=True)
 
     uploaded_by_email = models.CharField(max_length=150, blank=True, null=True)
@@ -469,20 +470,8 @@ class RentalResidentialProperty(models.Model):
 
     uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
 
-    # -------------------------
-    # System
-    # -------------------------
-    
-    
-    
-
-    #created_at = models.DateTimeField(auto_now_add=True)
-   # from django.utils import timezone
-
-    #created_at = models.DateTimeField(auto_now_add=True, default=timezone.now)
-
     def __str__(self):
-        return str(self.property_title)
+        return str(self.property_title) if self.property_title else f"Property #{self.id}"
     
     
     

@@ -405,6 +405,15 @@
     margin-left: var(--sidebar-collapsed-width);
   }
 
+  /* Page Wrapper with Grid for Preview */
+  .page-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
   /* Page Header */
   .page-header {
     background: var(--primary-gradient);
@@ -415,6 +424,7 @@
     margin-bottom: 30px;
     position: relative;
     overflow: hidden;
+    grid-column: 1 / -1;
   }
 
   .page-header::before {
@@ -473,6 +483,97 @@
     opacity: 0.8;
   }
 
+  /* STEPPER STYLES */
+  .stepper-container {
+    grid-column: 1 / -1;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+  }
+
+  .step-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #adb5bd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: 3px solid #e9ecef;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+  }
+
+  .step-circle.active {
+    background: var(--primary-gradient);
+    color: white;
+    border-color: #667eea;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .step-circle.done {
+    background: var(--success-gradient);
+    color: white;
+    border-color: #11998e;
+  }
+
+  .step-label {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #adb5bd;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .step-label.active {
+    color: #667eea;
+  }
+
+  .step-label.done {
+    color: #11998e;
+  }
+
+  .step-line {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    right: -50%;
+    height: 3px;
+    background: #e9ecef;
+    z-index: 1;
+    transition: all 0.3s ease;
+  }
+
+  .step-item:last-child .step-line {
+    display: none;
+  }
+
+  .step-line.done {
+    background: var(--success-gradient);
+  }
+
   /* Form Container */
   .form-container {
     background: white;
@@ -529,6 +630,27 @@
     background: var(--dark-gradient);
     color: white;
     transform: translateY(-2px);
+  }
+
+  /* Step Content */
+  .step-content {
+    display: none;
+  }
+
+  .step-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   /* Form Sections */
@@ -609,6 +731,48 @@
     font-size: 0.8rem;
     color: #718096;
     margin-top: 6px;
+  }
+
+  /* Step Navigation Buttons */
+  .step-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    gap: 15px;
+  }
+
+  .btn-step {
+    padding: 12px 35px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-prev {
+    background: #f8f9fa;
+    color: #2d3748;
+    border: 2px solid #e9ecef;
+  }
+
+  .btn-prev:hover {
+    background: #e9ecef;
+  }
+
+  .btn-next {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .btn-next:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
   }
 
   /* Image Preview */
@@ -700,7 +864,187 @@
     background: #e9ecef;
   }
 
+  /* PREVIEW SIDEBAR */
+  .preview-sidebar {
+    position: sticky;
+    top: calc(var(--topbar-height) + 30px);
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .preview-card {
+    background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+    border-radius: 16px;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .preview-header {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .preview-mock {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .preview-image {
+    height: 140px;
+    background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    position: relative;
+  }
+
+  .preview-badges {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 6px;
+  }
+
+  .preview-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #0f172a;
+  }
+
+  .preview-price {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(15, 23, 42, 0.9);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 900;
+    padding: 5px 12px;
+    border-radius: 8px;
+  }
+
+  .preview-body {
+    padding: 15px;
+  }
+
+  .preview-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 5px;
+  }
+
+  .preview-location {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 10px;
+  }
+
+  .preview-specs {
+    display: flex;
+    gap: 12px;
+    font-size: 0.75rem;
+    color: #475569;
+    font-weight: 600;
+  }
+
+  .checklist-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .checklist-title {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #2d3748;
+    margin-bottom: 15px;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 0.85rem;
+    color: #718096;
+  }
+
+  .checklist-item i {
+    font-size: 0.8rem;
+    width: 18px;
+  }
+
+  .checklist-item.done {
+    color: #11998e;
+  }
+
+  .checklist-item.done i {
+    color: #11998e;
+  }
+
+  .info-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .info-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #2d3748;
+    margin-bottom: 12px;
+  }
+
+  .info-item {
+    font-size: 0.8rem;
+    color: #475569;
+    padding: 6px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .info-item i {
+    color: #667eea;
+    font-size: 0.75rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
   /* Responsive Design */
+  @media (max-width: 1400px) {
+    .page-wrapper {
+      grid-template-columns: 1fr 300px;
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .page-wrapper {
+      grid-template-columns: 1fr;
+    }
+
+    .preview-sidebar {
+      display: none;
+    }
+  }
+
   @media (max-width: 992px) {
     .sidebar {
       transform: translateX(-100%);
@@ -721,6 +1065,14 @@
     .topbar-search {
       display: none;
     }
+
+    .stepper {
+      overflow-x: auto;
+    }
+
+    .step-label {
+      font-size: 0.75rem;
+    }
   }
 
   @media (max-width: 768px) {
@@ -738,6 +1090,16 @@
 
     .section-body {
       padding: 15px;
+    }
+
+    .step-circle {
+      width: 40px;
+      height: 40px;
+      font-size: 0.9rem;
+    }
+
+    .step-label {
+      display: none;
     }
   }
 
@@ -832,520 +1194,918 @@
     background: #c0392b;
     transform: scale(1.1);
   }
+
+  .radio-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .radio-option:hover {
+    border-color: #667eea;
+    background: #f0f4ff;
+  }
+
+  .radio-option input {
+    cursor: pointer;
+  }
+
+  .conditional-section {
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      max-height: 500px;
+    }
+  }
 </style>
 
+<!-- Add SweetAlert2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
 <div class="main-content">
-  <!-- Page Header -->
-
-
-  <!-- Form Container -->
-  <div class="form-container">
-    <div class="form-header">
-      <div class="form-title">
-        <i class="fas fa-edit"></i>
-        Sell your agricultural property
+  <div class="page-wrapper">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-content">
+        <h1 class="page-title">🌾 Sell Agricultural Property</h1>
+        <p class="page-subtitle">Complete 4 simple steps to list your agricultural land</p>
       </div>
-      <button  class="btn-back" onclick="history.back();r">
-        <i class="fas fa-arrow-left"></i>
-        Back to List
-      </button>
     </div>
 
-    <form method="POST" enctype="multipart/form-data">
-      {% csrf_token %}
-
-      <div class="form-section">
-        <div class="section-header">
-          <i class="fas fa-info-circle"></i>
-          Agricultural Land Details
+    <!-- Stepper -->
+    <div class="stepper-container">
+      <div class="stepper" id="stepper">
+        <div class="step-item">
+          <div class="step-circle active" id="sc1">1</div>
+          <div class="step-label active" id="sl1">Land Details</div>
+          <div class="step-line" id="line1"></div>
         </div>
-        <div class="section-body">
-          <div class="row">
-
-
-
-
-            <div class="form-group" hidden>
-              <label class="form-label">Property Title <span class="required">*</span></label>
-              <input type="text" class="form-control" id="agri_title" placeholder="e.g., Fertile Agricultural Land"
-                required>
-            </div>
-
-           <div class="col-md-4 mt-2">
-  <div class="form-group">
-    <label class="form-label"> Property Type <span class="required">*</span></label>
-    <select class="form-select" id="agriculture_property_type" name="agriculture_property_type" required>
-      <option value="">Select</option>
-    
-      <option value="agriculture_land">Agriculture Land</option>
-      <option value="farm_land">Farm Land</option>
-      <option value="orchard_land">Orchard Land</option>
-    </select>
-  </div>
-</div>
-
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">Village <span class="required">*</span></label>
-                <input type="text" class="form-control" id="agri_village" placeholder="Village name" required>
-              </div>
-            </div>
-
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">Taluka <span class="required">*</span></label>
-                <input type="text" class="form-control" id="agri_taluka" placeholder="Taluka name" required>
-              </div>
-            </div>
-
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">District <span class="required">*</span></label>
-                <input type="text" class="form-control" id="agri_district" placeholder="District name" required>
-              </div>
-            </div>
-
-
-          </div>
-
-          <div class="row">
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">Land Area (Acres) <span class="required">*</span></label>
-                <input type="number" class="form-control" id="agri_area" placeholder="e.g., 5" step="0.01" required>
-              </div>
-            </div>
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">Soil Type</label>
-                <select class="form-select" id="agri_soil">
-                  <option value="">Select</option>
-                  <option value="red">Red Soil</option>
-                  <option value="black">Black Soil</option>
-                  <option value="alluvial">Alluvial Soil</option>
-                  <option value="loamy">Loamy Soil</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">Irrigation Facility?</label>
-                <select class="form-select" id="agri_irrigation">
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">Water Source</label>
-                <select class="form-select" id="agri_water">
-                  <option value="">Select</option>
-                  <option value="well">Well</option>
-                  <option value="borewell">Borewell</option>
-                  <option value="canal">Canal</option>
-                  <option value="river">River</option>
-                  <option value="none">None</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">Previous Crops Grown</label>
-                <input type="text" class="form-control" id="agri_crops" placeholder="e.g., Rice, Wheat">
-              </div>
-            </div>
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">Fertility Status</label>
-                <select class="form-select" id="agri_fertility">
-                  <option value="">Select</option>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
-                </select>
-              </div>
-            </div>
-
-          </div>
+        <div class="step-item">
+          <div class="step-circle" id="sc2">2</div>
+          <div class="step-label" id="sl2">Pricing & Legal</div>
+          <div class="step-line" id="line2"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" id="sc3">3</div>
+          <div class="step-label" id="sl3">Location & Owner</div>
+          <div class="step-line" id="line3"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" id="sc4">4</div>
+          <div class="step-label" id="sl4">Documents & Photos</div>
         </div>
       </div>
-
-      <div class="form-section">
-        <div class="section-header">
-          <i class="fas fa-indian-rupee-sign"></i>
-          Pricing
-        </div>
-        <div class="section-body">
-          <div class="row">
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
-                <input type="number" class="form-control" id="agri_price" placeholder="e.g., 5000000" required>
-              </div>
-            </div>
-
-               <div class="col-md-4 mt-2">
-    <div class="form-group">
-        <label class="form-label">
-            <i class="fas fa-handshake"></i>
-            Brokerage
-        </label>
-        <select class="form-select" name="brokerage" id="brokerageSelect">
-            <option value="">Select Option</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-        </select>
     </div>
-</div>
-          </div>
 
+    <!-- Form Container -->
+    <div class="form-container">
+      <div class="form-header">
+        <div class="form-title">
+          <i class="fas fa-edit"></i>
+          Sell your agricultural property
         </div>
+        <button class="btn-back" onclick="history.back();">
+          <i class="fas fa-arrow-left"></i>
+          Back to List
+        </button>
       </div>
 
+      <form method="POST" enctype="multipart/form-data" id="agriculturalForm">
+        {% csrf_token %}
 
-      <div class="form-section">
-        <div class="section-header">
-          <i class="fas fa-shield-halved"></i>
-          Ownership & Legal Details
-        </div>
-        <div class="section-body">
-          <div class="row">
-            <div class="col-md-12 mt-2">
-
-
-              <div class="form-group mt-2">
-                <label class="form-label">Ownership Type <span class="required">*</span></label>
-                <select class="form-select" id="agri_ownership" required>
-                  <option value="">Select</option>
-                  <option value="freehold">Freehold</option>
-                  <option value="leasehold">Leasehold</option>
-                </select>
-              </div>
-
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-12">
-
-              <div class="form-group mt-2">
-                <label class="form-label">Loan on Property? <span class="required">*</span></label>
-                <div class="radio-group">
-                  <label class="radio-option">
-                    <input type="radio" name="agri_loan" value="no" required> No
-                  </label>
-                  <label class="radio-option">
-                    <input type="radio" name="agri_loan" value="yes"> Yes
-                  </label>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="conditional-section mt-2" id="agri_loan_amount_section" style="display: none;">
-              <div class="form-group">
-                <label class="form-label">Loan Amount (₹)</label>
-                <input type="number" class="form-control" id="agri_loan_amount" placeholder="e.g., 2000000">
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="form-group mt-2">
-              <label class="form-label">Existing Tenants? <span class="required">*</span></label>
-              <div class="radio-group">
-                <label class="radio-option">
-                  <input type="radio" name="agri_tenants" value="no" required> No
-                </label>
-                <label class="radio-option">
-                  <input type="radio" name="agri_tenants" value="yes"> Yes
-                </label>
-              </div>
-            </div>
-
-            <div class="conditional-section mt-2" id="agri_tenant_details_section" style="display: none;">
-              <div class="form-group">
-                <label class="form-label">Tenant Details</label>
-                <textarea class="form-control" id="agri_tenant_details" placeholder="Tenant information"></textarea>
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-12">
-
-
-              <div class="form-group mt-2">
-                <label class="form-label">Any Legal Dispute? <span class="required">*</span></label>
-                <div class="radio-group">
-                  <label class="radio-option">
-                    <input type="radio" name="agri_dispute" value="no" required> No
-                  </label>
-                  <label class="radio-option">
-                    <input type="radio" name="agri_dispute" value="yes"> Yes
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="conditional-section mt-2" id="agri_dispute_details_section" style="display: none;">
-              <div class="form-group">
-                <label class="form-label">Dispute Description</label>
-                <textarea class="form-control" id="agri_dispute_details"
-                  placeholder="Describe the legal dispute"></textarea>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="row">
-            <div class="col-md-12">
-
-              <div class="form-group mt-2">
-                <label class="form-label">Government Tax Dues? <span class="required">*</span></label>
-                <div class="radio-group">
-                  <label class="radio-option">
-                    <input type="radio" name="agri_tax_due" value="no" required> No - Tax Paid
-                  </label>
-                  <label class="radio-option">
-                    <input type="radio" name="agri_tax_due" value="yes"> Yes - Pending
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="conditional-section mt-2" id="agri_tax_amount_section" style="display: none;">
-              <div class="form-group">
-                <label class="form-label">Pending Tax Amount (₹)</label>
-                <input type="number" class="form-control" id="agri_tax_amount" placeholder="e.g., 20000">
-              </div>
-            </div>
-
-            <div class="form-group mt-2">
-              <label class="form-label">Property Description <span class="required">*</span></label>
-              <textarea class="form-control" id="resale_agricultural_desc" name="resale_agricultural_desc" placeholder="Describe property highlights, location benefits, nearby amenities..." required></textarea>
-            </div>
-
-          </div>
-
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="form-section">
-          <div class="section-header">
-            <i class="fas fa-images"></i>
-            Property Images
-          </div>
-          <div class="image-upload-area" id="uploadArea">
-            <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*"
-              style="display: none;">
-            <div class="upload-icon">
-              <i class="fas fa-cloud-upload-alt"></i>
-            </div>
-            <div class="upload-text">Click or Drag Images Here</div>
-            <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG)</div>
-          </div>
-          <div class="image-preview" id="imagePreview"></div>
-
-        </div>
-
-        <div class="row mt-2">
-          <div class="col-md-6">
-            <div class="form-group">
-              <label class="form-label">
-                <i class="fa-solid fa-file"></i> Upload Encumbrance Certificate <span class="required">*</span>
-              </label>
-
-              <input type="file" name="property_images" accept="image/*">
-            </div>
-          </div>
-
-          <div class="col-md-6">
-            <div class="form-group">
-              <label class="form-label">
-                <i class="fa-solid fa-camera"></i> Upload Video on Social Media <span class="required">*</span>
-              </label>
-
-              <input type="file" name="property_images" accept="video/*">
-            </div>
-          </div>
-
-        </div>
-        <br>
-
-
-        <div class="form-section">
-          <div class="section-header">
-            <i class="fas fa-star"></i>
-            Address
-          </div>
-          <div class="row">
-            <div class="col-md-6 mt-2">
-              <div class="form-group">
-                <label class="form-label">City <span class="required">*</span></label>
-                <input type="text" class="form-control" id="comm_city" placeholder="e.g., Mumbai" required>
-              </div>
-            </div>
-            <div class="col-md-6 mt-2">
-              <div class="form-group">
-                <label class="form-label">Area/Locality <span class="required">*</span></label>
-                <input type="text" class="form-control" id="comm_locality" placeholder="e.g., BKC" required>
-              </div>
-            </div>
-          </div>
-
-
-          <div class="form-group mt-2">
-            <label class="form-label">Property Address <span class="required">*</span></label>
-            <textarea class="form-control" id="comm_address" placeholder="Complete address" required></textarea>
-          </div>
-
-
-        </div>
-
-        <div class="form-section">
-          <div class="section-header">
-            <i class="fas fa-user"></i>
-            Owner Contact Information
-          </div>
-          <div class="row">
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">Owner Name <span class="required">*</span></label>
-                <input type="text" class="form-control" id="comm_owner_name" placeholder="Full name" required>
-              </div>
-            </div>
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">Owner Contact <span class="required">*</span></label>
-                <input type="tel" class="form-control" id="comm_owner_contact" placeholder="10-digit mobile"
-                  pattern="[0-9]{10}" required>
-              </div>
-            </div>
-            <div class="col-md-4 mt-2">
-              <div class="form-group">
-                <label class="form-label">Email <span class="required">*</span></label>
-                <input type="email" class="form-control" id="comm_owner_email" placeholder="email@example.com" required>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group mt-2">
-            <label class="form-label">Residential Status <span class="required">*</span></label>
-            <div class="radio-group">
-              <label class="radio-option">
-                <input type="radio" name="comm_residency" value="resident" required> Resident
-              </label>
-              <label class="radio-option">
-                <input type="radio" name="comm_residency" value="nri"> NRI
-              </label>
-              <label class="radio-option">
-                <input type="radio" name="comm_residency" value="pio"> PIO
-              </label>
-            </div>
-          </div>
-
-
-        </div>
-
-        <div class="form-section">
+        <!-- STEP 1: Agricultural Land Details -->
+        <div class="step-content active" id="step1">
+          <div class="form-section">
             <div class="section-header">
-                <i class="fas fa-upload"></i>
-                Listing Uploaded By
+              <i class="fas fa-info-circle"></i>
+              Agricultural Land Details
             </div>
-
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-user"></i> Name
-                        </label>
-                        <input type="text" class="form-control"
-                               name="uploaded_by_name"
-                               value="{{ admin_obj.name }}"
-                               disabled>
-                    </div>
+            <div class="section-body">
+              <div class="row">
+                <div class="form-group" hidden>
+                  <label class="form-label">Property Title <span class="required">*</span></label>
+                  <input type="text" class="form-control" id="agri_title" name="title"
+                    placeholder="e.g., Fertile Agricultural Land">
                 </div>
 
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-envelope"></i> Email
-                        </label>
-                        <input type="email" class="form-control"
-                               name="uploaded_by_email"
-                               value="{{ admin_obj.email }}"
-                               disabled>
-                    </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Property Type <span class="required">*</span></label>
+                    <select class="form-select form-control" id="agriculture_property_type" name="agriculture_property_type" required>
+                      <option value="">Select</option>
+                      <option value="agriculture_land">Agriculture Land</option>
+                      <option value="farm_land">Farm Land</option>
+                      <option value="orchard_land">Orchard Land</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-phone"></i> Contact
-                        </label>
-                        <input type="text" class="form-control"
-                               name="uploaded_by_contact"
-                               value="{{ admin_obj.phone }}"
-                               disabled>
-                    </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Village <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="agri_village" name="village" placeholder="Village name" required>
+                  </div>
                 </div>
 
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-user-tag"></i> Role
-                        </label>
-                        <input type="text" class="form-control"
-                               name="uploaded_by_role"
-                               value="{{ admin_obj.role }}"
-                               disabled>
-                    </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Taluka <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="agri_taluka" name="taluka" placeholder="Taluka name" required>
+                  </div>
                 </div>
+
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">District <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="agri_district" name="district" placeholder="District name" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Land Area (Acres) <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="agri_area" name="land_area" placeholder="e.g., 5" step="0.01" required>
+                  </div>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Soil Type</label>
+                    <select class="form-select form-control" id="agri_soil" name="soil_type">
+                      <option value="">Select</option>
+                      <option value="red">Red Soil</option>
+                      <option value="black">Black Soil</option>
+                      <option value="alluvial">Alluvial Soil</option>
+                      <option value="loamy">Loamy Soil</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Irrigation Facility?</label>
+                    <select class="form-select form-control" id="agri_irrigation" name="irrigation_facility">
+                      <option value="no">No</option>
+                      <option value="yes">Yes</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Water Source</label>
+                    <select class="form-select form-control" id="agri_water" name="water_source">
+                      <option value="">Select</option>
+                      <option value="well">Well</option>
+                      <option value="borewell">Borewell</option>
+                      <option value="canal">Canal</option>
+                      <option value="river">River</option>
+                      <option value="none">None</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Previous Crops Grown</label>
+                    <input type="text" class="form-control" id="agri_crops" name="previous_crops" placeholder="e.g., Rice, Wheat">
+                  </div>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Fertility Status</label>
+                    <select class="form-select form-control" id="agri_fertility" name="fertility_status">
+                      <option value="">Select</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <div class="step-nav">
+            <div></div>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(2)">
+              Next — Pricing & Legal <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
         </div>
 
+        <!-- STEP 2: Pricing & Legal Details -->
+        <div class="step-content" id="step2">
+          <div class="form-section">
+            <div class="section-header">
+              <i class="fas fa-indian-rupee-sign"></i>
+              Pricing
+            </div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-6 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="agri_price" name="expected_price" placeholder="e.g., 5000000" required>
+                  </div>
+                </div>
+
+                <div class="col-md-6 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fas fa-handshake"></i>
+                      Brokerage
+                    </label>
+                    <select class="form-select form-control" name="brokerage" id="brokerageSelect">
+                      <option value="">Select Option</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-header">
+              <i class="fas fa-shield-halved"></i>
+              Ownership & Legal Details
+            </div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-12 mt-2">
+                  <div class="form-group mt-2">
+                    <label class="form-label">Ownership Type <span class="required">*</span></label>
+                    <select class="form-select form-control" id="agri_ownership" name="ownership_type" required>
+                      <option value="">Select</option>
+                      <option value="freehold">Freehold</option>
+                      <option value="leasehold">Leasehold</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group mt-2">
+                    <label class="form-label">Loan on Property? <span class="required">*</span></label>
+                    <div class="radio-group">
+                      <label class="radio-option">
+                        <input type="radio" name="agri_loan" value="no" required checked> No
+                      </label>
+                      <label class="radio-option">
+                        <input type="radio" name="agri_loan" value="yes"> Yes
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="conditional-section mt-2" id="agri_loan_amount_section" style="display: none;">
+                  <div class="form-group">
+                    <label class="form-label">Loan Amount (₹)</label>
+                    <input type="number" class="form-control" id="agri_loan_amount" name="loan_amount" placeholder="e.g., 2000000">
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="form-group mt-2">
+                  <label class="form-label">Existing Tenants? <span class="required">*</span></label>
+                  <div class="radio-group">
+                    <label class="radio-option">
+                      <input type="radio" name="agri_tenants" value="no" required checked> No
+                    </label>
+                    <label class="radio-option">
+                      <input type="radio" name="agri_tenants" value="yes"> Yes
+                    </label>
+                  </div>
+                </div>
+
+                <div class="conditional-section mt-2" id="agri_tenant_details_section" style="display: none;">
+                  <div class="form-group">
+                    <label class="form-label">Tenant Details</label>
+                    <textarea class="form-control" id="agri_tenant_details" name="tenant_details" placeholder="Tenant information"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group mt-2">
+                    <label class="form-label">Any Legal Dispute? <span class="required">*</span></label>
+                    <div class="radio-group">
+                      <label class="radio-option">
+                        <input type="radio" name="agri_dispute" value="no" required checked> No
+                      </label>
+                      <label class="radio-option">
+                        <input type="radio" name="agri_dispute" value="yes"> Yes
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="conditional-section mt-2" id="agri_dispute_details_section" style="display: none;">
+                  <div class="form-group">
+                    <label class="form-label">Dispute Description</label>
+                    <textarea class="form-control" id="agri_dispute_details" name="dispute_details"
+                      placeholder="Describe the legal dispute"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="form-group mt-2">
+                    <label class="form-label">Government Tax Dues? <span class="required">*</span></label>
+                    <div class="radio-group">
+                      <label class="radio-option">
+                        <input type="radio" name="agri_tax_due" value="no" required checked> No - Tax Paid
+                      </label>
+                      <label class="radio-option">
+                        <input type="radio" name="agri_tax_due" value="yes"> Yes - Pending
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="conditional-section mt-2" id="agri_tax_amount_section" style="display: none;">
+                  <div class="form-group">
+                    <label class="form-label">Pending Tax Amount (₹)</label>
+                    <input type="number" class="form-control" id="agri_tax_amount" name="pending_tax_amount" placeholder="e.g., 20000">
+                  </div>
+                </div>
+
+                <div class="form-group mt-2">
+                  <label class="form-label">Property Description <span class="required">*</span></label>
+                  <textarea class="form-control" id="resale_agricultural_desc" name="resale_agricultural_desc" 
+                    placeholder="Describe property highlights, location benefits, nearby amenities..." required></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(1)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(3)">
+              Next — Location & Owner <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Location & Owner Details -->
+        <div class="step-content" id="step3">
+          <div class="form-section">
+            <div class="section-header">
+              <i class="fas fa-location-dot"></i>
+              Address
+            </div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-6 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">City <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="comm_city" name="city" placeholder="e.g., Mumbai" required>
+                  </div>
+                </div>
+                <div class="col-md-6 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Area/Locality <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="comm_locality" name="locality" placeholder="e.g., BKC" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group mt-2">
+                <label class="form-label">Property Address <span class="required">*</span></label>
+                <textarea class="form-control" id="comm_address" name="address" placeholder="Complete address" required></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-header">
+              <i class="fas fa-user"></i>
+              Owner Contact Information
+            </div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Owner Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="comm_owner_name" name="owner_name" placeholder="Full name" required>
+                  </div>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Owner Contact <span class="required">*</span></label>
+                    <input type="tel" class="form-control" id="comm_owner_contact" name="owner_contact" placeholder="10-digit mobile"
+                      pattern="[0-9]{10}" required>
+                  </div>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Email <span class="required">*</span></label>
+                    <input type="email" class="form-control" id="comm_owner_email" name="owner_email" placeholder="email@example.com" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group mt-2">
+                <label class="form-label">Residential Status <span class="required">*</span></label>
+                <div class="radio-group">
+                  <label class="radio-option">
+                    <input type="radio" name="comm_residency" value="resident" required checked> Resident
+                  </label>
+                  <label class="radio-option">
+                    <input type="radio" name="comm_residency" value="nri"> NRI
+                  </label>
+                  <label class="radio-option">
+                    <input type="radio" name="comm_residency" value="pio"> PIO
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(2)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(4)">
+              Next — Documents & Photos <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 4: Documents & Photos -->
+        <div class="step-content" id="step4">
+          <div class="form-section">
+            <div class="section-header">
+              <i class="fas fa-images"></i>
+              Property Images
+            </div>
+            <div class="section-body">
+              <div class="image-upload-area" id="uploadArea">
+                <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*"
+                  style="display: none;">
+                <div class="upload-icon">
+                  <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #667eea;"></i>
+                </div>
+                <div class="upload-text">Click or Drag Images Here</div>
+                <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG)</div>
+              </div>
+              <div class="image-preview" id="imagePreview"></div>
+            </div>
+          </div>
+
+          <div class="row mt-2">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fa-solid fa-file"></i> Upload Encumbrance Certificate <span class="required">*</span>
+                </label>
+                <input type="file" class="form-control" name="encumbrance_certificate" accept="image/*" required>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="fa-solid fa-camera"></i> Upload Video on Social Media
+                </label>
+                <input type="file" class="form-control" name="property_video" accept="video/*">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-header">
+              <i class="fas fa-upload"></i>
+              Listing Uploaded By
+            </div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fas fa-user"></i> Name
+                    </label>
+                    <input type="text" class="form-control"
+                      name="uploaded_by_name"
+                      value="{{ admin_obj.name }}"
+                      readonly>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" class="form-control"
+                      name="uploaded_by_email"
+                      value="{{ admin_obj.email }}"
+                      readonly>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fas fa-phone"></i> Contact
+                    </label>
+                    <input type="text" class="form-control"
+                      name="uploaded_by_contact"
+                      value="{{ admin_obj.phone }}"
+                      readonly>
+                  </div>
+                </div>
+
+                <div class="col-md-3">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fas fa-user-tag"></i> Role
+                    </label>
+                    <input type="text" class="form-control"
+                      name="uploaded_by_role"
+                      value="{{ admin_obj.role }}"
+                      readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-footer">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(3)">
+              <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button type="reset" class="btn-reset">
+              <i class="fas fa-redo"></i> Reset
+            </button>
+            <button type="submit" class="btn-submit">
+              <i class="fas fa-save"></i> Submit Property
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- PREVIEW SIDEBAR -->
+    <div class="preview-sidebar">
+      <div class="preview-card">
+        <div class="preview-header">
+          <i class="fas fa-eye"></i> Live Preview — Portal Card
+        </div>
+        <div class="preview-mock">
+          <div class="preview-image">
+            🌾
+            <div class="preview-badges">
+              <span class="preview-badge">FOR SALE</span>
+              <span class="preview-badge" style="background: #10b981; color: white;">🌿 Agricultural</span>
+            </div>
+            <div class="preview-price" id="previewPrice">₹ — </div>
+          </div>
+          <div class="preview-body">
+            <div class="preview-title" id="previewTitle">Agricultural Land</div>
+            <div class="preview-location" id="previewLoc">
+              <i class="fas fa-map-marker-alt" style="color:#667eea;"></i> Village, District
+            </div>
+            <div class="preview-specs">
+              <span id="prevArea">— acres</span>
+              <span id="prevType">Land Type</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-top:12px;text-align:center;">
+          Will appear in search results & featured section
+        </div>
       </div>
 
-      <div class="form-footer">
-        <button type="reset" class="btn-reset">
-          <i class="fas fa-redo"></i> Reset
-        </button>
-        <button type="submit" class="btn-submit">
-          <i class="fas fa-save"></i> Submit
-        </button>
+      <div class="checklist-card">
+        <div class="checklist-title">📋 Listing Checklist</div>
+        <div class="checklist-item" id="cl-type"><i class="fas fa-circle"></i> Property type selected</div>
+        <div class="checklist-item" id="cl-location"><i class="fas fa-circle"></i> Location details added</div>
+        <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i> Land area entered</div>
+        <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Expected price set</div>
+        <div class="checklist-item" id="cl-owner"><i class="fas fa-circle"></i> Owner details filled</div>
+        <div class="checklist-item" id="cl-docs"><i class="fas fa-circle"></i> Documents uploaded</div>
       </div>
-    </form>
+
+      <div class="info-card">
+        <div class="info-title">💡 Pro Tips for Faster Sales</div>
+        <div class="info-item"><i class="fas fa-camera"></i> Add clear land photos showing boundaries</div>
+        <div class="info-item"><i class="fas fa-file-alt"></i> Upload all legal documents</div>
+        <div class="info-item"><i class="fas fa-water"></i> Highlight water source & irrigation</div>
+        <div class="info-item"><i class="fas fa-road"></i> Mention road connectivity & access</div>
+        <div class="info-item"><i class="fas fa-chart-line"></i> Price competitively based on market rates</div>
+      </div>
+    </div>
   </div>
 </div>
-</div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-        window.onload = function() {
-            if (CKEDITOR.instances.resale_agricultural_desc) {
-                CKEDITOR.instances.resale_agricultural_desc.destroy();
-            }
-            CKEDITOR.replace('resale_agricultural_desc');
-        };
-</script>
+  let currentStep = 1;
 
-<script>
+  /* ══════════════════════════════════════════
+     STEPPER NAVIGATION LOGIC
+  ═════════════════════════════════════════════ */
+  function goToStep(n) {
+    // Validate current step before moving forward
+    if (n > currentStep && !validateStep(currentStep)) {
+      return false;
+    }
 
-  $("#Resale").addClass("active");
-  
-  // Sidebar Toggle for Desktop and Mobile
+    // Hide current step
+    document.getElementById('step' + currentStep).classList.remove('active');
+    
+    // Show new step
+    document.getElementById('step' + n).classList.add('active');
+    
+    // Update stepper UI
+    for (let i = 1; i <= 4; i++) {
+      const sc = document.getElementById('sc' + i);
+      const sl = document.getElementById('sl' + i);
+      const line = document.getElementById('line' + i);
+      
+      sc.className = 'step-circle';
+      sl.className = 'step-label';
+      if (line) line.className = 'step-line';
+      
+      if (i < n) {
+        // Completed steps
+        sc.classList.add('done');
+        sl.classList.add('done');
+        sc.innerHTML = '<i class="fas fa-check" style="font-size:.7rem;"></i>';
+        if (line) line.classList.add('done');
+      } else if (i === n) {
+        // Active step
+        sc.classList.add('active');
+        sl.classList.add('active');
+        sc.textContent = i;
+      } else {
+        // Upcoming steps
+        sc.textContent = i;
+      }
+    }
+    
+    currentStep = n;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updatePreview();
+  }
+
+  /* ══════════════════════════════════════════
+     STEP VALIDATION
+  ═════════════════════════════════════════════ */
+  function validateStep(step) {
+    const stepElement = document.getElementById('step' + step);
+    const requiredFields = stepElement.querySelectorAll('[required]');
+    let isValid = true;
+    let missingFields = [];
+
+    requiredFields.forEach(field => {
+      if (field.type === 'radio') {
+        const radioGroup = stepElement.querySelectorAll(`[name="${field.name}"]`);
+        const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+        if (!isChecked) {
+          isValid = false;
+          const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
+          if (label && !missingFields.includes(label)) {
+            missingFields.push(label);
+          }
+        }
+      } else if (!field.value.trim()) {
+        isValid = false;
+        const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
+        if (label && !missingFields.includes(label)) {
+          missingFields.push(label);
+        }
+      }
+    });
+
+    if (!isValid) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Required Fields Missing',
+        html: `<p style="margin-bottom: 10px;">Please fill the following required fields:</p>
+               <ul style="text-align: left; display: inline-block;">
+                 ${missingFields.map(field => `<li>${field}</li>`).join('')}
+               </ul>`,
+        confirmButtonColor: '#667eea',
+        confirmButtonText: 'Got it!'
+      });
+      return false;
+    }
+
+    return true;
+  }
+
+  /* ══════════════════════════════════════════
+     LIVE PREVIEW UPDATE
+  ═════════════════════════════════════════════ */
+  function updatePreview() {
+    // Update price
+    const price = document.getElementById('agri_price')?.value;
+    if (price) {
+      document.getElementById('previewPrice').textContent = 
+        '₹' + parseInt(price).toLocaleString('en-IN');
+    }
+
+    // Update property type
+    const propType = document.getElementById('agriculture_property_type')?.value;
+    if (propType) {
+      const typeText = propType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      document.getElementById('prevType').textContent = typeText;
+    }
+
+    // Update area
+    const area = document.getElementById('agri_area')?.value;
+    if (area) {
+      document.getElementById('prevArea').textContent = area + ' acres';
+    }
+
+    // Update location
+    const village = document.getElementById('agri_village')?.value;
+    const district = document.getElementById('agri_district')?.value;
+    if (village || district) {
+      document.getElementById('previewLoc').innerHTML = 
+        '<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ' +
+        (village || 'Village') + ', ' + (district || 'District');
+    }
+
+    updateChecklist();
+  }
+
+  /* ══════════════════════════════════════════
+     CHECKLIST UPDATE
+  ═════════════════════════════════════════════ */
+  function updateChecklist() {
+    setCheck('cl-type', !!document.getElementById('agriculture_property_type')?.value);
+    setCheck('cl-location', !!document.getElementById('agri_village')?.value && !!document.getElementById('agri_district')?.value);
+    setCheck('cl-area', !!document.getElementById('agri_area')?.value);
+    setCheck('cl-price', !!document.getElementById('agri_price')?.value);
+    setCheck('cl-owner', !!document.getElementById('comm_owner_name')?.value);
+    setCheck('cl-docs', false); // Will be updated when files are uploaded
+  }
+
+  function setCheck(id, done) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'checklist-item' + (done ? ' done' : '');
+    el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+  }
+
+  /* ══════════════════════════════════════════
+     FORM INITIALIZATION
+  ═════════════════════════════════════════════ */
+  document.addEventListener("DOMContentLoaded", function () {
+    // Add change listeners to all form inputs for preview update
+    const formInputs = document.querySelectorAll('input, select, textarea');
+    formInputs.forEach(input => {
+      input.addEventListener('change', updatePreview);
+      input.addEventListener('input', updatePreview);
+    });
+
+    // Agricultural Loan
+    document.querySelectorAll('input[name="agri_loan"]').forEach(radio => {
+      radio.addEventListener('change', function () {
+        document.getElementById('agri_loan_amount_section').style.display =
+          (this.value === 'yes') ? 'block' : 'none';
+      });
+    });
+
+    // Agricultural Tenants
+    document.querySelectorAll('input[name="agri_tenants"]').forEach(radio => {
+      radio.addEventListener('change', function () {
+        document.getElementById('agri_tenant_details_section').style.display =
+          (this.value === 'yes') ? 'block' : 'none';
+      });
+    });
+
+    // Agricultural Dispute
+    document.querySelectorAll('input[name="agri_dispute"]').forEach(radio => {
+      radio.addEventListener('change', function () {
+        document.getElementById('agri_dispute_details_section').style.display =
+          (this.value === 'yes') ? 'block' : 'none';
+      });
+    });
+
+    // Agricultural Tax Due
+    document.querySelectorAll('input[name="agri_tax_due"]').forEach(radio => {
+      radio.addEventListener('change', function () {
+        document.getElementById('agri_tax_amount_section').style.display =
+          (this.value === 'yes') ? 'block' : 'none';
+      });
+    });
+
+    // Image Upload
+    const uploadArea = document.getElementById('uploadArea');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    let selectedFiles = [];
+
+    uploadArea?.addEventListener('click', () => imageInput.click());
+
+    uploadArea?.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea?.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea?.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    imageInput?.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+
+    function handleFiles(files) {
+      const fileArray = Array.from(files);
+      if (selectedFiles.length + fileArray.length > 10) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Too Many Files',
+          text: 'Maximum 10 images allowed',
+          confirmButtonColor: '#667eea'
+        });
+        return;
+      }
+      fileArray.forEach(file => {
+        if (file.type.startsWith('image/')) {
+          selectedFiles.push(file);
+          displayImage(file);
+        }
+      });
+      syncFileInput();
+    }
+
+    function displayImage(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const div = document.createElement('div');
+        div.className = 'preview-item';
+        div.dataset.fileName = file.name;
+        div.innerHTML = `
+          <img src="${e.target.result}" alt="Preview">
+          <button type="button" class="remove-image"
+            onclick="removeImage(this, '${file.name}')">
+            <i class="fas fa-times"></i>
+          </button>`;
+        imagePreview.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    window.removeImage = function(button, fileName) {
+      selectedFiles = selectedFiles.filter(f => f.name !== fileName);
+      button.closest('.preview-item').remove();
+      syncFileInput();
+    };
+
+    function syncFileInput() {
+      const dt = new DataTransfer();
+      selectedFiles.forEach(f => dt.items.add(f));
+      imageInput.files = dt.files;
+    }
+
+    // Initialize preview
+    updatePreview();
+  });
+
+  /* ══════════════════════════════════════════
+     SIDEBAR TOGGLE (FROM ORIGINAL)
+  ═════════════════════════════════════════════ */
   function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
     const windowWidth = window.innerWidth;
-
     if (windowWidth <= 768) {
       sidebar.classList.toggle('active');
       overlay.classList.toggle('active');
@@ -1355,7 +2115,6 @@
     }
   }
 
-  // Close Sidebar (Mobile)
   function closeSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
@@ -1364,192 +2123,33 @@
     document.body.style.overflow = '';
   }
 
-  // Submenu Toggle - FIXED VERSION FOR MOBILE
   function toggleSubmenu(event, element) {
     event.preventDefault();
     event.stopPropagation();
-
     const submenu = element.nextElementSibling;
-    const allSubmenus = document.querySelectorAll('.submenu');
-    const allDropdownLinks = document.querySelectorAll('.menu-link');
-
-    allSubmenus.forEach(sub => {
-      if (sub !== submenu) {
-        sub.classList.remove('active');
-      }
+    document.querySelectorAll('.submenu').forEach(sub => {
+      if (sub !== submenu) sub.classList.remove('active');
     });
-
-    allDropdownLinks.forEach(link => {
-      if (link !== element) {
-        link.classList.remove('dropdown-open');
-      }
+    document.querySelectorAll('.menu-link').forEach(link => {
+      if (link !== element) link.classList.remove('dropdown-open');
     });
-
     submenu.classList.toggle('active');
     element.classList.toggle('dropdown-open');
-
     return false;
   }
 
+  $("#Resale").addClass("active");
 
-
-  // Filter buttons
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-    });
-  });
-
-  // Close sidebar on window resize
-  window.addEventListener('resize', function () {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    const windowWidth = window.innerWidth;
-
-    if (windowWidth > 768) {
-      sidebar.classList.remove('active');
-      overlay.classList.remove('active');
-      document.body.style.overflow = '';
-    }
-  });
-
-  // Handle clicks on submenu links and regular menu links
-  document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.submenu-link').forEach(link => {
-      link.addEventListener('click', function (e) {
-        if (window.innerWidth <= 768) {
-          setTimeout(() => {
-            closeSidebar();
-          }, 200);
-        }
-      });
-    });
-
-    document.querySelectorAll('.menu-link').forEach(link => {
-      if (!link.hasAttribute('onclick')) {
-        link.addEventListener('click', function (e) {
-          if (window.innerWidth <= 768) {
-            setTimeout(() => {
-              closeSidebar();
-            }, 200);
-          }
-        });
+  // CKEditor initialization
+  window.onload = function () {
+    if (typeof CKEDITOR !== 'undefined') {
+      if (CKEDITOR.instances.resale_agricultural_desc) {
+        CKEDITOR.instances.resale_agricultural_desc.destroy();
       }
-    });
-  });
-
-  // Prevent body scroll when sidebar is open on mobile
-  document.getElementById('sidebar').addEventListener('transitionend', function () {
-    if (this.classList.contains('active')) {
-      document.body.style.overflow = 'hidden';
+      CKEDITOR.replace('resale_agricultural_desc');
     }
-  });
-
-  // Image Upload Functionality
-  const uploadArea = document.getElementById('uploadArea');
-  const imageInput = document.getElementById('imageInput');
-  const imagePreview = document.getElementById('imagePreview');
-  let selectedFiles = [];
-
-  uploadArea.addEventListener('click', () => imageInput.click());
-
-  uploadArea.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadArea.classList.add('dragover');
-  });
-
-  uploadArea.addEventListener('dragleave', () => {
-    uploadArea.classList.remove('dragover');
-  });
-
-  uploadArea.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadArea.classList.remove('dragover');
-    handleFiles(e.dataTransfer.files);
-  });
-
-  imageInput.addEventListener('change', (e) => {
-    handleFiles(e.target.files);
-  });
-
-  function handleFiles(files) {
-    const fileArray = Array.from(files);
-    if (selectedFiles.length + fileArray.length > 10) {
-      alert('Maximum 10 images allowed');
-      return;
-    }
-
-    fileArray.forEach(file => {
-      if (file.type.startsWith('image/')) {
-        selectedFiles.push(file);
-        displayImage(file);
-      }
-    });
-  }
-
-  function displayImage(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const div = document.createElement('div');
-      div.className = 'preview-item';
-      div.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview">
-                    <button type="button" class="remove-image" onclick="removeImage(this, '${file.name}')">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-      imagePreview.appendChild(div);
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function removeImage(button, fileName) {
-    selectedFiles = selectedFiles.filter(file => file.name !== fileName);
-    button.parentElement.remove();
-  }
-
-
-  // AGRICULTURAL FORM
-
-  // Agricultural Loan
-  document.querySelectorAll('input[name="agri_loan"]').forEach(radio => {
-    radio.addEventListener('change', function () {
-      document.getElementById('agri_loan_amount_section').style.display =
-        (this.value === 'yes') ? 'block' : 'none';
-    });
-  });
-
-  // Agricultural Tenants
-  document.querySelectorAll('input[name="agri_tenants"]').forEach(radio => {
-    radio.addEventListener('change', function () {
-      document.getElementById('agri_tenant_details_section').style.display =
-        (this.value === 'yes') ? 'block' : 'none';
-    });
-  });
-
-  // Agricultural Dispute
-  document.querySelectorAll('input[name="agri_dispute"]').forEach(radio => {
-    radio.addEventListener('change', function () {
-      document.getElementById('agri_dispute_details_section').style.display =
-        (this.value === 'yes') ? 'block' : 'none';
-    });
-  });
-
-  // Agricultural Tax Due
-  document.querySelectorAll('input[name="agri_tax_due"]').forEach(radio => {
-    radio.addEventListener('change', function () {
-      document.getElementById('agri_tax_amount_section').style.display =
-        (this.value === 'yes') ? 'block' : 'none';
-    });
-  });
-
-
-
-
-
+  };
 </script>
 
 </body>
-
 </html>

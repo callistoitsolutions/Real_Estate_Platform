@@ -458,188 +458,184 @@
         </div>
 
         <!-- Table -->
-        <div class="table-responsive">
-            <table class="properties-table" id="rentalTable">
-                <thead>
-                    <tr>
-                        <th>Sr.No</th>
-                        <th>Images</th>
-                        <th>Property Title</th>
-                        <th>Purpose</th>
-                        <th>Type</th>
-                        <th>BHK</th>
-                        <th>Renting Option</th>
-                        <th>Furnishing</th>
-                        <th>Available For</th>
-                        <th>Built-Up Area</th>
-                        <th>Carpet Area</th>
-                        <th>Plot Area</th>
-                        <th>Bathrooms</th>
-                        <th>Balconies</th>
-                        <th>Floor No.</th>
-                        <th>Total Floors</th>
-                        <th>Facing</th>
-                        <th>Zone</th>
-                        <th>Ownership</th>
-                        <th>Construction</th>
-                        <th>Prop. Age</th>
-                        <th>Building Name</th>
-                        <th>Possession</th>
-                        <th>Available From</th>
-                        <th>Lease Duration</th>
-                        <th>Brokerage</th>
-                        <th>Brokerage %</th>
-                        <th>Manual Brokerage</th>
-                        <th>Monthly Rent</th>
-                        <th>Security Deposit</th>
-                        <th>Maintenance Type</th>
-                        <th>Maintenance Amt</th>
-                        <th>Expected Price</th>
-                        <th>City</th>
-                        <th>Locality</th>
-                        <th>State</th>
-                        <th>Address</th>
-                        <th>Pincode</th>
-                        <th>Road Connectivity</th>
-                        <th>Amenities</th>
-                        <th>Description</th>
-                        <th>Rent Desc</th>
-                        <th>Owner Name</th>
-                        <th>Contact</th>
-                        <th>Email</th>
-                        <th>Alt. Contact</th>
-                        <th>Uploaded By</th>
-                        <th>UB Email</th>
-                        <th>UB Contact</th>
-                        <th>UB Role</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for prop in page_obj %}
-                    <tr id="row-{{ prop.id }}">
-                        <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+     <div class="table-responsive">
+    <table class="properties-table" id="rentalTable">
+        <thead>
+            <tr>
+                <th>Sr.No</th>
+                <th>Images</th>
+                <th>Property Title</th>
+                <th>Purpose</th>
+                <th>Type</th>
+                <th>BHK</th>
+                <th>Renting Option</th>
+                <th>Furnishing</th>
+                <th>Available For</th>
+                <th>Built-Up Area</th>
+                <th>Carpet Area</th>
+                <th>Plot Area</th>
+                <th>Bathrooms</th>
+                <th>Balconies</th>
+                <th>Floor No.</th>
+                <th>Total Floors</th>
+                <th>Facing</th>
+                <th>Zone</th>
+                <th>Ownership</th>
+                <th>Construction</th>
+                <th>Prop. Age</th>
+                <th>Building Name</th>
+                <th>Possession</th>
+                <th>Available From</th>
+                <th>Lease Duration</th>
+                <th>Brokerage</th>
+                <th>Brokerage %</th>
+                <th>Manual Brokerage</th>
+                <th>Monthly Rent</th>
+                <th>Security Deposit</th>
+                <th>Maintenance Type</th>
+                <th>Maintenance Amt</th>
+                <th>Expected Price</th>
+                <th>City</th>
+                <th>Locality</th>
+                <th>State</th>
+                <th>Address</th>
+                <th>Pincode</th>
+                <th>Road Connectivity</th>
+                <th>Amenities</th>
+                <th>Facilities</th> <!-- NEW -->
+                <th>Description</th>
+                <th>Rent Desc</th>
+                <th>Owner Name</th>
+                <th>Contact</th>
+                <th>Email</th>
+                <th>Alt. Contact</th>
+                <th>Uploaded By</th>
+                <th>UB Email</th>
+                <th>UB Contact</th>
+                <th>UB Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
 
-                        <!-- Images -->
-                        <td>
-                            <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                                {% if prop.image1 %}<img src="{{ prop.image1.url }}" class="property-image" alt="img1">{% endif %}
-                                {% if prop.image2 %}<img src="{{ prop.image2.url }}" class="property-image" alt="img2">{% endif %}
-                                {% if prop.image3 %}<img src="{{ prop.image3.url }}" class="property-image" alt="img3">{% endif %}
-                                {% if prop.image4 %}<img src="{{ prop.image4.url }}" class="property-image" alt="img4">{% endif %}
-                                {% if prop.image5 %}<img src="{{ prop.image5.url }}" class="property-image" alt="img5">{% endif %}
-                                {% if not prop.image1 and not prop.image2 %}
-                                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=120&h=80&fit=crop"
-                                         class="property-image" alt="No Image">
-                                {% endif %}
-                            </div>
-                        </td>
+        <tbody>
+            {% for prop in page_obj %}
+            <tr id="row-{{ prop.id }}">
+                <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
 
-                        <!-- Basic Info -->
-                        <td><div class="property-title">{{ prop.property_title|default:"—" }}</div></td>
-                        <td>{{ prop.property_purpose|default:"—" }}</td>
-                        <td><span class="badge badge-residential">{{ prop.property_type|default:"—" }}</span></td>
-                        <td>{{ prop.bhk_type|default:"—" }}</td>
-                        <td>{{ prop.renting_option|default:"—" }}</td>
-                        <td>{{ prop.furnishing_status|default:"—" }}</td>
-                        <td>{{ prop.available_for|default:"—" }}</td>
+                <!-- ALL IMAGES -->
+             <td>
+    <div style="display:flex; gap:4px; flex-wrap:wrap;">
+        
+        {% if prop.image1 %}<img src="{{ prop.image1.url }}" class="property-image">{% endif %}
+        {% if prop.image2 %}<img src="{{ prop.image2.url }}" class="property-image">{% endif %}
+        {% if prop.image3 %}<img src="{{ prop.image3.url }}" class="property-image">{% endif %}
+        {% if prop.image4 %}<img src="{{ prop.image4.url }}" class="property-image">{% endif %}
+        {% if prop.image5 %}<img src="{{ prop.image5.url }}" class="property-image">{% endif %}
+        {% if prop.image6 %}<img src="{{ prop.image6.url }}" class="property-image">{% endif %}
+        {% if prop.image7 %}<img src="{{ prop.image7.url }}" class="property-image">{% endif %}
+        {% if prop.image8 %}<img src="{{ prop.image8.url }}" class="property-image">{% endif %}
+        {% if prop.image9 %}<img src="{{ prop.image9.url }}" class="property-image">{% endif %}
+        {% if prop.image10 %}<img src="{{ prop.image10.url }}" class="property-image">{% endif %}
 
-                        <!-- Areas -->
-                        <td>{% if prop.built_up_area %}{{ prop.built_up_area }} sq.ft{% else %}—{% endif %}</td>
-                        <td>{% if prop.carpet_area %}{{ prop.carpet_area }} sq.ft{% else %}—{% endif %}</td>
-                        <td>{% if prop.plot_area %}{{ prop.plot_area }} sq.ft{% else %}—{% endif %}</td>
+        {% if not prop.image1 and not prop.image2 %}
+            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=120&h=80&fit=crop"
+                 class="property-image">
+        {% endif %}
 
-                        <!-- Specs -->
-                        <td>{{ prop.bathrooms|default:"—" }}</td>
-                        <td>{{ prop.balconies|default:"—" }}</td>
-                        <td>{{ prop.floor_number|default:"—" }}</td>
-                        <td>{{ prop.total_floors|default:"—" }}</td>
-                        <td>{{ prop.facing|default:"—" }}</td>
+    </div>
+</td>
 
-                        <!-- Details -->
-                        <td>{{ prop.zone|default:"—" }}</td>
-                        <td>{{ prop.ownership_type|default:"—" }}</td>
-                        <td>{{ prop.construction_status|default:"—" }}</td>
-                        <td>{{ prop.property_age|default:"—" }}</td>
-                        <td>{{ prop.building_name|default:"—" }}</td>
+                <!-- BASIC -->
+                <td>{{ prop.property_title|default:"—" }}</td>
+                <td>{{ prop.property_purpose|default:"—" }}</td>
+                <td><span class="badge badge-residential">{{ prop.property_type|default:"—" }}</span></td>
+                <td>{{ prop.bhk_type|default:"—" }}</td>
+                <td>{{ prop.renting_option|default:"—" }}</td>
+                <td>{{ prop.furnishing_status|default:"—" }}</td>
+                <td>{{ prop.available_for|default:"—" }}</td>
 
-                        <!-- Availability -->
-                        <td>{{ prop.possession_status|default:"—" }}</td>
-                        <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
-                        <td>{{ prop.lease_duration|default:"—" }}</td>
-                        <td>{{ prop.brokerage|default:"—" }}</td>
-                        <td>{{ prop.brokerage_percentage|default:"—" }}</td>
-                        <td>{{ prop.manual_brokerage|default:"—" }}</td>
+                <!-- AREA -->
+                <td>{{ prop.built_up_area|default:"—" }}</td>
+                <td>{{ prop.carpet_area|default:"—" }}</td>
+                <td>{{ prop.plot_area|default:"—" }}</td>
 
-                        <!-- Pricing -->
-                        <td>
-                            {% if prop.monthly_rent %}
-                                <div class="price-tag">₹{{ prop.monthly_rent }}</div>
-                                <div class="price-period">/month</div>
-                            {% else %}—{% endif %}
-                        </td>
-                        <td>{% if prop.security_deposit %}₹{{ prop.security_deposit }}{% else %}—{% endif %}</td>
-                        <td>{{ prop.maintenance_type|default:"—" }}</td>
-                        <td>{% if prop.maintenance_amount %}₹{{ prop.maintenance_amount }}{% else %}—{% endif %}</td>
-                        <td>{% if prop.expected_price %}₹{{ prop.expected_price }}{% else %}—{% endif %}</td>
+                <!-- SPEC -->
+                <td>{{ prop.bathrooms|default:"—" }}</td>
+                <td>{{ prop.balconies|default:"—" }}</td>
+                <td>{{ prop.floor_number|default:"—" }}</td>
+                <td>{{ prop.total_floors|default:"—" }}</td>
+                <td>{{ prop.facing|default:"—" }}</td>
 
-                        <!-- Location -->
-                        <td>{{ prop.city|default:"—" }}</td>
-                        <td><i class="fas fa-map-marker-alt" style="color:#667eea;"></i> {{ prop.locality|default:"—" }}</td>
-                        <td>{{ prop.state|default:"—" }}</td>
-                        <td style="min-width:160px;">{{ prop.address|default:"—" }}</td>
-                        <td>{{ prop.pincode|default:"—" }}</td>
-                        <td>{{ prop.road_connectivity|default:"—" }}</td>
+                <!-- DETAILS -->
+                <td>{{ prop.zone|default:"—" }}</td>
+                <td>{{ prop.ownership_type|default:"—" }}</td>
+                <td>{{ prop.construction_status|default:"—" }}</td>
+                <td>{{ prop.property_age|default:"—" }}</td>
+                <td>{{ prop.building_name|default:"—" }}</td>
 
-                        <!-- Text fields -->
-                        <td style="min-width:160px;"><span title="{{ prop.amenities }}">{{ prop.amenities|truncatechars:50|default:"—" }}</span></td>
-                        <td style="min-width:180px;"><span title="{{ prop.description }}">{{ prop.description|truncatechars:60|default:"—" }}</span></td>
-                        <td style="min-width:180px;"><span title="{{ prop.rent_residential_desc }}">{{ prop.rent_residential_desc|truncatechars:60|default:"—" }}</span></td>
+                <!-- AVAILABILITY -->
+                <td>{{ prop.possession_status|default:"—" }}</td>
+                <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
+                <td>{{ prop.lease_duration|default:"—" }}</td>
+                <td>{{ prop.brokerage|default:"—" }}</td>
+                <td>{{ prop.brokerage_percentage|default:"—" }}</td>
+                <td>{{ prop.manual_brokerage|default:"—" }}</td>
 
-                        <!-- Owner -->
-                        <td>{{ prop.owner_name|default:"—" }}</td>
-                        <td>{{ prop.contact_number|default:"—" }}</td>
-                        <td>{{ prop.email|default:"—" }}</td>
-                        <td>{{ prop.alternate_contact|default:"—" }}</td>
+                <!-- PRICE -->
+                <td>{{ prop.monthly_rent|default:"—" }}</td>
+                <td>{{ prop.security_deposit|default:"—" }}</td>
+                <td>{{ prop.maintenance_type|default:"—" }}</td>
+                <td>{{ prop.maintenance_amount|default:"—" }}</td>
+                <td>{{ prop.expected_price|default:"—" }}</td>
 
-                        <!-- Uploaded By -->
-                        <td>{{ prop.uploaded_by_name|default:"—" }}</td>
-                        <td>{{ prop.uploaded_by_email|default:"—" }}</td>
-                        <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
-                        <td>{{ prop.uploaded_by_role|default:"—" }}</td>
+                <!-- LOCATION -->
+                <td>{{ prop.city|default:"—" }}</td>
+                <td>{{ prop.locality|default:"—" }}</td>
+                <td>{{ prop.state|default:"—" }}</td>
+                <td>{{ prop.address|default:"—" }}</td>
+                <td>{{ prop.pincode|default:"—" }}</td>
+                <td>{{ prop.road_connectivity|default:"—" }}</td>
 
-                        <!-- Actions -->
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-action btn-view" title="View"
-                                        onclick="window.location.href='{% url 'rental_residential_view' prop.id %}'">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-action btn-edit" title="Edit"
-                                        onclick="window.location.href='{% url 'rental_residential_edit' prop.id %}'">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" title="Delete"
-                                        onclick="deleteProperty({{ prop.id }})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="51">
-                            <div class="empty-state">
-                                <i class="fas fa-inbox"></i>
-                                No properties found.
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                <!-- TEXT -->
+                <td>{{ prop.amenities|default:"—" }}</td>
+                <td>{{ prop.facilities|default:"—" }}</td> <!-- NEW -->
+                <td>{{ prop.description|default:"—" }}</td>
+                <td>{{ prop.rent_residential_desc|default:"—" }}</td>
 
+                <!-- OWNER -->
+                <td>{{ prop.owner_name|default:"—" }}</td>
+                <td>{{ prop.contact_number|default:"—" }}</td>
+                <td>{{ prop.email|default:"—" }}</td>
+                <td>{{ prop.alternate_contact|default:"—" }}</td>
+
+                <!-- UPLOADED -->
+                <td>{{ prop.uploaded_by_name|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_email|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_role|default:"—" }}</td>
+
+                <!-- ACTION -->
+                <td>
+                    <div class="action-buttons">
+                        <button onclick="window.location.href='{% url 'rental_residential_view' prop.id %}'">View</button>
+                        <button onclick="window.location.href='{% url 'rental_residential_edit' prop.id %}'">Edit</button>
+                        <button onclick="deleteProperty({{ prop.id }})">Delete</button>
+                    </div>
+                </td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="52">
+                    <div class="empty-state">
+                        No properties found.
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
         <!-- Pagination -->
         {% if page_obj.paginator.num_pages > 1 %}
         <div class="pagination-wrap">
