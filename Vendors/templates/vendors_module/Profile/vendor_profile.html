@@ -1,13 +1,8 @@
-{% include "admin_user/admin_header.html" %}
+{% include "vendors_module/vendor_header.html" %}
 {% load static %}
 
 <style>
-  :root {
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    --sidebar-width: 280px;
-    --topbar-height: 70px;
-  }
+  
 
   /* --- Original Layout Styles --- */
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -37,8 +32,8 @@
   .step-progress-bar { display: flex; justify-content: space-between; align-items: center; margin: 0 auto 40px; position: relative; max-width: 600px; }
   .step-progress-bar::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 3px; background: #e9ecef; transform: translateY(-50%); z-index: 1; }
   .step-indicator { position: relative; z-index: 2; width: 45px; height: 45px; background: white; border: 3px solid #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #adb5bd; transition: all 0.3s ease; }
-  .step-indicator.active { border-color: #667eea; color: #667eea; transform: scale(1.1); box-shadow: 0 0 15px rgba(102, 126, 234, 0.2); }
-  .step-indicator.completed { background: #667eea; border-color: #667eea; color: white; }
+  .step-indicator.active { border-color: #3b82f6; color: #3b82f6; transform: scale(1.1); box-shadow: 0 0 15px rgba(102, 126, 234, 0.2); }
+  .step-indicator.completed { background: #3b82f6; border-color: #3b82f6; color: white; }
   
   .form-step { display: none; }
   .form-step.active { display: block; animation: fadeIn 0.5s ease; }
@@ -81,25 +76,25 @@
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Name <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_name" name="user_name" value="{{vendor.user_name}}" required>
+                <input type="text" class="form-control" id="user_name" name="user_name" value="{{user_obj.user_name}}" required>
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Email <span style="color:red;">*</span></label>
-                <input type="email" class="form-control" id="user_email" name="user_email" value="{{vendor.user_email}}" required>
+                <input type="email" class="form-control" id="user_email" name="user_email" value="{{user_obj.user_email}}" required>
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Phone <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_phone" name="user_phone" value="{{vendor.user_phone}}" maxlength="10" required>
+                <input type="text" class="form-control" id="user_phone" name="user_phone" value="{{user_obj.user_phone}}" maxlength="10" required>
               </div>
             </div>
             <div class="row mt-3">
               <div class="col-md-6">
                 <label class="form-label">Password <span style="color:red;">*</span></label>
-                <input type="password" class="form-control" id="user_password" name="user_password" value="{{vendor.user_password}}" required>
+                <input type="password" class="form-control" id="user_password" name="user_password" value="{{user_obj.user_password}}" required>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Confirm Password <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_com_password" value="{{vendor.user_password}}" required>
+                <input type="text" class="form-control" id="user_com_password" value="{{user_obj.user_password}}" required>
               </div>
             </div>
           </div>
@@ -113,15 +108,15 @@
             <div class="row">
               <div class="col-md-4">
                 <label class="form-label">State</label>
-                <input type="text" class="form-control" id="user_state" name="user_state" value="{{vendor.user_state}}">
+                <input type="text" class="form-control" id="user_state" name="user_state" value="{{user_obj.user_state}}">
               </div>
               <div class="col-md-4">
                 <label class="form-label">City</label>
-                <input type="text" class="form-control" id="user_city" name="user_city" value="{{vendor.user_city}}">
+                <input type="text" class="form-control" id="user_city" name="user_city" value="{{user_obj.user_city}}">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Address <span style="color:red;">*</span></label>
-                <textarea class="form-control" placeholder="Enter Address" id="user_address" name="user_address">{{vendor.user_address}}</textarea>
+                <textarea class="form-control" placeholder="Enter Address" id="user_address" name="user_address">{{user_obj.user_address}}</textarea>
               </div>
             </div>
           </div>
@@ -138,29 +133,29 @@
                 <select class="form-control" id="user_service_type" name="user_service_type">
                   <option value="SelectService" disabled>Select Service...</option>
                   {% for service in services_obj %}
-                  <option value="{{service.service_name}}" {% if vendor.user_service_type == service.service_name %}selected{% endif %}>{{service.service_name}}</option>
+                  <option value="{{service.service_name}}" {% if user_obj.user_service_type == service.service_name %}selected{% endif %}>{{service.service_name}}</option>
                   {% endfor %}
                 </select>
               </div>
               <div class="col-md-4">
                 <label class="form-label">Company Name</label>
-                <input type="text" class="form-control" id="user_company_name" name="user_company_name" value="{{vendor.user_company_name}}">
+                <input type="text" class="form-control" id="user_company_name" name="user_company_name" value="{{user_obj.user_company_name}}">
               </div>
               <div class="col-md-4">
                 <label class="form-label">PAN Number</label>
-                <input type="text" class="form-control" id="user_pan_number" name="user_pan_number" value="{{vendor.user_pan_number}}">
+                <input type="text" class="form-control" id="user_pan_number" name="user_pan_number" value="{{user_obj.user_pan_number}}">
               </div>
             </div>
             <div class="row mt-3">
               <div class="col-md-4">
                 <label class="form-label">GSTIN Number</label>
-                <input type="text" class="form-control" id="user_gstin_number" name="user_gstin_number" value="{{vendor.user_gstin_number}}">
+                <input type="text" class="form-control" id="user_gstin_number" name="user_gstin_number" value="{{user_obj.user_gstin_number}}">
               </div>
               <div class="col-md-4">
                 <label class="form-label">Profile Picture</label>
                 <input type="file" class="form-control" id="user_profile">
-                {% if vendor.user_profile %}
-                <small class="text-success">Current: <a href="{{vendor.user_profile.url}}" target="_blank">View File</a></small>
+                {% if user_obj.user_profile %}
+                <small class="text-success">Current: <a href="{{user_obj.user_profile.url}}" target="_blank">View File</a></small>
                 {% endif %}
               </div>
               <div class="col-md-4">
@@ -180,8 +175,8 @@
               <div class="col-md-12">
                 <label class="form-label">Scope</label>
                 <select class="form-control" id="user_operational_scope" onchange="handleScopeChange()">
-                  <option value="all" {% if vendor.user_operational_scope == 'all' or not vendor.id %}selected{% endif %}>All Over India</option>
-                  <option value="other" {% if vendor.user_operational_scope == 'other' %}selected{% endif %}>Other (Select Specific Regions)</option>
+                  <option value="all" {% if user_obj.user_operational_scope == 'all' or not user_obj.id %}selected{% endif %}>All Over India</option>
+                  <option value="other" {% if user_obj.user_operational_scope == 'other' %}selected{% endif %}>Other (Select Specific Regions)</option>
                 </select>
               </div>
               <div class="col-md-12 mt-3" id="state_selection_container" style="display: none;">
@@ -201,7 +196,7 @@
       <div class="form-footer">
         <button type="button" class="btn-prev" id="prevBtn" onclick="changeStep(-1)" style="display:none;">Previous</button>
         <button type="button" class="btn-next" id="nextBtn" onclick="changeStep(1)">Next Step <i class="fas fa-arrow-right"></i></button>
-        <button type="button" class="btn-submit" id="submitBtn" onclick="Update_Vendor(this)" style="display:none;"><i class="fas fa-save"></i> Update Vendor</button>
+        <button type="button" class="btn-submit" id="submitBtn" onclick="Update_Profile(this)" style="display:none;"><i class="fas fa-save"></i> Update Profile</button>
       </div>
     </form>
   </div>
@@ -212,7 +207,7 @@
 
 <script>
 
-  $("#Teams").addClass("active");
+  $("#Profile").addClass("active");
 
   // Sidebar Toggle for Desktop and Mobile
   function toggleSidebar() {
@@ -360,7 +355,7 @@
   }
 
   // --- Operational Area Logic ---
-  const savedRegions = "{{ vendor.selected_regions|safe }}".split(',').map(s => s.trim());
+  const savedRegions = "{{ user_obj.selected_regions|safe }}".split(',').map(s => s.trim());
   const indiaRegions = ["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu", "Lakshadweep", "Delhi", "Puducherry", "Ladakh", "Jammu and Kashmir"];
 
   function populateRegions() {
@@ -392,7 +387,7 @@
   document.getElementById("user_phone").addEventListener("input", function() { this.value = this.value.replace(/\D/g, "").slice(0, 10); });
 
   // --- Original AJAX Logic ---
-  function Update_Vendor(_this) {
+  function Update_Profile(_this) {
     var user_password = $("#user_password").val();
     var user_com_password = $("#user_com_password").val();
 
@@ -402,7 +397,7 @@
     }
 
     var fd = new FormData();
-    fd.append('id', '{{vendor.id}}');
+    fd.append('id', '{{user_obj.id}}');
     fd.append('user_name', $("#user_name").val());
     fd.append('user_email', $("#user_email").val());
     fd.append('user_phone', $("#user_phone").val());
@@ -439,10 +434,10 @@
       processData: false,
       contentType: false,
       success: function (response) {
-        $(_this).prop("disabled", false).html(`<i class="fas fa-save"></i> Update Vendor`);
+        $(_this).prop("disabled", false).html(`<i class="fas fa-save"></i> Update Profile`);
         if (response.status == '1') {
           swal({ title: response.msg, icon: 'success' }).then(() => {
-            window.location.href = "{% url 'Vendor_List' %}";
+            window.location.href = "{% url 'Vendors:vendors_Dashboard' %}";
           });
         } else {
           swal({ title: response.msg, icon: 'error' });

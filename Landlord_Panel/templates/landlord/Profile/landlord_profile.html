@@ -1,22 +1,16 @@
-{% include "admin_user/admin_header.html" %}
+{% include "landlord/landlord_header.html" %}
 {% load static %}
 
 <style>
-  :root {
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    --sidebar-width: 280px;
-    --topbar-height: 70px;
-  }
 
-  /* --- Original Layout Styles --- */
+  /* --- Original Layout & Sidebar Styles --- */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; min-height: 100vh; }
   .main-content { margin-left: var(--sidebar-width); margin-top: var(--topbar-height); padding: 30px; transition: all 0.3s ease; }
   .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
   .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
   
-  /* --- Original Back Button CSS --- */
+  /* --- Keeping Your Exact Back Button CSS --- */
   .btn-back {
     background: #f8f9fa;
     color: #2d3748;
@@ -38,117 +32,116 @@
   }
 
   /* --- Multi-step Horizontal Tracker --- */
-  .form-steps { display: flex; justify-content: space-between; margin-bottom: 40px; position: relative; max-width: 500px; margin-left: auto; margin-right: auto; }
-  .form-steps::before { content: ""; position: absolute; top: 22px; left: 0; right: 0; height: 3px; background: #e9ecef; z-index: 1; }
-  .step-indicator { position: relative; z-index: 2; background: white; width: 45px; height: 45px; border-radius: 50%; border: 3px solid #e9ecef; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #adb5bd; transition: all 0.3s ease; }
-  .step-indicator.active { border-color: #667eea; color: #667eea; box-shadow: 0 0 10px rgba(102,126,234,0.2); }
-  .step-indicator.completed { background: #667eea; border-color: #667eea; color: white; }
+  .step-progress-bar { display: flex; justify-content: space-between; align-items: center; margin: 0 auto 40px; position: relative; max-width: 600px; }
+  .step-progress-bar::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 3px; background: #e9ecef; transform: translateY(-50%); z-index: 1; }
+  .step-indicator { position: relative; z-index: 2; width: 45px; height: 45px; background: white; border: 3px solid #e9ecef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #adb5bd; transition: all 0.3s ease; }
+  .step-indicator.active { border-color: #10b981; color: #10b981; transform: scale(1.1); box-shadow: 0 0 15px rgba(102, 126, 234, 0.2); }
+  .step-indicator.completed { background: #10b981; border-color: #10b981; color: white; }
   
-  .step-content { display: none; }
-  .step-content.active { display: block; animation: fadeIn 0.4s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  /* --- Form Step Animation --- */
+  .form-step { display: none; }
+  .form-step.active { display: block; animation: fadeIn 0.5s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+  /* --- Section & Control Styling --- */
   .section-header { background: var(--primary-gradient); color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
   .section-body { background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; }
   .form-label { font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
   .form-control { border: 2px solid #e9ecef; border-radius: 12px; padding: 12px 15px; font-size: 0.95rem; transition: all 0.3s ease; width: 100%; }
+
   .form-footer { margin-top: 30px; padding-top: 25px; border-top: 2px solid #f0f0f0; display: flex; gap: 15px; justify-content: flex-end; }
-  .btn-submit { background: var(--primary-gradient); color: white; padding: 12px 35px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
-  .btn-reset { background: #f8f9fa; color: #2d3748; padding: 12px 35px; border-radius: 12px; border: 2px solid #e9ecef; font-weight: 600; cursor: pointer; }
+  .btn-submit, .btn-next { background: var(--primary-gradient); color: white; padding: 12px 35px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+  .btn-prev { background: #f8f9fa; color: #2d3748; padding: 12px 35px; border-radius: 12px; border: 2px solid #e9ecef; font-weight: 600; cursor: pointer; }
 
   .form-title { font-size: 1.5rem; font-weight: 700; color: #2d3748; display: flex; align-items: center; gap: 12px; }
-  .form-title i { width: 45px; height: 45px; background: var(--primary-gradient); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+
 </style>
 
 <div class="main-content">
-  <div class="form-container">
-    <div class="form-header">
-      <div class="form-title">
-        <i class="fas fa-edit"></i> Update Tenant
-      </div>
-      <button class="btn-back" onclick="history.back();">
-        <i class="fas fa-arrow-left"></i> Back to List
-      </button>
+  <div class="form-container" >
+    <div class="form-header" >
+      <div class="form-title" ><i class="fas fa-edit" ></i> Update Profile</div>
+      <button class="btn-back" onclick="history.back();"><i class="fas fa-arrow-left"></i> Back to List</button>
     </div>
 
-    <div class="form-steps">
-      <div class="step-indicator active" id="ind_1">1</div>
-      <div class="step-indicator" id="ind_2">2</div>
-      <div class="step-indicator" id="ind_3">3</div>
+    <div class="step-progress-bar">
+      <div class="step-indicator active" id="ind-1">1</div>
+      <div class="step-indicator" id="ind-2">2</div>
+      <div class="step-indicator" id="ind-3">3</div>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" id="updateTenantForm">
+    <form method="POST" enctype="multipart/form-data" id="multistep-update-form">
       {% csrf_token %}
 
-      <div class="step-content active" id="step_1">
+      <div class="form-step active" id="step-1">
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-user-tie"></i> Identity Information</div>
+          <div class="section-header"><i class="fas fa-user-tie"></i> Step 1: Landlord Details</div>
           <div class="section-body">
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Name <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_name" name="user_name" required value="{{tenant.user_name}}">
+                <input type="text" class="form-control" id="user_name" name="user_name" required value="{{user_obj.user_name}}">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Email Address <span style="color:red;">*</span></label>
-                <input type="email" class="form-control" id="user_email" name="user_email" required value="{{tenant.user_email}}">
+                <input type="text" class="form-control" id="user_email" name="user_name" required value="{{user_obj.user_email}}">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Phone Number <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_phone" name="user_phone" maxlength="10" required value="{{tenant.user_phone}}">
+                <input type="text" class="form-control" id="user_phone" name="user_phone" maxlength="10" required value="{{user_obj.user_phone}}">
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="step-content" id="step_2">
+      <div class="form-step" id="step-2">
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-map-marker-alt"></i> Location Details</div>
+          <div class="section-header"><i class="fas fa-map-marked-alt"></i> Step 2: Location Details</div>
           <div class="section-body">
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">State <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_state" name="user_state" required value="{{tenant.user_state}}">
+                <input type="text" class="form-control" id="user_state" name="user_state" required value="{{user_obj.user_state}}">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">City <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_city" name="user_city" required value="{{tenant.user_city}}">
+                <input type="text" class="form-control" id="user_city" name="user_city" required value="{{user_obj.user_city}}">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Address <span style="color:red;">*</span></label>
-                <textarea class="form-control" id="user_address" name="user_address" required>{{tenant.user_address}}</textarea>
+                <textarea class="form-control" id="user_address" name="user_address" required>{{user_obj.user_address}}</textarea>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="step-content" id="step_3">
+      <div class="form-step" id="step-3">
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-shield-alt"></i> Account Security</div>
+          <div class="section-header"><i class="fas fa-shield-alt"></i> Step 3: Account Security</div>
           <div class="section-body">
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Password <span style="color:red;">*</span></label>
-                <input type="password" class="form-control" id="user_password" name="user_password" required value="{{tenant.user_password}}">
+                <input type="password" class="form-control" id="user_password" name="user_password" required value="{{user_obj.user_password}}">
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Confirm Password <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="user_com_password" name="user_com_password" required value="{{tenant.user_password}}">
+                <input type="text" class="form-control" id="user_com_password" name="user_com_password" required value="{{user_obj.user_password}}">
               </div>
               <div class="col-md-4 mt-2">
-                <label class="form-label">Profile Picture</label>
+                <label class="form-label">Profile Picture <span style="color:red;">*</span></label>
                 <input type="file" class="form-control" id="user_profile" name="user_profile">
-                {% if tenant.user_profile %}
-                  <div class="mt-2"><a href="{{tenant.user_profile.url}}" target="_blank">View Current Image</a></div>
+                {% if user_obj.user_profile %}
+                    <div class="mt-2"><a href="{{user_obj.user_profile.url}}" target="_blank">View Current Image</a></div>
                 {% endif %}
               </div>
             </div>
-            <div class="row mt-3">
-              <div class="col-md-4">
-                <label class="form-label">Role</label>
-                <input type="text" class="form-control" value="{{tenant.user_role}}" disabled id="user_role">
+            <div class="row">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Role <span style="color:red;">*</span></label>
+                <input type="text" class="form-control" value="{{user_obj.user_role}}" disabled id="user_role">
               </div>
             </div>
           </div>
@@ -156,9 +149,9 @@
       </div>
 
       <div class="form-footer">
-        <button type="button" class="btn-reset" id="prevBtn" onclick="moveStep(-1)" style="display:none;">Previous</button>
-        <button type="button" class="btn-submit" id="nextBtn" onclick="moveStep(1)">Next <i class="fas fa-arrow-right"></i></button>
-        <button type="button" class="btn-submit" id="submitBtn" onclick="Update_Tenant(this)" style="display:none;"><i class="fas fa-save mr-1"></i> Update Tenant</button>
+        <button type="button" class="btn-prev" id="prevBtn" onclick="changeStep(-1)" style="display:none;">Previous</button>
+        <button type="button" class="btn-next" id="nextBtn" onclick="changeStep(1)">Next Step <i class="fas fa-arrow-right"></i></button>
+        <button type="button" class="btn-submit" id="submitBtn" onclick="Update_Profile(this)" style="display:none;"><i class="fas fa-save"></i> Update Profile</button>
       </div>
     </form>
   </div>
@@ -169,7 +162,7 @@
 
 <script>
 
-  $("#Teams").addClass("active");
+  $("#Profile").addClass("active");
 
   // Sidebar Toggle for Desktop and Mobile
   function toggleSidebar() {
@@ -280,53 +273,53 @@
   
   let currentStep = 1;
 
-  function moveStep(n) {
-    if (n === 1 && !validateStep(currentStep)) return false;
+  function showStep(step) {
+    $(".form-step").removeClass("active");
+    $(`#step-${step}`).addClass("active");
 
-    $(`#step_${currentStep}`).removeClass('active');
-    $(`#ind_${currentStep}`).removeClass('active');
-    if (n === 1) $(`#ind_${currentStep}`).addClass('completed');
-
-    currentStep += n;
-
-    $(`#step_${currentStep}`).addClass('active');
-    $(`#ind_${currentStep}`).addClass('active');
-
-    // Button Visibility logic
-    $('#prevBtn').toggle(currentStep > 1);
-    if (currentStep === 3) {
-      $('#nextBtn').hide();
-      $('#submitBtn').show();
-    } else {
-      $('#nextBtn').show();
-      $('#submitBtn').hide();
+    $(".step-indicator").removeClass("active completed");
+    for (let i = 1; i <= 3; i++) {
+        if (i < step) $(`#ind-${i}`).addClass("completed");
+        if (i === step) $(`#ind-${i}`).addClass("active");
     }
+
+    $("#prevBtn").toggle(step > 1);
+    $("#nextBtn").toggle(step < 3);
+    $("#submitBtn").toggle(step === 3);
     window.scrollTo(0, 0);
   }
 
-  function validateStep(step) {
+  function changeStep(n) {
+    if (n === 1 && !validateCurrentStep()) return false;
+    currentStep += n;
+    showStep(currentStep);
+  }
+
+  function validateCurrentStep() {
     let valid = true;
-    $(`#step_${step} [required]`).each(function() {
-      if ($(this).val() === "") {
-        $(this).css('border-color', 'red');
-        valid = false;
-      } else {
-        $(this).css('border-color', '#e9ecef');
-      }
+    $(`#step-${currentStep} [required]`).each(function() {
+        if ($(this).val() === "") {
+            $(this).css("border-color", "#e74c3c");
+            valid = false;
+        } else {
+            $(this).css("border-color", "#e9ecef");
+        }
     });
+    if (!valid) swal("Wait!", "Please fill all required fields.", "warning");
     return valid;
   }
 
   // Identity Input Restrictions
-  document.getElementById("user_name").addEventListener("input", function() {
+  document.getElementById("user_name").addEventListener("input", function () {
     this.value = this.value.replace(/[^a-zA-Z ]/g, "");
   });
-  document.getElementById("user_phone").addEventListener("input", function() {
+
+  document.getElementById("user_phone").addEventListener("input", function () {
     this.value = this.value.replace(/\D/g, "").slice(0, 10);
   });
 
-  // Ajax Update Logic
-  function Update_Tenant(_this) {
+  // AJAX Logic for Landlord Update
+  function Update_Profile(_this) {
     var user_name = $("#user_name").val();
     var user_email = $("#user_email").val();
     var user_phone = $("#user_phone").val();
@@ -338,13 +331,13 @@
     var user_profile = $("#user_profile")[0].files;
     var user_role = $("#user_role").val();
 
-    if (user_password !== user_com_password) {
+    if (user_password != user_com_password) {
       swal("Error", "Passwords do not match", "error");
       return;
     }
 
     var fd = new FormData();
-    fd.append('id', '{{tenant.id}}');
+    fd.append('id', '{{user_obj.id}}');
     fd.append('user_name', user_name);
     fd.append('user_email', user_email);
     fd.append('user_phone', user_phone);
@@ -365,10 +358,10 @@
       processData: false,
       contentType: false,
       success: function (response) {
-        $(_this).prop("disabled", false).html(`<i class="fas fa-save mr-1"></i> Update Tenant`);
+        $(_this).prop("disabled", false).html(`<i class="fas fa-save"></i> Update Profile`);
         if (response.status == '1') {
           swal("Success!", response.msg, "success").then(() => {
-            window.location.href = "{% url 'Tenant_List' %}";
+            window.location.href = "{% url 'landlord_dashboard' %}";
           });
         } else {
           swal("Error", response.msg, "error");

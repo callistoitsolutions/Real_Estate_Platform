@@ -8,6 +8,11 @@ urlpatterns = [
       ##########urls for Lanlord#####
    
     path('agent_dashboard',views.agent_dashboard,name="agent_dashboard"),
+    
+    ############ urls for update agent profile ###########################
+
+    path('Update_Profile_Agent',views.Update_Profile_Agent,name='Update_Profile_Agent'),
+    
    # path('Wallet_Recharge_agent',views.Wallet_Recharge_agent,name="Wallet_Recharge_agent"),
     #path('lead_purchase',views.lead_purchase,name="lead_purchase"),
     #path('Commission_Report_Filter',views.Commission_Report_Filter,name="Commission_Report_Filter"),

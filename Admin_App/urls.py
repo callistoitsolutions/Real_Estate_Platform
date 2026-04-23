@@ -237,6 +237,14 @@ urlpatterns = [
 
     path('Update_Vendor/<int:id>',views.Update_Vendor,name='Update_Vendor'),
 
+    ############## urls for update profile page ###########################
+
+    path('Update_Profile_Admin',views.Update_Profile_Admin,name='Update_Profile_Admin'),
+
+    ############# urls for ajax for update profile #######################
+
+    path('Admin_Profile_Ajax',views.Admin_Profile_Ajax,name='Admin_Profile_Ajax'),
+
      
 
      

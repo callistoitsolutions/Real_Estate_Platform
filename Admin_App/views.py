@@ -2407,6 +2407,38 @@ def Update_Vendor(request,id):
 ######### Views end for update vendor ##########################
 
 
+############ Views start for update profile page ########################
+
+def Update_Profile_Admin(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        context = {'admin_obj':admin_obj}
+
+        return render(request,'admin_user/Profile/profile_admin.html',context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for update profile page ###########################
+
+
+############ Views start for ajax for update profile #######################
+
+@csrf_exempt
+def Admin_Profile_Ajax(request):
+    data=request.POST.dict()
+    try:
+        Admin_Login.objects.get(id=data['id'])
+        Admin_Login.objects.filter(id=data['id']).update(**data)
+        return JsonResponse({"status":"1", "msg" : f"Profile updated successfully"})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+
+############## Views end for ajax for update profile ##########################
+
+
 
 def broadcast_email(request):
     return render(request,"admin_user/broadcast_email.html")

@@ -1,9 +1,9 @@
 
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404,HttpResponse
 from django.contrib import messages
 from django.urls import reverse
 from django.db.models import Q
-from .models import Vendor, VendorDocument,CommissionTransaction
+# from .models import Vendor, VendorDocument,CommissionTransaction
 
 import json
 import uuid
@@ -12,7 +12,7 @@ from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbid
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from .models import ServiceEnquiry, LeadShare, CommissionLedger, Vendor
+# from .models import ServiceEnquiry, LeadShare, CommissionLedger, Vendor
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
 from django.views.decorators.http import require_http_methods
@@ -21,13 +21,13 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import timedelta
-from .models import ServiceEnquiry, LeadShare, Vendor
+# from .models import ServiceEnquiry, LeadShare, Vendor
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import timedelta
 
-from .models import ServiceEnquiry, Vendor, LeadShare
+# from .models import ServiceEnquiry, Vendor, LeadShare
 from decimal import Decimal, InvalidOperation
 from django.db import transaction
 from Admin_App.models import *
@@ -55,6 +55,32 @@ def vendors_Dashboard(request):
     }
     
     return render(request, "vendors_module/vendors_Dashboard.html", context) 
+
+
+############### Views start for update vendor profile ##########################
+
+def Update_Profile_Vendor(request):
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Vendor":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    services_obj = Service_Type_Details.objects.all()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role,
+        'services_obj':services_obj
+    }
+    
+    return render(request, "vendors_module/Profile/vendor_profile.html", context)
+
+############ Views end for update vendor profile ############################
 
 
 

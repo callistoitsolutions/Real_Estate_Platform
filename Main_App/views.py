@@ -553,10 +553,10 @@ def login_view(request):
                     url = reverse('agent_dashboard')
 
                 if user_role == "Vendor":
-                    url = reverse('vendors_Dashboard')
+                    url = reverse('Vendors:vendors_Dashboard')
 
                 if user_role == "Tenant":
-                    url = reverse('Tenant_Dashboard')
+                    url = reverse('Tenant_App:tenant_Dashboard')
 
                 if user_role == "Buyer":
                     url = reverse('Buyer_Dashboard')

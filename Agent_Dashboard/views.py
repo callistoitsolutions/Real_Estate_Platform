@@ -1,10 +1,4 @@
-from django.shortcuts import render
-
-# Create your views here.
-from django.shortcuts import render
-
-# Create your views here.
-from django.shortcuts import render
+from django.shortcuts import render,HttpResponse
 from django.contrib import messages
 from django.shortcuts import render,redirect,get_object_or_404
 from Agent_Dashboard .models import *
@@ -39,6 +33,30 @@ def agent_dashboard(request):
     }
     
     return render(request, "agent/agent_dashboard.html", context) 
+
+
+############## Views start for update agent profile #########################
+
+def Update_Profile_Agent(request):
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Agent":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "agent/Profile/agent_profile.html", context)
+
+############# Views end for update agent profile ##############################
 
 
 
