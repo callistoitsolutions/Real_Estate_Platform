@@ -143,7 +143,9 @@ urlpatterns = [
     
     
     path('listingpage/', views.listings_view, name='listings'),
-    # your_app/urls.py
+   
+    path('listing/<str:listing_type>/<str:category>/<int:pk>/', views.property_detail_view, name='property_detail'),
+
 
    # path('listings/', views.listings_view, name='listings'),
 
