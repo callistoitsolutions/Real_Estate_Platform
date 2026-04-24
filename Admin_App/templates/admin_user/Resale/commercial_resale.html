@@ -405,6 +405,15 @@
         margin-left: var(--sidebar-collapsed-width);
     }
 
+    /* Page Wrapper with Grid for Preview */
+    .page-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 30px;
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
     /* Page Header */
     .page-header {
         background: var(--primary-gradient);
@@ -415,6 +424,7 @@
         margin-bottom: 30px;
         position: relative;
         overflow: hidden;
+        grid-column: 1 / -1;
     }
 
     .page-header::before {
@@ -473,6 +483,97 @@
         opacity: 0.8;
     }
 
+    /* STEPPER STYLES */
+    .stepper-container {
+        grid-column: 1 / -1;
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .stepper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        position: relative;
+    }
+
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #e9ecef;
+        color: #adb5bd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        border: 3px solid #e9ecef;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-circle.active {
+        background: var(--primary-gradient);
+        color: white;
+        border-color: #667eea;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .step-circle.done {
+        background: var(--success-gradient);
+        color: white;
+        border-color: #11998e;
+    }
+
+    .step-label {
+        margin-top: 10px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #adb5bd;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .step-label.active {
+        color: #667eea;
+    }
+
+    .step-label.done {
+        color: #11998e;
+    }
+
+    .step-line {
+        position: absolute;
+        top: 25px;
+        left: 50%;
+        right: -50%;
+        height: 3px;
+        background: #e9ecef;
+        z-index: 1;
+        transition: all 0.3s ease;
+    }
+
+    .step-item:last-child .step-line {
+        display: none;
+    }
+
+    .step-line.done {
+        background: var(--success-gradient);
+    }
+
     /* Form Container */
     .form-container {
         background: white;
@@ -529,6 +630,27 @@
         background: var(--dark-gradient);
         color: white;
         transform: translateY(-2px);
+    }
+
+    /* Step Content */
+    .step-content {
+        display: none;
+    }
+
+    .step-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     /* Form Sections */
@@ -609,6 +731,48 @@
         font-size: 0.8rem;
         color: #718096;
         margin-top: 6px;
+    }
+
+    /* Step Navigation Buttons */
+    .step-nav {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+        gap: 15px;
+    }
+
+    .btn-step {
+        padding: 12px 35px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-prev {
+        background: #f8f9fa;
+        color: #2d3748;
+        border: 2px solid #e9ecef;
+    }
+
+    .btn-prev:hover {
+        background: #e9ecef;
+    }
+
+    .btn-next {
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-next:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
     }
 
     /* Image Preview */
@@ -700,7 +864,187 @@
         background: #e9ecef;
     }
 
+    /* PREVIEW SIDEBAR */
+    .preview-sidebar {
+        position: sticky;
+        top: calc(var(--topbar-height) + 30px);
+        height: fit-content;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .preview-card {
+        background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+        border-radius: 16px;
+        padding: 20px;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .preview-header {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .preview-mock {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .preview-image {
+        height: 140px;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        position: relative;
+    }
+
+    .preview-badges {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        display: flex;
+        gap: 6px;
+    }
+
+    .preview-badge {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #0f172a;
+    }
+
+    .preview-price {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background: rgba(15, 23, 42, 0.9);
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 900;
+        padding: 5px 12px;
+        border-radius: 8px;
+    }
+
+    .preview-body {
+        padding: 15px;
+    }
+
+    .preview-title {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #0f172a;
+        margin-bottom: 5px;
+    }
+
+    .preview-location {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-bottom: 10px;
+    }
+
+    .preview-specs {
+        display: flex;
+        gap: 12px;
+        font-size: 0.75rem;
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .checklist-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .checklist-title {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #2d3748;
+        margin-bottom: 15px;
+    }
+
+    .checklist-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 0.85rem;
+        color: #718096;
+    }
+
+    .checklist-item i {
+        font-size: 0.8rem;
+        width: 18px;
+    }
+
+    .checklist-item.done {
+        color: #11998e;
+    }
+
+    .checklist-item.done i {
+        color: #11998e;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .info-title {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: #2d3748;
+        margin-bottom: 12px;
+    }
+
+    .info-item {
+        font-size: 0.8rem;
+        color: #475569;
+        padding: 6px 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .info-item i {
+        color: #667eea;
+        font-size: 0.75rem;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+
     /* Responsive Design */
+    @media (max-width: 1400px) {
+        .page-wrapper {
+            grid-template-columns: 1fr 300px;
+        }
+    }
+
+    @media (max-width: 1200px) {
+        .page-wrapper {
+            grid-template-columns: 1fr;
+        }
+
+        .preview-sidebar {
+            display: none;
+        }
+    }
+
     @media (max-width: 992px) {
         .sidebar {
             transform: translateX(-100%);
@@ -721,6 +1065,14 @@
         .topbar-search {
             display: none;
         }
+
+        .stepper {
+            overflow-x: auto;
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+        }
     }
 
     @media (max-width: 768px) {
@@ -738,6 +1090,16 @@
 
         .section-body {
             padding: 15px;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            font-size: 0.9rem;
+        }
+
+        .step-label {
+            display: none;
         }
     }
 
@@ -832,836 +1194,1185 @@
         background: #c0392b;
         transform: scale(1.1);
     }
+
+    .radio-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 15px;
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .radio-option:hover {
+        border-color: #667eea;
+        background: #f0f4ff;
+    }
+
+    .radio-option input {
+        cursor: pointer;
+    }
+
+    .conditional-section {
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            max-height: 0;
+        }
+        to {
+            opacity: 1;
+            max-height: 500px;
+        }
+    }
 </style>
 
+<!-- Add SweetAlert2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
 <div class="main-content">
-    <!-- Page Header -->
-
-
-    <!-- Form Container -->
-    <div class="form-container">
-        <div class="form-header">
-            <div class="form-title">
-                <i class="fas fa-edit"></i>
-                Sell your commercial property
+    <div class="page-wrapper">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-header-content">
+                <h1 class="page-title">🏢 Sell Commercial Property</h1>
+                <p class="page-subtitle">Complete 4 simple steps to list your property</p>
             </div>
-            <button class="btn-back" onclick="history.back();">
-                <i class="fas fa-arrow-left"></i>
-                Back to List
-            </button>
         </div>
 
-      <form method="POST" enctype="multipart/form-data" id="commercialPropertyForm">
-    {% csrf_token %}
-
-    <div class="form-section">
-        <div class="section-header">
-            <i class="fas fa-info-circle"></i>
-            Basic Information
-        </div>
-        <div class="section-body">
-            <div class="row">
-
-                <div class="form-group mt-2" hidden>
-                    <label class="form-label">Property Title <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="comm_title" name="title"
-                        placeholder="e.g., Prime Commercial Office Space" required>
+        <!-- Stepper -->
+        <div class="stepper-container">
+            <div class="stepper" id="stepper">
+                <div class="step-item">
+                    <div class="step-circle active" id="sc1">1</div>
+                    <div class="step-label active" id="sl1">Basic Info & Specs</div>
+                    <div class="step-line" id="line1"></div>
                 </div>
-
-                <div class="col-md-6 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Property Type <span class="required">*</span></label>
-                        <select class="form-select" id="comm_property_type" name="property_type" required>
-                            <option value="">Select property type</option>
-                            <option value="office">Office Space</option>
-                            <option value="shop">Shop/Showroom</option>
-                            <option value="warehouse">Warehouse/Godown</option>
-                            <option value="industrial">Industrial Building</option>
-                            <option value="land">Commercial Land</option>
-                        </select>
-                    </div>
+                <div class="step-item">
+                    <div class="step-circle" id="sc2">2</div>
+                    <div class="step-label" id="sl2">Legal & Pricing</div>
+                    <div class="step-line" id="line2"></div>
                 </div>
-
-                <div class="col-md-6 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Zone Type <span class="required">*</span></label>
-                        <select class="form-select" id="comm_zone" name="zone_type" required>
-                            <option value="">Select</option>
-                            <option value="industrial">Industrial</option>
-                            <option value="commercial">Commercial</option>
-                            <option value="residential">Residential</option>
-                            <option value="sez">Special Economic Zone</option>
-                        </select>
-                    </div>
+                <div class="step-item">
+                    <div class="step-circle" id="sc3">3</div>
+                    <div class="step-label" id="sl3">Amenities & Location</div>
+                    <div class="step-line" id="line3"></div>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Location Hub</label>
-                        <select class="form-select" id="comm_location_hub" name="location_hub">
-                            <option value="">Select</option>
-                            <option value="it">IT Park</option>
-                            <option value="business">Business District</option>
-                            <option value="mall">Shopping Mall</option>
-                            <option value="standalone">Standalone</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-6 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Property Condition <span class="required">*</span></label>
-                        <select class="form-select" id="comm_condition" name="property_condition" required>
-                            <option value="">Select</option>
-                            <option value="new">Brand New</option>
-                            <option value="excellent">Excellent</option>
-                            <option value="good">Good</option>
-                            <option value="renovation">Needs Renovation</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Ownership Type <span class="required">*</span></label>
-                        <select class="form-select" id="comm_ownership" name="ownership_type" required>
-                            <option value="">Select</option>
-                            <option value="freehold">Freehold</option>
-                            <option value="leasehold">Leasehold</option>
-                            <option value="cooperative">Co-operative Society</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-6 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Age of Property <span class="required">*</span></label>
-                        <select class="form-select" id="comm_age" name="age_of_property" required>
-                            <option value="">Select</option>
-                            <option value="0-1">0-1 Year</option>
-                            <option value="1-3">1-3 Years</option>
-                            <option value="3-5">3-5 Years</option>
-                            <option value="5-10">5-10 Years</option>
-                            <option value="10+">10+ Years</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-calendar"></i>
-                            Available From
-                        </label>
-                        <input type="date" class="form-control" name="available_from">
-                    </div>
+                <div class="step-item">
+                    <div class="step-circle" id="sc4">4</div>
+                    <div class="step-label" id="sl4">Photos & Publish</div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="form-section">
-        <div class="section-header">
-            <i class="fas fa-building"></i>
-            Commercial Specifications
+        <!-- Form Container -->
+        <div class="form-container">
+            <div class="form-header">
+                <div class="form-title">
+                    <i class="fas fa-building"></i>
+                    Sell your commercial property
+                </div>
+                <button class="btn-back" onclick="history.back();">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to List
+                </button>
+            </div>
+
+            <form method="POST" action="" enctype="multipart/form-data" id="commercialPropertyForm">
+                {% csrf_token %}
+
+                <!-- STEP 1: Basic Information & Specifications -->
+                <div class="step-content active" id="step1">
+                    <!-- Section 1: Basic Information -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-info-circle"></i>
+                            Basic Information
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="form-group mt-2" hidden>
+                                    <label class="form-label">Property Title <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="comm_title" name="title"
+                                        placeholder="e.g., Prime Commercial Office Space">
+                                </div>
+
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Property Type <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="comm_property_type" name="property_type" required>
+                                            <option value="">Select property type</option>
+                                            <option value="office">Office Space</option>
+                                            <option value="shop">Shop/Showroom</option>
+                                            <option value="warehouse">Warehouse/Godown</option>
+                                            <option value="industrial">Industrial Building</option>
+                                            <option value="land">Commercial Land</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Zone Type <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="comm_zone" name="zone_type" required>
+                                            <option value="">Select</option>
+                                            <option value="industrial">Industrial</option>
+                                            <option value="commercial">Commercial</option>
+                                            <option value="residential">Residential</option>
+                                            <option value="sez">Special Economic Zone</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Location Hub</label>
+                                        <select class="form-select form-control" id="comm_location_hub" name="location_hub">
+                                            <option value="">Select</option>
+                                            <option value="it">IT Park</option>
+                                            <option value="business">Business District</option>
+                                            <option value="mall">Shopping Mall</option>
+                                            <option value="standalone">Standalone</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Property Condition <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="comm_condition" name="property_condition" required>
+                                            <option value="">Select</option>
+                                            <option value="new">Brand New</option>
+                                            <option value="excellent">Excellent</option>
+                                            <option value="good">Good</option>
+                                            <option value="renovation">Needs Renovation</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Ownership Type <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="comm_ownership" name="ownership_type" required>
+                                            <option value="">Select</option>
+                                            <option value="freehold">Freehold</option>
+                                            <option value="leasehold">Leasehold</option>
+                                            <option value="cooperative">Co-operative Society</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Age of Property <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="comm_age" name="age_of_property" required>
+                                            <option value="">Select</option>
+                                            <option value="0-1">0-1 Year</option>
+                                            <option value="1-3">1-3 Years</option>
+                                            <option value="3-5">3-5 Years</option>
+                                            <option value="5-10">5-10 Years</option>
+                                            <option value="10+">10+ Years</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Available From</label>
+                                        <input type="date" class="form-control" id="comm_available_from" name="available_from">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Commercial Specifications -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-building"></i>
+                            Commercial Specifications
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-3 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">No. of Staircases</label>
+                                        <input type="number" class="form-control" id="comm_staircases" name="num_staircases" min="0"
+                                            placeholder="e.g., 2">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Passenger Lifts</label>
+                                        <input type="number" class="form-control" id="comm_passenger_lifts" name="passenger_lifts" min="0" value="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Service Lifts</label>
+                                        <input type="number" class="form-control" id="comm_service_lifts" name="service_lifts" min="0" value="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">No. of Cabins</label>
+                                        <input type="number" class="form-control" id="comm_cabins" name="num_cabins" min="0"
+                                            placeholder="e.g., 5">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Meeting Rooms</label>
+                                        <input type="number" class="form-control" id="comm_meeting_rooms" name="meeting_rooms" min="0"
+                                            placeholder="e.g., 2">
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Min. Seats</label>
+                                        <input type="number" class="form-control" id="comm_min_seats" name="min_seats" placeholder="e.g., 20">
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Max. Seats</label>
+                                        <input type="number" class="form-control" id="comm_max_seats" name="max_seats" placeholder="e.g., 50">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Private Parking <span class="required">*</span></label>
+                                        <input type="number" class="form-control" id="comm_private_parking" name="private_parking" min="0" value="0"
+                                            required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Public Parking</label>
+                                        <input type="number" class="form-control" id="comm_public_parking" name="public_parking" min="0"
+                                            placeholder="e.g., 20">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Area Measurements -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-ruler-combined"></i>
+                            Area Measurements
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Built-up Area (sq.ft) <span class="required">*</span></label>
+                                        <input type="number" class="form-control" id="comm_builtup_area" name="builtup_area"
+                                            placeholder="e.g., 2000" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Carpet Area (sq.ft)</label>
+                                        <input type="number" class="form-control" id="comm_carpet_area" name="carpet_area"
+                                            placeholder="e.g., 1600">
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Plot Area (sq.ft)</label>
+                                        <input type="number" class="form-control" id="comm_plot_area" name="plot_area" placeholder="e.g., 1500">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-nav">
+                        <div></div>
+                        <button type="button" class="btn-step btn-next" onclick="goToStep(2)">
+                            Next — Legal & Pricing <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Legal & Pricing Details -->
+                <div class="step-content" id="step2">
+                    <!-- Section 4: Ownership & Legal Details -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-shield-halved"></i>
+                            Ownership & Legal Details
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">No. of Owners <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="comm_num_owners" name="num_owners" required>
+                                            <option value="">Select</option>
+                                            <option value="1">Single Owner</option>
+                                            <option value="2">2 Owners</option>
+                                            <option value="3">3 Owners</option>
+                                            <option value="4+">4+ Owners</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Loan on Property? <span class="required">*</span></label>
+                                        <div class="radio-group">
+                                            <label class="radio-option">
+                                                <input type="radio" name="loan_on_property" value="no" required checked> No
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="loan_on_property" value="yes"> Yes
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="conditional-section mt-2" id="comm_loan_amount_section" style="display: none;">
+                                    <div class="form-group">
+                                        <label class="form-label">Loan Amount (₹)</label>
+                                        <input type="number" class="form-control" id="comm_loan_amount" name="loan_amount"
+                                            placeholder="e.g., 5000000">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Existing Tenants? <span class="required">*</span></label>
+                                        <div class="radio-group">
+                                            <label class="radio-option">
+                                                <input type="radio" name="existing_tenants" value="no" required checked> No
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="existing_tenants" value="yes"> Yes
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="conditional-section mt-2" id="comm_tenant_details_section" style="display: none;">
+                                    <div class="form-group">
+                                        <label class="form-label">Tenant Details</label>
+                                        <textarea class="form-control" id="comm_tenant_details" name="tenant_details"
+                                            placeholder="Tenant name, lease period, rent amount"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Any Legal Dispute? <span class="required">*</span></label>
+                                        <div class="radio-group">
+                                            <label class="radio-option">
+                                                <input type="radio" name="legal_dispute" value="no" required checked> No
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="legal_dispute" value="yes"> Yes
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="conditional-section mt-2" id="comm_dispute_details_section" style="display: none;">
+                                    <div class="form-group">
+                                        <label class="form-label">Dispute Description</label>
+                                        <textarea class="form-control" id="comm_dispute_details" name="dispute_details"
+                                            placeholder="Describe the legal dispute"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Government Tax Dues? <span class="required">*</span></label>
+                                        <div class="radio-group">
+                                            <label class="radio-option">
+                                                <input type="radio" name="tax_due" value="no" required checked> No - Tax Paid
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="tax_due" value="yes"> Yes - Pending
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="conditional-section mt-2" id="comm_tax_amount_section" style="display: none;">
+                                    <div class="form-group">
+                                        <label class="form-label">Pending Tax Amount (₹)</label>
+                                        <input type="number" class="form-control" id="comm_tax_amount" name="pending_tax_amount"
+                                            placeholder="e.g., 50000">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Fire Safety NOC Available?</label>
+                                        <div class="radio-group">
+                                            <label class="radio-option">
+                                                <input type="radio" name="fire_noc" value="no"> No
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="fire_noc" value="yes"> Yes
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Pricing Details -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-indian-rupee-sign"></i>
+                            Pricing Details
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Brokerage</label>
+                                        <select class="form-select form-control" name="brokerage" id="brokerageSelect">
+                                            <option value="">Select Option</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mt-2" id="brokerageSection" style="display:none;">
+                                    <div class="form-group">
+                                        <label class="form-label">Brokerage Percentage</label>
+                                        <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
+                                            <option value="">Select Brokerage</option>
+                                            <option value="1%">1%</option>
+                                            <option value="1.5%">1.5%</option>
+                                            <option value="2%">2%</option>
+                                            <option value="Negotiable">Negotiable</option>
+                                            <option value="Manual">Enter Manually</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mt-2" id="manualBrokerage" style="display:none;">
+                                    <div class="form-group">
+                                        <label class="form-label">Enter Brokerage</label>
+                                        <input type="text" class="form-control" name="manual_brokerage" placeholder="Enter Brokerage e.g. 2.5%">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
+                                        <input type="number" class="form-control" id="comm_price" name="expected_price" placeholder="e.g., 10000000"
+                                            required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-2">
+                                <label class="form-label">Property Description <span class="required">*</span></label>
+                                <textarea class="form-control" id="resale_commercial_desc" name="property_description"
+                                    placeholder="Describe property highlights, location benefits, nearby amenities..."
+                                    required></textarea>
+                            </div>
+
+                            <div class="form-group mt-2">
+                                <label class="form-label">Sanctioning Authority <span class="required">*</span></label>
+                                <textarea class="form-control" id="comm_sanctioning" name="sanctioning_authority"
+                                    placeholder="Enter Sanctioning Authority" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-nav">
+                        <button type="button" class="btn-step btn-prev" onclick="goToStep(1)">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="button" class="btn-step btn-next" onclick="goToStep(3)">
+                            Next — Amenities & Location <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: Amenities & Location -->
+                <div class="step-content" id="step3">
+                    <!-- Section 6: Nearby Facilities -->
+                    <div class="form-section facility-theme">
+                        <div class="section-header">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Nearby Facilities
+                        </div>
+                        <div class="section-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="form-label mb-0">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    Nearby Facilities <span class="required" style="color:red;">*</span>
+                                </label>
+                                
+                                <div class="selection-summary">
+                                    <span class="text-muted small" style="font-weight:bold;">Total Facilities Selected:</span>
+                                    <input type="text" id="facilityCounter" value="0" readonly 
+                                        class="counter-box blue-theme"
+                                        style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #bae6fd; font-weight: bold; background: #f0f9ff; color: #0369a1;">
+                                </div>
+                            </div>
+
+                            <div class="checkbox-group">
+                                {% for facilities in facilities_obj %}
+                                    <div class="checkbox-item">
+                                        <div class="form-check">
+                                            <input class="form-check-input facility-checkbox" type="checkbox" name="facilities[]" 
+                                                value="{{facilities.facilities_name}}" id="facility_{{ forloop.counter }}">
+                                            
+                                            <label class="form-check-label" for="facility_{{ forloop.counter }}">
+                                                <i class="{{facilities.facilities_icon}}"></i> {{facilities.facilities_name}}
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 7: Amenities & Features -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-star"></i>
+                            Amenities & Features
+                        </div>
+                        <div class="section-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="form-label mb-0">
+                                    <i class="fas fa-star"></i>
+                                    Amenities <span class="required" style="color:red;">*</span>
+                                </label>
+                                
+                                <div class="selection-summary">
+                                    <span class="text-muted small" style="font-weight:bold;">Total Amenities Selected:</span>
+                                    <input type="text" id="amenityCounter" value="0" readonly 
+                                        style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #ddd; font-weight: bold; background: #f8f9fa;">
+                                </div>
+                            </div>
+
+                            <div class="checkbox-group">
+                                {% for ameneties in ameneties_obj %}
+                                    <div class="checkbox-item">
+                                        <div class="form-check">
+                                            <input class="form-check-input amenity-checkbox" type="checkbox" name="amenities[]" 
+                                                value="{{ameneties.amenties_name}}" id="amenity_{{ forloop.counter }}">
+                                            
+                                            <label class="form-check-label" for="amenity_{{ forloop.counter }}">
+                                                <i class="{{ameneties.amenties_icon}}"></i> {{ameneties.amenties_name}}
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 8: Address -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-location-dot"></i>
+                            Address
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">City <span class="required">*</span></label>
+                                        <input type="text" class="form-control" id="comm_city" name="city"
+                                            placeholder="e.g., Mumbai" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Area/Locality <span class="required">*</span></label>
+                                        <input type="text" class="form-control" id="comm_locality" name="locality"
+                                            placeholder="e.g., BKC" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-2">
+                                <label class="form-label">Building / Project / Society</label>
+                                <input type="text" class="form-control" id="comm_building" name="building_name"
+                                    placeholder="Building name">
+                            </div>
+
+                            <div class="form-group mt-2">
+                                <label class="form-label">Property Address <span class="required">*</span></label>
+                                <textarea class="form-control" id="comm_address" name="property_address"
+                                    placeholder="Complete address" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 9: Owner Contact Information -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-user"></i>
+                            Owner Contact Information
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Owner Name <span class="required">*</span></label>
+                                        <input type="text" class="form-control" id="comm_owner_name" name="owner_name"
+                                            placeholder="Full name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Owner Contact <span class="required">*</span></label>
+                                        <input type="tel" class="form-control" id="comm_owner_contact" name="owner_contact"
+                                            placeholder="10-digit mobile" pattern="[0-9]{10}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Email <span class="required">*</span></label>
+                                        <input type="email" class="form-control" id="comm_owner_email" name="owner_email"
+                                            placeholder="email@example.com" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-2">
+                                <label class="form-label">Residential Status <span class="required">*</span></label>
+                                <div class="radio-group">
+                                    <label class="radio-option">
+                                        <input type="radio" name="residential_status" value="resident" required checked> Resident
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="residential_status" value="nri"> NRI
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="residential_status" value="pio"> PIO
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-nav">
+                        <button type="button" class="btn-step btn-prev" onclick="goToStep(2)">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="button" class="btn-step btn-next" onclick="goToStep(4)">
+                            Next — Photos & Publish <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 4: Photos & Publish -->
+                <div class="step-content" id="step4">
+                    <!-- Section 10: Property Images -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-images"></i>
+                            Property Images
+                        </div>
+                        <div class="section-body">
+                            <div class="image-upload-area" id="uploadArea">
+                                <input type="file" id="imageInput" name="property_images" multiple accept="image/*"
+                                    style="display: none;">
+                                <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #667eea;"></i></div>
+                                <div class="upload-text">Click or Drag Images Here</div>
+                                <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG)</div>
+                            </div>
+                            <div class="image-preview" id="imagePreview"></div>
+
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fa-solid fa-map"></i> Upload Floor Plan <span class="required">*</span>
+                                        </label>
+                                        <input type="file" class="form-control" name="floor_plan" accept="image/*" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fa-solid fa-video"></i> Upload Video
+                                        </label>
+                                        <input type="file" class="form-control" name="property_video" accept="video/*">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 11: Listing Uploaded By -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-upload"></i>
+                            Listing Uploaded By
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user"></i> Name</label>
+                                        <input type="text" class="form-control"
+                                               name="uploaded_by_name"
+                                               value="{{ admin_obj.name }}"
+                                               readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
+                                        <input type="email" class="form-control"
+                                               name="uploaded_by_email"
+                                               value="{{ admin_obj.email }}"
+                                               readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-phone"></i> Contact</label>
+                                        <input type="text" class="form-control"
+                                               name="uploaded_by_contact"
+                                               value="{{ admin_obj.phone }}"
+                                               readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
+                                        <input type="text" class="form-control"
+                                               name="uploaded_by_role"
+                                               value="{{ admin_obj.role }}"
+                                               readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Footer -->
+                    <div class="form-footer">
+                        <button type="button" class="btn-step btn-prev" onclick="goToStep(3)">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button type="reset" class="btn-reset">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-save"></i> Submit Property
+                        </button>
+                    </div>
+                </div>
+
+            </form>
         </div>
-        <div class="section-body">
-            <div class="row">
-                <div class="col-md-3 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">No. of Staircases</label>
-                        <input type="number" class="form-control" id="comm_staircases" name="num_staircases" min="0"
-                            placeholder="e.g., 2">
-                    </div>
-                </div>
-                <div class="col-md-3 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Passenger Lifts</label>
-                        <input type="number" class="form-control" id="comm_passenger_lifts" name="passenger_lifts" min="0" value="0">
-                    </div>
-                </div>
-                <div class="col-md-3 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Service Lifts</label>
-                        <input type="number" class="form-control" id="comm_service_lifts" name="service_lifts" min="0" value="0">
-                    </div>
-                </div>
-                <div class="col-md-3 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">No. of Cabins</label>
-                        <input type="number" class="form-control" id="comm_cabins" name="num_cabins" min="0"
-                            placeholder="e.g., 5">
-                    </div>
-                </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-4 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Meeting Rooms</label>
-                        <input type="number" class="form-control" id="comm_meeting_rooms" name="meeting_rooms" min="0"
-                            placeholder="e.g., 2">
-                    </div>
+        <!-- PREVIEW SIDEBAR -->
+        <div class="preview-sidebar">
+            <div class="preview-card">
+                <div class="preview-header">
+                    <i class="fas fa-eye"></i> Live Preview — Portal Card
                 </div>
-                <div class="col-md-4 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Min. Seats</label>
-                        <input type="number" class="form-control" id="comm_min_seats" name="min_seats" placeholder="e.g., 20">
+                <div class="preview-mock">
+                    <div class="preview-image">
+                        🏢
+                        <div class="preview-badges">
+                            <span class="preview-badge">FOR SALE</span>
+                            <span class="preview-badge" style="background: #3b82f6; color: white;">🆕 New</span>
+                        </div>
+                        <div class="preview-price" id="previewPrice">₹ — </div>
                     </div>
-                </div>
-                <div class="col-md-4 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Max. Seats</label>
-                        <input type="number" class="form-control" id="comm_max_seats" name="max_seats" placeholder="e.g., 50">
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Private Parking <span class="required">*</span></label>
-                        <input type="number" class="form-control" id="comm_private_parking" name="private_parking" min="0" value="0"
-                            required>
-                    </div>
-                </div>
-                <div class="col-md-6 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Public Parking</label>
-                        <input type="number" class="form-control" id="comm_public_parking" name="public_parking" min="0"
-                            placeholder="e.g., 20">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="form-section">
-        <div class="section-header">
-            <i class="fas fa-ruler-combined"></i>
-            Area & Pricing
-        </div>
-        <div class="section-body">
-            <div class="row">
-                <div class="col-md-4 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Built-up Area (sq.ft) <span class="required">*</span></label>
-                        <input type="number" class="form-control" id="comm_builtup_area" name="builtup_area"
-                            placeholder="e.g., 2000" required>
-                    </div>
-                </div>
-                <div class="col-md-4 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Carpet Area (sq.ft)</label>
-                        <input type="number" class="form-control" id="comm_carpet_area" name="carpet_area"
-                            placeholder="e.g., 1600">
-                    </div>
-                </div>
-
-                <div class="col-md-4 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-draw-polygon"></i>
-                            Plot Area (sq.ft)
-                        </label>
-                        <input type="number" class="form-control" name="plot_area" placeholder="e.g., 1500">
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-4 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-handshake"></i>
-                            Brokerage
-                        </label>
-                        <select class="form-select" name="brokerage" id="brokerageSelect">
-                            <option value="">Select Option</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="col-md-4 mt-2" id="brokerageSection" style="display:none;">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-percent"></i>
-                            Brokerage Percentage
-                        </label>
-                        <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
-                            <option value="">Select Brokerage</option>
-                            <option value="1%">1%</option>
-                            <option value="1.5%">1.5%</option>
-                            <option value="2%">2%</option>
-                            <option value="Negotiable">Negotiable</option>
-                            <option value="Manual">Enter Manually</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="col-md-4 mt-2" id="manualBrokerage" style="display:none;">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-edit"></i>
-                            Enter Brokerage
-                        </label>
-                        <input type="text" class="form-control" name="manual_brokerage" placeholder="Enter Brokerage e.g. 2.5%">
-                    </div>
-                </div>
-
-                <div class="col-md-4 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
-                        <input type="number" class="form-control" id="comm_price" name="expected_price" placeholder="e.g., 10000000"
-                            required>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="form-section">
-        <div class="section-header">
-            <i class="fas fa-shield-halved"></i>
-            Ownership & Legal Details
-        </div>
-        <div class="section-body">
-            <div class="row">
-                <div class="col-md-12 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">No. of Owners <span class="required">*</span></label>
-                        <select class="form-select" id="comm_num_owners" name="num_owners" required>
-                            <option value="">Select</option>
-                            <option value="1">Single Owner</option>
-                            <option value="2">2 Owners</option>
-                            <option value="3">3 Owners</option>
-                            <option value="4+">4+ Owners</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group mt-2">
-                        <label class="form-label">Loan on Property? <span class="required">*</span></label>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="loan_on_property" value="no" required> No
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="loan_on_property" value="yes"> Yes
-                            </label>
+                    <div class="preview-body">
+                        <div class="preview-title" id="previewTitle">Your Property Title</div>
+                        <div class="preview-location" id="previewLoc">
+                            <i class="fas fa-map-marker-alt" style="color:#667eea;"></i> Area, City
+                        </div>
+                        <div class="preview-specs">
+                            <span id="prevArea">— sqft</span>
+                            <span>Commercial</span>
                         </div>
                     </div>
                 </div>
-
-                <div class="conditional-section mt-2" id="comm_loan_amount_section" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">Loan Amount (₹)</label>
-                        <input type="number" class="form-control" id="comm_loan_amount" name="loan_amount"
-                            placeholder="e.g., 5000000">
-                    </div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-top:12px;text-align:center;">
+                    Will appear in search results & featured section
                 </div>
             </div>
 
-            <div class="row">
-                <div class="form-group mt-2">
-                    <label class="form-label">Existing Tenants? <span class="required">*</span></label>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="existing_tenants" value="no" required> No
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="existing_tenants" value="yes"> Yes
-                        </label>
-                    </div>
-                </div>
-
-                <div class="conditional-section mt-2" id="comm_tenant_details_section" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">Tenant Details</label>
-                        <textarea class="form-control" id="comm_tenant_details" name="tenant_details"
-                            placeholder="Tenant name, lease period, rent amount"></textarea>
-                    </div>
-                </div>
+            <div class="checklist-card">
+                <div class="checklist-title">📋 Listing Checklist</div>
+                <div class="checklist-item" id="cl-type"><i class="fas fa-circle"></i> Property type selected</div>
+                <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i> Area measurements entered</div>
+                <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Expected price set</div>
+                <div class="checklist-item" id="cl-location"><i class="fas fa-circle"></i> Location details added</div>
+                <div class="checklist-item" id="cl-owner"><i class="fas fa-circle"></i> Owner details filled</div>
             </div>
 
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group mt-2">
-                        <label class="form-label">Any Legal Dispute? <span class="required">*</span></label>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="legal_dispute" value="no" required> No
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="legal_dispute" value="yes"> Yes
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="conditional-section mt-2" id="comm_dispute_details_section" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">Dispute Description</label>
-                        <textarea class="form-control" id="comm_dispute_details" name="dispute_details"
-                            placeholder="Describe the legal dispute"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group mt-2">
-                        <label class="form-label">Government Tax Dues? <span class="required">*</span></label>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="tax_due" value="no" required> No - Tax Paid
-                            </label>
-                            <label class="radio-option">
-                                <input type="radio" name="tax_due" value="yes"> Yes - Pending
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="conditional-section mt-2" id="comm_tax_amount_section" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label">Pending Tax Amount (₹)</label>
-                        <input type="number" class="form-control" id="comm_tax_amount" name="pending_tax_amount"
-                            placeholder="e.g., 50000">
-                    </div>
-                </div>
-
-                <div class="form-group mt-2">
-                    <label class="form-label">Fire Safety NOC Available?</label>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="fire_noc" value="no"> No
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="fire_noc" value="yes"> Yes
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group mt-2">
-                    <label class="form-label">Property Description <span class="required">*</span></label>
-                    <textarea class="form-control" id="resale_commercial_desc" name="property_description"
-                        placeholder="Describe property highlights, location benefits, nearby amenities..."
-                        required></textarea>
-                </div>
-
-                <div class="form-group mt-2">
-                    <label class="form-label">Sanctioning Authority <span class="required">*</span></label>
-                    <textarea class="form-control" name="sanctioning_authority"
-                        placeholder="Enter Sanctioning Authority" required></textarea>
-                </div>
+            <div class="info-card">
+                <div class="info-title">💡 Pro Tips for Faster Sales</div>
+                <div class="info-item"><i class="fas fa-camera"></i> Add 8+ clear photos — 5× more enquiries</div>
+                <div class="info-item"><i class="fas fa-pencil-alt"></i> Write 150+ word description</div>
+                <div class="info-item"><i class="fas fa-shield-alt"></i> Request PropCRM Verification for 6× trust</div>
+                <div class="info-item"><i class="fas fa-map-pin"></i> Add Google Maps link for better search rank</div>
+                <div class="info-item"><i class="fas fa-rupee-sign"></i> Price competitively — compare nearby listings</div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="form-section">
-        <div class="form-section">
-            <div class="section-header">
-                <i class="fas fa-images"></i>
-                Property Images
-            </div>
-            <div class="image-upload-area" id="uploadArea">
-                <input type="file" id="imageInput" name="property_images" multiple accept="image/*"
-                    style="display: none;">
-                <div class="upload-icon">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                </div>
-                <div class="upload-text">Click or Drag Images Here</div>
-                <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG)</div>
-            </div>
-            <div class="image-preview" id="imagePreview"></div>
-        </div>
-
-        <div class="row mt-2">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fa-solid fa-camera"></i> Upload Floor Plan <span class="required">*</span>
-                    </label>
-                    <input type="file" name="floor_plan" accept="image/*">
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fa-solid fa-camera"></i> Upload Video on Social Media <span class="required">*</span>
-                    </label>
-                    <input type="file" name="property_video" accept="video/*">
-                </div>
-            </div>
-        </div>
-        <br>
-
-        <div class="form-section facility-theme">
-        <div class="section-header">
-            <i class="fas fa-map-marker-alt"></i>
-            Nearby Facilities
-        </div>
-        <div class="section-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <label class="form-label mb-0">
-                    <i class="fas fa-map-marker-alt"></i>
-                    Nearby Facilities <span class="required-star" style="color:red;">*</span>
-                </label>
-                
-                <div class="selection-summary">
-                    <span class="text-muted small" style="font-weight:bold;">Total Facilities Selected:</span>
-                    <input type="text" id="facilityCounter" value="0" readonly 
-                        class="counter-box blue-theme"
-                        style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #bae6fd; font-weight: bold; background: #f0f9ff; color: #0369a1;">
-                </div>
-
-            </div>
-
-            <div class="checkbox-group">
-                {% for facilities in facilities_obj %}
-                    <div class="checkbox-item">
-                        <div class="form-check">
-                            <input class="form-check-input facility-checkbox" type="checkbox" name="facilities[]" 
-                                value="{{facilities.facilities_name}}" id="facility_{{ forloop.counter }}">
-                            
-                            <label class="form-check-label" for="facility_{{ forloop.counter }}">
-                                <i class="{{facilities.facilities_icon}}"></i> {{facilities.facilities_name}}
-                            </label>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-
-        <div class="form-section">
-        <div class="section-header">
-            <i class="fas fa-star"></i>
-            Amenities & Features
-        </div>
-        <div class="section-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <label class="form-label mb-0">
-                    <i class="fas fa-star"></i>
-                    Amenities <span class="required-star" style="color:red;">*</span>
-                </label>
-                
-                <div class="selection-summary">
-                    <span class="text-muted small" style="font-weight:bold;">Total Ameneties Selected:</span>
-                    <input type="text" id="amenityCounter" value="0" readonly 
-                        style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #ddd; font-weight: bold; background: #f8f9fa;">
-                </div>
-            </div>
-
-            <div class="checkbox-group">
-                {% for ameneties in ameneties_obj %}
-                    <div class="checkbox-item">
-                        <div class="form-check">
-                            <input class="form-check-input amenity-checkbox" type="checkbox" name="amenities[]" 
-                                value="{{ameneties.amenties_name}}" id="amenity_{{ forloop.counter }}">
-                            
-                            <label class="form-check-label" for="amenity_{{ forloop.counter }}">
-                                <i class="{{ameneties.amenties_icon}}"></i> {{ameneties.amenties_name}}
-                            </label>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-
-        <div class="form-section">
-            <div class="section-header">
-                <i class="fas fa-star"></i>
-                Address
-            </div>
-            <div class="row">
-                <div class="col-md-6 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">City <span class="required">*</span></label>
-                        <input type="text" class="form-control" id="comm_city" name="city"
-                            placeholder="e.g., Mumbai" required>
-                    </div>
-                </div>
-                <div class="col-md-6 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Area/Locality <span class="required">*</span></label>
-                        <input type="text" class="form-control" id="comm_locality" name="locality"
-                            placeholder="e.g., BKC" required>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group mt-2">
-                <label class="form-label">Building / Project / Society</label>
-                <input type="text" class="form-control" id="comm_building" name="building_name"
-                    placeholder="Building name">
-            </div>
-
-            <div class="form-group mt-2">
-                <label class="form-label">Property Address <span class="required">*</span></label>
-                <textarea class="form-control" id="comm_address" name="property_address"
-                    placeholder="Complete address" required></textarea>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <div class="section-header">
-                <i class="fas fa-user"></i>
-                Owner Contact Information
-            </div>
-            <div class="row">
-                <div class="col-md-4 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Owner Name <span class="required">*</span></label>
-                        <input type="text" class="form-control" id="comm_owner_name" name="owner_name"
-                            placeholder="Full name" required>
-                    </div>
-                </div>
-                <div class="col-md-4 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Owner Contact <span class="required">*</span></label>
-                        <input type="tel" class="form-control" id="comm_owner_contact" name="owner_contact"
-                            placeholder="10-digit mobile" pattern="[0-9]{10}" required>
-                    </div>
-                </div>
-                <div class="col-md-4 mt-2">
-                    <div class="form-group">
-                        <label class="form-label">Email <span class="required">*</span></label>
-                        <input type="email" class="form-control" id="comm_owner_email" name="owner_email"
-                            placeholder="email@example.com" required>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group mt-2">
-                <label class="form-label">Residential Status <span class="required">*</span></label>
-                <div class="radio-group">
-                    <label class="radio-option">
-                        <input type="radio" name="residential_status" value="resident" required> Resident
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="residential_status" value="nri"> NRI
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="residential_status" value="pio"> PIO
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-section">
-            <div class="section-header">
-                <i class="fas fa-upload"></i>
-                Listing Uploaded By
-            </div>
-
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-user"></i> Name
-                        </label>
-                        <input type="text" class="form-control"
-                               name="uploaded_by_name"
-                               value="{{ admin_obj.name }}"
-                               disabled>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-envelope"></i> Email
-                        </label>
-                        <input type="email" class="form-control"
-                               name="uploaded_by_email"
-                               value="{{ admin_obj.email }}"
-                               disabled>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-phone"></i> Contact
-                        </label>
-                        <input type="text" class="form-control"
-                               name="uploaded_by_contact"
-                               value="{{ admin_obj.phone }}"
-                               disabled>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-user-tag"></i> Role
-                        </label>
-                        <input type="text" class="form-control"
-                               name="uploaded_by_role"
-                               value="{{ admin_obj.role }}"
-                               disabled>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-footer">
-            <button type="reset" class="btn-reset">
-                <i class="fas fa-redo"></i> Reset
-            </button>
-            <button type="submit" class="btn-submit" id="submitBtn">
-                <i class="fas fa-save"></i> Submit
-            </button>
-        </div>
-</form>
-
-
-<!-- ── SweetAlert2 CDN (place before closing </body>) ── -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-        $(document).ready(function() {
-            // Function to update the count
-            function updateAmenityCount() {
-                // Count how many checkboxes with name "amenities[]" are checked
-                var totalSelected = $('input[name="amenities[]"]:checked').length;
-                
-                // Update the textbox value
-                $('#amenityCounter').val(totalSelected);
-                
-                // Optional: Change background color if selections are made
-                if(totalSelected > 0) {
-                    $('#amenityCounter').css('background-color', '#fff3e0');
-                    $('#amenityCounter').css('border-color', '#e85d04');
-                } else {
-                    $('#amenityCounter').css('background-color', '#f8f9fa');
-                    $('#amenityCounter').css('border-color', '#ddd');
-                }
-            }
-
-            // Listen for changes on any amenity checkbox
-            $(document).on('change', 'input[name="amenities[]"]', function() {
-                updateAmenityCount();
-            });
-
-            // Run on page load in case some are pre-selected (useful for Edit pages)
-            updateAmenityCount();
-        });
-    </script>
-
-    <script>
-        $(document).ready(function() {
-            function updateFacilityCount() {
-                // Count how many checkboxes with name "facilities[]" are checked
-                var total = $('input[name="facilities[]"]:checked').length;
-                
-                // Update the facility counter value
-                var $counter = $('#facilityCounter');
-                $counter.val(total);
-                
-                // Toggle the active blue styling
-                if(total > 0) {
-                    $counter.addClass('active-blue');
-                } else {
-                    $counter.removeClass('active-blue');
-                }
-            }
-
-            // Listen for changes specifically on facilities checkboxes
-            $(document).on('change', 'input[name="facilities[]"]', function() {
-                updateFacilityCount();
-            });
-
-            // Initialize on page load (important if editing an existing property)
-            updateFacilityCount();
-        });
-    </script>
-
-<script>
-// ── SweetAlert on form submit (AJAX) ──────────────────
-document.getElementById('commercialPropertyForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const form = this;
-    const formData = new FormData(form);
-
-    // Show loading while submitting
-    Swal.fire({
-        title: 'Submitting...',
-        text: 'Please wait while we save the property.',
-        allowOutsideClick: false,
-        didOpen: () => { Swal.showLoading(); }
-    });
-
-    fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Property Saved!',
-                text: data.message || 'Commercial property added successfully.',
-                confirmButtonColor: '#28a745',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                form.reset();
-                // window.location.href = '/your-list-page/';  // optional redirect
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Submission Failed',
-                text: data.message || 'Something went wrong. Please try again.',
-                confirmButtonColor: '#dc3545',
-            });
-        }
-    })
-    .catch(error => {
-        Swal.fire({
-            icon: 'error',
-            title: 'Server Error',
-            text: 'Could not connect to server. Please try again.',
-            confirmButtonColor: '#dc3545',
-        });
-    });
-});
-</script>
-
-
-<!-- ── Your existing scripts below — unchanged ──────── -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<!-- Remove your old CKEditor script and replace with: -->
-<script src="https://cdn.ckeditor.com/4.25.1-lts/standard/ckeditor.js"></script>
 
 <script>
-    window.onload = function() {
-        if (CKEDITOR.instances.resale_commercial_desc) {
-            CKEDITOR.instances.resale_commercial_desc.destroy();
+    let currentStep = 1;
+
+    /* ══════════════════════════════════════════
+       STEPPER NAVIGATION LOGIC
+    ═════════════════════════════════════════════ */
+    function goToStep(n) {
+        // Validate current step before moving forward
+        if (n > currentStep && !validateStep(currentStep)) {
+            return false;
         }
-        CKEDITOR.replace('resale_commercial_desc');
-    };
-</script>
 
-<script>
-    $("#Resale").addClass("active");
+        // Hide current step
+        document.getElementById('step' + currentStep).classList.remove('active');
+        
+        // Show new step
+        document.getElementById('step' + n).classList.add('active');
+        
+        // Update stepper UI
+        for (let i = 1; i <= 4; i++) {
+            const sc = document.getElementById('sc' + i);
+            const sl = document.getElementById('sl' + i);
+            const line = document.getElementById('line' + i);
+            
+            sc.className = 'step-circle';
+            sl.className = 'step-label';
+            if (line) line.className = 'step-line';
+            
+            if (i < n) {
+                // Completed steps
+                sc.classList.add('done');
+                sl.classList.add('done');
+                sc.innerHTML = '<i class="fas fa-check" style="font-size:.7rem;"></i>';
+                if (line) line.classList.add('done');
+            } else if (i === n) {
+                // Active step
+                sc.classList.add('active');
+                sl.classList.add('active');
+                sc.textContent = i;
+            } else {
+                // Upcoming steps
+                sc.textContent = i;
+            }
+        }
+        
+        currentStep = n;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        updatePreview();
+    }
 
+    /* ══════════════════════════════════════════
+       STEP VALIDATION (ONLY SHOW MISSING FIELDS)
+    ═════════════════════════════════════════════ */
+    function validateStep(step) {
+        const stepElement = document.getElementById('step' + step);
+        const requiredFields = stepElement.querySelectorAll('[required]');
+        let isValid = true;
+        let missingFields = [];
+
+        requiredFields.forEach(field => {
+            if (field.type === 'radio') {
+                const radioGroup = stepElement.querySelectorAll(`[name="${field.name}"]`);
+                const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+                if (!isChecked) {
+                    isValid = false;
+                    const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
+                    if (label && !missingFields.includes(label)) {
+                        missingFields.push(label);
+                    }
+                }
+            } else if (!field.value.trim()) {
+                isValid = false;
+                const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
+                if (label && !missingFields.includes(label)) {
+                    missingFields.push(label);
+                }
+            }
+        });
+
+        if (!isValid) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Required Fields Missing',
+                html: `<p style="margin-bottom: 10px;">Please fill the following required fields:</p>
+                       <ul style="text-align: left; display: inline-block;">
+                         ${missingFields.map(field => `<li>${field}</li>`).join('')}
+                       </ul>`,
+                confirmButtonColor: '#667eea',
+                confirmButtonText: 'Got it!'
+            });
+            return false;
+        }
+
+        return true;
+    }
+
+    /* ══════════════════════════════════════════
+       LIVE PREVIEW UPDATE
+    ═════════════════════════════════════════════ */
+    function updatePreview() {
+        // Update price
+        const price = document.getElementById('comm_price')?.value;
+        if (price) {
+            document.getElementById('previewPrice').textContent = 
+                '₹' + parseInt(price).toLocaleString('en-IN');
+        }
+
+        // Update area
+        const area = document.getElementById('comm_builtup_area')?.value;
+        if (area) {
+            document.getElementById('prevArea').textContent = area + ' sqft';
+        }
+
+        // Update location
+        const locality = document.getElementById('comm_locality')?.value;
+        const city = document.getElementById('comm_city')?.value;
+        if (locality || city) {
+            document.getElementById('previewLoc').innerHTML = 
+                '<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ' +
+                (locality || 'Area') + ', ' + (city || 'City');
+        }
+
+        updateChecklist();
+    }
+
+    /* ══════════════════════════════════════════
+       CHECKLIST UPDATE
+    ═════════════════════════════════════════════ */
+    function updateChecklist() {
+        setCheck('cl-type', !!document.getElementById('comm_property_type')?.value);
+        setCheck('cl-area', !!document.getElementById('comm_builtup_area')?.value);
+        setCheck('cl-price', !!document.getElementById('comm_price')?.value);
+        setCheck('cl-location', !!document.getElementById('comm_city')?.value && !!document.getElementById('comm_locality')?.value);
+        setCheck('cl-owner', !!document.getElementById('comm_owner_name')?.value);
+    }
+
+    function setCheck(id, done) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.className = 'checklist-item' + (done ? ' done' : '');
+        el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+    }
+
+    /* ══════════════════════════════════════════
+       FORM INITIALIZATION
+    ═════════════════════════════════════════════ */
+    document.addEventListener("DOMContentLoaded", function () {
+        // Add change listeners to all form inputs for preview update
+        const formInputs = document.querySelectorAll('input, select, textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('change', updatePreview);
+            input.addEventListener('input', updatePreview);
+        });
+
+        // Brokerage Toggle
+        const brokerageSelect = document.getElementById("brokerageSelect");
+        const brokerageSection = document.getElementById("brokerageSection");
+        const brokeragePercentage = document.getElementById("brokeragePercentage");
+        const manualBrokerage = document.getElementById("manualBrokerage");
+
+        brokerageSelect?.addEventListener("change", function () {
+            if (this.value === "Yes") {
+                brokerageSection.style.display = "block";
+            } else {
+                brokerageSection.style.display = "none";
+                manualBrokerage.style.display = "none";
+            }
+        });
+
+        brokeragePercentage?.addEventListener("change", function () {
+            manualBrokerage.style.display = (this.value === "Manual") ? "block" : "none";
+        });
+
+        // Legal Section Toggles
+        document.querySelectorAll('input[name="loan_on_property"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('comm_loan_amount_section').style.display =
+                    (this.value === 'yes') ? 'block' : 'none';
+            });
+        });
+
+        document.querySelectorAll('input[name="existing_tenants"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('comm_tenant_details_section').style.display =
+                    (this.value === 'yes') ? 'block' : 'none';
+            });
+        });
+
+        document.querySelectorAll('input[name="legal_dispute"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('comm_dispute_details_section').style.display =
+                    (this.value === 'yes') ? 'block' : 'none';
+            });
+        });
+
+        document.querySelectorAll('input[name="tax_due"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('comm_tax_amount_section').style.display =
+                    (this.value === 'yes') ? 'block' : 'none';
+            });
+        });
+
+        // Multi-Image Upload
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        let selectedFiles = [];
+
+        uploadArea?.addEventListener('click', () => imageInput.click());
+
+        uploadArea?.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea?.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea?.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        imageInput?.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            const fileArray = Array.from(files);
+            if (selectedFiles.length + fileArray.length > 10) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Too Many Files',
+                    text: 'Maximum 10 images allowed',
+                    confirmButtonColor: '#667eea'
+                });
+                return;
+            }
+            fileArray.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    selectedFiles.push(file);
+                    displayImage(file);
+                }
+            });
+            syncFileInput();
+        }
+
+        function displayImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.dataset.fileName = file.name;
+                div.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <button type="button" class="remove-image"
+                        onclick="removeImage(this, '${file.name}')">
+                        <i class="fas fa-times"></i>
+                    </button>`;
+                imagePreview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        window.removeImage = function(button, fileName) {
+            selectedFiles = selectedFiles.filter(f => f.name !== fileName);
+            button.closest('.preview-item').remove();
+            syncFileInput();
+        };
+
+        function syncFileInput() {
+            const dt = new DataTransfer();
+            selectedFiles.forEach(f => dt.items.add(f));
+            imageInput.files = dt.files;
+        }
+
+        // Amenity and Facility Counters
+        function updateAmenityCount() {
+            const totalSelected = document.querySelectorAll('input[name="amenities[]"]:checked').length;
+            const counter = document.getElementById('amenityCounter');
+            if (counter) {
+                counter.value = totalSelected;
+                if(totalSelected > 0) {
+                    counter.style.backgroundColor = '#fff3e0';
+                    counter.style.borderColor = '#e85d04';
+                } else {
+                    counter.style.backgroundColor = '#f8f9fa';
+                    counter.style.borderColor = '#ddd';
+                }
+            }
+        }
+
+        function updateFacilityCount() {
+            const total = document.querySelectorAll('input[name="facilities[]"]:checked').length;
+            const counter = document.getElementById('facilityCounter');
+            if (counter) {
+                counter.value = total;
+            }
+        }
+
+        document.querySelectorAll('input[name="amenities[]"]').forEach(checkbox => {
+            checkbox.addEventListener('change', updateAmenityCount);
+        });
+
+        document.querySelectorAll('input[name="facilities[]"]').forEach(checkbox => {
+            checkbox.addEventListener('change', updateFacilityCount);
+        });
+
+        // Initialize counters
+        updateAmenityCount();
+        updateFacilityCount();
+        updatePreview();
+    });
+
+    /* ══════════════════════════════════════════
+       SIDEBAR TOGGLE (FROM ORIGINAL)
+    ═════════════════════════════════════════════ */
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -1687,200 +2398,29 @@ document.getElementById('commercialPropertyForm').addEventListener('submit', fun
         event.preventDefault();
         event.stopPropagation();
         const submenu = element.nextElementSibling;
-        const allSubmenus = document.querySelectorAll('.submenu');
-        const allDropdownLinks = document.querySelectorAll('.menu-link');
-        allSubmenus.forEach(sub => { if (sub !== submenu) sub.classList.remove('active'); });
-        allDropdownLinks.forEach(link => { if (link !== element) link.classList.remove('dropdown-open'); });
+        document.querySelectorAll('.submenu').forEach(sub => {
+            if (sub !== submenu) sub.classList.remove('active');
+        });
+        document.querySelectorAll('.menu-link').forEach(link => {
+            if (link !== element) link.classList.remove('dropdown-open');
+        });
         submenu.classList.toggle('active');
         element.classList.toggle('dropdown-open');
         return false;
     }
 
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
+    $("#Resale").addClass("active");
 
-    window.addEventListener('resize', function () {
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        if (window.innerWidth > 768) {
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-
-        // ── SweetAlert Form Submit ──────────────────────────
-        document.getElementById('commercialPropertyForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const form = this;
-            const formData = new FormData(form);
-
-            Swal.fire({
-                title: 'Submitting...',
-                text: 'Please wait while we save the property.',
-                allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
-            });
-
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Property Saved!',
-                        text: data.message || 'Commercial property added successfully.',
-                        confirmButtonColor: '#28a745',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        form.reset();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Submission Failed',
-                        text: data.message || 'Something went wrong. Please try again.',
-                        confirmButtonColor: '#dc3545',
-                    });
-                }
-            })
-            .catch(error => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Server Error',
-                    text: 'Could not connect to server. Please try again.',
-                    confirmButtonColor: '#dc3545',
-                });
-            });
-        });
-
-        // ── Sidebar submenu links ───────────────────────────
-        document.querySelectorAll('.submenu-link').forEach(link => {
-            link.addEventListener('click', function () {
-                if (window.innerWidth <= 768) setTimeout(() => closeSidebar(), 200);
-            });
-        });
-        document.querySelectorAll('.menu-link').forEach(link => {
-            if (!link.hasAttribute('onclick')) {
-                link.addEventListener('click', function () {
-                    if (window.innerWidth <= 768) setTimeout(() => closeSidebar(), 200);
-                });
+    // CKEditor initialization
+    window.onload = function () {
+        if (typeof CKEDITOR !== 'undefined') {
+            if (CKEDITOR.instances.resale_commercial_desc) {
+                CKEDITOR.instances.resale_commercial_desc.destroy();
             }
-        });
-    });
-
-    document.getElementById('sidebar').addEventListener('transitionend', function () {
-        if (this.classList.contains('active')) document.body.style.overflow = 'hidden';
-    });
-
-    // ── Image Upload ────────────────────────────────────────
-    const uploadArea = document.getElementById('uploadArea');
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
-    let selectedFiles = [];
-
-    uploadArea.addEventListener('click', () => imageInput.click());
-    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.classList.remove('dragover');
-        handleFiles(e.dataTransfer.files);
-    });
-    imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
-
-    function handleFiles(files) {
-        const fileArray = Array.from(files);
-        if (selectedFiles.length + fileArray.length > 10) {
-            alert('Maximum 10 images allowed');
-            return;
+            CKEDITOR.replace('resale_commercial_desc');
         }
-        fileArray.forEach(file => {
-            if (file.type.startsWith('image/')) {
-                selectedFiles.push(file);
-                displayImage(file);
-            }
-        });
-    }
-
-    function displayImage(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const div = document.createElement('div');
-            div.className = 'preview-item';
-            div.innerHTML = `
-                <img src="${e.target.result}" alt="Preview">
-                <button type="button" class="remove-image" onclick="removeImage(this, '${file.name}')">
-                    <i class="fas fa-times"></i>
-                </button>`;
-            imagePreview.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-    }
-
-    function removeImage(button, fileName) {
-        selectedFiles = selectedFiles.filter(file => file.name !== fileName);
-        button.parentElement.remove();
-    }
-
-    // ── Radio toggles ───────────────────────────────────────
-    document.querySelectorAll('input[name="loan_on_property"]').forEach(radio => {
-        radio.addEventListener('change', function () {
-            document.getElementById('comm_loan_amount_section').style.display =
-                this.value === 'yes' ? 'block' : 'none';
-        });
-    });
-
-    document.querySelectorAll('input[name="existing_tenants"]').forEach(radio => {
-        radio.addEventListener('change', function () {
-            document.getElementById('comm_tenant_details_section').style.display =
-                this.value === 'yes' ? 'block' : 'none';
-        });
-    });
-
-    document.querySelectorAll('input[name="legal_dispute"]').forEach(radio => {
-        radio.addEventListener('change', function () {
-            document.getElementById('comm_dispute_details_section').style.display =
-                this.value === 'yes' ? 'block' : 'none';
-        });
-    });
-
-    document.querySelectorAll('input[name="tax_due"]').forEach(radio => {
-        radio.addEventListener('change', function () {
-            document.getElementById('comm_tax_amount_section').style.display =
-                this.value === 'yes' ? 'block' : 'none';
-        });
-    });
+    };
 </script>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const brokerageSelect = document.getElementById("brokerageSelect");
-    const brokerageSection = document.getElementById("brokerageSection");
-    const brokeragePercentage = document.getElementById("brokeragePercentage");
-    const manualBrokerage = document.getElementById("manualBrokerage");
-
-    brokerageSelect.addEventListener("change", function () {
-        brokerageSection.style.display = this.value === "Yes" ? "block" : "none";
-        if (this.value !== "Yes") manualBrokerage.style.display = "none";
-    });
-
-    brokeragePercentage.addEventListener("change", function () {
-        manualBrokerage.style.display = this.value === "Manual" ? "block" : "none";
-    });
-});
-</script>
+</body>
+</html>
