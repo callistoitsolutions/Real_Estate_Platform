@@ -4,151 +4,172 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Flats & Houses for Rent in Nagpur — PropCRM
-
      {% if listing_type == 'sale' %}Flats & Houses for Sale{% elif listing_type == 'commercial' %}Commercial Properties{% else %}Flats & Houses for Rent{% endif %}
   in Nagpur — PropCRM
 </title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{--pr:#f97316;--pr2:#ea580c;--sec:#0f172a;--muted:#64748b;--border:#e2e8f0;--bg:#f8fafc;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e293b;}
-.nav{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:500;box-shadow:0 1px 8px rgba(0,0,0,.06);}
-.nav-inner{max-width:1300px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:16px;height:60px;}
-.logo{font-weight:900;font-size:1.2rem;color:var(--sec);text-decoration:none;}
-.logo span{color:var(--pr);}
-.nav-links{display:flex;gap:2px;margin-left:16px;}
-.nl{padding:6px 12px;border-radius:7px;font-size:.82rem;font-weight:600;color:var(--muted);text-decoration:none;transition:.2s;}
-.nl:hover{background:#f1f5f9;color:var(--sec);}.nl.active{color:var(--pr);}
-.nav-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
-.btn{padding:7px 16px;border-radius:8px;font-weight:700;font-size:.81rem;cursor:pointer;border:none;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
-.btn-pr{background:var(--pr);color:white;}.btn-pr:hover{background:var(--pr2);}
-.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--sec);}
-.btn-outline:hover{border-color:var(--pr);color:var(--pr);}
+/* ============================================
+   GLOBAL VARIABLES & RESET (PROFESSIONAL LIGHT)
+============================================ */
+:root {
+    --primary: #006ce4; /* Corporate Trust Blue */
+    --primary-dark: #0050a8;
+    --accent: #f97316; /* Action Orange */
+    --accent-dark: #ea580c;
+    --sec: #1e293b;
+    --body-text: #475569;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --shadow-sm: 0 4px 12px rgba(0,0,0,0.04);
+    --shadow-md: 0 12px 30px rgba(0,0,0,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--body-text); }
 
-/* SEARCH BAR */
-.search-bar{background:white;border-bottom:1px solid var(--border);padding:14px 20px;}
-.sb-inner{max-width:1300px;margin:0 auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-.sb-field{display:flex;flex-direction:column;gap:2px;}
-.sb-label{font-size:.6rem;font-weight:700;color:var(--muted);text-transform:uppercase;}
-.sb-sel{background:white;border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.82rem;font-weight:600;color:var(--sec);cursor:pointer;min-width:130px;}
-.sb-sel:focus{outline:none;border-color:var(--pr);}
-.sb-inp{background:white;border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:.82rem;color:var(--sec);min-width:200px;}
-.sb-inp:focus{outline:none;border-color:var(--pr);}
-.sb-search-btn{background:var(--pr);color:white;border:none;border-radius:8px;padding:9px 20px;font-weight:700;font-size:.83rem;cursor:pointer;white-space:nowrap;}
+/* ============================================
+   GLOBAL BUTTONS
+============================================ */
+.btn { padding: 8px 18px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; border: none; transition: .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn-pr { background: var(--accent); color: white; }
+.btn-pr:hover { background: var(--accent-dark); color: white; transform: translateY(-1px); }
+.btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
+.btn-outline:hover { background: var(--primary); color: white; }
 
-/* LAYOUT */
-.page-layout{max-width:1300px;margin:0 auto;padding:20px;display:grid;grid-template-columns:280px 1fr;gap:20px;}
+/* ============================================
+   SEARCH BAR
+============================================ */
+.search-bar { background: white; border-bottom: 1px solid var(--border); padding: 16px 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+.sb-inner { max-width: 1300px; margin: 0 auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.sb-field { display: flex; flex-direction: column; gap: 4px; }
+.sb-label { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.sb-sel, .sb-inp { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; font-weight: 500; color: var(--sec); cursor: pointer; transition: 0.2s; font-family: 'Poppins', sans-serif; }
+.sb-sel { min-width: 140px; }
+.sb-inp { min-width: 220px; }
+.sb-sel:focus, .sb-inp:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1); }
+.sb-search-btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 10px 24px; font-weight: 700; font-size: 0.9rem; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+.sb-search-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
 
-/* FILTER SIDEBAR */
-.filter-sidebar{background:white;border-radius:14px;border:1px solid var(--border);padding:20px;height:fit-content;position:sticky;top:80px;}
-.fs-title{font-size:.86rem;font-weight:800;color:var(--sec);margin-bottom:16px;display:flex;justify-content:space-between;}
-.fs-clear{font-size:.74rem;font-weight:600;color:var(--pr);cursor:pointer;}
-.filter-group{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border);}
-.filter-group:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
-.fg-title{font-size:.76rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
-.filter-btn{padding:7px 13px;border-radius:8px;font-size:.78rem;font-weight:600;cursor:pointer;
-  border:1.5px solid var(--border);background:white;color:var(--muted);transition:.2s;margin:3px;}
-.filter-btn:hover,.filter-btn.active{background:var(--pr);color:white;border-color:var(--pr);}
-.range-input{width:100%;accent-color:var(--pr);cursor:pointer;}
-.range-labels{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:4px;}
-.checkbox-item{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:.81rem;}
-.checkbox-item input{accent-color:var(--pr);width:15px;height:15px;}
+/* ============================================
+   LAYOUT & SIDEBAR
+============================================ */
+.page-layout { max-width: 1300px; margin: 0 auto; padding: 24px 20px; display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
 
-/* RESULTS AREA */
-.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
-.rh-count{font-size:.88rem;font-weight:700;color:var(--sec);}
-.rh-count span{color:var(--pr);}
-.rh-sort{display:flex;align-items:center;gap:8px;}
-.sort-select{background:white;border:1.5px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.8rem;font-weight:600;color:var(--sec);cursor:pointer;}
-.view-toggle{display:flex;gap:4px;}
-.vt-btn{width:32px;height:32px;border-radius:7px;border:1.5px solid var(--border);background:white;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.8rem;transition:.2s;}
-.vt-btn.active{background:var(--pr);color:white;border-color:var(--pr);}
+.filter-sidebar { background: white; border-radius: 12px; border: 1px solid var(--border); padding: 24px; height: fit-content; position: sticky; top: 94px; box-shadow: var(--shadow-sm); }
+.fs-title { font-size: 1rem; font-weight: 800; color: var(--sec); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+.fs-clear { font-size: 0.75rem; font-weight: 600; color: var(--primary); cursor: pointer; text-decoration: none; }
+.fs-clear:hover { text-decoration: underline; }
 
-/* PROP CARDS GRID */
-.listings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.listings-grid.list-view{grid-template-columns:1fr;}
+.filter-group { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+.filter-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.fg-title { font-size: 0.8rem; font-weight: 700; color: var(--sec); margin-bottom: 12px; }
 
-/* PROPERTY CARD */
-.pcard{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;transition:.3s;cursor:pointer;text-decoration:none;color:inherit;display:block;}
-.pcard:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.09);color:inherit;}
-.pc-img{height:180px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
-.pc-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.5rem;}
-.pc-badges{position:absolute;top:10px;left:10px;display:flex;gap:4px;flex-wrap:wrap;}
-.badge{font-size:.62rem;font-weight:800;padding:3px 8px;border-radius:6px;}
-.b-feat{background:#f59e0b;color:white;}.b-verif{background:#10b981;color:white;}
-.b-excl{background:#7c3aed;color:white;}.b-new{background:#3b82f6;color:white;}
-.b-rent{background:rgba(255,255,255,.9);color:#0f172a;}.b-sale{background:var(--pr);color:white;}
-.pc-save{position:absolute;top:10px;right:10px;width:32px;height:32px;
-  background:rgba(255,255,255,.9);border-radius:50%;display:flex;align-items:center;
-  justify-content:center;cursor:pointer;transition:.2s;font-size:.85rem;border:none;}
-.pc-price-tag{position:absolute;bottom:10px;left:10px;
-  background:rgba(15,23,42,.85);backdrop-filter:blur(8px);
-  color:white;padding:4px 10px;border-radius:7px;font-size:.88rem;font-weight:900;}
-.pc-body{padding:14px;}
-.pc-title{font-size:.9rem;font-weight:800;color:var(--sec);margin-bottom:3px;}
-.pc-addr{font-size:.74rem;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:4px;}
-.pc-specs{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
-.spec{font-size:.74rem;color:#475569;display:flex;align-items:center;gap:4px;font-weight:600;}
-.spec i{color:var(--muted);font-size:.7rem;}
-.pc-tags{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;}
-.pt{font-size:.66rem;font-weight:600;padding:2px 8px;border-radius:5px;background:#f1f5f9;color:#475569;}
-.pc-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--border);}
-.pc-agent{display:flex;align-items:center;gap:7px;}
-.pa-av{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:800;color:white;}
-.pa-name{font-size:.7rem;font-weight:700;color:var(--sec);}
-.pa-role{font-size:.6rem;color:var(--muted);}
-.pc-contact-btns{display:flex;gap:5px;}
-.cb{padding:5px 10px;border-radius:7px;font-size:.72rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;transition:.2s;display:flex;align-items:center;gap:4px;}
-.cb:hover{border-color:var(--pr);color:var(--pr);}
-.cb.wa:hover{border-color:#25d366;color:#25d366;}
+.filter-btn { padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--body-text); transition: .2s; margin: 4px 2px; font-family: 'Poppins', sans-serif; }
+.filter-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(0, 108, 228, 0.04); }
+.filter-btn.active { background: rgba(0, 108, 228, 0.1); color: var(--primary); border-color: var(--primary); }
 
-/* PAGINATION */
-.pagination{display:flex;justify-content:center;gap:6px;margin-top:28px;flex-wrap:wrap;}
-.pg-btn{width:36px;height:36px;border-radius:8px;border:1.5px solid var(--border);background:white;color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.82rem;font-weight:700;transition:.2s;}
-.pg-btn:hover{border-color:var(--pr);color:var(--pr);}
-.pg-btn.active{background:var(--pr);color:white;border-color:var(--pr);}
+.range-input { width: 100%; accent-color: var(--primary); cursor: pointer; }
+.range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 8px; font-weight: 500; }
 
-/* LIST VIEW CARD */
-.listings-grid.list-view .pcard{display:grid;grid-template-columns:260px 1fr;}
-.listings-grid.list-view .pc-img{height:100%;min-height:160px;}
+.checkbox-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; font-size: 0.85rem; color: var(--body-text); font-weight: 500; }
+.checkbox-item input { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
+
+/* ============================================
+   RESULTS AREA
+============================================ */
+.results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.rh-count { font-size: 1rem; font-weight: 700; color: var(--sec); }
+.rh-count span { color: var(--primary); }
+
+.rh-sort { display: flex; align-items: center; gap: 12px; }
+.sort-select { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 0.85rem; font-weight: 600; color: var(--sec); cursor: pointer; font-family: 'Poppins', sans-serif; }
+.sort-select:focus { outline: none; border-color: var(--primary); }
+
+.view-toggle { display: flex; gap: 6px; }
+.vt-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: white; color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; transition: .2s; }
+.vt-btn:hover { border-color: var(--primary); color: var(--primary); }
+.vt-btn.active { background: rgba(0, 108, 228, 0.1); color: var(--primary); border-color: var(--primary); }
 
 /* APPLIED FILTERS */
-.applied-filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
-.af-label{font-size:.74rem;color:var(--muted);font-weight:700;}
-.af-tag{font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:6px;
-  background:#fef3c7;color:#92400e;border:1px solid #fcd34d;display:flex;align-items:center;gap:5px;cursor:pointer;}
-.af-tag:hover{background:#fde68a;}
+.applied-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+.af-label { font-size: 0.8rem; color: var(--sec); font-weight: 700; margin-right: 4px; }
+.af-tag { font-size: 0.75rem; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s; }
+.af-tag:hover { background: #bae6fd; }
 
-@media(max-width:1024px){.page-layout{grid-template-columns:1fr;}.filter-sidebar{display:none;}}
-@media(max-width:768px){.listings-grid{grid-template-columns:1fr;}.listings-grid.list-view{grid-template-columns:1fr;}.listings-grid.list-view .pcard{grid-template-columns:1fr;}}
+/* ============================================
+   PROPERTY CARDS
+============================================ */
+.listings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.listings-grid.list-view { grid-template-columns: 1fr; }
+
+.pcard { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; transition: .3s; cursor: pointer; text-decoration: none; color: inherit; display: block; box-shadow: var(--shadow-sm); }
+.pcard:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: rgba(0, 108, 228, 0.3); }
+
+.pc-img { height: 200px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #e2e8f0; }
+.pc-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; background: #f1f5f9 !important; }
+
+.pc-badges { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+.badge { font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.b-feat { background: #f59e0b; color: white; }
+.b-verif { background: #10b981; color: white; }
+.b-excl { background: #7c3aed; color: white; }
+.b-new { background: #3b82f6; color: white; }
+.b-rent { background: rgba(255,255,255,.95); color: #0f172a; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.b-sale { background: var(--primary); color: white; }
+
+.pc-save { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; background: rgba(255,255,255,.95); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: .2s; font-size: 1rem; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.pc-save:hover { background: #fff; transform: scale(1.1); }
+.pc-save.saved i { color: #ef4444; font-weight: 900; }
+
+.pc-price-tag { position: absolute; bottom: 12px; left: 12px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); color: white; padding: 6px 14px; border-radius: 8px; font-size: 1rem; font-weight: 800; border: 1px solid rgba(255,255,255,0.15); }
+
+.pc-body { padding: 18px; }
+.pc-title { font-size: 1rem; font-weight: 700; color: var(--sec); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-addr { font-size: 0.8rem; color: var(--body-text); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; font-weight: 500; }
+.pc-specs { display: flex; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
+.spec { font-size: 0.8rem; color: var(--sec); display: flex; align-items: center; gap: 5px; font-weight: 600; background: #f1f5f9; padding: 4px 10px; border-radius: 6px; }
+.spec i { color: var(--muted); font-size: 0.8rem; }
+.pc-tags { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.pt { font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 6px; background: white; border: 1px solid var(--border); color: var(--muted); }
+
+.pc-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--border); }
+.pc-agent { display: flex; align-items: center; gap: 10px; }
+.pa-av { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.pa-name { font-size: 0.8rem; font-weight: 700; color: var(--sec); }
+.pa-role { font-size: 0.65rem; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+
+.pc-contact-btns { display: flex; gap: 8px; }
+.cb { padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: 1px solid var(--primary); background: white; color: var(--primary); transition: .2s; display: flex; align-items: center; gap: 6px; }
+.cb:hover { background: var(--primary); color: white; }
+.cb.wa { border-color: #25d366; color: #25d366; }
+.cb.wa:hover { background: #25d366; color: white; }
+
+/* LIST VIEW OVERRIDES */
+.listings-grid.list-view .pcard { display: grid; grid-template-columns: 280px 1fr; }
+.listings-grid.list-view .pc-img { height: 100%; min-height: 200px; }
+
+/* ============================================
+   PAGINATION
+============================================ */
+.pagination { display: flex; justify-content: center; gap: 8px; margin-top: 40px; flex-wrap: wrap; }
+.pg-btn { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border); background: white; color: var(--sec); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; font-weight: 700; transition: .2s; }
+.pg-btn:hover { border-color: var(--primary); color: var(--primary); background: #f8fafc; }
+.pg-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* RESPONSIVE */
+@media(max-width:1024px) { .page-layout { grid-template-columns: 1fr; } .filter-sidebar { display: none; } }
+@media(max-width:768px) { .listings-grid { grid-template-columns: 1fr; } .listings-grid.list-view { grid-template-columns: 1fr; } .listings-grid.list-view .pcard { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
+{% include 'home_page/header.html' %}
 
-
-   
-
-<!-- NAV — unchanged -->
-<nav class="nav">
-  <div class="nav-inner">
-    <a href="/" class="logo">🏠 Prop<span>CRM</span></a>
-    <div class="nav-links">
-      <a href="/listings/?type=rent"       class="nl {% if listing_type == 'rent' %}active{% endif %}">For Rent</a>
-      <a href="/listings/?type=sale"       class="nl {% if listing_type == 'sale' %}active{% endif %}">For Sale</a>
-      <a href="/listings/?type=commercial" class="nl {% if listing_type == 'commercial' %}active{% endif %}">Commercial</a>
-    </div>
-    <div class="nav-right">
-      <a href="/add-listing/" class="btn btn-outline"><i class="fas fa-plus"></i> Post Property</a>
-      <a href="#" class="btn btn-pr"><i class="fas fa-sign-in-alt"></i> Login</a>
-    </div>
-  </div>
-</nav>
-
-<!-- SEARCH BAR — values pre-filled from GET params -->
 <div class="search-bar">
   <div class="sb-inner">
     <div class="sb-field">
@@ -197,18 +218,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
     <button class="sb-search-btn" onclick="applySearchBar()">
       <i class="fas fa-search" style="margin-right:6px;"></i> Search
     </button>
-    <button class="btn btn-outline" style="font-size:.8rem;padding:7px 14px;"
+    <button class="btn btn-outline" style="font-size:0.85rem;padding:9px 16px; border-color:var(--border); color:var(--sec);"
             onclick="window.location.href='/listings/?type={{ listing_type }}'">
       <i class="fas fa-times"></i> Reset
     </button>
   </div>
 </div>
 
-<!-- PAGE LAYOUT — sidebar unchanged -->
 <div class="page-layout">
   <div class="filter-sidebar">
-    <!-- paste your entire sidebar HTML here unchanged -->
-    <!-- only change the Apply Filters button onclick: -->
     <div class="fs-title">Filters <span class="fs-clear" onclick="resetFilters()">Clear All</span></div>
 
     <div class="filter-group">
@@ -269,54 +287,51 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
       <label class="checkbox-item"><input type="checkbox"> Parking</label>
     </div>
 
-    <button class="btn btn-pr" style="width:100%;justify-content:center;margin-top:8px;"
+    <button class="btn btn-pr" style="width:100%;justify-content:center;margin-top:8px;padding:12px;"
             onclick="applyFilters()">
       <i class="fas fa-filter me-1"></i> Apply Filters
     </button>
   </div>
 
-  <!-- RESULTS -->
   <div>
-    <div style="font-size:.76rem;color:var(--muted);margin-bottom:14px;">
-      <a href="/" style="color:var(--pr);text-decoration:none;">Home</a> &rsaquo;
+    <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px;font-weight:500;">
+      <a href="/" style="color:var(--primary);text-decoration:none;">Home</a> &rsaquo;
       {% if listing_type == 'sale' %}Sale{% elif listing_type == 'commercial' %}Commercial{% else %}Rent{% endif %}
-      &rsaquo; Nagpur
+      &rsaquo; <span style="color:var(--sec);">Nagpur</span>
     </div>
 
-    <!-- applied filter chips — built from active GET params -->
     <div class="applied-filters" id="appliedFilters">
-      <span class="af-label">Applied:</span>
+      <span class="af-label">Applied Filters:</span>
       <div class="af-tag">
         {% if listing_type == 'sale' %}For Sale{% elif listing_type == 'commercial' %}Commercial{% else %}For Rent{% endif %}
-        <i class="fas fa-times" style="font-size:.6rem;"></i>
+        <i class="fas fa-times" style="font-size:0.7rem;"></i>
       </div>
       {% if current_bhk %}
       <div class="af-tag" id="chip-bhk">
         {{ current_bhk|upper }}
-        <i class="fas fa-times" style="font-size:.6rem;" onclick="removeParam('bhk')"></i>
+        <i class="fas fa-times" style="font-size:0.7rem;" onclick="removeParam('bhk')"></i>
       </div>
       {% endif %}
       {% if current_area %}
       <div class="af-tag" id="chip-area">
         {{ current_area }}
-        <i class="fas fa-times" style="font-size:.6rem;" onclick="removeParam('area')"></i>
+        <i class="fas fa-times" style="font-size:0.7rem;" onclick="removeParam('area')"></i>
       </div>
       {% endif %}
       {% if current_budget %}
       <div class="af-tag" id="chip-budget">
         {{ current_budget }}
-        <i class="fas fa-times" style="font-size:.6rem;" onclick="removeParam('budget')"></i>
+        <i class="fas fa-times" style="font-size:0.7rem;" onclick="removeParam('budget')"></i>
       </div>
       {% endif %}
       {% if current_furnishing %}
       <div class="af-tag" id="chip-furn">
         {{ current_furnishing }}
-        <i class="fas fa-times" style="font-size:.6rem;" onclick="removeParam('furnishing')"></i>
+        <i class="fas fa-times" style="font-size:0.7rem;" onclick="removeParam('furnishing')"></i>
       </div>
       {% endif %}
     </div>
 
-    <!-- results header -->
     <div class="results-header">
       <div class="rh-count">
         Showing <span id="resultCount">{{ total }}</span> properties
@@ -337,13 +352,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
       </div>
     </div>
 
-    <!-- LISTINGS GRID — rendered by Django -->
     <div class="listings-grid" id="listingsGrid">
       {% for p in properties %}
       <a href="/listing/{{ p.listing_type }}/{{ p.category }}/{{ p.id }}/" class="pcard">
         <div class="pc-img">
-          <div class="pc-img-placeholder"
-               style="background:linear-gradient(135deg,#dbeafe,#bfdbfe);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3.5rem;">
+          <div class="pc-img-placeholder">
             {% if p.listing_type == 'sale' %}🏘{% elif p.listing_type == 'commercial-rent' or p.listing_type == 'commercial-sale' %}🏗{% else %}🏠{% endif %}
           </div>
           <div class="pc-badges">
@@ -364,7 +377,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
         <div class="pc-body">
           <div class="pc-title">{{ p.title }}</div>
           <div class="pc-addr">
-            <i class="fas fa-map-marker-alt" style="color:#f97316;font-size:.7rem;"></i>
+            <i class="fas fa-map-marker-alt" style="color:var(--primary);font-size:0.8rem;"></i>
             {{ p.location }}
           </div>
           <div class="pc-specs">
@@ -381,13 +394,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
             <span class="pt">{{ p.furnished }}</span>
             <span class="pt">{{ p.available }}</span>
             {% if p.is_new %}
-            <span class="pt" style="background:#dbeafe;color:#1e40af;">Just Listed</span>
+            <span class="pt" style="background:#e0f2fe;color:#0284c7;border-color:#bae6fd;">Just Listed</span>
             {% endif %}
           </div>
           <div class="pc-footer">
             <div class="pc-agent">
-              <div class="pa-av"
-                   style="background:#f97316;width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:800;color:white;">
+              <div class="pa-av" style="background:var(--accent);">
                 {{ p.owner|slice:":2"|upper }}
               </div>
               <div>
@@ -409,15 +421,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
         </div>
       </a>
       {% empty %}
-      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#64748b;">
-        <i class="fas fa-search" style="font-size:2rem;margin-bottom:12px;display:block;"></i>
-        <div style="font-size:.92rem;font-weight:700;">No properties found matching your criteria.</div>
-        <div style="font-size:.78rem;margin-top:6px;">Try adjusting your filters.</div>
+      <div style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted);background:white;border-radius:12px;border:1px solid var(--border);">
+        <i class="fas fa-search" style="font-size:2.5rem;margin-bottom:16px;display:block;color:var(--primary);"></i>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--sec);">No properties found matching your criteria.</div>
+        <div style="font-size:0.9rem;margin-top:8px;">Try adjusting your filters or search area.</div>
       </div>
       {% endfor %}
     </div>
 
-    <!-- PAGINATION — unchanged -->
     <div class="pagination">
       <button class="pg-btn"><i class="fas fa-chevron-left"></i></button>
       <button class="pg-btn active">1</button>
@@ -513,18 +524,18 @@ function contactListing(phone) {
   Swal.fire({
     title: 'Contact Owner',
     html: `<div style="text-align:center;padding:8px;">
-      <div style="font-size:1.1rem;font-weight:900;color:#f97316;">📞 ${phone || 'N/A'}</div>
-      <div style="font-size:.74rem;color:#64748b;margin-top:6px;">PropCRM Verified · Available 9AM–7PM</div>
+      <div style="font-size:1.4rem;font-weight:900;color:#006ce4;margin:12px 0;">📞 ${phone || 'N/A'}</div>
+      <div style="font-size:.8rem;color:#64748b;font-weight:500;">PropCRM Verified · Available 9AM–7PM</div>
     </div>`,
-    background: '#fff', color: '#1e293b',
-    confirmButtonColor: '#f97316', confirmButtonText: 'Call Now',
+    background: '#ffffff', color: '#1e293b',
+    confirmButtonColor: '#006ce4', confirmButtonText: 'Call Now',
   });
 }
 
 function waListing(phone) {
   if (phone) window.open(`https://wa.me/91${phone}`, '_blank');
   else Swal.fire({ icon: 'info', title: 'No WhatsApp number available',
-                   background: '#fff', timer: 1400, showConfirmButton: false });
+                   background: '#ffffff', color: '#1e293b', timer: 1400, showConfirmButton: false });
 }
 </script>
 </body>

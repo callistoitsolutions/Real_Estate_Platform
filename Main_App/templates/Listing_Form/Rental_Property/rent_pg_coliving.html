@@ -7,21 +7,31 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{
-  --pr:#f97316;--pr2:#ea580c;--sec:#0f172a;--dark:#020617;
-  --muted:#64748b;--border:#e2e8f0;--card:#fff;--bg:#f8fafc;
-  --success:#10b981;--info:#3b82f6;--warn:#f59e0b;
+:root {
+  --primary: #006ce4; 
+  --primary-dark: #0050a8;
+  --pr: #f97316;
+  --pr2: #ea580c;
+  --sec: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --card: #ffffff;
+  --bg: #f8fafc;
+  --success: #10b981;
+  --info: #3b82f6;
+  --warn: #f59e0b;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e293b;}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 
-.topnav{background:var(--dark);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.4);}
-.logo{font-weight:900;font-size:1.2rem;color:#fff;text-decoration:none;display:flex;align-items:center;gap:6px;}
-.logo span{color:var(--pr);}
-.nav-chip{font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(249,115,22,.15);color:var(--pr);border:1px solid rgba(249,115,22,.3);}
-.nav-back{margin-left:auto;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.6);text-decoration:none;display:flex;align-items:center;gap:5px;}
-.nav-back:hover{color:var(--pr);}
+/* SUB-HEADER FOR CONTEXT */
+.sub-header { background: white; border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
+.sub-header-left { display: flex; align-items: center; gap: 8px; }
+.nav-chip { font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: rgba(249,115,22,.15); color: var(--pr); border: 1px solid rgba(249,115,22,.3); }
+.nav-back { font-weight: 700; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+.nav-back:hover { color: var(--primary-dark); }
 
 .page-wrap{max-width:1220px;margin:0 auto;padding:28px 20px 60px;display:grid;grid-template-columns:1fr 320px;gap:24px;}
 
@@ -40,7 +50,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 .step-line{flex:1;height:2px;background:var(--border);margin:0 10px;}
 .step-line.done{background:var(--success);}
 
-.form-card{background:white;border-radius:16px;border:1px solid var(--border);padding:28px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.form-card{background:white;border-radius:16px;border:1px solid var(--border);padding:28px;box-shadow:0 4px 12px rgba(0,0,0,.03);}
 .card-head{margin-bottom:22px;}
 .card-head h2{font-size:1.05rem;font-weight:900;color:var(--sec);display:flex;align-items:center;gap:8px;}
 .card-head p{font-size:.78rem;color:var(--muted);margin-top:5px;}
@@ -58,8 +68,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 .field label{font-size:.76rem;font-weight:700;color:#374151;}
 .field label .req{color:#ef4444;margin-left:2px;}
 .field label .opt{font-size:.66rem;color:var(--muted);font-weight:400;margin-left:4px;}
-.field input,.field select,.field textarea{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 13px;font-size:.84rem;color:var(--sec);transition:.2s;width:100%;}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--pr);background:white;box-shadow:0 0 0 3px rgba(249,115,22,.08);}
+.field input,.field select,.field textarea{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 13px;font-size:.84rem;color:var(--sec);transition:.2s;width:100%;font-family:'Poppins',sans-serif;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);background:white;box-shadow:0 0 0 3px rgba(0,108,228,.1);}
 .field textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .field .help{font-size:.68rem;color:var(--muted);margin-top:2px;}
 .field .prefix-wrap{position:relative;}
@@ -67,19 +77,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 .field .prefix-wrap input{padding-left:28px;}
 
 .toggle-group{display:flex;flex-wrap:wrap;gap:8px;}
-.tgl{padding:8px 14px;border-radius:9px;font-size:.78rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);transition:.2s;user-select:none;}
-.tgl:hover{border-color:var(--pr);color:var(--pr);}
-.tgl.active{background:var(--pr);color:white;border-color:var(--pr);}
+.tgl{padding:8px 14px;border-radius:9px;font-size:.78rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:white;color:var(--muted);transition:.2s;user-select:none;font-family:'Poppins',sans-serif;}
+.tgl:hover{border-color:var(--primary);color:var(--primary);}
+.tgl.active{background:rgba(0,108,228,0.1);color:var(--primary);border-color:var(--primary);}
 
 .check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .check-item{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;cursor:pointer;transition:.2s;}
-.check-item:hover{border-color:var(--pr);}
-.check-item input{accent-color:var(--pr);width:15px;height:15px;flex-shrink:0;}
+.check-item:hover{border-color:var(--primary);}
+.check-item input{accent-color:var(--primary);width:15px;height:15px;flex-shrink:0;cursor:pointer;}
 .check-item label{font-size:.78rem;font-weight:600;color:#374151;cursor:pointer;}
-.check-item.selected{background:#fff7ed;border-color:var(--pr);}
+.check-item.selected{background:rgba(0,108,228,0.05);border-color:var(--primary);}
 
 .photo-drop{border:2px dashed var(--border);border-radius:14px;padding:40px 20px;text-align:center;cursor:pointer;transition:.2s;background:var(--bg);}
-.photo-drop:hover{border-color:var(--pr);background:#fff7ed;}
+.photo-drop:hover{border-color:var(--primary);background:rgba(0,108,228,0.03);}
 .photo-drop input{display:none;}
 .photo-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;}
 .photo-thumb{width:90px;height:80px;border-radius:9px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.5rem;background:var(--bg);position:relative;overflow:hidden;}
@@ -92,47 +102,47 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 .rb-val{font-weight:800;color:var(--sec);}
 
 .step-nav{display:flex;justify-content:space-between;margin-top:24px;gap:12px;}
-.btn{padding:10px 22px;border-radius:10px;font-weight:800;font-size:.85rem;cursor:pointer;border:none;transition:.2s;display:inline-flex;align-items:center;gap:7px;}
+.btn{padding:10px 22px;border-radius:10px;font-weight:800;font-size:.85rem;cursor:pointer;border:none;transition:.2s;display:inline-flex;align-items:center;gap:7px;font-family:'Poppins',sans-serif;}
 .btn-pr{background:var(--pr);color:white;}
 .btn-pr:hover{background:var(--pr2);transform:translateY(-1px);}
 .btn-sec{background:white;color:var(--sec);border:1.5px solid var(--border);}
-.btn-sec:hover{border-color:var(--pr);color:var(--pr);}
+.btn-sec:hover{border-color:var(--primary);color:var(--primary);}
 .btn-lg{padding:13px 28px;font-size:.9rem;}
 
 .sidebar{display:flex;flex-direction:column;gap:16px;}
 
-.preview-card{background:var(--dark);border-radius:14px;padding:18px;color:white;}
-.pc-head{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
-.pc-mock{background:white;border-radius:10px;overflow:hidden;}
-.pcm-img{height:120px;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;}
+.preview-card{background:white;border:1px solid var(--border);border-radius:14px;padding:18px;color:var(--sec);box-shadow:0 4px 12px rgba(0,0,0,.03);}
+.pc-head{font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.pc-mock{background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.pcm-img{height:120px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;}
 .pcm-badges{position:absolute;top:8px;left:8px;display:flex;gap:4px;}
 .pcm-badge{font-size:.58rem;font-weight:800;padding:2px 7px;border-radius:5px;}
-.b-rent{background:rgba(255,255,255,.9);color:#0f172a;}
-.b-pg{background:#7c3aed;color:white;}
+.b-rent{background:rgba(255,255,255,.9);color:#0f172a;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+.b-pg{background:#059669;color:white;}
 .pcm-price{position:absolute;bottom:8px;left:8px;background:rgba(15,23,42,.85);color:white;font-size:.82rem;font-weight:900;padding:3px 9px;border-radius:6px;}
 .pcm-body{padding:12px;}
 .pcm-title{font-size:.84rem;font-weight:800;color:#0f172a;margin-bottom:3px;}
 .pcm-loc{font-size:.7rem;color:#64748b;margin-bottom:8px;}
 .pcm-specs{display:flex;gap:10px;font-size:.7rem;color:#475569;font-weight:600;}
 
-.checklist-card{background:white;border-radius:14px;border:1px solid var(--border);padding:16px;}
+.checklist-card{background:white;border-radius:14px;border:1px solid var(--border);padding:16px;box-shadow:0 4px 12px rgba(0,0,0,.03);}
 .cl-title{font-size:.8rem;font-weight:800;color:var(--sec);margin-bottom:10px;}
 .cl-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.76rem;color:var(--muted);}
 .cl-item i{font-size:.72rem;width:16px;}
 .cl-item.done{color:var(--success);}
 .cl-item.done i{color:var(--success);}
 
-.info-card{background:white;border-radius:14px;border:1px solid var(--border);padding:14px;}
+.info-card{background:white;border-radius:14px;border:1px solid var(--border);padding:14px;box-shadow:0 4px 12px rgba(0,0,0,.03);}
 .ic-title{font-size:.76rem;font-weight:800;color:var(--sec);margin-bottom:8px;}
 .ic-item{font-size:.73rem;color:#475569;padding:4px 0;display:flex;align-items:flex-start;gap:6px;}
-.ic-item i{color:var(--pr);font-size:.7rem;margin-top:2px;flex-shrink:0;}
+.ic-item i{color:var(--primary);font-size:.7rem;margin-top:2px;flex-shrink:0;}
 
 .step-content{display:none;}
 .step-content.active{display:block;}
 
 .form-badge{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:6px;}
-.fb-rent{background:#dbeafe;color:#1e40af;}
-.fb-pg{background:#ede9fe;color:#5b21b6;}
+.fb-rent{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe;}
+.fb-pg{background:#dcfce7;color:#166534;border:1px solid #bbf7d0;}
 
 .inline-status{padding:11px 14px;border-radius:9px;font-size:.78rem;font-weight:700;display:flex;align-items:center;gap:8px;}
 .is-info{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
@@ -140,8 +150,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 .is-success{background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;}
 
 .number-stepper{display:flex;align-items:center;gap:10px;}
-.stepper-btn{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--pr);background:#fff;color:var(--pr);font-weight:700;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;}
-.stepper-btn:hover{background:var(--pr);color:#fff;}
+.stepper-btn{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--primary);background:#fff;color:var(--primary);font-weight:700;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;}
+.stepper-btn:hover{background:var(--primary);color:#fff;}
 .stepper-value{min-width:36px;text-align:center;font-weight:700;font-size:1rem;}
 
 .toggle-switch-wrap{display:flex;align-items:center;gap:10px;font-size:.84rem;font-weight:600;color:#374151;}
@@ -149,10 +159,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 .switch input{opacity:0;width:0;height:0;}
 .slider-sw{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#cbd5e1;transition:.3s;border-radius:24px;}
 .slider-sw:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:white;transition:.3s;border-radius:50%;}
-input:checked+.slider-sw{background:var(--pr);}
+input:checked+.slider-sw{background:var(--primary);}
 input:checked+.slider-sw:before{transform:translateX(18px);}
 
-.room-card{background:#f8fafc;border:1.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+.room-card{background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
 .room-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid var(--border);}
 .room-card-title{font-size:.95rem;font-weight:800;color:var(--sec);}
 
@@ -163,12 +173,16 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
 </head>
 <body>
 
-<nav class="topnav">
-  <a href="#" class="logo">🏢 Prop<span>CRM</span></a>
-  <span class="nav-chip">📋 Post Property</span>
-  <span class="form-badge fb-rent" style="margin-left:8px;">🏠 PG / Co-Living</span>
-  <a href="#" class="nav-back"><i class="fas fa-arrow-left"></i> Back to Portal</a>
-</nav>
+{% include 'home_page/header.html' %}
+
+<div class="sub-header">
+  <div class="sub-header-left">
+    <span class="nav-chip">📋 Post Property</span>
+    <span class="form-badge fb-rent">🏠 Rental</span>
+    <span class="form-badge fb-pg">🛏 PG / Co-Living</span>
+  </div>
+  <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> Back to Portal</a>
+</div>
 
 <div class="page-wrap">
 
@@ -199,11 +213,10 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
     </div>
   </div>
 
-  <!-- ═══════════════ STEP 1 ═══════════════ -->
   <div class="step-content active" id="step1">
   <div class="form-card">
     <div class="card-head">
-      <h2><i class="fas fa-home" style="color:var(--pr);"></i> Step 1 — Basic PG / Co-Living Information</h2>
+      <h2><i class="fas fa-home" style="color:var(--primary);"></i> Step 1 — Basic PG / Co-Living Information</h2>
       <p>Tell us about your PG property, location, and basic details.</p>
     </div>
 
@@ -347,10 +360,10 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
         <label>Property Manager Stays at Property? <span class="opt">(Optional)</span></label>
         <div style="display:flex;gap:20px;margin-top:6px;">
           <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;cursor:pointer;">
-            <input type="radio" name="manager_stays" value="Yes" style="accent-color:var(--pr);"> Yes
+            <input type="radio" name="manager_stays" value="Yes" style="accent-color:var(--primary);"> Yes
           </label>
           <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;cursor:pointer;">
-            <input type="radio" name="manager_stays" value="No" style="accent-color:var(--pr);"> No
+            <input type="radio" name="manager_stays" value="No" style="accent-color:var(--primary);"> No
           </label>
         </div>
       </div>
@@ -358,31 +371,29 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
 
     <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Common Area Facilities</div><div class="sd-line"></div></div>
     <div class="check-grid">
-      <label class="check-item"><input type="checkbox" name="common_area[]" value="TV" onchange="checkToggle(this)"><label><i class="fas fa-tv" style="color:var(--pr);font-size:12px;"></i> TV</label></label>
-      <label class="check-item"><input type="checkbox" name="common_area[]" value="Refrigerator" onchange="checkToggle(this)"><label><i class="fas fa-snowflake" style="color:var(--pr);font-size:12px;"></i> Refrigerator</label></label>
-      <label class="check-item"><input type="checkbox" name="common_area[]" value="Washing Machine" onchange="checkToggle(this)"><label><i class="fas fa-tint" style="color:var(--pr);font-size:12px;"></i> Washing Machine</label></label>
-      <label class="check-item"><input type="checkbox" name="common_area[]" value="Kitchen" onchange="checkToggle(this)"><label><i class="fas fa-utensils" style="color:var(--pr);font-size:12px;"></i> Kitchen</label></label>
-      <label class="check-item"><input type="checkbox" name="common_area[]" value="Lounge" onchange="checkToggle(this)"><label><i class="fas fa-couch" style="color:var(--pr);font-size:12px;"></i> Lounge</label></label>
+      <label class="check-item"><input type="checkbox" name="common_area[]" value="TV" onchange="checkToggle(this)"><label><i class="fas fa-tv" style="color:var(--primary);font-size:12px;"></i> TV</label></label>
+      <label class="check-item"><input type="checkbox" name="common_area[]" value="Refrigerator" onchange="checkToggle(this)"><label><i class="fas fa-snowflake" style="color:var(--primary);font-size:12px;"></i> Refrigerator</label></label>
+      <label class="check-item"><input type="checkbox" name="common_area[]" value="Washing Machine" onchange="checkToggle(this)"><label><i class="fas fa-tint" style="color:var(--primary);font-size:12px;"></i> Washing Machine</label></label>
+      <label class="check-item"><input type="checkbox" name="common_area[]" value="Kitchen" onchange="checkToggle(this)"><label><i class="fas fa-utensils" style="color:var(--primary);font-size:12px;"></i> Kitchen</label></label>
+      <label class="check-item"><input type="checkbox" name="common_area[]" value="Lounge" onchange="checkToggle(this)"><label><i class="fas fa-couch" style="color:var(--primary);font-size:12px;"></i> Lounge</label></label>
     </div>
 
     <div class="step-nav">
       <div></div>
-      <button class="btn btn-pr" onclick="goToStep(2)">Next — Rooms & Pricing <i class="fas fa-arrow-right"></i></button>
+      <button class="btn btn-primary" onclick="goToStep(2)" style="background:var(--primary);color:white;border:none;">Next — Rooms & Pricing <i class="fas fa-arrow-right"></i></button>
     </div>
   </div>
   </div>
 
-  <!-- ═══════════════ STEP 2 ═══════════════ -->
   <div class="step-content" id="step2">
   <div class="form-card">
     <div class="card-head">
-      <h2><i class="fas fa-door-closed" style="color:var(--pr);"></i> Step 2 — Room Details & Pricing</h2>
+      <h2><i class="fas fa-door-closed" style="color:var(--primary);"></i> Step 2 — Room Details & Pricing</h2>
       <p>Add room configurations, rent, security deposit, and brokerage details.</p>
     </div>
 
     <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Room Configuration</div><div class="sd-line"></div></div>
     <div id="roomsContainer">
-      <!-- Room 1 -->
       <div class="room-card">
         <div class="room-card-header">
           <div class="room-card-title">Room 1</div>
@@ -473,16 +484,15 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
 
     <div class="step-nav" style="margin-top:24px;">
       <button class="btn btn-sec" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
-      <button class="btn btn-pr" onclick="goToStep(3)">Next — Amenities & Rules <i class="fas fa-arrow-right"></i></button>
+      <button class="btn btn-primary" onclick="goToStep(3)" style="background:var(--primary);color:white;border:none;">Next — Amenities & Rules <i class="fas fa-arrow-right"></i></button>
     </div>
   </div>
   </div>
 
-  <!-- ═══════════════ STEP 3 ═══════════════ -->
   <div class="step-content" id="step3">
   <div class="form-card">
     <div class="card-head">
-      <h2><i class="fas fa-gavel" style="color:var(--pr);"></i> Step 3 — Amenities, Rules & Nearby Facilities</h2>
+      <h2><i class="fas fa-gavel" style="color:var(--primary);"></i> Step 3 — Amenities, Rules & Nearby Facilities</h2>
       <p>Select amenities, set PG rules, and add nearby facilities.</p>
     </div>
 
@@ -547,38 +557,29 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
 
     <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Amenities</div><div class="sd-line"></div></div>
     <div class="check-grid">
-
         {% for amenities in ameneties_obj %}
-
-          <label class="check-item"><input type="checkbox" name="amenities[]" value="{{amenities.amenties_name}}" onchange="checkToggle(this)"> <label><i class="{{amenities.amenties_icon}}" style="color:var(--pr);font-size:12px;"></i> {{amenities.amenties_name}}</label></label>
-
+          <label class="check-item"><input type="checkbox" name="amenities[]" value="{{amenities.amenties_name}}" onchange="checkToggle(this)"> <label><i class="{{amenities.amenties_icon}}" style="color:var(--primary);font-size:12px;"></i> {{amenities.amenties_name}}</label></label>
         {% endfor %}
-
     </div>
 
     <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Nearby Facilities</div><div class="sd-line"></div></div>
       <div class="check-grid">
-        
         {% for facilities in facilities_obj %}
-
-          <label class="check-item"><input type="checkbox" name="facilities[]" value="{{facilities.facilities_name}}" onchange="checkToggle(this)"> <label><i class="{{facilities.facilities_icon}}" style="color:var(--pr);font-size:12px;"></i> {{facilities.facilities_name}}</label></label>
-
+          <label class="check-item"><input type="checkbox" name="facilities[]" value="{{facilities.facilities_name}}" onchange="checkToggle(this)"> <label><i class="{{facilities.facilities_icon}}" style="color:var(--primary);font-size:12px;"></i> {{facilities.facilities_name}}</label></label>
         {% endfor %}
-        
       </div>
 
     <div class="step-nav">
       <button class="btn btn-sec" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
-      <button class="btn btn-pr" onclick="goToStep(4)">Next — Photos & Publish <i class="fas fa-arrow-right"></i></button>
+      <button class="btn btn-primary" onclick="goToStep(4)" style="background:var(--primary);color:white;border:none;">Next — Photos & Publish <i class="fas fa-arrow-right"></i></button>
     </div>
   </div>
   </div>
 
-  <!-- ═══════════════ STEP 4 ═══════════════ -->
   <div class="step-content" id="step4">
   <div class="form-card">
     <div class="card-head">
-      <h2><i class="fas fa-camera" style="color:var(--pr);"></i> Step 4 — Photos, Contact & Publish</h2>
+      <h2><i class="fas fa-camera" style="color:var(--primary);"></i> Step 4 — Photos, Contact & Publish</h2>
       <p>Listings with photos get <strong>5× more enquiries</strong>. Add at least 3 photos.</p>
     </div>
 
@@ -628,19 +629,19 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
     <div class="fg fg-4">
       <div class="field">
         <label>Name</label>
-        <input type="text" name="uploaded_by_name" value="{{ uploader_name }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;">
+        <input type="text" name="uploaded_by_name" value="{{ uploader_name }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
       </div>
       <div class="field">
         <label>Email</label>
-        <input type="email" name="uploaded_by_email" value="{{ uploader_email }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;">
+        <input type="email" name="uploaded_by_email" value="{{ uploader_email }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
       </div>
       <div class="field">
         <label>Contact</label>
-        <input type="tel" name="uploaded_by_contact" value="{{ uploader_phone }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;">
+        <input type="tel" name="uploaded_by_contact" value="{{ uploader_phone }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
       </div>
       <div class="field">
         <label>Role</label>
-        <input type="text" name="uploaded_by_role" value="{{ uploader_role }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;">
+        <input type="text" name="uploaded_by_role" value="{{ uploader_role }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
       </div>
     </div>
     <div class="inline-status is-info" style="margin-top:4px;margin-bottom:8px;">
@@ -675,7 +676,7 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
       <label class="check-item" style="background:#fffbeb;border-color:#fcd34d;">
         <input type="checkbox" id="agreeTerms" style="accent-color:var(--pr);width:15px;height:15px;">
         <label for="agreeTerms" style="font-size:.78rem;font-weight:600;color:#92400e;cursor:pointer;">
-          I agree to PropCRM <a href="#" style="color:var(--pr);">Terms of Service</a> and confirm this is a genuine PG / Co-living listing.
+          I agree to PropCRM <a href="#" style="color:var(--primary);">Terms of Service</a> and confirm this is a genuine PG / Co-living listing.
         </label>
       </label>
     </div>
@@ -689,7 +690,6 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
   </div>
   </div>
 
-  <!-- ═══════════════ SIDEBAR ═══════════════ -->
   <div class="sidebar">
     <div class="preview-card">
       <div class="pc-head"><i class="fas fa-eye"></i> Live Preview — Portal Card</div>
@@ -704,14 +704,14 @@ input:checked+.slider-sw:before{transform:translateX(18px);}
         </div>
         <div class="pcm-body">
           <div class="pcm-title" id="previewTitle">PG Property</div>
-          <div class="pcm-loc" id="previewLoc"><i class="fas fa-map-marker-alt" style="color:#f97316;"></i> Area, City</div>
+          <div class="pcm-loc" id="previewLoc"><i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> Area, City</div>
           <div class="pcm-specs">
             <span id="prevBeds">— beds</span>
             <span>PG / Co-living</span>
           </div>
         </div>
       </div>
-      <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:10px;text-align:center;">Will appear in search results &amp; featured section</div>
+      <div style="font-size:.68rem;color:var(--muted);margin-top:10px;text-align:center;">Will appear in search results &amp; featured section</div>
     </div>
 
     <div class="checklist-card">
@@ -902,7 +902,7 @@ function updatePreview() {
   const rent = document.getElementById('roomRent1')?.value;
 
   document.getElementById('previewTitle').textContent = pgName;
-  document.getElementById('previewLoc').innerHTML = '<i class="fas fa-map-marker-alt" style="color:#f97316;"></i> ' + (loc || 'Area') + ', ' + (city || 'City');
+  document.getElementById('previewLoc').innerHTML = '<i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> ' + (loc || 'Area') + ', ' + (city || 'City');
   document.getElementById('previewPrice').textContent = rent ? '₹' + parseInt(rent).toLocaleString('en-IN') + '/mo' : '₹ — /mo';
   document.getElementById('prevBeds').textContent = beds ? beds + ' beds' : '— beds';
 
@@ -967,7 +967,7 @@ function publishListing() {
       <div style="font-size:.78rem;color:#64748b;">Visible to 50,000+ students & professionals · RM assigned · WhatsApp alerts enabled</div>
     </div>`,
     confirmButtonColor: '#f97316', confirmButtonText: 'View Portal →'
-  }).then(() => { window.location.href = '#'; });
+  }).then(() => { window.location.href = '/listingpage/?category=pg'; });
 }
 
 // Toggle switch label update

@@ -1,0 +1,394 @@
+{% load static %}
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div>
+                <div class="fl-brand">🏠 PropCRM</div>
+                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
+                <div class="footer-social mt-4 d-flex gap-3">
+                    <a href="#"><i class="bi bi-facebook"></i></a>
+                    <a href="#"><i class="bi bi-instagram"></i></a>
+                    <a href="#"><i class="bi bi-whatsapp"></i></a>
+                    <a href="#"><i class="bi bi-twitter-x"></i></a>
+                </div>
+            </div>
+            <div>
+                <div class="fl-title">For Tenants</div>
+                <a href="/listingpage/?type=rent" class="fl-link">Flats for Rent</a>
+                <a href="/listingpage/?category=pg" class="fl-link">PG / Hostels</a>
+                <a href="#" class="fl-link">Short-term Stays</a>
+                <a href="#" class="fl-link">Rent Agreement</a>
+            </div>
+            <div>
+                <div class="fl-title">For Buyers</div>
+                <a href="/listingpage/?type=sale" class="fl-link">Flats for Sale</a>
+                <a href="#" class="fl-link">New Projects</a>
+                <a href="#" class="fl-link">Plots &amp; Land</a>
+                <a href="#" class="fl-link">Home Loans</a>
+            </div>
+            <div>
+                <div class="fl-title">For Owners</div>
+                <a href="{% url 'post_property' %}" class="fl-link">Post Property FREE</a>
+                <a href="#" class="fl-link">Agent Registration</a>
+                <a href="#" class="fl-link">PropCRM Plans</a>
+                <a href="#" class="fl-link">Contact Support</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
+            <span>Privacy Policy · Terms · Sitemap</span>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<script>
+// ── Popover Toggle & Event Delegation ──────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Toggle popovers using event delegation attached to triggers
+    document.querySelectorAll('.sb-custom-dropdown').forEach(dropdown => {
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const popover = this.querySelector('.custom-popover');
+            
+            // Close all others
+            document.querySelectorAll('.custom-popover').forEach(p => {
+                if (p !== popover) p.classList.remove('show-popover');
+            });
+            
+            // Toggle current
+            if (popover) popover.classList.toggle('show-popover');
+        });
+    });
+
+    // Prevent closing when clicking INSIDE the popover
+    document.querySelectorAll('.custom-popover').forEach(popover => {
+        popover.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+
+    // Close all popovers when clicking ANYWHERE OUTSIDE
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.custom-popover').forEach(p => p.classList.remove('show-popover'));
+    });
+    
+});
+
+// Event delegation for Checkboxes and Radio buttons (to update display text instantly)
+document.addEventListener('change', function(e) {
+
+    // City Radios
+    if (e.target && e.target.name === 'city_select') {
+        const display = document.getElementById('city-display');
+        display.innerText = e.target.value;
+        
+        // Auto close city dropdown when selecting
+        const popover = document.getElementById('city-popover');
+        if(popover) popover.classList.remove('show-popover');
+    }
+    
+    // Property Type Checkboxes
+    if (e.target && e.target.classList.contains('ptype-cb')) {
+        const checkedBoxes = document.querySelectorAll('.ptype-cb:checked');
+        const display = document.getElementById('type-display');
+        
+        if (checkedBoxes.length === 0) {
+            display.innerText = "Property Sub-Type";
+            display.style.color = "#333";
+        } else if (checkedBoxes.length === 1) {
+            display.innerText = checkedBoxes[0].value;
+            display.style.color = "var(--primary-dark)";
+        } else {
+            display.innerText = checkedBoxes.length + " Types Selected";
+            display.style.color = "var(--primary-dark)";
+        }
+    }
+    
+    // Budget Radios
+    if (e.target && e.target.name === 'budget_range') {
+        const display = document.getElementById('budget-display');
+        if (e.target.value === "Any Budget") {
+            display.innerText = "Budget";
+            display.style.color = "#333";
+        } else {
+            display.innerText = e.target.value;
+            display.style.color = "var(--primary-dark)";
+        }
+        
+        // Auto close budget dropdown when selecting
+        const popover = document.getElementById('budget-popover');
+        if(popover) popover.classList.remove('show-popover');
+    }
+});
+
+
+// ── Search Multi-Locality Tag Logic (FIXED SCROLLING) ───────────────────────
+const locInput = document.getElementById('sb-location-input');
+const tagsContainer = document.getElementById('locality-tags');
+let selectedLocalities = []; 
+
+if (locInput) {
+    locInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            addLocality(this.value);
+        }
+    });
+}
+
+function addLocality(val) {
+    const text = val.trim().replace(',', '');
+    if (text && selectedLocalities.length < 3 && !selectedLocalities.includes(text)) {
+        selectedLocalities.push(text);
+        
+        if (selectedLocalities.length >= 3) {
+            locInput.style.display = 'none'; // CRITICAL: Hides the input so space opens up for the 3 tags
+        }
+        
+        renderTags();
+        locInput.value = ''; 
+        
+        // Auto-scroll logic so the newest tag is always visible
+        const localityBox = document.getElementById('loc-scroll-wrapper');
+        if(localityBox) {
+            setTimeout(() => {
+                localityBox.scrollLeft = localityBox.scrollWidth;
+            }, 10);
+        }
+    } else if (selectedLocalities.length >= 3) {
+        locInput.value = ''; // Just clear if full
+    }
+}
+
+function removeLocality(index) {
+    selectedLocalities.splice(index, 1);
+    locInput.style.display = 'block'; // Ensure input returns when tag removed
+    renderTags();
+}
+
+function renderTags() {
+    if(!tagsContainer) return;
+    tagsContainer.innerHTML = '';
+    selectedLocalities.forEach((loc, i) => {
+        const tag = document.createElement('span');
+        tag.className = 'loc-tag';
+        tag.innerHTML = `${loc} <i class="bi bi-x-circle-fill" style="cursor:pointer;" onclick="removeLocality(${i})"></i>`;
+        tagsContainer.appendChild(tag);
+    });
+
+    if (selectedLocalities.length > 0) {
+        locInput.placeholder = "";
+    } else {
+        locInput.placeholder = "Search up to 3 localities (Press Enter)";
+    }
+}
+
+// ── Dynamic Tab Switching Logic (Update Popover Options) ───────────────────
+const TYPE_OPTIONS = {
+    rent: `
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Residential"> <span>Residential</span></label>
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Commercial"> <span>Commercial</span></label>
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="PG/Co-living"> <span>PG / Co-living</span></label>
+    `,
+    resale: `
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Residential"> <span>Residential</span></label>
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Commercial"> <span>Commercial</span></label>
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Plots/Land"> <span>Plots / Land</span></label>
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Agricultural"> <span>Agricultural</span></label>
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Industrial"> <span>Industrial</span></label>
+    `
+};
+
+function switchTab(tab, el) {
+    // Remove active class from all tabs, add to clicked
+    document.querySelectorAll('.tab-99a').forEach(t => t.classList.remove('active-tab'));
+    if(el) el.classList.add('active-tab');
+    
+    // Inject new checkboxes into the Property Type popover
+    const typeContainer = document.getElementById('type-checkboxes');
+    if(typeContainer) typeContainer.innerHTML = TYPE_OPTIONS[tab] || TYPE_OPTIONS['rent'];
+    
+    // Reset the Search Box display text
+    const typeDisplay = document.getElementById('type-display');
+    if(typeDisplay) {
+        typeDisplay.innerText = "Property Sub-Type";
+        typeDisplay.style.color = "#333";
+    }
+}
+
+// ── Search Submission Logic ────────────────────────────────────────────────
+function doSearch(e) {
+    if (e) e.preventDefault();
+    
+    const activeTab = document.querySelector('.tab-99a.active-tab');
+    const tabText = activeTab ? activeTab.textContent.trim().toLowerCase() : 'rent';
+    
+    const cityRadio = document.querySelector('input[name="city_select"]:checked');
+    const city = cityRadio ? cityRadio.value : 'Nagpur';
+    
+    // Get ALL Checked Property Types as comma separated string
+    const checkedTypes = Array.from(document.querySelectorAll('.ptype-cb:checked')).map(cb => cb.value).join(',');
+    
+    // Get Selected Budget
+    const budgetRadio = document.querySelector('input[name="budget_range"]:checked');
+    const budget = budgetRadio ? budgetRadio.value : 'Any Budget';
+    
+    const params = new URLSearchParams();
+
+    // Check if user typed a location but didn't press enter
+    const locInputElem = document.getElementById('sb-location-input');
+    if (locInputElem && locInputElem.style.display !== 'none') {
+        const pendingText = locInputElem.value.trim();
+        if (pendingText) addLocality(pendingText); // Convert to tag
+    }
+    const locationStr = selectedLocalities.join(','); // Join tags
+
+    // Logic based on tabs
+    if (tabText.includes('rent')) {
+        params.set('type', 'rent');
+    } else {
+        params.set('type', 'sale');
+    }
+
+    params.set('city', city);
+    if (locationStr) params.set('area', locationStr);
+    
+    // Pass custom selections
+    if (checkedTypes) params.set('category', checkedTypes.toLowerCase()); // Passing as 'category' parameter
+    if (budget && budget !== 'Any Budget') params.set('budget', budget);
+
+    window.location.href = '/listingpage/?' + params.toString();
+}
+
+// ── Mobile Menu ────────────────────────────────────────────────────────────
+function toggleMobileMenu() { document.getElementById("mobileMenu").classList.toggle("d-none"); }
+document.addEventListener('click', function(e) {
+    const menu = document.getElementById('mobileMenu');
+    const btn = document.querySelector('.mobile-menu-btn');
+    if (!menu.classList.contains('d-none') && !menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.add('d-none');
+    }
+});
+
+// ── Static Listings & Interactions ─────────────────────────────────────────
+const LISTINGS = [
+  {id:1,title:'Spacious 2BHK with Modular Kitchen',type:'rent',cat:'2bhk',price:'₹18,000/mo',
+   area:'920 sqft',beds:2,baths:2,parking:1,floor:'3rd/7',
+   location:'Civil Lines, Nagpur',furnished:'Semi Furnished',available:'Available Now',
+   badges:['featured','verified'],listingType:'rent',
+   owner:'Ramesh Verma',ownerRole:'Verified Owner',ownerColor:'#f97316',ownerInitials:'RV',
+   rmPhone:'9876543210',emoji:'🏠',bgColor:'#e2e8f0',isNew:false},
+  {id:2,title:'Premium 3BHK — Ready Possession',type:'sale',cat:'3bhk',price:'₹65,00,000',
+   area:'1,240 sqft',beds:3,baths:3,parking:2,floor:'2nd/5',
+   location:'Wardha Road, Nagpur',furnished:'Semi Furnished',available:'Ready Possession',
+   badges:['featured','verified','exclusive'],listingType:'sale',
+   owner:'Rajesh Khanna Realty',ownerRole:'Gold Agent',ownerColor:'#7c3aed',ownerInitials:'RK',
+   rmPhone:'9823456789',emoji:'🏢',bgColor:'#cbd5e1',isNew:false},
+  {id:3,title:'Cozy 1BHK — Fully Furnished',type:'rent',cat:'1bhk',price:'₹10,000/mo',
+   area:'480 sqft',beds:1,baths:1,parking:0,floor:'1st/3',
+   location:'Sadar, Nagpur',furnished:'Fully Furnished',available:'Available Now',
+   badges:['new'],listingType:'rent',
+   owner:'Pooja Desai',ownerRole:'Owner',ownerColor:'#0ea5e9',ownerInitials:'PD',
+   rmPhone:'9812345678',emoji:'🏡',bgColor:'#f1f5f9',isNew:true},
+];
+
+window.addEventListener('DOMContentLoaded', () => {
+    const newL = localStorage.getItem('newListingAdded');
+    if (newL) {
+        const data = JSON.parse(newL);
+        const banner = document.getElementById('newListingBanner');
+        if (banner) {
+            banner.style.display = 'flex';
+            document.getElementById('newListingMsg').textContent = `"${data.title}" is now live! Visible to 1,248+ users on PropCRM.`;
+        }
+        localStorage.removeItem('newListingAdded');
+        LISTINGS.unshift({...data, isNew:true, badges:['new'], listingType:'rent', bgColor:'#f1f5f9', emoji:'🏠'});
+    }
+    renderRecent();
+});
+
+function buildCard(l) {
+    const badgeHTML = l.badges.map(b => {
+        const map = { featured: '<span class="badge-tag b-feat">⭐ Featured</span>', verified: '<span class="badge-tag b-verif">✅ Verified</span>', exclusive: '<span class="badge-tag b-excl">💎 Exclusive</span>', new: '<span class="badge-tag b-new">🆕 New</span>' };
+        return map[b] || '';
+    }).join('');
+
+    const typeBadge = l.listingType === 'rent' ? '<span class="badge-tag b-rent">FOR RENT</span>' : l.listingType === 'sale' ? '<span class="badge-tag b-sale">FOR SALE</span>' : '<span class="badge-tag b-both">RENT + SALE</span>';
+
+    const specs = [];
+    if (l.beds > 0) specs.push(`<div class="spec"><i class="bi bi-door-open"></i> ${l.beds} Bed</div>`);
+    specs.push(`<div class="spec"><i class="bi bi-droplet"></i> ${l.baths} Bath</div>`);
+    specs.push(`<div class="spec"><i class="bi bi-aspect-ratio"></i> ${l.area}</div>`);
+    if (l.parking > 0) specs.push(`<div class="spec"><i class="bi bi-car-front"></i> Parking</div>`);
+
+    return `
+    <a href="/listing_detail/?id=${l.id}" class="pcard">
+        <div class="pc-img">
+            <div class="pc-img-placeholder" style="background:${l.bgColor};">${l.emoji}</div>
+            <div class="pc-badges">${typeBadge} ${badgeHTML}</div>
+            <button class="pc-save" onclick="event.preventDefault();toggleSave(${l.id},this)"><i class="bi bi-heart"></i></button>
+            <div class="pc-price-tag">${l.price}</div>
+        </div>
+        <div class="pc-body">
+            <div class="pc-title">${l.title}</div>
+            <div class="pc-addr"><i class="bi bi-geo-alt-fill"></i> ${l.location}</div>
+            <div class="pc-specs">${specs.join('')}</div>
+            <div class="pc-meta">${l.furnished} &nbsp;·&nbsp; ${l.floor} Floor &nbsp;·&nbsp; ${l.available}</div>
+            <div class="pc-footer">
+                <div class="pc-agent"><div class="pa-av" style="background:${l.ownerColor};">${l.ownerInitials}</div><div><div class="pa-name">${l.owner}</div><div class="pa-role">${l.ownerRole}</div></div></div>
+                <div class="pc-actions">
+                    <button class="pca" onclick="event.preventDefault();callListing(${l.id})" title="Call"><i class="bi bi-telephone"></i></button>
+                    <button class="pca wa" onclick="event.preventDefault();waListing(${l.id})" title="WhatsApp"><i class="bi bi-whatsapp"></i></button>
+                </div>
+            </div>
+        </div>
+    </a>`;
+}
+
+function renderRecent() {
+    const recentGrid = document.getElementById('recentGrid');
+    if (!recentGrid) return;
+    const recent = [...LISTINGS].sort((a,b) => b.id - a.id).slice(0, 6);
+    recentGrid.innerHTML = recent.map(buildCard).join('');
+}
+
+function filterCat(cat, el) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    let filtered;
+    if (cat === 'all') filtered = LISTINGS;
+    else if (cat === 'rent') filtered = LISTINGS.filter(l => l.listingType === 'rent' || l.listingType === 'both');
+    else if (cat === 'sale') filtered = LISTINGS.filter(l => l.listingType === 'sale' || l.listingType === 'both');
+    else if (cat === 'featured') filtered = LISTINGS.filter(l => l.badges.includes('featured'));
+    else if (cat === 'verified') filtered = LISTINGS.filter(l => l.badges.includes('verified'));
+    else filtered = LISTINGS.filter(l => l.cat === cat || l.type === cat);
+    document.getElementById('recentGrid').innerHTML = (filtered.length ? filtered : LISTINGS).slice(0,6).map(buildCard).join('');
+}
+
+function toggleSave(id, btn) {
+    btn.classList.toggle('saved');
+    const icon = btn.querySelector('i');
+    if (btn.classList.contains('saved')) {
+        icon.className = 'bi bi-heart-fill';
+        Swal.fire({icon:'success',title:'Saved!',text:'Property added to your wishlist.', background:'#ffffff',color:'#1e293b',confirmButtonColor:'#006ce4', timer:1500,showConfirmButton:false});
+    } else {
+        icon.className = 'bi bi-heart';
+    }
+}
+
+function callListing(id) {
+    const l = LISTINGS.find(x => x.id === id);
+    Swal.fire({ title: 'Contact Owner', html: `<div style="text-align:center;padding:8px;"><div style="font-size:1rem;font-weight:700;color:#1e293b;">${l ? l.owner : 'Owner'}</div><div style="font-size:1.4rem;font-weight:900;color:#006ce4;margin:12px 0;">📞 ${l ? l.rmPhone : '9876543210'}</div><div style="font-size:.8rem;color:#64748b;font-weight:500;">PropCRM Verified · Available 9AM–7PM</div></div>`, background: '#ffffff', color: '#1e293b', confirmButtonColor: '#006ce4', confirmButtonText: 'Call Now' });
+}
+
+function waListing(id) {
+    Swal.fire({icon:'success',title:'Opening WhatsApp', text:'Connecting you with the property owner.', background:'#ffffff',color:'#1e293b',timer:1500,showConfirmButton:false});
+}
+</script>
+
+</body>
+</html>
