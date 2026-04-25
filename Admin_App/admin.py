@@ -43,16 +43,3 @@ admin.site.register(ResaleResidentialProperty)
 ########### Register CommercialResaleProperty Table/Modal ###############
 
 admin.site.register(CommercialResaleProperty)
-
-
-############ Regiister Open Plot/Land Property Table/Modal ######################
-
-admin.site.register(ResalePlotProperty)
-
-############## Register Industrial Property Table/Modal ########################
-
-admin.site.register(ResaleIndustrialProperty)
-
-################ Register Agricultural Property Table/Modal ######################
-
-admin.site.register(ResaleAgriculturalProperty)

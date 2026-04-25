@@ -132,9 +132,8 @@ def listings_view(request):
     area         = request.GET.get('area',     '').strip()
     sort         = request.GET.get('sort',     'relevant').strip()
 
-    # Normalize BHK: "2BHK" → "2 BHK"
-    bhk = re.sub(r'(\d)(BHK)', r'\1 \2', bhk)
-    bhk = re.sub(r'(\d)(RK)',  r'\1 \2', bhk)
+    # Normalize BHK: "2BHK" → "2 BHK" (Case-insensitive)
+    bhk = re.sub(r'(\d)\s*(BHK|RK)', r'\1 \2', bhk, flags=re.IGNORECASE).upper()
 
     properties  = []
     page_title  = 'Properties'
@@ -229,11 +228,54 @@ def listings_view(request):
         for p in qs:
             properties.append(_normalize_commercial_resale(p))
 
-    # ── SALE → PLOT / AGRICULTURE / INDUSTRIAL (models pending) ─────────────
-    elif listing_type == 'sale' and category in ('plot', 'agriculture', 'industrial'):
-        page_title = f'{category.title()} Properties for Sale'
-        # These models don't exist yet — show empty with friendly message
-        properties = []
+    # ── SALE → PLOT ──────────────────────────────────────────────────────────
+    # elif listing_type == 'sale' and category == 'plot':
+    #     page_title = 'Plots & Land for Sale'
+    #     qs = ResalePlotProperty.objects.all()
+
+    #     if area:
+    #         qs = qs.filter(Q(locality__icontains=area) | Q(city__icontains=area))
+    #     if budget:
+    #         low, high = _parse_sale_budget(budget)
+    #         if low  is not None: qs = qs.filter(expected_price__gte=low)
+    #         if high is not None: qs = qs.filter(expected_price__lte=high)
+
+    #     qs = _sort_qs(qs, sort, 'expected_price')
+    #     for p in qs:
+    #         properties.append(_normalize_plot(p))
+
+    # # ── SALE → AGRICULTURE ───────────────────────────────────────────────────
+    # elif listing_type == 'sale' and category == 'agriculture':
+    #     page_title = 'Agricultural Land for Sale'
+    #     qs = ResaleAgriculturalProperty.objects.all()
+
+    #     if area:
+    #         # Agriculture usually searches by village/taluka instead of pure locality
+    #         qs = qs.filter(Q(village__icontains=area) | Q(taluka__icontains=area) | Q(district__icontains=area))
+    #     if budget:
+    #         low, high = _parse_sale_budget(budget)
+    #         if low  is not None: qs = qs.filter(expected_price__gte=low)
+    #         if high is not None: qs = qs.filter(expected_price__lte=high)
+
+    #     qs = _sort_qs(qs, sort, 'expected_price')
+    #     for p in qs:
+    #         properties.append(_normalize_agriculture(p))
+
+    # # ── SALE → INDUSTRIAL ────────────────────────────────────────────────────
+    # elif listing_type == 'sale' and category == 'industrial':
+    #     page_title = 'Industrial Properties for Sale'
+    #     qs = ResaleIndustrialProperty.objects.all()
+
+    #     if area:
+    #         qs = qs.filter(Q(locality__icontains=area) | Q(city__icontains=area))
+    #     if budget:
+    #         low, high = _parse_sale_budget(budget)
+    #         if low  is not None: qs = qs.filter(expected_price__gte=low)
+    #         if high is not None: qs = qs.filter(expected_price__lte=high)
+
+    #     qs = _sort_qs(qs, sort, 'expected_price')
+    #     for p in qs:
+    #         properties.append(_normalize_industrial(p))
 
     # ── CONTEXT ──────────────────────────────────────────────────────────────
     context = {
