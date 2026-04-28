@@ -2465,5 +2465,72 @@
     };
 </script>
 
+
+<script>
+
+document.getElementById('propertyForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Stop standard form submission
+    
+    // Update CKEditor textareas before sending (if using CKEditor)
+    if (typeof CKEDITOR !== 'undefined') {
+        for (instance in CKEDITOR.instances) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+    }
+
+    let formData = new FormData(this);
+    let submitBtn = document.querySelector('.btn-submit');
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    submitBtn.disabled = true;
+
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest' // Tells Django this is an AJAX request
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Awesome!',
+                text: data.message,
+                confirmButtonColor: '#11998e',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirect to your property list page, or refresh the page
+                    window.location.reload(); 
+                }
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!',
+                confirmButtonColor: '#e74c3c'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Server Error',
+            text: 'Could not connect to the server.',
+        });
+    })
+    .finally(() => {
+        // Reset button
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Submit Property';
+        submitBtn.disabled = false;
+    });
+});
+
+</script>
+
 </body>
 </html>

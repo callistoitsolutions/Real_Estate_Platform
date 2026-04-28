@@ -129,189 +129,283 @@
         </div>
 
         <div class="form-container">
-            <form method="POST" enctype="multipart/form-data" id="plotForm">
-                {% csrf_token %}
+    <form action="{% url 'plot_sale_add' %}" method="POST" enctype="multipart/form-data" id="plotForm">
+        {% csrf_token %}
 
-                <div class="step-content active" id="step1">
-                    <div class="section-header"><i class="fas fa-info-circle"></i> Plot/Land Details</div>
-                    <div class="section-body">
-                        <div class="row">
-                            <div class="col-md-12 mt-2">
-                                <label class="form-label">Project Name <span class="required">*</span></label>
-                                <input type="text" class="form-control" name="plot_title" id="plot_title" placeholder="e.g., Prime Residential Plot" required>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Plot Area (sq.ft) <span class="required">*</span></label>
-                                <input type="number" class="form-control" name="plot_area" id="plot_area" placeholder="e.g., 2000" required>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Plot Type <span class="required">*</span></label>
-                                <select class="form-select form-control" name="resale_plot_type" id="resale_plot_type" required>
-                                    <option value="">Select</option>
-                                    <option value="open_plot">Open Plot</option>
-                                    <option value="residential_plot">Residential Plot</option>
-                                    <option value="commercial_plot">Commercial Plot</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Road Facing <span class="required">*</span></label>
-                                <select class="form-select form-control" name="plot_road_facing" id="plot_road_facing" required>
-                                    <option value="">Select</option>
-                                    <option value="main">Main Road</option>
-                                    <option value="internal">Internal Road</option>
-                                    <option value="corner">Corner Plot</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Corner Plot?</label>
-                                <select class="form-select form-control" name="plot_corner" id="plot_corner">
-                                    <option value="no">No</option>
-                                    <option value="yes">Yes</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Available From</label>
-                                <input type="date" class="form-control" name="available_from">
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Sanctioning Authority</label>
-                                <input type="text" class="form-control" name="plot_authority" placeholder="e.g., MHADA, CIDCO">
-                            </div>
-                        </div>
-                        <div class="form-group mt-3">
-                            <label class="form-label">Fencing Done?</label>
-                            <div class="radio-group">
-                                <label class="radio-option"><input type="radio" name="plot_fencing" value="no" checked> No</label>
-                                <label class="radio-option"><input type="radio" name="plot_fencing" value="yes"> Yes</label>
-                            </div>
-                        </div>
+        <div class="step-content active" id="step1">
+            <div class="section-header"><i class="fas fa-info-circle"></i> Plot/Land Details</div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-12 mt-2">
+                        <label class="form-label">Project Name <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="plot_title" id="plot_title" placeholder="e.g., Prime Residential Plot" required>
                     </div>
-                    <div class="text-end">
-                        <button type="button" class="btn btn-primary px-5 py-2" onclick="goToStep(2)">Next: Pricing & Legal <i class="fas fa-arrow-right ml-2"></i></button>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Plot Area (sq.ft) <span class="required">*</span></label>
+                        <input type="number" class="form-control" name="plot_area" id="plot_area" placeholder="e.g., 2000" required>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Plot Type <span class="required">*</span></label>
+                        <select class="form-select form-control" name="resale_plot_type" id="resale_plot_type" required>
+                            <option value="">Select</option>
+                            <option value="open_plot">Open Plot</option>
+                            <option value="residential_plot">Residential Plot</option>
+                            <option value="commercial_plot">Commercial Plot</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Road Facing <span class="required">*</span></label>
+                        <select class="form-select form-control" name="plot_road_facing" id="plot_road_facing" required>
+                            <option value="">Select</option>
+                            <option value="main">Main Road</option>
+                            <option value="internal">Internal Road</option>
+                            <option value="corner">Corner Plot</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Corner Plot?</label>
+                        <select class="form-select form-control" name="plot_corner" id="plot_corner">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Available From</label>
+                        <input type="date" class="form-control" name="available_from">
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Sanctioning Authority</label>
+                        <input type="text" class="form-control" name="plot_authority" placeholder="e.g., MHADA, CIDCO">
                     </div>
                 </div>
-
-                <div class="step-content" id="step2">
-                    <div class="section-header"><i class="fas fa-hand-holding-usd"></i> Pricing & Legal</div>
-                    <div class="section-body">
-                        <div class="row">
-                            <div class="col-md-6 mt-2">
-                                <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
-                                <input type="number" class="form-control" name="plot_price" id="plot_price" placeholder="e.g., 3000000" required>
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <label class="form-label">Price per Sq.ft (₹)</label>
-                                <input type="number" class="form-control" id="plot_price_per_sqft" placeholder="Auto-calculated" readonly>
-                            </div>
-                            <div class="col-md-6 mt-3">
-                                <label class="form-label">Brokerage</label>
-                                <select class="form-select form-control" name="brokerage" id="brokerageSelect">
-                                    <option value="No">No</option>
-                                    <option value="Yes">Yes</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mt-3" id="brokerageSection" style="display:none;">
-                                <label class="form-label">Brokerage Percentage</label>
-                                <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
-                                    <option value="1%">1%</option>
-                                    <option value="2%">2%</option>
-                                    <option value="Manual">Enter Manually</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Ownership Type <span class="required">*</span></label>
-                                <select class="form-select form-control" name="plot_ownership" id="plot_ownership" required>
-                                    <option value="freehold">Freehold</option>
-                                    <option value="leasehold">Leasehold</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Loan on Property? <span class="required">*</span></label>
-                                <div class="radio-group">
-                                    <label class="radio-option"><input type="radio" name="plot_loan" value="no" checked required> No</label>
-                                    <label class="radio-option"><input type="radio" name="plot_loan" value="yes"> Yes</label>
-                                </div>
-                                <div id="plot_loan_amount_section" style="display:none;" class="mt-2">
-                                    <input type="number" class="form-control" name="plot_loan_amount" placeholder="Loan Amount (₹)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <button type="button" class="btn btn-secondary px-4" onclick="goToStep(1)">Back</button>
-                        <button type="button" class="btn btn-primary px-5" onclick="goToStep(3)">Next: Photos <i class="fas fa-arrow-right"></i></button>
+                <div class="form-group mt-3">
+                    <label class="form-label">Fencing Done?</label>
+                    <div class="radio-group">
+                        <label class="radio-option"><input type="radio" name="plot_fencing" value="no" checked> No</label>
+                        <label class="radio-option"><input type="radio" name="plot_fencing" value="yes"> Yes</label>
                     </div>
                 </div>
-
-                <div class="step-content" id="step3">
-                    <div class="section-header"><i class="fas fa-images"></i> Media & Certificates</div>
-                    <div class="section-body">
-                        <div class="image-upload-area p-5 text-center" style="border: 2px dashed #cbd5e0; cursor: pointer;" id="uploadArea">
-                            <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
-                            <i class="fas fa-cloud-upload-alt fa-3x mb-2" style="color: #667eea;"></i>
-                            <p class="mb-0">Click or Drag Images (Max 10)</p>
-                        </div>
-                        <div class="image-preview" id="imagePreview"></div>
-                        <div class="row mt-4">
-                            <div class="col-md-6">
-                                <label class="form-label">Encumberance Certificate <span class="required">*</span></label>
-                                <input type="file" class="form-control" name="encumbrance_cert" >
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Social Media Video <span class="required">*</span></label>
-                                <input type="file" class="form-control" name="social_video">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <button type="button" class="btn btn-secondary px-4" onclick="goToStep(2)">Back</button>
-                        <button type="button" class="btn btn-primary px-5" onclick="goToStep(4)">Next: Location <i class="fas fa-arrow-right"></i></button>
-                    </div>
-                </div>
-
-                <div class="step-content" id="step4">
-                    <div class="section-header"><i class="fas fa-map-marker-alt"></i> Location & Contact</div>
-                    <div class="section-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label">City <span class="required">*</span></label>
-                                <input type="text" class="form-control" name="plot_city" id="plot_city" placeholder="e.g., Nagpur" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Locality <span class="required">*</span></label>
-                                <input type="text" class="form-control" name="plot_locality" id="plot_locality" placeholder="e.g., Panvel" required>
-                            </div>
-                            <div class="col-md-12 mt-3">
-                                <label class="form-label">Complete Address <span class="required">*</span></label>
-                                <textarea class="form-control" name="plot_address" required></textarea>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Owner Name <span class="required">*</span></label>
-                                <input type="text" class="form-control" name="plot_owner_name" required>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Owner Contact <span class="required">*</span></label>
-                                <input type="tel" class="form-control" name="plot_owner_contact" pattern="[0-9]{10}" required>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Email <span class="required">*</span></label>
-                                <input type="email" class="form-control" name="plot_owner_email" required>
-                            </div>
-                        </div>
-                        <div class="row mt-4 pt-3 border-top">
-                            <div class="col-md-3"><label class="form-label">Uploaded By</label><input type="text" class="form-control" value="{{ admin_obj.name }}" disabled></div>
-                            <div class="col-md-3"><label class="form-label">Role</label><input type="text" class="form-control" value="{{ admin_obj.role }}" disabled></div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <button type="button" class="btn btn-secondary px-4" onclick="goToStep(3)">Back</button>
-                        <button type="submit" class="btn btn-success px-5">Submit Plot Listing <i class="fas fa-save ml-2"></i></button>
-                    </div>
-                </div>
-            </form>
+            </div>
+            <div class="text-end">
+                <button type="button" class="btn btn-primary px-5 py-2" onclick="goToStep(2)">Next: Pricing & Legal <i class="fas fa-arrow-right ml-2"></i></button>
+            </div>
         </div>
+
+        <div class="step-content" id="step2">
+            <div class="section-header"><i class="fas fa-hand-holding-usd"></i> Pricing & Legal</div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-6 mt-2">
+                        <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
+                        <input type="number" class="form-control" name="plot_price" id="plot_price" placeholder="e.g., 3000000" required>
+                    </div>
+                    <div class="col-md-6 mt-2">
+                        <label class="form-label">Price per Sq.ft (₹)</label>
+                        <input type="number" class="form-control" id="plot_price_per_sqft" placeholder="Auto-calculated" readonly>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <label class="form-label">Brokerage</label>
+                        <select class="form-select form-control" name="brokerage" id="brokerageSelect">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mt-3" id="brokerageSection" style="display:none;">
+                        <label class="form-label">Brokerage Percentage</label>
+                        <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
+                            <option value="1%">1%</option>
+                            <option value="2%">2%</option>
+                            <option value="Manual">Enter Manually</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Ownership Type <span class="required">*</span></label>
+                        <select class="form-select form-control" name="plot_ownership" id="plot_ownership" required>
+                            <option value="freehold">Freehold</option>
+                            <option value="leasehold">Leasehold</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Loan on Property? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-option"><input type="radio" name="plot_loan" value="no" checked required> No</label>
+                            <label class="radio-option"><input type="radio" name="plot_loan" value="yes"> Yes</label>
+                        </div>
+                        <div id="plot_loan_amount_section" style="display:none;" class="mt-2">
+                            <input type="number" class="form-control" name="plot_loan_amount" placeholder="Loan Amount (₹)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary px-4" onclick="goToStep(1)">Back</button>
+                <button type="button" class="btn btn-primary px-5" onclick="goToStep(3)">Next: Photos <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="step-content" id="step3">
+            <div class="section-header"><i class="fas fa-images"></i> Media & Certificates</div>
+            <div class="section-body">
+                <div class="image-upload-area p-5 text-center" style="border: 2px dashed #cbd5e0; cursor: pointer;" id="uploadArea">
+                    <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
+                    <i class="fas fa-cloud-upload-alt fa-3x mb-2" style="color: #667eea;"></i>
+                    <p class="mb-0">Click or Drag Images</p>
+                    <p class="text-danger mt-2 mb-0" style="font-size: 0.85rem; font-weight: 600;">Note: Please upload a minimum of 1 and a maximum of 10 images.</p>
+                </div>
+                <div class="image-preview" id="imagePreview"></div>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Encumberance Certificate <span class="required">*</span></label>
+                        <input type="file" class="form-control" name="encumbrance_cert" >
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Social Media Video <span class="required">*</span></label>
+                        <input type="file" class="form-control" name="social_video">
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary px-4" onclick="goToStep(2)">Back</button>
+                <button type="button" class="btn btn-primary px-5" onclick="goToStep(4)">Next: Location <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="step-content" id="step4">
+            <div class="section-header"><i class="fas fa-map-marker-alt"></i> Location & Contact</div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">City <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="plot_city" id="plot_city" placeholder="e.g., Nagpur" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Locality <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="plot_locality" id="plot_locality" placeholder="e.g., Panvel" required>
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <label class="form-label">Complete Address <span class="required">*</span></label>
+                        <textarea class="form-control" name="plot_address" required></textarea>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Owner Name <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="plot_owner_name" required>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Owner Contact <span class="required">*</span></label>
+                        <input type="tel" class="form-control" name="plot_owner_contact" pattern="[0-9]{10}" required>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Email <span class="required">*</span></label>
+                        <input type="email" class="form-control" name="plot_owner_email" required>
+                    </div>
+                </div>
+                <div class="row mt-4 pt-3 border-top">
+                    <div class="col-md-3"><label class="form-label">Uploaded By</label><input type="text" class="form-control" value="{{ admin_obj.name }}" disabled></div>
+                    <div class="col-md-3"><label class="form-label">Role</label><input type="text" class="form-control" value="{{ admin_obj.role }}" disabled></div>
+                    <div class="col-md-3"><label class="form-label">Email</label><input type="text" class="form-control" value="{{ admin_obj.email }}" disabled></div>
+                    <div class="col-md-3"><label class="form-label">Phone</label><input type="text" class="form-control" value="{{ admin_obj.phone }}" disabled></div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary px-4" onclick="goToStep(3)">Back</button>
+                <button type="submit" class="btn btn-success px-5" id="submitBtn">Submit Plot Listing <i class="fas fa-save ml-2"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // FORM SUBMISSION AJAX WITH SWEETALERT
+    document.getElementById('plotForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent page reload
+
+        // Validate final step before submitting
+        const requiredFields = document.getElementById('step4').querySelectorAll('[required]');
+        let missing = false;
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) missing = true;
+        });
+
+        if (missing) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Fields',
+                text: 'Please fill all required fields in the Location step before submitting.',
+            });
+            return;
+        }
+
+        // Validate max images
+        const imageFiles = document.getElementById('imageInput').files;
+        if (imageFiles.length > 10) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Too Many Images',
+                text: 'You can only upload a maximum of 10 images.',
+            });
+            return;
+        }
+
+        // UI Feedback during submission
+        const submitBtn = document.getElementById('submitBtn');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        submitBtn.disabled = true;
+
+        // Fetch API request
+        let formData = new FormData(this);
+        let actionUrl = this.getAttribute('action'); // Gets URL from form action
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Trigger Success SweetAlert
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message || 'Property listed successfully!',
+                    confirmButtonColor: '#38ef7d'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Optionally reload or redirect after success
+                        window.location.reload(); 
+                    }
+                });
+            } else {
+                // Trigger Error SweetAlert
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: data.message || 'Something went wrong while saving.',
+                    confirmButtonColor: '#e74c3c'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Server Error',
+                text: 'A server error occurred. Please try again.',
+                confirmButtonColor: '#e74c3c'
+            });
+        })
+        .finally(() => {
+            // Restore button
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        });
+    });
+</script>
 
         <div class="preview-sidebar">
             <div class="preview-card">

@@ -24,51 +24,23 @@
                     <div class="stat-icon primary">
                         <i class="fas fa-home"></i>
                     </div>
-                    <div class="stat-value">48</div>
+                    <div class="stat-value">{{ total_properties }}</div>
                     <div class="stat-label">Total Properties</div>
                     <span class="stat-change positive">
                         <i class="fas fa-arrow-up"></i> +12%
                     </span>
                 </div>
 
-                <div class="stat-card success">
-                    <div class="stat-icon success">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div class="stat-value">32</div>
-                    <div class="stat-label">Residential</div>
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +8%
-                    </span>
-                </div>
+              
+              
 
-                <div class="stat-card warning">
-                    <div class="stat-icon warning">
-                        <i class="fas fa-briefcase"></i>
-                    </div>
-                    <div class="stat-value">12</div>
-                    <div class="stat-label">Commercial</div>
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +5%
-                    </span>
-                </div>
-
-                <div class="stat-card info">
-                    <div class="stat-icon info">
-                        <i class="fas fa-bed"></i>
-                    </div>
-                    <div class="stat-value">4</div>
-                    <div class="stat-label">PG/Co-living</div>
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +15%
-                    </span>
-                </div>
+                
 
                 <div class="stat-card danger">
                     <div class="stat-icon danger" style="background: var(--success-gradient);">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                    <div class="stat-value">42</div>
+<div class="stat-value">{{ active_listings }}</div>
                     <div class="stat-label">Active Listings</div>
                     <span class="stat-change positive">
                         <i class="fas fa-chart-line"></i> Good
@@ -79,7 +51,7 @@
                     <div class="stat-icon success" style="background: var(--dark-gradient);">
                         <i class="fas fa-rupee-sign"></i>
                     </div>
-                    <div class="stat-value">₹12.5L</div>
+                    <div class="stat-value">₹{{ monthly_revenue }}</div>
                     <div class="stat-label">Monthly Revenue</div>
                     <span class="stat-change positive">
                         <i class="fas fa-arrow-up"></i> +20%
@@ -142,7 +114,7 @@
                         <div class="stat-item-icon" style="color: #10b981;">
                             <i class="fas fa-user-check"></i>
                         </div>
-                        <div class="stat-item-value">38</div>
+                       <div class="stat-item-value">{{ total_tenants }}</div>
                         <div class="stat-item-label">Total Tenants</div>
                     </div>
 
@@ -150,7 +122,7 @@
                         <div class="stat-item-icon" style="color: #3b82f6;">
                             <i class="fas fa-calendar-check"></i>
                         </div>
-                        <div class="stat-item-value">95%</div>
+                        <div class="stat-item-value">{{ collection_rate }}%</div>
                         <div class="stat-item-label">Collection Rate</div>
                     </div>
 
@@ -158,7 +130,7 @@
                         <div class="stat-item-icon" style="color: #f59e0b;">
                             <i class="fas fa-clock"></i>
                         </div>
-                        <div class="stat-item-value">3</div>
+                       <div class="stat-item-value">{{ pending_payments }}</div>
                         <div class="stat-item-label">Pending Payments</div>
                     </div>
 
@@ -166,7 +138,7 @@
                         <div class="stat-item-icon" style="color: #8b5cf6;">
                             <i class="fas fa-tools"></i>
                         </div>
-                        <div class="stat-item-value">5</div>
+                       <div class="stat-item-value">{{ maintenance_req }}</div>
                         <div class="stat-item-label">Maintenance Req</div>
                     </div>
                 </div>
@@ -209,217 +181,192 @@
     </div>
 
     <!-- Table -->
-    <div class="table-responsive">
-        <table class="properties-table" id="commercialTable">
-            <thead>
-                <tr>
-                    <th>Sr.No</th>
-                    <th>Image</th>
-                    <th>Property Title</th>
-                    <th>Property Type</th>
-                    <th>City</th>
-                    <th>Area / Locality</th>
-                    <th>Address</th>
-                    <th>Building Name</th>
-                    <th>Possession Status</th>
-                    <th>Available From</th>
-                    <th>Age of Property</th>
-                    <th>Zone Type</th>
-                    <th>Location Hub</th>
-                    <th>Property Condition</th>
-                    <th>Ownership Type</th>
-                    <th>Construction Status</th>
-                    <th>Builtup Area</th>
-                    <th>Carpet Area</th>
-                    <th>Expected Rent</th>
-                    <th>Security Deposit</th>
-                    <th>Maintenance</th>
-                    <th>Negotiable</th>
-                    <th>Brokerage</th>
-                    <th>Brokerage %</th>
-                    <th>Manual Brokerage</th>
-                    <th>DG/UPS</th>
-                    <th>Electricity</th>
-                    <th>Water</th>
-                    <th>Lockin Period</th>
-                    <th>Rent Increase %</th>
-                    <th>Total Floors</th>
-                    <th>Your Floor</th>
-                    <th>Staircases</th>
-                    <th>Passenger Lifts</th>
-                    <th>Service Lifts</th>
-                    <th>Private Parking</th>
-                    <th>Min Seats</th>
-                    <th>Max Seats</th>
-                    <th>Cabins</th>
-                    <th>Meeting Rooms</th>
-                    <th>Private Washroom</th>
-                    <th>Public Washroom</th>
-                    <th>Flooring Type</th>
-                    <th>Metro Station</th>
-                    <th>Bus Stop</th>
-                    <th>Restaurants</th>
-                    <th>Banks</th>
-                    <th>Parking</th>
-                    <th>Security</th>
-                    <th>AC</th>
-                    <th>Power Backup</th>
-                    <th>Cafeteria</th>
-                    <th>Conference Room</th>
-                    <th>Fire Safety</th>
-                    <th>CCTV</th>
-                    <th>Owner Name</th>
-                    <th>Contact Number</th>
-                    <th>Email</th>
-                    <th>Alternate Contact</th>
-                    <th>Uploaded By Name</th>
-                    <th>Uploaded By Email</th>
-                    <th>Uploaded By Contact</th>
-                    <th>Uploaded By Role</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for prop in page_obj %}
-                <tr id="row-{{ prop.id }}">
+   <div class="table-responsive">
+    <table class="properties-table" id="commercialTable">
 
-                    <td>{{ forloop.counter }}</td>
+        <thead>
+            <tr>
+                <th>Sr.No</th>
+                <th>Image</th>
 
-                    <!-- Image -->
-                    <td>
-                        {% if prop.property_images %}
-                            <img src="{{ prop.property_images.url }}" class="property-image" alt="img">
+                <th>Property Type</th>
+                <th>City</th>
+                <th>Area / Locality</th>
+                <th>Address</th>
+                <th>Building Name</th>
+
+                <th>Possession Status</th>
+                <th>Available From</th>
+                <th>Age</th>
+
+                <th>Zone Type</th>
+                <th>Location Hub</th>
+
+                <th>Condition</th>
+                <th>Ownership</th>
+                <th>Construction</th>
+
+                <th>Builtup Area</th>
+                <th>Carpet Area</th>
+
+                <th>Expected Rent</th>
+                <th>Deposit</th>
+                <th>Maintenance</th>
+
+                <th>Negotiable</th>
+                <th>Brokerage</th>
+
+                <th>DG/UPS</th>
+                <th>Electricity</th>
+                <th>Water</th>
+
+                <th>Lock-in</th>
+                <th>Rent Increase %</th>
+
+                <th>Total Floors</th>
+                <th>Your Floor</th>
+
+                <th>Seats (Min-Max)</th>
+                <th>Cabins</th>
+                <th>Meeting Rooms</th>
+
+                <th>Washroom (Pvt/Public)</th>
+                <th>Flooring</th>
+
+                <th>Amenities</th>
+                <th>Nearby Facilities</th>
+
+                <th>Owner Name</th>
+                <th>Contact</th>
+                <th>Email</th>
+
+                <th>Uploaded By</th>
+                <th>Created At</th>
+
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for prop in page_obj %}
+            <tr>
+
+                <td>{{ forloop.counter }}</td>
+
+                <!-- IMAGE (from related model) -->
+                <td>
+                    {% with prop.images.first as img %}
+                        {% if img %}
+                            <img src="{{ img.image.url }}" class="property-image">
                         {% else %}
-                            <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=300&h=200&fit=crop"
-                                 class="property-image" alt="No Image">
+                            <img src="https://via.placeholder.com/120x80" class="property-image">
                         {% endif %}
-                    </td>
+                    {% endwith %}
+                </td>
 
-                    <!-- Basic Info -->
-                    <td><div class="property-title">{{ prop.property_title|default:"—" }}</div></td>
-                    <td><span class="badge badge-commercial">{{ prop.get_property_type_display|default:"—" }}</span></td>
-                    <td>{{ prop.city|default:"—" }}</td>
-                    <td>
-                        <i class="fas fa-map-marker-alt" style="color:#667eea;"></i>
-                        {{ prop.area_locality|default:"—" }}
-                    </td>
-                    <td style="min-width:180px;">{{ prop.property_address|default:"—" }}</td>
-                    <td>{{ prop.building_name|default:"—" }}</td>
-                    <td>{{ prop.get_possession_status_display|default:"—" }}</td>
-                    <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
-                    <td>{{ prop.get_age_of_property_display|default:"—" }}</td>
-                    <td>{{ prop.get_zone_type_display|default:"—" }}</td>
-                    <td>{{ prop.get_location_hub_display|default:"—" }}</td>
-                    <td>{{ prop.get_property_condition_display|default:"—" }}</td>
-                    <td>{{ prop.get_ownership_type_display|default:"—" }}</td>
-                    <td>{{ prop.get_construction_status_display|default:"—" }}</td>
+                <td>{{ prop.property_type }}</td>
+                <td>{{ prop.city }}</td>
+                <td>{{ prop.area_locality }}</td>
+                <td>{{ prop.property_address }}</td>
+                <td>{{ prop.building_name }}</td>
 
-                    <!-- Area & Pricing -->
-                    <td>{% if prop.builtup_area %}{{ prop.builtup_area }} sq.ft{% else %}—{% endif %}</td>
-                    <td>{% if prop.carpet_area %}{{ prop.carpet_area }} sq.ft{% else %}—{% endif %}</td>
-                    <td>
-                        <div class="price-tag">₹{{ prop.expected_rent|default:"0" }}</div>
-                        <div class="price-period">/month</div>
-                    </td>
-                    <td>{% if prop.security_deposit %}₹{{ prop.security_deposit }}{% else %}—{% endif %}</td>
-                    <td>{% if prop.maintenance_charges %}₹{{ prop.maintenance_charges }}{% else %}—{% endif %}</td>
-                    <td>
-                        {% if prop.negotiable %}
-                            <span style="color:green; font-weight:600;">Yes</span>
-                        {% else %}
-                            <span style="color:red; font-weight:600;">No</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ prop.brokerage|default:"—" }}</td>
-                    <td>{{ prop.brokerage_percentage|default:"—" }}</td>
-                    <td>{{ prop.manual_brokerage|default:"—" }}</td>
+                <td>{{ prop.possession_status }}</td>
+                <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
+                <td>{{ prop.age_of_property }}</td>
 
-                    <!-- Utilities -->
-                    <td>{% if prop.dg_ups_included %}<span style="color:green;">✔</span>{% else %}<span style="color:red;">✘</span>{% endif %}</td>
-                    <td>{% if prop.electricity_included %}<span style="color:green;">✔</span>{% else %}<span style="color:red;">✘</span>{% endif %}</td>
-                    <td>{% if prop.water_included %}<span style="color:green;">✔</span>{% else %}<span style="color:red;">✘</span>{% endif %}</td>
-                    <td>{% if prop.lockin_period %}{{ prop.lockin_period }} months{% else %}—{% endif %}</td>
-                    <td>{% if prop.rent_increase %}{{ prop.rent_increase }}%{% else %}—{% endif %}</td>
+                <td>{{ prop.zone_type|default:"—" }}</td>
+                <td>{{ prop.location_hub|default:"—" }}</td>
 
-                    <!-- Building Details -->
-                    <td>{{ prop.total_floors|default:"—" }}</td>
-                    <td>{{ prop.your_floor|default:"—" }}</td>
-                    <td>{{ prop.staircases|default:"—" }}</td>
-                    <td>{{ prop.passenger_lifts|default:"0" }}</td>
-                    <td>{{ prop.service_lifts|default:"0" }}</td>
-                    <td>{{ prop.private_parking|default:"0" }}</td>
+                <td>{{ prop.property_condition }}</td>
+                <td>{{ prop.ownership_type }}</td>
+                <td>{{ prop.construction_status|default:"—" }}</td>
 
-                    <!-- Office Facilities -->
-                    <td>{{ prop.min_seats|default:"—" }}</td>
-                    <td>{{ prop.max_seats|default:"—" }}</td>
-                    <td>{{ prop.cabins|default:"—" }}</td>
-                    <td>{{ prop.meeting_rooms|default:"—" }}</td>
-                    <td>{{ prop.private_washroom|default:"0" }}</td>
-                    <td>{{ prop.public_washroom|default:"0" }}</td>
-                    <td>{{ prop.get_flooring_type_display|default:"—" }}</td>
+                <td>{{ prop.builtup_area }}</td>
+                <td>{{ prop.carpet_area|default:"—" }}</td>
 
-                    <!-- Nearby -->
-                    <td>{{ prop.metro_station|default:"—" }}</td>
-                    <td>{{ prop.bus_stop|default:"—" }}</td>
-                    <td>{{ prop.restaurants|default:"—" }}</td>
-                    <td>{{ prop.banks|default:"—" }}</td>
+                <td>₹{{ prop.expected_rent }}</td>
+                <td>₹{{ prop.security_deposit|default:"—" }}</td>
+                <td>₹{{ prop.maintenance_charges|default:"—" }}</td>
 
-                    <!-- Amenities -->
-                    <td>{% if prop.parking %}<span style="color:green;">✔</span>{% else %}<span style="color:red;">✘</span>{% endif %}</td>
-                    <td>{% if prop.security %}<span style="color:green;">✔</span>{% else %}<span style="color:red;">✘</span>{% endif %}</td>
-                    <td>{% if prop.ac %}<span style="color:green;">✔</span>{% else %}<span style="color:red;">✘</span>{% endif %}</td>
-                    <td>{% if prop.power_backup %}<span style="color:green;">✔</span>{% else %}<span style="color:red;">✘</span>{% endif %}</td>
-                    <td>{% if prop.cafeteria %}<span style="color:green;">✔</span>{% else %}<span style="color:red;">✘</span>{% endif %}</td>
-                    <td>{% if prop.conference_room %}<span style="color:green;">✔</span>{% else %}<span style="color:red;">✘</span>{% endif %}</td>
-                    <td>{% if prop.fire_safety %}<span style="color:green;">✔</span>{% else %}<span style="color:red;">✘</span>{% endif %}</td>
-                    <td>{% if prop.cctv %}<span style="color:green;">✔</span>{% else %}<span style="color:red;">✘</span>{% endif %}</td>
+                <td>
+                    {% if prop.negotiable %}Yes{% else %}No{% endif %}
+                </td>
 
-                    <!-- Owner -->
-                    <td>{{ prop.owner_name|default:"—" }}</td>
-                    <td>{{ prop.contact_number|default:"—" }}</td>
-                    <td>{{ prop.email|default:"—" }}</td>
-                    <td>{{ prop.alternate_contact|default:"—" }}</td>
+                <td>
+                    {{ prop.brokerage|default:"—" }} / {{ prop.brokerage_percentage|default:"—" }}%
+                </td>
 
-                    <!-- Uploaded By -->
-                    <td>{{ prop.uploaded_by_name|default:"—" }}</td>
-                    <td>{{ prop.uploaded_by_email|default:"—" }}</td>
-                    <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
-                    <td>{{ prop.uploaded_by_role|default:"—" }}</td>
+                <td>{% if prop.dg_ups_included %}✔{% else %}✘{% endif %}</td>
+                <td>{% if prop.electricity_included %}✔{% else %}✘{% endif %}</td>
+                <td>{% if prop.water_included %}✔{% else %}✘{% endif %}</td>
 
-                    <!-- Created At -->
-                    <td>{{ prop.created_at|date:"d M Y, h:i A"|default:"—" }}</td>
+                <td>{{ prop.lockin_period|default:"—" }} months</td>
+                <td>{{ prop.rent_increase|default:"—" }}%</td>
 
-                    <!-- Actions -->
-                    <td>
-                        <div class="action-buttons">
-                            <button class="btn-action btn-view" title="View"
-                                    onclick="window.location.href='{% url 'commercial_view' prop.id %}'">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn-action btn-edit" title="Edit"
-                                    onclick="window.location.href='{% url 'commercial_edit' prop.id %}'">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn-action btn-delete" title="Delete"
-                                    onclick="deleteCommercial({{ prop.id }})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
+                <td>{{ prop.total_floors|default:"—" }}</td>
+                <td>{{ prop.your_floor|default:"—" }}</td>
 
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="65" style="text-align:center; padding:40px; color:#888;">
-                        <i class="fas fa-inbox" style="font-size:2rem; display:block; margin-bottom:8px;"></i>
-                        No commercial properties found.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                <td>{{ prop.min_seats|default:"—" }} - {{ prop.max_seats|default:"—" }}</td>
+                <td>{{ prop.cabins|default:"—" }}</td>
+                <td>{{ prop.meeting_rooms|default:"—" }}</td>
+
+                <td>{{ prop.private_washroom }}/{{ prop.public_washroom }}</td>
+                <td>{{ prop.flooring_type|default:"—" }}</td>
+
+                <!-- JSON Fields -->
+                <td>
+                    {% if prop.amenities %}
+                        {{ prop.amenities|join:", " }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if prop.nearby_facilities %}
+                        {{ prop.nearby_facilities|join:", " }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+
+                <td>{{ prop.owner_name }}</td>
+                <td>{{ prop.contact_number }}</td>
+                <td>{{ prop.email }}</td>
+
+                <td>
+                    {{ prop.uploaded_by_name|default:"—" }}
+                </td>
+
+                <td>{{ prop.created_at|date:"d M Y" }}</td>
+
+                <td>
+                    <a class="btn-action btn-view" title="View"
+   href="{% url 'commercial_view' prop.id %}">
+    <i class="fas fa-eye"></i>
+</a>
+
+<a class="btn-action btn-edit" title="Edit"
+   href="{% url 'commercial_edit' prop.id %}">
+    <i class="fas fa-edit"></i>
+</a>
+
+<a class="btn-action btn-delete" title="Delete"
+   href="javascript:void(0);" onclick="deleteCommercial({{ prop.id }})">
+    <i class="fas fa-trash"></i>
+</a>
+                </td>
+
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="40" style="text-align:center;">No properties found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+
+    </table>
+</div>
 
     <!-- Pagination -->
     {% if page_obj.paginator.num_pages > 1 %}
@@ -501,7 +448,7 @@
                             Fill in the template and re-upload. Do not change column headers.
                         </p>
                     </div>
-                    <a href="{% url 'download_commercial_template' %}"
+                    <a href="{% url 'download_commercial_rental__template' %}"
                        style="padding:7px 16px; background:#DC2626; color:white; border-radius:6px;
                               text-decoration:none; font-size:12px; font-weight:600; white-space:nowrap;">
                         <i class="fas fa-download"></i> Download Template
@@ -740,6 +687,67 @@
         });
     }
 
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const ctx = document.getElementById('propertyPieChart');
+
+new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: ['Residential', 'Commercial', 'PG'],
+        datasets: [{
+            data: [32, 12, 4],
+            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b']
+        }]
+    }
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // 1. Monthly Rental Income (Bar Chart)
+    new Chart(document.getElementById('rentalIncomeChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr'],
+            datasets: [{
+                label: 'Rent',
+                data: [50000, 60000, 55000, 70000],
+                backgroundColor: '#3b82f6'
+            }]
+        }
+    });
+
+    // 2. Occupancy (Doughnut Chart)
+    new Chart(document.getElementById('occupancyDoughnutChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Occupied', 'Vacant'],
+            datasets: [{
+                data: [80, 20],
+                backgroundColor: ['#10b981', '#ef4444']
+            }]
+        }
+    });
+
+    // 3. Rent Range (Bar Chart)
+    new Chart(document.getElementById('rentRangeChart'), {
+        type: 'bar',
+        data: {
+            labels: ['0-10k', '10-25k', '25k+'],
+            datasets: [{
+                label: 'Properties',
+                data: [10, 20, 5],
+                backgroundColor: '#f59e0b'
+            }]
+        }
+    });
+
+});
 </script>
 </body>
 </html>

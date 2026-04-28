@@ -86,7 +86,12 @@ urlpatterns = [
 
      path('residential_resale_list',views.residential_resale_list,name="residential_resale_list"),
      path('commercial_resale_list',views.commercial_resale_list,name="commercial_resale_list"),
+
      path('plot_resale_list',views.plot_resale_list,name="plot_resale_list"),
+
+
+
+
      path('industrial_resale_list',views.industrial_resale_list,name="industrial_resale_list"),
      path('agricultural_resale_list',views.agricultural_resale_list,name="agricultural_resale_list"),
 
@@ -353,9 +358,9 @@ urlpatterns = [
    
    
     path('Admin_App/commercial/import-excel/', views.import_commercial_excel, name='import_commercial_excel'),
-    path('Admin_App/commercial/download-template/', views.download_commercial_template, name='download_commercial_template'),
+    path('Admin_App/commercial/download-template/', views.download_commercial_rental__template, name='download_commercial_rental__template'),
     
-   # path('commercial/list/',           views.commercial_list,   name='commercial_list'),
+    path('commercial/list/',           views.commercial_list,   name='commercial_list'),
     path('commercial/view/<int:pk>/',  views.commercial_view,   name='commercial_view'),
     path('commercial/edit/<int:pk>/',  views.commercial_edit,   name='commercial_edit'),
     path('commercial/delete/<int:pk>/',views.commercial_delete, name='commercial_delete'),
@@ -366,6 +371,11 @@ urlpatterns = [
     path('Admin_App/pg/download-template/',  views.download_pg_template,  name='download_pg_template'),
     
     path('Admin_App/pg/delete/<int:pk>/', views.pg_delete, name='pg_delete'),
+
+
+   
+    #path('Admin_App/pg/view/<int:pk>/', views.pg_view, name='pg_view'),
+    path('Admin_App/pg/edit/<int:pk>/', views.pg_edit, name='pg_edit'),
     
     
       ####################Start Urls Section For Resindential Resale Property #######################################
@@ -376,6 +386,7 @@ urlpatterns = [
   #  path('resale_residential_list',            views.resale_residential_list,   name='resale_residential_list'),
     path('resale_residential_view/<int:pk>/',   views.resale_residential_view,   name='resale_residential_view'),
     path('resale_residential_delete/<int:pk>/', views.resale_residential_delete, name='resale_residential_delete'),
+    path('resale-residential/edit/<int:id>/', views.resale_residential_edit, name='resale_residential_edit'),
     
     
     # Excel Import & Sample Download
@@ -401,7 +412,55 @@ urlpatterns = [
      path('commercial_sample_excel',           views.download_commercial_sample_excel,   name='download_commercial_sample_excel'),
     # path('commercial/view/<int:prop_id>/',     views.view_commercial_property,           name='view_commercial_property'),
     # path('commercial/edit/<int:prop_id>/',     views.edit_commercial_property,           name='edit_commercial_property'),
-# ]
+
+
+#######################START URL SECTION RESALE PLOT LISTING###############
+
+
+
+
+    path('plot-sale/add/', views.plot_sale_add, name='plot_sale_add'),
+   
+    path('plot-sale/edit/<int:id>/', views.plot_sale_edit, name='plot_sale_edit'),
+
+
+    path('plot-resale/download-template/', views.download_plot_resale_template, name='download_plot_resale_template'),
+    path('plot-resale/import/', views.import_plot_resale_excel, name='import_plot_resale_excel'),
+
+
+    path('plot-resale/view/<int:id>/', views.plot_sale_view, name='plot_sale_view'),
+    path('plot-resale/delete/<int:id>/', views.plot_sale_delete, name='plot_sale_delete'),
+
+
+
+#######################END URL SECTION RESALE PLOT LISTING###############
+
+
+##################START URL SECTION RESALE INDUSTRIAL LISTING###########################
+
+
+
+    path('industrial-resale/add/', views.industrial_resale_add, name='industrial_resale_add'),
+    
+    # URL for Editing Industrial Resale
+    path('industrial-resale/edit/<int:id>/', views.industrial_resale_edit, name='industrial_resale_edit'),
+
+    
+    path('industrial-resale/view/<int:id>/', views.industrial_resale_view, name='industrial_resale_view'),
+
+
+
+    path('industrial-resale/delete/<int:id>/', views.industrial_resale_delete, name='industrial_resale_delete'),
+
+
+  
+    # ... your existing urls ...
+    path('industrial-resale/download-template/', views.download_industrial_resale_template, name='download_industrial_resale_template'),
+    path('industrial-resale/import/', views.import_industrial_resale_excel, name='import_industrial_resale_excel'),
+
+
+################END URL SECTION RESALE INDUSTRIAL LISTING##################
+
     
 ]
 

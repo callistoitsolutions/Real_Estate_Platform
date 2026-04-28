@@ -1,0 +1,124 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --topbar-height: 70px;
+    }
+    body { font-family: 'Poppins', sans-serif; background: #f5f7fa; min-height: 100vh; }
+    .main-content { padding: 30px; margin-top: var(--topbar-height); max-width: 1400px; margin-left: auto; margin-right: auto; }
+    
+    .view-card { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 30px; }
+    .view-header { background: var(--primary-gradient); color: white; padding: 25px 30px; display: flex; justify-content: space-between; align-items: center; }
+    .view-header h2 { margin: 0; font-size: 1.5rem; font-weight: 700; }
+    
+    .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 30px; }
+    .detail-item { padding: 15px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
+    .detail-label { font-size: 0.75rem; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 5px; }
+    .detail-value { font-size: 1rem; color: #2d3748; font-weight: 600; word-break: break-word; }
+    
+    .section-title { font-size: 1.1rem; font-weight: 700; color: #2d3748; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin: 0 30px 15px 30px; }
+    
+    /* Image Gallery */
+    .gallery-container { padding: 0 30px 30px 30px; display: flex; flex-wrap: wrap; gap: 15px; }
+    .gallery-img { width: 150px; height: 150px; object-fit: cover; border-radius: 12px; border: 2px solid #e2e8f0; transition: transform 0.3s; cursor: pointer; }
+    .gallery-img:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    
+    .document-links { padding: 0 30px 30px 30px; display: flex; gap: 15px; }
+    .doc-btn { display: inline-flex; align-items: center; gap: 8px; background: #edf2f7; color: #4a5568; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s; }
+    .doc-btn:hover { background: #e2e8f0; color: #2d3748; }
+</style>
+
+<div class="main-content">
+    <div class="mb-3">
+        <a href="{% url 'plot_resale_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Listings</a>
+    </div>
+
+    <div class="view-card">
+        <div class="view-header">
+            <div>
+                <h2>{{ prop.plot_title|default:"Unnamed Plot Project" }}</h2>
+                <div class="mt-1 opacity-75"><i class="fas fa-map-marker-alt"></i> {{ prop.plot_locality }}, {{ prop.plot_city }}</div>
+            </div>
+            <div class="text-end">
+                <div style="font-size: 0.9rem; opacity: 0.8;">Expected Price</div>
+                <div style="font-size: 1.8rem; font-weight: 800;">₹ {{ prop.plot_price }}</div>
+            </div>
+        </div>
+
+        <div class="section-title mt-4"><i class="fas fa-info-circle text-primary"></i> Plot Specifications</div>
+        <div class="details-grid">
+            <div class="detail-item"><div class="detail-label">Plot Area</div><div class="detail-value">{{ prop.plot_area }} sq.ft</div></div>
+            <div class="detail-item"><div class="detail-label">Plot Type</div><div class="detail-value text-capitalize">{{ prop.resale_plot_type }}</div></div>
+            <div class="detail-item"><div class="detail-label">Road Facing</div><div class="detail-value text-capitalize">{{ prop.plot_road_facing|default:"N/A" }}</div></div>
+            <div class="detail-item"><div class="detail-label">Corner Plot</div><div class="detail-value">{% if prop.plot_corner %}Yes{% else %}No{% endif %}</div></div>
+            <div class="detail-item"><div class="detail-label">Fencing Done</div><div class="detail-value">{% if prop.plot_fencing %}Yes{% else %}No{% endif %}</div></div>
+            <div class="detail-item"><div class="detail-label">Available From</div><div class="detail-value">{{ prop.available_from|date:"d M Y"|default:"Immediate" }}</div></div>
+            <div class="detail-item"><div class="detail-label">Authority</div><div class="detail-value">{{ prop.plot_authority|default:"N/A" }}</div></div>
+        </div>
+
+        <div class="section-title"><i class="fas fa-gavel text-primary"></i> Pricing & Legal</div>
+        <div class="details-grid">
+            <div class="detail-item"><div class="detail-label">Ownership Type</div><div class="detail-value text-capitalize">{{ prop.plot_ownership|default:"N/A" }}</div></div>
+            <div class="detail-item"><div class="detail-label">Brokerage</div><div class="detail-value">{{ prop.brokerage|default:"N/A" }} {% if prop.brokerage == 'Yes' %}({{ prop.brokerage_percentage }}){% endif %}</div></div>
+            <div class="detail-item"><div class="detail-label">Loan on Property</div><div class="detail-value">{% if prop.plot_loan %}Yes (₹{{ prop.plot_loan_amount }}){% else %}No{% endif %}</div></div>
+        </div>
+
+        <div class="section-title"><i class="fas fa-address-book text-primary"></i> Contact & Location Info</div>
+        <div class="details-grid">
+            <div class="detail-item"><div class="detail-label">Complete Address</div><div class="detail-value">{{ prop.plot_address|default:"N/A" }}</div></div>
+            <div class="detail-item"><div class="detail-label">Owner Name</div><div class="detail-value">{{ prop.plot_owner_name|default:"N/A" }}</div></div>
+            <div class="detail-item"><div class="detail-label">Contact Number</div><div class="detail-value">{{ prop.plot_owner_contact|default:"N/A" }}</div></div>
+            <div class="detail-item"><div class="detail-label">Email Address</div><div class="detail-value">{{ prop.plot_owner_email|default:"N/A" }}</div></div>
+        </div>
+        
+        <div class="section-title"><i class="fas fa-server text-primary"></i> System Upload Details</div>
+        <div class="details-grid" style="background: #f8fafc; margin: 0 30px 30px 30px; border-radius: 12px;">
+            <div class="detail-item border-0"><div class="detail-label">Uploaded By</div><div class="detail-value">{{ prop.uploaded_by_name|default:"N/A" }}</div></div>
+            <div class="detail-item border-0"><div class="detail-label">Role</div><div class="detail-value">{{ prop.uploaded_by_role|default:"N/A" }}</div></div>
+            <div class="detail-item border-0"><div class="detail-label">Upload Date</div><div class="detail-value">{{ prop.created_at|date:"d M Y, h:i A" }}</div></div>
+            <div class="detail-item border-0"><div class="detail-label">Last Updated</div><div class="detail-value">{{ prop.updated_at|date:"d M Y, h:i A" }}</div></div>
+        </div>
+    </div>
+
+    <div class="view-card">
+        <div class="view-header" style="background: #2d3748;">
+            <h2><i class="fas fa-images"></i> Media & Documents</h2>
+        </div>
+        
+        <div class="mt-4">
+            <div class="section-title border-0">Property Images ({{ prop.images.count }})</div>
+            <div class="gallery-container">
+                {% for img in prop.images.all %}
+                    <a href="{{ img.image.url }}" target="_blank">
+                        <img src="{{ img.image.url }}" class="gallery-img" alt="Plot Image">
+                    </a>
+                {% empty %}
+                    <p class="text-muted w-100"><i class="fas fa-info-circle"></i> No images uploaded for this property.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="mt-2">
+            <div class="section-title border-0">Uploaded Documents</div>
+            <div class="document-links">
+                {% if prop.encumbrance_cert %}
+                    <a href="{{ prop.encumbrance_cert.url }}" target="_blank" class="doc-btn">
+                        <i class="fas fa-file-pdf text-danger"></i> View Encumbrance Certificate
+                    </a>
+                {% endif %}
+                
+                {% if prop.social_video %}
+                    <a href="{{ prop.social_video.url }}" target="_blank" class="doc-btn">
+                        <i class="fas fa-video text-primary"></i> View Social Media Video
+                    </a>
+                {% endif %}
+
+                {% if not prop.encumbrance_cert and not prop.social_video %}
+                    <p class="text-muted"><i class="fas fa-info-circle"></i> No documents or videos uploaded.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

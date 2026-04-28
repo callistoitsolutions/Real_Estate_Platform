@@ -1262,14 +1262,14 @@
                   <div class="col-md-6 mb-3">
                     <div class="form-group">
                       <label class="form-label">Area/Locality <span class="required">*</span></label>
-                      <input type="text" class="form-control" name="locality" id="locality" placeholder="Enter area/locality" required>
+                      <input type="text" class="form-control"  name="area_locality" id="locality" placeholder="Enter area/locality" required>
                     </div>
                   </div>
 
                   <div class="col-md-12 mb-3">
                     <div class="form-group">
                       <label class="form-label">Property Address <span class="required">*</span></label>
-                      <textarea class="form-control" name="address" rows="3" placeholder="Enter complete address" required></textarea>
+                      <textarea class="form-control" name="property_address" rows="3" placeholder="Enter complete address" required></textarea>
                     </div>
                   </div>
 
@@ -1303,7 +1303,7 @@
                   <div class="col-md-6 mb-3">
                     <div class="form-group">
                       <label class="form-label">Age of Property <span class="required">*</span></label>
-                      <select class="form-select" name="property_age" required>
+                      <select class="form-select" name="age_of_property" required>
                         <option value="">Select</option>
                         <option value="0-1">0-1 Year</option>
                         <option value="1-3">1-3 Years</option>
@@ -1386,7 +1386,7 @@
                   <div class="col-md-6 mb-3">
                     <div class="form-group">
                       <label class="form-label">Built-up Area (sq.ft) <span class="required">*</span></label>
-                      <input type="number" class="form-control" name="built_up_area" id="builtArea" min="100" required placeholder="Enter Built-up Area (sq.ft)">
+                      <input type="number" class="form-control" name="builtup_area" id="builtArea" min="100" required placeholder="Enter Built-up Area (sq.ft)">
                     </div>
                   </div>
 
@@ -1400,7 +1400,7 @@
                   <div class="col-md-4 mb-3">
                     <div class="form-group">
                       <label class="form-label">Expected Rent (₹/month) <span class="required">*</span></label>
-                      <input type="number" class="form-control" name="monthly_rent" id="monthlyRent" placeholder="Enter amount" required>
+                      <input type="number" class="form-control" name="expected_rent"  id="monthlyRent" placeholder="Enter amount" required>
                     </div>
                   </div>
 
@@ -1550,22 +1550,27 @@
                   <div class="col-md-4 mb-3">
                     <div class="form-group">
                       <label class="form-label">Passenger Lifts</label>
-                      <div class="number-stepper">
-                        <button type="button" class="stepper-btn" onclick="updateStepper('passenger-lifts',-1)">−</button>
-                        <span class="stepper-value" id="passenger-lifts">0</span>
-                        <button type="button" class="stepper-btn" onclick="updateStepper('passenger-lifts',1)">+</button>
-                      </div>
+                     <div class="number-stepper">
+  <button type="button" onclick="updateStepper('passenger_lifts', -1)">−</button>
+  <span id="passenger_lifts_display">0</span>
+  <button type="button" onclick="updateStepper('passenger_lifts', 1)">+</button>
+
+  <!-- IMPORTANT -->
+  <input type="hidden" name="passenger_lifts" id="passenger_lifts" value="0">
+</div>
                     </div>
                   </div>
 
                   <div class="col-md-4 mb-3">
                     <div class="form-group">
                       <label class="form-label">Service Lifts</label>
-                      <div class="number-stepper">
-                        <button type="button" class="stepper-btn" onclick="updateStepper('service-lifts',-1)">−</button>
-                        <span class="stepper-value" id="service-lifts">0</span>
-                        <button type="button" class="stepper-btn" onclick="updateStepper('service-lifts',1)">+</button>
-                      </div>
+                     <div class="number-stepper">
+  <button type="button" onclick="updateStepper('service_lifts', -1)">−</button>
+  <span id="service_lifts_display">0</span>
+  <button type="button" onclick="updateStepper('service_lifts', 1)">+</button>
+
+  <input type="hidden" name="service_lifts" id="service_lifts" value="0">
+</div>
                     </div>
                   </div>
 
@@ -1573,10 +1578,12 @@
                     <div class="form-group">
                       <label class="form-label">Private Parking</label>
                       <div class="number-stepper">
-                        <button type="button" class="stepper-btn" onclick="updateStepper('private-parking',-1)">−</button>
-                        <span class="stepper-value" id="private-parking">0</span>
-                        <button type="button" class="stepper-btn" onclick="updateStepper('private-parking',1)">+</button>
-                      </div>
+  <button type="button" onclick="updateStepper('private_parking', -1)">−</button>
+  <span id="private_parking_display">0</span>
+  <button type="button" onclick="updateStepper('private_parking', 1)">+</button>
+
+  <input type="hidden" name="private_parking" id="private_parking" value="0">
+</div>
                     </div>
                   </div>
 
@@ -1611,22 +1618,26 @@
                   <div class="col-md-6 mb-3">
                     <div class="form-group">
                       <label class="form-label">Private Washroom</label>
-                      <div class="number-stepper">
-                        <button type="button" class="stepper-btn" onclick="updateStepper('private-washroom',-1)">−</button>
-                        <span class="stepper-value" id="private-washroom">0</span>
-                        <button type="button" class="stepper-btn" onclick="updateStepper('private-washroom',1)">+</button>
-                      </div>
+                     <div class="number-stepper">
+  <button type="button" onclick="updateStepper('private_washroom', -1)">−</button>
+  <span id="private_washroom_display">0</span>
+  <button type="button" onclick="updateStepper('private_washroom', 1)">+</button>
+
+  <input type="hidden" name="private_washroom" id="private_washroom" value="0">
+</div>
                     </div>
                   </div>
 
                   <div class="col-md-6 mb-3">
                     <div class="form-group">
                       <label class="form-label">Public Washroom</label>
-                      <div class="number-stepper">
-                        <button type="button" class="stepper-btn" onclick="updateStepper('public-washroom',-1)">−</button>
-                        <span class="stepper-value" id="public-washroom">0</span>
-                        <button type="button" class="stepper-btn" onclick="updateStepper('public-washroom',1)">+</button>
-                      </div>
+                     <div class="number-stepper">
+  <button type="button" onclick="updateStepper('public_washroom', -1)">−</button>
+  <span id="public_washroom_display">0</span>
+  <button type="button" onclick="updateStepper('public_washroom', 1)">+</button>
+
+  <input type="hidden" name="public_washroom" id="public_washroom" value="0">
+</div>
                     </div>
                   </div>
 
@@ -1749,42 +1760,91 @@
                 Property Images
               </div>
               <div class="section-body">
-                <div class="row">
-                  <div class="col-md-12 mb-3">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fa-solid fa-camera"></i> Upload Property Images <span class="required">*</span>
-                      </label>
-                      <div class="image-upload-area" id="uploadArea">
-                        <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display: none;">
-                        <div class="upload-icon">
-                          <i class="fas fa-cloud-upload-alt" style="font-size:3rem;color:#667eea;"></i>
-                        </div>
-                        <div class="upload-text">Click or Drag Images Here</div>
-                        <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG)</div>
-                      </div>
-                      <div class="image-preview" id="imagePreview"></div>
-                    </div>
-                  </div>
+               <div class="row">
 
-                  <div class="col-md-6 mb-3">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fa-solid fa-camera"></i> Upload Floor Plan
-                      </label>
-                      <input type="file" class="form-control" name="floor_plan" accept="image/*">
-                    </div>
-                  </div>
+  <!-- PROPERTY IMAGES -->
+  <div class="col-md-12 mb-3">
+    <div class="form-group">
 
-                  <div class="col-md-6 mb-3">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fa-solid fa-video"></i> Upload Video
-                      </label>
-                      <input type="file" class="form-control" name="property_video" accept="video/*">
-                    </div>
-                  </div>
-                </div>
+      <label class="form-label">
+        <i class="fa-solid fa-camera"></i> Upload Property Images <span class="required">*</span>
+      </label>
+
+      <!-- UPLOAD BOX -->
+      <div class="image-upload-area" id="uploadArea" style="cursor:pointer; border:2px dashed #667eea; padding:30px; text-align:center; border-radius:10px; background:#f8f9ff;">
+
+        <input 
+          type="file" 
+          id="imageInput" 
+          name="property_images[]" 
+          multiple 
+          accept="image/jpeg, image/png" 
+          hidden
+          required
+        >
+
+        <div class="upload-icon">
+          <i class="fas fa-cloud-upload-alt" style="font-size:3rem;color:#667eea;"></i>
+        </div>
+
+        <div class="upload-text" style="font-weight:bold; margin-top:10px;">
+          Click or Drag Images Here
+        </div>
+
+        <div class="upload-subtext" style="font-size:13px; color:#666;">
+          Upload up to <b>10 images</b> (JPG, PNG • Max 5MB each)
+        </div>
+
+      </div>
+
+      <!-- PREVIEW -->
+      <div class="image-preview d-flex flex-wrap mt-3" id="imagePreview"></div>
+
+    </div>
+  </div>
+
+
+  <!-- FLOOR PLAN -->
+  <div class="col-md-6 mb-3">
+    <div class="form-group">
+
+      <label class="form-label">
+        <i class="fa-solid fa-image"></i> Upload Floor Plan
+      </label>
+
+      <input 
+        type="file" 
+        class="form-control" 
+        name="floor_plan" 
+        accept="image/jpeg, image/png"
+      >
+
+      <small class="text-muted">Optional • Max 5MB</small>
+
+    </div>
+  </div>
+
+
+  <!-- VIDEO -->
+  <div class="col-md-6 mb-3">
+    <div class="form-group">
+
+      <label class="form-label">
+        <i class="fa-solid fa-video"></i> Upload Property Video
+      </label>
+
+      <input 
+        type="file" 
+        class="form-control" 
+        name="video"   
+        accept="video/mp4, video/webm">
+
+      <small class="text-muted">Optional • Max 20MB</small>
+
+    </div>
+  </div>
+
+</div>
               </div>
             </div>
 
@@ -1808,7 +1868,7 @@
                       <label class="form-label">
                         <i class="fas fa-phone"></i> Contact Number <span class="required-star">*</span>
                       </label>
-                      <input type="tel" class="form-control" name="contact_number" placeholder="e.g., +91 9876543210" required>
+                      <input  class="form-control" type="tel" name="contact_number" pattern="[0-9]{10}" placeholder="e.g., +91 9876543210" required>
                     </div>
                   </div>
 
@@ -2079,11 +2139,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // NUMBER STEPPER
-function updateStepper(id, change) {
-  const elem = document.getElementById(id);
-  let val = parseInt(elem.textContent) || 0;
-  val = Math.max(0, val + change);
-  elem.textContent = val;
+function updateStepper(field, change) {
+  const hiddenInput = document.getElementById(field);
+  const display = document.getElementById(field + "_display");
+
+  let value = parseInt(hiddenInput.value) || 0;
+  value = Math.max(0, value + change);
+
+  hiddenInput.value = value;
+  display.textContent = value;
 }
 
 // AMENITY COUNTER
@@ -2263,6 +2327,170 @@ window.addEventListener('resize', function() {
     document.body.style.overflow = '';
   }
 });
+</script>
+
+<script>
+
+
+// =======================================
+// IMAGE UPLOAD (DRAG + PREVIEW + VALIDATION)
+// =======================================
+
+(function () {
+
+    const uploadArea = document.getElementById("uploadArea");
+    const imageInput = document.getElementById("imageInput");
+    const preview = document.getElementById("imagePreview");
+
+    if (!uploadArea || !imageInput || !preview) return;
+
+    let selectedFiles = [];
+
+    uploadArea.addEventListener("click", () => imageInput.click());
+
+    uploadArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadArea.classList.add("dragover");
+    });
+
+    uploadArea.addEventListener("dragleave", () => {
+        uploadArea.classList.remove("dragover");
+    });
+
+    uploadArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove("dragover");
+        handleImages(e.dataTransfer.files);
+    });
+
+    imageInput.addEventListener("change", function () {
+        handleImages(this.files);
+    });
+
+    function handleImages(files) {
+
+        preview.innerHTML = "";
+        selectedFiles = [];
+
+        if (files.length > 10) {
+            Swal.fire("Limit Exceeded", "Maximum 10 images allowed", "warning");
+            imageInput.value = "";
+            return;
+        }
+
+        Array.from(files).forEach(file => {
+
+            if (!["image/jpeg", "image/png"].includes(file.type)) {
+                Swal.fire("Invalid File", "Only JPG/PNG allowed", "error");
+                imageInput.value = "";
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire("File Too Large", "Each image must be under 5MB", "error");
+                imageInput.value = "";
+                return;
+            }
+
+            selectedFiles.push(file);
+
+            let reader = new FileReader();
+
+            reader.onload = function (e) {
+                let img = document.createElement("img");
+                img.src = e.target.result;
+                img.style.width = "100px";
+                img.style.margin = "5px";
+                img.style.borderRadius = "6px";
+                preview.appendChild(img);
+            };
+
+            reader.readAsDataURL(file);
+        });
+    }
+
+})();
+
+
+// =======================================
+// GET CSRF TOKEN
+// =======================================
+
+function getCSRFToken() {
+    let name = "csrftoken";
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== "") {
+        let cookies = document.cookie.split(";");
+
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+// =======================================
+// FORM SUBMIT (AJAX + SWEET ALERT)
+// =======================================
+
+(function () {
+
+    const form = document.getElementById("commercialForm");
+
+    if (!form) return;
+
+    form.addEventListener("submit", function (e) {
+
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRFToken": getCSRFToken()
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response error");
+            }
+            return response.json();
+        })
+        .then(data => {
+
+            if (data.status === "success") {
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: data.message
+                }).then(() => {
+                    form.reset();
+                    window.location.reload();
+                });
+
+            } else {
+                Swal.fire("Error", data.message || "Something went wrong", "error");
+            }
+
+        })
+        .catch(error => {
+            console.error(error);
+            Swal.fire("Error", "Server error or invalid response", "error");
+        });
+
+    });
+
+})();
 </script>
 
 </body>

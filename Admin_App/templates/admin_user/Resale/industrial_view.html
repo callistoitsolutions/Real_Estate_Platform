@@ -1,0 +1,184 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --topbar-height: 70px;
+        --sidebar-width: 250px; /* Adjust this to match your actual sidebar width */
+    }
+    
+    body { 
+        font-family: 'Poppins', sans-serif; 
+        background: #f5f7fa; 
+        min-height: 100vh; 
+        overflow-x: hidden;
+    }
+    
+    /* Layout Fix: Ensure content respects the sidebar and topbar */
+    .main-content { 
+        padding: 30px; 
+        margin-top: var(--topbar-height); 
+        margin-left: var(--sidebar-width); 
+        transition: all 0.3s ease; /* Smooth transition if sidebar collapses */
+    }
+
+    /* Container for the cards to prevent them from stretching too wide on massive screens */
+    .content-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .view-card { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 30px; }
+    .view-header { background: var(--primary-gradient); color: white; padding: 25px 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+    .view-header h2 { margin: 0; font-size: 1.5rem; font-weight: 700; text-transform: capitalize; }
+    
+    .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 30px; }
+    .detail-item { padding: 15px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
+    .detail-label { font-size: 0.75rem; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 5px; }
+    .detail-value { font-size: 1rem; color: #2d3748; font-weight: 600; word-break: break-word; }
+    
+    .section-title { font-size: 1.1rem; font-weight: 700; color: #2d3748; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin: 0 30px 15px 30px; }
+    
+    .description-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 0 30px 30px 30px; color: #4a5568; line-height: 1.6; }
+    
+    /* Image Gallery */
+    .gallery-container { padding: 0 30px 30px 30px; display: flex; flex-wrap: wrap; gap: 15px; }
+    .gallery-img { width: 150px; height: 150px; object-fit: cover; border-radius: 12px; border: 2px solid #e2e8f0; transition: transform 0.3s; cursor: pointer; }
+    .gallery-img:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    
+    .document-links { padding: 0 30px 30px 30px; display: flex; gap: 15px; flex-wrap: wrap; }
+    .doc-btn { display: inline-flex; align-items: center; gap: 8px; background: #edf2f7; color: #4a5568; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s; border: 1px solid #e2e8f0; }
+    .doc-btn:hover { background: #e2e8f0; color: #2d3748; }
+
+    /* Responsive adjustments for mobile/tablets where sidebar might be hidden */
+    @media (max-width: 992px) {
+        .main-content {
+            margin-left: 0;
+        }
+    }
+</style>
+
+<div class="main-content">
+    <div class="content-container">
+        
+        <div class="mb-4">
+            <a href="{% url 'industrial_resale_list' %}" class="btn btn-secondary" style="border-radius: 8px; padding: 8px 20px; font-weight: 500;">
+                <i class="fas fa-arrow-left me-2"></i> Back to Industrial Listings
+            </a>
+        </div>
+
+        <div class="view-card">
+            <div class="view-header">
+                <div>
+                    <h2><i class="fas fa-industry me-2"></i> {{ prop.property_type}}</h2>
+                    <div class="mt-2" style="font-size: 0.95rem; opacity: 0.9;">
+                        <i class="fas fa-map-marker-alt text-warning me-1"></i> {{ prop.locality|default:"Locality Not Set" }}, {{ prop.city|default:"City Not Set" }}
+                    </div>
+                </div>
+                <div class="text-md-end text-start mt-3 mt-md-0">
+                    <div style="font-size: 0.85rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Expected Price</div>
+                    <div style="font-size: 2rem; font-weight: 800; line-height: 1;">₹ {{ prop.expected_price }}</div>
+                </div>
+            </div>
+
+            <div class="section-title mt-4 pt-2"><i class="fas fa-cogs text-primary me-2"></i> Industrial Specifications</div>
+            <div class="details-grid">
+                <div class="detail-item"><div class="detail-label">Land Area</div><div class="detail-value">{{ prop.land_area }} sq.ft/acres</div></div>
+                <div class="detail-item"><div class="detail-label">Available From</div><div class="detail-value">{{ prop.available_from|date:"d M Y"|default:"Immediate" }}</div></div>
+                <div class="detail-item"><div class="detail-label">Power Supply</div><div class="detail-value">{% if prop.power_supply %}Yes ({{ prop.kva_capacity|default:"N/A" }} KVA){% else %}No{% endif %}</div></div>
+                <div class="detail-item"><div class="detail-label">Water Supply</div><div class="detail-value text-capitalize">{{ prop.water_supply|default:"N/A" }}</div></div>
+                <div class="detail-item"><div class="detail-label">Heavy Machinery/Crane</div><div class="detail-value">{% if prop.crane_heavy_machinery %}Available{% else %}Not Available{% endif %}</div></div>
+                <div class="detail-item"><div class="detail-label">Road Connectivity</div><div class="detail-value text-capitalize">{{ prop.road_connectivity|default:"N/A" }}</div></div>
+                <div class="detail-item"><div class="detail-label">Worker Housing</div><div class="detail-value">{% if prop.worker_housing_nearby %}Available Nearby{% else %}Not Available{% endif %}</div></div>
+            </div>
+
+            <div class="section-title"><i class="fas fa-gavel text-primary me-2"></i> Legal & Commercials</div>
+            <div class="details-grid">
+                <div class="detail-item"><div class="detail-label">Ownership Type</div><div class="detail-value text-capitalize">{{ prop.ownership_type|default:"N/A" }}</div></div>
+                <div class="detail-item"><div class="detail-label">Sanctioning Authority</div><div class="detail-value">{{ prop.sanctioning_authority|default:"N/A" }}</div></div>
+                <div class="detail-item"><div class="detail-label">Brokerage</div><div class="detail-value">{{ prop.brokerage|default:"N/A" }} {% if prop.brokerage == 'Yes' %}({{ prop.brokerage_percentage }}{% if prop.manual_brokerage %} - {{ prop.manual_brokerage }}{% endif %}){% endif %}</div></div>
+                
+                <div class="detail-item"><div class="detail-label">Property Loan</div><div class="detail-value">{% if prop.has_loan %}Yes (₹{{ prop.loan_amount }}){% else %}No{% endif %}</div></div>
+                <div class="detail-item"><div class="detail-label">Tax Dues</div><div class="detail-value">{% if prop.tax_due %}Pending (₹{{ prop.tax_amount }}){% else %}Clear{% endif %}</div></div>
+                <div class="detail-item"><div class="detail-label">Tax Clearance Cert.</div><div class="detail-value">{% if prop.tax_clearance_cert %}Available{% else %}Not Available{% endif %}</div></div>
+                
+                <div class="detail-item"><div class="detail-label">Existing Tenants</div><div class="detail-value">{% if prop.existing_tenants %}Yes{% else %}No{% endif %}</div></div>
+                <div class="detail-item"><div class="detail-label">Legal Disputes</div><div class="detail-value">{% if prop.legal_dispute %}Yes{% else %}No{% endif %}</div></div>
+            </div>
+
+            {% if prop.existing_tenants or prop.legal_dispute %}
+            <div class="details-grid pt-0">
+                {% if prop.existing_tenants %}
+                <div class="detail-item" style="border-left: 4px solid #f59e0b;"><div class="detail-label text-warning">Tenant Details</div><div class="detail-value">{{ prop.tenant_details|default:"No details provided." }}</div></div>
+                {% endif %}
+                {% if prop.legal_dispute %}
+                <div class="detail-item" style="border-left: 4px solid #ef4444;"><div class="detail-label text-danger">Dispute Details</div><div class="detail-value">{{ prop.dispute_details|default:"No details provided." }}</div></div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="section-title"><i class="fas fa-align-left text-primary me-2"></i> Property Description</div>
+            <div class="description-box">
+                {{ prop.property_description|safe|default:"No detailed description provided." }}
+            </div>
+
+            <div class="section-title"><i class="fas fa-address-book text-primary me-2"></i> Contact & Location Info</div>
+            <div class="details-grid">
+                <div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-label">Complete Address</div><div class="detail-value">{{ prop.complete_address|default:"N/A" }}</div></div>
+                <div class="detail-item"><div class="detail-label">Owner Name</div><div class="detail-value">{{ prop.owner_name|default:"N/A" }}</div></div>
+                <div class="detail-item"><div class="detail-label">Contact Number</div><div class="detail-value">{{ prop.owner_contact|default:"N/A" }}</div></div>
+                <div class="detail-item"><div class="detail-label">Email Address</div><div class="detail-value">{{ prop.owner_email|default:"N/A" }}</div></div>
+                <div class="detail-item"><div class="detail-label">Residency Status</div><div class="detail-value text-capitalize">{{ prop.residency_status|default:"N/A" }}</div></div>
+            </div>
+            
+            <div class="section-title"><i class="fas fa-server text-primary me-2"></i> System Record Details</div>
+            <div class="details-grid" style="background: #f8fafc; margin: 0 30px 30px 30px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <div class="detail-item border-0 bg-transparent"><div class="detail-label">Uploaded By</div><div class="detail-value">{{ prop.uploaded_by_name|default:"N/A" }}</div></div>
+                <div class="detail-item border-0 bg-transparent"><div class="detail-label">Role</div><div class="detail-value">{{ prop.uploaded_by_role|default:"N/A" }}</div></div>
+                <div class="detail-item border-0 bg-transparent"><div class="detail-label">Upload Date</div><div class="detail-value">{{ prop.created_at|date:"d M Y, h:i A" }}</div></div>
+                <div class="detail-item border-0 bg-transparent"><div class="detail-label">Last Updated</div><div class="detail-value">{{ prop.updated_at|date:"d M Y, h:i A" }}</div></div>
+            </div>
+        </div>
+
+        <div class="view-card">
+            <div class="view-header" style="background: #2d3748;">
+                <h2><i class="fas fa-images text-warning me-2"></i> Media & Compliance Documents</h2>
+            </div>
+            
+            <div class="mt-4 pt-2">
+                <div class="section-title border-0">Property Images ({{ prop.images.count }})</div>
+                <div class="gallery-container">
+                    {% for img in prop.images.all %}
+                        <a href="{{ img.image.url }}" target="_blank">
+                            <img src="{{ img.image.url }}" class="gallery-img" alt="Industrial Image">
+                        </a>
+                    {% empty %}
+                        <div class="alert alert-light border w-100"><i class="fas fa-info-circle me-2"></i> No images uploaded for this property.</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mt-2">
+                <div class="section-title border-0">Compliance & Video Links</div>
+                <div class="document-links">
+                    {% if prop.compliance_docs %}
+                        <a href="{{ prop.compliance_docs.url }}" target="_blank" class="doc-btn">
+                            <i class="fas fa-file-pdf text-danger" style="font-size: 1.2rem;"></i> View Compliance Docs
+                        </a>
+                    {% endif %}
+                    
+                    {% if prop.social_video %}
+                        <a href="{{ prop.social_video.url }}" target="_blank" class="doc-btn">
+                            <i class="fas fa-video text-primary" style="font-size: 1.2rem;"></i> View Property Video
+                        </a>
+                    {% endif %}
+
+                    {% if not prop.compliance_docs and not prop.social_video %}
+                        <div class="alert alert-light border w-100"><i class="fas fa-info-circle me-2"></i> No external documents or videos uploaded.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div> </div> 

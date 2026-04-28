@@ -447,6 +447,12 @@
                                                 <i class="fas fa-eye"></i>
                                             </button>
                                         </a>
+
+                                        <a href="{% url 'resale_residential_edit' prop.pk %}">
+            <button class="btn-action btn-edit" title="Edit" style="color: #667eea; border-color: #667eea;">
+                <i class="fas fa-edit"></i>
+            </button>
+        </a>
                                         <button class="btn-action btn-delete" title="Delete"
                                             onclick="Delete_Property({{ prop.pk }})">
                                             <i class="fas fa-trash"></i>
