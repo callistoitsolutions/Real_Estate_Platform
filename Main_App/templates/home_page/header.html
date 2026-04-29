@@ -2,6 +2,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 <style>
 /* ============================================
    ISOLATED HEADER CSS (NO CONFLICTS)
@@ -180,9 +185,58 @@
         <a href="{% url 'post_property' %}" class="btn-nav-outline">
             <i class="bi bi-plus-lg"></i> Post Property FREE
         </a>
-        <a href="{% url 'login' %}" class="btn-nav-pr">
-            <i class="bi bi-box-arrow-in-right"></i> Login
-        </a>
+        {% if user_obj %}
+            <div class="dropdown d-inline-block">
+                <a href="#" class="btn-nav-pr dropdown-toggle text-decoration-none" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person"></i> Hello {{user_obj.user_name}}-{{user_obj.user_role}}
+                </a>
+    
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="loginDropdown" style="border-radius: 12px; min-width: 200px;">
+                    <li>
+                        {% if user_obj.user_role == "Landlord" %}
+                            <a class="dropdown-item py-2 fw-medium text-secondary" href="{% url 'landlord_dashboard' %}" target="_blank">
+                        {% elif user_obj.user_role == "Tenant" %}
+                            <a class="dropdown-item py-2 fw-medium text-secondary" href="{% url 'Tenant_App:tenant_Dashboard' %}" target="_blank">
+                        {% elif user_obj.user_role == "Buyer" %}
+                            <a class="dropdown-item py-2 fw-medium text-secondary" href="{% url 'Buyer_Dashboard' %}" target="_blank">
+                        {% elif user_obj.user_role == "Agent" %}
+                            <a class="dropdown-item py-2 fw-medium text-secondary" href="{% url 'agent_dashboard' %}" target="_blank">
+                        {% elif user_obj.user_role == "Agency/Builder" %}
+                            <a class="dropdown-item py-2 fw-medium text-secondary" href="{% url 'Agency_Dashboard' %}" target="_blank">
+                        {% elif user_obj.user_role == "Vendor" %}
+                            <a class="dropdown-item py-2 fw-medium text-secondary" href="{% url 'Vendors:vendors_Dashboard' %}" target="_blank">
+                        {% endif %}
+                            <i class="bi bi-send me-2 text-primary"></i> Access Dashboard
+                        </a>
+                    </li>
+
+                    <li>    
+                        <a class="dropdown-item py-2 fw-medium text-secondary" href="#" target="_blank">
+                         <i class="bi bi-heart me-2 text-primary"></i> Wishlist Properties
+                        </a>
+                    </li>
+
+                    <li>    
+                        <a class="dropdown-item py-2 fw-medium text-secondary" href="#" target="_blank">
+                         <i class="bi bi-search me-2 text-primary"></i> Searched Properties
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <button class="dropdown-item py-2 fw-medium text-secondary" onclick="User_Logout()">
+                            <i class="bi bi-door-closed me-2 text-primary"></i> Logout
+                        </button>
+                    </li>
+                    
+                </ul>
+            </div>
+
+        {% else %}
+
+            <a href="{% url 'login' %}" class="btn-nav-pr">
+                <i class="bi bi-box-arrow-in-right"></i> Login
+            </a>
+        {% endif %}
     </div>
 
     <button class="mobile-menu-btn" onclick="toggleHdrMenu(event)">
@@ -216,4 +270,62 @@ document.addEventListener('click', function(e) {
         menu.classList.remove('show');
     }
 });
+</script>
+
+{% comment %} Ajax Jquery and Javascript for user Logout {% endcomment %}
+
+<script>
+    function User_Logout() {
+        Swal.fire({
+            title: "LOGOUT",
+            text: "Are you sure you want to logout from the user panel?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444", 
+            cancelButtonColor: "#64748b",  
+            confirmButtonText: "Yes, Logout",
+            cancelButtonText: "No, Cancel",
+            allowOutsideClick: false
+        }).then((result) => {
+            
+            if (result.isConfirmed) {   
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'User_Logout' %}",
+                    data: {
+                        'user_id': '{{user_obj.id}}',
+                        'csrfmiddlewaretoken': '{{ csrf_token }}' // ✅ ADDED: This is required by Django to allow POST requests
+                    },
+                    success: function (response) {
+                        if (response.status == '1') {
+                            Swal.fire({
+                                text: response.msg,
+                                icon: "success",
+                                confirmButtonText: "Ok",
+                                allowOutsideClick: false
+                            }).then(() => {
+                                // Redirect to login page after clicking Ok
+                                window.location.href = "{% url 'index' %}";
+                            });
+                        } else {
+                            Swal.fire({
+                                text: response.msg,
+                                icon: "info",
+                                confirmButtonText: "Ok",
+                                allowOutsideClick: false
+                            });
+                        }
+                    },
+                    error: function() {
+                        // Failsafe if the server throws a 500 error
+                        Swal.fire({
+                            title: "Error",
+                            text: "Something went wrong. Please try again.",
+                            icon: "error"
+                        });
+                    }
+                });
+            }
+        });
+    }
 </script>

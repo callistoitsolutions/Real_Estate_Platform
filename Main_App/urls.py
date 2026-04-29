@@ -15,9 +15,7 @@ urlpatterns = [
     path('login', views.login_view, name='login'),
     path('dashboard/', views.dashboard_view, name='dashboard12'),
     path('lead-capture/', views.lead_capture_view, name='lead_capture'),
-    path('post_property', views.post_property_view, name='post_property'),
-    path('property_view_report', views.property_view_report, name='property_view_report'),
-#path('property_details',views.property_details,name="property_details"),
+   
     
 #path('properties',views.properties,name="properties"),
     path('services',views.services,name="services"),
@@ -164,6 +162,15 @@ urlpatterns = [
     path('resale/plot/', views.resale_plot_form, name='resale_plot_form'),
     path('resale/industrial/', views.resale_industrial_form, name='resale_industrial_form'),
 
+
+
+################# START URL SECTION POST PROPERTY SECTION  ######################
+   
+    path('post_property', views.post_property, name='post_property'),
+
+
+ 
+############### END URL SECTION POST PROPERTY SECTION ######################
 ]
 
     

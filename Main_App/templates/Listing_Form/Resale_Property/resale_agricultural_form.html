@@ -176,7 +176,7 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
     <span class="form-badge fb-resale">💰 Resale</span>
     <span class="form-badge fb-agriculture">🌾 Agriculture</span>
   </div>
-  <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> Back to Portal</a>
+  <a href="{% url 'index' %}" class="nav-back"><i class="fas fa-arrow-left"></i> Back to Portal</a>
 </div>
 
 <div class="page-wrap">
@@ -549,19 +549,19 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
     <div class="fg fg-4">
       <div class="field">
         <label>Name</label>
-        <input type="text" name="uploaded_by_name" value="{{ uploader_name }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
+        <input type="text" name="uploaded_by_name" id="display_up_name" value="{{ user_obj.user_name|default:'' }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
       </div>
       <div class="field">
         <label>Email</label>
-        <input type="email" name="uploaded_by_email" value="{{ uploader_email }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
+        <input type="email" name="uploaded_by_email" id="display_up_email" value="{{ user_obj.user_email|default:'' }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
       </div>
       <div class="field">
         <label>Contact</label>
-        <input type="tel" name="uploaded_by_contact" value="{{ uploader_phone }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
+        <input type="tel" name="uploaded_by_contact" id="display_up_mobile" value="{{ user_obj.user_phone|default:'' }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
       </div>
       <div class="field">
         <label>Role</label>
-        <input type="text" name="uploaded_by_role" value="{{ uploader_role }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
+        <input type="text" name="uploaded_by_role" id="display_up_role" value="{{ user_obj.user_role|default:'' }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
       </div>
     </div>
     <div class="inline-status is-info" style="margin-top:4px;margin-bottom:16px;">
@@ -616,12 +616,186 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="modal fade" id="authModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+      
+      <div class="modal-header border-0 pb-0" style="position: relative;">
+        <h5 class="modal-title" style="font-weight: 800; color: #1e293b;">Unlock Next Steps</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 20px;"></button>
+      </div>
+
+      <div class="modal-body pt-2 pb-4 px-4">
+        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Please login or register to continue posting your property and access land specifics.</p>
+        
+        <ul class="nav nav-pills mb-4" id="authTabs" role="tablist" style="background: #f1f5f9; padding: 4px; border-radius: 12px;">
+          <li class="nav-item" role="presentation" style="flex: 1; text-align: center;">
+            <button class="nav-link active w-100" data-bs-toggle="pill" data-bs-target="#modalLogin" type="button" style="border-radius: 10px; font-weight: 600;">Login</button>
+          </li>
+          <li class="nav-item" role="presentation" style="flex: 1; text-align: center;">
+            <button class="nav-link w-100" data-bs-toggle="pill" data-bs-target="#modalRegister" type="button" style="border-radius: 10px; font-weight: 600;">Register</button>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <div class="tab-pane fade show active" id="modalLogin">
+            <div class="mb-3">
+              <label style="font-size: 0.8rem; font-weight: 700;">Email Address <span class="text-danger">*</span></label>
+              <input type="email" id="modal_login_email" class="form-control" placeholder="name@example.com" style="border-radius: 10px;">
+            </div>
+            <div class="mb-3">
+              <label style="font-size: 0.8rem; font-weight: 700;">Password <span class="text-danger">*</span></label>
+              <input type="password" id="modal_login_password" class="form-control" placeholder="Enter password" style="border-radius: 10px;">
+            </div>
+
+            <div class="mb-3">
+                <label style="font-size: 0.8rem; font-weight: 700;">Account Role <span class="text-danger">*</span></label>
+                  <select name="user_role" class="form-select" id="modal_login_role" required>
+                    <option value="SelectRole" selected disabled>Choose a role...</option>
+                    <option value="Relationship Manager">Relationship Manager (RM)</option>
+                    <option value="Landlord">Landlord</option>
+                    <option value="Tenant">Tenant</option>
+                    <option value="Buyer">Buyer</option>
+                    <option value="Agent">Agent</option>
+                    <option value="Agency/Builder">Agencies / Builder</option>
+                    <option value="Vendor">Vendor</option>
+                  </select>
+            </div>
+
+            <button type="button" class="btn w-100 mt-2" onclick="processModalLogin(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px; justify-content:center;">Sign In & Continue</button>
+          </div>
+
+          <div class="tab-pane fade" id="modalRegister">
+            <div class="mb-3">
+              <label style="font-size: 0.8rem; font-weight: 700;">Full Name <span class="text-danger">*</span></label>
+              <input type="text" id="modal_reg_name" class="form-control" placeholder="John Doe" style="border-radius: 10px;">
+            </div>
+            <div class="row">
+              <div class="col-6 mb-3">
+                <label style="font-size: 0.8rem; font-weight: 700;">Email <span class="text-danger">*</span></label>
+                <input type="email" id="modal_reg_email" class="form-control" placeholder="Email" style="border-radius: 10px;">
+              </div>
+              <div class="col-6 mb-3">
+                <label style="font-size: 0.8rem; font-weight: 700;">Mobile <span class="text-danger">*</span></label>
+                <input type="tel" id="modal_reg_mobile" class="form-control" placeholder="10 Digits" style="border-radius: 10px;" maxlength="10">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label style="font-size: 0.8rem; font-weight: 700;">Create Password <span class="text-danger">*</span></label>
+              <input type="password" id="modal_reg_password" class="form-control" placeholder="6+ characters" style="border-radius: 10px;">
+            </div>
+
+            <div class="mb-3">
+                <label style="font-size: 0.8rem; font-weight: 700;">Account Role <span class="text-danger">*</span></label>
+                  <select name="user_role" class="form-select" id="modal_reg_role" required>
+                    <option value="SelectRole" selected disabled>Choose a role...</option>
+                    <option value="Relationship Manager">Relationship Manager (RM)</option>
+                    <option value="Landlord">Landlord</option>
+                    <option value="Tenant">Tenant</option>
+                    <option value="Buyer">Buyer</option>
+                    <option value="Agent">Agent</option>
+                    <option value="Agency/Builder">Agencies / Builder</option>
+                    <option value="Vendor">Vendor</option>
+                  </select>
+            </div>
+
+            <button type="button" class="btn w-100 mt-2" onclick="processModalRegister(this)" style="background: #f97316; color: white; font-weight: 700; padding: 12px; border-radius: 10px; justify-content:center;">Register & Continue</button>
+
+            <button type="button" class="btn w-100 mt-2" data-bs-dismiss="modal" style="background: grey; color: white; font-weight: 700; padding: 12px; border-radius: 10px; justify-content:center;">Close</button>
+            
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <script>
+// --- AUTHENTICATION STATE & INTERCEPTION ---
+let isLoggedIn = {% if user_obj %}true{% else %}false{% endif %};
+let userMobile = "{{ user_obj.user_phone|default:''|escapejs }}";
+let pendingStep = null;
 let currentStep = 1;
+
+/* ── UPDATE HEADER NAV DYNAMICALLY ── */
+function updateHeaderNav(uName, uRole, uEmail, uMobile) {
+    const navRight = document.querySelector('.nav-right');
+    const loginBtn = navRight ? navRight.querySelector('a[href*="login"]') : null;
+    
+    const dashboardUrls = {
+        "Landlord": "{% url 'landlord_dashboard' %}",
+        "Tenant": "{% url 'Tenant_App:tenant_Dashboard' %}",
+        "Buyer": "{% url 'Buyer_Dashboard' %}",
+        "Agent": "{% url 'agent_dashboard' %}",
+        "Agency/Builder": "{% url 'Agency_Dashboard' %}",
+        "Vendor": "{% url 'Vendors:vendors_Dashboard' %}"
+    };
+
+    const targetUrl = dashboardUrls[uRole] || "#";
+    
+    if (loginBtn) {
+        const dropdownHTML = `
+            <div class="dropdown d-inline-block">
+                <a href="#" class="btn-nav-pr dropdown-toggle text-decoration-none" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person"></i> Hello ${uName}-${uRole}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="loginDropdown" style="border-radius: 12px; min-width: 200px;">
+                    <li>
+                        <a class="dropdown-item py-2 fw-medium text-secondary" href="${targetUrl}" target="_blank">
+                            <i class="bi bi-send me-2 text-primary"></i> Access Dashboard
+                        </a>
+                    </li>
+                    <li>    
+                        <a class="dropdown-item py-2 fw-medium text-secondary" href="#" target="_blank">
+                         <i class="bi bi-heart me-2 text-primary"></i> Wishlist Properties
+                        </a>
+                    </li>
+                    <li>    
+                        <a class="dropdown-item py-2 fw-medium text-secondary" href="#" target="_blank">
+                         <i class="bi bi-search me-2 text-primary"></i> Searched Properties
+                        </a>
+                    </li>
+                    <li>
+                        <button class="dropdown-item py-2 fw-medium text-secondary" onclick="User_Logout()">
+                            <i class="bi bi-door-closed me-2 text-primary"></i> Logout
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        `;
+        loginBtn.outerHTML = dropdownHTML;
+        
+        const newDropdown = document.getElementById('loginDropdown');
+        if(newDropdown && typeof bootstrap !== 'undefined') {
+            new bootstrap.Dropdown(newDropdown);
+        }
+    }
+
+    const nameField = document.getElementById('display_up_name');
+    const emailField = document.getElementById('display_up_email');
+    const mobileField = document.getElementById('display_up_mobile');
+    const roleField = document.getElementById('display_up_role');
+    
+    if(nameField) nameField.value = uName;
+    if(emailField) emailField.value = uEmail;
+    if(roleField) roleField.value = uRole;
+    if(mobileField) mobileField.value = uMobile || "";
+}
 
 /* ── STEPPER ── */
 function goToStep(n) {
+  // INTERCEPT: If trying to go to Step 2 and NOT logged in
+  if (n === 2 && !isLoggedIn) {
+      pendingStep = n; 
+      const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+      authModal.show();
+      return; 
+  }
+
   document.getElementById('step' + currentStep).classList.remove('active');
   document.getElementById('step' + n).classList.add('active');
   for (let i = 1; i <= 4; i++) {
@@ -642,6 +816,120 @@ function goToStep(n) {
   }
   currentStep = n;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// --- MODAL AJAX LOGIN ---
+function processModalLogin(btn) {
+    const email = document.getElementById('modal_login_email').value;
+    const password = document.getElementById('modal_login_password').value;
+    const role = document.getElementById('modal_login_role').value;
+
+    if (!email || !password || role === "SelectRole") {
+        Swal.fire({icon: "warning", title: "Missing Input", text: "Please enter email, password and select a role"});
+        return;
+    }
+
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Verifying...`;
+    btn.disabled = true;
+
+    $.ajax({
+        method: "POST",
+        url: "{% url 'login' %}", 
+        contentType: "application/json",
+        data: JSON.stringify({
+            "user_email": email,
+            "user_password": password,
+            "user_role": role
+        }),
+        success: function (response) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+
+            if (response.status == '1' || response.status == 'success') {
+                isLoggedIn = true; 
+                bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
+                
+                updateHeaderNav(
+                    response.user_name || "User", 
+                    response.user_role || role, 
+                    email, 
+                    response.user_mobile || ""
+                );
+                
+                Swal.fire({icon: 'success', title: 'Welcome Back!', text: 'Continuing to Land Specifics...', timer: 1500, showConfirmButton: false});
+                if(pendingStep) {
+                    goToStep(pendingStep);
+                    pendingStep = null; 
+                }
+            } else {
+                Swal.fire({icon: "error", title: "Login Failed", text: response.msg});
+            }
+        },
+        error: function() {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            Swal.fire({icon: "error", title: "Error", text: "Server connection failed."});
+        }
+    });
+}
+
+// --- MODAL AJAX REGISTER ---
+function processModalRegister(btn) {
+    const name = document.getElementById('modal_reg_name').value;
+    const email = document.getElementById('modal_reg_email').value;
+    const mobile = document.getElementById('modal_reg_mobile').value;
+    const password = document.getElementById('modal_reg_password').value;
+    const role = document.getElementById('modal_reg_role').value;
+
+    if (!name || !email || !mobile || !password || role === "SelectRole") {
+        Swal.fire({icon: "warning", title: "Missing Input", text: "Please fill all fields"});
+        return;
+    }
+
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Creating Account...`;
+    btn.disabled = true;
+
+    var fd = new FormData();
+    fd.append('role', role);
+    fd.append('full_name', name);
+    fd.append('email', email);
+    fd.append('mobile_number', mobile);
+    fd.append('password', password);
+    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+    $.ajax({
+        method: "POST",
+        url: "{% url 'signup' %}", 
+        data: fd,
+        processData: false,
+        contentType: false,
+        success: function (response) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+
+            if (response.status == '1' || response.status == 'success') {
+                isLoggedIn = true; 
+                bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
+                
+                updateHeaderNav(name, role, email, mobile);
+                
+                Swal.fire({icon: 'success', title: 'Account Created!', text: 'Continuing to Land Specifics...', timer: 1500, showConfirmButton: false});
+                if(pendingStep) {
+                    goToStep(pendingStep);
+                    pendingStep = null; 
+                }
+            } else {
+                Swal.fire({icon: "error", title: "Registration Failed", text: response.msg});
+            }
+        },
+        error: function() {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            Swal.fire({icon: "error", title: "Error", text: "Server connection failed."});
+        }
+    });
 }
 
 /* ── TOGGLE SCRIPTS (Brokerage & Legal) ── */
@@ -721,7 +1009,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   title: 'Property Saved!',
                   text: data.message || 'Agricultural property added successfully.',
                   confirmButtonColor: '#28a745',
-              }).then(() => { form.reset(); });
+              }).then(() => { form.reset(); window.location.href = '/listingpage/?type=agriculture'; });
           } else {
               Swal.fire({
                   icon: 'error',
