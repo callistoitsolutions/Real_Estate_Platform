@@ -1536,3 +1536,49 @@
     }
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Grab the completion percentage
+    let completionPercentage = parseInt("{{ profile_completion_percentage|default:'45' }}");
+    
+    // 2. Get the exact URL of the Update Profile page and the Current Page
+    let updateProfilePath = "{% url 'Update_Profile_Landlord' %}";
+    let currentPath = window.location.pathname;
+    
+    // 3. ONLY show the modal if profile < 100% AND they are NOT already on the update page
+    if (completionPercentage < 100 && currentPath !== updateProfilePath) {
+        
+        // Wait 1 second after page load so it feels smooth
+        setTimeout(function() {
+            swal({
+                title: "Profile " + completionPercentage + "% Complete",
+                text: "You are almost there! \n\nLandlords with a 100% complete profile receive up to 3x more property views and genuine tenant leads.\n\nTake a moment to fill in your remaining details.",
+                icon: "info",
+                buttons: {
+                    cancel: {
+                        text: "Remind Me Later",
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: "Update Profile Now",
+                        value: "update",
+                        visible: true,
+                        className: "bg-success", // Uses standard bootstrap green
+                        closeModal: true
+                    }
+                },
+                closeOnClickOutside: false // Allows them to just click away to dismiss
+            })
+            .then((value) => {
+                // If they click "Update Profile Now", redirect them
+                if (value === "update") {
+                    window.location.href = updateProfilePath;
+                }
+            });
+        }, 1000); 
+    }
+});
+</script> 
+

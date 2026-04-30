@@ -1524,3 +1524,62 @@
     }
 </script>
 
+<!-- Custom CSS to inject the exact hex color into the SweetAlert button -->
+<style>
+    .swal-button--custom-blue {
+        background-color: #3b82f6 !important;
+        color: white !important;
+        transition: all 0.3s ease;
+    }
+    .swal-button--custom-blue:hover {
+        background-color: #2563eb !important; /* Slightly darker blue for the hover effect */
+    }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Grab the completion percentage
+    let completionPercentage = parseInt("{{ profile_completion_percentage|default:'45' }}");
+    
+    // 2. Get the exact URL of the Update Profile page and the Current Page
+    // IMPORTANT: Make sure this URL matches the exact name in your urls.py!
+    let updateProfilePath = "{% url 'Vendors:Update_Profile_Vendor' %}"; 
+    let currentPath = window.location.pathname;
+    
+    // 3. ONLY show the modal if profile < 100% AND they are NOT already on the update page
+    if (completionPercentage < 100 && currentPath !== updateProfilePath) {
+        
+        // Wait 1 second after page load so it feels smooth
+        setTimeout(function() {
+            swal({
+                title: "Profile " + completionPercentage + "% Complete",
+                text: "You are almost there! \n\nVendors with a 100% complete profile appear at the top of our service directory and receive up to 3x more service requests from landlords and agencies.\n\nTake a moment to fill in your service types and company details.",
+                icon: "info",
+                buttons: {
+                    cancel: {
+                        text: "Remind Me Later",
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: "Update Profile Now",
+                        value: "update",
+                        visible: true,
+                        className: "swal-button--custom-blue", // Injects your custom hex color CSS class
+                        closeModal: true
+                    }
+                },
+                closeOnClickOutside: false // Requires them to click a button
+            })
+            .then((value) => {
+                // If they click "Update Profile Now", redirect them
+                if (value === "update") {
+                    window.location.href = updateProfilePath;
+                }
+            });
+        }, 1000); 
+    }
+});
+</script>
+

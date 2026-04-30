@@ -1,5 +1,6 @@
 from django.shortcuts import render,HttpResponse,redirect
 from Admin_App.models import *
+from Landlord_Panel.views import calculate_profile_strength
 
 # Create your views here.
 
@@ -16,10 +17,14 @@ def tenant_Dashboard(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    completion_score = calculate_profile_strength(user_obj)
+
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'profile_completion_percentage': completion_score,
     }
     
     return render(request, "tenant_panel/tenant_dashboard.html", context)

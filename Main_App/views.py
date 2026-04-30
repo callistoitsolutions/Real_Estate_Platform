@@ -622,11 +622,15 @@ def login_view(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode('utf-8'))
-            user_email = data['user_email']
+            user_identifier = data['user_identifier']
             user_password = data['user_password']
             user_role = data.get('user_role') 
-            
-            user_qs = User_Details.objects.filter(user_email=user_email, user_password=user_password, user_role=user_role)
+
+            user_qs = User_Details.objects.filter(
+                Q(user_email=user_identifier) | Q(user_phone=user_identifier),
+                user_password=user_password, 
+                user_role=user_role
+            )
             
             if user_qs.exists():
                 user_obj = user_qs.first()
@@ -646,6 +650,7 @@ def login_view(request):
                     'user_name': user_obj.user_name, 
                     'user_role': user_obj.user_role,
                     'user_mobile':user_obj.user_phone, 
+                    'user_email':user_obj.user_email,
                 })
 
             return JsonResponse({'status': 0, 'msg': 'Invalid Credentials or Role Selection'})

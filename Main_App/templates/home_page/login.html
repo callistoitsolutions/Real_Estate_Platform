@@ -192,11 +192,11 @@
       <input type="hidden" name="next" value="{{ next|default:'' }}">
 
       <label class="form-label-top">
-        Email Address <span class="required">*</span>
+        Email Address/Phone Number <span class="required">*</span>
       </label>
       <div class="form-floating mb-3">
-        <input name="user_email" id="user_email" type="email" class="form-control" placeholder="Enter Email Address" required>
-        <label>name@example.com</label>
+        <input name="user_identifier" id="user_identifier" type="text" class="form-control" placeholder="Enter Email Address/Phone Number" required>
+        <label>Email Address/Phone Number</label>
       </div>
 
       <label class="form-label-top">
@@ -250,12 +250,12 @@
 
   <script>
     function User_Login(_this){
-        var user_email = $("#user_email").val();
+        var user_identifier = $("#user_identifier").val();
         var user_password = $("#user_password").val();
         var user_role = $("#user_role").val();
         
-        if (user_email == "") {
-            swal({icon: "warning", title: "Missing Input", text: "Please Enter Email Address"});
+        if (user_identifier == "") {
+            swal({icon: "warning", title: "Missing Input", text: "Please Enter Email Address/Phone Number"});
         }
         else if(user_password == "") {
             swal({icon: "warning", title: "Missing Input", text: "Please Enter Password"});
@@ -272,7 +272,7 @@
                 url : "{% url 'login' %}",
                 contentType: "application/json",
                 data:JSON.stringify({
-                "user_email":user_email,
+                "user_identifier":user_identifier,
                 "user_password":user_password,
                 "user_role":user_role,
                 }),
@@ -282,7 +282,7 @@
                     if (response.status == '1'){
                         
                           // If browser blocks popup, fallback to same tab
-                          window.location.href = response.redirect_url;
+                          window.location.href = "{% url 'index' %}";
                   }
                 else
                 {

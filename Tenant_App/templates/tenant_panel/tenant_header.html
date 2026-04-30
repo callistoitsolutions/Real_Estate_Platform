@@ -1508,3 +1508,51 @@
     }
 </script>
 
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Grab the completion percentage
+    let completionPercentage = parseInt("{{ profile_completion_percentage|default:'45' }}");
+    
+    // 2. Get the exact URL of the Update Profile page and the Current Page
+    // IMPORTANT: Make sure 'Update_Profile_Tenant' matches the exact name in your urls.py!
+    let updateProfilePath = "{% url 'Tenant_App:Update_Profile_Tenant' %}"; 
+    let currentPath = window.location.pathname;
+    
+    // 3. ONLY show the modal if profile < 100% AND they are NOT already on the update page
+    if (completionPercentage < 100 && currentPath !== updateProfilePath) {
+        
+        // Wait 1 second after page load so it feels smooth
+        setTimeout(function() {
+            swal({
+                title: "Profile " + completionPercentage + "% Complete",
+                text: "You are almost there! \n\nTenants with a 100% complete profile are 3x more likely to get approved quickly by landlords and secure their dream home.\n\nTake a moment to fill in your remaining details.",
+                icon: "info",
+                buttons: {
+                    cancel: {
+                        text: "Remind Me Later",
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: "Update Profile Now",
+                        value: "update",
+                        visible: true,
+                        className: "bg-danger", // Uses standard bootstrap green
+                        closeModal: true
+                    }
+                },
+                closeOnClickOutside: false // Requires them to click a button
+            })
+            .then((value) => {
+                // If they click "Update Profile Now", redirect them
+                if (value === "update") {
+                    window.location.href = updateProfilePath;
+                }
+            });
+        }, 1000); 
+    }
+});
+</script>   
+

@@ -658,8 +658,8 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
         <div class="tab-content">
           <div class="tab-pane fade show active" id="modalLogin">
             <div class="mb-3">
-              <label style="font-size: 0.8rem; font-weight: 700;">Email Address <span class="text-danger">*</span></label>
-              <input type="email" id="modal_login_email" class="form-control" placeholder="name@example.com" style="border-radius: 10px;">
+              <label style="font-size: 0.8rem; font-weight: 700;">Email Address/Phone Number <span class="text-danger">*</span></label>
+              <input type="text" id="modal_login_email" class="form-control" placeholder="name@example.com/1234567890" style="border-radius: 10px;">
             </div>
             <div class="mb-3">
               <label style="font-size: 0.8rem; font-weight: 700;">Password <span class="text-danger">*</span></label>
@@ -836,12 +836,12 @@ function goToStep(n) {
 
 // --- MODAL AJAX LOGIN ---
 function processModalLogin(btn) {
-    const email = document.getElementById('modal_login_email').value;
+    const user_identifier = document.getElementById('modal_login_email').value;
     const password = document.getElementById('modal_login_password').value;
     const role = document.getElementById('modal_login_role').value;
 
-    if (!email || !password || role === "SelectRole") {
-        Swal.fire({icon: "warning", title: "Missing Input", text: "Please enter email, password and select a role"});
+    if (!user_identifier || !password || role === "SelectRole") {
+        Swal.fire({icon: "warning", title: "Missing Input", text: "Please enter email/phone number, password and select a role"});
         return;
     }
 
@@ -851,10 +851,10 @@ function processModalLogin(btn) {
 
     $.ajax({
         method: "POST",
-        url: "{% url 'login' %}", 
+        url: "{% url 'login' %}", // Adjust to your actual login endpoint
         contentType: "application/json",
         data: JSON.stringify({
-            "user_email": email,
+            "user_identifier": user_identifier,
             "user_password": password,
             "user_role": role
         }),
@@ -866,14 +866,15 @@ function processModalLogin(btn) {
                 isLoggedIn = true; 
                 bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
                 
+                // Dynamically update Header and Form Fields
                 updateHeaderNav(
-                    response.user_name || "User", 
-                    response.user_role || role, 
-                    email, 
-                    response.user_mobile || ""
+                  response.user_name || "User", 
+                  response.user_role || role, 
+                  response.user_email || email,  // <--- FIXED! Ask Django for the real email.
+                  response.user_mobile || ""
                 );
                 
-                Swal.fire({icon: 'success', title: 'Welcome Back!', text: 'Continuing to Next Step...', timer: 1500, showConfirmButton: false});
+                Swal.fire({icon: 'success', title: 'Welcome Back!', text: 'Continuing to Rent Details...', timer: 1500, showConfirmButton: false});
                 if(pendingStep) {
                     goToStep(pendingStep);
                     pendingStep = null; 

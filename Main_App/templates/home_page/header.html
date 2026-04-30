@@ -158,10 +158,38 @@
 .hdr-mobile-menu a:last-child { border-bottom: none; }
 .hdr-mobile-menu a:hover { color: #006ce4; background: #f8fafc; }
 
+/* ============================================
+   RESPONSIVE ADJUSTMENTS 
+============================================ */
 @media(max-width:900px) {
+    .premium-header { padding: 0 15px; } /* Reduce padding for tablets */
     .premium-header .desktop-menu { display: none; }
     .premium-header .mobile-menu-btn { display: block; }
     .premium-header .nav-right .btn-nav-outline { display: none; }
+    
+    /* Ensure the username dropdown button doesn't overflow */
+    .premium-header .btn-nav-pr {
+        max-width: 180px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+@media(max-width: 500px) {
+    .premium-header { padding: 0 10px; } /* Reduce padding for small mobiles */
+    .premium-header .logo { font-size: 1.2rem; gap: 4px; }
+    .premium-header .logo-badge { display: none; } /* Hide badge to make room for long usernames */
+    
+    /* Shrink the right side buttons */
+    .premium-header .btn-nav-pr {
+        max-width: 140px; 
+        padding: 6px 12px;
+        font-size: 0.75rem;
+    }
+    
+    .premium-header .mobile-menu-btn i { font-size: 1.6rem; }
+    .premium-header .nav-right { gap: 6px; }
 }
 </style>
 
