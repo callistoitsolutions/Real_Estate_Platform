@@ -17,6 +17,7 @@ urlpatterns = [
     path('lead-capture/', views.lead_capture_view, name='lead_capture'),
   
 #path('property_details',views.property_details,name="property_details"),
+   
     
 #path('properties',views.properties,name="properties"),
     path('services',views.services,name="services"),
@@ -164,11 +165,22 @@ urlpatterns = [
     path('resale/industrial/', views.resale_industrial_form, name='resale_industrial_form'),
 
     #######################START URL SECTION OF POST PROPERTY####################################
+
    path('post_property', views.post_property, name='post_property'),
+
+
         #######################END URL SECTION OF POST PROPERTY##################################
 
-]
 
+
+
+
+
+
+ 
+
+
+]
     
     
     

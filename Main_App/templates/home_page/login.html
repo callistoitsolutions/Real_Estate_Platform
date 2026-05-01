@@ -116,6 +116,22 @@
       margin-left: 2px;
     }
 
+    /* PASSWORD TOGGLE ICON */
+    .password-toggle {
+      position: absolute;
+      top: 50%;
+      right: 16px;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      z-index: 10;
+      transition: color 0.2s;
+    }
+    .password-toggle:hover {
+      color: var(--primary);
+    }
+
     /* LOGIN BUTTON */
     .btn-login {
       width: 100%;
@@ -176,19 +192,20 @@
       <input type="hidden" name="next" value="{{ next|default:'' }}">
 
       <label class="form-label-top">
-        Email Address <span class="required">*</span>
+        Email Address/Phone Number <span class="required">*</span>
       </label>
       <div class="form-floating mb-3">
-        <input name="user_email" id="user_email" type="email" class="form-control" placeholder="Enter Email Address" required>
-        <label>name@example.com</label>
+        <input name="user_identifier" id="user_identifier" type="text" class="form-control" placeholder="Enter Email Address/Phone Number" required>
+        <label>Email Address/Phone Number</label>
       </div>
 
       <label class="form-label-top">
         Password <span class="required">*</span>
       </label>
-      <div class="form-floating mb-3">
-        <input name="user_password" id="user_password" type="password" class="form-control" placeholder="Enter Password" required>
+      <div class="form-floating mb-3 position-relative">
+        <input name="user_password" id="user_password" type="password" class="form-control" style="padding-right: 45px;" placeholder="Enter Password" required>
         <label>Enter Password</label>
+        <i class="bi bi-eye-slash password-toggle" id="togglePassword"></i>
       </div>
 
       <label class="form-label-top">
@@ -211,20 +228,34 @@
       <button type="button" class="btn-login" onclick="User_Login(this)">Sign In</button>
 
       <div class="bottom-link">
-        New to PropCRM? <a href="{% url 'signup' %}?next={{ next|default:'' }}">Create an Account</a>
+        New to PropCRM? <a href="{% url 'signup' %}">Create an Account</a>
       </div>
     </form>
 
   </div>
 
   <script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const passwordInput = document.getElementById('user_password');
+        
+        // Toggle the type attribute
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        
+        // Toggle the icon
+        this.classList.toggle('bi-eye');
+        this.classList.toggle('bi-eye-slash');
+    });
+  </script>
+
+  <script>
     function User_Login(_this){
-        var user_email = $("#user_email").val();
+        var user_identifier = $("#user_identifier").val();
         var user_password = $("#user_password").val();
         var user_role = $("#user_role").val();
         
-        if (user_email == "") {
-            swal({icon: "warning", title: "Missing Input", text: "Please Enter Email Address"});
+        if (user_identifier == "") {
+            swal({icon: "warning", title: "Missing Input", text: "Please Enter Email Address/Phone Number"});
         }
         else if(user_password == "") {
             swal({icon: "warning", title: "Missing Input", text: "Please Enter Password"});
@@ -241,7 +272,7 @@
                 url : "{% url 'login' %}",
                 contentType: "application/json",
                 data:JSON.stringify({
-                "user_email":user_email,
+                "user_identifier":user_identifier,
                 "user_password":user_password,
                 "user_role":user_role,
                 }),
@@ -249,13 +280,9 @@
                 $(_this).prop("disabled", false);
                     _this.innerHTML = `Sign In`;
                     if (response.status == '1'){
-                        var win = window.open(response.redirect_url, '_blank');
-                      if (win) {
-                          win.focus();
-                      } else {
+                        
                           // If browser blocks popup, fallback to same tab
-                          window.location.href = response.redirect_url;
-                      }
+                          window.location.href = "{% url 'index' %}";
                   }
                 else
                 {

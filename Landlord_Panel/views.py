@@ -16,6 +16,59 @@ from Admin_App.models import *
 
 # Create your views here.
 
+
+############## Views start for calculate profile strength ##########################
+
+def calculate_profile_strength(user_obj):
+    """Calculates the profile completion percentage dynamically based on the user's role."""
+    strength = 0
+    
+    # ---------------------------------------------------------
+    # 1. BASE DETAILS (Applies to everyone - Total 50%)
+    # ---------------------------------------------------------
+    if user_obj.user_name: strength += 10
+    if user_obj.user_email: strength += 10
+    if user_obj.user_phone: strength += 10
+    if user_obj.user_password: strength += 10
+    if user_obj.user_role: strength += 10
+    
+    # ---------------------------------------------------------
+    # 2. ROLE-SPECIFIC DETAILS (Remaining 50%)
+    # ---------------------------------------------------------
+    role = user_obj.user_role
+
+    if role == 'Vendor':
+        # Vendor requires 5 specific things (10% each)
+        if getattr(user_obj, 'user_state', None): strength += 10
+        if getattr(user_obj, 'user_city', None): strength += 10
+        if getattr(user_obj, 'user_address', None): strength += 10
+        if getattr(user_obj, 'user_profile', None) and user_obj.user_profile.name: strength += 10
+        if getattr(user_obj, 'user_service_type', None): strength += 10 # <-- Change to your actual DB field
+        if getattr(user_obj, 'user_company_name', None): strength += 10 # <-- Change to your actual DB field
+        if getattr(user_obj, 'user_profile', None) and user_obj.user_profile.name: strength += 10
+        
+    elif role in ['Agent', 'Agency/Builder']:
+        # Agents/Agencies require different fields (10% each)
+        if getattr(user_obj, 'user_state', None): strength += 10
+        if getattr(user_obj, 'user_city', None): strength += 10
+        if getattr(user_obj, 'user_address', None): strength += 10
+        if getattr(user_obj, 'user_license_number', None): strength += 10 # <-- Change to your actual DB field
+        if getattr(user_obj, 'user_profile', None) and user_obj.user_profile.name: strength += 10
+        
+    else:
+        # Default for Landlord, Tenant, and Buyer
+        if getattr(user_obj, 'user_state', None): strength += 15
+        if getattr(user_obj, 'user_city', None): strength += 15
+        if getattr(user_obj, 'user_address', None): strength += 10
+        if getattr(user_obj, 'user_profile', None) and user_obj.user_profile.name: strength += 10
+
+    # Ensure it never accidentally goes over 100
+    return min(strength, 100)
+
+############# Views end for calculate profile strength ##########################
+
+
+
 ########### Crime Officer Views#######
 
 
@@ -30,10 +83,13 @@ def landlord_dashboard(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    completion_score = calculate_profile_strength(user_obj)
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'profile_completion_percentage': completion_score,
     }
     
     return render(request, "landlord/landlord_dashboard.html", context) 

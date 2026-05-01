@@ -332,6 +332,7 @@
     }
 
     var fd = new FormData();
+    fd.append('id', '');
     fd.append('user_name', $("#user_name").val());
     fd.append('user_email', $("#user_email").val());
     fd.append('user_phone', $("#user_phone").val());
@@ -341,7 +342,6 @@
     fd.append('user_password', user_password);
     fd.append('user_profile', $("#user_profile")[0].files[0]);
     fd.append('user_role', "Landlord");
-    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
     $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Registering...`);
 

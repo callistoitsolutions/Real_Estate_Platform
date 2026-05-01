@@ -354,7 +354,6 @@
     fd.append('user_password', user_password);
     fd.append('user_profile', user_profile[0]);
     fd.append('user_role', user_role);
-    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
     $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Updating...`);
 

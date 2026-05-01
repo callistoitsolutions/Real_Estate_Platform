@@ -32,6 +32,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import traceback
 from django.urls import reverse
+import random
 
 from django.shortcuts import render
 from django.db.models import Q
@@ -39,7 +40,6 @@ from itertools import chain
 from datetime import datetime, timedelta
 import random
 
-# Create your views here.
 
 ########### Crime Officer Views#######
 
@@ -296,6 +296,16 @@ def listings_view(request):
         'current_area':       area,
         'current_sort':       sort,
     }
+
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+            
+
     return render(request, 'home_page/listingpage.html', context)
 
 
@@ -540,58 +550,67 @@ def get_client_ip(request):
 
 
 # ---------------- SIGNUP ----------------
+
+@csrf_exempt
 def signup_view(request):
-    if request.method == 'GET':
-        new_key = CaptchaStore.generate_key()
-        captcha_img = captcha_image_url(new_key)
-        return render(request, 'home_page/signup.html', {
-            'captcha_key': new_key,
-            'captcha_img': captcha_img,
-        })
+    if request.method == "POST":
+        full_name = request.POST.get('full_name', '').strip()
+        email = request.POST.get('email', '').strip()
+        mobile_number = request.POST.get('mobile_number', '').strip()
+        password = request.POST.get('password', '')
+        role = request.POST.get('role', '').strip()
 
-    # Save draft safely
-    SignupDraft.objects.create(
-        full_name=request.POST.get('full_name'),
-        email=request.POST.get('email'),
-        role=request.POST.get('role'),
-        referral_source=request.POST.get('referral_source') or "unknown",
-        ip_address=get_client_ip(request),
-    )
+        # Basic Validation
+        if not all([full_name, email, mobile_number, password, role]):
+            return JsonResponse({
+                'status': '0', 
+                'msg': 'Please fill all the required fields.'
+            })
 
-    # Captcha
-    user_captcha = request.POST.get('captcha')
-    captcha_key = request.POST.get('captcha_key')
-    try:
-        captcha_obj = CaptchaStore.objects.get(hashkey=captcha_key)
-    except CaptchaStore.DoesNotExist:
-        messages.error(request, "Captcha expired. Please try again.")
-        return redirect('signup')
+        try:
+            if User_Details.objects.filter(user_email=email,user_role=role).exists():
+                return JsonResponse({
+                    'status': '0', 
+                    'msg': 'An account with this email address already exists.'
+                })
+            
+            if User_Details.objects.filter(user_phone=mobile_number,user_role=role).exists():
+                return JsonResponse({'status': '0', 'msg': 'This mobile number is already registered.'})
 
-    if captcha_obj.response != (user_captcha or "").lower():
-        messages.error(request, "Invalid captcha. Draft saved.")
-        captcha_obj.delete()
-        return redirect('signup')
+            # 3. Create the User
+            User_Details.objects.create(
+                user_name=full_name,
+                user_email=email,
+                user_phone=mobile_number,
+                user_role=role,              
+                user_password=password
+            )
+           
+            user_qs = User_Details.objects.filter(user_email=email, user_password=password, user_role=role)
+            
+            if user_qs.exists():
+                user_obj = user_qs.first()
+                
+                # --- SESSION LOGIC ---
+                # Note: Logging in a new person will overwrite these session keys
+                request.session['User_id'] = str(user_obj.id)
+                request.session['user_type'] = role
 
-    # Duplicate email
-    if CustomUser.objects.filter(email=request.POST['email']).exists():
-        messages.error(request, "User already exists. Please login.")
-        captcha_obj.delete()
-        return redirect('login')
+            return JsonResponse({
+                'status': '1', 
+                'msg': 'Account created successfully!',
+                'user_name': user_obj.user_name,    
+                'user_role': user_obj.user_role,   
+                'user_mobile': user_obj.user_phone,
+            })
 
-    # Create user safely
-    user = CustomUser.objects.create_user(
-        username=request.POST['email'].split('@')[0],
-        email=request.POST['email'],
-        password=request.POST['password'],
-        role=request.POST.get('role'),
-        referral_source=request.POST.get('referral_source') or "unknown",
-    )
+        except Exception as e:
+            return JsonResponse({
+                'status': '0', 
+                'msg': f'An error occurred: {str(e)}'
+            })
 
-    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-    captcha_obj.delete()
-
-    messages.success(request, "Signup successful! Welcome.")
-    return redirect('dashboard12')
+    return render(request, 'home_page/signup.html')
 
 
 @csrf_exempt
@@ -599,11 +618,15 @@ def login_view(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode('utf-8'))
-            user_email = data['user_email']
+            user_identifier = data['user_identifier']
             user_password = data['user_password']
             user_role = data.get('user_role') 
-            
-            user_qs = User_Details.objects.filter(user_email=user_email, user_password=user_password, user_role=user_role)
+
+            user_qs = User_Details.objects.filter(
+                Q(user_email=user_identifier) | Q(user_phone=user_identifier),
+                user_password=user_password, 
+                user_role=user_role
+            )
             
             if user_qs.exists():
                 user_obj = user_qs.first()
@@ -612,29 +635,19 @@ def login_view(request):
                 # Note: Logging in a new person will overwrite these session keys
                 request.session['User_id'] = str(user_obj.id)
                 request.session['user_type'] = user_role
+
+                url = reverse('index')
                 
-                if user_role == "Relationship Manager":
-                    url = reverse('rm_dashboard')
                 
-                if user_role == "Landlord":
-                    url = reverse('landlord_dashboard')
-                
-                if user_role == "Agent":
-                    url = reverse('agent_dashboard')
 
-                if user_role == "Vendor":
-                    url = reverse('Vendors:vendors_Dashboard')
-
-                if user_role == "Tenant":
-                    url = reverse('Tenant_App:tenant_Dashboard')
-
-                if user_role == "Buyer":
-                    url = reverse('Buyer_Dashboard')
-
-                if user_role == "Agency/Builder":
-                    url = reverse('Agency_Dashboard')
-
-                return JsonResponse({'status': 1, 'msg': f'{user_role} Login Successful', 'redirect_url': url})
+                return JsonResponse({
+                    'status': '1', 
+                    'msg': 'Success!',
+                    'user_name': user_obj.user_name, 
+                    'user_role': user_obj.user_role,
+                    'user_mobile':user_obj.user_phone, 
+                    'user_email':user_obj.user_email,
+                })
 
             return JsonResponse({'status': 0, 'msg': 'Invalid Credentials or Role Selection'})
 
@@ -692,6 +705,15 @@ def lead_capture_view(request):
 
 
 
+
+
+
+
+
+
+
+
+
 def get_featured_queryset(model):
     return model.objects.filter(
        
@@ -730,7 +752,16 @@ def index(request):
         "hero": hero,
         "blogs": blogs,
         "faqs": faqs,
+        'user_obj':None
     }
+
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
 
     return render(request, "home_page/index.html", context)
 
@@ -1346,6 +1377,15 @@ def rent_residential(request):
     facilities_obj = Facilities_Details.objects.all()
 
     context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
     return render(request, "Listing_Form/Rental_Property/rent_residential.html",context)
 
 
@@ -1356,6 +1396,14 @@ def rent_commercial(request):
 
     context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
 
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
     return render(request, "Listing_Form/Rental_Property/rent_commercial.html",context)
 
 def rent_pg_coliving(request):
@@ -1363,6 +1411,14 @@ def rent_pg_coliving(request):
     facilities_obj = Facilities_Details.objects.all()
 
     context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
 
     return render(request, "Listing_Form/Rental_Property/rent_pg_coliving.html",context)
 
@@ -1380,6 +1436,14 @@ def residential_resale_form(request):
 
     context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
 
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
     return render(request, "Listing_Form/Resale_Property/residential_resale_form.html",context)
 
 
@@ -1390,30 +1454,76 @@ def resale_commercial_form(request):
 
     context = {'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
 
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
     return render(request, "Listing_Form/Resale_Property/resale_commercial_form.html",context)
 
 def resale_agricultural_form(request):
+    context = {}
 
-    return render(request, "Listing_Form/Resale_Property/resale_agricultural_form.html")
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
+    return render(request, "Listing_Form/Resale_Property/resale_agricultural_form.html",context)
 
 
 def resale_plot_form(request):
+    context = {}
 
-    return render(request, "Listing_Form/Resale_Property/resale_plot_form.html")
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
+    return render(request, "Listing_Form/Resale_Property/resale_plot_form.html",context)
 
 def resale_industrial_form(request):
+    context = {}
 
-    return render(request, "Listing_Form/Resale_Property/resale_industrial_form.html")
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
+    return render(request, "Listing_Form/Resale_Property/resale_industrial_form.html",context)
 
 
-#######################START View Section For POST PROPERTY#################################
+
+
+
+#######################End View Section For Resale Listing#################################
+
+
+
+#######################START View Section For POST PROPERTY SECTION#################################
 
 def post_property(request):
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    context={}
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
 
-    return render(request, "Post_proeprty_pages/post_property.html")
-
-
-#############################END VIEW SECTION OF POST PROPERTY######################
-
+    return render(request, "Post_Property_pages/post_property.html",context)
 
 
