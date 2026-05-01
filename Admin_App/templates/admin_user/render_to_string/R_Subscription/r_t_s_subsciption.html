@@ -9,22 +9,22 @@
 <div class="quick-stats">
 
     <h3 class="quick-stats-title">
-        <i class="fas fa-chart-line"></i> Service Types Summary and Listings
+        <i class="fas fa-chart-line"></i> Subscriptions Summary and Listings
     </h3>
 
     <div class="stats-row">
 
         <div class="stat-item">
             <div class="stat-item-icon" style="color:#10b981;">
-                <i class="fas fa-gear"></i>
+                <i class="fas fa-money-bill-wave"></i>
             </div>
 
             <div class="stat-item-value">
-                {{ services_obj_count }}
+                {{ subscriptions_obj_count }}
             </div>
 
             <div class="stat-item-label" style="color:black;font-weight:bold;">
-                Total Service Types
+                Total Subscriptions
             </div>
         </div>
 
@@ -35,21 +35,29 @@
 
 <div class="table-responsive">
 
-<table class="properties-table" id="servicesTable">
+<table class="properties-table" id="subscriptionsTable">
 
     <thead>
         <tr>
             <th>Actions</th>
             <th>Sr. No.</th>
-            <th>Service Id</th>
-            <th>Service Name</th>
-            <th>Added Date</th>
+            <th>Package Name</th>
+            <th>Plan Type</th>
+            <th>Plan Duration</th>
+            <th>Plan For</th>
+            <th>Base Price</th>
+            <th>Offer Price</th>
+            <th>Discount</th>
+            <th>Max Listings</th>
+            <th>Offer Start Date</th>
+            <th>Offer End Date</th>
+            <th>Plan Upload Date</th>
         </tr>
     </thead>
 
     <tbody>
 
-    {% for service in services_obj %}
+    {% for subscription in subscriptions_obj %}
 
         <tr>
 
@@ -60,7 +68,7 @@
                         <i class="fas fa-eye"></i>
                     </button> {% endcomment %}
 
-                    <a href="{% url "Update_Services" service.id %}" class="btn-action btn-edit" title="Edit">
+                    <a href="{% url "Update_Subscriptions" subscription.id %}" class="btn-action btn-edit" title="Edit">
                         <i class="fas fa-edit"></i>
                     </a>
 
@@ -68,7 +76,7 @@
                         <i class="fas fa-power-off"></i>
                     </button> {% endcomment %}
 
-                    <button class="btn-action btn-delete" title="Delete" onclick="Delete_Services({{service.id}})">
+                    <button class="btn-action btn-delete" title="Delete" onclick="Delete_Subscriptions({{subscription.id}})">
                         <i class="fas fa-trash"></i>
                     </button>
 
@@ -78,12 +86,20 @@
             <td>{{ forloop.counter }}</td>
 
             <td>
-                {{ service.service_id }}
+                {{ subscription.package_name }}
             </td>
 
-            <td>{{ service.service_name }}</td>
+            <td>{{ subscription.plan_type }}</td>
+            <td>{{ subscription.plan_duration }}</td>
+            <td>{{ subscription.plan_for }}</td>
+            <td>{{ subscription.plan_base_price }}</td>
+            <td>{{ subscription.plan_offer_price }}</td>
+            <td>{{ subscription.plan_discount }}</td>
+            <td>{{ subscription.plan_max_listings }}</td>
+            <td>{{ subscription.plan_offer_start_date }}</td>
+            <td>{{ subscription.plan_offer_end_date }}</td>
 
-            <td>{{ service.service_upload_date }}</td>
+            <td>{{ subscription.plan_upload_date }}</td>
 
         </tr>
 
@@ -98,7 +114,7 @@
 <script>
    $(document).ready(function () {
 
-    var table = $('#servicesTable').DataTable({
+    var table = $('#subscriptionsTable').DataTable({
         dom: '<"table-header"Blf>rt<"table-footer"ip>',
         buttons: ['excel','csv'],
         paging: true,
@@ -109,7 +125,7 @@
         lengthMenu: [5,10,25,50],
         language:{
             search: "",
-            searchPlaceholder: "Search Service Types...",
+            searchPlaceholder: "Search Subscriptions...",
             paginate:{
                 previous:"<i class='fas fa-chevron-left'></i>",
                 next:"<i class='fas fa-chevron-right'></i>"
@@ -118,6 +134,6 @@
     });
 
     // Force placeholder
-    $('.dataTables_filter input').attr("placeholder","Search Service Types...");
+    $('.dataTables_filter input').attr("placeholder","Search Subscriptions...");
 });
 </script>

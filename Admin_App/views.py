@@ -526,19 +526,19 @@ def Services_Ajax(request):
         return JsonResponse({"status":"1", "msg" : f"Service Type Details added successfully"})
 
     # UPDATE MODE
-    # else:
-    #     try:
-    #         ameneties = Ameneties_Details.objects.get(id=data['id'])
-    #     except Ameneties_Details.DoesNotExist:
-    #         return JsonResponse({'status': '0', 'msg': 'Ameneties Details not found'})
+    else:
+        try:
+            services = Service_Type_Details.objects.get(id=data['id'])
+        except Service_Type_Details.DoesNotExist:
+            return JsonResponse({'status': '0', 'msg': 'Service Type Details not found'})
 
 
-    #     # Update withdraw fields (unchanged)
-    #     for key, value in data.items():
-    #         setattr(ameneties, key, value)
+        # Update withdraw fields (unchanged)
+        for key, value in data.items():
+            setattr(services, key, value)
 
-    #     ameneties.save()
-    #     return JsonResponse({"status":"1", "msg" : f"Ameneties Details updated successfully"})
+        services.save()
+        return JsonResponse({"status":"1", "msg" : f"Service Type Details updated successfully"})
 
 ########## Views end for ajax for add/update service types ########################
 
@@ -582,6 +582,233 @@ def Services_Data(request):
     })
 
 ############ Views end for upload service type details via excel ######################
+
+
+########### Views start for delete vendor service details ##########################
+
+@csrf_exempt
+def Delete_Services(request):
+    try:
+        try:
+            services_id = request.POST.get('services_id')
+            Service_Type_Details.objects.filter(id=services_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Services type details deleted successfully...'})
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+
+############## Views end for delete vendor service details #########################
+
+
+########## Views start for update service details ########################
+
+def Update_Services(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        service = Service_Type_Details.objects.get(id=id)
+        context = {'service':service,'admin_obj':admin_obj}
+
+        return render(request,"admin_user/Service_Type/update_service_type.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############ Views end for update service details ######################
+
+
+############## Views start for subscriptions list ##########################
+
+def Subscriptions_List(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        subscriptions_obj = Subscription_Details.objects.all().order_by('-id')
+        subscriptions_obj_count = Subscription_Details.objects.all().count()
+
+        rendered = render_to_string("admin_user/render_to_string/R_Subscription/r_t_s_subsciption.html",{'subscriptions_obj':subscriptions_obj,'subscriptions_obj_count':subscriptions_obj_count})
+
+        context = {'admin_obj':admin_obj,'subscriptions_list':rendered}
+
+        return render(request,"admin_user/Subscription/subscriptions_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############## Views end for subscriptions list ##########################
+
+
+############### Views start for add subscriptions ########################
+
+def Add_Subscriptions(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        context = {'admin_obj':admin_obj}
+        return render(request,"admin_user/Subscription/add_subscription.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############ Views end for add subscriptions ###########################
+
+
+############ Views start for ajax for add/update subscriptions ################
+
+@csrf_exempt
+def Subscriptions_Ajax(request):
+    data = request.POST.dict()
+
+    if data.get('id') == "":
+        data.pop("id", None)        
+        data['plan_upload_date'] = datetime.today()
+        data['plan_upload_time'] = datetime.now()
+        Subscription_Details.objects.create(**data)
+        return JsonResponse({"status":"1", "msg" : f"Subscription Details added successfully"})
+
+    # UPDATE MODE
+    else:
+        try:
+            subscriptions = Subscription_Details.objects.get(id=data['id'])
+        except Subscription_Details.DoesNotExist:
+            return JsonResponse({'status': '0', 'msg': 'Subscription Details not found'})
+
+
+        # Update withdraw fields (unchanged)
+        for key, value in data.items():
+            setattr(subscriptions, key, value)
+
+        subscriptions.save()
+        return JsonResponse({"status":"1", "msg" : f"Subscriptions Details updated successfully"})
+
+########### Views end for ajax for add/update subscriptions ######################
+
+
+############## Views start for delete subscriptions #####################
+
+@csrf_exempt
+def Delete_Subscriptions(request):
+    try:
+        try:
+            subscription_id = request.POST.get('subscription_id')
+            Subscription_Details.objects.filter(id=subscription_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Subscription type details deleted successfully...'})
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+
+########### Views end for delete subscriptions ########################
+
+############## Views start for update subscriptions #########################
+
+def Update_Subscriptions(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        subscription = Subscription_Details.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'subscription':subscription}
+        return render(request,"admin_user/Subscription/update_subscription.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for update subscriptions ##########################
+
+
+########### Views start for upload subscription details via excel ###############
+
+@csrf_exempt
+def Subscriptions_Data(request):
+    if request.method == 'POST':
+        excel_file = request.FILES.get('subscriptions_file')
+
+        if not excel_file:
+            return JsonResponse({
+                "status": "0",
+                "msg": "No file uploaded."
+            })
+
+        try:
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+
+            # Iterating through rows, skipping the header (min_row=2)
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                
+                # Unpacking the exact columns from your generated dummy data
+                package_name = row[0]
+                plan_type = row[1]
+                # row[2] is plan_duration which we combined into the package name/desc in the model
+                plan_for = row[3]
+                plan_base_price = row[4]
+                plan_offer_price = row[5]
+                plan_discount = row[6]
+                plan_max_listings = row[7]
+                plan_offer_start_date = row[8]
+                plan_offer_end_date = row[9]
+                plan_desc = row[10]
+
+                # Skip empty rows where package_name is missing
+                if not package_name:
+                    continue
+                    
+                # Format the dates properly for Django DateField if they are strings
+                if isinstance(plan_offer_start_date, str):
+                    try:
+                        plan_offer_start_date = datetime.strptime(plan_offer_start_date, '%Y-%m-%d').date()
+                    except ValueError:
+                        pass # Handle or log date parsing error
+                        
+                if isinstance(plan_offer_end_date, str):
+                    try:
+                        plan_offer_end_date = datetime.strptime(plan_offer_end_date, '%Y-%m-%d').date()
+                    except ValueError:
+                        pass # Handle or log date parsing error
+
+                # Create or Update the subscription plan
+                # Using package_name as the unique identifier to update existing ones
+                Subscription_Details.objects.update_or_create(
+                    package_name=package_name,  # condition to check existing
+                    defaults={
+                        "plan_type": plan_type,
+                        "plan_for": plan_for,
+                        "plan_base_price": plan_base_price,
+                        "plan_offer_price": plan_offer_price,
+                        "plan_discount": plan_discount,
+                        "plan_max_listings": plan_max_listings,
+                        "plan_offer_start_date": plan_offer_start_date,
+                        "plan_offer_end_date": plan_offer_end_date,
+                        "plan_desc": plan_desc,
+                        "plan_upload_date":datetime.today()
+                        # is_active and created_at/updated_at will be handled by model defaults
+                    }
+                )
+
+            return JsonResponse({
+                "status": "1",
+                "msg": "Subscriptions Uploaded / Updated Successfully..."
+            })
+
+        except Exception as e:
+            # It's good practice to log 'e' here in a real application
+            return JsonResponse({
+                "status": "0",
+                "msg": f"An error occurred while processing the file: {str(e)}"
+            })
+
+    return JsonResponse({
+        "status": "0",
+        "msg": "Invalid request method."
+    })
+
+########### Views end for upload subscriptions data via excel ######################
 
 
 ############  Views start for rental property list ########################
