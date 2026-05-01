@@ -409,9 +409,9 @@
                         <a class="btn-action btn-edit" title="Edit" href="{% url 'commercial_edit' prop.id %}">
                             <i class="fas fa-edit"></i>
                         </a>
-                        <a class="btn-action btn-delete" title="Delete" href="javascript:void(0);" onclick="deleteCommercial({{ prop.id }})">
-                            <i class="fas fa-trash"></i>
-                        </a>
+                       <button type="button" class="btn-action btn-delete" title="Delete Property" onclick="deleteCommercial({{ prop.id }})">
+    <i class="fas fa-trash-alt"></i>
+</button>
                     </div>
                 </td>
             </tr>
@@ -765,6 +765,87 @@ new Chart(ctx, {
         }]
     }
 });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+function deleteCommercial(propertyId) {
+    // 1. Show the SweetAlert confirmation
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this! All associated images and media will be deleted.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444', // Red for delete
+        cancelButtonColor: '#94a3b8',  // Grey for cancel
+        confirmButtonText: '<i class="fas fa-trash-alt"></i> Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            
+            // 2. Show a loading spinner
+            Swal.fire({ 
+                title: 'Deleting...', 
+                allowOutsideClick: false, 
+                didOpen: () => { Swal.showLoading(); } 
+            });
+
+            // 3. Grab the CSRF token securely
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+
+            // 4. Set the exact URL for your Django delete view
+            // NOTE: Ensure this URL exactly matches your urls.py route!
+            const deleteUrl = `/Admin_App/commercial/delete/${propertyId}/`;
+
+            // 5. Send the AJAX request to Django
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server returned HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    // Show success popup
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: 'The commercial property has been deleted.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    
+                    // Smoothly remove the row from the table
+                    // Make sure your <tr> tag has id="row-{{ prop.id }}"
+                    const row = document.getElementById(`row-${propertyId}`);
+                    if (row) {
+                        row.style.transition = "all 0.4s ease";
+                        row.style.opacity = "0";
+                        row.style.transform = "translateX(-20px)";
+                        setTimeout(() => row.remove(), 400); // Remove after animation finishes
+                    } else {
+                        // Fallback if the row ID isn't found
+                        setTimeout(() => window.location.reload(), 1500); 
+                    }
+                    
+                } else {
+                    Swal.fire('Error!', data.message || 'Could not delete property.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error("Delete error:", error);
+                Swal.fire('Error!', `Server connection failed: ${error.message}`, 'error');
+            });
+        }
+    });
+}
 </script>
 
 <script>

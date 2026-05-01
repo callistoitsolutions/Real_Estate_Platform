@@ -353,6 +353,9 @@ urlpatterns = [
     path('residential_download_template/', views.download_residential_template, name='download_residential_template'),
    
    ################## END URL SECTION OF RENTAL RESIDENTIAL LISTING ###############################
+
+
+#########################START URL SECTION OF COMMERICIAL RENTAL LISTING##############################
    
     path('Admin_App/commercial/import-excel/', views.import_commercial_excel, name='import_commercial_excel'),
     path('Admin_App/commercial/download-template/', views.download_commercial_rental__template, name='download_commercial_rental__template'),
@@ -360,8 +363,12 @@ urlpatterns = [
     path('commercial/list/',           views.commercial_list,   name='commercial_list'),
     path('commercial/view/<int:pk>/',  views.commercial_view,   name='commercial_view'),
     path('commercial/edit/<int:pk>/',  views.commercial_edit,   name='commercial_edit'),
-    path('commercial/delete/<int:pk>/',views.commercial_delete, name='commercial_delete'),
+    path('commercial/delete/<int:pk>/', views.commercial_delete, name='commercial_delete'),
     path('commercial_rental_add', views.commercial_rental_add, name='commercial_rental_add'),
+
+
+#########################END URL SECTION OF COMMERICIAL RENTAL LISTING##############################
+
 
     ##############################START URL SECTION RENTAL PG_COLIVING LISTING#####################
 
@@ -369,11 +376,11 @@ urlpatterns = [
     path('Admin_App/pg/import-excel/',       views.import_pg_excel,       name='import_pg_excel'),
     path('Admin_App/pg/download-template/',  views.download_pg_template,  name='download_pg_template'),
     
-    path('Admin_App/pg/delete/<int:pk>/', views.pg_delete, name='pg_delete'),
+    
+    path('pg-coliving/view/<int:pk>/', views.pg_coliving_view, name='pg_coliving_view'),
 
+    path('pg-coliving/delete/<int:pk>/', views.pg_coliving_delete, name='pg_coliving_delete'),
 
-   
-    #path('Admin_App/pg/view/<int:pk>/', views.pg_view, name='pg_view'),
     path('Admin_App/pg/edit/<int:pk>/', views.pg_edit, name='pg_edit'),
     
      ##############################END URL SECTION RENTAL PG_COLIVING LISTING#####################

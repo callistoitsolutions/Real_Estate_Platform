@@ -1,0 +1,418 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<style>
+.page-wrap { max-width:1100px; margin:0 auto; padding:24px; font-family: 'Poppins', sans-serif;}
+
+/* ── Header ── */
+.pg-header { background:linear-gradient(135deg,#6366F1,#4F46E5); border-radius:16px; padding:26px 32px; margin-bottom:28px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; box-shadow:0 8px 32px rgba(99,102,241,.25); }
+.pg-header h1 { color:#fff; font-size:21px; font-weight:700; margin:0; text-transform: capitalize; }
+.pg-header p  { color:rgba(255,255,255,.8); margin:4px 0 0; font-size:13px; }
+.header-actions { display:flex; gap:10px; flex-wrap:wrap; }
+.btn-back { display:flex; align-items:center; gap:8px; padding:9px 18px; background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:8px; text-decoration:none; font-size:13px; font-weight:600; transition:background .2s; }
+.btn-back:hover { background:rgba(255,255,255,.25); color:#fff; }
+.btn-edit { display:flex; align-items:center; gap:8px; padding:9px 18px; background:#fff; color:#4F46E5; border:none; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none; transition:all .2s; cursor:pointer; }
+.btn-edit:hover { background:#EEF2FF; color:#4F46E5; }
+.btn-delete { display:flex; align-items:center; gap:8px; padding:9px 18px; background:rgba(255,255,255,.1); color:#fff; border:1px solid rgba(255,100,100,.5); border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; }
+.btn-delete:hover { background:rgba(255,50,50,.3); }
+
+/* ── Stats strip ── */
+.stats-strip { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px; margin-bottom:28px; }
+.stat-card { background:#fff; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,.07); padding:18px 20px; display:flex; align-items:center; gap:14px; }
+.stat-icon { width:42px; height:42px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; color:#fff; }
+.stat-val { font-size:18px; font-weight:800; color:#1e293b; line-height:1.1; }
+.stat-lbl { font-size:11px; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:.4px; margin-top:2px; }
+
+/* ── Section Cards ── */
+.card { background:#fff; border-radius:14px; box-shadow:0 2px 16px rgba(0,0,0,.07); margin-bottom:24px; overflow:hidden; }
+.card-head { background:linear-gradient(135deg,#f8fafc,#f1f5f9); border-bottom:2px solid #e2e8f0; padding:15px 24px; display:flex; align-items:center; gap:12px; }
+.card-icon { width:34px; height:34px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:14px; color:#fff; }
+.card-head h3 { margin:0; font-size:15px; font-weight:700; color:#1e293b; }
+.card-body { padding:24px; }
+
+/* ── Detail grid ── */
+.dg { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:0; }
+.dg .full { grid-column:1/-1; }
+.ditem { padding:14px 0; border-bottom:1px solid #f1f5f9; }
+.ditem:last-child { border-bottom:none; }
+.dlbl { font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.dval { font-size:14px; color:#1e293b; font-weight:500; word-break:break-word; text-transform: capitalize; }
+
+/* ── Badges & Chips ── */
+.badge { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+.badge-green  { background:#F0FDF4; color:#16A34A; }
+.badge-red    { background:#FEF2F2; color:#DC2626; }
+.badge-blue   { background:#EFF6FF; color:#2563EB; }
+.badge-gray   { background:#F1F5F9; color:#64748B; }
+
+.amen-chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; }
+.chip.on  { background:#F0FDF4; color:#16A34A; border:1px solid #bbf7d0; }
+.chip.info { background:#EFF6FF; color:#2563EB; border:1px solid #bfdbfe; }
+.chip.warn { background:#FFFBEB; color:#D97706; border:1px solid #FDE68A; }
+.chip.off { background:#f8fafc; color:#94a3b8; border:1px solid #e2e8f0; font-style: italic; }
+
+/* ── Room Cards ── */
+.room-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:15px; }
+.room-card { background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; padding:15px; }
+.room-card h4 { margin:0 0 10px 0; font-size:14px; font-weight:800; color:#0f172a; border-bottom:2px solid #e2e8f0; padding-bottom:8px;}
+.room-row { display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px; }
+.room-lbl { color:#64748b; font-weight:600; }
+.room-val { color:#0f172a; font-weight:700; }
+
+/* ── Media ── */
+.media-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; }
+.media-item { border-radius:10px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,.1); border:2px solid #f1f5f9; cursor: pointer; transition: 0.3s; }
+.media-item:hover { border-color: #6366F1; transform: translateY(-3px); }
+.media-item img { width:100%; height:160px; object-fit:cover; display:block; }
+.media-cap { padding:10px 14px; background:#f8fafc; font-size:12px; font-weight:600; color:#64748b; text-align: center; }
+.no-media { color:#94a3b8; font-style:italic; font-size:13px; background: #f8fafc; padding: 20px; border-radius: 8px; text-align: center; border: 2px dashed #e2e8f0;}
+
+@media(max-width:768px){ .page-wrap { padding:16px; } .dg { grid-template-columns:1fr 1fr; } }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<div class="main-content">
+<div class="page-wrap">
+
+<!-- ── Page Header ── -->
+<div class="pg-header">
+    <div>
+        <h1><i class="fas fa-home"></i>&nbsp; {{ pg.pg_name }} in {{ pg.locality }}</h1>
+        <p>{{ pg.city }} &nbsp;·&nbsp; Listed on {{ pg.created_at|date:"d M Y" }}</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'pg_list' %}" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+        <a href="{% url 'pg_edit' pg.id %}" class="btn-edit"><i class="fas fa-edit"></i> Edit</a>
+        <button class="btn-delete" onclick="deletePG({{ pg.id }})"><i class="fas fa-trash"></i> Delete</button>
+    </div>
+</div>
+
+<!-- ── Stats Strip ── -->
+<div class="stats-strip">
+    <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#6366F1,#4F46E5)"><i class="fas fa-bed"></i></div>
+        <div>
+            <div class="stat-val">{{ pg.total_beds }}</div>
+            <div class="stat-lbl">Total Beds</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#EC4899,#BE185D)"><i class="fas fa-users"></i></div>
+        <div>
+            <div class="stat-val">{{ pg.pg_for|default:"Any"|title }}</div>
+            <div class="stat-lbl">Allowed For</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#10B981,#047857)"><i class="fas fa-utensils"></i></div>
+        <div>
+            <div class="stat-val">{% if pg.meals_available %}Yes{% else %}No{% endif %}</div>
+            <div class="stat-lbl">Meals Provided</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#F59E0B,#B45309)"><i class="fas fa-lock"></i></div>
+        <div>
+            <div class="stat-val">{{ pg.minimum_stay|default:"1" }} mo</div>
+            <div class="stat-lbl">Minimum Stay</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Basic Information ── -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#6366F1,#4F46E5)"><i class="fas fa-info-circle"></i></div>
+        <h3>Basic Information</h3>
+    </div>
+    <div class="card-body">
+        <div class="dg">
+            <div class="ditem"><div class="dlbl">PG Name</div><div class="dval" style="font-weight:700;">{{ pg.pg_name }}</div></div>
+            <div class="ditem"><div class="dlbl">City</div><div class="dval">{{ pg.city }}</div></div>
+            <div class="ditem"><div class="dlbl">Locality</div><div class="dval">{{ pg.locality }}</div></div>
+            <div class="ditem"><div class="dlbl">Building / Project</div><div class="dval">{{ pg.building_name|default:"—" }}</div></div>
+            <div class="ditem full"><div class="dlbl">Full Address</div><div class="dval">{{ pg.property_address }}</div></div>
+            
+            <div class="ditem full">
+                <div class="dlbl mb-2">PG is For</div>
+                <div class="amen-chips">
+                    {% for item in pg_for_list %}<span class="chip info">{{ item }}</span>{% endfor %}
+                </div>
+            </div>
+            
+            <div class="ditem">
+                <div class="dlbl">Furnishing Type</div>
+                <div class="dval"><span class="badge badge-gray">{{ pg.furnishing_type|title }}</span></div>
+            </div>
+            
+            <div class="ditem">
+                <div class="dlbl">Sharing Type</div>
+                <div class="dval">{{ pg.sharing_type }}</div>
+            </div>
+            
+            <div class="ditem full">
+                <div class="dlbl mb-2">Best Suited For</div>
+                <div class="amen-chips">
+                    {% for item in best_suited_list %}<span class="chip warn">{{ item }}</span>{% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Room Details ── -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#10B981,#047857)"><i class="fa-solid fa-door-open"></i></div>
+        <h3>Room Details & Pricing</h3>
+    </div>
+    <div class="card-body">
+        <div class="room-wrap">
+            {% for room in parsed_rooms %}
+            <div class="room-card">
+                <h4><i class="fas fa-bed text-muted"></i> Room {{ forloop.counter }}</h4>
+                <div class="room-row"><span class="room-lbl">Type</span><span class="room-val">{{ room.type }}</span></div>
+                <div class="room-row"><span class="room-lbl">Total Beds</span><span class="room-val">{{ room.beds }}</span></div>
+                <div class="room-row"><span class="room-lbl">Rent / mo</span><span class="room-val" style="color:#DC2626;">₹{{ room.rent }}</span></div>
+                <div class="room-row"><span class="room-lbl">Deposit</span><span class="room-val">₹{{ room.deposit }}</span></div>
+                
+                {% if room.brokerage == 'Yes' %}
+                <div style="border-top:1px dashed #cbd5e1; margin-top:8px; padding-top:8px;">
+                    <div class="room-row"><span class="room-lbl">Brokerage %</span><span class="room-val">{{ room.brokerage_percent }}</span></div>
+                    {% if room.manual_brokerage %}<div class="room-row"><span class="room-lbl">Manual</span><span class="room-val">₹{{ room.manual_brokerage }}</span></div>{% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% empty %}
+                <p class="no-media">No room details added.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ── Rules & Policies ── -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#EF4444,#B91C1C)"><i class="fas fa-gavel"></i></div>
+        <h3>Rules & Policies</h3>
+    </div>
+    <div class="card-body">
+        <div class="dg mb-4">
+            <div class="ditem"><div class="dlbl">Available From</div><div class="dval">{{ pg.available_from|date:"d M Y" }}</div></div>
+            <div class="ditem"><div class="dlbl">Minimum Stay</div><div class="dval">{{ pg.minimum_stay }} months</div></div>
+            <div class="ditem"><div class="dlbl">Lock-in Period</div><div class="dval">{{ pg.lockin_period|default:"—" }} days</div></div>
+            <div class="ditem"><div class="dlbl">Notice Period</div><div class="dval">{{ pg.notice_period|default:"—" }} days</div></div>
+            <div class="ditem"><div class="dlbl">Managed By</div><div class="dval">{{ pg.property_managed_by|title|default:"—" }}</div></div>
+            <div class="ditem"><div class="dlbl">Manager Stays Here?</div><div class="dval">{% if pg.manager_stays %}Yes{% else %}No{% endif %}</div></div>
+        </div>
+
+        <div class="dlbl mb-2">Property Restrictions</div>
+        <div class="amen-chips">
+            {% if pg.non_veg_allowed %}<span class="chip on"><i class="fas fa-check"></i> Non-Veg Allowed</span>{% else %}<span class="chip off"><i class="fas fa-times"></i> Non-Veg</span>{% endif %}
+            {% if pg.opposite_sex_allowed %}<span class="chip on"><i class="fas fa-check"></i> Opposite Sex Allowed</span>{% else %}<span class="chip off"><i class="fas fa-times"></i> Opposite Sex</span>{% endif %}
+            {% if pg.any_time_allowed %}<span class="chip on"><i class="fas fa-check"></i> Any Time Entry</span>{% else %}<span class="chip off"><i class="fas fa-times"></i> Any Time Entry</span>{% endif %}
+            {% if pg.visitors_allowed %}<span class="chip on"><i class="fas fa-check"></i> Visitors Allowed</span>{% else %}<span class="chip off"><i class="fas fa-times"></i> Visitors</span>{% endif %}
+            {% if pg.guardian_allowed %}<span class="chip on"><i class="fas fa-check"></i> Guardians Allowed</span>{% else %}<span class="chip off"><i class="fas fa-times"></i> Guardians</span>{% endif %}
+            {% if pg.drinking_allowed %}<span class="chip on"><i class="fas fa-check"></i> Drinking Allowed</span>{% else %}<span class="chip off"><i class="fas fa-times"></i> Drinking</span>{% endif %}
+            {% if pg.smoking_allowed %}<span class="chip on"><i class="fas fa-check"></i> Smoking Allowed</span>{% else %}<span class="chip off"><i class="fas fa-times"></i> Smoking</span>{% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ── Meals & Food ── -->
+{% if pg.meals_available %}
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#F59E0B,#B45309)"><i class="fas fa-utensils"></i></div>
+        <h3>Meals & Food</h3>
+    </div>
+    <div class="card-body">
+        <div class="dlbl mb-2">Meal Offerings</div>
+        <div class="amen-chips mb-4">
+            {% for item in meal_offerings_list %}<span class="chip warn">{{ item }}</span>{% endfor %}
+        </div>
+        <div class="dlbl mb-2">Meal Speciality</div>
+        <div class="amen-chips">
+            {% for item in meal_speciality_list %}<span class="chip info">{{ item }}</span>{% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ── Amenities & Facilities ── -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#06B6D4,#0369A1)"><i class="fas fa-star"></i></div>
+        <h3>Amenities & Nearby Facilities</h3>
+    </div>
+    <div class="card-body">
+        <div class="dlbl mb-2">Common Areas</div>
+        <div class="amen-chips mb-4">
+            {% if common_area_list %}
+                {% for item in common_area_list %}<span class="chip on"><i class="fas fa-couch"></i> {{ item }}</span>{% endfor %}
+            {% else %}<span class="chip off">No common areas</span>{% endif %}
+        </div>
+
+        <div class="dlbl mb-2">PG Amenities</div>
+        <div class="amen-chips mb-4">
+            {% if amenities_list %}
+                {% for item in amenities_list %}<span class="chip on"><i class="fas fa-check-circle"></i> {{ item }}</span>{% endfor %}
+            {% else %}<span class="chip off">No specific amenities listed</span>{% endif %}
+        </div>
+
+        <div class="dlbl mb-2">Nearby Facilities</div>
+        <div class="amen-chips">
+            {% if facilities_list %}
+                {% for item in facilities_list %}<span class="chip info"><i class="fas fa-map-marker-alt"></i> {{ item }}</span>{% endfor %}
+            {% else %}<span class="chip off">No nearby facilities listed</span>{% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ── Media Gallery ── -->
+<div class="card">
+    <div class="card-head">
+        <div class="card-icon" style="background:linear-gradient(135deg,#EC4899,#831843)"><i class="fas fa-images"></i></div>
+        <h3>Media Gallery</h3>
+    </div>
+    <div class="card-body">
+        <div class="dlbl mb-2">Property Images</div>
+        {% if pg.images.all %}
+            <div class="media-grid mb-4">
+                {% for img in pg.images.all %}
+                <div class="media-item" onclick="previewMedia('image', '{{ img.image.url }}')">
+                    <img src="{{ img.image.url }}" alt="PG Image">
+                    <div class="media-cap">Image {{ forloop.counter }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-media mb-4"><i class="fas fa-image" style="font-size:2rem; margin-bottom:10px; display:block;"></i> No images uploaded</div>
+        {% endif %}
+
+        <div class="media-grid">
+            {% if pg.floor_plan %}
+            <div>
+                <div class="dlbl mb-2">Floor Plan</div>
+                <div class="media-item" onclick="previewMedia('image', '{{ pg.floor_plan.url }}')">
+                    <img src="{{ pg.floor_plan.url }}" alt="Floor Plan">
+                    <div class="media-cap"><i class="fas fa-map"></i> View Plan</div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if pg.video %}
+            <div>
+                <div class="dlbl mb-2">Property Video</div>
+                <div class="media-item" onclick="previewMedia('video', '{{ pg.video.url }}')">
+                    <div style="height:160px; background:#1e293b; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas fa-play-circle" style="font-size:3rem; color:#fff;"></i>
+                    </div>
+                    <div class="media-cap"><i class="fas fa-video"></i> Watch Video</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ── Owner & Uploader Details ── -->
+<div class="dg" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+    <!-- Owner -->
+    <div class="card" style="margin-bottom:0;">
+        <div class="card-head">
+            <div class="card-icon" style="background:linear-gradient(135deg,#6366F1,#3730A3)"><i class="fas fa-user-tie"></i></div>
+            <h3>Owner Details</h3>
+        </div>
+        <div class="card-body">
+            <div class="dg" style="grid-template-columns:1fr;">
+                <div class="ditem"><div class="dlbl">Name</div><div class="dval">{{ pg.owner_name|default:"—" }}</div></div>
+                <div class="ditem"><div class="dlbl">Contact</div><div class="dval"><a href="tel:{{ pg.contact_number }}" style="color:#4F46E5;font-weight:600;">{{ pg.contact_number|default:"—" }}</a></div></div>
+                <div class="ditem"><div class="dlbl">Email</div><div class="dval"><a href="mailto:{{ pg.email }}" style="color:#4F46E5;">{{ pg.email|default:"—" }}</a></div></div>
+                <div class="ditem"><div class="dlbl">Alt Contact</div><div class="dval">{{ pg.alternate_contact|default:"—" }}</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Uploader -->
+    <div class="card" style="margin-bottom:0;">
+        <div class="card-head">
+            <div class="card-icon" style="background:linear-gradient(135deg,#64748B,#1E293B)"><i class="fas fa-upload"></i></div>
+            <h3>Uploaded By</h3>
+        </div>
+        <div class="card-body">
+            <div class="dg" style="grid-template-columns:1fr;">
+                <div class="ditem"><div class="dlbl">Name</div><div class="dval">{{ pg.uploaded_by_name|default:"—" }}</div></div>
+                <div class="ditem"><div class="dlbl">Email</div><div class="dval">{{ pg.uploaded_by_email|default:"—" }}</div></div>
+                <div class="ditem"><div class="dlbl">Contact</div><div class="dval">{{ pg.uploaded_by_contact|default:"—" }}</div></div>
+                <div class="ditem"><div class="dlbl">Role</div>
+                    <div class="dval">
+                        {% if pg.uploaded_by_role %}<span class="badge badge-gray">{{ pg.uploaded_by_role }}</span>{% else %}—{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div><!-- end page-wrap -->
+</div><!-- end main-content -->
+
+<!-- Scripts -->
+<script>
+function previewMedia(type, url) {
+    let contentHtml = type === 'image' 
+        ? `<img src="${url}" style="width: 100%; max-height: 75vh; object-fit: contain; border-radius: 8px;">`
+        : `<video width="100%" controls autoplay style="max-height: 75vh; border-radius: 8px; background: #000;"><source src="${url}" type="video/mp4"></video>`;
+
+    Swal.fire({
+        html: contentHtml,
+        width: '800px',
+        showCloseButton: true,
+        showConfirmButton: false,
+        padding: '1em',
+        background: '#fff',
+        backdrop: 'rgba(0,0,0,0.9)',
+    });
+}
+
+function deletePG(propertyId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this! All associated rooms and images will be permanently deleted.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: '<i class="fas fa-trash-alt"></i> Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({ title: 'Deleting...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            const csrfToken = '{{ csrf_token }}';
+            const deleteUrl = `/Admin_App/pg-coliving/delete/${propertyId}/`; // Ensure this matches urls.py!
+
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire('Deleted!', 'Property has been removed.', 'success').then(() => {
+                        window.location.href = "{% url 'pg_list' %}"; // Redirect to your list page
+                    });
+                } else {
+                    Swal.fire('Error!', data.message || 'Could not delete property.', 'error');
+                }
+            })
+            .catch(err => Swal.fire('Error!', `Connection failed: ${err.message}`, 'error'));
+        }
+    });
+}
+</script>

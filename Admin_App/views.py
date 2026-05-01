@@ -4005,13 +4005,13 @@ def _date(val):
 
 
 
+
+
 def pg_list(request):
-
     if not request.session.get('Admin_id'):
-        return render(request,'home_page/Adminlogin.html')
+        return render(request, 'home_page/Adminlogin.html')
 
-    search = request.GET.get('search','')
-
+    search = request.GET.get('search', '')
     qs = PGColivingProperty.objects.all().order_by('-id')
 
     if search:
@@ -4026,19 +4026,54 @@ def pg_list(request):
         res = HttpResponse(content_type='text/csv')
         res['Content-Disposition'] = 'attachment; filename="pg.csv"'
         w = csv.writer(res)
-
-        w.writerow(["PG","City","Rent","Owner","Contact"])
-
+        w.writerow(["PG", "City", "Total Beds", "Owner", "Contact"])
         for p in qs:
-            w.writerow([p.pg_name,p.city,p.rent,p.owner_name,p.contact_number])
-
+            w.writerow([p.pg_name, p.city, p.total_beds, p.owner_name, p.contact_number])
         return res
 
-    paginator = Paginator(qs,10)
+    paginator = Paginator(qs, 10)
     page = paginator.get_page(request.GET.get('page'))
 
-    return render(request,'admin_user/Reports/Rental/pg_list.html',{
-        "page_obj":page
+    # ==========================================
+    # DASHBOARD AGGREGATION LOGIC
+    # ==========================================
+    
+    # 1. Get counts for property types
+    pg_count = PGColivingProperty.objects.count()
+    
+    try:
+        # Assuming you have these models imported
+        commercial_count = CommercialRentalProperty.objects.count()
+        # residential_count = ResidentialRentalProperty.objects.count() # Update with your actual model name
+        residential_count = 32 # Placeholder: replace with actual query
+    except NameError:
+        commercial_count = 0
+        residential_count = 0
+
+    total_properties = pg_count + commercial_count + residential_count
+
+    # 2. Get PG Specific Stats
+    total_pg_beds = PGColivingProperty.objects.aggregate(total=Sum('total_beds'))['total'] or 0
+    
+    # Pack data for charts (Converting to JSON for safe Javascript usage)
+    chart_data = {
+        "property_distribution": [residential_count, commercial_count, pg_count],
+        "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        "rental_income": [120000, 150000, 180000, 210000, 250000, 300000], # Mock data: replace with real monthly aggregation
+    }
+
+    return render(request, 'admin_user/Reports/Rental/pg_list.html', {
+        "page_obj": page,
+        "search": search,
+        
+        # Pass Stats to template
+        "total_properties": total_properties,
+        "residential_count": residential_count,
+        "commercial_count": commercial_count,
+        "pg_count": pg_count,
+        "total_pg_beds": total_pg_beds,
+        "active_listings": total_properties, # Assuming all are active for now
+        "chart_data_json": json.dumps(chart_data) # Send secure JSON to JS
     })
 
 
@@ -4242,103 +4277,213 @@ def download_pg_template(request):
     return response
 
 
-
 @csrf_exempt
 def pg_edit(request, pk):
-    session_id = request.session.get('Admin_id')
-    if not session_id:
-        return redirect('admin_login')
+    sid, admin_obj = _get_admin(request) # Use your standard auth check
+    if not sid:
+        return redirect('login') # Or your login route
 
-    prop = get_object_or_404(PGColivingProperty, pk=pk)
+    pg = get_object_or_404(PGColivingProperty, pk=pk)
 
     if request.method == "POST":
+        try:
+            def get_list(name):
+                return ",".join(request.POST.getlist(name))
 
-        def get_list(name):
-            return ",".join(request.POST.getlist(name))
+            # ✅ 1. ROOM LOGIC (MULTIPLE → TEXT)
+            room_types = request.POST.getlist("room_type[]")
+            beds = request.POST.getlist("room_beds[]")
+            rents = request.POST.getlist("room_rent[]")
+            deposits = request.POST.getlist("room_deposit[]")
+            brokerages = request.POST.getlist("room_brokerage[]")
+            brokerage_percents = request.POST.getlist("room_brokerage_percent[]")
+            manual_brokerages = request.POST.getlist("room_manual_brokerage[]")
 
-        # BASIC
-        prop.city = request.POST.get("city")
-        prop.building_name = request.POST.get("building")
-        prop.locality = request.POST.get("locality")
-        prop.pg_name = request.POST.get("pg_name")
-        prop.property_address = request.POST.get("address")
+            room_data = []
+            for i in range(len(room_types)):
+                room_data.append(
+                    f"{room_types[i]}|{beds[i]}|{rents[i]}|{deposits[i]}|"
+                    f"{brokerages[i] if i < len(brokerages) else ''}|"
+                    f"{brokerage_percents[i] if i < len(brokerage_percents) else ''}|"
+                    f"{manual_brokerages[i] if i < len(manual_brokerages) else ''}"
+                )
 
-        prop.total_beds = request.POST.get("total_beds")
+            pg.room_details = ",".join(room_data)
 
-        prop.pg_for = request.POST.get("pg_for")
-        prop.furnishing_type = request.POST.get("furnishing_type")
-        prop.best_suited_for = request.POST.get("best_suited_for")
+            # ✅ 2. BASIC
+            pg.city = request.POST.get("city")
+            pg.building_name = request.POST.get("building_name")
+            pg.locality = request.POST.get("locality")
+            pg.pg_name = request.POST.get("pg_name")
+            pg.property_address = request.POST.get("property_address")
+            pg.total_beds = request.POST.get("total_beds")
 
-        # ROOM (first entry only)
-        prop.room_type = request.POST.getlist("room_type[]")[0]
-        prop.room_total_beds = request.POST.getlist("room_beds[]")[0]
-        prop.rent = request.POST.getlist("room_rent[]")[0]
-        prop.security_deposit = request.POST.getlist("room_deposit[]")[0]
+            pg.pg_for = request.POST.get("pg_for")
+            pg.furnishing_type = request.POST.get("furnishing_type")
+            pg.sharing_type = request.POST.get("sharing_type")
+            pg.best_suited_for = request.POST.get("best_suited_for")
 
-        prop.brokerage = True if request.POST.getlist("room_brokerage[]")[0] == "Yes" else False
-        prop.brokerage_percentage = request.POST.getlist("room_brokerage_percent[]")[0]
-        prop.manual_brokerage = request.POST.getlist("room_manual_brokerage[]")[0]
+            # ✅ 3. FACILITIES (Lists)
+            pg.common_area = get_list("common_area[]")
+            pg.amenities = get_list("amenities[]")
+            pg.nearby_facilities = get_list("facilities[]")
 
-        # MULTI SELECT
-        prop.room_facilities = get_list("room_facilities_1[]")
-        prop.common_area = get_list("common_area[]")
-        prop.amenities = get_list("amenities[]")
-        prop.nearby_facilities = get_list("facilities[]")
+            # ✅ 4. MEALS & RULES (Booleans & Toggles)
+            pg.meals_available = True if request.POST.get("meals_available") else False
+            pg.meal_offerings = request.POST.get("meal_offerings")
+            pg.meal_speciality = request.POST.get("meal_speciality")
 
-        # MEALS
-        prop.meals_available = True if request.POST.get("meals_available") else False
-        prop.meal_offerings = request.POST.get("meal_offerings")
-        prop.meal_speciality = request.POST.get("meal_speciality")
+            pg.notice_period = request.POST.get("notice_period") or None
+            pg.lockin_period = request.POST.get("lockin_period") or None
+            pg.minimum_stay = request.POST.get("minimum_stay")
+            pg.available_from = request.POST.get("available_from")
 
-        # RULES
-        prop.notice_period = request.POST.get("notice_period")
-        prop.lockin_period = request.POST.get("lockin_period")
-        prop.minimum_stay = request.POST.get("min_stay")
-        prop.available_from = request.POST.get("available_from")
+            pg.property_managed_by = request.POST.get("property_managed_by")
+            pg.manager_stays = True if request.POST.get("manager_stays") == "true" else False
 
-        prop.property_managed_by = request.POST.get("managed_by")
-        prop.manager_stays = True if request.POST.get("manager_stays") == "Yes" else False
+            pg.non_veg_allowed = True if request.POST.get("non_veg_allowed") else False
+            pg.opposite_sex_allowed = True if request.POST.get("opposite_sex_allowed") else False
+            pg.any_time_allowed = True if request.POST.get("any_time_allowed") else False
+            pg.visitors_allowed = True if request.POST.get("visitors_allowed") else False
+            pg.guardian_allowed = True if request.POST.get("guardian_allowed") else False
+            pg.drinking_allowed = True if request.POST.get("drinking_allowed") else False
+            pg.smoking_allowed = True if request.POST.get("smoking_allowed") else False
 
-        prop.non_veg_allowed = True if request.POST.get("nonveg_allowed") else False
-        prop.opposite_sex_allowed = True if request.POST.get("opposite_sex_allowed") else False
-        prop.any_time_allowed = True if request.POST.get("anytime_allowed") else False
-        prop.visitors_allowed = True if request.POST.get("visitors_allowed") else False
-        prop.guardian_allowed = True if request.POST.get("guardian_allowed") else False
-        prop.drinking_allowed = True if request.POST.get("drinking_allowed") else False
-        prop.smoking_allowed = True if request.POST.get("smoking_allowed") else False
+            # ✅ 5. CONTACT & UPLOADER
+            pg.owner_name = request.POST.get("owner_name")
+            pg.contact_number = request.POST.get("contact_number")
+            pg.email = request.POST.get("email")
+            pg.alternate_contact = request.POST.get("alternate_contact")
 
-        # FILES (update only if new uploaded)
-        if request.FILES.get("floor_plan"):
-            prop.floor_plan = request.FILES.get("floor_plan")
+            # We usually keep original uploader data, but map it if needed
+            pg.uploaded_by_name = request.POST.get("uploaded_by_name", pg.uploaded_by_name)
+            pg.uploaded_by_email = request.POST.get("uploaded_by_email", pg.uploaded_by_email)
+            pg.uploaded_by_contact = request.POST.get("uploaded_by_contact", pg.uploaded_by_contact)
+            pg.uploaded_by_role = request.POST.get("uploaded_by_role", pg.uploaded_by_role)
 
-        if request.FILES.get("property_video"):
-            prop.video = request.FILES.get("property_video")
+            # ✅ 6. MEDIA
+            if "floor_plan" in request.FILES:
+                pg.floor_plan = request.FILES["floor_plan"]
+            if "video" in request.FILES:
+                pg.video = request.FILES["video"]
 
-        # CONTACT
-        prop.owner_name = request.POST.get("owner_name")
-        prop.contact_number = request.POST.get("contact_number")
-        prop.email = request.POST.get("email")
-        prop.alternate_contact = request.POST.get("alternate_contact")
+            pg.save()
 
-        prop.save()
+            # ✅ 7. MULTIPLE IMAGES SAVE
+            images = request.FILES.getlist("property_images[]")
+            current_image_count = PGPropertyImage.objects.filter(property=pg).count()
+            
+            for img in images:
+                if current_image_count < 10:
+                    PGPropertyImage.objects.create(property=pg, image=img)
+                    current_image_count += 1
 
-        return JsonResponse({"status": "success", "message": "PG Updated Successfully"})
+            return JsonResponse({
+                "status": "success",
+                "message": "PG Updated Successfully",
+                "redirect_url": reverse('pg_list') # Replace with your actual list URL name
+            })
 
-    return render(request, "admin_user/Reports/Rental/pg_edit.html", {"prop": prop})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
+
+    # ========== GET REQUEST (LOAD FORM) ==========
+    
+    # Parse the custom room_details string into a list of dictionaries for the template
+    parsed_rooms = []
+    if pg.room_details:
+        room_strings = pg.room_details.split(',')
+        for rs in room_strings:
+            parts = rs.split('|')
+            if len(parts) >= 4:
+                parsed_rooms.append({
+                    'type': parts[0],
+                    'beds': parts[1],
+                    'rent': parts[2],
+                    'deposit': parts[3],
+                    'brokerage': parts[4] if len(parts) > 4 else '',
+                    'brokerage_percent': parts[5] if len(parts) > 5 else '',
+                    'manual_brokerage': parts[6] if len(parts) > 6 else '',
+                })
+
+    return render(request, "admin_user/Reports/Rental/pg_edit.html", {
+        "admin_obj": admin_obj,
+        "pg": pg,
+        "parsed_rooms": parsed_rooms,
+        "ameneties_obj": Ameneties_Details.objects.all(),
+        "facilities_obj": Facilities_Details.objects.all(),
+    })
+
+   
+
+
 
 
 
 
 @require_POST
-def pg_delete(request, pk):
+def pg_coliving_delete(request, pk):
+    # Check if admin/user is logged in (using your standard auth logic)
+    sid, _ = _get_admin(request)
+    if not sid:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 
-    if not request.session.get('Admin_id'):
-        return JsonResponse({'status':'error'}, status=401)
+    try:
+        # Find the PG and delete it
+        pg = get_object_or_404(PGColivingProperty, pk=pk)
+        pg.delete()
+        
+        return JsonResponse({'status': 'success'})
+        
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
-    obj = get_object_or_404(PGColivingProperty, pk=pk)
-    obj.delete()
 
-    return JsonResponse({'status':'success'})
+
+
+def pg_coliving_view(request, pk):
+    sid, admin_obj = _get_admin(request) # Use your standard auth check
+    if not sid:
+        return redirect('login')
+
+    pg = get_object_or_404(PGColivingProperty, pk=pk)
+
+    # 1. Parse Room Details
+    parsed_rooms = []
+    if pg.room_details:
+        room_strings = pg.room_details.split(',')
+        for rs in room_strings:
+            parts = rs.split('|')
+            if len(parts) >= 4:
+                parsed_rooms.append({
+                    'type': parts[0].title(),
+                    'beds': parts[1],
+                    'rent': parts[2],
+                    'deposit': parts[3],
+                    'brokerage': parts[4] if len(parts) > 4 else '',
+                    'brokerage_percent': parts[5] if len(parts) > 5 else '',
+                    'manual_brokerage': parts[6] if len(parts) > 6 else '',
+                })
+
+    # 2. Parse Comma-Separated Strings into Lists for "Chip" styling in HTML
+    def split_to_list(db_string):
+        return [x.strip() for x in db_string.split(',')] if db_string else []
+
+    context = {
+        'admin_obj': admin_obj,
+        'pg': pg,
+        'parsed_rooms': parsed_rooms,
+        'pg_for_list': split_to_list(pg.pg_for),
+        'sharing_type_list': split_to_list(pg.sharing_type),
+        'best_suited_list': split_to_list(pg.best_suited_for),
+        'common_area_list': split_to_list(pg.common_area),
+        'amenities_list': split_to_list(pg.amenities),
+        'facilities_list': split_to_list(pg.nearby_facilities),
+        'meal_offerings_list': split_to_list(pg.meal_offerings),
+        'meal_speciality_list': split_to_list(pg.meal_speciality),
+    }
+
+    return render(request, "admin_user/Reports/Rental/pg_coliving_view.html", context)
 
 ###############################END VIEW SECTION OF RENTAL PG_COLIVING PROPERTY###############################
 

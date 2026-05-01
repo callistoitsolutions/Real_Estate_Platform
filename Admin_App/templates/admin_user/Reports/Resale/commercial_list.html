@@ -473,7 +473,92 @@ $(document).ready(function () {
     });
 });
 </script>
-<!-- Add this to your <script> section at the bottom -->
+
+
+<!-- Include SweetAlert2 if you haven't already -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+function Delete_Property(propertyId) {
+    // 1. Show SweetAlert confirmation dialog
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this! All associated images will also be deleted.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444', // Matches your button's red color
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: '<i class="fas fa-trash"></i> Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            
+            // 2. Show loading state
+            Swal.fire({ 
+                title: 'Deleting...', 
+                allowOutsideClick: false, 
+                didOpen: () => { Swal.showLoading(); } 
+            });
+
+            // 3. Get CSRF Token
+            // This looks for a hidden input field named csrfmiddlewaretoken
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+
+            // 4. Determine the URL
+            // Make sure this matches your urls.py path exactly!
+            const deleteUrl = `/Admin_App/commercial/delete/${propertyId}/`;
+
+            // 5. Send the AJAX request to Django
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    // Success alert
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: 'Property has been removed.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    
+                    // Smoothly remove the row from the table
+                    // Note: Ensure your <tr> tags have an id like id="row-{{ prop.id }}"
+                    const row = document.getElementById(`row-${propertyId}`);
+                    if (row) {
+                        row.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+                        row.style.opacity = "0";
+                        row.style.transform = "translateX(-20px)";
+                        setTimeout(() => row.remove(), 400);
+                    } else {
+                        // Fallback: reload page if row ID is missing
+                        setTimeout(() => window.location.reload(), 1500); 
+                    }
+                } else {
+                    Swal.fire('Error!', data.message || 'Could not delete property.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error("Delete error:", error);
+                Swal.fire('Error!', `Connection failed: ${error.message}`, 'error');
+            });
+        }
+    });
+}
+</script>
+
+
+
 <script>
 function openGallery(element) {
     const rawData = element.getAttribute('data-images');

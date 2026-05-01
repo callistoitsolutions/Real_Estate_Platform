@@ -22,108 +22,166 @@
                 </div>
             </div>
 
-            <!-- Statistics Cards -->
-            <div class="stats-grid">
-                <div class="stat-card primary">
-                    <div class="stat-icon primary"><i class="fas fa-home"></i></div>
-                    <div class="stat-value">48</div>
-                    <div class="stat-label">Total Properties</div>
-                    <span class="stat-change positive"><i class="fas fa-arrow-up"></i> +12%</span>
-                </div>
-                <div class="stat-card success">
-                    <div class="stat-icon success"><i class="fas fa-building"></i></div>
-                    <div class="stat-value">32</div>
-                    <div class="stat-label">Residential</div>
-                    <span class="stat-change positive"><i class="fas fa-arrow-up"></i> +8%</span>
-                </div>
-                <div class="stat-card warning">
-                    <div class="stat-icon warning"><i class="fas fa-briefcase"></i></div>
-                    <div class="stat-value">12</div>
-                    <div class="stat-label">Commercial</div>
-                    <span class="stat-change positive"><i class="fas fa-arrow-up"></i> +5%</span>
-                </div>
-                <div class="stat-card info">
-                    <div class="stat-icon info"><i class="fas fa-bed"></i></div>
-                    <div class="stat-value">4</div>
-                    <div class="stat-label">PG/Co-living</div>
-                    <span class="stat-change positive"><i class="fas fa-arrow-up"></i> +15%</span>
-                </div>
-                <div class="stat-card danger">
-                    <div class="stat-icon danger" style="background: var(--success-gradient);">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-value">42</div>
-                    <div class="stat-label">Active Listings</div>
-                    <span class="stat-change positive"><i class="fas fa-chart-line"></i> Good</span>
-                </div>
-                <div class="stat-card success">
-                    <div class="stat-icon success" style="background: var(--dark-gradient);">
-                        <i class="fas fa-rupee-sign"></i>
-                    </div>
-                    <div class="stat-value">₹12.5L</div>
-                    <div class="stat-label">Monthly Revenue</div>
-                    <span class="stat-change positive"><i class="fas fa-arrow-up"></i> +20%</span>
-                </div>
-            </div>
+         <!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-            <!-- Analytics Section with Charts -->
-            <div class="analytics-section">
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Property Distribution</h3>
-                    </div>
-                    <div class="chart-wrapper"><canvas id="propertyPieChart"></canvas></div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Monthly Rental Income</h3>
-                        <div class="chart-filters">
-                            <button class="filter-btn active">2026</button>
-                            <button class="filter-btn">2025</button>
-                        </div>
-                    </div>
-                    <div class="chart-wrapper"><canvas id="rentalIncomeChart"></canvas></div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Occupancy Status</h3>
-                    </div>
-                    <div class="chart-wrapper"><canvas id="occupancyDoughnutChart"></canvas></div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Rent Range Distribution</h3>
-                    </div>
-                    <div class="chart-wrapper"><canvas id="rentRangeChart"></canvas></div>
-                </div>
-            </div>
+<div class="stats-grid">
+    <div class="stat-card primary">
+        <div class="stat-icon primary"><i class="fas fa-home"></i></div>
+        <div class="stat-value">{{ total_properties }}</div>
+        <div class="stat-label">Total Properties</div>
+    </div>
+    
+    <div class="stat-card success">
+        <div class="stat-icon success"><i class="fas fa-building"></i></div>
+        <div class="stat-value">{{ residential_count }}</div>
+        <div class="stat-label">Residential</div>
+    </div>
+    
+    <div class="stat-card warning">
+        <div class="stat-icon warning"><i class="fas fa-briefcase"></i></div>
+        <div class="stat-value">{{ commercial_count }}</div>
+        <div class="stat-label">Commercial</div>
+    </div>
+    
+    <div class="stat-card info">
+        <div class="stat-icon info"><i class="fas fa-bed"></i></div>
+        <div class="stat-value">{{ pg_count }}</div>
+        <div class="stat-label">PG/Co-living</div>
+    </div>
+    
+    <div class="stat-card danger">
+        <div class="stat-icon danger" style="background: var(--success-gradient);">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-value">{{ active_listings }}</div>
+        <div class="stat-label">Active Listings</div>
+    </div>
+    
+    <div class="stat-card success">
+        <div class="stat-icon success" style="background: var(--dark-gradient);">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value">{{ total_pg_beds }}</div>
+        <div class="stat-label">Total PG Beds Available</div>
+    </div>
+</div>
 
-            <!-- Quick Stats Section -->
-            <div class="quick-stats">
-                <h3 class="quick-stats-title"><i class="fas fa-chart-line"></i> Performance Insights</h3>
-                <div class="stats-row">
-                    <div class="stat-item">
-                        <div class="stat-item-icon" style="color: #10b981;"><i class="fas fa-user-check"></i></div>
-                        <div class="stat-item-value">38</div>
-                        <div class="stat-item-label">Total Tenants</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-item-icon" style="color: #3b82f6;"><i class="fas fa-calendar-check"></i></div>
-                        <div class="stat-item-value">95%</div>
-                        <div class="stat-item-label">Collection Rate</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-item-icon" style="color: #f59e0b;"><i class="fas fa-clock"></i></div>
-                        <div class="stat-item-value">3</div>
-                        <div class="stat-item-label">Pending Payments</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-item-icon" style="color: #8b5cf6;"><i class="fas fa-tools"></i></div>
-                        <div class="stat-item-value">5</div>
-                        <div class="stat-item-label">Maintenance Req</div>
-                    </div>
-                </div>
+<!-- Analytics Section with Charts -->
+<div class="analytics-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-top: 30px;">
+    
+    <div class="chart-container" style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <div class="chart-header">
+            <h3 class="chart-title" style="font-size: 1rem; color: #2d3748; margin-bottom: 15px;"><i class="fas fa-chart-pie text-primary"></i> Property Distribution</h3>
+        </div>
+        <div class="chart-wrapper" style="height: 250px; position: relative;">
+            <canvas id="propertyPieChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-container" style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 class="chart-title" style="font-size: 1rem; color: #2d3748; margin: 0;"><i class="fas fa-chart-bar text-success"></i> Monthly Rental Income</h3>
+            <div class="chart-filters">
+                <button class="filter-btn active" style="border: 1px solid #e2e8f0; background: #f8fafc; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">2026</button>
             </div>
+        </div>
+        <div class="chart-wrapper" style="height: 250px; position: relative;">
+            <canvas id="rentalIncomeChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<!-- Quick Stats Section -->
+<div class="quick-stats" style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px;">
+    <h3 class="quick-stats-title" style="font-size: 1.1rem; color: #2d3748; margin-bottom: 20px;"><i class="fas fa-chart-line text-info"></i> Performance Insights</h3>
+    <div class="stats-row" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+        <div class="stat-item" style="text-align: center; flex: 1;">
+            <div class="stat-item-icon" style="color: #10b981; font-size: 1.5rem; margin-bottom: 8px;"><i class="fas fa-user-check"></i></div>
+            <div class="stat-item-value" style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">38</div>
+            <div class="stat-item-label" style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Total Tenants</div>
+        </div>
+        <div class="stat-item" style="text-align: center; flex: 1;">
+            <div class="stat-item-icon" style="color: #3b82f6; font-size: 1.5rem; margin-bottom: 8px;"><i class="fas fa-calendar-check"></i></div>
+            <div class="stat-item-value" style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">95%</div>
+            <div class="stat-item-label" style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Collection Rate</div>
+        </div>
+        <div class="stat-item" style="text-align: center; flex: 1;">
+            <div class="stat-item-icon" style="color: #f59e0b; font-size: 1.5rem; margin-bottom: 8px;"><i class="fas fa-clock"></i></div>
+            <div class="stat-item-value" style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">3</div>
+            <div class="stat-item-label" style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Pending Payments</div>
+        </div>
+        <div class="stat-item" style="text-align: center; flex: 1;">
+            <div class="stat-item-icon" style="color: #8b5cf6; font-size: 1.5rem; margin-bottom: 8px;"><i class="fas fa-tools"></i></div>
+            <div class="stat-item-value" style="font-size: 1.5rem; font-weight: 800; color: #1e293b;">5</div>
+            <div class="stat-item-label" style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase;">Maintenance Req</div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- CHART INITIALIZATION SCRIPT -->
+<!-- ============================================== -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Safely load the JSON data passed from Django View
+    const chartData = JSON.parse('{{ chart_data_json|escapejs }}');
+
+    // 2. Property Distribution Pie Chart
+    const pieCtx = document.getElementById('propertyPieChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Residential', 'Commercial', 'PG/Co-living'],
+            datasets: [{
+                data: chartData.property_distribution,
+                backgroundColor: ['#10b981', '#f59e0b', '#3b82f6'],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right' }
+            },
+            cutout: '70%'
+        }
+    });
+
+    // 3. Monthly Rental Income Bar Chart
+    const barCtx = document.getElementById('rentalIncomeChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: chartData.months,
+            datasets: [{
+                label: 'Income (₹)',
+                data: chartData.rental_income,
+                backgroundColor: '#6366f1',
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    grid: { borderDash: [5, 5], color: '#e2e8f0' },
+                    ticks: { callback: function(value) { return '₹' + (value/1000) + 'k'; } }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+});
+</script>
 
             <!-- Properties Table -->
             <div class="properties-section">
@@ -132,11 +190,15 @@
                 </div>
              
                 <div class="table-responsive" style="overflow-x: auto;">
-   <table class="properties-table" style="min-width: 1800px; width: 100%;">
+   
+                    <table class="properties-table" style="min-width: 1800px; width: 100%;">
 <thead>
 <tr>
-<th>#</th>
-<th>Image</th>
+<th>Sr.No</th>
+
+<th>Images</th>
+<th>Floor Plan</th>
+<th>Video</th>
 
 <!-- BASIC -->
 <th>City</th>
@@ -148,19 +210,13 @@
 <th>Total Beds</th>
 <th>PG For</th>
 <th>Furnishing</th>
+<th>Sharing</th>
 <th>Best For</th>
 
-<!-- ROOM -->
-<th>Room Type</th>
-<th>Room Beds</th>
-<th>Rent</th>
-<th>Security</th>
-<th>Brokerage</th>
-<th>Brok %</th>
-<th>Manual Brok</th>
+<!-- ROOM (NEW) -->
+<th>Room Details</th>
 
-<!-- ✅ TEXT BASED FIELDS -->
-<th>Room Facilities</th>
+<!-- FACILITIES -->
 <th>Common Area</th>
 <th>Amenities</th>
 <th>Nearby</th>
@@ -193,12 +249,6 @@
 <th>Email</th>
 <th>Alt Contact</th>
 
-<!-- UPLOADED -->
-<th>Uploaded By</th>
-<th>Up Email</th>
-<th>Up Contact</th>
-<th>Role</th>
-
 <th>Added</th>
 <th>Actions</th>
 </tr>
@@ -210,12 +260,35 @@
 
 <td>{{ forloop.counter }}</td>
 
+<!-- IMAGES -->
+<td>
+{% if prop.images.all %}
+<img src="{{ prop.images.first.image.url }}" width="50"
+     onclick="openImagePreview('{{ prop.images.first.image.url }}')">
+<div>{{ prop.images.count }} Photos</div>
+{% else %}
+—
+{% endif %}
+</td>
+
+<!-- FLOOR PLAN -->
 <td>
 {% if prop.floor_plan %}
-<img src="{{ prop.floor_plan.url }}" style="width:50px;height:40px;">
-{% else %}
-<img src="https://via.placeholder.com/50">
-{% endif %}
+<a href="{{ prop.floor_plan.url }}" target="_blank"
+   onclick="openImagePreview('{{ prop.floor_plan.url }}'); return false;">
+📄 View
+</a>
+{% else %}—{% endif %}
+</td>
+
+<!-- VIDEO -->
+<td>
+{% if prop.video %}
+<a href="{{ prop.video.url }}" target="_blank"
+   onclick="openVideoPreview('{{ prop.video.url }}'); return false;">
+🎥 Play
+</a>
+{% else %}—{% endif %}
 </td>
 
 <!-- BASIC -->
@@ -228,22 +301,18 @@
 <td>{{ prop.total_beds }}</td>
 <td>{{ prop.pg_for }}</td>
 <td>{{ prop.furnishing_type }}</td>
+<td>{{ prop.sharing_type }}</td>
 <td>{{ prop.best_suited_for }}</td>
 
-<!-- ROOM -->
-<td>{{ prop.room_type }}</td>
-<td>{{ prop.room_total_beds }}</td>
-<td>₹{{ prop.rent }}</td>
-<td>₹{{ prop.security_deposit }}</td>
-<td>{{ prop.brokerage|yesno:"Yes,No" }}</td>
-<td>{{ prop.brokerage_percentage|default:"—" }}</td>
-<td>{{ prop.manual_brokerage|default:"—" }}</td>
+<!-- ROOM DETAILS -->
+<td style="max-width:300px; white-space: pre-wrap;">
+{{ prop.room_details }}
+</td>
 
-<!-- ✅ TEXT FIELDS (FIXED) -->
-<td style="max-width:200px;">{{ prop.room_facilities|default:"—" }}</td>
-<td style="max-width:200px;">{{ prop.common_area|default:"—" }}</td>
-<td style="max-width:200px;">{{ prop.amenities|default:"—" }}</td>
-<td style="max-width:200px;">{{ prop.nearby_facilities|default:"—" }}</td>
+<!-- FACILITIES -->
+<td>{{ prop.common_area }}</td>
+<td>{{ prop.amenities }}</td>
+<td>{{ prop.nearby_facilities }}</td>
 
 <!-- MEALS -->
 <td>{{ prop.meals_available|yesno:"Yes,No" }}</td>
@@ -273,19 +342,24 @@
 <td>{{ prop.email }}</td>
 <td>{{ prop.alternate_contact }}</td>
 
-<!-- UPLOADED -->
-<td>{{ prop.uploaded_by_name }}</td>
-<td>{{ prop.uploaded_by_email }}</td>
-<td>{{ prop.uploaded_by_contact }}</td>
-<td>{{ prop.uploaded_by_role }}</td>
-
 <td>{{ prop.created_at|date:"d M Y" }}</td>
 
-<!-- ACTIONS -->
 <td>
-<button onclick="viewPG({{ prop.id }})">👁</button>
-<button onclick="editPG({{ prop.id }})">✏</button>
-<button onclick="deletePG({{ prop.id }})">🗑</button>
+    <div style="display: flex; gap: 5px;">
+        <!-- View Button -->
+      <a class="btn-action btn-view" title="View" href="{% url 'pg_coliving_view' prop.id %}">
+            <i class="fas fa-eye"></i>
+        </a>
+        <!-- Edit Button -->
+        <a class="btn-action btn-edit" title="Edit" href="{% url 'pg_edit' prop.id %}">
+            <i class="fas fa-edit"></i>
+        </a>
+        
+        <!-- Delete Button -->
+        <button type="button" class="btn-action btn-delete" title="Delete" onclick="deletePG({{ prop.id }})">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </div>
 </td>
 
 </tr>
@@ -534,9 +608,111 @@
             </div>
         </div>
     </div>
+<div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000000cc; z-index:9999;">
+    <span onclick="closePreview()" style="position:absolute;top:20px;right:30px;color:white;font-size:30px;cursor:pointer;">✖</span>
+
+    <img id="previewImage" style="display:none; max-width:80%; margin:auto; margin-top:5%;">
+    <video id="previewVideo" controls style="display:none; max-width:80%; margin:auto; margin-top:5%;"></video>
+</div>
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Ensure SweetAlert2 is loaded on the page -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+function deletePG(propertyId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this! All associated rooms and images will be permanently deleted.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444', // Red for delete
+        cancelButtonColor: '#94a3b8',  // Grey for cancel
+        confirmButtonText: '<i class="fas fa-trash-alt"></i> Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            
+            // Show loading spinner
+            Swal.fire({ 
+                title: 'Deleting...', 
+                allowOutsideClick: false, 
+                didOpen: () => { Swal.showLoading(); } 
+            });
+
+            // Grab CSRF token
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+
+            // Define the URL (Must match your urls.py)
+            const deleteUrl = `/Admin_App/pg-coliving/delete/${propertyId}/`;
+
+            // Send AJAX request
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: 'The PG property has been removed.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    
+                    // Smoothly fade out the row
+                    const row = document.getElementById(`row-${propertyId}`);
+                    if (row) {
+                        row.style.transition = "all 0.4s ease";
+                        row.style.opacity = "0";
+                        row.style.transform = "translateX(-20px)";
+                        setTimeout(() => row.remove(), 400);
+                    } else {
+                        setTimeout(() => window.location.reload(), 1500); 
+                    }
+                } else {
+                    Swal.fire('Error!', data.message || 'Could not delete PG.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error("Delete error:", error);
+                Swal.fire('Error!', `Server connection failed: ${error.message}`, 'error');
+            });
+        }
+    });
+}
+</script>
+    <script>
+
+        function openImagePreview(src){
+    document.getElementById("previewModal").style.display = "block";
+    document.getElementById("previewImage").src = src;
+    document.getElementById("previewImage").style.display = "block";
+    document.getElementById("previewVideo").style.display = "none";
+}
+
+function openVideoPreview(src){
+    document.getElementById("previewModal").style.display = "block";
+    document.getElementById("previewVideo").src = src;
+    document.getElementById("previewVideo").style.display = "block";
+    document.getElementById("previewImage").style.display = "none";
+}
+
+function closePreview(){
+    document.getElementById("previewModal").style.display = "none";
+}
+
+</script>
+
     <script>
         $("#Rent").addClass("active");
 
