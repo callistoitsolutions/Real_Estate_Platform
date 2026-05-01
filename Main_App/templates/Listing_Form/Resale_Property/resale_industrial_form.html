@@ -7,22 +7,31 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{
-  --pr:#f97316;--pr2:#ea580c;--sec:#0f172a;--dark:#020617;
-  --muted:#64748b;--border:#e2e8f0;--card:#fff;--bg:#f8fafc;
-  --success:#10b981;--info:#3b82f6;--warn:#f59e0b;
+:root {
+  --primary: #006ce4; 
+  --primary-dark: #0050a8;
+  --pr: #f97316;
+  --pr2: #ea580c;
+  --sec: #1e293b;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --card: #ffffff;
+  --bg: #f8fafc;
+  --success: #10b981;
+  --info: #3b82f6;
+  --warn: #f59e0b;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e293b;}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 
-/* NAV */
-.topnav{background:var(--dark);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.4);}
-.logo{font-weight:900;font-size:1.2rem;color:#fff;text-decoration:none;display:flex;align-items:center;gap:6px;}
-.logo span{color:var(--pr);}
-.nav-chip{font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(249,115,22,.15);color:var(--pr);border:1px solid rgba(249,115,22,.3);}
-.nav-back{margin-left:auto;font-size:.78rem;font-weight:700;color:rgba(255,255,255,.6);text-decoration:none;display:flex;align-items:center;gap:5px;}
-.nav-back:hover{color:var(--pr);}
+/* SUB-HEADER FOR CONTEXT */
+.sub-header { background: white; border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
+.sub-header-left { display: flex; align-items: center; gap: 8px; }
+.nav-chip { font-size: .72rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: rgba(249,115,22,.15); color: var(--pr); border: 1px solid rgba(249,115,22,.3); }
+.nav-back { font-weight: 700; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+.nav-back:hover { color: var(--primary-dark); }
 
 /* PAGE LAYOUT */
 .page-wrap{max-width:1220px;margin:0 auto;padding:28px 20px 60px;display:grid;grid-template-columns:1fr 320px;gap:24px;}
@@ -47,7 +56,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 
 /* CARD */
 .form-card{background:white;border-radius:16px;border:1px solid var(--border);
-  padding:28px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+  padding:28px;box-shadow:0 4px 12px rgba(0,0,0,.03);}
 .card-head{margin-bottom:22px;}
 .card-head h2{font-size:1.05rem;font-weight:900;color:var(--sec);display:flex;align-items:center;gap:8px;}
 .card-head p{font-size:.78rem;color:var(--muted);margin-top:5px;}
@@ -71,9 +80,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 .field label .opt{font-size:.66rem;color:var(--muted);font-weight:400;margin-left:4px;}
 .field input[type="text"],.field input[type="number"],.field input[type="tel"],.field input[type="email"],.field input[type="date"],.field input[type="file"],.field select,.field textarea{
   background:var(--bg);border:1.5px solid var(--border);border-radius:9px;
-  padding:9px 13px;font-size:.84rem;color:var(--sec);transition:.2s;width:100%;}
+  padding:9px 13px;font-size:.84rem;color:var(--sec);transition:.2s;width:100%;font-family:'Poppins',sans-serif;}
 .field input:focus,.field select:focus,.field textarea:focus{
-  outline:none;border-color:var(--pr);background:white;box-shadow:0 0 0 3px rgba(249,115,22,.08);}
+  outline:none;border-color:var(--primary);background:white;box-shadow:0 0 0 3px rgba(0,108,228,.1);}
 .field textarea{resize:vertical;min-height:90px;line-height:1.5;}
 .field .help{font-size:.68rem;color:var(--muted);margin-top:2px;}
 .field .prefix-wrap{position:relative;}
@@ -83,13 +92,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 
 /* TOGGLE BUTTONS & RADIOS */
 .radio-group-inline {display:flex; gap: 20px; margin-top: 6px; flex-wrap: wrap;}
-.radio-label {display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;cursor:pointer;}
-.radio-label input {accent-color:var(--pr); width: 16px; height: 16px;}
+.radio-label {display:flex;align-items:center;gap:6px;font-size:.84rem;font-weight:600;cursor:pointer;color:var(--sec);}
+.radio-label input {accent-color:var(--primary); width: 16px; height: 16px; cursor:pointer;}
 
 /* PHOTO UPLOAD */
 .photo-drop{border:2px dashed var(--border);border-radius:14px;padding:40px 20px;
   text-align:center;cursor:pointer;transition:.2s;background:var(--bg);}
-.photo-drop:hover{border-color:var(--pr);background:#fff7ed;}
+.photo-drop:hover{border-color:var(--primary);background:rgba(0,108,228,0.03);}
 .photo-drop input{display:none;}
 .photo-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;}
 .photo-thumb{width:90px;height:80px;border-radius:9px;border:1.5px solid var(--border);
@@ -109,25 +118,25 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 /* NAVIGATION BTNS */
 .step-nav{display:flex;justify-content:space-between;margin-top:24px;gap:12px;}
 .btn{padding:10px 22px;border-radius:10px;font-weight:800;font-size:.85rem;
-  cursor:pointer;border:none;transition:.2s;display:inline-flex;align-items:center;gap:7px;}
+  cursor:pointer;border:none;transition:.2s;display:inline-flex;align-items:center;gap:7px;font-family:'Poppins',sans-serif;}
 .btn-pr{background:var(--pr);color:white;}
 .btn-pr:hover{background:var(--pr2);transform:translateY(-1px);}
 .btn-sec{background:white;color:var(--sec);border:1.5px solid var(--border);}
-.btn-sec:hover{border-color:var(--pr);color:var(--pr);}
+.btn-sec:hover{border-color:var(--primary);color:var(--primary);}
 .btn-lg{padding:13px 28px;font-size:.9rem;}
 
 /* SIDEBAR */
 .sidebar{display:flex;flex-direction:column;gap:16px;}
 
-/* LIVE PREVIEW CARD */
-.preview-card{background:var(--dark);border-radius:14px;padding:18px;color:white;}
-.pc-head{font-size:.72rem;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
-.pc-mock{background:white;border-radius:10px;overflow:hidden;}
-.pcm-img{height:120px;background:linear-gradient(135deg,#94a3b8,#cbd5e1);
+/* LIVE PREVIEW CARD (LIGHT THEME) */
+.preview-card{background:white;border:1px solid var(--border);border-radius:14px;padding:18px;color:var(--sec);box-shadow:0 4px 12px rgba(0,0,0,.03);}
+.pc-head{font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.pc-mock{background:white;border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.pcm-img{height:120px;background:linear-gradient(135deg,#f1f5f9,#cbd5e1);
   display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;}
 .pcm-badges{position:absolute;top:8px;left:8px;display:flex;gap:4px;}
 .pcm-badge{font-size:.58rem;font-weight:800;padding:2px 7px;border-radius:5px;}
-.b-rent{background:rgba(255,255,255,.9);color:#0f172a;}
+.b-rent{background:rgba(255,255,255,.9);color:#0f172a;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
 .b-new{background:#475569;color:white;}
 .pcm-price{position:absolute;bottom:8px;left:8px;background:rgba(15,23,42,.85);
   color:white;font-size:.82rem;font-weight:900;padding:3px 9px;border-radius:6px;}
@@ -137,18 +146,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 .pcm-specs{display:flex;gap:10px;font-size:.7rem;color:#475569;font-weight:600;}
 
 /* CHECKLIST */
-.checklist-card{background:white;border-radius:14px;border:1px solid var(--border);padding:16px;}
+.checklist-card{background:white;border-radius:14px;border:1px solid var(--border);padding:16px;box-shadow:0 4px 12px rgba(0,0,0,.03);}
 .cl-title{font-size:.8rem;font-weight:800;color:var(--sec);margin-bottom:10px;}
 .cl-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.76rem;color:var(--muted);}
 .cl-item i{font-size:.72rem;width:16px;}
 .cl-item.done{color:var(--success);}
 .cl-item.done i{color:var(--success);}
-
-/* INFO CARDS */
-.info-card{background:white;border-radius:14px;border:1px solid var(--border);padding:14px;}
-.ic-title{font-size:.76rem;font-weight:800;color:var(--sec);margin-bottom:8px;}
-.ic-item{font-size:.73rem;color:#475569;padding:4px 0;display:flex;align-items:flex-start;gap:6px;}
-.ic-item i{color:var(--pr);font-size:.7rem;margin-top:2px;flex-shrink:0;}
 
 /* STEP DISPLAY */
 .step-content{display:none;}
@@ -157,7 +160,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 /* BADGE */
 .form-badge{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;
   padding:4px 10px;border-radius:6px;}
-.fb-resale{background:#fef3c7;color:#b45309;}
+.fb-resale{background:#fef3c7;color:#b45309;border:1px solid #fde68a;}
 .fb-industrial{background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;}
 
 /* INLINE STATUS */
@@ -173,13 +176,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 </head>
 <body>
 
-<nav class="topnav">
-  <a href="index.html" class="logo">🏭 Prop<span>CRM</span></a>
-  <span class="nav-chip">📋 Post Property</span>
-  <span class="form-badge fb-resale" style="margin-left:8px;">💰 Resale</span>
-  <span class="form-badge fb-industrial" style="margin-left:4px;">🏭 Industrial</span>
+{% include 'home_page/header.html' %}
+
+<div class="sub-header">
+  <div class="sub-header-left">
+    <span class="nav-chip">📋 Post Property</span>
+    <span class="form-badge fb-resale">💰 Resale</span>
+    <span class="form-badge fb-industrial">🏭 Industrial</span>
+  </div>
   <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> Back to Portal</a>
-</nav>
+</div>
 
 <div class="page-wrap">
 
@@ -259,7 +265,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
     <div class="fg fg-2">
       <div class="field">
         <label>City <span class="req">*</span></label>
-        <input type="text" name="city" placeholder="e.g., Pune" required style="background:#f0fdf4;color:var(--success);font-weight:700;">
+        <input type="text" name="city" placeholder="e.g., Pune" required style="background:#f0fdf4;color:var(--success);font-weight:700;border-color:#bbf7d0;">
       </div>
       <div class="field">
         <label>Area / Locality <span class="req">*</span></label>
@@ -559,19 +565,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
     <div class="fg fg-4">
       <div class="field">
         <label>Name</label>
-        <input type="text" name="uploaded_by_name" value="{{ uploader_name }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;">
+        <input type="text" name="uploaded_by_name" value="{{ uploader_name }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
       </div>
       <div class="field">
         <label>Email</label>
-        <input type="email" name="uploaded_by_email" value="{{ uploader_email }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;">
+        <input type="email" name="uploaded_by_email" value="{{ uploader_email }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
       </div>
       <div class="field">
         <label>Contact</label>
-        <input type="tel" name="uploaded_by_contact" value="{{ uploader_phone }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;">
+        <input type="tel" name="uploaded_by_contact" value="{{ uploader_phone }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
       </div>
       <div class="field">
         <label>Role</label>
-        <input type="text" name="uploaded_by_role" value="{{ uploader_role }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;">
+        <input type="text" name="uploaded_by_role" value="{{ uploader_role }}" readonly style="background:#f0fdf4;color:var(--success);font-weight:600;border-color:#bbf7d0;">
       </div>
     </div>
     <div class="inline-status is-info" style="margin-top:4px;margin-bottom:16px;">
@@ -598,20 +604,20 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
           🏭
           <div class="pcm-badges">
             <span class="pcm-badge b-rent">RESALE</span>
-            <span class="pcm-badge b-new">Industrial</span>
+            <span class="pcm-badge b-new" style="background:#475569;">Industrial</span>
           </div>
           <div class="pcm-price" id="previewPrice">₹ —</div>
         </div>
         <div class="pcm-body">
           <div class="pcm-title" id="previewTitle">Property Title</div>
-          <div class="pcm-loc" id="previewLoc"><i class="fas fa-map-marker-alt" style="color:#f97316;"></i> Area, City</div>
+          <div class="pcm-loc" id="previewLoc"><i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> Area, City</div>
           <div class="pcm-specs">
             <span id="prevArea">— sqft</span>
             <span>Industrial</span>
           </div>
         </div>
       </div>
-      <div style="font-size:.68rem;color:rgba(255,255,255,.4);margin-top:10px;text-align:center;">Will appear in search results &amp; featured section</div>
+      <div style="font-size:.68rem;color:var(--muted);margin-top:10px;text-align:center;">Will appear in search results &amp; featured section</div>
     </div>
 
     <div class="checklist-card">
@@ -761,7 +767,7 @@ function updatePreview() {
 
   document.getElementById('previewTitle').textContent = title;
   document.getElementById('previewLoc').innerHTML =
-    '<i class="fas fa-map-marker-alt" style="color:#f97316;"></i> ' + (loc || 'Area') + ', City';
+    '<i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> ' + (loc || 'Area') + ', City';
   document.getElementById('previewPrice').textContent =
     price ? '₹' + parseInt(price).toLocaleString('en-IN') : '₹ —';
   document.getElementById('prevArea').textContent = area ? area + ' sqft/acres' : '— sqft';

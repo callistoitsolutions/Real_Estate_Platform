@@ -1,0 +1,248 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<style>
+    body { background: #f8f9fa; font-family: 'Poppins', sans-serif; }
+    .main-content { margin-left: 280px; margin-top: 70px; padding: 30px; }
+    .view-card { background: white; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 25px; }
+    .card-title { font-size: 1.15rem; font-weight: 700; color: #2c3e50; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .detail-label { font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .detail-value { font-size: 0.95rem; color: #0f172a; font-weight: 500; margin-bottom: 15px; }
+    .badge-custom { padding: 5px 12px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; display: inline-block; }
+    .gallery-img { width: 100%; height: 160px; object-fit: cover; border-radius: 12px; transition: transform 0.3s; border: 1px solid #e2e8f0; }
+    .gallery-img:hover { transform: scale(1.03); cursor: pointer; }
+    .media-btn { background: #f1f5f9; color: #3b82f6; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: 0.3s; }
+    .media-btn:hover { background: #3b82f6; color: white; }
+</style>
+
+<div class="main-content">
+    <!-- Header Area -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark m-0">{{ prop.title }}</h2>
+            <div class="text-muted mt-1" style="font-size: 0.9rem;">
+                <i class="fas fa-map-marker-alt text-primary"></i> {{ prop.locality }}, {{ prop.city }} 
+                &nbsp;|&nbsp; 
+                {% if prop.is_active %}
+                    <span class="text-success fw-bold"><i class="fas fa-circle" style="font-size:0.5rem;"></i> Active Listing</span>
+                {% else %}
+                    <span class="text-danger fw-bold"><i class="fas fa-circle" style="font-size:0.5rem;"></i> Inactive</span>
+                {% endif %}
+            </div>
+        </div>
+        <div>
+            <a href="{% url 'commercial_resale_edit' prop.id %}" class="btn btn-primary shadow-sm rounded-3 px-4"><i class="fas fa-edit"></i> Edit Property</a>
+            <button onclick="history.back()" class="btn btn-light shadow-sm rounded-3 ms-2 px-4"><i class="fas fa-arrow-left"></i> Back</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- LEFT COLUMN (Main Details) -->
+        <div class="col-md-8">
+            
+            <!-- 1. Commercial Overview & Area -->
+            <div class="view-card">
+                <div class="card-title"><i class="fas fa-building text-primary"></i> Commercial Overview & Area</div>
+                <div class="row">
+                    <div class="col-md-4"><div class="detail-label">Property Type</div><div class="detail-value">{{ prop.get_property_type_display }}</div></div>
+                    <div class="col-md-4"><div class="detail-label">Expected Price</div><div class="detail-value text-success fw-bold">₹ {{ prop.expected_price|floatformat:0 }}</div></div>
+                    <div class="col-md-4"><div class="detail-label">Age of Property</div><div class="detail-value">{{ prop.get_age_of_property_display }}</div></div>
+                    
+                    <div class="col-md-4"><div class="detail-label">Built-up Area</div><div class="detail-value">{{ prop.builtup_area }} sqft</div></div>
+                    <div class="col-md-4"><div class="detail-label">Carpet Area</div><div class="detail-value">{{ prop.carpet_area|default:"—" }} sqft</div></div>
+                    <div class="col-md-4"><div class="detail-label">Plot Area</div><div class="detail-value">{{ prop.plot_area|default:"—" }} sqft</div></div>
+                    
+                    <div class="col-md-4"><div class="detail-label">Zone Type</div><div class="detail-value">{{ prop.get_zone_type_display }}</div></div>
+                    <div class="col-md-4"><div class="detail-label">Location Hub</div><div class="detail-value">{{ prop.get_location_hub_display|default:"—" }}</div></div>
+                    <div class="col-md-4"><div class="detail-label">Condition</div><div class="detail-value">{{ prop.get_property_condition_display }}</div></div>
+                    
+                    <div class="col-md-4"><div class="detail-label">Available From</div><div class="detail-value">{{ prop.available_from|date:"d M Y"|default:"Immediate" }}</div></div>
+                </div>
+                
+                <div class="mt-3 border-top pt-3">
+                    <div class="detail-label">Property Description</div>
+                    <div class="detail-value" style="line-height: 1.6;">{{ prop.property_description|safe }}</div>
+                </div>
+            </div>
+
+            <!-- 2. Specifications & Features -->
+            <div class="view-card">
+                <div class="card-title"><i class="fas fa-cogs text-primary"></i> Specifications</div>
+                <div class="row">
+                    <div class="col-md-3"><div class="detail-label">Staircases</div><div class="detail-value">{{ prop.num_staircases|default:"0" }}</div></div>
+                    <div class="col-md-3"><div class="detail-label">Pass. Lifts</div><div class="detail-value">{{ prop.passenger_lifts|default:"0" }}</div></div>
+                    <div class="col-md-3"><div class="detail-label">Service Lifts</div><div class="detail-value">{{ prop.service_lifts|default:"0" }}</div></div>
+                    <div class="col-md-3"><div class="detail-label">Cabins</div><div class="detail-value">{{ prop.num_cabins|default:"0" }}</div></div>
+                    
+                    <div class="col-md-3"><div class="detail-label">Meeting Rooms</div><div class="detail-value">{{ prop.meeting_rooms|default:"0" }}</div></div>
+                    <div class="col-md-3"><div class="detail-label">Seats (Min-Max)</div><div class="detail-value">{{ prop.min_seats|default:"0" }} - {{ prop.max_seats|default:"0" }}</div></div>
+                    <div class="col-md-3"><div class="detail-label">Pvt. Parking</div><div class="detail-value">{{ prop.private_parking|default:"0" }}</div></div>
+                    <div class="col-md-3"><div class="detail-label">Pub. Parking</div><div class="detail-value">{{ prop.public_parking|default:"0" }}</div></div>
+                </div>
+            </div>
+
+            <!-- 3. Facilities & Amenities -->
+            <div class="view-card">
+                <div class="card-title"><i class="fas fa-star text-primary"></i> Facilities & Amenities</div>
+                <div class="detail-label mb-2">Nearby Facilities</div>
+                <div class="mb-4">
+                    {% for facility in facilities_list %}
+                        <span class="badge bg-light text-dark border me-1 mb-1 px-2 py-1">{{ facility }}</span>
+                    {% empty %}
+                        <span class="text-muted" style="font-size: 0.9rem;">No nearby facilities recorded.</span>
+                    {% endfor %}
+                </div>
+                
+                <div class="detail-label mb-2">Property Amenities</div>
+                <div>
+                    {% for amenity in amenities_list %}
+                        <span class="badge bg-light text-dark border me-1 mb-1 px-2 py-1">{{ amenity }}</span>
+                    {% empty %}
+                        <span class="text-muted" style="font-size: 0.9rem;">No amenities recorded.</span>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- 4. Property Media (Images, Video, Floor Plan) -->
+            <div class="view-card">
+                <div class="card-title d-flex justify-content-between w-100">
+                    <div><i class="fas fa-images text-primary"></i> Property Media</div>
+                    <div class="d-flex gap-2">
+                        {% if prop.floor_plan %}
+                            <a href="{{ prop.floor_plan.url }}" target="_blank" class="media-btn"><i class="fas fa-file-image"></i> Floor Plan</a>
+                        {% endif %}
+                        {% if prop.property_video %}
+                            <a href="{{ prop.property_video.url }}" target="_blank" class="media-btn" style="color: #e11d48; background: #fce7f3;"><i class="fas fa-video"></i> Video</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row g-3 mt-1">
+                    {% for img in images %}
+                        <div class="col-md-3">
+                            <a href="{{ img.image.url }}" target="_blank">
+                                <img src="{{ img.image.url }}" class="gallery-img shadow-sm" alt="Commercial Image">
+                            </a>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-muted text-center py-4 border rounded" style="background:#f8f9fa;">
+                            <i class="fas fa-image fs-1 mb-2 text-light"></i><br>No images uploaded for this property.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 5. Complete Address -->
+            <div class="view-card">
+                <div class="card-title"><i class="fas fa-map-marked-alt text-primary"></i> Complete Address</div>
+                <div class="row">
+                    <div class="col-md-4"><div class="detail-label">City</div><div class="detail-value">{{ prop.city }}</div></div>
+                    <div class="col-md-4"><div class="detail-label">Locality</div><div class="detail-value">{{ prop.locality }}</div></div>
+                    <div class="col-md-4"><div class="detail-label">Building Name</div><div class="detail-value">{{ prop.building_name|default:"—" }}</div></div>
+                    <div class="col-md-12"><div class="detail-label">Full Address</div><div class="detail-value mb-0">{{ prop.property_address }}</div></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN (Sidebar Details) -->
+        <div class="col-md-4">
+            
+            <!-- 6. Legal & Ownership -->
+            <div class="view-card">
+                <div class="card-title"><i class="fas fa-shield-alt text-primary"></i> Legal Details</div>
+                
+                <div class="detail-label">Ownership Status</div>
+                <div class="detail-value">{{ prop.get_ownership_type_display }} ({{ prop.num_owners }} Owner{% if prop.num_owners != '1' %}s{% endif %})</div>
+                
+                <div class="detail-label">Loan on Property</div>
+                <div class="detail-value mb-3">
+                    {% if prop.loan_on_property == 'yes' %}<span class="badge-custom bg-danger text-white">Yes (₹ {{ prop.loan_amount|floatformat:0 }})</span>
+                    {% else %}<span class="badge-custom bg-success text-white">No</span>{% endif %}
+                </div>
+
+                <div class="detail-label">Existing Tenants</div>
+                <div class="detail-value mb-3">
+                    {% if prop.existing_tenants == 'yes' %}
+                        <span class="badge-custom bg-warning text-dark mb-1">Yes</span><br>
+                        <small class="text-muted">{{ prop.tenant_details }}</small>
+                    {% else %}<span class="badge-custom bg-secondary text-white">No</span>{% endif %}
+                </div>
+                
+                <div class="detail-label">Legal Dispute</div>
+                <div class="detail-value mb-3">
+                    {% if prop.legal_dispute == 'yes' %}
+                        <span class="badge-custom bg-danger text-white mb-1">Yes</span><br>
+                        <small class="text-muted">{{ prop.dispute_details }}</small>
+                    {% else %}<span class="badge-custom bg-success text-white">No</span>{% endif %}
+                </div>
+                
+                <div class="detail-label">Tax Dues</div>
+                <div class="detail-value mb-3">
+                    {% if prop.tax_due == 'yes' %}<span class="badge-custom bg-danger text-white">Pending (₹ {{ prop.pending_tax_amount|floatformat:0 }})</span>
+                    {% else %}<span class="badge-custom bg-success text-white">Cleared</span>{% endif %}
+                </div>
+
+                <div class="detail-label">Fire NOC</div>
+                <div class="detail-value mb-3">
+                    {% if prop.fire_noc == 'yes' %}<span class="badge-custom bg-success text-white">Available</span>
+                    {% else %}<span class="badge-custom bg-danger text-white">Missing / No</span>{% endif %}
+                </div>
+
+                <div class="detail-label">Sanctioning Authority</div>
+                <div class="detail-value mb-0">{{ prop.sanctioning_authority|default:"—" }}</div>
+            </div>
+
+            <!-- 7. Pricing & Brokerage -->
+            <div class="view-card">
+                <div class="card-title"><i class="fas fa-handshake text-primary"></i> Brokerage Info</div>
+                <div class="detail-label">Brokerage Required</div>
+                <div class="detail-value">
+                    {% if prop.brokerage == 'yes' %}
+                        <span class="badge-custom bg-primary text-white mb-1">Yes</span><br>
+                        {% if prop.brokerage_percentage %}
+                            <small class="fw-bold">Percentage: {{ prop.brokerage_percentage }}</small>
+                        {% elif prop.manual_brokerage %}
+                            <small class="fw-bold">Value: {{ prop.manual_brokerage }}</small>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge-custom bg-secondary text-white">No Brokerage</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 8. Owner Info -->
+            <div class="view-card">
+                <div class="card-title"><i class="fas fa-user-tie text-primary"></i> Owner Contact</div>
+                <div class="detail-label">Owner Name</div><div class="detail-value">{{ prop.owner_name }}</div>
+                <div class="detail-label">Contact Number</div><div class="detail-value">{{ prop.owner_contact }}</div>
+                <div class="detail-label">Email Address</div><div class="detail-value mb-3">{{ prop.owner_email|default:"Not Provided" }}</div>
+                <div class="detail-label">Residential Status</div>
+                <div class="detail-value mb-0"><span class="badge bg-info text-dark">{{ prop.get_residential_status_display }}</span></div>
+            </div>
+
+            <!-- 9. Listing Meta Data -->
+            <div class="view-card bg-light border-0 shadow-none">
+                <div class="card-title" style="font-size: 1rem;"><i class="fas fa-info-circle text-secondary"></i> System Details</div>
+                <div class="detail-label">Uploaded By</div>
+                <div class="detail-value" style="font-size:0.85rem;">
+                    <strong>{{ prop.uploaded_by_name|default:"Admin" }}</strong> 
+                    {% if prop.uploaded_by_role %}({{ prop.uploaded_by_role }}){% endif %}<br>
+                    {{ prop.uploaded_by_email|default:"" }}<br>
+                    {{ prop.uploaded_by_contact|default:"" }}
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-6">
+                        <div class="detail-label" style="font-size:0.7rem;">Created At</div>
+                        <div class="detail-value text-muted" style="font-size:0.8rem;">{{ prop.created_at|date:"d M Y, H:i" }}</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="detail-label" style="font-size:0.7rem;">Last Updated</div>
+                        <div class="detail-value text-muted" style="font-size:0.8rem; margin-bottom:0;">{{ prop.updated_at|date:"d M Y, H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

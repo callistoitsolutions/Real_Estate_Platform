@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Post Property FREE | PropCRM Nagpur</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================
+   GLOBAL VARIABLES & RESET (PROFESSIONAL LIGHT)
+============================================ */
+:root {
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --primary: #006ce4; /* Trustworthy Corporate Blue */
+    --primary-dark: #0050a8;
+    --accent: #f59e0b;
+    --pr: #f97316; /* Action Orange */
+    --pr2: #ea580c;
+    --text-dark: #1e293b;
+    --text-body: #475569;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --shadow-1: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-2: 0 12px 30px rgba(0,0,0,0.1);
+    --radius: 12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body {
+    font-family: "Poppins", sans-serif;
+    background: var(--bg-main);
+    color: var(--text-body);
+    overflow-x: hidden;
+}
+
+/* ============================================
+   PAGE HERO 
+============================================ */
+.page-hero {
+    background: linear-gradient(135deg, #002347 0%, #004282 50%, #0059b3 100%);
+    padding: 60px 24px 50px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.page-hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='1' fill='rgba(255,255,255,.04)'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+.page-hero h1 {
+    font-size: 2.6rem; font-weight: 900; line-height: 1.2; margin-bottom: 12px;
+    position: relative; color: #ffffff;
+}
+.page-hero h1 em { font-style: normal; color: #f9b449; }
+.page-hero p { font-size: 1.05rem; color: rgba(255,255,255,.8); position: relative; font-weight: 500; }
+
+/* ============================================
+   MAIN CONTENT 
+============================================ */
+.page-wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
+
+/* ── STEP CARD ── */
+.step-card {
+    background: var(--bg-card); border-radius: var(--radius);
+    border: 1px solid var(--border); padding: 36px; margin-bottom: 24px;
+    box-shadow: var(--shadow-1);
+}
+.step-label {
+    font-size: 0.7rem; font-weight: 800; color: var(--primary);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+}
+.step-label::before { content: ''; display: inline-block; width: 20px; height: 2px; background: var(--primary); border-radius: 2px; }
+.step-title { font-size: 1.4rem; font-weight: 800; color: var(--text-dark); margin-bottom: 6px; }
+.step-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 28px; font-weight: 500;}
+
+/* ── FIELD LABEL ── */
+.field-label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.field-label .req { color: #ef4444; margin-left: 2px; }
+
+/* ── LISTING TYPE BUTTONS ── */
+.listing-type-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px; }
+.lt-btn {
+    flex: 1; min-width: 130px; padding: 16px 20px; border-radius: var(--radius);
+    border: 2px solid var(--border); background: #f8fafc; color: var(--text-body);
+    cursor: pointer; transition: .2s; display: flex; align-items: center; gap: 10px;
+    font-size: 0.95rem; font-weight: 700;
+}
+.lt-btn i { font-size: 1.2rem; color: var(--text-muted); transition: 0.2s; }
+.lt-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(0, 108, 228, 0.04); }
+.lt-btn:hover i { color: var(--primary); }
+.lt-btn.active { background: rgba(0, 108, 228, 0.1); color: var(--primary); border-color: var(--primary); }
+.lt-btn.active i { color: var(--primary); }
+
+/* ── CATEGORY GRID ── */
+.cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media(max-width:640px) { .cat-grid { grid-template-columns: 1fr 1fr; } }
+@media(max-width:400px) { .cat-grid { grid-template-columns: 1fr; } }
+
+.cat-card {
+    background: #ffffff; border: 1.5px solid var(--border); border-radius: var(--radius);
+    padding: 24px 16px; text-align: center; cursor: pointer; transition: .2s;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.cat-card:hover { border-color: var(--primary); background: rgba(0, 108, 228, 0.03); transform: translateY(-3px); box-shadow: var(--shadow-1); }
+.cat-card.selected { border-color: var(--primary); background: rgba(0, 108, 228, 0.08); box-shadow: 0 0 0 2px rgba(0, 108, 228, 0.15); }
+
+.cat-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; background: #f1f5f9; }
+.cat-card.selected .cat-icon { background: white; }
+
+.cat-name { font-size: 0.9rem; font-weight: 800; color: var(--text-dark); }
+.cat-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.5; font-weight: 500;}
+
+/* ── CONTINUE BTN ── */
+.continue-wrap { margin-top: 32px; display: flex; justify-content: flex-end; }
+.btn-continue {
+    background: var(--pr); color: white; border: none; padding: 14px 36px;
+    border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 10px; transition: .2s;
+}
+.btn-continue:hover:not(:disabled) { background: var(--pr2); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(249,115,22,.25); }
+.btn-continue:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; }
+
+/* ── PROGRESS DOTS ── */
+.progress-dots { display: flex; align-items: center; gap: 8px; margin-bottom: 32px; }
+.pd { width: 10px; height: 10px; border-radius: 50%; background: #cbd5e1; }
+.pd.active { background: var(--primary); width: 32px; border-radius: 6px; }
+.pd.done { background: var(--primary); }
+
+/* ── INFO STRIP ── */
+.info-strip {
+    background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius);
+    padding: 16px 20px; display: flex; align-items: center; gap: 14px; margin-bottom: 24px;
+}
+.info-strip i { color: #10b981; font-size: 1.3rem; flex-shrink: 0; }
+.info-strip span { font-size: 0.85rem; color: #065f46; font-weight: 600; line-height: 1.5; }
+
+/* ── FOOTER ── */
+footer { background: #0f172a; padding: 60px 20px 30px; margin-top: 0; border-top: 1px solid var(--border); color: rgba(255,255,255,.7); }
+.footer-inner { max-width: 1300px; margin: 0 auto; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 50px; margin-bottom: 40px; }
+@media(max-width:900px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; } }
+@media(max-width:580px) { .footer-grid { grid-template-columns: 1fr; } }
+.fl-brand { font-size: 1.4rem; font-weight: 900; color: white; margin-bottom: 14px; }
+.fl-desc { font-size: 0.85rem; line-height: 1.7; }
+.fl-title { font-size: 0.85rem; font-weight: 700; color: white; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.fl-link { display: block; font-size: 0.85rem; color: rgba(255,255,255,.6); text-decoration: none; padding: 6px 0; transition: 0.2s; }
+.fl-link:hover { color: white; padding-left: 4px; }
+.footer-social a { width: 36px; height: 36px; background: rgba(255,255,255,.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 0.9rem; text-decoration: none; transition: .2s; }
+.footer-social a:hover { background: var(--primary); transform: translateY(-2px); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 24px; display: flex; justify-content: space-between; font-size: 0.8rem; flex-wrap: wrap; gap: 10px; }
+
+/* ── DIVIDER ── */
+.sec-divider { height: 1px; background: var(--border); margin: 28px 0; }
+</style>
+</head>
+<body>
+
+{% include 'home_page/header.html' %}
+
+<section class="page-hero">
+  <h1>Post Your Property <em>for FREE</em></h1>
+  <p>List in 4 simple steps · Goes live instantly · Get leads from 87+ RMs & 50,000+ users</p>
+</section>
+
+<div class="page-wrap">
+
+  <div class="info-strip">
+    <i class="bi bi-shield-check-fill"></i>
+    <span>100% FREE to list · No brokerage · Verified leads directly to your WhatsApp · Listing live in under 5 minutes</span>
+  </div>
+
+  <div class="step-card">
+
+    <div class="progress-dots">
+      <div class="pd active" id="dot1"></div>
+      <div class="pd" id="dot2"></div>
+      <div class="pd" id="dot3"></div>
+    </div>
+
+    <div class="step-label">Step 1 of 3</div>
+    <div class="step-title">Basic Property Information</div>
+    <div class="step-desc">Tell us what you're listing and where it is located in Nagpur.</div>
+
+    <div class="field-label">Listing For <span class="req">*</span></div>
+    <div class="listing-type-group">
+      <button class="lt-btn active" id="btn-rent" onclick="selectListingType('rent')">
+        <i class="bi bi-house-fill"></i> Rent
+      </button>
+      <button class="lt-btn" id="btn-sale" onclick="selectListingType('sale')">
+        <i class="bi bi-tag-fill"></i> Sale / Resale
+      </button>
+      <button class="lt-btn" id="btn-both" onclick="selectListingType('both')">
+        <i class="bi bi-arrow-left-right"></i> Rent + Sale Both
+      </button>
+    </div>
+
+    <div id="rent-section">
+      <div class="sec-divider"></div>
+      <div class="field-label">Select Property Category <span class="req">*</span></div>
+      <div class="cat-grid">
+
+        <div class="cat-card" id="cat-rent-residential" onclick="selectCat('rent','residential',this)">
+          <div class="cat-icon" style="background:#fff7ed; color:#ea580c;">🏠</div>
+          <div class="cat-name">Residential</div>
+          <div class="cat-desc">Flat, Apartment, Villa, Independent House, Studio</div>
+        </div>
+
+        <div class="cat-card" id="cat-rent-commercial" onclick="selectCat('rent','commercial',this)">
+          <div class="cat-icon" style="background:#eff6ff; color:#2563eb;">🏢</div>
+          <div class="cat-name">Commercial</div>
+          <div class="cat-desc">Office, Shop, Showroom, Warehouse, Industrial</div>
+        </div>
+
+        <div class="cat-card" id="cat-rent-pg" onclick="selectCat('rent','pg',this)">
+          <div class="cat-icon" style="background:#f0fdf4; color:#059669;">🛏</div>
+          <div class="cat-name">PG / Co-Living</div>
+          <div class="cat-desc">PG, Hostel, Single Room, Shared Room, Paying Guest</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="sale-section" style="display:none;">
+      <div class="sec-divider"></div>
+      <div class="field-label">Select Property Category <span class="req">*</span></div>
+      <div class="cat-grid" style="grid-template-columns:repeat(3,1fr);">
+
+        <div class="cat-card" id="cat-sale-residential" onclick="selectCat('sale','residential',this)">
+          <div class="cat-icon" style="background:#fff7ed; color:#ea580c;">🏠</div>
+          <div class="cat-name">Residential</div>
+          <div class="cat-desc">Flat, Apartment, Villa, Duplex, Penthouse</div>
+        </div>
+
+        <div class="cat-card" id="cat-sale-commercial" onclick="selectCat('sale','commercial',this)">
+          <div class="cat-icon" style="background:#eff6ff; color:#2563eb;">🏢</div>
+          <div class="cat-name">Commercial</div>
+          <div class="cat-desc">Office, Shop, Showroom, Godown, Industrial Unit</div>
+        </div>
+
+        <div class="cat-card" id="cat-sale-plot" onclick="selectCat('sale','plot',this)">
+          <div class="cat-icon" style="background:#fef3c7; color:#d97706;">📐</div>
+          <div class="cat-name">Plot / Land</div>
+          <div class="cat-desc">Residential Plot, NA Plot, Layout Plot</div>
+        </div>
+
+        <div class="cat-card" id="cat-sale-agriculture" onclick="selectCat('sale','agriculture',this)">
+          <div class="cat-icon" style="background:#f0fdf4; color:#059669;">🌾</div>
+          <div class="cat-name">Agriculture Land</div>
+          <div class="cat-desc">Farm Land, Agricultural Plot, Garden Land</div>
+        </div>
+
+        <div class="cat-card" id="cat-sale-industrial" onclick="selectCat('sale','industrial',this)">
+          <div class="cat-icon" style="background:#f3e8ff; color:#7c3aed;">🏭</div>
+          <div class="cat-name">Industrial</div>
+          <div class="cat-desc">Factory, Shed, Industrial Plot, Warehouse Unit</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="both-section" style="display:none;">
+      <div class="sec-divider"></div>
+      <div class="field-label">Select Property Category <span class="req">*</span></div>
+      <div class="cat-grid">
+
+        <div class="cat-card" id="cat-both-residential" onclick="selectCat('both','residential',this)">
+          <div class="cat-icon" style="background:#fff7ed; color:#ea580c;">🏠</div>
+          <div class="cat-name">Residential</div>
+          <div class="cat-desc">Flat, Villa, Independent House, Duplex</div>
+        </div>
+
+        <div class="cat-card" id="cat-both-commercial" onclick="selectCat('both','commercial',this)">
+          <div class="cat-icon" style="background:#eff6ff; color:#2563eb;">🏢</div>
+          <div class="cat-name">Commercial</div>
+          <div class="cat-desc">Office, Shop, Showroom, Warehouse</div>
+        </div>
+
+        <div class="cat-card" id="cat-both-plot" onclick="selectCat('both','plot',this)">
+          <div class="cat-icon" style="background:#fef3c7; color:#d97706;">📐</div>
+          <div class="cat-name">Plot / Land</div>
+          <div class="cat-desc">Residential, NA Plot, Layout</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="continue-wrap">
+      <button class="btn-continue" id="continueBtn" disabled onclick="goToForm()">
+        Continue &nbsp;<i class="bi bi-arrow-right"></i>
+      </button>
+    </div>
+
+  </div>
+
+  <div class="step-card" style="padding:30px 36px;">
+    <div style="font-size:0.85rem;font-weight:800;color:var(--text-dark);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:20px;">Why Post on PropCRM?</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div style="display:flex;align-items:flex-start;gap:14px;">
+        <div style="width:42px;height:42px;background:#fff7ed;color:#ea580c;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem;">🚀</div>
+        <div><div style="font-size:0.9rem;font-weight:700;color:var(--text-dark);">Goes Live Instantly</div><div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">No waiting, no approval delays</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;">
+        <div style="width:42px;height:42px;background:#f0fdf4;color:#059669;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem;">✅</div>
+        <div><div style="font-size:0.9rem;font-weight:700;color:var(--text-dark);">Verified Leads Only</div><div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">No spam, genuine enquiries</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;">
+        <div style="width:42px;height:42px;background:#eff6ff;color:#2563eb;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem;">💬</div>
+        <div><div style="font-size:0.9rem;font-weight:700;color:var(--text-dark);">WhatsApp Alerts</div><div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">Every new enquiry on your phone</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;">
+        <div style="width:42px;height:42px;background:#f3e8ff;color:#7c3aed;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.1rem;">👨‍💼</div>
+        <div><div style="font-size:0.9rem;font-weight:700;color:var(--text-dark);">Dedicated RM Support</div><div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">87 RMs work to close your deal</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div>
+                <div class="fl-brand">🏠 PropCRM</div>
+                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
+                <div class="footer-social mt-4 d-flex gap-3">
+                    <a href="#"><i class="bi bi-facebook"></i></a>
+                    <a href="#"><i class="bi bi-instagram"></i></a>
+                    <a href="#"><i class="bi bi-whatsapp"></i></a>
+                    <a href="#"><i class="bi bi-twitter-x"></i></a>
+                </div>
+            </div>
+            <div>
+                <div class="fl-title">For Tenants</div>
+                <a href="/listingpage/?type=rent" class="fl-link">Flats for Rent</a>
+                <a href="/listingpage/?category=pg" class="fl-link">PG / Hostels</a>
+                <a href="#" class="fl-link">Short-term Stays</a>
+                <a href="#" class="fl-link">Rent Agreement</a>
+            </div>
+            <div>
+                <div class="fl-title">For Buyers</div>
+                <a href="/listingpage/?type=sale" class="fl-link">Flats for Sale</a>
+                <a href="#" class="fl-link">New Projects</a>
+                <a href="#" class="fl-link">Plots &amp; Land</a>
+                <a href="#" class="fl-link">Home Loans</a>
+            </div>
+            <div>
+                <div class="fl-title">For Owners</div>
+                <a href="{% url 'post_property' %}" class="fl-link">Post Property FREE</a>
+                <a href="#" class="fl-link">Agent Registration</a>
+                <a href="#" class="fl-link">PropCRM Plans</a>
+                <a href="#" class="fl-link">Contact Support</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
+            <span>Privacy Policy · Terms · Sitemap</span>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script>
+
+/* ── URL MAP: listing_type + category → form URL ── */
+const FORM_URLS = {
+  'rent-residential'  : '/rent/residential/',
+  'rent-commercial'   : '/rent/commercial/',
+  'rent-pg'           : '/rent/pg-coliving/',
+  'sale-residential'  : '/resale/residential/',
+  'sale-commercial'   : '/resale/commercial/',
+  'sale-plot'         : '/resale/plot/',
+  'sale-agriculture'  : '/resale/agricultural/',
+  'sale-industrial'   : '/resale/industrial/',
+  'both-residential'  : '/resale/residential/',
+  'both-commercial'   : '/resale/commercial/',
+  'both-plot'         : '/resale/plot/',
+};
+
+let currentType = 'rent';
+let currentCat  = null;
+
+/* ── SELECT LISTING TYPE ── */
+function selectListingType(type) {
+  currentType = type;
+  currentCat  = null;
+
+  ['rent','sale','both'].forEach(t => {
+    document.getElementById('btn-' + t).classList.toggle('active', t === type);
+    const sec = document.getElementById(t + '-section');
+    if (sec) sec.style.display = (t === type) ? 'block' : 'none';
+  });
+
+  // deselect all cat cards
+  document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('continueBtn').disabled = true;
+}
+
+/* ── SELECT CATEGORY ── */
+function selectCat(type, cat, el) {
+  // deselect all cards in current section
+  const section = document.getElementById(type + '-section');
+  section.querySelectorAll('.cat-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  currentCat = cat;
+  document.getElementById('continueBtn').disabled = false;
+}
+
+/* ── GO TO FORM ── */
+function goToForm() {
+  if (!currentCat) return;
+  const key = currentType + '-' + currentCat;
+  const url = FORM_URLS[key];
+  if (url) {
+    window.location.href = url;
+  } else {
+    Swal.fire({
+      icon: 'info',
+      title: 'Coming Soon',
+      text: 'The form for this property type is being set up.',
+      background: '#ffffff', color: '#1e293b',
+      confirmButtonColor: '#006ce4'
+    });
+  }
+}
+
+</script>
+</body>
+</html>

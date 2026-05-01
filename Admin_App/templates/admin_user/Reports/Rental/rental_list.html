@@ -268,6 +268,62 @@
         .analytics-section { grid-template-columns: 1fr; }
         .stats-row { gap: 16px; }
     }
+
+/* --- Action Buttons Styling --- */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-action {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-action:active {
+    transform: translateY(0);
+}
+
+/* View Button - Blue */
+.btn-view {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+.btn-view:hover {
+    background: linear-gradient(135deg, #3a9bdc 0%, #00d4df 100%);
+}
+
+/* Edit Button - Purple/Indigo */
+.btn-edit {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.btn-edit:hover {
+    background: linear-gradient(135deg, #5a6fd1 0%, #683e91 100%);
+}
+
+/* Delete Button - Red */
+.btn-delete {
+    background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+}
+.btn-delete:hover {
+    background: linear-gradient(135deg, #e60039 0%, #e69d85 100%);
+}
 </style>
 
 <!-- ══════════════════════════════════════
@@ -459,11 +515,14 @@
 
         <!-- Table -->
      <div class="table-responsive">
-    <table class="properties-table" id="rentalTable">
+   <table class="properties-table" id="rentalTable">
         <thead>
             <tr>
+                <!-- 1-2. ID & Images -->
                 <th>Sr.No</th>
                 <th>Images</th>
+                
+                <!-- 3-15. Basic Information -->
                 <th>Property Title</th>
                 <th>Purpose</th>
                 <th>Type</th>
@@ -472,47 +531,65 @@
                 <th>Furnishing</th>
                 <th>Available For</th>
                 <th>Built-Up Area</th>
-                <th>Carpet Area</th>
-                <th>Plot Area</th>
                 <th>Bathrooms</th>
                 <th>Balconies</th>
                 <th>Floor No.</th>
                 <th>Total Floors</th>
                 <th>Facing</th>
+                
+                <!-- 16-22. Property Details -->
                 <th>Zone</th>
                 <th>Ownership</th>
                 <th>Construction</th>
                 <th>Prop. Age</th>
+                <th>Carpet Area</th>
+                <th>Plot Area</th>
                 <th>Building Name</th>
+                
+                <!-- 23-28. Availability -->
                 <th>Possession</th>
                 <th>Available From</th>
                 <th>Lease Duration</th>
                 <th>Brokerage</th>
                 <th>Brokerage %</th>
                 <th>Manual Brokerage</th>
+                
+                <!-- 29-33. Pricing -->
                 <th>Monthly Rent</th>
                 <th>Security Deposit</th>
                 <th>Maintenance Type</th>
                 <th>Maintenance Amt</th>
                 <th>Expected Price</th>
+                
+                <!-- 34-39. Location -->
+                <th>Address</th>
                 <th>City</th>
                 <th>Locality</th>
                 <th>State</th>
-                <th>Address</th>
                 <th>Pincode</th>
                 <th>Road Connectivity</th>
+                
+                <!-- 40-41. Amenities & Facilities -->
                 <th>Amenities</th>
-                <th>Facilities</th> <!-- NEW -->
+                <th>Facilities</th>
+                
+                <!-- 42-43. Description -->
                 <th>Description</th>
                 <th>Rent Desc</th>
+                
+                <!-- 44-47. Owner Details -->
                 <th>Owner Name</th>
                 <th>Contact</th>
                 <th>Email</th>
                 <th>Alt. Contact</th>
+                
+                <!-- 48-51. Uploaded By -->
                 <th>Uploaded By</th>
                 <th>UB Email</th>
                 <th>UB Contact</th>
                 <th>UB Role</th>
+                
+                <!-- 52. Actions -->
                 <th>Actions</th>
             </tr>
         </thead>
@@ -520,32 +597,23 @@
         <tbody>
             {% for prop in page_obj %}
             <tr id="row-{{ prop.id }}">
+                <!-- 1. Sr.No -->
                 <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
 
-                <!-- ALL IMAGES -->
-             <td>
-    <div style="display:flex; gap:4px; flex-wrap:wrap;">
-        
-        {% if prop.image1 %}<img src="{{ prop.image1.url }}" class="property-image">{% endif %}
-        {% if prop.image2 %}<img src="{{ prop.image2.url }}" class="property-image">{% endif %}
-        {% if prop.image3 %}<img src="{{ prop.image3.url }}" class="property-image">{% endif %}
-        {% if prop.image4 %}<img src="{{ prop.image4.url }}" class="property-image">{% endif %}
-        {% if prop.image5 %}<img src="{{ prop.image5.url }}" class="property-image">{% endif %}
-        {% if prop.image6 %}<img src="{{ prop.image6.url }}" class="property-image">{% endif %}
-        {% if prop.image7 %}<img src="{{ prop.image7.url }}" class="property-image">{% endif %}
-        {% if prop.image8 %}<img src="{{ prop.image8.url }}" class="property-image">{% endif %}
-        {% if prop.image9 %}<img src="{{ prop.image9.url }}" class="property-image">{% endif %}
-        {% if prop.image10 %}<img src="{{ prop.image10.url }}" class="property-image">{% endif %}
+                <!-- 2. Images (FIXED TO USE NEW RELATED MODEL) -->
+                <td>
+                    <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                        {% if prop.images.all %}
+                            {% for img in prop.images.all %}
+                                <img src="{{ img.image.url }}" class="property-image" alt="Property Image">
+                            {% endfor %}
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=120&h=80&fit=crop" class="property-image" alt="Placeholder">
+                        {% endif %}
+                    </div>
+                </td>
 
-        {% if not prop.image1 and not prop.image2 %}
-            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=120&h=80&fit=crop"
-                 class="property-image">
-        {% endif %}
-
-    </div>
-</td>
-
-                <!-- BASIC -->
+                <!-- 3-15. Basic Information -->
                 <td>{{ prop.property_title|default:"—" }}</td>
                 <td>{{ prop.property_purpose|default:"—" }}</td>
                 <td><span class="badge badge-residential">{{ prop.property_type|default:"—" }}</span></td>
@@ -553,27 +621,23 @@
                 <td>{{ prop.renting_option|default:"—" }}</td>
                 <td>{{ prop.furnishing_status|default:"—" }}</td>
                 <td>{{ prop.available_for|default:"—" }}</td>
-
-                <!-- AREA -->
                 <td>{{ prop.built_up_area|default:"—" }}</td>
-                <td>{{ prop.carpet_area|default:"—" }}</td>
-                <td>{{ prop.plot_area|default:"—" }}</td>
-
-                <!-- SPEC -->
                 <td>{{ prop.bathrooms|default:"—" }}</td>
                 <td>{{ prop.balconies|default:"—" }}</td>
                 <td>{{ prop.floor_number|default:"—" }}</td>
                 <td>{{ prop.total_floors|default:"—" }}</td>
                 <td>{{ prop.facing|default:"—" }}</td>
 
-                <!-- DETAILS -->
+                <!-- 16-22. Property Details -->
                 <td>{{ prop.zone|default:"—" }}</td>
                 <td>{{ prop.ownership_type|default:"—" }}</td>
                 <td>{{ prop.construction_status|default:"—" }}</td>
                 <td>{{ prop.property_age|default:"—" }}</td>
+                <td>{{ prop.carpet_area|default:"—" }}</td>
+                <td>{{ prop.plot_area|default:"—" }}</td>
                 <td>{{ prop.building_name|default:"—" }}</td>
 
-                <!-- AVAILABILITY -->
+                <!-- 23-28. Availability -->
                 <td>{{ prop.possession_status|default:"—" }}</td>
                 <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
                 <td>{{ prop.lease_duration|default:"—" }}</td>
@@ -581,47 +645,55 @@
                 <td>{{ prop.brokerage_percentage|default:"—" }}</td>
                 <td>{{ prop.manual_brokerage|default:"—" }}</td>
 
-                <!-- PRICE -->
+                <!-- 29-33. Pricing -->
                 <td>{{ prop.monthly_rent|default:"—" }}</td>
                 <td>{{ prop.security_deposit|default:"—" }}</td>
                 <td>{{ prop.maintenance_type|default:"—" }}</td>
                 <td>{{ prop.maintenance_amount|default:"—" }}</td>
                 <td>{{ prop.expected_price|default:"—" }}</td>
 
-                <!-- LOCATION -->
+                <!-- 34-39. Location -->
+                <td>{{ prop.address|default:"—" }}</td>
                 <td>{{ prop.city|default:"—" }}</td>
                 <td>{{ prop.locality|default:"—" }}</td>
                 <td>{{ prop.state|default:"—" }}</td>
-                <td>{{ prop.address|default:"—" }}</td>
                 <td>{{ prop.pincode|default:"—" }}</td>
                 <td>{{ prop.road_connectivity|default:"—" }}</td>
 
-                <!-- TEXT -->
+                <!-- 40-41. Amenities & Facilities -->
                 <td>{{ prop.amenities|default:"—" }}</td>
-                <td>{{ prop.facilities|default:"—" }}</td> <!-- NEW -->
+                <td>{{ prop.facilities|default:"—" }}</td>
+
+                <!-- 42-43. Description -->
                 <td>{{ prop.description|default:"—" }}</td>
                 <td>{{ prop.rent_residential_desc|default:"—" }}</td>
 
-                <!-- OWNER -->
+                <!-- 44-47. Owner Details -->
                 <td>{{ prop.owner_name|default:"—" }}</td>
                 <td>{{ prop.contact_number|default:"—" }}</td>
                 <td>{{ prop.email|default:"—" }}</td>
                 <td>{{ prop.alternate_contact|default:"—" }}</td>
 
-                <!-- UPLOADED -->
+                <!-- 48-51. Uploaded By -->
                 <td>{{ prop.uploaded_by_name|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_email|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_role|default:"—" }}</td>
 
-                <!-- ACTION -->
-                <td>
-                    <div class="action-buttons">
-                        <button onclick="window.location.href='{% url 'rental_residential_view' prop.id %}'">View</button>
-                        <button onclick="window.location.href='{% url 'rental_residential_edit' prop.id %}'">Edit</button>
-                        <button onclick="deleteProperty({{ prop.id }})">Delete</button>
-                    </div>
-                </td>
+                <!-- 52. Actions -->
+             <td>
+    <div class="action-buttons">
+        <button class="btn-action btn-view" onclick="window.location.href='{% url 'rental_residential_view' prop.id %}'" title="View Details">
+            <i class="fas fa-eye"></i>
+        </button>
+        <button class="btn-action btn-edit" onclick="window.location.href='{% url 'rental_residential_edit' prop.id %}'" title="Edit Property">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button class="btn-action btn-delete" onclick="deleteProperty({{ prop.id }})" title="Delete Property">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </div>
+</td>
             </tr>
 
             {% empty %}
@@ -750,6 +822,7 @@
         </div>
     </div>
 </div>
+
 
 
 <!-- ══════════════════════════════════════
@@ -923,23 +996,73 @@ function showImportResult(data) {
 
 /* ─── Delete Property ─── */
 const csrfToken = '{{ csrf_token }}';
-function deleteProperty(id) {
+// ─── Delete Property ─── //
+function deleteProperty(propertyId) {
     Swal.fire({
-        title: 'Are you sure?', text: 'This property will be permanently deleted!',
-        icon: 'warning', showCancelButton: true,
-        confirmButtonColor: '#d33', cancelButtonColor: '#aaa', confirmButtonText: 'Yes, Delete!'
+        title: 'Are you sure?',
+        text: "You won't be able to revert this! All associated images will also be deleted.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ff0844', 
+        cancelButtonColor: '#adb5bd',  
+        confirmButtonText: '<i class="fas fa-trash-alt"></i> Yes, delete it!'
     }).then((result) => {
         if (result.isConfirmed) {
-            fetch(`/Admin_App/rental/residential/delete/${id}/`, {
-                method: 'POST', headers: { 'X-CSRFToken': csrfToken }
+            
+            Swal.fire({ 
+                title: 'Deleting...', 
+                allowOutsideClick: false, 
+                didOpen: () => { Swal.showLoading(); } 
+            });
+
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+
+            // ✅ FIXED: Added the /Admin_App/ prefix to match your Django routing!
+            // Adjust this path if your urls.py path is slightly different.
+            const deleteUrl = `/Admin_App/rental-residential/delete/${propertyId}/`;
+
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
-            .then(res => res.json())
+            .then(response => {
+                // ✅ Added explicitly to catch 404 or 500 errors before JSON parsing fails
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.status === 'success') {
-                    Swal.fire('Deleted!', data.message, 'success').then(() => {
-                        document.getElementById(`row-${id}`).remove();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: data.message,
+                        timer: 2000,
+                        showConfirmButton: false
                     });
-                } else { Swal.fire('Error!', 'Something went wrong.', 'error'); }
+                    
+                    const row = document.getElementById(`row-${propertyId}`);
+                    if (row) {
+                        row.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+                        row.style.opacity = "0";
+                        row.style.transform = "translateX(-20px)";
+                        setTimeout(() => row.remove(), 400);
+                    } else {
+                        window.location.reload(); 
+                    }
+                    
+                } else {
+                    Swal.fire('Error!', data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                // Now this will show you exactly what went wrong (e.g., HTTP error 404)
+                Swal.fire('Error!', `Server connection failed: ${error.message}`, 'error');
             });
         }
     });
@@ -976,6 +1099,8 @@ document.addEventListener('DOMContentLoaded', () => {
     $("#Rent")?.addClass("active");
 });
 </script>
+
+
 
 </body>
 </html>

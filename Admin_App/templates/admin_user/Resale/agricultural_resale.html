@@ -1283,7 +1283,7 @@
         </button>
       </div>
 
-      <form method="POST" enctype="multipart/form-data" id="agriculturalForm">
+      <form method="POST" enctype="multipart/form-data" action="{% url 'add_agricultural_property' %}" id="agriculturalForm">
         {% csrf_token %}
 
         <!-- STEP 1: Agricultural Land Details -->
@@ -1425,18 +1425,39 @@
                 </div>
 
                 <div class="col-md-6 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">
-                      <i class="fas fa-handshake"></i>
-                      Brokerage
-                    </label>
-                    <select class="form-select form-control" name="brokerage" id="brokerageSelect">
-                      <option value="">Select Option</option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                    </select>
-                  </div>
-                </div>
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-handshake"></i>
+              Brokerage
+            </label>
+            <select class="form-select form-control" name="brokerage" id="brokerageSelect">
+              <option value="">Select Option</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-md-6 mt-2 conditional-section" id="brokerageSection" style="display:none;">
+            <div class="form-group">
+                <label class="form-label">Brokerage Percentage</label>
+                <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
+                    <option value="">Select Brokerage</option>
+                    <option value="1%">1%</option>
+                    <option value="1.5%">1.5%</option>
+                    <option value="2%">2%</option>
+                    <option value="Negotiable">Negotiable</option>
+                    <option value="Manual">Enter Manually</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-6 mt-2 conditional-section" id="manualBrokerage" style="display:none;">
+            <div class="form-group">
+                <label class="form-label">Enter Brokerage Manually</label>
+                <input type="text" class="form-control" name="manual_brokerage" placeholder="Enter Brokerage e.g. 2.5%">
+            </div>
+        </div>
               </div>
             </div>
           </div>
@@ -1584,6 +1605,14 @@
                     <input type="text" class="form-control" id="comm_city" name="city" placeholder="e.g., Mumbai" required>
                   </div>
                 </div>
+
+
+                <div class="col-md-6 mt-2">
+  <div class="form-group">
+    <label class="form-label">State <span class="required">*</span></label>
+    <input type="text" class="form-control" name="state" placeholder="e.g., Maharashtra" required>
+  </div>
+</div>
                 <div class="col-md-6 mt-2">
                   <div class="form-group">
                     <label class="form-label">Area/Locality <span class="required">*</span></label>
@@ -1681,7 +1710,7 @@
                 <label class="form-label">
                   <i class="fa-solid fa-file"></i> Upload Encumbrance Certificate <span class="required">*</span>
                 </label>
-                <input type="file" class="form-control" name="encumbrance_certificate" accept="image/*" required>
+                <input type="file" class="form-control" name="encumbrance_cert" accept="image/*" required>
               </div>
             </div>
 
@@ -1829,9 +1858,22 @@
   let currentStep = 1;
 
   /* ══════════════════════════════════════════
+     CKEDITOR SYNC (Helper function)
+  ═════════════════════════════════════════════ */
+  function syncCKEditor() {
+    if (typeof CKEDITOR !== 'undefined') {
+      for (instance in CKEDITOR.instances) {
+        CKEDITOR.instances[instance].updateElement();
+      }
+    }
+  }
+
+  /* ══════════════════════════════════════════
      STEPPER NAVIGATION LOGIC
   ═════════════════════════════════════════════ */
   function goToStep(n) {
+    syncCKEditor(); // Ensure textareas have latest data before validating
+    
     // Validate current step before moving forward
     if (n > currentStep && !validateStep(currentStep)) {
       return false;
@@ -1854,18 +1896,15 @@
       if (line) line.className = 'step-line';
       
       if (i < n) {
-        // Completed steps
         sc.classList.add('done');
         sl.classList.add('done');
         sc.innerHTML = '<i class="fas fa-check" style="font-size:.7rem;"></i>';
         if (line) line.classList.add('done');
       } else if (i === n) {
-        // Active step
         sc.classList.add('active');
         sl.classList.add('active');
         sc.textContent = i;
       } else {
-        // Upcoming steps
         sc.textContent = i;
       }
     }
@@ -1925,27 +1964,22 @@
      LIVE PREVIEW UPDATE
   ═════════════════════════════════════════════ */
   function updatePreview() {
-    // Update price
     const price = document.getElementById('agri_price')?.value;
     if (price) {
-      document.getElementById('previewPrice').textContent = 
-        '₹' + parseInt(price).toLocaleString('en-IN');
+      document.getElementById('previewPrice').textContent = '₹' + parseInt(price).toLocaleString('en-IN');
     }
 
-    // Update property type
     const propType = document.getElementById('agriculture_property_type')?.value;
     if (propType) {
       const typeText = propType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
       document.getElementById('prevType').textContent = typeText;
     }
 
-    // Update area
     const area = document.getElementById('agri_area')?.value;
     if (area) {
       document.getElementById('prevArea').textContent = area + ' acres';
     }
 
-    // Update location
     const village = document.getElementById('agri_village')?.value;
     const district = document.getElementById('agri_district')?.value;
     if (village || district) {
@@ -1966,7 +2000,7 @@
     setCheck('cl-area', !!document.getElementById('agri_area')?.value);
     setCheck('cl-price', !!document.getElementById('agri_price')?.value);
     setCheck('cl-owner', !!document.getElementById('comm_owner_name')?.value);
-    setCheck('cl-docs', false); // Will be updated when files are uploaded
+    // cl-docs is handled in the syncFileInput function now
   }
 
   function setCheck(id, done) {
@@ -1977,84 +2011,80 @@
   }
 
   /* ══════════════════════════════════════════
-     FORM INITIALIZATION
+     FORM INITIALIZATION & SUBMIT
   ═════════════════════════════════════════════ */
   document.addEventListener("DOMContentLoaded", function () {
-    // Add change listeners to all form inputs for preview update
     const formInputs = document.querySelectorAll('input, select, textarea');
     formInputs.forEach(input => {
       input.addEventListener('change', updatePreview);
       input.addEventListener('input', updatePreview);
     });
 
-    // Agricultural Loan
+    // --- BROKERAGE TOGGLES (NEWLY ADDED) ---
+    const brokerageSelect = document.getElementById('brokerageSelect');
+    const brokerageSection = document.getElementById('brokerageSection');
+    const brokeragePercentage = document.getElementById('brokeragePercentage');
+    const manualBrokerage = document.getElementById('manualBrokerage');
+
+    if (brokerageSelect) {
+      brokerageSelect.addEventListener('change', function () {
+        if (brokerageSection) brokerageSection.style.display = (this.value === 'Yes') ? 'block' : 'none';
+        if (this.value !== 'Yes' && manualBrokerage) manualBrokerage.style.display = 'none';
+      });
+    }
+
+    if (brokeragePercentage) {
+      brokeragePercentage.addEventListener('change', function () {
+        if (manualBrokerage) manualBrokerage.style.display = (this.value === 'Manual') ? 'block' : 'none';
+      });
+    }
+
+    // --- CONDITIONAL LEGAL TOGGLES ---
     document.querySelectorAll('input[name="agri_loan"]').forEach(radio => {
       radio.addEventListener('change', function () {
-        document.getElementById('agri_loan_amount_section').style.display =
-          (this.value === 'yes') ? 'block' : 'none';
+        document.getElementById('agri_loan_amount_section').style.display = (this.value === 'yes') ? 'block' : 'none';
       });
     });
 
-    // Agricultural Tenants
     document.querySelectorAll('input[name="agri_tenants"]').forEach(radio => {
       radio.addEventListener('change', function () {
-        document.getElementById('agri_tenant_details_section').style.display =
-          (this.value === 'yes') ? 'block' : 'none';
+        document.getElementById('agri_tenant_details_section').style.display = (this.value === 'yes') ? 'block' : 'none';
       });
     });
 
-    // Agricultural Dispute
     document.querySelectorAll('input[name="agri_dispute"]').forEach(radio => {
       radio.addEventListener('change', function () {
-        document.getElementById('agri_dispute_details_section').style.display =
-          (this.value === 'yes') ? 'block' : 'none';
+        document.getElementById('agri_dispute_details_section').style.display = (this.value === 'yes') ? 'block' : 'none';
       });
     });
 
-    // Agricultural Tax Due
     document.querySelectorAll('input[name="agri_tax_due"]').forEach(radio => {
       radio.addEventListener('change', function () {
-        document.getElementById('agri_tax_amount_section').style.display =
-          (this.value === 'yes') ? 'block' : 'none';
+        document.getElementById('agri_tax_amount_section').style.display = (this.value === 'yes') ? 'block' : 'none';
       });
     });
 
-    // Image Upload
+    // --- IMAGE UPLOAD ---
     const uploadArea = document.getElementById('uploadArea');
     const imageInput = document.getElementById('imageInput');
     const imagePreview = document.getElementById('imagePreview');
     let selectedFiles = [];
 
     uploadArea?.addEventListener('click', () => imageInput.click());
-
-    uploadArea?.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      uploadArea.classList.add('dragover');
-    });
-
-    uploadArea?.addEventListener('dragleave', () => {
-      uploadArea.classList.remove('dragover');
-    });
-
+    uploadArea?.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+    uploadArea?.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
     uploadArea?.addEventListener('drop', (e) => {
       e.preventDefault();
       uploadArea.classList.remove('dragover');
       handleFiles(e.dataTransfer.files);
     });
 
-    imageInput?.addEventListener('change', (e) => {
-      handleFiles(e.target.files);
-    });
+    imageInput?.addEventListener('change', (e) => { handleFiles(e.target.files); });
 
     function handleFiles(files) {
       const fileArray = Array.from(files);
       if (selectedFiles.length + fileArray.length > 10) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Too Many Files',
-          text: 'Maximum 10 images allowed',
-          confirmButtonColor: '#667eea'
-        });
+        Swal.fire({ icon: 'warning', title: 'Too Many Files', text: 'Maximum 10 images allowed', confirmButtonColor: '#667eea' });
         return;
       }
       fileArray.forEach(file => {
@@ -2074,8 +2104,7 @@
         div.dataset.fileName = file.name;
         div.innerHTML = `
           <img src="${e.target.result}" alt="Preview">
-          <button type="button" class="remove-image"
-            onclick="removeImage(this, '${file.name}')">
+          <button type="button" class="remove-image" onclick="removeImage(this, '${file.name}')">
             <i class="fas fa-times"></i>
           </button>`;
         imagePreview.appendChild(div);
@@ -2093,9 +2122,58 @@
       const dt = new DataTransfer();
       selectedFiles.forEach(f => dt.items.add(f));
       imageInput.files = dt.files;
+      // Fix Checklist: Turn green if at least one file is uploaded
+      setCheck('cl-docs', selectedFiles.length > 0);
     }
 
-    // Initialize preview
+    // --- FORM SUBMISSION WITH SWEETALERT ---
+    const form = document.getElementById('agriculturalForm');
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault(); // Stop default reload
+        syncCKEditor(); // Update description textarea
+
+        // Final check just in case
+        if (!validateStep(4)) return;
+
+        const formData = new FormData(this);
+
+        Swal.fire({
+          title: 'Submitting...',
+          text: 'Please wait while we save your property listing.',
+          allowOutsideClick: false,
+          didOpen: () => { Swal.showLoading(); }
+        });
+
+        // AJAX Request
+        fetch(this.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success' || data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success!',
+              text: data.message || 'Agricultural property submitted successfully!',
+              confirmButtonColor: '#11998e'
+            }).then(() => {
+              // Redirect or reset form
+              if(data.redirect_url) { window.location.href = data.redirect_url; } 
+              else { location.reload(); }
+            });
+          } else {
+            Swal.fire({ icon: 'error', title: 'Submission Failed', text: data.message || 'Please check your inputs and try again.', confirmButtonColor: '#e74c3c' });
+          }
+        })
+        .catch(error => {
+          Swal.fire({ icon: 'error', title: 'Server Error', text: 'Could not connect to the server. Please try again later.', confirmButtonColor: '#e74c3c' });
+        });
+      });
+    }
+
     updatePreview();
   });
 
@@ -2105,8 +2183,7 @@
   function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
-    const windowWidth = window.innerWidth;
-    if (windowWidth <= 768) {
+    if (window.innerWidth <= 768) {
       sidebar.classList.toggle('active');
       overlay.classList.toggle('active');
       document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
@@ -2116,10 +2193,8 @@
   }
 
   function closeSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    sidebar.classList.remove('active');
-    overlay.classList.remove('active');
+    document.getElementById('sidebar').classList.remove('active');
+    document.getElementById('sidebarOverlay').classList.remove('active');
     document.body.style.overflow = '';
   }
 
@@ -2127,12 +2202,8 @@
     event.preventDefault();
     event.stopPropagation();
     const submenu = element.nextElementSibling;
-    document.querySelectorAll('.submenu').forEach(sub => {
-      if (sub !== submenu) sub.classList.remove('active');
-    });
-    document.querySelectorAll('.menu-link').forEach(link => {
-      if (link !== element) link.classList.remove('dropdown-open');
-    });
+    document.querySelectorAll('.submenu').forEach(sub => { if (sub !== submenu) sub.classList.remove('active'); });
+    document.querySelectorAll('.menu-link').forEach(link => { if (link !== element) link.classList.remove('dropdown-open'); });
     submenu.classList.toggle('active');
     element.classList.toggle('dropdown-open');
     return false;

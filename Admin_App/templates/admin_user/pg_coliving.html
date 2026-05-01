@@ -1473,7 +1473,7 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Building / Project / Society</label>
-                      <input type="text" class="form-control" name="building" placeholder="Search, select or add new">
+                      <input type="text" class="form-control" name="building_name" placeholder="Search, select or add new">
                     </div>
                   </div>
                 </div>
@@ -1496,7 +1496,7 @@
 
                 <div class="form-group mt-2">
                   <label class="form-label">Property Address <span class="required">*</span></label>
-                  <textarea class="form-control" name="address" rows="3" placeholder="Enter complete property address" required></textarea>
+                  <textarea class="form-control" name="property_address" rows="3" placeholder="Enter complete property address" required></textarea>
                 </div>
 
                 <div class="row mt-2">
@@ -1609,7 +1609,7 @@
                   <div class="col-md-4">
                     <div class="form-group">
                       <label class="form-label">Minimum Stay (Months) <span class="required">*</span></label>
-                      <input type="number" class="form-control" name="min_stay" min="1" placeholder="Enter months" required>
+                      <input type="number" class="form-control" name="minimum_stay" min="1" placeholder="Enter months" required>
                     </div>
                   </div>
                 </div>
@@ -1625,7 +1625,7 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Property Managed By</label>
-                      <select class="form-select" name="managed_by">
+                      <select class="form-select" name="property_managed_by">
                         <option value="">Select</option>
                         <option value="self">Self</option>
                         <option value="family">Family</option>
@@ -1640,10 +1640,10 @@
                   <label class="form-label">Property Manager Stays at Property?</label>
                   <div style="display:flex;gap:20px;margin-top:6px;">
                     <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;cursor:pointer;">
-                      <input type="radio" name="manager_stays" value="Yes" style="accent-color:#667eea;width:18px;height:18px;"> Yes
+                      <input type="radio" name="manager_stays" value="true" style="accent-color:#667eea;width:18px;height:18px;"> Yes
                     </label>
                     <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;cursor:pointer;">
-                      <input type="radio" name="manager_stays" value="No" style="accent-color:#667eea;width:18px;height:18px;"> No
+                      <input type="radio" name="manager_stays" value="false" style="accent-color:#667eea;width:18px;height:18px;"> No
                     </label>
                   </div>
                 </div>
@@ -1834,7 +1834,7 @@
                     <div class="form-group">
                       <label class="form-label">Non-Veg Allowed?</label>
                       <label class="toggle-switch">
-                        <input type="checkbox" name="nonveg_allowed">
+                        <input type="checkbox" name="non_veg_allowed">
                         <span class="toggle-slider"></span>
                       </label>
                     </div>
@@ -1856,7 +1856,7 @@
                     <div class="form-group">
                       <label class="form-label">Any Time Allowed?</label>
                       <label class="toggle-switch">
-                        <input type="checkbox" name="anytime_allowed">
+                        <input type="checkbox" name="any_time_allowed">
                         <span class="toggle-slider"></span>
                       </label>
                     </div>
@@ -2005,10 +2005,10 @@
                   </label>
                   <p class="text-muted small">Listings with photos get <strong>5× more enquiries</strong>. Add at least 3 photos.</p>
                   <div class="image-upload-area" id="uploadArea">
-                    <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display: none;">
+                 <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" required>
                     <div class="upload-icon" style="font-size:2.5rem;margin-bottom:10px;">📷</div>
                     <div class="upload-text">Click or Drag Images Here</div>
-                    <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG)</div>
+                    <div class="upload-subtext">Upload minimum 3 and maximum 10 images (JPG, PNG)</div>
                   </div>
                   <div class="image-preview" id="imagePreview"></div>
                 </div>
@@ -2028,7 +2028,7 @@
                       <label class="form-label">
                         <i class="fa-solid fa-video"></i> Upload Video
                       </label>
-                      <input type="file" class="form-control" name="property_video" accept="video/*" style="padding:8px;">
+                      <input type="file" class="form-control" name="video" accept="video/*" style="padding:8px;">
                     </div>
                   </div>
                 </div>

@@ -46,8 +46,3 @@ admin.site.register(ResaleResidentialProperty)
 ########### Register CommercialResaleProperty Table/Modal ###############
 
 admin.site.register(CommercialResaleProperty)
-
-
-########### Register PlotResale Property Table/Modal ###############
-
-admin.site.register(PlotSaleProperty)

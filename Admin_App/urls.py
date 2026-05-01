@@ -336,26 +336,23 @@ urlpatterns = [
     
     path('addons/add/', views.addon_create, name='addon_create'),
     
-    
- 
-    #path('rental_list', views.rental_list, name='rental_list'),
-    # Admin_App/urls.py
 
-    # ... your existing urls ...
+################## START URL SECTION OF RENTAL RESIDENTIAL LISTING ###############################
     path('residential_list/', views.rental_list, name='residential_list'),
 
     path('rental_residential_add', views.rental_residential_add, name='rental_residential_add'),
     path('rental/residential/view/<int:pk>/', views.rental_residential_view, name='rental_residential_view'),
     path('rental/residential/edit/<int:pk>/', views.rental_residential_edit, name='rental_residential_edit'),
-  #  path('rental/residential/toggle/<int:pk>/', views.rental_residential_toggle, name='rental_residential_toggle'),
-  #  path('rental/residential/delete/<int:pk>/', views.rental_residential_delete, name='rental_residential_delete'),
+
+    path('rental-residential/delete/<int:pk>/', views.rental_residential_delete, name='rental_residential_delete'),
+
   
   
     path('residential_import_excel/', views.import_residential_excel, name='import_residential_excel'),
 
     path('residential_download_template/', views.download_residential_template, name='download_residential_template'),
    
-   
+   ################## END URL SECTION OF RENTAL RESIDENTIAL LISTING ###############################
    
     path('Admin_App/commercial/import-excel/', views.import_commercial_excel, name='import_commercial_excel'),
     path('Admin_App/commercial/download-template/', views.download_commercial_rental__template, name='download_commercial_rental__template'),
@@ -366,7 +363,9 @@ urlpatterns = [
     path('commercial/delete/<int:pk>/',views.commercial_delete, name='commercial_delete'),
     path('commercial_rental_add', views.commercial_rental_add, name='commercial_rental_add'),
 
+    ##############################START URL SECTION RENTAL PG_COLIVING LISTING#####################
 
+    path('add-pg/', views.add_pg, name='add_pg'),
     path('Admin_App/pg/import-excel/',       views.import_pg_excel,       name='import_pg_excel'),
     path('Admin_App/pg/download-template/',  views.download_pg_template,  name='download_pg_template'),
     
@@ -377,7 +376,9 @@ urlpatterns = [
     #path('Admin_App/pg/view/<int:pk>/', views.pg_view, name='pg_view'),
     path('Admin_App/pg/edit/<int:pk>/', views.pg_edit, name='pg_edit'),
     
-    
+     ##############################END URL SECTION RENTAL PG_COLIVING LISTING#####################
+
+
       ####################Start Urls Section For Resindential Resale Property #######################################
     
     
@@ -396,27 +397,29 @@ urlpatterns = [
     
     ####################End Urls Section For Resindential Resale Property #######################################
     
-    
+    #################### START Urls Section For Commercial Resale Property #######################################
     
      path('add_commercial_property', views.add_commercial_property, name='add_commercial_property'),
-     
-    
-# ✅ CORRECT — add trailing slash
-    # path('commercial/import/', views.import_commercial_data, name='import_commercial_data'),
-     path('commercial/import/', views.import_commercial_data, name='import_commercial_data'),
+
+     path('commercial-resale/import/', views.import_commercial_data, name='import_commercial_data'),
+     path('commercial-resale/download-sample/', views.download_commercial_sample_excel, name='download_commercial_sample_excel'),
      path('commercial/import/test/', views.import_test_view,            name='import_test_view'),       
-     #path('commercial/list/',                   views.commercial_list_view,              name='commercial_list'),
      path('commercial_toggle',                 views.toggle_commercial_property,         name='toggle_commercial_property'),
      path('commercial_delete',                 views.delete_commercial_property,         name='delete_commercial_property'),
      path('commercial_import',                 views.import_commercial_data,             name='import_commercial_data'),
-     path('commercial_sample_excel',           views.download_commercial_sample_excel,   name='download_commercial_sample_excel'),
-    # path('commercial/view/<int:prop_id>/',     views.view_commercial_property,           name='view_commercial_property'),
-    # path('commercial/edit/<int:prop_id>/',     views.edit_commercial_property,           name='edit_commercial_property'),
+     
+
+    
+    
+    path('commercial-resale/view/<int:id>/', views.commercial_resale_view, name='commercial_resale_view'),
+    path('commercial-resale/edit/<int:id>/', views.commercial_resale_edit, name='commercial_resale_edit'),
+
+
+    ####################End Urls Section For Commercial Resale Property #######################################
+
 
 
 #######################START URL SECTION RESALE PLOT LISTING###############
-
-
 
 
     path('plot-sale/add/', views.plot_sale_add, name='plot_sale_add'),
@@ -459,10 +462,26 @@ urlpatterns = [
     path('industrial-resale/import/', views.import_industrial_resale_excel, name='import_industrial_resale_excel'),
 
 
-################END URL SECTION RESALE INDUSTRIAL LISTING##################
+################END URL SECTION RESALE INDUSTRIAL LISTING######################################################
 
     
+    ################START URL SECTION RESALE AGRICULTURAL LISTING######################################################
+  
+    path('admin/add-agricultural-property/', views.add_agricultural_property, name='add_agricultural_property'),
+    path('admin/edit-agricultural/<int:pk>/', views.edit_agricultural_property, name='edit_agricultural_property'),
+   
+   
+    path('delete-agricultural/<int:pk>/', views.delete_agricultural_property, name='delete_agricultural_property'),
+
+    path('admin/view-agricultural/<int:pk>/', views.view_agricultural_property, name='view_agricultural_property'),
+    
+    path('admin/download-agri-sample/', views.download_agri_sample_excel, name='download_agri_sample_excel'),
+ 
+
+    
+    ################END URL SECTION RESALE AGRICULTURAL LISTING######################################################
 ]
+
 
 
 
@@ -472,11 +491,7 @@ urlpatterns = [
 
 
 
-   ##########urls for complaint update######
-
-   
-
-   ########## End urls for complaint update######
+ 
 
 
 

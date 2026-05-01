@@ -178,127 +178,190 @@
                     <h3 class="section-title m-0"><i class="fas fa-list"></i> Complete Industrial Listings Data</h3>
                 </div>
 
-                <div class="table-responsive">
-                    <table id="industrialListingsTable" class="table table-hover display nowrap" style="width:100%">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Image</th>
-                                <th>Property Type</th>
-                                <th>Area (sq.ft/acres)</th>
-                                <th>Price (₹)</th>
-                                <th>Location</th>
-                                <th>City</th>
-                                <th>Available From</th>
-                                <th>Power Supply</th>
-                                <th>KVA Capacity</th>
-                                <th>Water Supply</th>
-                                <th>Crane / Heavy Mach.</th>
-                                <th>Road Connectivity</th>
-                                <th>Worker Housing</th>
-                                <th>Brokerage</th>
-                                <th>Brokerage %</th>
-                                <th>Authority</th>
-                                <th>Ownership</th>
-                                <th>Has Loan?</th>
-                                <th>Loan Amount</th>
-                                <th>Existing Tenants?</th>
-                                <th>Legal Dispute?</th>
-                                <th>Tax Dues?</th>
-                                <th>Tax Clearance?</th>
-                                <th>Compliance PDF</th>
-                                <th>Video</th>
-                                <th>Owner Name</th>
-                                <th>Owner Contact</th>
-                                <th>Owner Email</th>
-                                <th>Residency Status</th>
-                                <th>Uploaded By</th>
-                                <th>Role</th>
-                                <th>Date Added</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for prop in properties %}
-                            <tr>
-                                <td>
-                                    {% if prop.images.first %}
-                                        <img src="{{ prop.images.first.image.url }}" alt="Industrial" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
-                                    {% else %}
-                                        <span class="text-muted"><i class="fas fa-image"></i> N/A</span>
-                                    {% endif %}
-                                </td>
-                                
-                                <td style="text-transform: capitalize; font-weight: 600; color: #667eea;">{{ prop.property_type }}</td>
-                                <td>{{ prop.land_area }}</td>
-                                <td style="font-weight: bold; color: #10b981;">₹{{ prop.expected_price }}</td>
-                                <td>{{ prop.locality|default:"-" }}</td>
-                                <td>{{ prop.city|default:"-" }}</td>
-                                <td>{{ prop.available_from|date:"d M Y"|default:"-" }}</td>
-                                
-                                <td>{% if prop.power_supply %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-secondary">No</span>{% endif %}</td>
-                                <td>{{ prop.kva_capacity|default:"-" }}</td>
-                                <td style="text-transform: capitalize;">{{ prop.water_supply|default:"-" }}</td>
-                                <td>{% if prop.crane_heavy_machinery %}Yes{% else %}No{% endif %}</td>
-                                <td style="text-transform: capitalize;">{{ prop.road_connectivity|default:"-" }}</td>
-                                <td>{% if prop.worker_housing_nearby %}Yes{% else %}No{% endif %}</td>
-                                
-                                <td>{{ prop.brokerage|default:"-" }}</td>
-                                <td>{{ prop.brokerage_percentage|default:"-" }}</td>
-                                <td>{{ prop.sanctioning_authority|default:"-" }}</td>
-                                <td style="text-transform: capitalize;">{{ prop.ownership_type|default:"-" }}</td>
-                                <td>{% if prop.has_loan %}Yes{% else %}No{% endif %}</td>
-                                <td>{% if prop.has_loan %}₹{{ prop.loan_amount|default:"0" }}{% else %}-{% endif %}</td>
-                                <td>{% if prop.existing_tenants %}Yes{% else %}No{% endif %}</td>
-                                <td>{% if prop.legal_dispute %}Yes{% else %}No{% endif %}</td>
-                                <td>{% if prop.tax_due %}Yes (₹{{ prop.tax_amount|default:"0" }}){% else %}No{% endif %}</td>
-                                <td>{% if prop.tax_clearance_cert %}Yes{% else %}No{% endif %}</td>
-                                
-                                <td>
-                                    {% if prop.compliance_docs %}
-                                        <a href="{{ prop.compliance_docs.url }}" target="_blank" class="text-danger"><i class="fas fa-file-pdf"></i> View</a>
-                                    {% else %} - {% endif %}
-                                </td>
-                                <td>
-                                    {% if prop.social_video %}
-                                        <a href="{{ prop.social_video.url }}" target="_blank" class="text-primary"><i class="fas fa-video"></i> View</a>
-                                    {% else %} - {% endif %}
-                                </td>
-
-                                <td>{{ prop.owner_name|default:"-" }}</td>
-                                <td>{{ prop.owner_contact|default:"-" }}</td>
-                                <td>{{ prop.owner_email|default:"-" }}</td>
-                                <td style="text-transform: capitalize;">{{ prop.residency_status|default:"-" }}</td>
-
-                                <td>{{ prop.uploaded_by_name|default:"-" }}</td>
-                                <td>{{ prop.uploaded_by_role|default:"-" }}</td>
-                                <td>{{ prop.created_at|date:"Y-m-d H:i" }}</td>
-
-                                <td>
-                                    <div class="action-buttons d-flex gap-2">
-                                        <a href="{% url 'industrial_resale_view' prop.id %}" class="btn btn-sm btn-primary" title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{% url 'industrial_resale_edit' prop.id %}" class="btn btn-sm btn-warning" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-danger" title="Delete" onclick="deleteIndustrial({{ prop.id }})">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="33" class="text-center text-muted py-4">
-                                    <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
-                                    <h5>No Industrial Properties Found</h5>
-                                    <p>Start by adding your first industrial property</p>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <!-- Custom DataTables Controls Container -->
+                <div class="datatable-controls-wrapper" style="margin-bottom: 20px;">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div id="tableButtons" class="dt-buttons-container"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="tableSearch" class="dt-search-container"></div>
+                        </div>
+                    </div>
                 </div>
+
+            <div class="table-responsive">
+<table id="industrialListingsTable" class="table table-hover table-striped display nowrap" style="width:100%">
+<thead class="table-light">
+<tr>
+    <th>Sr.No</th>
+    <th>Images</th>
+    <th>Property Type</th>
+    <th>Area</th>
+    <th>Price</th>
+    <th>City</th>
+    <th>Locality</th>
+    <th>Address</th>
+    <th>Available</th>
+
+    <th>Power</th>
+    <th>KVA</th>
+    <th>Water</th>
+    <th>Crane</th>
+    <th>Road</th>
+    <th>Housing</th>
+
+    <th>Brokerage</th>
+    <th>%</th>
+    <th>Manual</th>
+
+    <th>Authority</th>
+    <th>Ownership</th>
+
+    <th>Loan</th>
+    <th>Loan Amt</th>
+
+    <th>Tenants</th>
+    <th>Tenant Details</th>
+
+    <th>Dispute</th>
+    <th>Dispute Details</th>
+
+    <th>Tax</th>
+    <th>Tax Amt</th>
+    <th>Clearance</th>
+
+    <th>Description</th>
+
+    <th>Docs</th>
+    <th>Video</th>
+
+    <th>Owner</th>
+    <th>Contact</th>
+    <th>Email</th>
+    <th>Residency</th>
+
+    <th>Uploaded Name</th>
+    <th>Uploaded Email</th>
+    <th>Uploaded Contact</th>
+    <th>Role</th>
+
+    <th>Created</th>
+    <th>Updated</th>
+
+    <th>Actions</th>
+</tr>
+</thead>
+
+<tbody>
+{% for prop in properties %}
+<tr>
+
+    <td>{{ forloop.counter }}</td>
+
+<td>
+{% if prop.images.all %}
+    <span class="badge bg-primary">
+        {{ prop.images.count }} Images
+    </span><br>
+
+    <button class="btn btn-sm btn-dark mt-1"
+        onclick='openGallery([
+            {% for img in prop.images.all %}
+                "{{ img.image.url }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ])'>
+        View All
+    </button>
+
+{% else %}
+    -
+{% endif %}
+</td>
+
+<td>{{ prop.property_type }}</td>
+<td>{{ prop.land_area }}</td>
+<td>₹{{ prop.expected_price }}</td>
+<td>{{ prop.city }}</td>
+<td>{{ prop.locality }}</td>
+<td>{{ prop.complete_address|truncatechars:30 }}</td>
+<td>{{ prop.available_from|date:"d M Y" }}</td>
+
+<td>{% if prop.power_supply %}Yes{% else %}No{% endif %}</td>
+<td>{{ prop.kva_capacity }}</td>
+<td>{{ prop.water_supply }}</td>
+<td>{% if prop.crane_heavy_machinery %}Yes{% else %}No{% endif %}</td>
+<td>{{ prop.road_connectivity }}</td>
+<td>{% if prop.worker_housing_nearby %}Yes{% else %}No{% endif %}</td>
+
+<td>{{ prop.brokerage }}</td>
+<td>{{ prop.brokerage_percentage }}</td>
+<td>{{ prop.manual_brokerage }}</td>
+
+<td>{{ prop.sanctioning_authority }}</td>
+<td>{{ prop.ownership_type }}</td>
+
+<td>{% if prop.has_loan %}Yes{% else %}No{% endif %}</td>
+<td>{{ prop.loan_amount }}</td>
+
+<td>{% if prop.existing_tenants %}Yes{% else %}No{% endif %}</td>
+<td>{{ prop.tenant_details|truncatechars:20 }}</td>
+
+<td>{% if prop.legal_dispute %}Yes{% else %}No{% endif %}</td>
+<td>{{ prop.dispute_details|truncatechars:20 }}</td>
+
+<td>{% if prop.tax_due %}Yes{% else %}No{% endif %}</td>
+<td>{{ prop.tax_amount }}</td>
+<td>{% if prop.tax_clearance_cert %}Yes{% else %}No{% endif %}</td>
+
+<td>{{ prop.property_description|safe|truncatechars:40 }}</td>
+
+<td>
+{% if prop.compliance_docs %}
+<button class="btn btn-sm btn-danger" onclick="openPDF('{{ prop.compliance_docs.url }}')">PDF</button>
+{% else %}-{% endif %}
+</td>
+
+<td>
+{% if prop.social_video %}
+<button class="btn btn-sm btn-primary" onclick="openVideo('{{ prop.social_video.url }}')">Video</button>
+{% else %}-{% endif %}
+</td>
+
+<td>{{ prop.owner_name }}</td>
+<td>{{ prop.owner_contact }}</td>
+<td>{{ prop.owner_email }}</td>
+<td>{{ prop.residency_status }}</td>
+
+<td>{{ prop.uploaded_by_name }}</td>
+<td>{{ prop.uploaded_by_email }}</td>
+<td>{{ prop.uploaded_by_contact }}</td>
+<td>{{ prop.uploaded_by_role }}</td>
+
+<td>{{ prop.created_at|date:"Y-m-d H:i" }}</td>
+<td>{{ prop.updated_at|date:"Y-m-d H:i" }}</td>
+
+<td>
+<div class="btn-group" role="group">
+    <a href="{% url 'industrial_resale_view' prop.id %}" class="btn btn-sm btn-primary" title="View">
+        <i class="fas fa-eye"></i>
+    </a>
+    <a href="{% url 'industrial_resale_edit' prop.id %}" class="btn btn-sm btn-warning" title="Edit">
+        <i class="fas fa-edit"></i>
+    </a>
+   <button class="btn btn-sm btn-danger" 
+    onclick="deleteIndustrial({{ prop.id }}, '{% url 'industrial_resale_delete' prop.id %}')" 
+    title="Delete">
+    <i class="fas fa-trash"></i>
+</button>
+</div>
+</td>
+
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
             </div>
 
         </div>
@@ -343,6 +406,175 @@
     </div>
 </div>
 
+<!-- Custom Styles for DataTables -->
+<style>
+/* DataTables Controls Styling */
+.datatable-controls-wrapper {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.dt-buttons-container {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dt-search-container {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.dt-search-container label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.dt-search-container input {
+    padding: 8px 15px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    min-width: 250px;
+}
+
+.dt-search-container input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* DataTables Button Styling */
+.dt-button {
+    padding: 8px 16px !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.dt-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+/* Table Styling */
+#industrialListingsTable {
+    font-size: 13px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+#industrialListingsTable thead th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    padding: 12px 8px;
+    border: none;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#industrialListingsTable tbody td {
+    padding: 10px 8px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+#industrialListingsTable tbody tr:hover {
+    background-color: #f0f4ff;
+}
+
+/* DataTables Info and Pagination Styling */
+.dataTables_info {
+    padding: 12px 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.dataTables_paginate {
+    padding: 12px 0;
+}
+
+.dataTables_paginate .paginate_button {
+    padding: 6px 12px;
+    margin: 0 2px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    color: #374151;
+    transition: all 0.2s ease;
+}
+
+.dataTables_paginate .paginate_button:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.dataTables_paginate .paginate_button.current {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+/* DataTables Length Menu */
+.dataTables_length {
+    padding: 12px 0;
+}
+
+.dataTables_length select {
+    padding: 6px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    margin: 0 8px;
+    font-size: 14px;
+}
+
+/* Action Buttons Group */
+.btn-group {
+    display: flex;
+    gap: 4px;
+}
+
+.btn-group .btn {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .datatable-controls-wrapper .row {
+        flex-direction: column;
+    }
+    
+    .dt-buttons-container {
+        margin-bottom: 15px;
+        justify-content: center;
+    }
+    
+    .dt-search-container {
+        justify-content: center;
+    }
+    
+    .dt-search-container input {
+        min-width: 100%;
+    }
+}
+</style>
+
 <!-- Load jQuery First -->
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 
@@ -352,6 +584,9 @@
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <!-- DataTables and Dependencies -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
@@ -360,6 +595,48 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+<script>
+function openGallery(images){
+    let html = '<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">';
+
+    images.forEach(img => {
+        html += `<img src="${img}" 
+                    style="width:120px;height:120px;object-fit:cover;border-radius:8px;cursor:pointer;" 
+                    onclick="window.open('${img}', '_blank')">`;
+    });
+
+    html += '</div>';
+
+    Swal.fire({
+        title: 'Property Images',
+        html: html,
+        width: '800px',
+        showConfirmButton: true,
+        confirmButtonText: 'Close',
+        confirmButtonColor: '#667eea'
+    });
+}
+</script>
+
+<script>
+function openPDF(url){
+    window.open(url, '_blank');
+}
+
+function openVideo(url){
+    Swal.fire({
+        html: `<video width="100%" controls autoplay>
+                <source src="${url}" type="video/mp4">
+                Your browser does not support the video tag.
+               </video>`,
+        width: 700,
+        showConfirmButton: true,
+        confirmButtonText: 'Close',
+        confirmButtonColor: '#667eea'
+    });
+}
+</script>
 
 <script>
 // ==============================================
@@ -408,12 +685,15 @@ function validateExcelFile(_this) {
 // DATATABLES INITIALIZATION
 // ==============================================
 $(document).ready(function() {
-    $('#industrialListingsTable').DataTable({
-        dom: 'Bfrtip',
+    const table = $('#industrialListingsTable').DataTable({
+        dom: "<'row'<'col-sm-12'B>>" +
+             "<'row'<'col-sm-6'l><'col-sm-6'f>>" +
+             "<'row'<'col-sm-12'tr>>" +
+             "<'row'<'col-sm-5'i><'col-sm-7'p>>",
         scrollX: true,
         pageLength: 10,
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
-        order: [[31, 'desc']], // Sort by "Date Added" column
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+        order: [[41, 'desc']], // Sort by "Created" column (updated index)
         buttons: [
             {
                 extend: 'excelHtml5',
@@ -443,17 +723,33 @@ $(document).ready(function() {
             search: "Quick Search:",
             lengthMenu: "Show _MENU_ entries",
             info: "Showing _START_ to _END_ of _TOTAL_ properties",
-            emptyTable: "No industrial properties available"
+            infoEmpty: "No properties available",
+            emptyTable: "No industrial properties available",
+            zeroRecords: "No matching properties found"
         },
         responsive: false,
-        autoWidth: false
+        autoWidth: false,
+        drawCallback: function() {
+            // Move buttons to custom container
+            if ($('#tableButtons').children().length === 0) {
+                $('.dt-buttons').appendTo('#tableButtons');
+            }
+            // Move search to custom container
+            if ($('#tableSearch').children().length === 0) {
+                $('.dataTables_filter').appendTo('#tableSearch');
+            }
+        }
     });
+    
+    // Initial move of controls
+    $('.dt-buttons').appendTo('#tableButtons');
+    $('.dataTables_filter').appendTo('#tableSearch');
 });
 
 // ==============================================
 // DELETE FUNCTION WITH PROPER CSRF
 // ==============================================
-function deleteIndustrial(propId) {
+function deleteIndustrial(propId, deleteUrl) {
     Swal.fire({
         title: 'Are you sure?',
         text: "This will permanently delete the property and all associated images!",
@@ -461,29 +757,24 @@ function deleteIndustrial(propId) {
         showCancelButton: true,
         confirmButtonColor: '#e74c3c',
         cancelButtonColor: '#95a5a6',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel'
+        confirmButtonText: '<i class="fas fa-trash"></i> Yes, delete it!',
+        cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+        reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
-            // Show loading
             Swal.fire({
                 title: 'Deleting...',
                 text: 'Please wait while we delete the property',
                 allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
+                allowEscapeKey: false,
+                didOpen: () => { Swal.showLoading(); }
             });
 
-            // Get CSRF token from cookie
-            const csrftoken = getCookie('csrftoken');
-
-            // Make DELETE request
-            fetch(`/industrial-resale/delete/${propId}/`, {
+            fetch(deleteUrl, {   // ✅ FIXED: use Django-generated URL
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': csrftoken,
+                    'X-CSRFToken': getCookie('csrftoken'),
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 credentials: 'same-origin'
@@ -500,25 +791,20 @@ function deleteIndustrial(propId) {
                         icon: 'success',
                         title: 'Deleted!',
                         text: data.message || 'Property deleted successfully',
-                        confirmButtonColor: '#10b981'
-                    }).then(() => {
-                        window.location.reload();
-                    });
+                        confirmButtonColor: '#10b981',
+                        timer: 2000,
+                        timerProgressBar: true
+                    }).then(() => window.location.reload());
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.message || 'Failed to delete property',
-                        confirmButtonColor: '#e74c3c'
-                    });
+                    Swal.fire({ icon: 'error', title: 'Error', text: data.message, confirmButtonColor: '#e74c3c' });
                 }
             })
             .catch(error => {
                 console.error('Delete Error:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Connection Error',
-                    text: 'Could not connect to server. Please check your connection and try again.',
+                    title: 'Error',
+                    text: 'Request failed: ' + error.message,  // ✅ Shows actual error now
                     confirmButtonColor: '#e74c3c'
                 });
             });
@@ -554,7 +840,9 @@ document.getElementById('importIndustrialForm').addEventListener('submit', funct
                 icon: 'success',
                 title: 'Import Successful!',
                 text: data.message,
-                confirmButtonColor: '#10b981'
+                confirmButtonColor: '#10b981',
+                timer: 2000,
+                timerProgressBar: true
             }).then(() => window.location.reload());
             
         } else if (data.status === 'warning') {

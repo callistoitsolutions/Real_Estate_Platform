@@ -2,615 +2,1785 @@
 {% load static %}
 
 <style>
-.page-wrap   { max-width:1200px; margin:0 auto; padding:24px; }
+  :root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --danger-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+    --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 80px;
+    --topbar-height: 70px;
+    --pr:#667eea;--pr2:#5a67d8;--sec:#2c3e50;--dark:#1a252f;
+    --muted:#64748b;--border:#e2e8f0;--card:#fff;--bg:#f8fafc;
+    --success:#10b981;--info:#3b82f6;--warn:#f59e0b;
+  }
 
-/* ── Header ── */
-.pg-header {
-    background: linear-gradient(135deg,#DC2626,#7F1D1D);
-    border-radius:16px; padding:26px 32px; margin-bottom:28px;
-    display:flex; align-items:center; justify-content:space-between;
-    flex-wrap:wrap; gap:16px;
-    box-shadow:0 8px 32px rgba(220,38,38,.25);
-}
-.pg-header h1 { color:#fff; font-size:21px; font-weight:700; margin:0; }
-.pg-header p  { color:rgba(255,255,255,.7); margin:4px 0 0; font-size:13px; }
-.btn-back {
-    display:flex; align-items:center; gap:8px;
-    padding:9px 20px; background:rgba(255,255,255,.15);
-    color:#fff; border:1px solid rgba(255,255,255,.3);
-    border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;
-    transition:background .2s;
-}
-.btn-back:hover { background:rgba(255,255,255,.25); color:#fff; text-decoration:none; }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-/* ── Section Cards ── */
-.card { background:#fff; border-radius:14px; box-shadow:0 2px 16px rgba(0,0,0,.07); margin-bottom:24px; overflow:hidden; }
-.card-head {
-    background:linear-gradient(135deg,#f8fafc,#f1f5f9);
-    border-bottom:2px solid #e2e8f0;
-    padding:15px 24px; display:flex; align-items:center; gap:12px;
-}
-.card-icon {
-    width:36px; height:36px; border-radius:8px; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-    font-size:15px; color:#fff;
-}
-.card-head h3 { margin:0; font-size:15px; font-weight:700; color:#1e293b; }
-.card-body { padding:24px; }
+  html,
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
 
-/* ── Grid ── */
-.fg { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:20px; }
-.fg .full { grid-column:1/-1; }
-.fgroup { display:flex; flex-direction:column; gap:6px; }
-.flabel {
-    font-size:11px; font-weight:700; color:#64748b;
-    text-transform:uppercase; letter-spacing:.6px;
-}
-.flabel .r { color:#DC2626; }
-.fc {
-    padding:10px 14px; border:1.5px solid #e2e8f0;
-    border-radius:8px; font-size:13px; color:#1e293b;
-    background:#fafafa; outline:none; transition:all .2s;
-}
-.fc:focus { border-color:#DC2626; background:#fff; box-shadow:0 0 0 3px rgba(220,38,38,.08); }
-textarea.fc { resize:vertical; min-height:80px; }
+  /* Sidebar Overlay */
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
 
-/* ── Bool buttons ── */
-.brow { display:flex; gap:8px; }
-.bbtn {
-    flex:1; padding:9px 10px; border:1.5px solid #e2e8f0;
-    border-radius:8px; font-size:12px; font-weight:600;
-    text-align:center; cursor:pointer; background:#fafafa;
-    color:#64748b; transition:all .2s; user-select:none;
-}
-.bbtn.yes.on { background:#F0FDF4; border-color:#16A34A; color:#16A34A; }
-.bbtn.no.on  { background:#FEF2F2; border-color:#DC2626; color:#DC2626; }
+  .sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+  }
 
-/* ── Amenity checkboxes ── */
-.amen-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:10px; }
-.amen-item {
-    display:flex; align-items:center; gap:10px;
-    padding:12px 14px; border:1.5px solid #e2e8f0;
-    border-radius:10px; cursor:pointer; background:#fafafa;
-    transition:all .2s; user-select:none;
-}
-.amen-item:hover,.amen-item.on { border-color:#DC2626; background:#FFF1F2; }
-.amen-item input { display:none; }
-.abox {
-    width:20px; height:20px; border:2px solid #cbd5e1;
-    border-radius:5px; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-    font-size:10px; color:transparent; transition:all .2s;
-}
-.amen-item.on .abox { background:#DC2626; border-color:#DC2626; color:#fff; }
-.aname { font-size:13px; font-weight:500; color:#374151; }
+  /* Sidebar Styles */
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+    padding: 20px 0;
+    transition: all 0.3s ease;
+    z-index: 999;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
 
-/* ── Image upload box ── */
-.img-box {
-    border:2px dashed #fecaca; border-radius:10px;
-    padding:20px; text-align:center; cursor:pointer;
-    background:#fffafa; transition:all .2s;
-}
-.img-box:hover { border-color:#DC2626; background:#FFF1F2; }
-.img-box i { font-size:1.6rem; color:#DC2626; }
-.img-box p { margin:6px 0 0; font-size:12px; color:#64748b; }
-.img-preview { width:100%; max-height:150px; object-fit:cover; border-radius:8px; margin-top:10px; }
+  .sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+  }
 
-/* ── Sticky submit bar ── */
-.submit-bar {
-    background:#fff; border-radius:14px;
-    padding:20px 24px; margin-bottom:24px;
-    box-shadow:0 2px 16px rgba(0,0,0,.07);
-    display:flex; justify-content:flex-end; gap:12px;
-    position:sticky; bottom:20px;
-}
-.btn-cancel {
-    padding:11px 28px; background:#f1f5f9; color:#64748b;
-    border:none; border-radius:8px; font-size:14px; font-weight:600;
-    cursor:pointer; text-decoration:none; transition:background .2s;
-}
-.btn-cancel:hover { background:#e2e8f0; }
-.btn-save {
-    padding:11px 32px;
-    background:linear-gradient(135deg,#DC2626,#991B1B);
-    color:#fff; border:none; border-radius:8px;
-    font-size:14px; font-weight:700; cursor:pointer;
-    box-shadow:0 4px 14px rgba(220,38,38,.35); transition:all .2s;
-}
-.btn-save:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(220,38,38,.45); }
+  .sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
 
-@media(max-width:768px){
-    .page-wrap { padding:16px; }
-    .fg { grid-template-columns:1fr; }
-    .amen-grid { grid-template-columns:repeat(2,1fr); }
-}
+  .sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+  }
+
+  .sidebar-brand {
+    padding: 20px 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .sidebar-brand-icon {
+    width: 45px;
+    height: 45px;
+    background: var(--primary-gradient);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .sidebar-brand-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .sidebar.collapsed .sidebar-brand-text {
+    display: none;
+  }
+
+  .sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 30px 0 0 0;
+  }
+
+  .menu-section-title {
+    padding: 15px 25px 10px;
+    color: #7f8c8d;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .sidebar.collapsed .menu-section-title {
+    opacity: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+  }
+
+  .menu-item {
+    position: relative;
+  }
+
+  .menu-link {
+    display: flex;
+    align-items: center;
+    padding: 15px 25px;
+    color: #bdc3c7;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    gap: 15px;
+    cursor: pointer;
+  }
+
+  .menu-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+  }
+
+  .menu-link.active {
+    background: var(--primary-gradient);
+    color: white;
+  }
+
+  .menu-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: white;
+  }
+
+  .menu-icon {
+    width: 24px;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  .menu-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .sidebar.collapsed .menu-text {
+    display: none;
+  }
+
+  .menu-badge {
+    margin-left: auto;
+    background: #e74c3c;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+
+  .sidebar.collapsed .menu-badge {
+    display: none;
+  }
+
+  .dropdown-icon {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+    font-size: 0.8rem;
+  }
+
+  .sidebar.collapsed .dropdown-icon {
+    display: none;
+  }
+
+  .menu-link.dropdown-open .dropdown-icon {
+    transform: rotate(180deg);
+  }
+
+  .submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    background: rgba(0, 0, 0, 0.2);
+  }
+
+  .submenu.active {
+    max-height: 1000px;
+  }
+
+  .submenu-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 25px 12px 65px;
+    color: #95a5a6;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+  }
+
+  .submenu-link:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .submenu-link.active {
+    color: #667eea;
+  }
+
+  /* Nested Submenu */
+  .submenu .menu-item {
+    position: relative;
+  }
+
+  .submenu .submenu {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .submenu .submenu-link {
+    padding-left: 85px;
+  }
+
+  /* Top Bar */
+  .topbar {
+    position: fixed;
+    left: var(--sidebar-width);
+    top: 0;
+    right: 0;
+    height: var(--topbar-height);
+    background: white;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    transition: all 0.3s ease;
+    z-index: 997;
+  }
+
+  .sidebar.collapsed~.main-wrapper .topbar {
+    left: var(--sidebar-collapsed-width);
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .toggle-sidebar {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #f8f9fa;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+  }
+
+  .toggle-sidebar:hover {
+    background: var(--primary-gradient);
+    color: white;
+  }
+
+  .topbar-search {
+    position: relative;
+    width: 300px;
+  }
+
+  .topbar-search input {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+  }
+
+  .topbar-search input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  }
+
+  .topbar-search i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #adb5bd;
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .topbar-icon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .topbar-icon:hover {
+    background: var(--primary-gradient);
+    color: white;
+  }
+
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .user-profile:hover {
+    background: #f8f9fa;
+  }
+
+  .user-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  /* Main Content */
+  .main-wrapper {
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+
+  .main-content {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--topbar-height);
+    padding: 30px;
+    min-height: calc(100vh - var(--topbar-height));
+    transition: all 0.3s ease;
+  }
+
+  .sidebar.collapsed~.main-wrapper .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+  }
+
+  /* Page Header */
+  .page-header {
+    background: var(--primary-gradient);
+    border-radius: 20px;
+    padding: 30px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .page-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+
+  .page-header-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .page-subtitle {
+    font-size: 0.95rem;
+    opacity: 0.9;
+  }
+
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin: 15px 0 0 0;
+  }
+
+  .breadcrumb-item {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+  }
+
+  .breadcrumb-item.active {
+    color: white;
+  }
+
+  .breadcrumb-item+.breadcrumb-item::before {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .breadcrumb-item a {
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .breadcrumb-item a:hover {
+    opacity: 0.8;
+  }
+
+  /* Form Container */
+  .page-wrap{
+    display:grid;
+    grid-template-columns:1fr 320px;
+    gap:24px;
+    max-width:100%;
+  }
+
+  .form-container {
+    background: white;
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  .form-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .form-title i {
+    width: 45px;
+    height: 45px;
+    background: var(--primary-gradient);
+    color: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-back {
+    background: #f8f9fa;
+    color: #2d3748;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .btn-back:hover {
+    background: var(--dark-gradient);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  /* STEPPER STYLES */
+  .stepper{
+    display:flex;
+    align-items:center;
+    gap:0;
+    margin-bottom:30px;
+    padding:20px 0;
+  }
+  .step-item{
+    display:flex;
+    align-items:center;
+    flex:1;
+  }
+  .step-circle{
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:.9rem;
+    font-weight:900;
+    flex-shrink:0;
+    border:3px solid var(--border);
+    background:white;
+    color:var(--muted);
+    transition:.3s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .step-circle.active{
+    background:var(--primary-gradient);
+    color:white;
+    border-color:transparent;
+    transform: scale(1.1);
+  }
+  .step-circle.done{
+    background:var(--success-gradient);
+    color:white;
+    border-color:transparent;
+  }
+  .step-label{
+    font-size:.85rem;
+    font-weight:700;
+    margin-left:10px;
+    color:var(--muted);
+    transition:.3s;
+  }
+  .step-label.active{
+    color:#667eea;
+  }
+  .step-label.done{
+    color:var(--success);
+  }
+  .step-line{
+    flex:1;
+    height:3px;
+    background:var(--border);
+    margin:0 15px;
+  }
+  .step-line.done{
+    background:var(--success-gradient);
+  }
+
+  .step-content{
+    display:none;
+  }
+  .step-content.active{
+    display:block;
+  }
+
+  /* Form Sections */
+  .form-section {
+    margin-bottom: 30px;
+  }
+
+  .section-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px 12px 0 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-body {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 0 0 12px 12px;
+    border: 2px solid #e9ecef;
+    border-top: none;
+  }
+
+  /* Form Controls */
+  .form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .form-label .required,
+  .required-star {
+    color: #e74c3c;
+    font-size: 1rem;
+  }
+
+  .form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 12px 15px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+
+  select.form-control, .form-select {
+    appearance: none;
+    background: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 0.75rem center;
+    background-size: 16px;
+    background-color: white;
+    padding-right: 2rem;
+  }
+
+  textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  .form-control-color {
+    height: 50px;
+    cursor: pointer;
+  }
+
+  .form-text {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-top: 6px;
+  }
+
+  /* Image Preview */
+  .image-preview {
+    margin-top: 15px;
+    display: none;
+  }
+
+  .image-preview.active {
+    display: block;
+  }
+
+  .image-preview img {
+    max-width: 100%;
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Checkbox */
+  .form-check {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+  }
+
+  .form-check-input {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e0;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+  }
+
+  .form-check-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-left: 10px;
+    cursor: pointer;
+  }
+
+  /* Step Navigation Buttons */
+  .step-nav{
+    display:flex;
+    justify-content:space-between;
+    margin-top:30px;
+    gap:15px;
+  }
+  
+  .btn-submit, .btn-next {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 12px 35px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-submit:hover, .btn-next:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-prev, .btn-reset {
+    background: #f8f9fa;
+    color: #2d3748;
+    padding: 12px 35px;
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-prev:hover, .btn-reset:hover {
+    background: #e9ecef;
+  }
+
+  /* SIDEBAR PREVIEW */
+  .preview-sidebar{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+
+  .preview-card{
+    background:linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+    border-radius:16px;
+    padding:20px;
+    color:white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  }
+  .pc-head{
+    font-size:.8rem;
+    font-weight:700;
+    color:rgba(255,255,255,.6);
+    margin-bottom:15px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .pc-mock{
+    background:white;
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .pcm-img{
+    height:140px;
+    background:linear-gradient(135deg,#e0e7ff,#c7d2fe);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:3rem;
+    position:relative;
+  }
+  .pcm-badges{
+    position:absolute;
+    top:10px;
+    left:10px;
+    display:flex;
+    gap:6px;
+  }
+  .pcm-badge{
+    font-size:.65rem;
+    font-weight:800;
+    padding:4px 10px;
+    border-radius:6px;
+  }
+  .b-rent{
+    background:rgba(255,255,255,.95);
+    color:#0f172a;
+  }
+  .b-comm{
+    background:#7c3aed;
+    color:white;
+  }
+  .pcm-price{
+    position:absolute;
+    bottom:10px;
+    left:10px;
+    background:rgba(15,23,42,.9);
+    color:white;
+    font-size:.9rem;
+    font-weight:900;
+    padding:5px 12px;
+    border-radius:8px;
+  }
+  .pcm-body{
+    padding:15px;
+  }
+  .pcm-title{
+    font-size:.95rem;
+    font-weight:800;
+    color:#0f172a;
+    margin-bottom:5px;
+  }
+  .pcm-loc{
+    font-size:.75rem;
+    color:#64748b;
+    margin-bottom:10px;
+  }
+  .pcm-specs{
+    display:flex;
+    gap:12px;
+    font-size:.75rem;
+    color:#475569;
+    font-weight:600;
+  }
+
+  .checklist-card{
+    background:white;
+    border-radius:16px;
+    border:2px solid #e9ecef;
+    padding:20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+  .cl-title{
+    font-size:.9rem;
+    font-weight:800;
+    color:var(--sec);
+    margin-bottom:15px;
+  }
+  .cl-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 0;
+    font-size:.8rem;
+    color:var(--muted);
+  }
+  .cl-item i{
+    font-size:.75rem;
+    width:18px;
+  }
+  .cl-item.done{
+    color:var(--success);
+  }
+  .cl-item.done i{
+    color:var(--success);
+  }
+
+  .info-card{
+    background:white;
+    border-radius:16px;
+    border:2px solid #e9ecef;
+    padding:18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+  .ic-title{
+    font-size:.85rem;
+    font-weight:800;
+    color:var(--sec);
+    margin-bottom:12px;
+  }
+  .ic-item{
+    font-size:.76rem;
+    color:#475569;
+    padding:6px 0;
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+  }
+  .ic-item i{
+    color:#667eea;
+    font-size:.75rem;
+    margin-top:3px;
+    flex-shrink:0;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .page-wrap{
+      grid-template-columns:1fr;
+    }
+    .preview-sidebar{
+      display:none;
+    }
+  }
+
+  @media (max-width: 992px) {
+    .sidebar {
+      transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+      transform: translateX(0);
+    }
+
+    .topbar {
+      left: 0 !important;
+    }
+
+    .main-content {
+      margin-left: 0 !important;
+    }
+
+    .topbar-search {
+      display: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .page-header {
+      padding: 20px;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+    }
+
+    .form-container {
+      padding: 20px;
+    }
+
+    .section-body {
+      padding: 15px;
+    }
+
+    .step-label{
+      display:none;
+    }
+  }
+
+  .checkbox-group,
+  .radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .checkbox-item,
+  .radio-item {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .image-upload-area {
+    border: 3px dashed #cbd5e0;
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .image-upload-area:hover {
+    border-color: #667eea;
+    background: #f0f4ff;
+    transform: scale(1.02);
+  }
+
+  .image-upload-area.dragover {
+    border-color: #667eea;
+    background: #e6f0ff;
+  }
+
+  .upload-text {
+    font-size: 1.1rem;
+    color: #4a5568;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .upload-subtext {
+    font-size: 0.9rem;
+    color: #718096;
+  }
+
+  .image-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .preview-item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    aspect-ratio: 1;
+  }
+
+  .preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .remove-image {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+  }
+
+  .remove-image:hover {
+    background: #c0392b;
+    transform: scale(1.1);
+  }
+
+  /* Number stepper */
+  .number-stepper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .stepper-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #667eea;
+    background: #fff;
+    color: #667eea;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .stepper-btn:hover {
+    background: #667eea;
+    color: #fff;
+  }
+
+  .stepper-value {
+    min-width: 40px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 26px;
+  }
+
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background-color: #667eea;
+  }
+
+  .toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+  }
+
+  .validation-error{
+    border:2px solid #e74c3c !important;
+    background:#fff5f5 !important;
+  }
+
+  .error-message{
+    color:#e74c3c;
+    font-size:0.75rem;
+    margin-top:5px;
+    display:none;
+  }
 </style>
 
+<!-- SweetAlert2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
 <div class="main-content">
-<div class="page-wrap">
-
-<!-- Page Header -->
-<div class="pg-header">
+  <div class="page-wrap">
+    
+    <!-- MAIN FORM -->
     <div>
-        <h1><i class="fas fa-edit"></i>&nbsp; Edit Commercial Property</h1>
-        <p>ID #{{ prop.id }} &nbsp;·&nbsp; {{ prop.property_title|default:"Untitled" }}</p>
-    </div>
-    <a href="{% url 'commercial_list' %}" class="btn-back">
-        <i class="fas fa-arrow-left"></i> Back to List
-    </a>
-</div>
-
-<form method="POST" enctype="multipart/form-data">
-{% csrf_token %}
-
-<!-- ①  BASIC INFORMATION -->
-<div class="card">
-    <div class="card-head">
-        <div class="card-icon" style="background:linear-gradient(135deg,#DC2626,#991B1B)"><i class="fas fa-building"></i></div>
-        <h3>Basic Information</h3>
-    </div>
-    <div class="card-body">
-        <div class="fg">
-
-            <div class="fgroup full">
-                <label class="flabel">Property Title</label>
-                <input type="text" name="property_title" class="fc"
-                       value="{{ prop.property_title|default:'' }}"
-                       placeholder="e.g. Premium Office Space in MIHAN">
-            </div>
-
-            <div class="fgroup">
-                <label class="flabel">Property Type <span class="r">*</span></label>
-                <select name="property_type" class="fc">
-                    <option value="office-space"   {% if prop.property_type == 'office-space'   %}selected{% endif %}>Office Space</option>
-                    <option value="shop"           {% if prop.property_type == 'shop'           %}selected{% endif %}>Shop / Showroom</option>
-                    <option value="warehouse"      {% if prop.property_type == 'warehouse'      %}selected{% endif %}>Warehouse / Godown</option>
-                    <option value="industrial"     {% if prop.property_type == 'industrial'     %}selected{% endif %}>Industrial Building</option>
-                    <option value="land"           {% if prop.property_type == 'land'           %}selected{% endif %}>Commercial Land</option>
-                </select>
-            </div>
-
-            <div class="fgroup">
-                <label class="flabel">City <span class="r">*</span></label>
-                <input type="text" name="city" class="fc" value="{{ prop.city|default:'' }}" placeholder="e.g. Nagpur">
-            </div>
-
-            <div class="fgroup">
-                <label class="flabel">Area / Locality <span class="r">*</span></label>
-                <input type="text" name="area_locality" class="fc" value="{{ prop.area_locality|default:'' }}" placeholder="e.g. MIHAN">
-            </div>
-
-            <div class="fgroup">
-                <label class="flabel">Building Name <span class="r">*</span></label>
-                <input type="text" name="building_name" class="fc" value="{{ prop.building_name|default:'' }}" placeholder="e.g. TechPark Tower">
-            </div>
-
-            <div class="fgroup full">
-                <label class="flabel">Property Address <span class="r">*</span></label>
-                <textarea name="property_address" class="fc" placeholder="Full address…">{{ prop.property_address|default:'' }}</textarea>
-            </div>
-
-            <div class="fgroup">
-                <label class="flabel">Possession Status <span class="r">*</span></label>
-                <select name="possession_status" class="fc">
-                    <option value="ready-to-move"      {% if prop.possession_status == 'ready-to-move'      %}selected{% endif %}>Ready to Move</option>
-                    <option value="under-construction" {% if prop.possession_status == 'under-construction' %}selected{% endif %}>Under Construction</option>
-                </select>
-            </div>
-
-            <div class="fgroup">
-                <label class="flabel">Available From</label>
-                <input type="date" name="available_from" class="fc" value="{{ prop.available_from|date:'Y-m-d'|default:'' }}">
-            </div>
-
-            <div class="fgroup">
-                <label class="flabel">Age of Property <span class="r">*</span></label>
-                <select name="age_of_property" class="fc">
-                    <option value="0-1"  {% if prop.age_of_property == '0-1'  %}selected{% endif %}>0–1 Year</option>
-                    <option value="1-3"  {% if prop.age_of_property == '1-3'  %}selected{% endif %}>1–3 Years</option>
-                    <option value="3-5"  {% if prop.age_of_property == '3-5'  %}selected{% endif %}>3–5 Years</option>
-                    <option value="5-10" {% if prop.age_of_property == '5-10' %}selected{% endif %}>5–10 Years</option>
-                    <option value="10+"  {% if prop.age_of_property == '10+'  %}selected{% endif %}>10+ Years</option>
-                </select>
-            </div>
-
-            <div class="fgroup">
-                <label class="flabel">Zone Type</label>
-                <select name="zone_type" class="fc">
-                    <option value="">— Select —</option>
-                    <option value="industrial"       {% if prop.zone_type == 'industrial'       %}selected{% endif %}>Industrial</option>
-                    <option value="commercial"       {% if prop.zone_type == 'commercial'       %}selected{% endif %}>Commercial</option>
-                    <option value="residential"      {% if prop.zone_type == 'residential'      %}selected{% endif %}>Residential</option>
-                    <option value="special-economic" {% if prop.zone_type == 'special-economic' %}selected{% endif %}>Special Economic Zone</option>
-                </select>
-            </div>
-
-            <div class="fgroup">
-                <label class="flabel">Location Hub</label>
-                <select name="location_hub" class="fc">
-                    <option value="">— Select —</option>
-                    <option value="it-park"           {% if prop.location_hub == 'it-park'           %}selected{% endif %}>IT Park</option>
-                    <option value="business-district" {% if prop.location_hub == 'business-district' %}selected{% endif %}>Business District</option>
-                    <option value="mall"              {% if prop.location_hub == 'mall'              %}selected{% endif %}>Shopping Mall</option>
-                    <option value="standalone"        {% if prop.location_hub == 'standalone'        %}selected{% endif %}>Standalone</option>
-                </select>
-            </div>
-
-            <div class="fgroup">
-                <label class="flabel">Property Condition <span class="r">*</span></label>
-                <select name="property_condition" class="fc">
-                    <option value="bare-shell" {% if prop.property_condition == 'bare-shell' %}selected{% endif %}>Bare Shell</option>
-                    <option value="warm-shell" {% if prop.property_condition == 'warm-shell' %}selected{% endif %}>Warm Shell</option>
-                    <option value="fitted"     {% if prop.property_condition == 'fitted'     %}selected{% endif %}>Fitted</option>
-                    <option value="furnished"  {% if prop.property_condition == 'furnished'  %}selected{% endif %}>Furnished</option>
-                </select>
-            </div>
-
-            <div class="fgroup">
-                <label class="flabel">Ownership Type <span class="r">*</span></label>
-                <select name="ownership_type" class="fc">
-                    <option value="freehold"     {% if prop.ownership_type == 'freehold'     %}selected{% endif %}>Freehold</option>
-                    <option value="leasehold"    {% if prop.ownership_type == 'leasehold'    %}selected{% endif %}>Leasehold</option>
-                    <option value="co-operative" {% if prop.ownership_type == 'co-operative' %}selected{% endif %}>Co-operative Society</option>
-                </select>
-            </div>
-
-            <div class="fgroup">
-                <label class="flabel">Construction Status</label>
-                <select name="construction_status" class="fc">
-                    <option value="">— Select —</option>
-                    <option value="new"    {% if prop.construction_status == 'new'    %}selected{% endif %}>New Construction</option>
-                    <option value="resale" {% if prop.construction_status == 'resale' %}selected{% endif %}>Resale</option>
-                </select>
-            </div>
-
+      <div class="form-container">
+        
+        <div class="form-header">
+          <div class="form-title"><i class="fas fa-edit"></i> Edit Commercial Property</div>
+          <button type="button" class="btn-back" onclick="window.location.href='{% url 'commercial_list' %}'">
+            <i class="fas fa-arrow-left"></i> Back to List
+          </button>
         </div>
-    </div>
-</div>
 
-<!-- ②  AREA & PRICING -->
-<div class="card">
-    <div class="card-head">
-        <div class="card-icon" style="background:linear-gradient(135deg,#D97706,#78350F)"><i class="fas fa-rupee-sign"></i></div>
-        <h3>Area &amp; Pricing</h3>
-    </div>
-    <div class="card-body">
-        <div class="fg">
+        <div class="stepper" id="stepper">
+          <div class="step-item"><div class="step-circle active" id="sc1">1</div><div class="step-label active" id="sl1">Basic Info</div></div>
+          <div class="step-line" id="line1"></div>
+          <div class="step-item"><div class="step-circle" id="sc2">2</div><div class="step-label" id="sl2">Area & Pricing</div></div>
+          <div class="step-line" id="line2"></div>
+          <div class="step-item"><div class="step-circle" id="sc3">3</div><div class="step-label" id="sl3">Amenities</div></div>
+          <div class="step-line" id="line3"></div>
+          <div class="step-item"><div class="step-circle" id="sc4">4</div><div class="step-label" id="sl4">Media & Contact</div></div>
+        </div>
 
-            <div class="fgroup">
-                <label class="flabel">Builtup Area (sq.ft) <span class="r">*</span></label>
-                <input type="number" name="builtup_area" class="fc" value="{{ prop.builtup_area|default:'' }}" placeholder="e.g. 2000">
-            </div>
-            <div class="fgroup">
-                <label class="flabel">Carpet Area (sq.ft)</label>
-                <input type="number" name="carpet_area" class="fc" value="{{ prop.carpet_area|default:'' }}" placeholder="e.g. 1800">
-            </div>
-            <div class="fgroup">
-                <label class="flabel">Expected Rent (₹/month) <span class="r">*</span></label>
-                <input type="number" name="expected_rent" class="fc" value="{{ prop.expected_rent|default:'' }}" placeholder="e.g. 75000">
-            </div>
-            <div class="fgroup">
-                <label class="flabel">Security Deposit (₹)</label>
-                <input type="number" name="security_deposit" class="fc" value="{{ prop.security_deposit|default:'' }}" placeholder="e.g. 225000">
-            </div>
-            <div class="fgroup">
-                <label class="flabel">Maintenance Charges (₹)</label>
-                <input type="number" name="maintenance_charges" class="fc" value="{{ prop.maintenance_charges|default:'' }}" placeholder="e.g. 5000">
-            </div>
+        <!-- Note: Replace 'commercial_edit' with your actual URL name for updating -->
+        <form id="commercialEditForm" action="{% url 'commercial_edit' prop.id %}" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
 
-            <div class="fgroup">
-                <label class="flabel">Rent Negotiable</label>
-                <div class="brow">
-                    <div class="bbtn yes {% if prop.negotiable %}on{% endif %}" onclick="setBool('negotiable',true,this)">✔ Yes</div>
-                    <div class="bbtn no {% if not prop.negotiable %}on{% endif %}" onclick="setBool('negotiable',false,this)">✘ No</div>
+          <!-- STEP 1 -->
+          <div class="step-content active" id="step1">
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-info-circle"></i> Basic Information</div>
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Property Type <span class="required">*</span></label>
+                    <select class="form-select" name="property_type" id="property_type" required>
+                      <option value="office-space" {% if prop.property_type == 'office-space' %}selected{% endif %}>Office Space</option>
+                      <option value="shop" {% if prop.property_type == 'shop' %}selected{% endif %}>Shop/Showroom</option>
+                      <option value="warehouse" {% if prop.property_type == 'warehouse' %}selected{% endif %}>Warehouse/Godown</option>
+                      <option value="industrial" {% if prop.property_type == 'industrial' %}selected{% endif %}>Industrial Building</option>
+                      <option value="land" {% if prop.property_type == 'land' %}selected{% endif %}>Commercial Land</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Property Condition <span class="required">*</span></label>
+                    <select class="form-select" name="property_condition" required>
+                      <option value="bare-shell" {% if prop.property_condition == 'bare-shell' %}selected{% endif %}>Bare Shell</option>
+                      <option value="warm-shell" {% if prop.property_condition == 'warm-shell' %}selected{% endif %}>Warm Shell</option>
+                      <option value="fitted" {% if prop.property_condition == 'fitted' %}selected{% endif %}>Fitted</option>
+                      <option value="furnished" {% if prop.property_condition == 'furnished' %}selected{% endif %}>Furnished</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">City <span class="required">*</span></label>
+                    <input type="text" class="form-control" name="city" id="cityInput" value="{{ prop.city }}" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Area/Locality <span class="required">*</span></label>
+                    <input type="text" class="form-control" name="area_locality" id="locality" value="{{ prop.area_locality }}" required>
+                  </div>
+                  <div class="col-md-12 mb-3">
+                    <label class="form-label">Property Address <span class="required">*</span></label>
+                    <textarea class="form-control" name="property_address" rows="2" required>{{ prop.property_address }}</textarea>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Building / Project <span class="required">*</span></label>
+                    <input type="text" class="form-control" name="building_name" value="{{ prop.building_name }}" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Possession Status <span class="required">*</span></label>
+                    <select class="form-select" name="possession_status" required>
+                      <option value="ready-to-move" {% if prop.possession_status == 'ready-to-move' %}selected{% endif %}>Ready to move</option>
+                      <option value="under-construction" {% if prop.possession_status == 'under-construction' %}selected{% endif %}>Under construction</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Available From</label>
+                    <input type="date" class="form-control" name="available_from" value="{{ prop.available_from|date:'Y-m-d' }}">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Age of Property <span class="required">*</span></label>
+                    <select class="form-select" name="age_of_property" required>
+                      <option value="0-1" {% if prop.age_of_property == '0-1' %}selected{% endif %}>0-1 Year</option>
+                      <option value="1-3" {% if prop.age_of_property == '1-3' %}selected{% endif %}>1-3 Years</option>
+                      <option value="3-5" {% if prop.age_of_property == '3-5' %}selected{% endif %}>3-5 Years</option>
+                      <option value="5-10" {% if prop.age_of_property == '5-10' %}selected{% endif %}>5-10 Years</option>
+                      <option value="10+" {% if prop.age_of_property == '10+' %}selected{% endif %}>10+ Years</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Zone Type</label>
+                    <select class="form-select" name="zone_type">
+                      <option value="">Select</option>
+                      <option value="industrial" {% if prop.zone_type == 'industrial' %}selected{% endif %}>Industrial</option>
+                      <option value="commercial" {% if prop.zone_type == 'commercial' %}selected{% endif %}>Commercial</option>
+                      <option value="residential" {% if prop.zone_type == 'residential' %}selected{% endif %}>Residential</option>
+                      <option value="special-economic" {% if prop.zone_type == 'special-economic' %}selected{% endif %}>Special Economic Zone</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Location Hub</label>
+                    <select class="form-select" name="location_hub">
+                      <option value="">Select</option>
+                      <option value="it-park" {% if prop.location_hub == 'it-park' %}selected{% endif %}>IT Park</option>
+                      <option value="business-district" {% if prop.location_hub == 'business-district' %}selected{% endif %}>Business District</option>
+                      <option value="mall" {% if prop.location_hub == 'mall' %}selected{% endif %}>Shopping Mall</option>
+                      <option value="standalone" {% if prop.location_hub == 'standalone' %}selected{% endif %}>Standalone</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Ownership Type <span class="required">*</span></label>
+                    <select class="form-select" name="ownership_type" required>
+                      <option value="freehold" {% if prop.ownership_type == 'freehold' %}selected{% endif %}>Freehold</option>
+                      <option value="leasehold" {% if prop.ownership_type == 'leasehold' %}selected{% endif %}>Leasehold</option>
+                      <option value="co-operative" {% if prop.ownership_type == 'co-operative' %}selected{% endif %}>Co-operative Society</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Construction Status</label>
+                    <select class="form-select" name="construction_status">
+                      <option value="">Select</option>
+                      <option value="new" {% if prop.construction_status == 'new' %}selected{% endif %}>New Construction</option>
+                      <option value="resale" {% if prop.construction_status == 'resale' %}selected{% endif %}>Resale</option>
+                    </select>
+                  </div>
                 </div>
-                <input type="hidden" name="negotiable" id="negotiable" value="{{ prop.negotiable }}">
+              </div>
             </div>
-
-            <div class="fgroup">
-                <label class="flabel">Brokerage</label>
-                <select name="brokerage" class="fc">
-                    <option value="">— Select —</option>
-                    <option value="Yes" {% if prop.brokerage == 'Yes' %}selected{% endif %}>Yes</option>
-                    <option value="No"  {% if prop.brokerage == 'No'  %}selected{% endif %}>No</option>
-                </select>
+            <div class="step-nav">
+              <div></div>
+              <button type="button" class="btn-next" onclick="goToStep(2)">Next <i class="fas fa-arrow-right"></i></button>
             </div>
-            <div class="fgroup">
-                <label class="flabel">Brokerage %</label>
-                <input type="text" name="brokerage_percentage" class="fc" value="{{ prop.brokerage_percentage|default:'' }}" placeholder="e.g. 2">
-            </div>
-            <div class="fgroup">
-                <label class="flabel">Manual Brokerage (₹)</label>
-                <input type="text" name="manual_brokerage" class="fc" value="{{ prop.manual_brokerage|default:'' }}" placeholder="e.g. 15000">
-            </div>
+          </div>
 
-        </div>
-    </div>
-</div>
+          <!-- STEP 2 -->
+          <div class="step-content" id="step2">
+            <div class="form-section">
+              <div class="section-header"><i class="fa-solid fa-ruler-combined"></i> Area, Pricing & Building</div>
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Built-up Area (sq.ft) <span class="required">*</span></label>
+                    <input type="number" class="form-control" name="builtup_area" id="builtArea" value="{{ prop.builtup_area }}" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Carpet Area (sq.ft)</label>
+                    <input type="number" class="form-control" name="carpet_area" value="{{ prop.carpet_area|default:'' }}">
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Expected Rent (₹/mo) <span class="required">*</span></label>
+                    <input type="number" class="form-control" name="expected_rent" id="monthlyRent" value="{{ prop.expected_rent }}" required>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Security Deposit (₹)</label>
+                    <input type="number" class="form-control" name="security_deposit" value="{{ prop.security_deposit|default:'' }}">
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Maintenance (₹/mo)</label>
+                    <input type="number" class="form-control" name="maintenance_charges" value="{{ prop.maintenance_charges|default:'' }}">
+                  </div>
 
-<!-- ③  UTILITIES & LEASE -->
-<div class="card">
-    <div class="card-head">
-        <div class="card-icon" style="background:linear-gradient(135deg,#0891B2,#0C4A6E)"><i class="fas fa-bolt"></i></div>
-        <h3>Utilities &amp; Lease Terms</h3>
-    </div>
-    <div class="card-body">
-        <div class="fg">
+                  <!-- Radio for Negotiable -->
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Negotiable</label>
+                    <div class="mt-2">
+                      <div class="form-check form-check-inline" style="display:inline-block; margin-right:10px;">
+                        <input class="form-check-input" type="radio" name="negotiable" value="Yes" id="neg-yes" {% if prop.negotiable %}checked{% endif %}>
+                        <label class="form-check-label" for="neg-yes">Yes</label>
+                      </div>
+                      <div class="form-check form-check-inline" style="display:inline-block;">
+                        <input class="form-check-input" type="radio" name="negotiable" value="No" id="neg-no" {% if not prop.negotiable %}checked{% endif %}>
+                        <label class="form-check-label" for="neg-no">No</label>
+                      </div>
+                    </div>
+                  </div>
 
-            <div class="fgroup">
-                <label class="flabel">DG / UPS Included</label>
-                <div class="brow">
-                    <div class="bbtn yes {% if prop.dg_ups_included %}on{% endif %}" onclick="setBool('dg_ups_included',true,this)">✔ Yes</div>
-                    <div class="bbtn no {% if not prop.dg_ups_included %}on{% endif %}" onclick="setBool('dg_ups_included',false,this)">✘ No</div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Brokerage</label>
+                    <select class="form-select" name="brokerage" id="brokerageSelect">
+                      <option value="">Select Option</option>
+                      <option value="Yes" {% if prop.brokerage == 'Yes' %}selected{% endif %}>Yes</option>
+                      <option value="No" {% if prop.brokerage == 'No' %}selected{% endif %}>No</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3" id="brokerageSection" style="{% if prop.brokerage != 'Yes' %}display:none;{% endif %}">
+                    <label class="form-label">Brokerage Percentage</label>
+                    <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
+                      <option value="">Select Brokerage</option>
+                      <option value="1%" {% if prop.brokerage_percentage == '1%' %}selected{% endif %}>1%</option>
+                      <option value="1.5%" {% if prop.brokerage_percentage == '1.5%' %}selected{% endif %}>1.5%</option>
+                      <option value="2%" {% if prop.brokerage_percentage == '2%' %}selected{% endif %}>2%</option>
+                      <option value="Negotiable" {% if prop.brokerage_percentage == 'Negotiable' %}selected{% endif %}>Negotiable</option>
+                      <option value="Manual" {% if prop.brokerage_percentage == 'Manual' %}selected{% endif %}>Enter Manually</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 mb-3" id="manualBrokerage" style="{% if prop.brokerage_percentage != 'Manual' %}display:none;{% endif %}">
+                    <label class="form-label">Enter Brokerage</label>
+                    <input type="text" class="form-control" name="manual_brokerage" value="{{ prop.manual_brokerage|default:'' }}">
+                  </div>
+
+                  <!-- Utilities Toggles -->
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">DG & UPS Included?</label>
+                    <label class="toggle-switch">
+                      <input type="checkbox" name="dg_ups_included" {% if prop.dg_ups_included %}checked{% endif %}>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Electricity Included?</label>
+                    <label class="toggle-switch">
+                      <input type="checkbox" name="electricity_included" {% if prop.electricity_included %}checked{% endif %}>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Water Included?</label>
+                    <label class="toggle-switch">
+                      <input type="checkbox" name="water_included" {% if prop.water_included %}checked{% endif %}>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Lock-in Period (months)</label>
+                    <input type="number" class="form-control" name="lockin_period" value="{{ prop.lockin_period|default:'' }}">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Rent Increase (%/year)</label>
+                    <input type="number" class="form-control" name="rent_increase" step="0.1" value="{{ prop.rent_increase|default:'' }}">
+                  </div>
+
+                  <!-- Building Numerics -->
+                  <div class="col-md-4 mb-3"><label class="form-label">Total Floors</label><input type="number" class="form-control" name="total_floors" value="{{ prop.total_floors|default:'' }}"></div>
+                  <div class="col-md-4 mb-3"><label class="form-label">Your Floor</label><input type="number" class="form-control" name="your_floor" value="{{ prop.your_floor|default:'' }}"></div>
+                  <div class="col-md-4 mb-3"><label class="form-label">Staircases</label><input type="number" class="form-control" name="staircases" value="{{ prop.staircases|default:'' }}"></div>
+
+                  <!-- Number Steppers -->
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Passenger Lifts</label>
+                    <div class="number-stepper">
+                      <button type="button" class="stepper-btn" onclick="updateStepper('passenger_lifts', -1)">−</button>
+                      <span class="stepper-value" id="passenger_lifts_display">{{ prop.passenger_lifts }}</span>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('passenger_lifts', 1)">+</button>
+                      <input type="hidden" name="passenger_lifts" id="passenger_lifts" value="{{ prop.passenger_lifts }}">
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Service Lifts</label>
+                    <div class="number-stepper">
+                      <button type="button" class="stepper-btn" onclick="updateStepper('service_lifts', -1)">−</button>
+                      <span class="stepper-value" id="service_lifts_display">{{ prop.service_lifts }}</span>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('service_lifts', 1)">+</button>
+                      <input type="hidden" name="service_lifts" id="service_lifts" value="{{ prop.service_lifts }}">
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Private Parking</label>
+                    <div class="number-stepper">
+                      <button type="button" class="stepper-btn" onclick="updateStepper('private_parking', -1)">−</button>
+                      <span class="stepper-value" id="private_parking_display">{{ prop.private_parking }}</span>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('private_parking', 1)">+</button>
+                      <input type="hidden" name="private_parking" id="private_parking" value="{{ prop.private_parking }}">
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3"><label class="form-label">Min Seats</label><input type="number" class="form-control" name="min_seats" value="{{ prop.min_seats|default:'' }}"></div>
+                  <div class="col-md-6 mb-3"><label class="form-label">Max Seats</label><input type="number" class="form-control" name="max_seats" value="{{ prop.max_seats|default:'' }}"></div>
+                  <div class="col-md-6 mb-3"><label class="form-label">Cabins</label><input type="number" class="form-control" name="cabins" value="{{ prop.cabins|default:'' }}"></div>
+                  <div class="col-md-6 mb-3"><label class="form-label">Meeting Rooms</label><input type="number" class="form-control" name="meeting_rooms" value="{{ prop.meeting_rooms|default:'' }}"></div>
+
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Private Washrooms</label>
+                    <div class="number-stepper">
+                      <button type="button" class="stepper-btn" onclick="updateStepper('private_washroom', -1)">−</button>
+                      <span class="stepper-value" id="private_washroom_display">{{ prop.private_washroom }}</span>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('private_washroom', 1)">+</button>
+                      <input type="hidden" name="private_washroom" id="private_washroom" value="{{ prop.private_washroom }}">
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Public Washrooms</label>
+                    <div class="number-stepper">
+                      <button type="button" class="stepper-btn" onclick="updateStepper('public_washroom', -1)">−</button>
+                      <span class="stepper-value" id="public_washroom_display">{{ prop.public_washroom }}</span>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('public_washroom', 1)">+</button>
+                      <input type="hidden" name="public_washroom" id="public_washroom" value="{{ prop.public_washroom }}">
+                    </div>
+                  </div>
+
+                  <div class="col-md-12 mb-3">
+                    <label class="form-label">Flooring Type</label>
+                    <select class="form-select" name="flooring_type">
+                      <option value="">Select</option>
+                      <option value="marble" {% if prop.flooring_type == 'marble' %}selected{% endif %}>Marble</option>
+                      <option value="vitrified" {% if prop.flooring_type == 'vitrified' %}selected{% endif %}>Vitrified Tiles</option>
+                      <option value="granite" {% if prop.flooring_type == 'granite' %}selected{% endif %}>Granite</option>
+                      <option value="wooden" {% if prop.flooring_type == 'wooden' %}selected{% endif %}>Wooden</option>
+                      <option value="ceramic" {% if prop.flooring_type == 'ceramic' %}selected{% endif %}>Ceramic Tiles</option>
+                    </select>
+                  </div>
+
                 </div>
-                <input type="hidden" name="dg_ups_included" id="dg_ups_included" value="{{ prop.dg_ups_included }}">
+              </div>
             </div>
+            <div class="step-nav">
+              <button type="button" class="btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
+              <button type="button" class="btn-next" onclick="goToStep(3)">Next <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
 
-            <div class="fgroup">
-                <label class="flabel">Electricity Included</label>
-                <div class="brow">
-                    <div class="bbtn yes {% if prop.electricity_included %}on{% endif %}" onclick="setBool('electricity_included',true,this)">✔ Yes</div>
-                    <div class="bbtn no {% if not prop.electricity_included %}on{% endif %}" onclick="setBool('electricity_included',false,this)">✘ No</div>
+          <!-- STEP 3 -->
+          <div class="step-content" id="step3">
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-star"></i> Amenities & Facilities</div>
+              <div class="section-body">
+                <label class="form-label"><i class="fas fa-star text-warning"></i> Amenities</label>
+                <div class="checkbox-group mb-4">
+                  {% for am in ameneties_obj %}
+                    <div class="checkbox-item">
+                      <div class="form-check">
+                        <!-- Check if am.name is in the prop.amenities list -->
+                        <input class="form-check-input" type="checkbox" name="amenities[]" value="{{ am.amenties_name }}" id="am_{{ forloop.counter }}" {% if am.amenties_name in prop.amenities %}checked{% endif %}>
+                        <label class="form-check-label" for="am_{{ forloop.counter }}"><i class="{{ am.amenties_icon }}"></i> {{ am.amenties_name }}</label>
+                      </div>
+                    </div>
+                  {% endfor %}
                 </div>
-                <input type="hidden" name="electricity_included" id="electricity_included" value="{{ prop.electricity_included }}">
-            </div>
 
-            <div class="fgroup">
-                <label class="flabel">Water Included</label>
-                <div class="brow">
-                    <div class="bbtn yes {% if prop.water_included %}on{% endif %}" onclick="setBool('water_included',true,this)">✔ Yes</div>
-                    <div class="bbtn no {% if not prop.water_included %}on{% endif %}" onclick="setBool('water_included',false,this)">✘ No</div>
+                <label class="form-label mt-3"><i class="fas fa-map-marker-alt text-info"></i> Nearby Facilities</label>
+                <div class="checkbox-group">
+                  {% for fa in facilities_obj %}
+                    <div class="checkbox-item">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="nearby_facilities[]" value="{{ fa.facilities_name }}" id="fa_{{ forloop.counter }}" {% if fa.facilities_name in prop.nearby_facilities %}checked{% endif %}>
+                        <label class="form-check-label" for="fa_{{ forloop.counter }}"><i class="{{ fa.facilities_icon }}"></i> {{ fa.facilities_name }}</label>
+                      </div>
+                    </div>
+                  {% endfor %}
                 </div>
-                <input type="hidden" name="water_included" id="water_included" value="{{ prop.water_included }}">
+              </div>
             </div>
-
-            <div class="fgroup">
-                <label class="flabel">Lock-in Period (months)</label>
-                <input type="number" name="lockin_period" class="fc" value="{{ prop.lockin_period|default:'' }}" placeholder="e.g. 11">
+            <div class="step-nav">
+              <button type="button" class="btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+              <button type="button" class="btn-next" onclick="goToStep(4)">Next <i class="fas fa-arrow-right"></i></button>
             </div>
-            <div class="fgroup">
-                <label class="flabel">Rent Increase % / year</label>
-                <input type="number" step="0.1" name="rent_increase" class="fc" value="{{ prop.rent_increase|default:'' }}" placeholder="e.g. 5.0">
-            </div>
+          </div>
 
-        </div>
-    </div>
-</div>
+          <!-- STEP 4 -->
+          <div class="step-content" id="step4">
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-images"></i> Media & Contact</div>
+              <div class="section-body">
+                <div class="row">
+                  
+                  <!-- Current Images -->
+                  <div class="col-md-12 mb-3">
+                      <label class="form-label">Current Property Images</label>
+                      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                          {% for img in prop.images.all %}
+                              <div style="position: relative; border-radius: 8px; overflow: hidden; border: 2px solid #e2e8f0; width:80px; height:80px;">
+                                  <img src="{{ img.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                              </div>
+                          {% empty %}
+                              <span style="color:#94a3b8; font-size:0.85rem;">No images uploaded previously.</span>
+                          {% endfor %}
+                      </div>
 
-<!-- ④  BUILDING DETAILS -->
-<div class="card">
-    <div class="card-head">
-        <div class="card-icon" style="background:linear-gradient(135deg,#7C3AED,#4C1D95)"><i class="fas fa-layer-group"></i></div>
-        <h3>Building Details</h3>
-    </div>
-    <div class="card-body">
-        <div class="fg">
-            <div class="fgroup"><label class="flabel">Total Floors</label><input type="number" name="total_floors" class="fc" value="{{ prop.total_floors|default:'' }}" placeholder="e.g. 10"></div>
-            <div class="fgroup"><label class="flabel">Your Floor</label><input type="number" name="your_floor" class="fc" value="{{ prop.your_floor|default:'' }}" placeholder="e.g. 5"></div>
-            <div class="fgroup"><label class="flabel">Staircases</label><input type="number" name="staircases" class="fc" value="{{ prop.staircases|default:'' }}" placeholder="e.g. 2"></div>
-            <div class="fgroup"><label class="flabel">Passenger Lifts</label><input type="number" name="passenger_lifts" class="fc" value="{{ prop.passenger_lifts|default:'0' }}"></div>
-            <div class="fgroup"><label class="flabel">Service Lifts</label><input type="number" name="service_lifts" class="fc" value="{{ prop.service_lifts|default:'0' }}"></div>
-            <div class="fgroup"><label class="flabel">Private Parking Slots</label><input type="number" name="private_parking" class="fc" value="{{ prop.private_parking|default:'0' }}"></div>
-        </div>
-    </div>
-</div>
+                      <label class="form-label">Upload Additional Images</label>
+                      <div class="image-upload-area" id="uploadArea" style="padding: 20px; border-radius: 8px;">
+                        <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display: none;">
+                        <i class="fas fa-cloud-upload-alt" style="font-size:2rem; color:#667eea;"></i>
+                        <div style="font-weight: 600; color: #4a5568;">Click or drag new images here</div>
+                        <div style="font-size: 0.8rem; color: #718096;">These will be added to the property gallery</div>
+                      </div>
+                      <div class="image-preview" id="imagePreview"></div>
+                  </div>
 
-<!-- ⑤  OFFICE FACILITIES -->
-<div class="card">
-    <div class="card-head">
-        <div class="card-icon" style="background:linear-gradient(135deg,#059669,#064E3B)"><i class="fas fa-chair"></i></div>
-        <h3>Office Facilities</h3>
-    </div>
-    <div class="card-body">
-        <div class="fg">
-            <div class="fgroup"><label class="flabel">Min Seats</label><input type="number" name="min_seats" class="fc" value="{{ prop.min_seats|default:'' }}" placeholder="e.g. 20"></div>
-            <div class="fgroup"><label class="flabel">Max Seats</label><input type="number" name="max_seats" class="fc" value="{{ prop.max_seats|default:'' }}" placeholder="e.g. 100"></div>
-            <div class="fgroup"><label class="flabel">Cabins</label><input type="number" name="cabins" class="fc" value="{{ prop.cabins|default:'' }}" placeholder="e.g. 10"></div>
-            <div class="fgroup"><label class="flabel">Meeting Rooms</label><input type="number" name="meeting_rooms" class="fc" value="{{ prop.meeting_rooms|default:'' }}" placeholder="e.g. 3"></div>
-            <div class="fgroup"><label class="flabel">Private Washrooms</label><input type="number" name="private_washroom" class="fc" value="{{ prop.private_washroom|default:'0' }}"></div>
-            <div class="fgroup"><label class="flabel">Public Washrooms</label><input type="number" name="public_washroom" class="fc" value="{{ prop.public_washroom|default:'0' }}"></div>
-            <div class="fgroup">
-                <label class="flabel">Flooring Type</label>
-                <select name="flooring_type" class="fc">
-                    <option value="">— Select —</option>
-                    <option value="marble"    {% if prop.flooring_type == 'marble'    %}selected{% endif %}>Marble</option>
-                    <option value="vitrified" {% if prop.flooring_type == 'vitrified' %}selected{% endif %}>Vitrified Tiles</option>
-                    <option value="granite"   {% if prop.flooring_type == 'granite'   %}selected{% endif %}>Granite</option>
-                    <option value="wooden"    {% if prop.flooring_type == 'wooden'    %}selected{% endif %}>Wooden</option>
-                    <option value="ceramic"   {% if prop.flooring_type == 'ceramic'   %}selected{% endif %}>Ceramic Tiles</option>
-                </select>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ⑥  AMENITIES -->
-<div class="card">
-    <div class="card-head">
-        <div class="card-icon" style="background:linear-gradient(135deg,#F59E0B,#78350F)"><i class="fas fa-star"></i></div>
-        <h3>Amenities</h3>
-    </div>
-    <div class="card-body">
-        <div class="amen-grid">
-            {% with alist="parking|car|Parking,security|shield-alt|Security,ac|snowflake|Air Conditioning,power_backup|plug|Power Backup,cafeteria|utensils|Cafeteria,conference_room|users|Conference Room,fire_safety|fire-extinguisher|Fire Safety,cctv|video|CCTV" %}{% endwith %}
-
-            <label class="amen-item {% if prop.parking %}on{% endif %}" onclick="toggleAmen(event,this)">
-                <input type="checkbox" name="parking" {% if prop.parking %}checked{% endif %}>
-                <div class="abox">✔</div><i class="fas fa-car" style="color:#DC2626;width:16px"></i><span class="aname">Parking</span>
-            </label>
-            <label class="amen-item {% if prop.security %}on{% endif %}" onclick="toggleAmen(event,this)">
-                <input type="checkbox" name="security" {% if prop.security %}checked{% endif %}>
-                <div class="abox">✔</div><i class="fas fa-shield-alt" style="color:#DC2626;width:16px"></i><span class="aname">Security</span>
-            </label>
-            <label class="amen-item {% if prop.ac %}on{% endif %}" onclick="toggleAmen(event,this)">
-                <input type="checkbox" name="ac" {% if prop.ac %}checked{% endif %}>
-                <div class="abox">✔</div><i class="fas fa-snowflake" style="color:#DC2626;width:16px"></i><span class="aname">Air Conditioning</span>
-            </label>
-            <label class="amen-item {% if prop.power_backup %}on{% endif %}" onclick="toggleAmen(event,this)">
-                <input type="checkbox" name="power_backup" {% if prop.power_backup %}checked{% endif %}>
-                <div class="abox">✔</div><i class="fas fa-plug" style="color:#DC2626;width:16px"></i><span class="aname">Power Backup</span>
-            </label>
-            <label class="amen-item {% if prop.cafeteria %}on{% endif %}" onclick="toggleAmen(event,this)">
-                <input type="checkbox" name="cafeteria" {% if prop.cafeteria %}checked{% endif %}>
-                <div class="abox">✔</div><i class="fas fa-utensils" style="color:#DC2626;width:16px"></i><span class="aname">Cafeteria</span>
-            </label>
-            <label class="amen-item {% if prop.conference_room %}on{% endif %}" onclick="toggleAmen(event,this)">
-                <input type="checkbox" name="conference_room" {% if prop.conference_room %}checked{% endif %}>
-                <div class="abox">✔</div><i class="fas fa-users" style="color:#DC2626;width:16px"></i><span class="aname">Conference Room</span>
-            </label>
-            <label class="amen-item {% if prop.fire_safety %}on{% endif %}" onclick="toggleAmen(event,this)">
-                <input type="checkbox" name="fire_safety" {% if prop.fire_safety %}checked{% endif %}>
-                <div class="abox">✔</div><i class="fas fa-fire-extinguisher" style="color:#DC2626;width:16px"></i><span class="aname">Fire Safety</span>
-            </label>
-            <label class="amen-item {% if prop.cctv %}on{% endif %}" onclick="toggleAmen(event,this)">
-                <input type="checkbox" name="cctv" {% if prop.cctv %}checked{% endif %}>
-                <div class="abox">✔</div><i class="fas fa-video" style="color:#DC2626;width:16px"></i><span class="aname">CCTV</span>
-            </label>
-        </div>
-    </div>
-</div>
-
-<!-- ⑦  NEARBY -->
-<div class="card">
-    <div class="card-head">
-        <div class="card-icon" style="background:linear-gradient(135deg,#0EA5E9,#0C4A6E)"><i class="fas fa-map-marker-alt"></i></div>
-        <h3>Nearby Facilities</h3>
-    </div>
-    <div class="card-body">
-        <div class="fg">
-            <div class="fgroup"><label class="flabel">Metro Station</label><input type="text" name="metro_station" class="fc" value="{{ prop.metro_station|default:'' }}" placeholder="e.g. MIHAN Metro 500m"></div>
-            <div class="fgroup"><label class="flabel">Bus Stop</label><input type="text" name="bus_stop" class="fc" value="{{ prop.bus_stop|default:'' }}" placeholder="e.g. Bus Stop 200m"></div>
-            <div class="fgroup"><label class="flabel">Restaurants</label><input type="text" name="restaurants" class="fc" value="{{ prop.restaurants|default:'' }}" placeholder="e.g. Food Court nearby"></div>
-            <div class="fgroup"><label class="flabel">Banks</label><input type="text" name="banks" class="fc" value="{{ prop.banks|default:'' }}" placeholder="e.g. HDFC Bank 300m"></div>
-        </div>
-    </div>
-</div>
-
-<!-- ⑧  MEDIA -->
-<div class="card">
-    <div class="card-head">
-        <div class="card-icon" style="background:linear-gradient(135deg,#EC4899,#831843)"><i class="fas fa-images"></i></div>
-        <h3>Media</h3>
-    </div>
-    <div class="card-body">
-        <div class="fg">
-            <!-- Property Image -->
-            <div class="fgroup">
-                <label class="flabel">Property Image</label>
-                <div class="img-box" onclick="document.getElementById('fi_img').click()">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Click to upload / replace image</p>
-                    {% if prop.property_images %}
-                        <img src="{{ prop.property_images.url }}" class="img-preview" id="cur_img">
-                    {% endif %}
-                </div>
-                <input type="file" id="fi_img" name="property_images" accept="image/*" style="display:none"
-                       onchange="previewFile(this,'prev_img','cur_img')">
-                <div id="prev_img"></div>
-            </div>
-            <!-- Floor Plan -->
-            <div class="fgroup">
-                <label class="flabel">Floor Plan</label>
-                <div class="img-box" onclick="document.getElementById('fi_fp').click()">
-                    <i class="fas fa-map"></i>
-                    <p>Click to upload / replace floor plan</p>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Update Floor Plan</label>
+                    <input type="file" class="form-control" name="floor_plan" accept="image/*">
                     {% if prop.floor_plan %}
-                        <img src="{{ prop.floor_plan.url }}" class="img-preview" id="cur_fp">
+                        <div style="margin-top:5px; font-size:0.8rem;"><a href="{{ prop.floor_plan.url }}" target="_blank">View Current Plan</a></div>
                     {% endif %}
-                </div>
-                <input type="file" id="fi_fp" name="floor_plan" accept="image/*" style="display:none"
-                       onchange="previewFile(this,'prev_fp','cur_fp')">
-                <div id="prev_fp"></div>
-            </div>
-            <!-- Video -->
-            <div class="fgroup">
-                <label class="flabel">Video</label>
-                <div class="img-box" onclick="document.getElementById('fi_vid').click()">
-                    <i class="fas fa-video"></i>
-                    <p>Click to upload / replace video</p>
+                  </div>
+                  
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Update Video</label>
+                    <input type="file" class="form-control" name="video" accept="video/*">
                     {% if prop.video %}
-                        <p style="margin-top:8px;color:#16A34A;font-size:12px;"><i class="fas fa-check-circle"></i> Video already uploaded</p>
+                        <div style="margin-top:5px; font-size:0.8rem;"><a href="{{ prop.video.url }}" target="_blank">View Current Video</a></div>
                     {% endif %}
+                  </div>
                 </div>
-                <input type="file" id="fi_vid" name="video" accept="video/*" style="display:none">
+              </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- ⑨  OWNER -->
-<div class="card">
-    <div class="card-head">
-        <div class="card-icon" style="background:linear-gradient(135deg,#6366F1,#3730A3)"><i class="fas fa-user-tie"></i></div>
-        <h3>Owner Details</h3>
-    </div>
-    <div class="card-body">
-        <div class="fg">
-            <div class="fgroup"><label class="flabel">Owner Name <span class="r">*</span></label><input type="text" name="owner_name" class="fc" value="{{ prop.owner_name|default:'' }}" placeholder="Full name"></div>
-            <div class="fgroup"><label class="flabel">Contact Number <span class="r">*</span></label><input type="text" name="contact_number" class="fc" value="{{ prop.contact_number|default:'' }}" placeholder="10-digit mobile"></div>
-            <div class="fgroup"><label class="flabel">Email <span class="r">*</span></label><input type="email" name="email" class="fc" value="{{ prop.email|default:'' }}" placeholder="owner@example.com"></div>
-            <div class="fgroup"><label class="flabel">Alternate Contact</label><input type="text" name="alternate_contact" class="fc" value="{{ prop.alternate_contact|default:'' }}" placeholder="Optional"></div>
-        </div>
-    </div>
-</div>
-
-<!-- ⑩  UPLOADED BY -->
-<div class="card">
-    <div class="card-head">
-        <div class="card-icon" style="background:linear-gradient(135deg,#64748B,#1E293B)"><i class="fas fa-upload"></i></div>
-        <h3>Uploaded By</h3>
-    </div>
-    <div class="card-body">
-        <div class="fg">
-            <div class="fgroup"><label class="flabel">Name</label><input type="text" name="uploaded_by_name" class="fc" value="{{ prop.uploaded_by_name|default:'' }}"></div>
-            <div class="fgroup"><label class="flabel">Email</label><input type="email" name="uploaded_by_email" class="fc" value="{{ prop.uploaded_by_email|default:'' }}"></div>
-            <div class="fgroup"><label class="flabel">Contact</label><input type="text" name="uploaded_by_contact" class="fc" value="{{ prop.uploaded_by_contact|default:'' }}"></div>
-            <div class="fgroup">
-                <label class="flabel">Role</label>
-                <select name="uploaded_by_role" class="fc">
-                    <option value="">— Select —</option>
-                    <option value="Admin" {% if prop.uploaded_by_role == 'Admin' %}selected{% endif %}>Admin</option>
-                    <option value="Agent" {% if prop.uploaded_by_role == 'Agent' %}selected{% endif %}>Agent</option>
-                    <option value="Owner" {% if prop.uploaded_by_role == 'Owner' %}selected{% endif %}>Owner</option>
-                </select>
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-user"></i> Owner Contact</div>
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-6 mb-3"><label class="form-label">Owner Name <span class="required">*</span></label><input type="text" class="form-control" name="owner_name" id="ownerName" value="{{ prop.owner_name }}" required></div>
+                  <div class="col-md-6 mb-3"><label class="form-label">Contact Number <span class="required">*</span></label><input type="text" class="form-control" name="contact_number" value="{{ prop.contact_number }}" required></div>
+                  <div class="col-md-6 mb-3"><label class="form-label">Email <span class="required">*</span></label><input type="email" class="form-control" name="email" value="{{ prop.email }}" required></div>
+                  <div class="col-md-6 mb-3"><label class="form-label">Alternate Contact</label><input type="text" class="form-control" name="alternate_contact" value="{{ prop.alternate_contact|default:'' }}"></div>
+                </div>
+                
+                <!-- Hidden original uploader details -->
+                <input type="hidden" name="uploaded_by_name" value="{{ prop.uploaded_by_name }}">
+                <input type="hidden" name="uploaded_by_email" value="{{ prop.uploaded_by_email }}">
+                <input type="hidden" name="uploaded_by_contact" value="{{ prop.uploaded_by_contact }}">
+                <input type="hidden" name="uploaded_by_role" value="{{ prop.uploaded_by_role }}">
+              </div>
             </div>
-        </div>
+
+            <div class="step-nav">
+              <button type="button" class="btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+              <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Update Property</button>
+            </div>
+          </div>
+
+        </form>
+      </div>
     </div>
-</div>
 
-<!-- Submit Bar -->
-<div class="submit-bar">
-    <a href="{% url 'commercial_list' %}" class="btn-cancel">Cancel</a>
-    <button type="submit" class="btn-save"><i class="fas fa-save"></i>&nbsp; Save Changes</button>
-</div>
+    <!-- PREVIEW SIDEBAR -->
+    <div class="preview-sidebar">
+      <div class="preview-card">
+        <div style="font-size: 0.8rem; font-weight: 700; color: rgba(255, 255, 255, 0.6); margin-bottom: 15px;"><i class="fas fa-eye"></i> Live Preview</div>
+        <div style="background: white; border-radius: 12px; overflow: hidden; color: #0f172a;">
+          <div class="pcm-img">
+            🏢
+            <div style="position: absolute; top: 10px; left: 10px; display: flex; gap: 5px;">
+              <span style="font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; background: rgba(255, 255, 255, 0.95); color: #0f172a;">FOR RENT</span>
+              <span id="previewType" style="font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; background: #7c3aed; color: white;">Commercial</span>
+            </div>
+            <div id="previewPrice" style="position: absolute; bottom: 10px; left: 10px; background: rgba(15, 23, 42, 0.9); color: white; font-size: 0.9rem; font-weight: 900; padding: 5px 12px; border-radius: 8px;">₹ 0 /mo</div>
+          </div>
+          <div class="pcm-body">
+            <div id="previewTitle" style="font-size: 0.95rem; font-weight: 800; margin-bottom: 5px;">Commercial Property</div>
+            <div id="previewLoc" style="font-size: 0.75rem; color: #64748b; margin-bottom: 10px;"><i class="fas fa-map-marker-alt" style="color:#667eea;"></i> Area, City</div>
+            <div style="display: flex; gap: 12px; font-size: 0.75rem; color: #475569; font-weight: 600;"><span id="prevArea">— sqft</span></div>
+          </div>
+        </div>
+      </div>
 
-</form>
-</div>
+      <div class="checklist-card">
+        <h4 style="font-size: 1rem; font-weight: 700; color: #2d3748; margin-bottom: 15px;"><i class="fas fa-clipboard-check text-success"></i> Edit Checklist</h4>
+        <div class="cl-item" id="cl-basic"><i class="fas fa-circle"></i> Basic details reviewed</div>
+        <div class="cl-item" id="cl-price"><i class="fas fa-circle"></i> Pricing & Area updated</div>
+        <div class="cl-item" id="cl-amen"><i class="fas fa-circle"></i> Amenities verified</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-function setBool(id, val, btn) {
-    document.getElementById(id).value = val;
-    btn.closest('.brow').querySelectorAll('.bbtn').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
+// --- STEPPER ---
+let currentStep = 1;
+function goToStep(n) {
+  if (n > currentStep && !validateStep(currentStep)) return false;
+  document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  for (let i = 1; i <= 4; i++) {
+    const sc = document.getElementById('sc' + i), sl = document.getElementById('sl' + i), line = document.getElementById('line' + i);
+    if (i < n) { sc.className = 'step-circle done'; sl.className = 'step-label done'; sc.innerHTML = '<i class="fas fa-check" style="font-size:.7rem;"></i>'; if(line) line.className='step-line done'; }
+    else if (i === n) { sc.className = 'step-circle active'; sl.className = 'step-label active'; sc.innerHTML = i; if(line) line.className='step-line'; }
+    else { sc.className = 'step-circle'; sl.className = 'step-label'; sc.innerHTML = i; if(line) line.className='step-line'; }
+  }
+  currentStep = n;
+  window.scrollTo(0, 0);
+  updatePreview();
 }
 
-function toggleAmen(e, label) {
-    e.preventDefault();
-    label.classList.toggle('on');
-    const cb = label.querySelector('input[type=checkbox]');
-    cb.checked = !cb.checked;
+function validateStep(step) {
+  let isValid = true;
+  document.getElementById('step' + step).querySelectorAll('[required]').forEach(field => {
+    field.classList.remove('validation-error');
+    if (!field.value.trim()) { field.classList.add('validation-error'); isValid = false; }
+  });
+  if (!isValid) Swal.fire('Incomplete', 'Please fill required fields (*)', 'warning');
+  return isValid;
 }
 
-function previewFile(input, previewBoxId, existingId) {
-    if (!input.files || !input.files[0]) return;
+// --- LIVE PREVIEW ---
+function updatePreview() {
+  const city = document.getElementById('cityInput')?.value;
+  const loc = document.getElementById('locality')?.value;
+  const rent = document.getElementById('monthlyRent')?.value;
+  const area = document.getElementById('builtArea')?.value;
+  const pType = document.getElementById('property_type');
+  
+  document.getElementById('previewType').innerText = pType.options[pType.selectedIndex].text;
+  document.getElementById('previewTitle').textContent = loc ? loc + ' Commercial Property' : 'Commercial Property';
+  document.getElementById('previewLoc').innerHTML = '<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ' + (loc||'Area') + ', ' + (city||'City');
+  document.getElementById('previewPrice').textContent = rent ? '₹' + parseInt(rent).toLocaleString('en-IN') + '/mo' : '₹ — /mo';
+  document.getElementById('prevArea').textContent = area ? area + ' sqft' : '— sqft';
+
+  // Update Checklist
+  const donestyle = 'cl-item done', pendstyle = 'cl-item';
+  const doneicon = 'fas fa-check-circle', pendicon = 'fas fa-circle';
+  
+  const b1 = (city && loc);
+  document.getElementById('cl-basic').className = b1 ? donestyle : pendstyle;
+  document.getElementById('cl-basic').querySelector('i').className = b1 ? doneicon : pendicon;
+
+  const b2 = (rent && area);
+  document.getElementById('cl-price').className = b2 ? donestyle : pendstyle;
+  document.getElementById('cl-price').querySelector('i').className = b2 ? doneicon : pendicon;
+  
+  const b3 = (document.querySelectorAll('input[name="amenities[]"]:checked').length > 0);
+  document.getElementById('cl-amen').className = b3 ? donestyle : pendstyle;
+  document.getElementById('cl-amen').querySelector('i').className = b3 ? doneicon : pendicon;
+}
+
+document.querySelectorAll('input, select, textarea').forEach(el => {
+  el.addEventListener('input', updatePreview);
+  el.addEventListener('change', updatePreview);
+});
+window.addEventListener('DOMContentLoaded', updatePreview);
+
+// --- DYNAMIC FIELDS ---
+function updateStepper(field, change) {
+  const input = document.getElementById(field);
+  const display = document.getElementById(field + '_display');
+  let val = Math.max(0, (parseInt(input.value) || 0) + change);
+  input.value = val;
+  display.textContent = val;
+}
+
+document.getElementById('brokerageSelect')?.addEventListener('change', function() {
+  document.getElementById('brokerageSection').style.display = (this.value === 'Yes') ? 'block' : 'none';
+  if(this.value !== 'Yes') document.getElementById('manualBrokerage').style.display = 'none';
+});
+
+document.getElementById('brokeragePercentage')?.addEventListener('change', function() {
+  document.getElementById('manualBrokerage').style.display = (this.value === 'Manual') ? 'block' : 'none';
+});
+
+// --- NEW IMAGE UPLOADS ---
+const uploadArea = document.getElementById('uploadArea');
+const imageInput = document.getElementById('imageInput');
+const imagePreview = document.getElementById('imagePreview');
+let selectedFiles = [];
+
+uploadArea.addEventListener('click', () => imageInput.click());
+uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor='#667eea'; });
+uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor='#cbd5e0'; });
+uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.style.borderColor='#cbd5e0'; handleFiles(e.dataTransfer.files); });
+imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+function handleFiles(files) {
+  const dt = new DataTransfer();
+  Array.from(files).forEach(f => { if(f.type.startsWith('image/')) selectedFiles.push(f); });
+  selectedFiles.forEach(f => dt.items.add(f));
+  imageInput.files = dt.files;
+  
+  imagePreview.innerHTML = "";
+  selectedFiles.forEach(f => {
     const reader = new FileReader();
     reader.onload = e => {
-        document.getElementById(previewBoxId).innerHTML =
-            `<img src="${e.target.result}" class="img-preview" style="margin-top:10px;">`;
-        const ex = document.getElementById(existingId);
-        if (ex) ex.style.display = 'none';
+      imagePreview.innerHTML += `<div style="position:relative; width:80px; height:80px; border-radius:8px; overflow:hidden; display:inline-block; margin-right:10px; margin-bottom:10px; border:2px solid #e2e8f0;"><img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;"><button type="button" onclick="removeImage('${f.name}', this)" style="position:absolute; top:2px; right:2px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer;">✖</button></div>`;
     };
-    reader.readAsDataURL(input.files[0]);
+    reader.readAsDataURL(f);
+  });
 }
+function removeImage(fname, btn) {
+  selectedFiles = selectedFiles.filter(f => f.name !== fname);
+  const dt = new DataTransfer();
+  selectedFiles.forEach(f => dt.items.add(f));
+  imageInput.files = dt.files;
+  btn.parentElement.remove();
+}
+
+// --- SWEETALERT SUBMISSION ---
+const form = document.getElementById('commercialEditForm');
+form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  if(!validateStep(4)) return;
+
+  Swal.fire({
+    title: 'Update Property?',
+    text: "Are you sure you want to save these changes?",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#667eea',
+    cancelButtonColor: '#e74c3c',
+    confirmButtonText: 'Yes, update it!'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire({ title: 'Updating...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      
+      fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(res => res.json())
+      .then(data => {
+        if(data.status === 'success') {
+          Swal.fire('Updated!', data.message, 'success').then(() => {
+            if(data.redirect_url) window.location.href = data.redirect_url;
+          });
+        } else {
+          Swal.fire('Error!', data.message, 'error');
+        }
+      }).catch(() => Swal.fire('Error!', 'Server connection failed.', 'error'));
+    }
+  });
+});
 </script>

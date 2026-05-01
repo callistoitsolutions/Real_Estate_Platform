@@ -180,69 +180,85 @@
         </div>
     </div>
 
-    <!-- Table -->
    <div class="table-responsive">
     <table class="properties-table" id="commercialTable">
-
         <thead>
             <tr>
                 <th>Sr.No</th>
-                <th>Image</th>
+                
+                <!-- ALL MEDIA (3) -->
+                <th>Images</th>
+                <th>Floor Plan</th>
+                <th>Video</th>
 
+                <!-- BASIC (5) -->
                 <th>Property Type</th>
                 <th>City</th>
                 <th>Area / Locality</th>
                 <th>Address</th>
                 <th>Building Name</th>
 
+                <!-- AVAILABILITY & CONDITION (8) -->
                 <th>Possession Status</th>
                 <th>Available From</th>
                 <th>Age</th>
-
                 <th>Zone Type</th>
                 <th>Location Hub</th>
-
                 <th>Condition</th>
                 <th>Ownership</th>
                 <th>Construction</th>
 
+                <!-- AREA (2) -->
                 <th>Builtup Area</th>
                 <th>Carpet Area</th>
 
+                <!-- PRICING (3) -->
                 <th>Expected Rent</th>
                 <th>Deposit</th>
                 <th>Maintenance</th>
 
+                <!-- NEGOTIABLE & BROKERAGE (4) -->
                 <th>Negotiable</th>
-                <th>Brokerage</th>
+                <th>Brokerage (Type / % / Manual)</th>
 
+                <!-- UTILITIES (5) -->
                 <th>DG/UPS</th>
                 <th>Electricity</th>
                 <th>Water</th>
-
-                <th>Lock-in</th>
+                <th>Lock-in (Months)</th>
                 <th>Rent Increase %</th>
 
+                <!-- BUILDING (6) -->
                 <th>Total Floors</th>
                 <th>Your Floor</th>
+                <th>Staircases</th>
+                <th>Lifts (Pass / Serv)</th>
+                <th>Private Parking</th>
 
-                <th>Seats (Min-Max)</th>
+                <!-- OFFICE (7) -->
+                <th>Seats (Min - Max)</th>
                 <th>Cabins</th>
                 <th>Meeting Rooms</th>
-
-                <th>Washroom (Pvt/Public)</th>
+                <th>Washroom (Pvt / Public)</th>
                 <th>Flooring</th>
 
+                <!-- JSON LISTS (2) -->
                 <th>Amenities</th>
                 <th>Nearby Facilities</th>
 
+                <!-- OWNER (4) -->
                 <th>Owner Name</th>
                 <th>Contact</th>
                 <th>Email</th>
+                <th>Alt. Contact</th>
 
-                <th>Uploaded By</th>
+                <!-- UPLOADER (4) -->
+                <th>UB Name</th>
+                <th>UB Email</th>
+                <th>UB Contact</th>
+                <th>UB Role</th>
+
                 <th>Created At</th>
-
                 <th>Actions</th>
             </tr>
         </thead>
@@ -250,121 +266,166 @@
         <tbody>
         {% for prop in page_obj %}
             <tr>
-
                 <td>{{ forloop.counter }}</td>
 
-                <!-- IMAGE (from related model) -->
+                <!-- MEDIA -->
+           <!-- 1. MULTIPLE IMAGES PREVIEW (FIXED) -->
+<td>
+    <div style="display:flex; gap:4px; flex-wrap:wrap; min-width: 100px;">
+    {% if prop.images.all %}
+        
+        <!-- Safely build the JavaScript array of URLs and pass it to previewGallery -->
+        <div style="display: flex; cursor: pointer; position: relative;" 
+             onclick="previewGallery([{% for img in prop.images.all %}'{{ img.image.url }}'{% if not forloop.last %}, {% endif %}{% endfor %}], '{{ prop.building_name|escapejs|default:'Property' }}')">
+             
+            {% for img in prop.images.all|slice:":3" %}
+                <img src="{{ img.image.url }}" 
+                     class="property-image" 
+                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); {% if not forloop.first %}margin-left: -15px;{% endif %} position: relative; z-index: {{ forloop.revcounter }};"
+                     title="Click to view all images">
+            {% endfor %}
+            
+            {% if prop.images.count > 3 %}
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 2px solid white; margin-left: -15px; position: relative; z-index: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    +{{ prop.images.count|add:"-3" }}
+                </div>
+            {% endif %}
+            
+        </div>
+        
+    {% else %}
+        <span style="color: #999; font-size: 0.8rem;">No Images</span>
+    {% endif %}
+    </div>
+</td>
+
+
                 <td>
-                    {% with prop.images.first as img %}
-                        {% if img %}
-                            <img src="{{ img.image.url }}" class="property-image">
-                        {% else %}
-                            <img src="https://via.placeholder.com/120x80" class="property-image">
-                        {% endif %}
-                    {% endwith %}
+                    {% if prop.floor_plan %}
+                        <button class="btn btn-sm btn-outline-info" onclick="previewMedia('image', '{{ prop.floor_plan.url }}', 'Floor Plan - {{ prop.building_name }}')">
+                            <i class="fas fa-map"></i> View Plan
+                        </button>
+                    {% else %}
+                        <span style="color: #999; font-size: 0.8rem;">—</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if prop.video %}
+                        <button class="btn btn-sm btn-outline-danger" onclick="previewMedia('video', '{{ prop.video.url }}', 'Property Video')">
+                            <i class="fas fa-play-circle"></i> Play
+                        </button>
+                    {% else %}
+                        <span style="color: #999; font-size: 0.8rem;">—</span>
+                    {% endif %}
                 </td>
 
+                <!-- BASIC -->
                 <td>{{ prop.property_type }}</td>
                 <td>{{ prop.city }}</td>
                 <td>{{ prop.area_locality }}</td>
                 <td>{{ prop.property_address }}</td>
                 <td>{{ prop.building_name }}</td>
 
+                <!-- AVAILABILITY & CONDITION -->
                 <td>{{ prop.possession_status }}</td>
                 <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
                 <td>{{ prop.age_of_property }}</td>
-
                 <td>{{ prop.zone_type|default:"—" }}</td>
                 <td>{{ prop.location_hub|default:"—" }}</td>
-
                 <td>{{ prop.property_condition }}</td>
                 <td>{{ prop.ownership_type }}</td>
                 <td>{{ prop.construction_status|default:"—" }}</td>
 
+                <!-- AREA -->
                 <td>{{ prop.builtup_area }}</td>
                 <td>{{ prop.carpet_area|default:"—" }}</td>
 
+                <!-- PRICING -->
                 <td>₹{{ prop.expected_rent }}</td>
                 <td>₹{{ prop.security_deposit|default:"—" }}</td>
                 <td>₹{{ prop.maintenance_charges|default:"—" }}</td>
 
+                <!-- NEGOTIABLE & BROKERAGE -->
+                <td>{% if prop.negotiable %}Yes{% else %}No{% endif %}</td>
                 <td>
-                    {% if prop.negotiable %}Yes{% else %}No{% endif %}
+                    {{ prop.brokerage|default:"—" }} 
+                    {% if prop.brokerage_percentage %} / {{ prop.brokerage_percentage }}{% endif %}
+                    {% if prop.manual_brokerage %} / {{ prop.manual_brokerage }}{% endif %}
                 </td>
 
-                <td>
-                    {{ prop.brokerage|default:"—" }} / {{ prop.brokerage_percentage|default:"—" }}%
-                </td>
-
+                <!-- UTILITIES -->
                 <td>{% if prop.dg_ups_included %}✔{% else %}✘{% endif %}</td>
                 <td>{% if prop.electricity_included %}✔{% else %}✘{% endif %}</td>
                 <td>{% if prop.water_included %}✔{% else %}✘{% endif %}</td>
+                <td>{{ prop.lockin_period|default:"—" }}</td>
+                <td>{{ prop.rent_increase|default:"—" }}</td>
 
-                <td>{{ prop.lockin_period|default:"—" }} months</td>
-                <td>{{ prop.rent_increase|default:"—" }}%</td>
-
+                <!-- BUILDING -->
                 <td>{{ prop.total_floors|default:"—" }}</td>
                 <td>{{ prop.your_floor|default:"—" }}</td>
+                <td>{{ prop.staircases|default:"—" }}</td>
+                <td>{{ prop.passenger_lifts|default:"0" }} / {{ prop.service_lifts|default:"0" }}</td>
+                <td>{{ prop.private_parking|default:"0" }}</td>
 
+                <!-- OFFICE -->
                 <td>{{ prop.min_seats|default:"—" }} - {{ prop.max_seats|default:"—" }}</td>
                 <td>{{ prop.cabins|default:"—" }}</td>
                 <td>{{ prop.meeting_rooms|default:"—" }}</td>
-
-                <td>{{ prop.private_washroom }}/{{ prop.public_washroom }}</td>
+                <td>{{ prop.private_washroom|default:"0" }} / {{ prop.public_washroom|default:"0" }}</td>
                 <td>{{ prop.flooring_type|default:"—" }}</td>
 
-                <!-- JSON Fields -->
+                <!-- JSON LISTS -->
                 <td>
                     {% if prop.amenities %}
                         {{ prop.amenities|join:", " }}
-                    {% else %}
-                        —
-                    {% endif %}
+                    {% else %}—{% endif %}
                 </td>
-
                 <td>
                     {% if prop.nearby_facilities %}
                         {{ prop.nearby_facilities|join:", " }}
-                    {% else %}
-                        —
-                    {% endif %}
+                    {% else %}—{% endif %}
                 </td>
 
+                <!-- OWNER -->
                 <td>{{ prop.owner_name }}</td>
                 <td>{{ prop.contact_number }}</td>
                 <td>{{ prop.email }}</td>
+                <td>{{ prop.alternate_contact|default:"—" }}</td>
 
-                <td>
-                    {{ prop.uploaded_by_name|default:"—" }}
-                </td>
+                <!-- UPLOADER -->
+                <td>{{ prop.uploaded_by_name|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_email|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_role|default:"—" }}</td>
 
                 <td>{{ prop.created_at|date:"d M Y" }}</td>
 
+                <!-- ACTIONS -->
                 <td>
-                    <a class="btn-action btn-view" title="View"
-   href="{% url 'commercial_view' prop.id %}">
-    <i class="fas fa-eye"></i>
-</a>
-
-<a class="btn-action btn-edit" title="Edit"
-   href="{% url 'commercial_edit' prop.id %}">
-    <i class="fas fa-edit"></i>
-</a>
-
-<a class="btn-action btn-delete" title="Delete"
-   href="javascript:void(0);" onclick="deleteCommercial({{ prop.id }})">
-    <i class="fas fa-trash"></i>
-</a>
+                    <div style="display: flex; gap: 5px;">
+                        <a class="btn-action btn-view" title="View" href="{% url 'commercial_view' prop.id %}">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a class="btn-action btn-edit" title="Edit" href="{% url 'commercial_edit' prop.id %}">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a class="btn-action btn-delete" title="Delete" href="javascript:void(0);" onclick="deleteCommercial({{ prop.id }})">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
                 </td>
-
             </tr>
         {% empty %}
             <tr>
-                <td colspan="40" style="text-align:center;">No properties found</td>
+                <td colspan="55" style="text-align:center; padding: 30px;">
+                    <div style="color: #64748b; font-size: 1.1rem;">
+                        <i class="fas fa-folder-open mb-2" style="font-size: 2rem;"></i><br>
+                        No commercial properties found
+                    </div>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
-
     </table>
 </div>
 
@@ -748,6 +809,98 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 });
+</script>
+
+<script>
+
+    // Global variable to keep track of gallery index
+let currentGalleryIndex = 0;
+let currentGalleryImages = [];
+
+function previewGallery(urls_array, title) {
+    // If it's a string from capture, split it. Otherwise use the array directly.
+    currentGalleryImages = typeof urls_array === 'string' ? urls_array.split(',') : urls_array;
+    currentGalleryIndex = 0;
+
+    if (currentGalleryImages.length === 0) return;
+
+    showGalleryModal(title);
+}
+
+function showGalleryModal(title) {
+    const total = currentGalleryImages.length;
+    const currentUrl = currentGalleryImages[currentGalleryIndex];
+
+    // Build navigation buttons if there's more than 1 image
+    let navHtml = '';
+    if (total > 1) {
+        navHtml = `
+            <div style="display: flex; justify-content: space-between; position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); padding: 0 10px; pointer-events: none;">
+                <button onclick="changeGalleryImage(-1)" style="pointer-events: auto; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s;"><i class="fas fa-chevron-left"></i></button>
+                <button onclick="changeGalleryImage(1)" style="pointer-events: auto; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s;"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">
+                ${currentGalleryIndex + 1} / ${total}
+            </div>
+        `;
+    }
+
+    const contentHtml = `
+        <div style="position: relative; width: 100%; height: 60vh; background: #f8fafc; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+            <img id="swalGalleryImage" src="${currentUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.3s ease;">
+            ${navHtml}
+        </div>
+        
+        <!-- Thumbnail strip at bottom -->
+        <div style="display: flex; gap: 8px; margin-top: 15px; overflow-x: auto; padding-bottom: 5px;">
+            ${currentGalleryImages.map((img, idx) => `
+                <img src="${img}" 
+                     onclick="jumpToGalleryImage(${idx})"
+                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 2px solid ${idx === currentGalleryIndex ? '#667eea' : 'transparent'}; opacity: ${idx === currentGalleryIndex ? '1' : '0.6'}; transition: all 0.2s ease;">
+            `).join('')}
+        </div>
+    `;
+
+    Swal.fire({
+        title: title,
+        html: contentHtml,
+        width: '800px',
+        showCloseButton: true,
+        showConfirmButton: false,
+        padding: '1.5em',
+        background: '#fff',
+        backdrop: 'rgba(0,0,0,0.85)',
+        didOpen: () => {
+            // Prevent SweetAlert from auto-focusing elements and scrolling weirdly
+            document.activeElement.blur();
+        }
+    });
+}
+
+// Navigation helpers
+function changeGalleryImage(direction) {
+    currentGalleryIndex += direction;
+    // Loop around
+    if (currentGalleryIndex >= currentGalleryImages.length) currentGalleryIndex = 0;
+    if (currentGalleryIndex < 0) currentGalleryIndex = currentGalleryImages.length - 1;
+    
+    // Update the image source without closing the modal
+    const imgEl = document.getElementById('swalGalleryImage');
+    if (imgEl) {
+        imgEl.style.opacity = '0';
+        setTimeout(() => {
+            // Re-render the modal to update counter and thumbnails
+            showGalleryModal(Swal.getTitle().textContent);
+        }, 150);
+    }
+}
+
+function jumpToGalleryImage(index) {
+    if (index === currentGalleryIndex) return;
+    currentGalleryIndex = index;
+    showGalleryModal(Swal.getTitle().textContent);
+}
+
 </script>
 </body>
 </html>
