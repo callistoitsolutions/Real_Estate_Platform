@@ -420,6 +420,110 @@ footer { background: #0f172a; padding: 60px 20px 30px; margin-top: 0; border-top
 .footer-social a:hover { background: var(--primary); transform: translateY(-2px); }
 .footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 24px; display: flex; justify-content: space-between; font-size: 0.8rem; flex-wrap: wrap; gap: 10px; }
 .bg-band { background: #f1f5f9; }
+
+
+/* Styling for the Plan For Badges */
+    .plan-badge {
+        background: white;
+        border: 2px solid #e9ecef;
+        color: #718096;
+        padding: 10px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .plan-badge:hover {
+        border-color: #667eea;
+        color: #667eea;
+    }
+    .plan-badge.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    /* Styling for the Select Duration Dropdown */
+    .duration-selector {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-weight: 700;
+        color: #2d3748;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        max-width: 300px; /* Keeps it from getting too wide */
+    }
+    .duration-selector:focus {
+        border-color: #667eea;
+    }
+
+    /* Basic Card Styling */
+    .plan-card {
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        text-align: center;
+        border: 2px solid transparent;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s ease;
+    }
+    .plan-card.popular {
+        border-color: #667eea;
+        position: relative;
+        transform: scale(1.05); /* Only for desktop */
+        z-index: 2;
+    }
+    .plan-popular-badge {
+        background: #ff6a00;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+    }
+    .plan-price { font-size: 2rem; font-weight: 800; color: #2d3748; margin: 15px 0; }
+    .plan-features { text-align: left; margin-bottom: 20px; flex-grow: 1; }
+    .plan-features ul { list-style: none; padding: 0; margin-top: 15px; }
+    .plan-features li { margin-bottom: 10px; color: #4a5568; }
+
+    /* =========================================
+       MOBILE RESPONSIVENESS FIXES
+       ========================================= */
+    @media (max-width: 768px) {
+        .bg-band {
+            padding: 30px 15px !important; /* Less padding on mobile */
+        }
+        .section-title {
+            font-size: 1.5rem !important; /* Smaller title */
+        }
+        .plan-badge {
+            padding: 8px 15px; /* Smaller badges so they fit better */
+            font-size: 0.85rem;
+            flex: 1 1 45%; /* Makes badges take up half the screen nicely */
+            text-align: center;
+        }
+        .plan-card {
+            padding: 20px 15px; /* Less inside padding so content isn't squished */
+        }
+        .plan-card.popular {
+            transform: scale(1); /* DISABLES SCALE ON MOBILE so it doesn't overflow */
+            border-width: 3px; 
+            margin-top: 15px; /* Adds space for the popular badge */
+        }
+    }
+
 </style>
 </head>
 
@@ -779,50 +883,78 @@ footer { background: #0f172a; padding: 60px 20px 30px; margin-top: 0; border-top
 
 <div class="bg-band" style="padding:60px 20px;">
     <div style="max-width:1300px;margin:0 auto;">
-        <div class="sec-header" style="justify-content:center;text-align:center;display:block;margin-bottom:40px;">
-            <div class="section-title">Subscription Plans</div>
-            <div class="section-subtitle">Choose the right plan to get maximum leads</div>
+        
+        <!-- Header -->
+        <div class="sec-header" style="justify-content:center;text-align:center;display:block;margin-bottom:30px;">
+            <div class="section-title" style="font-size: 2rem; font-weight: 800;">Subscription Plans</div>
+            <div class="section-subtitle" style="color: #718096;">Choose the right plan to get maximum leads</div>
         </div>
-        <div class="row g-4 justify-content-center">
-            <div class="col-md-4 col-sm-6">
-                <div class="plan-card">
-                    <h5 style="font-weight:800;">Basic Owner Plan</h5>
-                    <div class="plan-price">₹499</div>
-                    <ul>
-                        <li>✔ 1 Property Listing</li>
-                        <li>✔ 7 Days Visibility</li>
-                        <li>✔ Direct Buyer Leads</li>
-                    </ul>
-                    <button class="btn-primary w-100 mt-2" style="justify-content:center;">Choose Plan</button>
+
+        <!-- 1. EXACT "PLAN FOR" BADGES -->
+        <div class="d-flex justify-content-center flex-wrap gap-2 mb-4" id="planForBadges">
+            <button class="plan-badge active" data-target="Landlords">Landlords</button>
+            <button class="plan-badge" data-target="Agents/Agency">Agents/Agency</button>
+            <button class="plan-badge" data-target="Vendors">Vendors</button>
+            <button class="plan-badge" data-target="Tenants/Buyers">Tenants/Buyers</button>
+        </div>
+
+        <!-- 2. EXACT "DURATION" SELECTOR -->
+        <div class="d-flex justify-content-center mb-5">
+            <select id="durationSelect" class="duration-selector text-center">
+                <option value="1-month" selected>1 Month Duration</option>
+                <option value="3-months">3 Months Duration</option>
+                <option value="6-months">6 Months Duration</option>
+                <option value="12-months">12 Months Duration</option>
+            </select>
+        </div>
+
+        <!-- 3. PLAN CARDS CONTAINER -->
+        <div class="row g-4 justify-content-center align-items-stretch" id="plansContainer">
+            
+            {% for plan in subscriptions %}
+            <!-- We assign data attributes exactly matching your options so JS can filter them -->
+            <div class="col-lg-4 col-md-6 col-12 plan-item" 
+                 data-for="{{ plan.plan_for }}" 
+                 data-duration="{% if '1' in plan.plan_duration %}1-month{% elif '3' in plan.plan_duration %}3-months{% elif '6' in plan.plan_duration %}6-months{% elif '12' in plan.plan_duration %}12-months{% endif %}">
+                
+                <div class="plan-card {% if 'Standard' in plan.plan_type %}popular{% endif %}">
+                    {% if 'Standard Plan' in plan.plan_type %}
+                        <div class="plan-popular-badge">⭐ Most Popular</div>
+                    {% endif %}
+                    
+                    <!-- PLAN TYPE (Basic Plan, Standard Plan, Premium Plan) -->
+                    <h5 style="font-weight:800; color: #667eea; margin-top: {% if 'Standard' in plan.plan_type %}10px{% else %}0{% endif %};">
+                        {{ plan.plan_type }}
+                    </h5>
+                    
+                    <div class="plan-price">
+                        ₹{{ plan.plan_offer_price }}
+                        <div style="font-size: 1rem; color: #a0aec0; text-decoration: line-through;">₹{{ plan.plan_base_price }}</div>
+                    </div>
+                    
+                    {% if plan.plan_discount > 0 %}
+                    <div style="color: #38ef7d; font-weight: bold; margin-bottom: 15px;">Save {{ plan.plan_discount }}%</div>
+                    {% endif %}
+
+                    <div class="plan-features">
+                        <p style="font-size: 0.9rem; margin-bottom: 15px;">{{ plan.plan_desc|safe }}</p>
+                        <ul>
+                            <li>✔ <strong>{{ plan.plan_max_listings }}</strong> Max Listings/Enquiries</li>
+                            <li>✔ Direct Leads Included</li>
+                            <li>✔ Priority Support</li>
+                        </ul>
+                    </div>
+                    
+                    <button class="btn-primary w-100 mt-2" style="justify-content:center; padding: 12px; border-radius: 8px;">Choose Plan</button>
                 </div>
             </div>
-            <div class="col-md-4 col-sm-6">
-                <div class="plan-card popular">
-                    <div class="plan-popular-badge">⭐ Most Popular</div>
-                    <h5 style="font-weight:800;">Standard Plan</h5>
-                    <div class="plan-price">₹999</div>
-                    <ul>
-                        <li>✔ 5 Property Listings</li>
-                        <li>✔ 30 Days Visibility</li>
-                        <li>✔ WhatsApp Lead Alerts</li>
-                        <li>✔ RM Assistance</li>
-                    </ul>
-                    <button class="btn-primary w-100 mt-2" style="justify-content:center;">Choose Plan</button>
-                </div>
+            {% endfor %}
+            
+            <!-- Fallback Message -->
+            <div id="noPlansMsg" style="display: none; text-align: center; color: #718096; font-size: 1.2rem; padding: 40px; width: 100%;">
+                No plans available for this selected audience and duration.
             </div>
-            <div class="col-md-4 col-sm-6">
-                <div class="plan-card">
-                    <h5 style="font-weight:800;">Premium Owner</h5>
-                    <div class="plan-price">₹1,499</div>
-                    <ul>
-                        <li>✔ Unlimited Listings</li>
-                        <li>✔ Homepage Featured Slot</li>
-                        <li>✔ Priority RM Support</li>
-                        <li>✔ Analytics Dashboard</li>
-                    </ul>
-                    <button class="btn-primary w-100 mt-2" style="justify-content:center;">Choose Plan</button>
-                </div>
-            </div>
+
         </div>
     </div>
 </div>
@@ -1271,6 +1403,58 @@ function callListing(id) {
 function waListing(id) {
     Swal.fire({icon:'success',title:'Opening WhatsApp', text:'Connecting you with the property owner.', background:'#ffffff',color:'#1e293b',timer:1500,showConfirmButton:false});
 }
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const badges = document.querySelectorAll(".plan-badge");
+    const durationSelect = document.getElementById("durationSelect");
+    const items = document.querySelectorAll(".plan-item");
+    const noPlansMsg = document.getElementById("noPlansMsg");
+
+    // The filtering logic
+    function filterPlans() {
+        const activeAudience = document.querySelector(".plan-badge.active").getAttribute("data-target");
+        const activeDuration = durationSelect.value;
+        let visibleCount = 0;
+
+        items.forEach(item => {
+            const planFor = item.getAttribute("data-for");
+            const planDuration = item.getAttribute("data-duration");
+
+            // Check if card matches BOTH the Audience Badge and the Duration Dropdown
+            if (planFor === activeAudience && planDuration === activeDuration) {
+                item.style.display = "block";
+                visibleCount++;
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        // Show/Hide the "No Plans" message
+        if (visibleCount === 0) {
+            noPlansMsg.style.display = "block";
+        } else {
+            noPlansMsg.style.display = "none";
+        }
+    }
+
+    // When a Badge is clicked
+    badges.forEach(badge => {
+        badge.addEventListener("click", function() {
+            // Remove active class from all, add to clicked
+            badges.forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+            filterPlans(); // Re-run filter
+        });
+    });
+
+    // When the Duration Dropdown is changed
+    durationSelect.addEventListener("change", filterPlans);
+
+    // Run immediately on page load to set the initial state
+    filterPlans();
+});
 </script>
 
 </body>

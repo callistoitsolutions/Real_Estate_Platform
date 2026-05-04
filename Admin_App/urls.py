@@ -71,35 +71,35 @@ urlpatterns = [
 
      ######### urls for delete vendor service details #####################
 
-    #  path('Delete_Services',views.Delete_Services,name='Delete_Services'),
+    path('Delete_Services',views.Delete_Services,name='Delete_Services'),
 
      ############# urls for update service details #######################
 
-    #  path('Update_Services/<int:id>',views.Update_Services,name='Update_Services'),
+    path('Update_Services/<int:id>',views.Update_Services,name='Update_Services'),
 
      ############# urls for subscriptions list ###########################
 
-    #  path('Subscriptions_List',views.Subscriptions_List,name="Subscriptions_List"),
+    path('Subscriptions_List',views.Subscriptions_List,name="Subscriptions_List"),
 
      ############# urls for add subscriptions ###########################
 
-    #  path('Add_Subscriptions',views.Add_Subscriptions,name="Add_Subscriptions"),
+    path('Add_Subscriptions',views.Add_Subscriptions,name="Add_Subscriptions"),
 
      ########### urls for ajax for add/update subscriptions ##################
 
-    #  path('Subscriptions_Ajax',views.Subscriptions_Ajax,name="Subscriptions_Ajax"),
+    path('Subscriptions_Ajax',views.Subscriptions_Ajax,name="Subscriptions_Ajax"),
 
      ############# urls for delete subscriptions ##########################
 
-    #  path('Delete_Subscriptions',views.Delete_Subscriptions,name="Delete_Subscriptions"),
+    path('Delete_Subscriptions',views.Delete_Subscriptions,name="Delete_Subscriptions"),
 
      ############# urls for update subscriptions #########################
 
-    #  path('Update_Subscriptions/<int:id>',views.Update_Subscriptions,name="Update_Subscriptions"),
+    path('Update_Subscriptions/<int:id>',views.Update_Subscriptions,name="Update_Subscriptions"),
 
      ############ urls for upload subscription details via excel ########################
 
-    #  path('Subscriptions_Data',views.Subscriptions_Data,name="Subscriptions_Data"),
+    path('Subscriptions_Data',views.Subscriptions_Data,name="Subscriptions_Data"),
 
      ############# urls for rental property list ########################
 

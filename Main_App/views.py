@@ -111,6 +111,12 @@ def property_detail_view(request, listing_type, category, pk):
         if category == 'residential':
             obj = get_object_or_404(RentalResidentialProperty, pk=pk)
             p = _normalize_rental(obj)
+            amenities_list = []
+            facilities_list = []
+            if obj.amenities:
+                amenities_list = [a.strip() for a in obj.amenities.split(',') if a.strip()]
+                facilities_list = [a.strip() for a in obj.facilities.split(',') if a.strip()]
+
         elif category == 'commercial':
             obj = get_object_or_404(CommercialRentalProperty, pk=pk)
             p = _normalize_commercial_rental(obj)
@@ -126,7 +132,7 @@ def property_detail_view(request, listing_type, category, pk):
             obj = get_object_or_404(CommercialResaleProperty, pk=pk)
             p = _normalize_commercial_resale(obj)
 
-    return render(request, 'home_page/property_detail.html', {'p': p, 'original': obj})
+    return render(request, 'home_page/property_detail.html', {'p': p, 'original': obj,'amenities_list':amenities_list,'facilities_list':facilities_list})
 
 
 def listings_view(request):
@@ -725,6 +731,8 @@ def index(request):
     blogs = Blog.objects.all().order_by("-date_posted")
     faqs = FAQ.objects.all().order_by('-created_at')
 
+    subscriptions = Subscription_Details.objects.all()
+
     # ✅ CORRECT FUNCTION CALL
     residential = list(get_featured_queryset(ResidentialProperty))
     commercial = list(get_featured_queryset(CommercialProperty))
@@ -752,7 +760,8 @@ def index(request):
         "hero": hero,
         "blogs": blogs,
         "faqs": faqs,
-        'user_obj':None
+        'user_obj':None,
+        'subscriptions':subscriptions
     }
 
     # 🔹 3. Handle the logged-in user logic safely

@@ -77,17 +77,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 </head>
 <body>
 
-<nav class="nav">
-  <div class="nav-inner">
-    <a href="/" class="logo">🏠 Prop<span>CRM</span></a>
-    <div style="font-size:.78rem;color:var(--muted);margin-left:8px;">/ {{ category|title }} / Nagpur / {{ p.location }}</div>
-    <div class="nav-right">
-      <button class="btn btn-outline" onclick="shareListing()"><i class="fas fa-share-alt"></i> Share</button>
-      <button class="btn btn-outline" id="saveBtn" onclick="saveListing()"><i class="far fa-heart"></i> Save</button>
-      <a href="/add-listing/" class="btn btn-pr"><i class="fas fa-plus"></i> Post Property</a>
+{% include 'home_page/header.html' %}
+
+  {% comment %} <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="logo">🏠 Prop<span>CRM</span></a>
+      <div style="font-size:.78rem;color:var(--muted);margin-left:8px;">/ {{ category|title }} / Nagpur / {{ p.location }}</div>
+      <div class="nav-right">
+        <button class="btn btn-outline" onclick="shareListing()"><i class="fas fa-share-alt"></i> Share</button>
+        <button class="btn btn-outline" id="saveBtn" onclick="saveListing()"><i class="far fa-heart"></i> Save</button>
+        <a href="/add-listing/" class="btn btn-pr"><i class="fas fa-plus"></i> Post Property</a>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav> {% endcomment %}
 
 <div class="breadcrumb-bar">
   <a href="/">Home</a> &rsaquo; <a href="/listings/?type={{ listing_type }}">{{ listing_type|title }}</a> &rsaquo; <a href="#">Nagpur</a> &rsaquo; {{ p.location }}
@@ -143,18 +145,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
     <div class="detail-section">
       <div class="ds-title"><i class="fas fa-align-left" style="color:var(--pr);"></i> About This Property</div>
       <div style="font-size:.85rem;color:#475569;line-height:1.8;">
-        {{ original.description|default:"No detailed description provided."|linebreaks }}
+        {{ original.rent_residential_desc|default:"No detailed description provided."|linebreaks }}
       </div>
     </div>
 
     <div class="detail-section">
       <div class="ds-title"><i class="fas fa-star" style="color:var(--pr);"></i> Amenities</div>
       <div class="amenity-grid">
-        <div class="amenity-item"><i class="fas fa-elevator"></i> Lift</div>
-        <div class="amenity-item"><i class="fas fa-bolt"></i> Power Backup</div>
-        <div class="amenity-item"><i class="fas fa-shield-alt"></i> Security</div>
-        <div class="amenity-item"><i class="fas fa-car"></i> Parking</div>
-        <div class="amenity-item"><i class="fas fa-water"></i> 24hr Water</div>
+        {% for item in amenities_list %}
+          <div class="amenity-item">{{item}}</div>
+        {% endfor %}
+        
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="ds-title"><i class="fas fa-star" style="color:var(--pr);"></i> Nearby Faciilities</div>
+      <div class="amenity-grid">
+        {% for item in facilities_list %}
+          <div class="amenity-item">{{item}}</div>
+        {% endfor %}
       </div>
     </div>
 
