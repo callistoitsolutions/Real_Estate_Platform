@@ -1,0 +1,346 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --danger-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        --sidebar-width: 280px;
+        --topbar-height: 70px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; min-height: 100vh; }
+
+    .main-wrapper { transition: all 0.3s ease; width: 100%; }
+    .main-content { margin-left: var(--sidebar-width); margin-top: var(--topbar-height); padding: 30px; min-height: calc(100vh - var(--topbar-height)); transition: all 0.3s ease; }
+    .page-wrapper { max-width: 1400px; margin: 0 auto; }
+
+    /* Page Header */
+    .page-header { background: var(--primary-gradient); border-radius: 20px; padding: 30px; color: white; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); margin-bottom: 30px; position: relative; overflow: hidden; display: flex; justify-content: space-between; align-items: center; }
+    .page-header::before { content: ''; position: absolute; top: -50%; right: -10%; width: 300px; height: 300px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; }
+    .page-header-content { position: relative; z-index: 1; }
+    .page-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+    .page-subtitle { font-size: 0.95rem; opacity: 0.9; }
+
+    .btn-back { background: rgba(255,255,255,0.2); color: white; padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.4); font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-decoration: none; z-index: 1; display: inline-flex; align-items: center; gap: 8px; backdrop-filter: blur(5px); }
+    .btn-back:hover { background: white; color: #667eea; transform: translateY(-2px); }
+
+    /* Sections */
+    .view-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); margin-bottom: 30px; }
+    .form-section { margin-bottom: 30px; }
+    .section-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+    .section-body { background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; }
+
+    /* Data Display Styles */
+    .data-group { margin-bottom: 20px; }
+    .data-label { display: block; font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 4px; }
+    .data-value { display: block; font-size: 1rem; color: #2d3748; font-weight: 600; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #e2e8f0; }
+    .data-desc { background: white; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; color: #4a5568; font-size: 0.95rem; line-height: 1.6; white-space: pre-wrap; }
+
+    /* Badges */
+    .status-badge { display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; }
+    .badge-yes { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+    .badge-no { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+    
+    .feature-badge { display: inline-flex; align-items: center; gap: 6px; background: white; border: 1px solid #cbd5e0; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; color: #4a5568; margin: 0 10px 10px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+    .feature-badge i { color: #667eea; }
+
+    /* Image Gallery */
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 15px; }
+    .gallery-item { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); aspect-ratio: 4/3; cursor: pointer; transition: transform 0.3s ease; }
+    .gallery-item:hover { transform: scale(1.03); }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+    
+    /* Media Links */
+    .media-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 25px; border-radius: 12px; font-weight: 600; text-decoration: none; transition: all 0.3s ease; }
+    .btn-blueprint { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .btn-blueprint:hover { background: #bae6fd; }
+    .btn-video { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+    .btn-video:hover { background: #fed7aa; }
+
+    @media (max-width: 768px) {
+        .page-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+    }
+</style>
+
+<div class="main-content">
+    <div class="page-wrapper">
+        
+        <div class="page-header">
+            <div class="page-header-content">
+                <h1 class="page-title">🏠 {{ prop.title }}</h1>
+                <p class="page-subtitle">
+                    <i class="fas fa-map-marker-alt"></i> {{ prop.locality }}, {{ prop.city }} 
+                    &nbsp;|&nbsp; 
+                    <i class="fas fa-tag"></i> ₹{{ prop.expected_price }}
+                </p>
+            </div>
+            <a href="javascript:history.back()" class="btn-back">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+        <div class="view-container">
+            
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-info-circle"></i> Basic Information & Configuration
+                </div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Property Type</span>
+                            <span class="data-value">{{ prop.get_property_type_display|default:prop.property_type|title }}</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Zone</span>
+                            <span class="data-value">{{ prop.get_zone_display|default:prop.zone|title }}</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">BHK</span>
+                            <span class="data-value">{{ prop.get_bhk_display|default:prop.bhk|upper }}</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Facing</span>
+                            <span class="data-value">{{ prop.facing }}</span>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Furnishing</span>
+                            <span class="data-value">{{ prop.get_furnishing_type_display|default:prop.furnishing_type|title }}</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Age of Property</span>
+                            <span class="data-value">{{ prop.get_age_of_property_display|default:prop.age_of_property }}</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Society Type</span>
+                            <span class="data-value">{{ prop.get_society_type_display|default:prop.society_type|title }}</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Water Supply</span>
+                            <span class="data-value">{{ prop.get_water_type_display|default:prop.water_type|title }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-ruler-combined"></i> Measurements & Rooms
+                </div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Built-up Area</span>
+                            <span class="data-value">{{ prop.builtup_area }} sq.ft</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Carpet Area</span>
+                            <span class="data-value">{{ prop.carpet_area }} sq.ft</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Floor Details</span>
+                            <span class="data-value">Floor {{ prop.floor_no }} of {{ prop.total_floors }}</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Plot Area</span>
+                            <span class="data-value">{{ prop.plot_area|default:"N/A" }} sq.ft</span>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Bathrooms</span>
+                            <span class="data-value">{{ prop.bathrooms }}</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Balconies</span>
+                            <span class="data-value">{{ prop.balconies }}</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Covered Parking</span>
+                            <span class="data-value">{{ prop.covered_parking }}</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Open Parking</span>
+                            <span class="data-value">{{ prop.open_parking }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-indian-rupee-sign"></i> Pricing & Legal Details
+                </div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-4 data-group">
+                            <span class="data-label" style="color: #059669;">Expected Price</span>
+                            <span class="data-value" style="font-size: 1.2rem; color: #059669;">₹ {{ prop.expected_price }}</span>
+                        </div>
+                        <div class="col-md-4 data-group">
+                            <span class="data-label">Price per Sq.Ft</span>
+                            <span class="data-value">₹ {{ prop.price_per_sqft|default:"N/A" }}</span>
+                        </div>
+                        <div class="col-md-4 data-group">
+                            <span class="data-label">Is Negotiable?</span>
+                            <span class="data-value">{{ prop.is_negotiable|title }}</span>
+                        </div>
+                    </div>
+                    <hr style="border-color: #e2e8f0; margin: 15px 0;">
+                    <div class="row">
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Ownership</span>
+                            <span class="data-value">{{ prop.get_ownership_type_display|default:prop.ownership_type|title }}</span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Active Loan?</span>
+                            <span class="status-badge {% if prop.has_loan == 'yes' %}badge-no{% else %}badge-yes{% endif %} mt-1">
+                                {{ prop.has_loan|title }} {% if prop.has_loan == 'yes' %}(₹{{ prop.loan_amount }}){% endif %}
+                            </span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Legal Dispute?</span>
+                            <span class="status-badge {% if prop.has_legal_dispute == 'yes' %}badge-no{% else %}badge-yes{% endif %} mt-1">
+                                {{ prop.has_legal_dispute|title }}
+                            </span>
+                        </div>
+                        <div class="col-md-3 data-group">
+                            <span class="data-label">Pending Tax?</span>
+                            <span class="status-badge {% if prop.has_tax_due == 'yes' %}badge-no{% else %}badge-yes{% endif %} mt-1">
+                                {{ prop.has_tax_due|title }} {% if prop.has_tax_due == 'yes' %}(₹{{ prop.pending_tax_amount }}){% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-star"></i> Amenities & Description
+                </div>
+                <div class="section-body">
+                    <div class="data-group">
+                        <span class="data-label">Property Description</span>
+                        <div class="data-desc">{{ prop.description|safe }}</div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6 data-group">
+                            <span class="data-label mb-3">Amenities Included</span>
+                            <div>
+                                {% for amenity in amenities_list %}
+                                    <span class="feature-badge"><i class="fas fa-check-circle"></i> {{ amenity }}</span>
+                                {% empty %}
+                                    <span class="text-muted">No amenities specified</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6 data-group">
+                            <span class="data-label mb-3">Nearby Facilities</span>
+                            <div>
+                                {% for facility in facilities_list %}
+                                    <span class="feature-badge"><i class="fas fa-map-pin"></i> {{ facility }}</span>
+                                {% empty %}
+                                    <span class="text-muted">No nearby facilities specified</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-images"></i> Media Gallery
+                </div>
+                <div class="section-body">
+                    <div class="mb-4">
+                        {% if prop.floor_plan %}
+                            <a href="{{ prop.floor_plan.url }}" target="_blank" class="media-btn btn-blueprint">
+                                <i class="fas fa-map"></i> View Floor Plan
+                            </a>
+                        {% endif %}
+                        {% if prop.property_video %}
+                            <a href="{{ prop.property_video.url }}" target="_blank" class="media-btn btn-video">
+                                <i class="fas fa-play-circle"></i> Watch Property Video
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <span class="data-label">Property Photos ({{ images.count }})</span>
+                    {% if images %}
+                        <div class="gallery-grid">
+                            {% for img in images %}
+                                <a href="{{ img.image.url }}" target="_blank" class="gallery-item">
+                                    <img src="{{ img.image.url }}" alt="Property Image">
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-muted p-3 text-center" style="background: white; border-radius: 10px; border: 1px dashed #cbd5e0;">
+                            No images uploaded for this property.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="section-header">
+                    <i class="fas fa-address-card"></i> Contact & Address Details
+                </div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-6 data-group border-end">
+                            <span class="data-label text-primary"><i class="fas fa-user"></i> Owner Details</span>
+                            <div class="mt-3">
+                                <p class="mb-2"><strong>Name:</strong> {{ prop.owner_name }}</p>
+                                <p class="mb-2"><strong>Phone:</strong> {{ prop.owner_contact }}</p>
+                                <p class="mb-2"><strong>Email:</strong> {{ prop.owner_email }}</p>
+                                <p class="mb-0"><strong>Status:</strong> {{ prop.get_residential_status_display|default:prop.residential_status|title }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6 data-group ps-4">
+                            <span class="data-label text-primary"><i class="fas fa-location-dot"></i> Complete Address</span>
+                            <div class="mt-3">
+                                {% if prop.building_name %}
+                                <p class="mb-2"><strong>Building:</strong> {{ prop.building_name }}</p>
+                                {% endif %}
+                                <p class="mb-2"><strong>Locality:</strong> {{ prop.locality }}, {{ prop.city }}</p>
+                                <p class="mb-0 text-muted mt-2" style="font-size: 0.9rem;">
+                                    <i class="fas fa-map-pin"></i> {{ prop.complete_address }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center text-muted" style="font-size: 0.85rem;">
+                Listed on {{ prop.created_at|date:"d M Y" }} by {{ prop.uploaded_by_name }} ({{ prop.uploaded_by_role|title }})
+                <br> Last updated: {{ prop.updated_at|date:"d M Y, h:i A" }}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const resaleMenu = document.getElementById("Resale");
+        if(resaleMenu) {
+            resaleMenu.classList.add("active");
+        }
+    });
+</script>
+
+</body>
+</html>

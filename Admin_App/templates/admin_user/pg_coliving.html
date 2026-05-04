@@ -1473,7 +1473,7 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Building / Project / Society</label>
-                      <input type="text" class="form-control" name="building" placeholder="Search, select or add new">
+                      <input type="text" class="form-control" name="building_name" placeholder="Search, select or add new">
                     </div>
                   </div>
                 </div>
@@ -1496,7 +1496,7 @@
 
                 <div class="form-group mt-2">
                   <label class="form-label">Property Address <span class="required">*</span></label>
-                  <textarea class="form-control" name="address" rows="3" placeholder="Enter complete property address" required></textarea>
+                  <textarea class="form-control" name="property_address" rows="3" placeholder="Enter complete property address" required></textarea>
                 </div>
 
                 <div class="row mt-2">
@@ -1515,7 +1515,7 @@
                         <button type="button" class="pill-btn" data-toggle="multi" data-value="Girls">Girls</button>
                         <button type="button" class="pill-btn" data-toggle="multi" data-value="Co-living">Co-living</button>
                       </div>
-                      <input type="hidden" name="pg_for" id="pgFor">
+                      <input type="hidden" name="pg_for" id="pgFor" required>
                     </div>
                   </div>
                 </div>
@@ -1609,7 +1609,7 @@
                   <div class="col-md-4">
                     <div class="form-group">
                       <label class="form-label">Minimum Stay (Months) <span class="required">*</span></label>
-                      <input type="number" class="form-control" name="min_stay" min="1" placeholder="Enter months" required>
+                      <input type="number" class="form-control" name="minimum_stay" min="1" placeholder="Enter months" required>
                     </div>
                   </div>
                 </div>
@@ -1625,7 +1625,7 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Property Managed By</label>
-                      <select class="form-select" name="managed_by">
+                      <select class="form-select" name="property_managed_by">
                         <option value="">Select</option>
                         <option value="self">Self</option>
                         <option value="family">Family</option>
@@ -1640,10 +1640,10 @@
                   <label class="form-label">Property Manager Stays at Property?</label>
                   <div style="display:flex;gap:20px;margin-top:6px;">
                     <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;cursor:pointer;">
-                      <input type="radio" name="manager_stays" value="Yes" style="accent-color:#667eea;width:18px;height:18px;"> Yes
+                      <input type="radio" name="manager_stays" value="true" style="accent-color:#667eea;width:18px;height:18px;"> Yes
                     </label>
                     <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;cursor:pointer;">
-                      <input type="radio" name="manager_stays" value="No" style="accent-color:#667eea;width:18px;height:18px;"> No
+                      <input type="radio" name="manager_stays" value="false" style="accent-color:#667eea;width:18px;height:18px;"> No
                     </label>
                   </div>
                 </div>
@@ -1834,7 +1834,7 @@
                     <div class="form-group">
                       <label class="form-label">Non-Veg Allowed?</label>
                       <label class="toggle-switch">
-                        <input type="checkbox" name="nonveg_allowed">
+                        <input type="checkbox" name="non_veg_allowed">
                         <span class="toggle-slider"></span>
                       </label>
                     </div>
@@ -1856,7 +1856,7 @@
                     <div class="form-group">
                       <label class="form-label">Any Time Allowed?</label>
                       <label class="toggle-switch">
-                        <input type="checkbox" name="anytime_allowed">
+                        <input type="checkbox" name="any_time_allowed">
                         <span class="toggle-slider"></span>
                       </label>
                     </div>
@@ -1932,7 +1932,7 @@
                   {% for amenities in ameneties_obj %}
                     <div class="checkbox-item">
                       <div class="form-check">
-                        <input class="form-check-input amenity-checkbox" type="checkbox" name="amenities[]" 
+                        <input class="form-check-input amenity-checkbox-input" type="checkbox" name="amenities[]" 
                           value="{{amenities.amenties_name}}" id="amenity_{{ forloop.counter }}">
                         
                         <label class="form-check-label" for="amenity_{{ forloop.counter }}">
@@ -1968,7 +1968,7 @@
                   {% for facilities in facilities_obj %}
                     <div class="checkbox-item">
                       <div class="form-check">
-                        <input class="form-check-input facility-checkbox" type="checkbox" name="facilities[]" 
+                        <input class="form-check-input facility-checkbox-input" type="checkbox" name="facilities[]" 
                           value="{{facilities.facilities_name}}" id="facility_{{ forloop.counter }}">
                         
                         <label class="form-check-label" for="facility_{{ forloop.counter }}">
@@ -2005,10 +2005,10 @@
                   </label>
                   <p class="text-muted small">Listings with photos get <strong>5× more enquiries</strong>. Add at least 3 photos.</p>
                   <div class="image-upload-area" id="uploadArea">
-                    <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display: none;">
+                    <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;" required>
                     <div class="upload-icon" style="font-size:2.5rem;margin-bottom:10px;">📷</div>
                     <div class="upload-text">Click or Drag Images Here</div>
-                    <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG)</div>
+                    <div class="upload-subtext">Upload minimum 3 and maximum 10 images (JPG, PNG)</div>
                   </div>
                   <div class="image-preview" id="imagePreview"></div>
                 </div>
@@ -2028,7 +2028,7 @@
                       <label class="form-label">
                         <i class="fa-solid fa-video"></i> Upload Video
                       </label>
-                      <input type="file" class="form-control" name="property_video" accept="video/*" style="padding:8px;">
+                      <input type="file" class="form-control" name="video" accept="video/*" style="padding:8px;">
                     </div>
                   </div>
                 </div>
@@ -2199,6 +2199,8 @@
         <div class="cl-item" id="cl-location"><i class="fas fa-circle"></i> Location added</div>
         <div class="cl-item" id="cl-beds"><i class="fas fa-circle"></i> Total beds entered</div>
         <div class="cl-item" id="cl-rooms"><i class="fas fa-circle"></i> Room details added</div>
+        <div class="cl-item" id="cl-amenities"><i class="fas fa-circle"></i> Amenities selected</div>
+        <div class="cl-item" id="cl-facilities"><i class="fas fa-circle"></i> Facilities selected</div>
         <div class="cl-item" id="cl-owner"><i class="fas fa-circle"></i> Owner details added</div>
         <div class="cl-item" id="cl-photos"><i class="fas fa-circle"></i> Photos uploaded</div>
       </div>
@@ -2266,7 +2268,7 @@
     updateReview();
   }
 
-  // VALIDATION
+  // VALIDATION - FIXED VERSION
   function validateStep(step) {
     if (step === 1) {
       const city = document.getElementById('cityInput').value.trim();
@@ -2274,8 +2276,9 @@
       const pgName = document.getElementById('pgName').value.trim();
       const totalBeds = document.getElementById('totalBeds').value;
       const furnishingType = document.querySelector('select[name="furnishing_type"]').value;
-      const minStay = document.querySelector('input[name="min_stay"]').value;
+      const minStay = document.querySelector('input[name="minimum_stay"]').value; // FIXED: was min_stay
       const availableFrom = document.querySelector('input[name="available_from"]').value;
+      const pgFor = document.getElementById('pgFor').value; // Check if PG type is selected
 
       if (!city || !locality || !pgName || !totalBeds || !furnishingType || !minStay || !availableFrom) {
         Swal.fire({
@@ -2288,10 +2291,7 @@
       }
 
       // Check if at least one PG type is selected
-      const pgForButtons = document.querySelectorAll('.pill-btn[data-toggle="multi"]');
-      const hasPgTypeSelected = Array.from(pgForButtons).slice(0, 3).some(btn => btn.classList.contains('active'));
-      
-      if (!hasPgTypeSelected) {
+      if (!pgFor || pgFor.trim() === '') {
         Swal.fire({
           icon: 'error',
           title: 'PG Type Required!',
@@ -2321,11 +2321,41 @@
           return false;
         }
       }
+
+      // Update checklist
+      setCheck('cl-rooms', true);
       return true;
     }
     
     if (step === 3) {
-      // Amenities and facilities are optional, so just return true
+      // FIXED: Validate amenities and facilities
+      const amenitiesChecked = document.querySelectorAll('input[name="amenities[]"]:checked').length;
+      const facilitiesChecked = document.querySelectorAll('input[name="facilities[]"]:checked').length;
+
+      if (amenitiesChecked === 0) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Amenities Required!',
+          text: 'Please select at least one amenity before proceeding.',
+          confirmButtonColor: '#667eea'
+        });
+        return false;
+      }
+
+      if (facilitiesChecked === 0) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Facilities Required!',
+          text: 'Please select at least one nearby facility before proceeding.',
+          confirmButtonColor: '#667eea'
+        });
+        return false;
+      }
+
+      // Update checklist
+      setCheck('cl-amenities', amenitiesChecked > 0);
+      setCheck('cl-facilities', facilitiesChecked > 0);
+
       return true;
     }
     
@@ -2340,6 +2370,17 @@
           icon: 'error',
           title: 'Contact Information Required!',
           text: 'Please fill in Owner Name, Contact Number, and Email Address.',
+          confirmButtonColor: '#667eea'
+        });
+        return false;
+      }
+
+      // Check if at least 3 images are uploaded
+      if (selectedFiles.length < 3) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Photos Required!',
+          text: 'Please upload at least 3 property images.',
           confirmButtonColor: '#667eea'
         });
         return false;
@@ -2697,9 +2738,11 @@
       if(totalSelected > 0) {
         $('#amenityCounter').css('background-color', '#fff3e0');
         $('#amenityCounter').css('border-color', '#e85d04');
+        setCheck('cl-amenities', true);
       } else {
         $('#amenityCounter').css('background-color', '#f8f9fa');
         $('#amenityCounter').css('border-color', '#ddd');
+        setCheck('cl-amenities', false);
       }
     }
 
@@ -2709,9 +2752,11 @@
       if(total > 0) {
         $('#facilityCounter').css('background-color', '#dbeafe');
         $('#facilityCounter').css('border-color', '#3b82f6');
+        setCheck('cl-facilities', true);
       } else {
         $('#facilityCounter').css('background-color', '#f0f9ff');
         $('#facilityCounter').css('border-color', '#bae6fd');
+        setCheck('cl-facilities', false);
       }
     }
 
@@ -2740,8 +2785,7 @@
       confirmButtonColor: '#667eea',
       confirmButtonText: 'View Portal →'
     }).then(() => {
-      // this.submit(); // Uncomment to actually submit the form
-      window.location.href = '#';
+      this.submit(); // Actually submit the form
     });
   });
 

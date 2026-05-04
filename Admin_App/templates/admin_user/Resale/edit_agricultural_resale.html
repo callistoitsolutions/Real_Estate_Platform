@@ -1,0 +1,677 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<style>
+  :root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --danger-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+    --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    --topbar-height: 70px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; min-height: 100vh; }
+
+  /* Grid Layout */
+  .page-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  .stepper-container {
+    grid-column: 1 / -1;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  }
+  .form-container {
+    background: white;
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Stepper UI */
+  .stepper { display: flex; align-items: center; justify-content: space-between; position: relative; }
+  .step-item { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+  .step-circle {
+    width: 50px; height: 50px; border-radius: 50%; background: #e9ecef; color: #adb5bd;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem;
+    border: 3px solid #e9ecef; transition: all 0.3s ease; position: relative; z-index: 2;
+  }
+  .step-circle.active { background: var(--primary-gradient); color: white; border-color: #667eea; }
+  .step-circle.done { background: var(--success-gradient); color: white; border-color: #11998e; }
+  .step-label { margin-top: 10px; font-size: 0.85rem; font-weight: 600; color: #adb5bd; text-align: center; }
+  .step-label.active { color: #667eea; }
+  .step-label.done { color: #11998e; }
+  .step-line {
+    position: absolute; top: 25px; left: 50%; right: -50%; height: 3px; background: #e9ecef; z-index: 1; transition: all 0.3s ease;
+  }
+  .step-item:last-child .step-line { display: none; }
+  .step-line.done { background: var(--success-gradient); }
+
+  /* Form Elements */
+  .step-content { display: none; }
+  .step-content.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .form-section { margin-bottom: 30px; }
+  .section-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;
+    padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; display: flex; align-items: center; gap: 10px;
+  }
+  .section-body { background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; }
+  .form-label { font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 0.9rem; }
+  .form-label .required { color: #e74c3c; }
+  .form-control, .form-select {
+    border: 2px solid #e9ecef; border-radius: 12px; padding: 12px 15px; font-size: 0.95rem; width: 100%; transition: all 0.3s ease;
+  }
+  .form-control:focus { border-color: #667eea; outline: none; }
+  
+  /* Buttons */
+  .btn-step, .btn-submit, .btn-back {
+    padding: 12px 25px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+  }
+  .btn-next, .btn-submit { background: var(--primary-gradient); color: white; }
+  .btn-prev, .btn-back { background: #e9ecef; color: #2d3748; text-decoration: none; display: inline-block; }
+  .step-nav, .form-footer { display: flex; justify-content: space-between; margin-top: 20px; }
+  
+  /* Radios & Toggles */
+  .radio-group { display: flex; gap: 15px; }
+  .radio-option {
+    display: inline-flex; align-items: center; gap: 8px; padding: 8px 15px; background: white; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer;
+  }
+  .conditional-section { display: none; animation: slideDown 0.3s ease; margin-top: 15px; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<div class="main-content">
+  <div class="page-wrapper">
+    
+    <div class="page-header" style="grid-column: 1 / -1; background: var(--primary-gradient); padding: 30px; border-radius: 20px; color: white;">
+      <h1 style="font-weight: 700;">🌾 Edit Agricultural Property</h1>
+      <p>Updating listing: {{ property.title|default:property.village }}</p>
+    </div>
+
+    <div class="stepper-container">
+      <div class="stepper" id="stepper">
+        <div class="step-item"><div class="step-circle active" id="sc1">1</div><div class="step-label active" id="sl1">Basic Info & Location</div><div class="step-line" id="line1"></div></div>
+        <div class="step-item"><div class="step-circle" id="sc2">2</div><div class="step-label" id="sl2">Land Specifics</div><div class="step-line" id="line2"></div></div>
+        <div class="step-item"><div class="step-circle" id="sc3">3</div><div class="step-label" id="sl3">Pricing & Legal</div><div class="step-line" id="line3"></div></div>
+        <div class="step-item"><div class="step-circle" id="sc4">4</div><div class="step-label" id="sl4">Owner & Docs</div></div>
+      </div>
+    </div>
+
+    <div class="form-container">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <h2 style="font-size: 1.5rem; font-weight: 700;"><i class="fas fa-edit"></i> Edit Form</h2>
+        <a href="{% url 'agricultural_resale_list' %}" class="btn-back"><i class="fas fa-arrow-left"></i> Back to List</a>
+      </div>
+
+      <!-- ✅ FIXED: Added novalidate to prevent silent HTML5 required blocks -->
+      <form method="POST" enctype="multipart/form-data" id="agriculturalEditForm" novalidate>
+        {% csrf_token %}
+
+        <div class="step-content active" id="step1">
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-info-circle"></i> Basic Info & Location</div>
+            <div class="section-body">
+              
+              <div class="row">
+                <div class="col-md-12 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Property Title <span class="required">*</span></label>
+                    <input type="text" class="form-control" name="title" value="{{ property.title|default:'' }}" placeholder="e.g. 5 Acres Fertile Land Near Highway" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mt-3">
+                  <div class="form-group">
+                    <label class="form-label">Property Type <span class="required">*</span></label>
+                    <select class="form-select form-control" id="agriculture_property_type" name="agriculture_property_type" required>
+                      <option value="agriculture_land" {% if property.agriculture_property_type == 'agriculture_land' %}selected{% endif %}>Agriculture Land</option>
+                      <option value="farm_land" {% if property.agriculture_property_type == 'farm_land' %}selected{% endif %}>Farm Land</option>
+                      <option value="orchard_land" {% if property.agriculture_property_type == 'orchard_land' %}selected{% endif %}>Orchard Land</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-6 mt-3">
+                  <div class="form-group">
+                    <label class="form-label">Land Area (Acres) <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="agri_area" name="area" value="{{ property.area }}" step="0.01" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4 mt-3">
+                  <div class="form-group">
+                    <label class="form-label">State <span class="required">*</span></label>
+                    <input type="text" class="form-control" name="state" value="{{ property.state }}" required>
+                  </div>
+                </div>
+                <div class="col-md-4 mt-3">
+                  <div class="form-group">
+                    <label class="form-label">City <span class="required">*</span></label>
+                    <input type="text" class="form-control" name="city" value="{{ property.city }}" required>
+                  </div>
+                </div>
+                <div class="col-md-4 mt-3">
+                  <div class="form-group">
+                    <label class="form-label">District <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="agri_district" name="district" value="{{ property.district }}" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mt-3">
+                  <div class="form-group">
+                    <label class="form-label">Taluka <span class="required">*</span></label>
+                    <input type="text" class="form-control" name="taluka" value="{{ property.taluka }}" required>
+                  </div>
+                </div>
+                <div class="col-md-6 mt-3">
+                  <div class="form-group">
+                    <label class="form-label">Village <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="agri_village" name="village" value="{{ property.village }}" required>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-3">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label class="form-label">Property Address <span class="required">*</span></label>
+                    <textarea class="form-control" name="property_address" rows="3" required>{{ property.address }}</textarea>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <div class="step-nav">
+            <div></div>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(2)">Next <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <div class="step-content" id="step2">
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-leaf"></i> Land Specifics</div>
+            <div class="section-body">
+              
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Soil Type</label>
+                    <select class="form-select form-control" name="soil_type">
+                      <option value="">-- Select Soil --</option>
+                      <option value="red" {% if property.soil_type == 'red' %}selected{% endif %}>Red Soil</option>
+                      <option value="black" {% if property.soil_type == 'black' %}selected{% endif %}>Black Soil</option>
+                      <option value="alluvial" {% if property.soil_type == 'alluvial' %}selected{% endif %}>Alluvial Soil</option>
+                      <option value="loamy" {% if property.soil_type == 'loamy' %}selected{% endif %}>Loamy Soil</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Water Source</label>
+                    <select class="form-select form-control" name="water_source">
+                      <option value="">-- Select Source --</option>
+                      <option value="well" {% if property.water_source == 'well' %}selected{% endif %}>Well</option>
+                      <option value="borewell" {% if property.water_source == 'borewell' %}selected{% endif %}>Borewell</option>
+                      <option value="canal" {% if property.water_source == 'canal' %}selected{% endif %}>Canal</option>
+                      <option value="river" {% if property.water_source == 'river' %}selected{% endif %}>River</option>
+                      <option value="none" {% if property.water_source == 'none' %}selected{% endif %}>None</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Irrigation Facility?</label>
+                    <select class="form-select form-control" name="irrigation_facility">
+                      <option value="no" {% if property.irrigation_facility == 'no' %}selected{% endif %}>No</option>
+                      <option value="yes" {% if property.irrigation_facility == 'yes' %}selected{% endif %}>Yes</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-3">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Fertility Status</label>
+                    <select class="form-select form-control" name="fertility_status">
+                      <option value="">-- Select Status --</option>
+                      <option value="high" {% if property.fertility_status == 'high' %}selected{% endif %}>High</option>
+                      <option value="medium" {% if property.fertility_status == 'medium' %}selected{% endif %}>Medium</option>
+                      <option value="low" {% if property.fertility_status == 'low' %}selected{% endif %}>Low</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Previous Crops</label>
+                    <input type="text" class="form-control" name="previous_crops" value="{{ property.previous_crops|default:'' }}" placeholder="e.g. Wheat, Cotton">
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-3">
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label class="form-label">Property Description <span class="required">*</span></label>
+                    <textarea class="form-control" id="resale_agricultural_desc" name="resale_agricultural_desc" required>{{ property.resale_agricultural_desc }}</textarea>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <div class="step-content" id="step3">
+          
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-indian-rupee-sign"></i> Pricing Details</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
+                    <input type="number" class="form-control" id="agri_price" name="expected_price" value="{{ property.expected_price }}" required>
+                  </div>
+                </div>
+                <div class="col-md-4 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Brokerage</label>
+                    <select class="form-select form-control" name="brokerage" id="brokerageSelect">
+                      <option value="No" {% if property.brokerage == 'No' %}selected{% endif %}>No</option>
+                      <option value="Yes" {% if property.brokerage == 'Yes' %}selected{% endif %}>Yes</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-4 mt-2 conditional-section" id="brokerageSection" style="{% if property.brokerage == 'Yes' %}display:block;{% endif %}">
+                  <div class="form-group">
+                      <label class="form-label">Brokerage Percentage</label>
+                      <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
+                          <option value="1%" {% if property.brokerage_percentage == '1%' %}selected{% endif %}>1%</option>
+                          <option value="2%" {% if property.brokerage_percentage == '2%' %}selected{% endif %}>2%</option>
+                          <option value="Negotiable" {% if property.brokerage_percentage == 'Negotiable' %}selected{% endif %}>Negotiable</option>
+                          <option value="Manual" {% if property.brokerage_percentage == 'Manual' %}selected{% endif %}>Enter Manually</option>
+                      </select>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12 mt-2 conditional-section" id="manualBrokerage" style="{% if property.brokerage_percentage == 'Manual' %}display:block;{% endif %}">
+                  <div class="form-group">
+                      <label class="form-label">Enter Brokerage Manually</label>
+                      <input type="text" class="form-control" name="manual_brokerage" value="{{ property.manual_brokerage|default:'' }}">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-gavel"></i> Legal Details</div>
+            <div class="section-body">
+              
+              <div class="row">
+                <div class="col-md-12 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Ownership Type <span class="required">*</span></label>
+                    <select class="form-select form-control" name="ownership_type" required>
+                      <option value="freehold" {% if property.ownership_type == 'freehold' %}selected{% endif %}>Freehold</option>
+                      <option value="leasehold" {% if property.ownership_type == 'leasehold' %}selected{% endif %}>Leasehold</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-3">
+                <div class="col-md-4">
+                  <label class="form-label">Loan on Property?</label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="agri_loan" value="no" {% if property.agri_loan == 'no' %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="agri_loan" value="yes" {% if property.agri_loan == 'yes' %}checked{% endif %}> Yes</label>
+                  </div>
+                </div>
+                <div class="col-md-8 conditional-section" id="agri_loan_amount_section" style="{% if property.agri_loan == 'yes' %}display:block;{% endif %}">
+                  <label class="form-label">Loan Amount (₹)</label>
+                  <input type="number" class="form-control" name="loan_amount" value="{{ property.loan_amount|default:'' }}">
+                </div>
+              </div>
+
+              <div class="row mt-3">
+                <div class="col-md-4">
+                  <label class="form-label">Any Tenants/Lease?</label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="agri_tenants" value="no" {% if property.agri_tenants == 'no' %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="agri_tenants" value="yes" {% if property.agri_tenants == 'yes' %}checked{% endif %}> Yes</label>
+                  </div>
+                </div>
+                <div class="col-md-8 conditional-section" id="agri_tenant_details_section" style="{% if property.agri_tenants == 'yes' %}display:block;{% endif %}">
+                  <label class="form-label">Tenant/Lease Details</label>
+                  <textarea class="form-control" name="tenant_details" rows="2">{{ property.tenant_details|default:'' }}</textarea>
+                </div>
+              </div>
+
+              <div class="row mt-3">
+                <div class="col-md-4">
+                  <label class="form-label">Any Legal Dispute?</label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="agri_dispute" value="no" {% if property.agri_dispute == 'no' %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="agri_dispute" value="yes" {% if property.agri_dispute == 'yes' %}checked{% endif %}> Yes</label>
+                  </div>
+                </div>
+                <div class="col-md-8 conditional-section" id="agri_dispute_details_section" style="{% if property.agri_dispute == 'yes' %}display:block;{% endif %}">
+                  <label class="form-label">Dispute Details</label>
+                  <textarea class="form-control" name="dispute_details" rows="2">{{ property.dispute_details|default:'' }}</textarea>
+                </div>
+              </div>
+
+              <div class="row mt-3">
+                <div class="col-md-4">
+                  <label class="form-label">Any Pending Tax?</label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="agri_tax_due" value="no" {% if property.agri_tax_due == 'no' %}checked{% endif %}> No</label>
+                    <label class="radio-option"><input type="radio" name="agri_tax_due" value="yes" {% if property.agri_tax_due == 'yes' %}checked{% endif %}> Yes</label>
+                  </div>
+                </div>
+                <div class="col-md-8 conditional-section" id="agri_tax_due_section" style="{% if property.agri_tax_due == 'yes' %}display:block;{% endif %}">
+                  <label class="form-label">Pending Tax Amount (₹)</label>
+                  <input type="number" class="form-control" name="pending_tax_amount" value="{{ property.pending_tax_amount|default:'' }}">
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Next <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <div class="step-content" id="step4">
+          
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-user-tie"></i> Owner Details</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-6 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Owner Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" name="owner_name" value="{{ property.owner_name }}" required>
+                  </div>
+                </div>
+                <div class="col-md-6 mt-2">
+                  <div class="form-group">
+                    <label class="form-label">Owner Contact <span class="required">*</span></label>
+                    <input type="tel" class="form-control" name="owner_contact" value="{{ property.owner_contact }}" required>
+                  </div>
+                </div>
+              </div>
+              <div class="row mt-3">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Owner Email <span class="required">*</span></label>
+                    <input type="email" class="form-control" name="owner_email" value="{{ property.owner_email }}" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Residency Status <span class="required">*</span></label>
+                    <select class="form-select form-control" name="comm_residency" required>
+                      <option value="resident" {% if property.comm_residency == 'resident' %}selected{% endif %}>Resident</option>
+                      <option value="nri" {% if property.comm_residency == 'nri' %}selected{% endif %}>NRI</option>
+                      <option value="pio" {% if property.comm_residency == 'pio' %}selected{% endif %}>PIO</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-file-upload"></i> Update Documents & Media</div>
+            <div class="section-body">
+              <div class="row">
+                
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Update Encumbrance Certificate (PDF/Image)</label>
+                    {% if property.encumbrance_cert %}
+                      <div style="margin-bottom: 5px; font-size: 0.85rem;"><a href="{{ property.encumbrance_cert.url }}" target="_blank">View Current File</a></div>
+                    {% endif %}
+                    <input type="file" class="form-control" name="encumbrance_certificate" accept=".pdf, image/*">
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">Update Property Video (MP4)</label>
+                    {% if property.property_video %}
+                      <div style="margin-bottom: 5px; font-size: 0.85rem;"><a href="{{ property.property_video.url }}" target="_blank">View Current Video</a></div>
+                    {% endif %}
+                    <input type="file" class="form-control" name="property_video" accept="video/mp4, video/x-m4v, video/*">
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="row mt-4">
+                <div class="col-md-12">
+                  <label class="form-label">Add New Property Images</label>
+                  <div style="border: 2px dashed #cbd5e0; border-radius: 12px; padding: 30px; text-align: center; background: #fff; cursor: pointer;" onclick="document.getElementById('imageInput').click()">
+                    <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display: none;">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: #667eea; margin-bottom: 10px;"></i>
+                    <p style="margin: 0; font-weight: 600; color: #4a5568;">Click to browse new images</p>
+                    <p style="margin: 0; font-size: 0.8rem; color: #718096;">These will be added to your existing gallery.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-footer">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Update Property</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="preview-sidebar">
+      <div style="background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); border-radius: 16px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
+        <div style="font-size: 0.8rem; font-weight: 700; color: rgba(255, 255, 255, 0.6); margin-bottom: 15px;"><i class="fas fa-eye"></i> Live Preview</div>
+        <div style="background: white; border-radius: 12px; overflow: hidden;">
+          <div style="height: 140px; background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative;">
+            <i class="fas fa-tractor" style="color: rgba(0,0,0,0.1);"></i>
+            <div style="position: absolute; top: 10px; left: 10px;">
+              <span id="previewType" style="font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; background: rgba(255, 255, 255, 0.95); color: #0f172a;">Agriculture Land</span>
+            </div>
+            <div id="previewPrice" style="position: absolute; bottom: 10px; left: 10px; background: rgba(15, 23, 42, 0.9); color: white; font-size: 0.9rem; font-weight: 900; padding: 5px 12px; border-radius: 8px;">₹ 0</div>
+          </div>
+          <div style="padding: 15px;">
+            <div id="previewTitle" style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 5px;">Agricultural Listing</div>
+            <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 10px;"><i class="fas fa-map-marker-alt"></i> <span id="previewLocation">Location</span></div>
+            <div style="display: flex; gap: 12px; font-size: 0.75rem; color: #475569; font-weight: 600;">
+              <span><i class="fas fa-ruler-combined"></i> <span id="previewArea">0</span> Acres</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<script>
+  let currentStep = 1;
+  const totalSteps = 4;
+
+  // Multi-step form navigation
+  function goToStep(n) {
+    document.querySelectorAll('.step-content').forEach(step => step.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    
+    for(let i=1; i<=totalSteps; i++) {
+        let circle = document.getElementById('sc' + i);
+        let label = document.getElementById('sl' + i);
+        let line = document.getElementById('line' + i);
+        
+        if (i < n) {
+            circle.classList.add('done'); circle.classList.remove('active');
+            label.classList.add('done'); label.classList.remove('active');
+            if (line) line.classList.add('done');
+        } else if (i === n) {
+            circle.classList.add('active'); circle.classList.remove('done');
+            label.classList.add('active'); label.classList.remove('done');
+            if (line) line.classList.remove('done');
+        } else {
+            circle.classList.remove('done', 'active');
+            label.classList.remove('done', 'active');
+            if (line) line.classList.remove('done');
+        }
+    }
+    currentStep = n;
+    window.scrollTo(0, 0); 
+  }
+
+  // Live Sidebar Preview
+  function updatePreview() {
+    const typeSelect = document.getElementById('agriculture_property_type');
+    if(typeSelect && typeSelect.selectedIndex >= 0) document.getElementById('previewType').innerText = typeSelect.options[typeSelect.selectedIndex].text;
+    
+    const price = document.getElementById('agri_price').value;
+    document.getElementById('previewPrice').innerText = price ? '₹ ' + Number(price).toLocaleString('en-IN') : '₹ 0';
+    
+    const title = document.querySelector('input[name="title"]').value;
+    document.getElementById('previewTitle').innerText = title || 'Agricultural Listing';
+
+    const area = document.getElementById('agri_area').value;
+    document.getElementById('previewArea').innerText = area || '0';
+    
+    const village = document.getElementById('agri_village').value;
+    const district = document.getElementById('agri_district').value;
+    document.getElementById('previewLocation').innerText = [village, district].filter(Boolean).join(', ') || 'City, State';
+  }
+
+  // Helper for dynamic Radio Toggles
+  function setupToggle(radioName, sectionId) {
+    document.querySelectorAll(`input[name="${radioName}"]`).forEach(radio => {
+      radio.addEventListener('change', function() {
+        document.getElementById(sectionId).style.display = (this.value === 'yes') ? 'block' : 'none';
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    
+    // Attach preview updates
+    document.querySelectorAll('input, select').forEach(element => {
+        element.addEventListener('input', updatePreview);
+        element.addEventListener('change', updatePreview);
+    });
+    updatePreview(); // Trigger on load
+
+    // Setup Toggles for Legal Boolean fields
+    setupToggle('agri_loan', 'agri_loan_amount_section');
+    setupToggle('agri_tenants', 'agri_tenant_details_section');
+    setupToggle('agri_dispute', 'agri_dispute_details_section');
+    setupToggle('agri_tax_due', 'agri_tax_due_section');
+
+    // Brokerage Select Toggle
+    const brokerageSelect = document.getElementById('brokerageSelect');
+    if(brokerageSelect) {
+      brokerageSelect.addEventListener('change', function() {
+        document.getElementById('brokerageSection').style.display = (this.value === 'Yes') ? 'block' : 'none';
+      });
+    }
+
+    const brokeragePercentage = document.getElementById('brokeragePercentage');
+    if(brokeragePercentage) {
+      brokeragePercentage.addEventListener('change', function() {
+        document.getElementById('manualBrokerage').style.display = (this.value === 'Manual') ? 'block' : 'none';
+      });
+    }
+
+    // ✅ FIXED: Ajax Form Submission with explicit validation check
+    const form = document.getElementById('agriculturalEditForm');
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault(); 
+        
+        // MANUALLY CHECK VALIDATION
+        if (!form.checkValidity()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Incomplete Form',
+                text: 'Please review all steps and make sure all required fields are filled out.'
+            });
+            return; // Stop submission
+        }
+
+        if (typeof CKEDITOR !== 'undefined') {
+          for (instance in CKEDITOR.instances) { CKEDITOR.instances[instance].updateElement(); }
+        }
+
+        Swal.fire({
+          title: 'Update Property?',
+          text: "Are you sure you want to save these changes?",
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#667eea',
+          cancelButtonColor: '#e74c3c',
+          confirmButtonText: 'Yes, update it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire({ title: 'Updating...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+            // Ensure the form posts to the correct URL
+            const submitUrl = form.action || window.location.href;
+
+            fetch(submitUrl, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(response => response.json())
+            .then(data => {
+              if (data.status === 'success' || data.success) {
+                Swal.fire({ icon: 'success', title: 'Updated!', text: data.message || 'Successfully updated.' })
+                .then(() => { if(data.redirect_url) window.location.href = data.redirect_url; });
+              } else {
+                Swal.fire({ icon: 'error', title: 'Update Failed', text: data.message });
+              }
+            })
+            .catch(error => { 
+                console.error("Fetch Error:", error);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Server connection failed.' }); 
+            });
+          }
+        });
+      });
+    }
+
+    // CKEditor init
+    if (typeof CKEDITOR !== 'undefined') {
+      if (CKEDITOR.instances.resale_agricultural_desc) CKEDITOR.instances.resale_agricultural_desc.destroy();
+      CKEDITOR.replace('resale_agricultural_desc');
+    }
+  });
+</script>

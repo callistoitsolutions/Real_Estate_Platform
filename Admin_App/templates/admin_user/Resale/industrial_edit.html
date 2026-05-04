@@ -1,0 +1,592 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --topbar-height: 70px;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .main-content { padding: 30px; margin-top: var(--topbar-height); }
+
+    .page-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 30px;
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    /* Header & Stepper */
+    .page-header {
+        background: var(--primary-gradient);
+        border-radius: 20px;
+        padding: 30px;
+        color: white;
+        grid-column: 1 / -1;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .stepper-container {
+        grid-column: 1 / -1;
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .stepper { display: flex; align-items: center; justify-content: space-between; position: relative; }
+    .step-item { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; z-index: 2; }
+    .step-circle {
+        width: 50px; height: 50px; border-radius: 50%; background: #e9ecef;
+        display: flex; align-items: center; justify-content: center; font-weight: 700;
+        transition: all 0.3s ease; border: 3px solid #fff;
+    }
+    .step-circle.active { background: var(--primary-gradient); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
+    .step-circle.done { background: var(--success-gradient); color: white; }
+    .step-line { position: absolute; top: 25px; left: 50%; right: -50%; height: 3px; background: #e9ecef; z-index: 1; }
+    .step-line.done { background: var(--success-gradient); }
+
+    /* Form Design */
+    .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
+    .step-content { display: none; }
+    .step-content.active { display: block; animation: fadeIn 0.4s ease; }
+
+    .section-header {
+        background: var(--primary-gradient); color: white;
+        padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .section-body {
+        background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px;
+        border: 2px solid #e9ecef; border-top: none; margin-bottom: 30px;
+    }
+
+    .form-label { font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 0.85rem; display: block; }
+    .required { color: #e74c3c; }
+
+    .radio-group { display: flex; gap: 15px; padding: 10px 0; flex-wrap: wrap; }
+    .radio-option { cursor: pointer; display: flex; align-items: center; gap: 8px; background: #fff; padding: 10px 15px; border: 1px solid #ddd; border-radius: 10px; transition: 0.3s; }
+
+    /* Preview Sidebar */
+    .preview-sidebar { position: sticky; top: 100px; display: flex; flex-direction: column; gap: 20px; }
+    .preview-card { background: #2c3e50; border-radius: 16px; padding: 20px; color: white; }
+    .preview-mock { background: white; border-radius: 12px; overflow: hidden; color: #333; margin-top: 15px; }
+    .preview-image { height: 140px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
+    .preview-price { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.85); color: white; padding: 5px 12px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; }
+
+    .checklist-card, .tips-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    .checklist-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 10px; color: #718096; }
+    .checklist-item.done { color: #11998e; font-weight: 600; }
+
+    .image-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+    .preview-item { width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 2px solid #ddd; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } }
+</style>
+
+
+
+<div class="main-content">
+    <div class="page-wrapper">
+        <div class="page-header">
+            <h1 class="page-title">✏️ Edit Industrial Property</h1>
+            <p class="page-subtitle">Update details for your industrial listing in 4 steps</p>
+        </div>
+
+        <div class="stepper-container">
+            <div class="stepper">
+                <div class="step-item"><div class="step-circle active" id="sc1">1</div><span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Property Specs</span><div class="step-line" id="line1"></div></div>
+                <div class="step-item"><div class="step-circle" id="sc2">2</div><span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Pricing & Legal</span><div class="step-line" id="line2"></div></div>
+                <div class="step-item"><div class="step-circle" id="sc3">3</div><span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Media</span><div class="step-line" id="line3"></div></div>
+                <div class="step-item"><div class="step-circle" id="sc4">4</div><span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Location</span></div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <form action="{% url 'industrial_resale_edit' prop.id %}" method="POST" enctype="multipart/form-data" id="industrialForm">
+                {% csrf_token %}
+
+                <div class="step-content active" id="step1">
+                    <div class="section-header"><i class="fas fa-industry"></i> Industrial Property Details</div>
+                    <div class="section-body">
+                        <div class="row">
+                            <div class="col-md-4 mt-2">
+                                <label class="form-label">Property Type <span class="required">*</span></label>
+                                <select class="form-select form-control" id="industrial_property_type" name="industrial_property_type" required>
+                                    <option value="">Select</option>
+                                    <option value="industrial_land" {% if prop.property_type == 'industrial_land' %}selected{% endif %}>Industrial Land</option>
+                                    <option value="factory" {% if prop.property_type == 'factory' %}selected{% endif %}>Factory</option>
+                                    <option value="warehouse" {% if prop.property_type == 'warehouse' %}selected{% endif %}>Warehouse</option>
+                                    <option value="industrial_shed" {% if prop.property_type == 'industrial_shed' %}selected{% endif %}>Industrial Shed</option>
+                                    <option value="manufacturing_unit" {% if prop.property_type == 'manufacturing_unit' %}selected{% endif %}>Manufacturing Unit</option>
+                                    <option value="cold_storage" {% if prop.property_type == 'cold_storage' %}selected{% endif %}>Cold Storage</option>
+                                    <option value="logistics_park" {% if prop.property_type == 'logistics_park' %}selected{% endif %}>Logistics Park</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mt-2">
+                                <label class="form-label">Land Area (sq.ft/acres) <span class="required">*</span></label>
+                                <input type="number" class="form-control" name="ind_area" id="ind_area" value="{{ prop.land_area }}" required>
+                            </div>
+                            <div class="col-md-4 mt-2">
+                                <label class="form-label">Available From</label>
+                                <input type="date" class="form-control" name="available_from" value="{{ prop.available_from|date:'Y-m-d' }}">
+                            </div>
+                            <div class="col-md-4 mt-3">
+                                <label class="form-label">Power Supply Available?</label>
+                                <select class="form-select form-control" name="ind_power" id="ind_power">
+                                    <option value="yes" {% if prop.power_supply %}selected{% endif %}>Yes</option>
+                                    <option value="no" {% if not prop.power_supply %}selected{% endif %}>No</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mt-3">
+                                <label class="form-label">KVA Capacity</label>
+                                <input type="number" class="form-control" name="ind_kva" value="{{ prop.kva_capacity|default:'' }}">
+                            </div>
+                            <div class="col-md-4 mt-3">
+                                <label class="form-label">Water Supply</label>
+                                <select class="form-select form-control" name="ind_water">
+                                    <option value="">Select</option>
+                                    <option value="corporation" {% if prop.water_supply == 'corporation' %}selected{% endif %}>Corporation</option>
+                                    <option value="borewell" {% if prop.water_supply == 'borewell' %}selected{% endif %}>Borewell</option>
+                                    <option value="both" {% if prop.water_supply == 'both' %}selected{% endif %}>Both</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Crane/Heavy Machinery?</label>
+                                <select class="form-select form-control" name="ind_crane">
+                                    <option value="no" {% if not prop.crane_heavy_machinery %}selected{% endif %}>No</option>
+                                    <option value="yes" {% if prop.crane_heavy_machinery %}selected{% endif %}>Yes</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Road Connectivity</label>
+                                <select class="form-select form-control" name="ind_road">
+                                    <option value="">Select</option>
+                                    <option value="highway" {% if prop.road_connectivity == 'highway' %}selected{% endif %}>Near Highway</option>
+                                    <option value="main" {% if prop.road_connectivity == 'main' %}selected{% endif %}>Main Road</option>
+                                    <option value="internal" {% if prop.road_connectivity == 'internal' %}selected{% endif %}>Internal Road</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Worker Housing Nearby?</label>
+                                <select class="form-select form-control" name="ind_housing">
+                                    <option value="no" {% if not prop.worker_housing_nearby %}selected{% endif %}>No</option>
+                                    <option value="yes" {% if prop.worker_housing_nearby %}selected{% endif %}>Yes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-primary px-5 py-2" onclick="goToStep(2)">Next: Pricing & Legal <i class="fas fa-arrow-right ml-2"></i></button>
+                    </div>
+                </div>
+
+                <div class="step-content" id="step2">
+                    <div class="section-header"><i class="fas fa-indian-rupee-sign"></i> Pricing & Legal</div>
+                    <div class="section-body">
+                        <div class="row">
+                            <div class="col-md-6 mt-2">
+                                <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
+                                <input type="number" class="form-control" name="ind_price" id="ind_price" value="{{ prop.expected_price }}" required>
+                            </div>
+                            <div class="col-md-6 mt-2">
+                                <label class="form-label">Brokerage</label>
+                                <select class="form-select form-control" name="brokerage" id="brokerageSelect">
+                                    <option value="No" {% if prop.brokerage == 'No' %}selected{% endif %}>No</option>
+                                    <option value="Yes" {% if prop.brokerage == 'Yes' %}selected{% endif %}>Yes</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mt-3" id="brokerageSection" style="display: {% if prop.brokerage == 'Yes' %}block{% else %}none{% endif %};">
+                                <label class="form-label">Percentage</label>
+                                <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
+                                    <option value="1%" {% if prop.brokerage_percentage == '1%' %}selected{% endif %}>1%</option>
+                                    <option value="2%" {% if prop.brokerage_percentage == '2%' %}selected{% endif %}>2%</option>
+                                    <option value="Manual" {% if prop.brokerage_percentage == 'Manual' %}selected{% endif %}>Enter Manually</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mt-3" id="manualBrokerage" style="display: {% if prop.brokerage_percentage == 'Manual' %}block{% else %}none{% endif %};">
+                                <label class="form-label">Manual Brokerage</label>
+                                <input type="text" class="form-control" name="manual_brokerage" value="{{ prop.manual_brokerage|default:'' }}">
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Sanctioning Authority</label>
+                                <input type="text" class="form-control" name="ind_authority" value="{{ prop.sanctioning_authority|default:'' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ownership <span class="required">*</span></label>
+                                <select class="form-control form-select" name="ind_ownership" id="ind_ownership" required>
+                                    <option value="freehold" {% if prop.ownership_type == 'freehold' %}selected{% endif %}>Freehold</option>
+                                    <option value="leasehold" {% if prop.ownership_type == 'leasehold' %}selected{% endif %}>Leasehold</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Loan on Property? <span class="required">*</span></label>
+                                <div class="radio-group">
+                                    <label class="radio-option"><input type="radio" name="ind_loan" value="no" {% if not prop.has_loan %}checked{% endif %} required> No</label>
+                                    <label class="radio-option"><input type="radio" name="ind_loan" value="yes" {% if prop.has_loan %}checked{% endif %}> Yes</label>
+                                </div>
+                                <div id="ind_loan_amount_section" style="display: {% if prop.has_loan %}block{% else %}none{% endif %};" class="mt-2">
+                                    <input type="number" class="form-control" name="ind_loan_amount" value="{{ prop.loan_amount|default:'' }}" placeholder="Loan Amount (₹)">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Existing Tenants? <span class="required">*</span></label>
+                                <div class="radio-group">
+                                    <label class="radio-option"><input type="radio" name="ind_tenants" value="no" {% if not prop.existing_tenants %}checked{% endif %} required> No</label>
+                                    <label class="radio-option"><input type="radio" name="ind_tenants" value="yes" {% if prop.existing_tenants %}checked{% endif %}> Yes</label>
+                                </div>
+                                <div id="ind_tenant_details_section" style="display: {% if prop.existing_tenants %}block{% else %}none{% endif %};" class="mt-2">
+                                    <textarea class="form-control" name="ind_tenant_details" placeholder="Tenant details">{{ prop.tenant_details|default:'' }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Legal Dispute? <span class="required">*</span></label>
+                                <div class="radio-group">
+                                    <label class="radio-option"><input type="radio" name="ind_dispute" value="no" {% if not prop.legal_dispute %}checked{% endif %} required> No</label>
+                                    <label class="radio-option"><input type="radio" name="ind_dispute" value="yes" {% if prop.legal_dispute %}checked{% endif %}> Yes</label>
+                                </div>
+                                <div id="ind_dispute_details_section" style="display: {% if prop.legal_dispute %}block{% else %}none{% endif %};" class="mt-2">
+                                    <textarea class="form-control" name="ind_dispute_details" placeholder="Dispute info">{{ prop.dispute_details|default:'' }}</textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tax Dues? <span class="required">*</span></label>
+                                <div class="radio-group">
+                                    <label class="radio-option"><input type="radio" name="ind_tax_due" value="no" {% if not prop.tax_due %}checked{% endif %} required> No</label>
+                                    <label class="radio-option"><input type="radio" name="ind_tax_due" value="yes" {% if prop.tax_due %}checked{% endif %}> Yes</label>
+                                </div>
+                                <div id="ind_tax_amount_section" style="display: {% if prop.tax_due %}block{% else %}none{% endif %};" class="mt-2">
+                                    <input type="number" class="form-control" name="ind_tax_amount" value="{{ prop.tax_amount|default:'' }}" placeholder="Pending Amount (₹)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Tax Clearance Available?</label>
+                                <div class="radio-group">
+                                    <label class="radio-option"><input type="radio" name="ind_tax_cert" value="no" {% if not prop.tax_clearance_cert %}checked{% endif %}> No</label>
+                                    <label class="radio-option"><input type="radio" name="ind_tax_cert" value="yes" {% if prop.tax_clearance_cert %}checked{% endif %}> Yes</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Description <span class="required">*</span></label>
+                                <textarea class="form-control" name="resale_industrial_desc" id="resale_industrial_desc" required>{{ prop.property_description|safe }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary px-4" onclick="goToStep(1)">Back</button>
+                        <button type="button" class="btn btn-primary px-5" onclick="goToStep(3)">Next: Media <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="step-content" id="step3">
+                    <div class="section-header"><i class="fas fa-file-contract"></i> Media & Compliance</div>
+                    <div class="section-body">
+                        
+                        {% if prop.images.all %}
+                        <div class="mb-4 p-3 bg-white border rounded">
+                            <label class="form-label mb-2">Existing Images ({{ prop.images.count }}/10)</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for img in prop.images.all %}
+                                    <img src="{{ img.image.url }}" class="preview-item" style="object-fit:cover;">
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="image-upload-area p-5 text-center bg-white" style="border: 2px dashed #cbd5e0; cursor: pointer;" id="uploadArea">
+                            <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
+                            <i class="fas fa-plus-circle fa-3x mb-2" style="color: #667eea;"></i>
+                            <p class="mb-1" style="font-weight: 600;">Click or Drag to Add More Images</p>
+                            <p class="text-danger mb-0" style="font-size: 0.85rem; font-weight: 600;">Note: Adding files will append to your current images (Max 10 total).</p>
+                        </div>
+                        <div class="image-preview" id="imagePreview"></div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Compliance Documents (PDF)</label>
+                                {% if prop.compliance_docs %}<p class="small text-success m-0 mb-1"><i class="fas fa-check-circle"></i> Already uploaded</p>{% endif %}
+                                <input type="file" class="form-control" name="ind_compliance" accept=".pdf">
+                                <small class="text-muted">Upload to replace existing file</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Social Media Video (MP4)</label>
+                                {% if prop.social_video %}<p class="small text-success m-0 mb-1"><i class="fas fa-check-circle"></i> Already uploaded</p>{% endif %}
+                                <input type="file" class="form-control" name="ind_video" accept="video/*">
+                                <small class="text-muted">Upload to replace existing file</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary px-4" onclick="goToStep(2)">Back</button>
+                        <button type="button" class="btn btn-primary px-5" onclick="goToStep(4)">Next: Contact <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="step-content" id="step4">
+                    <div class="section-header"><i class="fas fa-address-card"></i> Location & Contact</div>
+                    <div class="section-body">
+                        <div class="row">
+                            <div class="col-md-6"><label class="form-label">City <span class="required">*</span></label><input type="text" class="form-control" name="ind_city" id="ind_city" value="{{ prop.city }}" required></div>
+                            <div class="col-md-6"><label class="form-label">Locality <span class="required">*</span></label><input type="text" class="form-control" name="ind_locality" id="ind_locality" value="{{ prop.locality }}" required></div>
+                        </div>
+                        <div class="mt-3"><label class="form-label">Complete Address <span class="required">*</span></label><textarea class="form-control" name="ind_address" required>{{ prop.complete_address }}</textarea></div>
+                        <div class="row mt-3">
+                            <div class="col-md-4"><label class="form-label">Owner Name <span class="required">*</span></label><input type="text" class="form-control" name="ind_owner_name" value="{{ prop.owner_name }}" required></div>
+                            <div class="col-md-4"><label class="form-label">Owner Contact <span class="required">*</span></label><input type="tel" class="form-control" name="ind_owner_contact" pattern="[0-9]{10}" value="{{ prop.owner_contact }}" required></div>
+                            <div class="col-md-4"><label class="form-label">Owner Email <span class="required">*</span></label><input type="email" class="form-control" name="ind_owner_email" value="{{ prop.owner_email }}" required></div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">Residency Status <span class="required">*</span></label>
+                            <div class="radio-group">
+                                <label class="radio-option"><input type="radio" name="ind_residency" value="resident" {% if prop.residency_status == 'resident' %}checked{% endif %} required> Resident</label>
+                                <label class="radio-option"><input type="radio" name="ind_residency" value="nri" {% if prop.residency_status == 'nri' %}checked{% endif %}> NRI</label>
+                            </div>
+                        </div>
+                        <div class="row mt-4 pt-3 border-top">
+                            <div class="col-md-4"><label class="form-label">Uploaded By</label><input type="text" class="form-control" value="{{ prop.uploaded_by_name }}" disabled></div>
+                            <div class="col-md-4"><label class="form-label">Role</label><input type="text" class="form-control" value="{{ prop.uploaded_by_role }}" disabled></div>
+
+                                 <div class="col-md-4"><label class="form-label">Email</label><input type="text" class="form-control" value="{{ prop.uploaded_by_email }}" disabled></div>
+                            <div class="col-md-4"><label class="form-label">Phone</label><input type="text" class="form-control" value="{{ prop.uploaded_by_phone }}" disabled></div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" class="btn btn-secondary px-4" onclick="goToStep(3)">Back</button>
+                        <button type="submit" class="btn btn-success px-5" id="submitBtn">Update Listing <i class="fas fa-save ml-2"></i></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="preview-sidebar">
+            <div class="preview-card">
+                <div class="preview-mock">
+                    <div class="preview-image">🏭
+                        <div class="preview-price" id="p_price">₹ 0</div>
+                    </div>
+                    <div class="p-3">
+                        <div id="p_type" style="font-weight: 800; font-size: 1rem;">Property Type</div>
+                        <div style="font-size: 0.75rem; color: #666; margin-top: 5px;"><i class="fas fa-map-marker-alt" style="color: #667eea;"></i> <span id="p_loc">Location</span></div>
+                        <div class="mt-2" style="font-weight: 700; font-size: 0.85rem;" id="p_area">0 sq.ft</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checklist-card">
+                <h6 style="font-weight: 800; font-size: 0.9rem; margin-bottom: 15px;">📋 Listing Status</h6>
+                <div class="checklist-item done" id="cl-type"><i class="fas fa-check-circle"></i> Industrial Type selected</div>
+                <div class="checklist-item done" id="cl-area"><i class="fas fa-check-circle"></i> Area details filled</div>
+                <div class="checklist-item done" id="cl-price"><i class="fas fa-check-circle"></i> Price entered</div>
+                <div class="checklist-item done" id="cl-loc"><i class="fas fa-check-circle"></i> Location verified</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+
+<script>
+    let currentStep = 1;
+
+    // CKEditor Initialization
+    window.onload = function() {
+        if (CKEDITOR.instances.resale_industrial_desc) CKEDITOR.instances.resale_industrial_desc.destroy();
+        CKEDITOR.replace('resale_industrial_desc');
+        updatePreview(); // Pre-fill preview card on load
+    };
+
+    function goToStep(n) {
+        if (n > currentStep && !validateStep(currentStep)) return;
+        document.getElementById('step' + currentStep).classList.remove('active');
+        document.getElementById('step' + n).classList.add('active');
+
+        for (let i = 1; i <= 4; i++) {
+            const sc = document.getElementById('sc' + i);
+            const line = document.getElementById('line' + i);
+            if (i < n) {
+                sc.className = 'step-circle done'; sc.innerHTML = '✓';
+                if(line) line.classList.add('done');
+            } else if (i === n) {
+                sc.className = 'step-circle active'; sc.innerHTML = i;
+                if(line) line.classList.remove('done');
+            } else {
+                sc.className = 'step-circle'; sc.innerHTML = i;
+            }
+        }
+        currentStep = n;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validateStep(step) {
+        const stepEl = document.getElementById('step' + step);
+        const requiredFields = stepEl.querySelectorAll('[required]');
+        let missing = [];
+
+        requiredFields.forEach(f => {
+            if (f.type === 'radio') {
+                if (!stepEl.querySelector(`input[name="${f.name}"]:checked`)) missing.push(f.name);
+            } else if (!f.value.trim() && f.name !== 'resale_industrial_desc' && f.type !== 'file') { 
+                const label = f.previousElementSibling?.innerText || "Field";
+                missing.push(label.replace('*', '').trim());
+            }
+        });
+
+        if (missing.length > 0) {
+            Swal.fire({ icon: 'warning', title: 'Missing Info', html: `Please check: <br><b>${missing.join(', ')}</b>`, confirmButtonColor: '#667eea' });
+            return false;
+        }
+        return true;
+    }
+
+    function updatePreview() {
+        const type = document.getElementById('industrial_property_type');
+        const area = document.getElementById('ind_area').value;
+        const price = document.getElementById('ind_price').value;
+        const city = document.getElementById('ind_city').value;
+        const loc = document.getElementById('ind_locality').value;
+
+        document.getElementById('p_type').innerText = type.options[type.selectedIndex]?.text || "Property Type";
+        document.getElementById('p_area').innerText = (area || "0") + " sq.ft/acres";
+        document.getElementById('p_price').innerText = price ? '₹ ' + parseInt(price).toLocaleString('en-IN') : '₹ 0';
+        document.getElementById('p_loc').innerText = (city || loc) ? `${city}, ${loc}` : "Location";
+    }
+
+    document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', updatePreview));
+
+    // Conditional Logic for Form Layout
+    document.querySelectorAll('input[name="ind_loan"]').forEach(r => r.onchange = (e) => 
+        document.getElementById('ind_loan_amount_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
+    document.querySelectorAll('input[name="ind_tenants"]').forEach(r => r.onchange = (e) => 
+        document.getElementById('ind_tenant_details_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
+    document.querySelectorAll('input[name="ind_dispute"]').forEach(r => r.onchange = (e) => 
+        document.getElementById('ind_dispute_details_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
+    document.querySelectorAll('input[name="ind_tax_due"]').forEach(r => r.onchange = (e) => 
+        document.getElementById('ind_tax_amount_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
+
+    document.getElementById("brokerageSelect").onchange = function() {
+        document.getElementById('brokerageSection').style.display = this.value === "Yes" ? "block" : "none";
+    };
+    
+    document.getElementById("brokeragePercentage").onchange = function() {
+        document.getElementById('manualBrokerage').style.display = this.value === "Manual" ? "block" : "none";
+    };
+
+    // Multi-Image Handler
+    const uploadArea = document.getElementById('uploadArea');
+    const imageInput = document.getElementById('imageInput');
+    uploadArea.onclick = () => imageInput.click();
+    imageInput.onchange = () => {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+        Array.from(imageInput.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
+                preview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    // SWEETALERT CONFIRMATION BEFORE SUBMIT
+    document.getElementById('industrialForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        for (instance in CKEDITOR.instances) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+
+        if (!validateStep(4)) return;
+
+        const currentImgCount = {{ prop.images.count|default:0 }};
+        const newImgCount = document.getElementById('imageInput').files.length;
+        
+        if ((currentImgCount + newImgCount) > 10) {
+            Swal.fire({ icon: 'warning', title: 'Limit Exceeded', text: `You already have ${currentImgCount} images. You can only add ${10 - currentImgCount} more.` });
+            goToStep(3);
+            return;
+        }
+
+        // CONFIRMATION DIALOG
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to update this property listing?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#38ef7d',
+            cancelButtonColor: '#95a5a6',
+            confirmButtonText: 'Yes, Update it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                
+                // Loading State
+                const submitBtn = document.getElementById('submitBtn');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+                submitBtn.disabled = true;
+
+                let formData = new FormData(this);
+                let actionUrl = this.getAttribute('action');
+
+                fetch(actionUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Updated Successfully!',
+                            text: data.message,
+                            confirmButtonColor: '#38ef7d'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Update Failed', text: data.message, confirmButtonColor: '#e74c3c' });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'Server error occurred.', 'error');
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                });
+            }
+        });
+    });
+</script>

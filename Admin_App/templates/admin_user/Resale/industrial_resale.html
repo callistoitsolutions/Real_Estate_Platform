@@ -11,49 +11,16 @@
         --topbar-height: 70px;
     }
 
-    body {
-        font-family: 'Poppins', sans-serif;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        min-height: 100vh;
-    }
-
+    body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; }
     .main-content { padding: 30px; margin-top: var(--topbar-height); }
-
-    .page-wrapper {
-        display: grid;
-        grid-template-columns: 1fr 350px;
-        gap: 30px;
-        max-width: 1600px;
-        margin: 0 auto;
-    }
+    .page-wrapper { display: grid; grid-template-columns: 1fr 350px; gap: 30px; max-width: 1600px; margin: 0 auto; }
 
     /* Header & Stepper */
-    .page-header {
-        background: var(--primary-gradient);
-        border-radius: 20px;
-        padding: 30px;
-        color: white;
-        grid-column: 1 / -1;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    }
-
-    .stepper-container {
-        grid-column: 1 / -1;
-        background: white;
-        border-radius: 20px;
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    }
-
+    .page-header { background: var(--primary-gradient); border-radius: 20px; padding: 30px; color: white; grid-column: 1 / -1; margin-bottom: 30px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); }
+    .stepper-container { grid-column: 1 / -1; background: white; border-radius: 20px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); }
     .stepper { display: flex; align-items: center; justify-content: space-between; position: relative; }
     .step-item { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; z-index: 2; }
-    .step-circle {
-        width: 50px; height: 50px; border-radius: 50%; background: #e9ecef;
-        display: flex; align-items: center; justify-content: center; font-weight: 700;
-        transition: all 0.3s ease; border: 3px solid #fff;
-    }
+    .step-circle { width: 50px; height: 50px; border-radius: 50%; background: #e9ecef; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: all 0.3s ease; border: 3px solid #fff; }
     .step-circle.active { background: var(--primary-gradient); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
     .step-circle.done { background: var(--success-gradient); color: white; }
     .step-line { position: absolute; top: 25px; left: 50%; right: -50%; height: 3px; background: #e9ecef; z-index: 1; }
@@ -63,22 +30,12 @@
     .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
     .step-content { display: none; }
     .step-content.active { display: block; animation: fadeIn 0.4s ease; }
-
-    .section-header {
-        background: var(--primary-gradient); color: white;
-        padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600;
-        display: flex; align-items: center; gap: 10px;
-    }
-    .section-body {
-        background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px;
-        border: 2px solid #e9ecef; border-top: none; margin-bottom: 30px;
-    }
-
+    .section-header { background: var(--primary-gradient); color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+    .section-body { background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; margin-bottom: 30px; }
     .form-label { font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 0.85rem; display: block; }
     .required { color: #e74c3c; }
-
     .radio-group { display: flex; gap: 15px; padding: 10px 0; flex-wrap: wrap; }
-    .radio-option { cursor: pointer; display: flex; align-items: center; gap: 8px; background: #fff; padding: 10px 15px; border: 1px solid #ddd; border-radius: 10px; transition: 0.3s; }
+    .radio-option { cursor: pointer; display: flex; align-items: center; gap: 8px; background: #fff; padding: 10px 15px; border: 1px solid #e9ecef; border-radius: 10px; transition: 0.3s; }
 
     /* Preview Sidebar */
     .preview-sidebar { position: sticky; top: 100px; display: flex; flex-direction: column; gap: 20px; }
@@ -86,13 +43,13 @@
     .preview-mock { background: white; border-radius: 12px; overflow: hidden; color: #333; margin-top: 15px; }
     .preview-image { height: 140px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
     .preview-price { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.85); color: white; padding: 5px 12px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; }
-
     .checklist-card, .tips-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
     .checklist-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 10px; color: #718096; }
     .checklist-item.done { color: #11998e; font-weight: 600; }
-
     .image-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
-    .preview-item { width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 2px solid #ddd; }
+    .preview-item { width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 2px solid #ddd; position: relative; }
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-item button { position: absolute; top: 2px; right: 2px; background: rgba(255,0,0,0.8); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; cursor: pointer; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } }
@@ -107,40 +64,26 @@
 
         <div class="stepper-container">
             <div class="stepper">
-                <div class="step-item">
-                    <div class="step-circle active" id="sc1">1</div>
-                    <span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Property Specs</span>
-                    <div class="step-line" id="line1"></div>
-                </div>
-                <div class="step-item">
-                    <div class="step-circle" id="sc2">2</div>
-                    <span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Pricing & Legal</span>
-                    <div class="step-line" id="line2"></div>
-                </div>
-                <div class="step-item">
-                    <div class="step-circle" id="sc3">3</div>
-                    <span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Media</span>
-                    <div class="step-line" id="line3"></div>
-                </div>
-                <div class="step-item">
-                    <div class="step-circle" id="sc4">4</div>
-                    <span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Location</span>
-                </div>
+                <div class="step-item"><div class="step-circle active" id="sc1">1</div><span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Property Specs</span><div class="step-line" id="line1"></div></div>
+                <div class="step-item"><div class="step-circle" id="sc2">2</div><span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Pricing & Legal</span><div class="step-line" id="line2"></div></div>
+                <div class="step-item"><div class="step-circle" id="sc3">3</div><span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Media</span><div class="step-line" id="line3"></div></div>
+                <div class="step-item"><div class="step-circle" id="sc4">4</div><span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Location</span></div>
             </div>
         </div>
 
         <div class="form-container">
-            <form method="POST" enctype="multipart/form-data" id="industrialForm">
+            <form action="{% url 'industrial_resale_add' %}" method="POST" enctype="multipart/form-data" id="industrialForm">
                 {% csrf_token %}
 
+                <!-- STEP 1: Specs -->
                 <div class="step-content active" id="step1">
                     <div class="section-header"><i class="fas fa-industry"></i> Industrial Property Details</div>
                     <div class="section-body">
                         <div class="row">
                             <div class="col-md-4 mt-2">
                                 <label class="form-label">Property Type <span class="required">*</span></label>
-                                <select class="form-select form-control" id="industrial_property_type" name="industrial_property_type" required>
-                                    <option value="">Select</option>
+                                <select class="form-select form-control" id="property_type" name="property_type" required>
+                                    <option value="">Select Type</option>
                                     <option value="industrial_land">Industrial Land</option>
                                     <option value="factory">Factory</option>
                                     <option value="warehouse">Warehouse</option>
@@ -152,27 +95,27 @@
                             </div>
                             <div class="col-md-4 mt-2">
                                 <label class="form-label">Land Area (sq.ft/acres) <span class="required">*</span></label>
-                                <input type="number" class="form-control" name="ind_area" id="ind_area" placeholder="e.g., 5000" required>
+                                <input type="number" step="0.01" class="form-control" name="land_area" id="land_area" placeholder="e.g., 5000" required>
                             </div>
                             <div class="col-md-4 mt-2">
                                 <label class="form-label">Available From</label>
-                                <input type="date" class="form-control" name="available_from">
+                                <input type="date" class="form-control" name="available_from" id="available_from">
                             </div>
                             <div class="col-md-4 mt-3">
                                 <label class="form-label">Power Supply Available?</label>
-                                <select class="form-select form-control" name="ind_power" id="ind_power">
-                                    <option value="yes">Yes</option>
-                                    <option value="no">No</option>
+                                <select class="form-select form-control" name="power_supply" id="power_supply">
+                                    <option value="True">Yes</option>
+                                    <option value="False">No</option>
                                 </select>
                             </div>
                             <div class="col-md-4 mt-3">
                                 <label class="form-label">KVA Capacity</label>
-                                <input type="number" class="form-control" name="ind_kva" placeholder="e.g., 500">
+                                <input type="number" class="form-control" name="kva_capacity" id="kva_capacity" placeholder="e.g., 500">
                             </div>
                             <div class="col-md-4 mt-3">
                                 <label class="form-label">Water Supply</label>
-                                <select class="form-select form-control" name="ind_water">
-                                    <option value="">Select</option>
+                                <select class="form-select form-control" name="water_supply" id="water_supply">
+                                    <option value="">Select Water Type</option>
                                     <option value="corporation">Corporation</option>
                                     <option value="borewell">Borewell</option>
                                     <option value="both">Both</option>
@@ -181,16 +124,16 @@
                         </div>
                         <div class="row mt-3">
                             <div class="col-md-4">
-                                <label class="form-label">Crane/Heavy Machinery?</label>
-                                <select class="form-select form-control" name="ind_crane">
-                                    <option value="no">No</option>
-                                    <option value="yes">Yes</option>
+                                <label class="form-label">Crane/Heavy Machinery Supported?</label>
+                                <select class="form-select form-control" name="crane_heavy_machinery" id="crane_heavy_machinery">
+                                    <option value="False">No</option>
+                                    <option value="True">Yes</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Road Connectivity</label>
-                                <select class="form-select form-control" name="ind_road">
-                                    <option value="">Select</option>
+                                <select class="form-select form-control" name="road_connectivity" id="road_connectivity">
+                                    <option value="">Select Connectivity</option>
                                     <option value="highway">Near Highway</option>
                                     <option value="main">Main Road</option>
                                     <option value="internal">Internal Road</option>
@@ -198,9 +141,9 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Worker Housing Nearby?</label>
-                                <select class="form-select form-control" name="ind_housing">
-                                    <option value="no">No</option>
-                                    <option value="yes">Yes</option>
+                                <select class="form-select form-control" name="worker_housing_nearby" id="worker_housing_nearby">
+                                    <option value="False">No</option>
+                                    <option value="True">Yes</option>
                                 </select>
                             </div>
                         </div>
@@ -210,23 +153,24 @@
                     </div>
                 </div>
 
+                <!-- STEP 2: Pricing & Legal -->
                 <div class="step-content" id="step2">
                     <div class="section-header"><i class="fas fa-indian-rupee-sign"></i> Pricing & Legal</div>
                     <div class="section-body">
                         <div class="row">
                             <div class="col-md-6 mt-2">
                                 <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
-                                <input type="number" class="form-control" name="ind_price" id="ind_price" placeholder="e.g., 20000000" required>
+                                <input type="number" step="0.01" class="form-control" name="expected_price" id="expected_price" placeholder="e.g., 20000000" required>
                             </div>
                             <div class="col-md-6 mt-2">
                                 <label class="form-label">Brokerage</label>
                                 <select class="form-select form-control" name="brokerage" id="brokerageSelect">
-                                    <option value="No">No</option>
+                                    <option value="No">No Brokerage</option>
                                     <option value="Yes">Yes</option>
                                 </select>
                             </div>
                             <div class="col-md-4 mt-3" id="brokerageSection" style="display:none;">
-                                <label class="form-label">Percentage</label>
+                                <label class="form-label">Brokerage Percentage</label>
                                 <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
                                     <option value="1%">1%</option>
                                     <option value="2%">2%</option>
@@ -234,78 +178,84 @@
                                 </select>
                             </div>
                             <div class="col-md-4 mt-3" id="manualBrokerage" style="display:none;">
-                                <label class="form-label">Manual Brokerage</label>
-                                <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. 2.5%">
+                                <label class="form-label">Manual Brokerage Amount/Percent</label>
+                                <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. 2.5% or Flat ₹50k">
                             </div>
                         </div>
                         <div class="row mt-4">
                             <div class="col-md-6">
                                 <label class="form-label">Sanctioning Authority</label>
-                                <input type="text" class="form-control" name="ind_authority" placeholder="e.g., MIDC">
+                                <input type="text" class="form-control" name="sanctioning_authority" id="sanctioning_authority" placeholder="e.g., MIDC, GIDC">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Ownership <span class="required">*</span></label>
-                                <select class="form-control form-select" name="ind_ownership" id="ind_ownership" required>
+                                <label class="form-label">Ownership Type <span class="required">*</span></label>
+                                <select class="form-control form-select" name="ownership_type" id="ownership_type" required>
+                                    <option value="">Select Ownership</option>
                                     <option value="freehold">Freehold</option>
                                     <option value="leasehold">Leasehold</option>
+                                    <option value="co_operative">Co-operative Society</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="row mt-4">
+                        
+                        <div class="row mt-4 pt-3 border-top">
                             <div class="col-md-6">
                                 <label class="form-label">Loan on Property? <span class="required">*</span></label>
                                 <div class="radio-group">
-                                    <label class="radio-option"><input type="radio" name="ind_loan" value="no" checked required> No</label>
-                                    <label class="radio-option"><input type="radio" name="ind_loan" value="yes"> Yes</label>
+                                    <label class="radio-option"><input type="radio" name="has_loan" value="False" checked required> No</label>
+                                    <label class="radio-option"><input type="radio" name="has_loan" value="True"> Yes</label>
                                 </div>
-                                <div id="ind_loan_amount_section" style="display:none;" class="mt-2">
-                                    <input type="number" class="form-control" name="ind_loan_amount" placeholder="Loan Amount (₹)">
+                                <div id="loan_amount_section" style="display:none;" class="mt-2">
+                                    <input type="number" step="0.01" class="form-control" name="loan_amount" placeholder="Active Loan Amount (₹)">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Existing Tenants? <span class="required">*</span></label>
                                 <div class="radio-group">
-                                    <label class="radio-option"><input type="radio" name="ind_tenants" value="no" checked required> No</label>
-                                    <label class="radio-option"><input type="radio" name="ind_tenants" value="yes"> Yes</label>
+                                    <label class="radio-option"><input type="radio" name="existing_tenants" value="False" checked required> No</label>
+                                    <label class="radio-option"><input type="radio" name="existing_tenants" value="True"> Yes</label>
                                 </div>
-                                <div id="ind_tenant_details_section" style="display:none;" class="mt-2">
-                                    <textarea class="form-control" name="ind_tenant_details" placeholder="Tenant details"></textarea>
+                                <div id="tenant_details_section" style="display:none;" class="mt-2">
+                                    <textarea class="form-control" name="tenant_details" placeholder="Brief details about current tenants"></textarea>
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="row mt-3">
                             <div class="col-md-6">
                                 <label class="form-label">Legal Dispute? <span class="required">*</span></label>
                                 <div class="radio-group">
-                                    <label class="radio-option"><input type="radio" name="ind_dispute" value="no" checked required> No</label>
-                                    <label class="radio-option"><input type="radio" name="ind_dispute" value="yes"> Yes</label>
+                                    <label class="radio-option"><input type="radio" name="legal_dispute" value="False" checked required> No</label>
+                                    <label class="radio-option"><input type="radio" name="legal_dispute" value="True"> Yes</label>
                                 </div>
-                                <div id="ind_dispute_details_section" style="display:none;" class="mt-2">
-                                    <textarea class="form-control" name="ind_dispute_details" placeholder="Dispute info"></textarea>
+                                <div id="dispute_details_section" style="display:none;" class="mt-2">
+                                    <textarea class="form-control" name="dispute_details" placeholder="Describe the dispute"></textarea>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Tax Dues? <span class="required">*</span></label>
+                                <label class="form-label">Government Tax Dues? <span class="required">*</span></label>
                                 <div class="radio-group">
-                                    <label class="radio-option"><input type="radio" name="ind_tax_due" value="no" checked required> No</label>
-                                    <label class="radio-option"><input type="radio" name="ind_tax_due" value="yes"> Yes</label>
+                                    <label class="radio-option"><input type="radio" name="tax_due" value="False" checked required> No</label>
+                                    <label class="radio-option"><input type="radio" name="tax_due" value="True"> Yes</label>
                                 </div>
-                                <div id="ind_tax_amount_section" style="display:none;" class="mt-2">
-                                    <input type="number" class="form-control" name="ind_tax_amount" placeholder="Pending Amount (₹)">
+                                <div id="tax_amount_section" style="display:none;" class="mt-2">
+                                    <input type="number" step="0.01" class="form-control" name="tax_amount" placeholder="Pending Tax Amount (₹)">
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="row mt-3">
                             <div class="col-md-6">
-                                <label class="form-label">Tax Clearance Available?</label>
+                                <label class="form-label">Tax Clearance Certificate Available?</label>
                                 <div class="radio-group">
-                                    <label class="radio-option"><input type="radio" name="ind_tax_cert" value="no" checked> No</label>
-                                    <label class="radio-option"><input type="radio" name="ind_tax_cert" value="yes"> Yes</label>
+                                    <label class="radio-option"><input type="radio" name="tax_clearance_cert" value="False" checked> No</label>
+                                    <label class="radio-option"><input type="radio" name="tax_clearance_cert" value="True"> Yes</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Description <span class="required">*</span></label>
-                                <textarea class="form-control" name="resale_industrial_desc" id="resale_industrial_desc" required></textarea>
+                                <label class="form-label">Property Description <span class="required">*</span></label>
+                                <!-- ID is needed for CKEditor binding, name is mapped to model -->
+                                <textarea class="form-control" name="property_description" id="property_description" required></textarea>
                             </div>
                         </div>
                     </div>
@@ -315,23 +265,29 @@
                     </div>
                 </div>
 
+                <!-- STEP 3: Media -->
                 <div class="step-content" id="step3">
                     <div class="section-header"><i class="fas fa-file-contract"></i> Media & Compliance</div>
                     <div class="section-body">
+                        <label class="form-label">Property Images <span class="required">*</span></label>
                         <div class="image-upload-area p-5 text-center" style="border: 2px dashed #cbd5e0; cursor: pointer;" id="uploadArea">
                             <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
                             <i class="fas fa-images fa-3x mb-2" style="color: #667eea;"></i>
-                            <p>Upload Images (Max 10)</p>
+                            <p class="mb-1" style="font-weight: 600;">Click or Drag Images Here</p>
+                            <p class="text-danger mb-0" style="font-size: 0.85rem; font-weight: 600;">Note: Minimum 1, Maximum 10 images.</p>
                         </div>
                         <div class="image-preview" id="imagePreview"></div>
-                        <div class="row mt-4">
+                        
+                        <div class="row mt-4 pt-3 border-top">
                             <div class="col-md-6">
-                                <label class="form-label">Compliance Documents <span class="required">*</span></label>
-                                <input type="file" class="form-control" name="ind_compliance" required>
+                                <label class="form-label">Compliance Documents (PDF)</label>
+                                <input type="file" class="form-control" name="compliance_docs" accept=".pdf">
+                                <small class="text-muted">Upload NOC, Clearances, or Approvals</small>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Social Media Video <span class="required">*</span></label>
-                                <input type="file" class="form-control" name="ind_video" required>
+                                <label class="form-label">Property Video (MP4)</label>
+                                <input type="file" class="form-control" name="social_video" accept="video/*">
+                                <small class="text-muted">Short walkthrough video of the factory/land</small>
                             </div>
                         </div>
                     </div>
@@ -341,39 +297,48 @@
                     </div>
                 </div>
 
+                <!-- STEP 4: Location -->
                 <div class="step-content" id="step4">
                     <div class="section-header"><i class="fas fa-address-card"></i> Location & Contact</div>
                     <div class="section-body">
                         <div class="row">
-                            <div class="col-md-6"><label class="form-label">City <span class="required">*</span></label><input type="text" class="form-control" name="ind_city" id="ind_city" required></div>
-                            <div class="col-md-6"><label class="form-label">Locality <span class="required">*</span></label><input type="text" class="form-control" name="ind_locality" id="ind_locality" required></div>
+                            <div class="col-md-6"><label class="form-label">City <span class="required">*</span></label><input type="text" class="form-control" name="city" id="city" placeholder="e.g., Pune" required></div>
+                            <div class="col-md-6"><label class="form-label">Locality / MIDC Area <span class="required">*</span></label><input type="text" class="form-control" name="locality" id="locality" placeholder="e.g., Bhosari MIDC" required></div>
                         </div>
-                        <div class="mt-3"><label class="form-label">Complete Address <span class="required">*</span></label><textarea class="form-control" name="ind_address" required></textarea></div>
-                        <div class="row mt-3">
-                            <div class="col-md-4"><label class="form-label">Owner Name <span class="required">*</span></label><input type="text" class="form-control" name="ind_owner_name" required></div>
-                            <div class="col-md-4"><label class="form-label">Owner Contact <span class="required">*</span></label><input type="tel" class="form-control" name="ind_owner_contact" pattern="[0-9]{10}" required></div>
-                            <div class="col-md-4"><label class="form-label">Owner Email <span class="required">*</span></label><input type="email" class="form-control" name="ind_owner_email" required></div>
+                        <div class="mt-3"><label class="form-label">Complete Address <span class="required">*</span></label><textarea class="form-control" name="complete_address" id="complete_address" placeholder="Full property address" required></textarea></div>
+                        
+                        <div class="row mt-4 pt-3 border-top">
+                            <div class="col-md-4"><label class="form-label">Owner Name <span class="required">*</span></label><input type="text" class="form-control" name="owner_name" placeholder="Full Name" required></div>
+                            <div class="col-md-4"><label class="form-label">Owner Contact <span class="required">*</span></label><input type="tel" class="form-control" name="owner_contact" placeholder="10-digit number" pattern="[0-9]{10}" required></div>
+                            <div class="col-md-4"><label class="form-label">Owner Email</label><input type="email" class="form-control" name="owner_email" placeholder="owner@email.com"></div>
                         </div>
+                        
                         <div class="mt-3">
                             <label class="form-label">Residency Status <span class="required">*</span></label>
                             <div class="radio-group">
-                                <label class="radio-option"><input type="radio" name="ind_residency" value="resident" checked required> Resident</label>
-                                <label class="radio-option"><input type="radio" name="ind_residency" value="nri"> NRI</label>
+                                <label class="radio-option"><input type="radio" name="residency_status" value="resident" checked required> Resident</label>
+                                <label class="radio-option"><input type="radio" name="residency_status" value="nri"> NRI</label>
                             </div>
                         </div>
-                        <div class="row mt-4 pt-3 border-top">
-                            <div class="col-md-4"><label class="form-label">Uploaded By</label><input type="text" class="form-control" value="{{ admin_obj.name }}" disabled></div>
-                            <div class="col-md-4"><label class="form-label">Role</label><input type="text" class="form-control" value="{{ admin_obj.role }}" disabled></div>
+                        
+                        <!-- System Data (Visual only, handled securely in backend session) -->
+                        <div class="row mt-4 pt-3 border-top" style="background: rgba(0,0,0,0.02); border-radius: 8px; padding: 15px;">
+                            <div class="col-md-3"><label class="form-label">Uploaded By</label><input type="text" class="form-control form-control-sm" value="{{ admin_obj.name }}" disabled></div>
+                            <div class="col-md-3"><label class="form-label">Role</label><input type="text" class="form-control form-control-sm" value="{{ admin_obj.role }}" disabled></div>
+                            <div class="col-md-3"><label class="form-label">Email </label><input type="text" class="form-control form-control-sm" value="{{ admin_obj.email }}" disabled></div>
+                            <div class="col-md-3"><label class="form-label">Phone</label><input type="text" class="form-control form-control-sm" value="{{ admin_obj.phone }}" disabled></div>
                         </div>
                     </div>
+                    
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-secondary px-4" onclick="goToStep(3)">Back</button>
-                        <button type="submit" class="btn btn-success px-5">Submit Industrial Listing <i class="fas fa-save ml-2"></i></button>
+                        <button type="submit" class="btn btn-success px-5" id="submitBtn" style="background: var(--success-gradient); border: none;">Submit Industrial Listing <i class="fas fa-save ml-2"></i></button>
                     </div>
                 </div>
             </form>
         </div>
 
+        <!-- Sidebar Preview -->
         <div class="preview-sidebar">
             <div class="preview-card">
                 <div class="preview-mock">
@@ -381,9 +346,9 @@
                         <div class="preview-price" id="p_price">₹ 0</div>
                     </div>
                     <div class="p-3">
-                        <div id="p_type" style="font-weight: 800; font-size: 1rem;">Property Type</div>
-                        <div style="font-size: 0.75rem; color: #666; margin-top: 5px;"><i class="fas fa-map-marker-alt" style="color: #667eea;"></i> <span id="p_loc">Location</span></div>
-                        <div class="mt-2" style="font-weight: 700; font-size: 0.85rem;" id="p_area">0 sq.ft</div>
+                        <div id="p_type" style="font-weight: 800; font-size: 1rem; color: #1a252f;">Property Type</div>
+                        <div style="font-size: 0.75rem; color: #64748b; margin-top: 5px;"><i class="fas fa-map-marker-alt" style="color: #667eea;"></i> <span id="p_loc">Location</span></div>
+                        <div class="mt-2" style="font-weight: 700; font-size: 0.85rem; color: #2d3748;" id="p_area">0 sq.ft/acres</div>
                     </div>
                 </div>
             </div>
@@ -414,10 +379,10 @@
 <script>
     let currentStep = 1;
 
-    // CKEditor
+    // CKEditor Initialization (Mapping to 'property_description')
     window.onload = function() {
-        if (CKEDITOR.instances.resale_industrial_desc) CKEDITOR.instances.resale_industrial_desc.destroy();
-        CKEDITOR.replace('resale_industrial_desc');
+        if (CKEDITOR.instances.property_description) CKEDITOR.instances.property_description.destroy();
+        CKEDITOR.replace('property_description');
     };
 
     function goToStep(n) {
@@ -429,7 +394,7 @@
             const sc = document.getElementById('sc' + i);
             const line = document.getElementById('line' + i);
             if (i < n) {
-                sc.className = 'step-circle done'; sc.innerHTML = '✓';
+                sc.className = 'step-circle done'; sc.innerHTML = '<i class="fas fa-check"></i>';
                 if(line) line.classList.add('done');
             } else if (i === n) {
                 sc.className = 'step-circle active'; sc.innerHTML = i;
@@ -450,27 +415,27 @@
         requiredFields.forEach(f => {
             if (f.type === 'radio') {
                 if (!stepEl.querySelector(`input[name="${f.name}"]:checked`)) missing.push(f.name);
-            } else if (!f.value.trim()) {
+            } else if (!f.value.trim() && f.name !== 'property_description') { 
                 const label = f.previousElementSibling?.innerText || "Field";
                 missing.push(label.replace('*', '').trim());
             }
         });
 
         if (missing.length > 0) {
-            Swal.fire({ icon: 'warning', title: 'Missing Info', html: `Please check: <br><b>${missing.join(', ')}</b>` });
+            Swal.fire({ icon: 'warning', title: 'Missing Info', html: `Please check: <br><b>${missing.join(', ')}</b>`, confirmButtonColor: '#667eea' });
             return false;
         }
         return true;
     }
 
     function updatePreview() {
-        const type = document.getElementById('industrial_property_type');
-        const area = document.getElementById('ind_area').value;
-        const price = document.getElementById('ind_price').value;
-        const city = document.getElementById('ind_city').value;
-        const loc = document.getElementById('ind_locality').value;
+        const type = document.getElementById('property_type');
+        const area = document.getElementById('land_area').value;
+        const price = document.getElementById('expected_price').value;
+        const city = document.getElementById('city').value;
+        const loc = document.getElementById('locality').value;
 
-        document.getElementById('p_type').innerText = type.options[type.selectedIndex].text || "Property Type";
+        document.getElementById('p_type').innerText = type.options[type.selectedIndex]?.text || "Property Type";
         document.getElementById('p_area').innerText = (area || "0") + " sq.ft/acres";
         document.getElementById('p_price').innerText = price ? '₹ ' + parseInt(price).toLocaleString('en-IN') : '₹ 0';
         document.getElementById('p_loc').innerText = (city || loc) ? `${city}, ${loc}` : "Location";
@@ -490,36 +455,129 @@
 
     document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', updatePreview));
 
-    // Conditional Fields
-    document.querySelectorAll('input[name="ind_loan"]').forEach(r => r.onchange = (e) => 
-        document.getElementById('ind_loan_amount_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
-    document.querySelectorAll('input[name="ind_tenants"]').forEach(r => r.onchange = (e) => 
-        document.getElementById('ind_tenant_details_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
-    document.querySelectorAll('input[name="ind_dispute"]').forEach(r => r.onchange = (e) => 
-        document.getElementById('ind_dispute_details_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
-    document.querySelectorAll('input[name="ind_tax_due"]').forEach(r => r.onchange = (e) => 
-        document.getElementById('ind_tax_amount_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
+    // Conditional Logic for Form Layout (Updated to new name attributes)
+    document.querySelectorAll('input[name="has_loan"]').forEach(r => r.onchange = (e) => 
+        document.getElementById('loan_amount_section').style.display = e.target.value === 'True' ? 'block' : 'none');
+        
+    document.querySelectorAll('input[name="existing_tenants"]').forEach(r => r.onchange = (e) => 
+        document.getElementById('tenant_details_section').style.display = e.target.value === 'True' ? 'block' : 'none');
+        
+    document.querySelectorAll('input[name="legal_dispute"]').forEach(r => r.onchange = (e) => 
+        document.getElementById('dispute_details_section').style.display = e.target.value === 'True' ? 'block' : 'none');
+        
+    document.querySelectorAll('input[name="tax_due"]').forEach(r => r.onchange = (e) => 
+        document.getElementById('tax_amount_section').style.display = e.target.value === 'True' ? 'block' : 'none');
 
+    // Brokerage toggles
     document.getElementById("brokerageSelect").onchange = function() {
         document.getElementById('brokerageSection').style.display = this.value === "Yes" ? "block" : "none";
     };
+    document.getElementById("brokeragePercentage").onchange = function() {
+        document.getElementById('manualBrokerage').style.display = this.value === "Manual" ? "block" : "none";
+    };
 
-    // Images
+    // Multi-Image Handler
     const uploadArea = document.getElementById('uploadArea');
     const imageInput = document.getElementById('imageInput');
+    let selectedFiles = [];
+
     uploadArea.onclick = () => imageInput.click();
-    imageInput.onchange = () => {
+    
+    imageInput.onchange = (e) => {
         const preview = document.getElementById('imagePreview');
         preview.innerHTML = '';
-        Array.from(imageInput.files).forEach(file => {
+        selectedFiles = Array.from(e.target.files);
+        
+        selectedFiles.forEach((file, index) => {
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = (ev) => {
                 const div = document.createElement('div');
                 div.className = 'preview-item';
-                div.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
+                div.innerHTML = `
+                    <img src="${ev.target.result}">
+                    <button type="button" onclick="removeImage(${index})"><i class="fas fa-times"></i></button>
+                `;
                 preview.appendChild(div);
             };
             reader.readAsDataURL(file);
         });
     };
+
+    function removeImage(index) {
+        selectedFiles.splice(index, 1);
+        const dt = new DataTransfer();
+        selectedFiles.forEach(f => dt.items.add(f));
+        imageInput.files = dt.files;
+        // Trigger onchange to rebuild preview
+        imageInput.dispatchEvent(new Event('change'));
+    }
+
+    // FORM SUBMISSION AJAX & SWEETALERT
+    document.getElementById('industrialForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Pass CKEditor data to textarea
+        for (instance in CKEDITOR.instances) {
+            CKEDITOR.instances[instance].updateElement();
+        }
+
+        // Validate final step
+        if (!validateStep(4)) return;
+
+        // Image Constraints Validation
+        const imageFiles = document.getElementById('imageInput').files;
+        if (imageFiles.length < 1) {
+            Swal.fire('Images Required', 'Please upload at least 1 property image.', 'warning');
+            goToStep(3);
+            return;
+        }
+        if (imageFiles.length > 10) {
+            Swal.fire('Too many images', 'You can only upload a maximum of 10 images.', 'warning');
+            goToStep(3);
+            return;
+        }
+
+        // Loading State
+        const submitBtn = document.getElementById('submitBtn');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        submitBtn.disabled = true;
+
+        let formData = new FormData(this);
+        let actionUrl = this.getAttribute('action');
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Listed Successfully!',
+                    text: data.message,
+                    confirmButtonColor: '#38ef7d',
+                    timer: 3000
+                }).then(() => {
+                    document.getElementById('industrialForm').reset();
+                    document.getElementById('imagePreview').innerHTML = '';
+                    CKEDITOR.instances.property_description.setData('');
+                    updatePreview();
+                    goToStep(1);
+                });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: data.message, confirmButtonColor: '#e74c3c' });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', 'Server error occurred.', 'error');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        });
+    });
 </script>

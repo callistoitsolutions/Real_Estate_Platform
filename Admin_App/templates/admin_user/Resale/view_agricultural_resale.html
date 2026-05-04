@@ -1,0 +1,365 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<style>
+  :root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --danger-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+    --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    --topbar-height: 70px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; min-height: 100vh; }
+
+  .page-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-bottom: 50px;
+  }
+  
+  .form-container {
+    background: white;
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    margin-top: 20px;
+  }
+
+  .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  .btn-back {
+    background: #f8f9fa; color: #2d3748; padding: 10px 20px; border-radius: 12px;
+    border: none; font-weight: 600; text-decoration: none; display: inline-flex;
+    align-items: center; gap: 8px; transition: all 0.3s ease;
+  }
+  .btn-back:hover { background: var(--dark-gradient); color: white; transform: translateY(-2px); }
+
+  .btn-edit {
+    background: var(--primary-gradient); color: white; padding: 10px 20px; border-radius: 12px;
+    border: none; font-weight: 600; text-decoration: none; display: inline-flex;
+    align-items: center; gap: 8px; transition: all 0.3s ease;
+  }
+  .btn-edit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4); }
+
+  .form-section { margin-bottom: 30px; }
+  .section-header {
+    background: var(--primary-gradient); color: white; padding: 15px 20px;
+    border-radius: 12px 12px 0 0; font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;
+  }
+  .section-body {
+    background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none;
+  }
+
+  /* Read-Only Text Styles */
+  .detail-group { margin-bottom: 20px; }
+  .detail-label {
+    font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;
+  }
+  .detail-value {
+    font-size: 1.05rem; color: #0f172a; font-weight: 500; background: white; padding: 10px 15px; border-radius: 8px; border: 1px solid #e2e8f0;
+  }
+  
+  .badge-status {
+    padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: inline-block;
+  }
+
+  .gallery-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;
+  }
+  .gallery-img {
+    width: 100%; height: 150px; object-fit: cover; border-radius: 10px; border: 2px solid #e2e8f0; transition: transform 0.3s ease;
+  }
+  .gallery-img:hover { transform: scale(1.05); border-color: #667eea; cursor: pointer; }
+
+  .doc-btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px;
+    font-weight: 600; text-decoration: none; transition: all 0.3s ease;
+  }
+  .doc-pdf { background: #e0f2fe; color: #0369a1; }
+  .doc-pdf:hover { background: #bae6fd; color: #0c4a6e; }
+  .doc-vid { background: #fce7f3; color: #be185d; }
+  .doc-vid:hover { background: #fbcfe8; color: #831843; }
+</style>
+
+<div class="main-content">
+  <div class="page-wrapper">
+    
+    <div class="page-header" style="background: var(--primary-gradient); padding: 30px; border-radius: 20px; color: white;">
+      <h1 style="font-weight: 700; font-size: 1.8rem; margin-bottom: 10px;">
+        <i class="fas fa-eye"></i> Property Details
+      </h1>
+      <p style="opacity: 0.9;">Viewing details for: {{ property.title|default:property.village }}</p>
+    </div>
+
+    <div class="form-container">
+      <div class="form-header">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">
+          ₹{{ property.expected_price|floatformat:"0"|default:"0" }}
+        </h2>
+        <div style="display:flex; gap:10px;">
+          <a href="{% url 'agricultural_resale_list' %}" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+          <a href="{% url 'edit_agricultural_property' property.id %}" class="btn-edit"><i class="fas fa-edit"></i> Edit</a>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header"><i class="fas fa-info-circle"></i> Basic Information & Location</div>
+        <div class="section-body">
+          <div class="row">
+            <div class="col-md-12 detail-group">
+              <div class="detail-label">Property Title</div>
+              <div class="detail-value">{{ property.title|default:"-" }}</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 detail-group">
+              <div class="detail-label">Property Type</div>
+              <div class="detail-value">
+                <span class="badge-status" style="background:#dcfce7; color:#166534;">
+                  {{ property.get_agriculture_property_type_display }}
+                </span>
+              </div>
+            </div>
+            <div class="col-md-4 detail-group">
+              <div class="detail-label">Land Area (Acres)</div>
+              <div class="detail-value">{{ property.area|default:"-" }}</div>
+            </div>
+            <div class="col-md-4 detail-group">
+              <div class="detail-label">Ownership Type</div>
+              <div class="detail-value">{{ property.get_ownership_type_display|default:"-" }}</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">State</div>
+              <div class="detail-value">{{ property.state|default:"-" }}</div>
+            </div>
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">City</div>
+              <div class="detail-value">{{ property.city|default:"-" }}</div>
+            </div>
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">District</div>
+              <div class="detail-value">{{ property.district|default:"-" }}</div>
+            </div>
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">Taluka</div>
+              <div class="detail-value">{{ property.taluka|default:"-" }}</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 detail-group">
+              <div class="detail-label">Village & Full Address</div>
+              <div class="detail-value">{{ property.village|default:"-" }} — {{ property.property_address|default:"-" }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header"><i class="fas fa-leaf"></i> Land Specifics</div>
+        <div class="section-body">
+          <div class="row">
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">Soil Type</div>
+              <div class="detail-value">{{ property.get_soil_type_display|default:"-" }}</div>
+            </div>
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">Water Source</div>
+              <div class="detail-value">{{ property.get_water_source_display|default:"-" }}</div>
+            </div>
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">Irrigation Facility</div>
+              <div class="detail-value" style="color: {% if property.irrigation_facility == 'yes' %}#10b981{% else %}#e74c3c{% endif %}; font-weight:700;">
+                <i class="fas {% if property.irrigation_facility == 'yes' %}fa-check{% else %}fa-times{% endif %}"></i> {{ property.irrigation_facility|default:"-"|title }}
+              </div>
+            </div>
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">Fertility Status</div>
+              <div class="detail-value">{{ property.get_fertility_status_display|default:"-" }}</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 detail-group">
+              <div class="detail-label">Previous Crops</div>
+              <div class="detail-value">{{ property.previous_crops|default:"-" }}</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 detail-group">
+              <div class="detail-label">Property Description</div>
+              <div class="detail-value" style="white-space: pre-line;">{{ property.resale_agricultural_desc|safe|default:"-" }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header"><i class="fas fa-gavel"></i> Financial & Legal Details</div>
+        <div class="section-body">
+          
+          <div class="row border-bottom pb-3 mb-3">
+            <div class="col-md-4 detail-group mb-0">
+              <div class="detail-label">Brokerage Required?</div>
+              <div class="detail-value">{{ property.brokerage|default:"No" }}</div>
+            </div>
+            <div class="col-md-4 detail-group mb-0">
+              <div class="detail-label">Brokerage Percentage</div>
+              <div class="detail-value">
+                {% if property.brokerage_percentage == 'Manual' %}
+                  {{ property.manual_brokerage|default:"-" }}
+                {% else %}
+                  {{ property.brokerage_percentage|default:"-" }}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 detail-group">
+              <div class="detail-label">Any Loan on Property?</div>
+              <div class="detail-value">
+                <strong style="color: {% if property.agri_loan == 'yes' %}#e74c3c{% else %}#10b981{% endif %};">
+                  {{ property.agri_loan|default:"no"|title }}
+                </strong>
+                {% if property.agri_loan == 'yes' %}
+                  <span style="margin-left: 10px;">Amount: ₹{{ property.loan_amount|floatformat:"0" }}</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6 detail-group">
+              <div class="detail-label">Any Tenants / Lease?</div>
+              <div class="detail-value">
+                <strong style="color: {% if property.agri_tenants == 'yes' %}#f59e0b{% else %}#10b981{% endif %};">
+                  {{ property.agri_tenants|default:"no"|title }}
+                </strong>
+                {% if property.agri_tenants == 'yes' %}
+                  <div style="font-size:0.9rem; margin-top:5px; color:#475569;">{{ property.tenant_details }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 detail-group">
+              <div class="detail-label">Any Legal Dispute?</div>
+              <div class="detail-value">
+                <strong style="color: {% if property.agri_dispute == 'yes' %}#e74c3c{% else %}#10b981{% endif %};">
+                  {{ property.agri_dispute|default:"no"|title }}
+                </strong>
+                {% if property.agri_dispute == 'yes' %}
+                  <div style="font-size:0.9rem; margin-top:5px; color:#475569;">{{ property.dispute_details }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6 detail-group">
+              <div class="detail-label">Any Pending Tax?</div>
+              <div class="detail-value">
+                <strong style="color: {% if property.agri_tax_due == 'yes' %}#e74c3c{% else %}#10b981{% endif %};">
+                  {{ property.agri_tax_due|default:"no"|title }}
+                </strong>
+                {% if property.agri_tax_due == 'yes' %}
+                  <span style="margin-left: 10px;">Amount: ₹{{ property.pending_tax_amount|floatformat:"0" }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header"><i class="fas fa-user-tie"></i> Owner Profile & System Info</div>
+        <div class="section-body">
+          <div class="row">
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">Owner Name</div>
+              <div class="detail-value">{{ property.owner_name|default:"-" }}</div>
+            </div>
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">Contact Number</div>
+              <div class="detail-value">{{ property.owner_contact|default:"-" }}</div>
+            </div>
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">Email Address</div>
+              <div class="detail-value">{{ property.owner_email|default:"-" }}</div>
+            </div>
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">Residency</div>
+              <div class="detail-value">{{ property.get_comm_residency_display|default:"-" }}</div>
+            </div>
+          </div>
+
+          <div class="row mt-3 border-top pt-4">
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">Uploaded By</div>
+              <div class="detail-value">{{ property.uploaded_by_name|default:"System Admin" }}</div>
+            </div>
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">Uploader Role</div>
+              <div class="detail-value">{{ property.uploaded_by_role|default:"-" }}</div>
+            </div>
+            <div class="col-md-3 detail-group">
+              <div class="detail-label">Created On</div>
+              <div class="detail-value">{{ property.created_at|date:"F d, Y h:i A" }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-header"><i class="fas fa-images"></i> Documents & Media Gallery</div>
+        <div class="section-body">
+          
+          <div class="row mb-4">
+            <div class="col-md-12" style="display:flex; gap:15px;">
+              {% if property.encumbrance_cert %}
+                <a href="{{ property.encumbrance_cert.url }}" target="_blank" class="doc-btn doc-pdf">
+                  <i class="fas fa-file-pdf"></i> View Encumbrance Certificate
+                </a>
+              {% else %}
+                <div class="doc-btn" style="background:#f1f5f9; color:#94a3b8;"><i class="fas fa-file-pdf"></i> No Certificate</div>
+              {% endif %}
+
+              {% if property.property_video %}
+                <a href="{{ property.property_video.url }}" target="_blank" class="doc-btn doc-vid">
+                  <i class="fas fa-video"></i> View Property Video
+                </a>
+              {% else %}
+                <div class="doc-btn" style="background:#f1f5f9; color:#94a3b8;"><i class="fas fa-video"></i> No Video</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="detail-label">Property Images ({{ property.images.count }})</div>
+          {% if property.images.all %}
+            <div class="gallery-grid">
+              {% for img in property.images.all %}
+                <a href="{{ img.image.url }}" target="_blank">
+                  <img src="{{ img.image.url }}" class="gallery-img" alt="Property Image {{ forloop.counter }}">
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div style="padding: 30px; background: white; border: 2px dashed #cbd5e0; border-radius: 12px; text-align: center; color: #94a3b8;">
+              <i class="fas fa-image" style="font-size: 3rem; margin-bottom: 10px;"></i>
+              <p>No images uploaded for this property.</p>
+            </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,0 +1,1144 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --danger-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+        --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 80px;
+        --topbar-height: 70px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; min-height: 100vh; }
+
+    /* Layout & Basic Styles */
+    .main-wrapper { transition: all 0.3s ease; width: 100%; }
+    .main-content { margin-left: var(--sidebar-width); margin-top: var(--topbar-height); padding: 30px; min-height: calc(100vh - var(--topbar-height)); transition: all 0.3s ease; }
+    .sidebar.collapsed~.main-wrapper .main-content { margin-left: var(--sidebar-collapsed-width); }
+    .page-wrapper { display: grid; grid-template-columns: 1fr 350px; gap: 30px; max-width: 1600px; margin: 0 auto; }
+    .page-header { background: var(--primary-gradient); border-radius: 20px; padding: 30px; color: white; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); margin-bottom: 30px; position: relative; overflow: hidden; grid-column: 1 / -1; }
+    .page-header::before { content: ''; position: absolute; top: -50%; right: -10%; width: 300px; height: 300px; background: rgba(255, 255, 255, 0.1); border-radius: 50%; }
+    .page-header-content { position: relative; z-index: 1; }
+    .page-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+    .page-subtitle { font-size: 0.95rem; opacity: 0.9; }
+
+    /* STEPPER STYLES */
+    .stepper-container { grid-column: 1 / -1; background: white; border-radius: 20px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); }
+    .stepper { display: flex; align-items: center; justify-content: space-between; position: relative; }
+    .step-item { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+    .step-circle { width: 50px; height: 50px; border-radius: 50%; background: #e9ecef; color: #adb5bd; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; border: 3px solid #e9ecef; transition: all 0.3s ease; position: relative; z-index: 2; }
+    .step-circle.active { background: var(--primary-gradient); color: white; border-color: #667eea; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
+    .step-circle.done { background: var(--success-gradient); color: white; border-color: #11998e; }
+    .step-label { margin-top: 10px; font-size: 0.85rem; font-weight: 600; color: #adb5bd; text-align: center; transition: all 0.3s ease; }
+    .step-label.active { color: #667eea; }
+    .step-label.done { color: #11998e; }
+    .step-line { position: absolute; top: 25px; left: 50%; right: -50%; height: 3px; background: #e9ecef; z-index: 1; transition: all 0.3s ease; }
+    .step-item:last-child .step-line { display: none; }
+    .step-line.done { background: var(--success-gradient); }
+
+    /* Form Styles */
+    .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
+    .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
+    .form-title { font-size: 1.5rem; font-weight: 700; color: #2d3748; display: flex; align-items: center; gap: 12px; }
+    .form-title i { width: 45px; height: 45px; background: var(--primary-gradient); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+    .btn-back { background: #f8f9fa; color: #2d3748; padding: 10px 20px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+    .btn-back:hover { background: var(--dark-gradient); color: white; transform: translateY(-2px); }
+
+    .step-content { display: none; }
+    .step-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .form-section { margin-bottom: 30px; }
+    .section-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+    .section-body { background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; }
+    .form-label { font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+    .form-label .required { color: #e74c3c; font-size: 1rem; }
+    .form-control { border: 2px solid #e9ecef; border-radius: 12px; padding: 12px 15px; font-size: 0.95rem; transition: all 0.3s ease; }
+    .form-control:focus { border-color: #667eea; box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1); outline: none; }
+    select.form-control { appearance: none; background: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 0.75rem center; background-size: 16px; background-color: white; padding-right: 2rem; }
+    textarea.form-control { min-height: 120px; resize: vertical; }
+
+    /* Form Buttons */
+    .step-nav { display: flex; justify-content: space-between; margin-top: 30px; gap: 15px; }
+    .btn-step { padding: 12px 35px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-prev { background: #f8f9fa; color: #2d3748; border: 2px solid #e9ecef; }
+    .btn-prev:hover { background: #e9ecef; }
+    .btn-next { background: var(--primary-gradient); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
+    .btn-next:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
+    .form-footer { margin-top: 30px; padding-top: 25px; border-top: 2px solid #f0f0f0; display: flex; gap: 15px; justify-content: flex-end; }
+    .btn-submit { background: var(--primary-gradient); color: white; padding: 12px 35px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); font-size: 1rem; }
+    .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
+
+    /* Checkboxes & Radios */
+    .checkbox-group, .radio-group { display: flex; flex-wrap: wrap; gap: 15px; }
+    .checkbox-item, .radio-item { flex: 1; min-width: 150px; }
+    .form-check { padding: 15px; background: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef; }
+    .form-check-input { width: 20px; height: 20px; border: 2px solid #cbd5e0; border-radius: 6px; cursor: pointer; }
+    .form-check-input:checked { background-color: #667eea; border-color: #667eea; }
+    .form-check-label { font-weight: 600; color: #2d3748; margin-left: 10px; cursor: pointer; }
+    .radio-option { display: inline-flex; align-items: center; gap: 8px; padding: 10px 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; }
+    .radio-option:hover { border-color: #667eea; background: #f0f4ff; }
+    .conditional-section { animation: slideDown 0.3s ease; }
+    @keyframes slideDown { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 500px; } }
+
+    /* Image Uploads */
+    .image-upload-area { border: 3px dashed #cbd5e0; border-radius: 15px; padding: 40px; text-align: center; background: #f8f9fa; transition: all 0.3s ease; cursor: pointer; position: relative; overflow: hidden; }
+    .image-upload-area:hover { border-color: #667eea; background: #f0f4ff; transform: scale(1.02); }
+    .image-upload-area.dragover { border-color: #667eea; background: #e6f0ff; }
+    .upload-text { font-size: 1.1rem; color: #4a5568; font-weight: 600; margin-bottom: 8px; }
+    .upload-subtext { font-size: 0.9rem; color: #718096; }
+    .image-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
+    .preview-item { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); aspect-ratio: 1; }
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .remove-image { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; background: #e74c3c; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; }
+    .remove-image:hover { background: #c0392b; transform: scale(1.1); }
+
+    /* PREVIEW SIDEBAR */
+    .preview-sidebar { position: sticky; top: calc(var(--topbar-height) + 30px); height: fit-content; display: flex; flex-direction: column; gap: 20px; }
+    .preview-card { background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); border-radius: 16px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+    .preview-header { font-size: 0.8rem; font-weight: 700; color: rgba(255, 255, 255, 0.6); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+    .preview-mock { background: white; border-radius: 12px; overflow: hidden; }
+    .preview-image { height: 140px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
+    .preview-badges { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; }
+    .preview-badge { font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; background: rgba(255, 255, 255, 0.95); color: #0f172a; }
+    .preview-price { position: absolute; bottom: 10px; left: 10px; background: rgba(15, 23, 42, 0.9); color: white; font-size: 0.9rem; font-weight: 900; padding: 5px 12px; border-radius: 8px; }
+    .preview-body { padding: 15px; }
+    .preview-title { font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 5px; }
+    .preview-location { font-size: 0.75rem; color: #64748b; margin-bottom: 10px; }
+    .preview-specs { display: flex; gap: 12px; font-size: 0.75rem; color: #475569; font-weight: 600; }
+
+    .checklist-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); }
+    .checklist-title { font-size: 0.9rem; font-weight: 800; color: #2d3748; margin-bottom: 15px; }
+    .checklist-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 0.85rem; color: #718096; }
+    .checklist-item i { font-size: 0.8rem; width: 18px; }
+    .checklist-item.done { color: #11998e; }
+    .checklist-item.done i { color: #11998e; }
+
+    .info-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); }
+    .info-title { font-size: 0.85rem; font-weight: 800; color: #2d3748; margin-bottom: 12px; }
+    .info-item { font-size: 0.8rem; color: #475569; padding: 6px 0; display: flex; align-items: flex-start; gap: 8px; }
+    .info-item i { color: #667eea; font-size: 0.75rem; margin-top: 2px; flex-shrink: 0; }
+
+    @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } }
+    @media (max-width: 768px) { .step-circle { width: 40px; height: 40px; font-size: 0.9rem; } .step-label { display: none; } }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<div class="main-content">
+    <div class="page-wrapper">
+        <div class="page-header">
+            <div class="page-header-content">
+                <h1 class="page-title">📝 Edit Property: {{ prop.title }}</h1>
+                <p class="page-subtitle">Update your listing details below</p>
+            </div>
+        </div>
+
+        <div class="stepper-container">
+            <div class="stepper" id="stepper">
+                <div class="step-item">
+                    <div class="step-circle active" id="sc1">1</div>
+                    <div class="step-label active" id="sl1">Basic Info & Config</div>
+                    <div class="step-line" id="line1"></div>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle" id="sc2">2</div>
+                    <div class="step-label" id="sl2">Legal & Pricing</div>
+                    <div class="step-line" id="line2"></div>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle" id="sc3">3</div>
+                    <div class="step-label" id="sl3">Amenities & Location</div>
+                    <div class="step-line" id="line3"></div>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle" id="sc4">4</div>
+                    <div class="step-label" id="sl4">Photos & Publish</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="form-header">
+                <div class="form-title">
+                    <i class="fas fa-edit"></i> Edit residential property
+                </div>
+                <button class="btn-back" onclick="history.back();">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </button>
+            </div>
+
+            <form method="POST" action="{% url 'resale_residential_edit' prop.id %}" enctype="multipart/form-data" id="propertyForm">
+                {% csrf_token %}
+
+                <div class="step-content active" id="step1">
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-info-circle"></i> Basic Information</div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="form-group mt-2" hidden>
+                                    <label class="form-label">Property Title <span class="required">*</span></label>
+                                    <input type="text" class="form-control" id="res_title" name="title" value="{{ prop.title }}">
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Property Type <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="res_property_type" name="property_type" required>
+                                            <option value="">Select property type</option>
+                                            <option value="apartment" {% if prop.property_type == 'apartment' %}selected{% endif %}>Apartment</option>
+                                            <option value="house" {% if prop.property_type == 'house' %}selected{% endif %}>Independent House/Villa</option>
+                                            <option value="floor" {% if prop.property_type == 'floor' %}selected{% endif %}>Independent Floor</option>
+                                            <option value="plot" {% if prop.property_type == 'plot' %}selected{% endif %}>Plot/Land</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Zone <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="res_zone" name="zone" required>
+                                            <option value="">Select zone</option>
+                                            <option value="north" {% if prop.zone == 'north' %}selected{% endif %}>North Zone</option>
+                                            <option value="south" {% if prop.zone == 'south' %}selected{% endif %}>South Zone</option>
+                                            <option value="east" {% if prop.zone == 'east' %}selected{% endif %}>East Zone</option>
+                                            <option value="west" {% if prop.zone == 'west' %}selected{% endif %}>West Zone</option>
+                                            <option value="central" {% if prop.zone == 'central' %}selected{% endif %}>Central Zone</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Society Type <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="res_society_type" name="society_type" required>
+                                            <option value="">Select society type</option>
+                                            <option value="gated" {% if prop.society_type == 'gated' %}selected{% endif %}>Gated Community</option>
+                                            <option value="open" {% if prop.society_type == 'open' %}selected{% endif %}>Open Society</option>
+                                            <option value="cooperative" {% if prop.society_type == 'cooperative' %}selected{% endif %}>Co-operative Housing</option>
+                                            <option value="apartment" {% if prop.society_type == 'apartment' %}selected{% endif %}>Apartment Complex</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Water Type <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="res_water_type" name="water_type" required>
+                                            <option value="">Select water type</option>
+                                            <option value="municipal" {% if prop.water_type == 'municipal' %}selected{% endif %}>Municipal Corporation</option>
+                                            <option value="borewell" {% if prop.water_type == 'borewell' %}selected{% endif %}>Borewell</option>
+                                            <option value="both" {% if prop.water_type == 'both' %}selected{% endif %}>Both</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Furnishing Type <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="res_furnishing" name="furnishing_type" required>
+                                            <option value="">Select furnishing</option>
+                                            <option value="unfurnished" {% if prop.furnishing_type == 'unfurnished' %}selected{% endif %}>Unfurnished</option>
+                                            <option value="semi" {% if prop.furnishing_type == 'semi' %}selected{% endif %}>Semi-Furnished</option>
+                                            <option value="fully" {% if prop.furnishing_type == 'fully' %}selected{% endif %}>Fully Furnished</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Age of Property <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="res_age" name="age_of_property" required>
+                                            <option value="">Select age</option>
+                                            <option value="0-1" {% if prop.age_of_property == '0-1' %}selected{% endif %}>0-1 Year</option>
+                                            <option value="1-3" {% if prop.age_of_property == '1-3' %}selected{% endif %}>1-3 Years</option>
+                                            <option value="3-5" {% if prop.age_of_property == '3-5' %}selected{% endif %}>3-5 Years</option>
+                                            <option value="5-10" {% if prop.age_of_property == '5-10' %}selected{% endif %}>5-10 Years</option>
+                                            <option value="10+" {% if prop.age_of_property == '10+' %}selected{% endif %}>10+ Years</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-compass"></i> Facing Direction <span class="required">*</span></label>
+                                        <select class="form-select form-control" name="facing" id="res_facing" required>
+                                            <option value="">Select Direction</option>
+                                            <option value="North" {% if prop.facing == 'North' %}selected{% endif %}>North</option>
+                                            <option value="South" {% if prop.facing == 'South' %}selected{% endif %}>South</option>
+                                            <option value="East" {% if prop.facing == 'East' %}selected{% endif %}>East</option>
+                                            <option value="West" {% if prop.facing == 'West' %}selected{% endif %}>West</option>
+                                            <option value="North-East" {% if prop.facing == 'North-East' %}selected{% endif %}>North-East</option>
+                                            <option value="North-West" {% if prop.facing == 'North-West' %}selected{% endif %}>North-West</option>
+                                            <option value="South-East" {% if prop.facing == 'South-East' %}selected{% endif %}>South-East</option>
+                                            <option value="South-West" {% if prop.facing == 'South-West' %}selected{% endif %}>South-West</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Available From</label>
+                                        <input type="date" class="form-control" name="available_from" id="res_available_from" value="{{ prop.available_from|date:'Y-m-d' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-sliders"></i> Property Configuration</div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">BHK <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="res_bhk" name="bhk" required>
+                                            <option value="">Select</option>
+                                            <option value="1rk" {% if prop.bhk == '1rk' %}selected{% endif %}>1 RK</option>
+                                            <option value="1bhk" {% if prop.bhk == '1bhk' %}selected{% endif %}>1 BHK</option>
+                                            <option value="2bhk" {% if prop.bhk == '2bhk' %}selected{% endif %}>2 BHK</option>
+                                            <option value="3bhk" {% if prop.bhk == '3bhk' %}selected{% endif %}>3 BHK</option>
+                                            <option value="4bhk" {% if prop.bhk == '4bhk' %}selected{% endif %}>4 BHK</option>
+                                            <option value="5+bhk" {% if prop.bhk == '5+bhk' %}selected{% endif %}>5+ BHK</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Bathrooms <span class="required">*</span></label>
+                                        <input type="number" class="form-control" id="res_bathrooms" name="bathrooms" min="1" value="{{ prop.bathrooms }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Balconies</label>
+                                        <input type="number" class="form-control" id="res_balconies" name="balconies" min="0" value="{{ prop.balconies }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Covered Parking</label>
+                                        <input type="number" class="form-control" id="res_covered_parking" name="covered_parking" min="0" value="{{ prop.covered_parking }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Open Parking</label>
+                                        <input type="number" class="form-control" id="res_open_parking" name="open_parking" min="0" value="{{ prop.open_parking }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-ruler-combined"></i> Property Measurements</div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Built-up Area (sq.ft) <span class="required">*</span></label>
+                                        <input type="number" class="form-control" id="res_builtup_area" name="builtup_area" value="{{ prop.builtup_area }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Carpet Area (sq.ft) <span class="required">*</span></label>
+                                        <input type="number" class="form-control" id="res_carpet_area" name="carpet_area" value="{{ prop.carpet_area }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Plot Area (sq.ft)</label>
+                                        <input type="number" class="form-control" id="res_plot_area" name="plot_area" value="{{ prop.plot_area|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Floor No. <span class="required">*</span></label>
+                                        <input type="number" class="form-control" id="res_floor" name="floor_no" value="{{ prop.floor_no }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Total Floors <span class="required">*</span></label>
+                                        <input type="number" class="form-control" id="res_total_floors" name="total_floors" value="{{ prop.total_floors }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-nav">
+                        <div></div>
+                        <button type="button" class="btn-step btn-next" onclick="goToStep(2)">Next — Legal & Pricing <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="step-content" id="step2">
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-shield-halved"></i> Ownership & Legal Details</div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Ownership Type <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="res_ownership" name="ownership_type" required>
+                                            <option value="">Select</option>
+                                            <option value="freehold" {% if prop.ownership_type == 'freehold' %}selected{% endif %}>Freehold</option>
+                                            <option value="leasehold" {% if prop.ownership_type == 'leasehold' %}selected{% endif %}>Leasehold</option>
+                                            <option value="cooperative" {% if prop.ownership_type == 'cooperative' %}selected{% endif %}>Co-operative</option>
+                                            <option value="poa" {% if prop.ownership_type == 'poa' %}selected{% endif %}>Power of Attorney</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">No. of Owners <span class="required">*</span></label>
+                                        <select class="form-select form-control" id="res_num_owners" name="num_owners" required>
+                                            <option value="">Select</option>
+                                            <option value="1" {% if prop.num_owners == '1' %}selected{% endif %}>Single Owner</option>
+                                            <option value="2" {% if prop.num_owners == '2' %}selected{% endif %}>2 Owners</option>
+                                            <option value="3" {% if prop.num_owners == '3' %}selected{% endif %}>3 Owners</option>
+                                            <option value="4+" {% if prop.num_owners == '4+' %}selected{% endif %}>4+ Owners</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Loan on Property? <span class="required">*</span></label>
+                                        <div class="radio-group">
+                                            <label class="radio-option">
+                                                <input type="radio" name="has_loan" value="no" required {% if prop.has_loan == 'no' %}checked{% endif %}> No
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="has_loan" value="yes" {% if prop.has_loan == 'yes' %}checked{% endif %}> Yes
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="conditional-section mt-2" id="res_loan_amount_section" {% if prop.has_loan == 'no' %}style="display: none;"{% endif %}>
+                                    <div class="form-group">
+                                        <label class="form-label">Loan Amount (₹)</label>
+                                        <input type="number" class="form-control" id="res_loan_amount" name="loan_amount" value="{{ prop.loan_amount|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Existing Tenants? <span class="required"></span></label>
+                                        <div class="radio-group">
+                                            <label class="radio-option">
+                                                <input type="radio" name="has_tenants" value="no" required {% if prop.has_tenants == 'no' %}checked{% endif %}> No
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="has_tenants" value="yes" {% if prop.has_tenants == 'yes' %}checked{% endif %}> Yes
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="conditional-section mt-2" id="res_tenant_details_section" {% if prop.has_tenants == 'no' %}style="display: none;"{% endif %}>
+                                    <div class="form-group">
+                                        <label class="form-label">Tenant Details</label>
+                                        <textarea class="form-control" id="res_tenant_details" name="tenant_details">{{ prop.tenant_details|default_if_none:'' }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Any Legal Dispute? <span class="required"></span></label>
+                                        <div class="radio-group">
+                                            <label class="radio-option">
+                                                <input type="radio" name="has_legal_dispute" value="no"  {% if prop.has_legal_dispute == 'no' %}checked{% endif %}> No
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="has_legal_dispute" value="yes" {% if prop.has_legal_dispute == 'yes' %}checked{% endif %}> Yes
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="conditional-section mt-2" id="res_dispute_details_section" {% if prop.has_legal_dispute == 'no' %}style="display: none;"{% endif %}>
+                                    <div class="form-group">
+                                        <label class="form-label">Dispute Description</label>
+                                        <textarea class="form-control" id="res_dispute_details" name="dispute_details">{{ prop.dispute_details|default_if_none:'' }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Government Tax Dues? <span class="required"></span></label>
+                                        <div class="radio-group">
+                                            <label class="radio-option">
+                                                <input type="radio" name="has_tax_due" value="no" {% if prop.has_tax_due == 'no' %}checked{% endif %}> No - Tax Paid
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="has_tax_due" value="yes" {% if prop.has_tax_due == 'yes' %}checked{% endif %}> Yes - Pending
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="conditional-section mt-2" id="res_tax_amount_section" {% if prop.has_tax_due == 'no' %}style="display: none;"{% endif %}>
+                                    <div class="form-group">
+                                        <label class="form-label">Pending Tax Amount (₹)</label>
+                                        <input type="number" class="form-control" id="res_tax_amount" name="pending_tax_amount" value="{{ prop.pending_tax_amount|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-indian-rupee-sign"></i> Pricing Details</div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
+                                        <input type="number" class="form-control" id="res_price" name="expected_price" value="{{ prop.expected_price }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Price per Sq.ft (₹)</label>
+                                        <input type="number" class="form-control" id="res_price_per_sqft" name="price_per_sqft" value="{{ prop.price_per_sqft|default_if_none:'' }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Price Negotiable?</label>
+                                        <select class="form-select form-control" id="res_negotiable" name="is_negotiable">
+                                            <option value="yes" {% if prop.is_negotiable == 'yes' %}selected{% endif %}>Yes</option>
+                                            <option value="no" {% if prop.is_negotiable == 'no' %}selected{% endif %}>No - Fixed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-handshake"></i> Brokerage</label>
+                                        <select class="form-select form-control" name="brokerage" id="brokerageSelect">
+                                            <option value="">Select Option</option>
+                                            <option value="Yes" {% if prop.brokerage == 'Yes' %}selected{% endif %}>Yes</option>
+                                            <option value="No" {% if prop.brokerage == 'No' %}selected{% endif %}>No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2" id="brokerageSection" {% if prop.brokerage != 'Yes' %}style="display:none;"{% endif %}>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-percent"></i> Brokerage Percentage</label>
+                                        <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
+                                            <option value="">Select Brokerage</option>
+                                            <option value="1%" {% if prop.brokerage_percentage == '1%' %}selected{% endif %}>1%</option>
+                                            <option value="1.5%" {% if prop.brokerage_percentage == '1.5%' %}selected{% endif %}>1.5%</option>
+                                            <option value="2%" {% if prop.brokerage_percentage == '2%' %}selected{% endif %}>2%</option>
+                                            <option value="Negotiable" {% if prop.brokerage_percentage == 'Negotiable' %}selected{% endif %}>Negotiable</option>
+                                            <option value="Manual" {% if prop.brokerage_percentage == 'Manual' %}selected{% endif %}>Enter Manually</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2" id="manualBrokerage" {% if prop.brokerage_percentage != 'Manual' %}style="display:none;"{% endif %}>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-edit"></i> Enter Brokerage</label>
+                                        <input type="text" class="form-control" name="manual_brokerage" value="{{ prop.manual_brokerage|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group mt-2">
+                                <label class="form-label">Property Description <span class="required">*</span></label>
+                                <textarea class="form-control" id="resale_residential_desc" name="description" required>{{ prop.description }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-nav">
+                        <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
+                        <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next — Amenities & Location <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="step-content" id="step3">
+                    <div class="form-section facility-theme">
+                        <div class="section-header"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
+                        <div class="section-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="form-label mb-0"><i class="fas fa-map-marker-alt"></i> Nearby Facilities <span class="required" style="color:red;">*</span></label>
+                                <div class="selection-summary">
+                                    <span class="text-muted small" style="font-weight:bold;">Total Selected:</span>
+                                    <input type="text" id="facilityCounter" value="0" readonly class="counter-box blue-theme" style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #bae6fd; font-weight: bold; background: #f0f9ff; color: #0369a1;">
+                                </div>
+                            </div>
+                            <div class="checkbox-group">
+                                {% for facilities in facilities_obj %}
+                                    <div class="checkbox-item">
+                                        <div class="form-check">
+                                            <input class="form-check-input facility-checkbox" type="checkbox" name="facilities[]" value="{{facilities.facilities_name}}" id="facility_{{ forloop.counter }}" {% if facilities.facilities_name in prop_facilities_list %}checked{% endif %}>
+                                            <label class="form-check-label" for="facility_{{ forloop.counter }}">
+                                                <i class="{{facilities.facilities_icon}}"></i> {{facilities.facilities_name}}
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-star"></i> Amenities & Features</div>
+                        <div class="section-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="form-label mb-0"><i class="fas fa-star"></i> Amenities <span class="required" style="color:red;">*</span></label>
+                                <div class="selection-summary">
+                                    <span class="text-muted small" style="font-weight:bold;">Total Selected:</span>
+                                    <input type="text" id="amenityCounter" value="0" readonly style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #ddd; font-weight: bold; background: #f8f9fa;">
+                                </div>
+                            </div>
+                            <div class="checkbox-group">
+                                {% for ameneties in ameneties_obj %}
+                                    <div class="checkbox-item">
+                                        <div class="form-check">
+                                            <input class="form-check-input amenity-checkbox" type="checkbox" name="amenities[]" value="{{ameneties.amenties_name}}" id="amenity_{{ forloop.counter }}" {% if ameneties.amenties_name in prop_amenities_list %}checked{% endif %}>
+                                            <label class="form-check-label" for="amenity_{{ forloop.counter }}">
+                                                <i class="{{ameneties.amenties_icon}}"></i> {{ameneties.amenties_name}}
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+                    
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-location-dot"></i> Address</div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">City <span class="required">*</span></label>
+                                        <input type="text" class="form-control" id="res_city" name="city" value="{{ prop.city }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Locality <span class="required">*</span></label>
+                                        <input type="text" class="form-control" id="res_locality" name="locality" value="{{ prop.locality }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group mt-2">
+                                <label class="form-label">Building/Society Name</label>
+                                <input type="text" class="form-control" id="res_building" name="building_name" value="{{ prop.building_name|default_if_none:'' }}">
+                            </div>
+                            <div class="form-group mt-2">
+                                <label class="form-label">Complete Address <span class="required">*</span></label>
+                                <textarea class="form-control" id="res_address" name="complete_address" required>{{ prop.complete_address }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-user"></i> Owner Contact Information</div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Owner Name <span class="required">*</span></label>
+                                        <input type="text" class="form-control" id="res_owner_name" name="owner_name" value="{{ prop.owner_name }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Owner Contact <span class="required">*</span></label>
+                                        <input type="tel" class="form-control" id="res_owner_contact" name="owner_contact" value="{{ prop.owner_contact }}" pattern="[0-9]{10}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Email <span class="required">*</span></label>
+                                        <input type="email" class="form-control" id="res_owner_email" name="owner_email" value="{{ prop.owner_email }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group mt-2">
+                                <label class="form-label">Residential Status <span class="required">*</span></label>
+                                <div class="radio-group">
+                                    <label class="radio-option">
+                                        <input type="radio" name="residential_status" value="resident" required {% if prop.residential_status == 'resident' %}checked{% endif %}> Resident
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="residential_status" value="nri" {% if prop.residential_status == 'nri' %}checked{% endif %}> NRI
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="residential_status" value="pio" {% if prop.residential_status == 'pio' %}checked{% endif %}> PIO
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-nav">
+                        <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+                        <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Next — Photos & Publish <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="step-content" id="step4">
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
+                        <div class="section-body">
+                            {% if existing_images %}
+                            <label class="form-label mt-2">Current Images</label>
+                            <div class="image-preview active mb-4" style="display: grid;" id="existingImagePreview">
+                                {% for img in existing_images %}
+                                <div class="preview-item" id="existing-img-{{ img.id }}">
+                                    <img src="{{ img.image.url }}" alt="Property Image">
+                                    <button type="button" class="remove-image" onclick="removeExistingImage('{{ img.id }}')">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div id="deletedImagesContainer"></div>
+                            {% endif %}
+
+                            <label class="form-label">Upload New Images</label>
+                            <div class="image-upload-area" id="uploadArea">
+                                <input type="file" id="imageInput" name="property_images" multiple accept="image/*" style="display: none;">
+                                <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #667eea;"></i></div>
+                                <div class="upload-text">Click or Drag New Images Here</div>
+                                <div class="upload-subtext">Adding images will append to existing gallery</div>
+                            </div>
+                            <div class="image-preview" id="imagePreview"></div>
+                            <div id="fileListContainer"></div>
+
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fa-solid fa-map"></i> Update Floor Plan
+                                            {% if prop.floor_plan %}
+                                            <small style="color:green;">(Current uploaded: {{ prop.floor_plan.name }})</small>
+                                            {% endif %}
+                                        </label>
+                                        <input type="file" class="form-control" name="floor_plan" accept="image/*">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fa-solid fa-video"></i> Update Video
+                                            {% if prop.property_video %}
+                                            <small style="color:green;">(Current uploaded: {{ prop.property_video.name }})</small>
+                                            {% endif %}
+                                        </label>
+                                        <input type="file" class="form-control" name="property_video" accept="video/*">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-upload"></i> Listing Uploaded By</div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user"></i> Name</label>
+                                        <input type="text" class="form-control" name="uploaded_by_name" value="{{ admin_obj.name }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
+                                        <input type="email" class="form-control" name="uploaded_by_email" value="{{ admin_obj.email }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-phone"></i> Contact</label>
+                                        <input type="text" class="form-control" name="uploaded_by_contact" value="{{ admin_obj.phone }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
+                                        <input type="text" class="form-control" name="uploaded_by_role" value="{{ admin_obj.role }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-footer">
+                        <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+                        <button type="submit" class="btn-submit">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="preview-sidebar">
+            <div class="preview-card">
+                <div class="preview-header">
+                    <i class="fas fa-eye"></i> Live Preview — Portal Card
+                </div>
+                <div class="preview-mock">
+                    <div class="preview-image">
+                        🏠
+                        <div class="preview-badges">
+                            <span class="preview-badge">FOR SALE</span>
+                            <span class="preview-badge" style="background: #3b82f6; color: white;">🆕 Edited</span>
+                        </div>
+                        <div class="preview-price" id="previewPrice">₹ {{ prop.expected_price|default:"—" }}</div>
+                    </div>
+                    <div class="preview-body">
+                        <div class="preview-title" id="previewTitle">{{ prop.title|default:"Your Property Title" }}</div>
+                        <div class="preview-location" id="previewLoc">
+                            <i class="fas fa-map-marker-alt" style="color:#667eea;"></i> {{ prop.locality|default:"Area" }}, {{ prop.city|default:"City" }}
+                        </div>
+                        <div class="preview-specs">
+                            <span id="prevArea">{{ prop.carpet_area|default:"—" }} sqft</span>
+                            <span id="prevBHK">{{ prop.bhk|upper|default:"—" }}</span>
+                            <span>Residential</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-top:12px;text-align:center;">
+                    Will appear in search results & featured section
+                </div>
+            </div>
+
+            <div class="checklist-card">
+                <div class="checklist-title">📋 Listing Checklist</div>
+                <div class="checklist-item done" id="cl-type"><i class="fas fa-check-circle"></i> Property type selected</div>
+                <div class="checklist-item done" id="cl-bhk"><i class="fas fa-check-circle"></i> BHK configuration added</div>
+                <div class="checklist-item done" id="cl-area"><i class="fas fa-check-circle"></i> Area measurements entered</div>
+                <div class="checklist-item done" id="cl-price"><i class="fas fa-check-circle"></i> Expected price set</div>
+                <div class="checklist-item done" id="cl-location"><i class="fas fa-check-circle"></i> Location details added</div>
+                <div class="checklist-item done" id="cl-owner"><i class="fas fa-check-circle"></i> Owner details filled</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
+
+<script>
+    let currentStep = 1;
+
+    function goToStep(n) {
+        if (n > currentStep && !validateStep(currentStep)) return false;
+        document.getElementById('step' + currentStep).classList.remove('active');
+        document.getElementById('step' + n).classList.add('active');
+        
+        for (let i = 1; i <= 4; i++) {
+            const sc = document.getElementById('sc' + i);
+            const sl = document.getElementById('sl' + i);
+            const line = document.getElementById('line' + i);
+            
+            sc.className = 'step-circle';
+            sl.className = 'step-label';
+            if (line) line.className = 'step-line';
+            
+            if (i < n) {
+                sc.classList.add('done');
+                sl.classList.add('done');
+                sc.innerHTML = '<i class="fas fa-check" style="font-size:.7rem;"></i>';
+                if (line) line.classList.add('done');
+            } else if (i === n) {
+                sc.classList.add('active');
+                sl.classList.add('active');
+                sc.textContent = i;
+            } else {
+                sc.textContent = i;
+            }
+        }
+        currentStep = n;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        updatePreview();
+    }
+
+    function validateStep(step) {
+        const stepElement = document.getElementById('step' + step);
+        const requiredFields = stepElement.querySelectorAll('[required]');
+        let isValid = true;
+        let missingFields = [];
+
+        requiredFields.forEach(field => {
+            if (field.type === 'radio') {
+                const radioGroup = stepElement.querySelectorAll(`[name="${field.name}"]`);
+                const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+                if (!isChecked) {
+                    isValid = false;
+                    const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
+                    if (label && !missingFields.includes(label)) missingFields.push(label);
+                }
+            } else if (!field.value.trim()) {
+                isValid = false;
+                const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
+                if (label && !missingFields.includes(label)) missingFields.push(label);
+            }
+        });
+
+        if (!isValid) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Required Fields Missing',
+                html: `<p style="margin-bottom: 10px;">Please fill the following required fields:</p>
+                       <ul style="text-align: left; display: inline-block;">
+                         ${missingFields.map(field => `<li>${field}</li>`).join('')}
+                       </ul>`,
+                confirmButtonColor: '#667eea',
+                confirmButtonText: 'Got it!'
+            });
+            return false;
+        }
+        return true;
+    }
+
+    function updatePreview() {
+        const price = document.getElementById('res_price')?.value;
+        if (price) document.getElementById('previewPrice').textContent = '₹' + parseInt(price).toLocaleString('en-IN');
+
+        const bhk = document.getElementById('res_bhk')?.value;
+        if (bhk) document.getElementById('prevBHK').textContent = bhk.toUpperCase();
+
+        const area = document.getElementById('res_carpet_area')?.value;
+        if (area) document.getElementById('prevArea').textContent = area + ' sqft';
+
+        const locality = document.getElementById('res_locality')?.value;
+        const city = document.getElementById('res_city')?.value;
+        if (locality || city) {
+            document.getElementById('previewLoc').innerHTML = 
+                '<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ' +
+                (locality || 'Area') + ', ' + (city || 'City');
+        }
+    }
+
+    // New Function for Auto Calculation of Price per Sqft
+    function autoCalculatePrice() {
+        const price = parseFloat(document.getElementById('res_price').value) || 0;
+        const area = parseFloat(document.getElementById('res_builtup_area').value) || 0;
+        const priceSqftInput = document.getElementById('res_price_per_sqft');
+        if (priceSqftInput && price > 0 && area > 0) {
+            priceSqftInput.value = (price / area).toFixed(2);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const formInputs = document.querySelectorAll('input, select, textarea');
+        formInputs.forEach(input => {
+            input.addEventListener('change', updatePreview);
+            input.addEventListener('input', updatePreview);
+        });
+
+        // Price Calculation Listeners
+        document.getElementById('res_price')?.addEventListener('input', autoCalculatePrice);
+        document.getElementById('res_builtup_area')?.addEventListener('input', autoCalculatePrice);
+
+        const brokerageSelect = document.getElementById("brokerageSelect");
+        const brokerageSection = document.getElementById("brokerageSection");
+        const brokeragePercentage = document.getElementById("brokeragePercentage");
+        const manualBrokerage = document.getElementById("manualBrokerage");
+
+        brokerageSelect?.addEventListener("change", function () {
+            if (this.value === "Yes") {
+                brokerageSection.style.display = "block";
+            } else {
+                brokerageSection.style.display = "none";
+                manualBrokerage.style.display = "none";
+            }
+        });
+
+        brokeragePercentage?.addEventListener("change", function () {
+            manualBrokerage.style.display = (this.value === "Manual") ? "block" : "none";
+        });
+
+        document.querySelectorAll('input[name="has_loan"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('res_loan_amount_section').style.display = (this.value === 'yes') ? 'block' : 'none';
+            });
+        });
+
+        document.querySelectorAll('input[name="has_tenants"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('res_tenant_details_section').style.display = (this.value === 'yes') ? 'block' : 'none';
+            });
+        });
+
+        document.querySelectorAll('input[name="has_legal_dispute"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('res_dispute_details_section').style.display = (this.value === 'yes') ? 'block' : 'none';
+            });
+        });
+
+        document.querySelectorAll('input[name="has_tax_due"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.getElementById('res_tax_amount_section').style.display = (this.value === 'yes') ? 'block' : 'none';
+            });
+        });
+
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        let selectedFiles = [];
+
+        uploadArea?.addEventListener('click', () => imageInput.click());
+        uploadArea?.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+        uploadArea?.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
+        uploadArea?.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+        imageInput?.addEventListener('change', (e) => { handleFiles(e.target.files); });
+
+        function handleFiles(files) {
+            const fileArray = Array.from(files);
+            if (selectedFiles.length + fileArray.length > 10) {
+                Swal.fire({ icon: 'warning', title: 'Too Many Files', text: 'Maximum 10 images allowed', confirmButtonColor: '#667eea' });
+                return;
+            }
+            fileArray.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    selectedFiles.push(file);
+                    displayImage(file);
+                }
+            });
+            syncFileInput();
+        }
+
+        function displayImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.innerHTML = `<img src="${e.target.result}" alt="Preview"><button type="button" class="remove-image" onclick="removeNewImage(this, '${file.name}')"><i class="fas fa-times"></i></button>`;
+                imagePreview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        window.removeNewImage = function(button, fileName) {
+            selectedFiles = selectedFiles.filter(f => f.name !== fileName);
+            button.closest('.preview-item').remove();
+            syncFileInput();
+        };
+
+        function syncFileInput() {
+            const dt = new DataTransfer();
+            selectedFiles.forEach(f => dt.items.add(f));
+            imageInput.files = dt.files;
+        }
+
+        function updateAmenityCount() {
+            const total = document.querySelectorAll('input[name="amenities[]"]:checked').length;
+            const counter = document.getElementById('amenityCounter');
+            if (counter) { counter.value = total; counter.style.backgroundColor = total > 0 ? '#fff3e0' : '#f8f9fa'; counter.style.borderColor = total > 0 ? '#e85d04' : '#ddd'; }
+        }
+
+        function updateFacilityCount() {
+            const total = document.querySelectorAll('input[name="facilities[]"]:checked').length;
+            const counter = document.getElementById('facilityCounter');
+            if (counter) counter.value = total;
+        }
+
+        document.querySelectorAll('input[name="amenities[]"]').forEach(cb => cb.addEventListener('change', updateAmenityCount));
+        document.querySelectorAll('input[name="facilities[]"]').forEach(cb => cb.addEventListener('change', updateFacilityCount));
+
+        updateAmenityCount();
+        updateFacilityCount();
+        updatePreview();
+    });
+
+    window.onload = function () {
+        if (typeof CKEDITOR !== 'undefined') {
+            if (CKEDITOR.instances.resale_residential_desc) CKEDITOR.instances.resale_residential_desc.destroy();
+            CKEDITOR.replace('resale_residential_desc');
+        }
+    };
+
+    // MODIFIED FORM SUBMISSION WITH SWEETALERT CONFIRMATION
+    document.getElementById('propertyForm').addEventListener('submit', function(e) {
+        e.preventDefault(); 
+
+        // Confirmation Dialog before starting AJAX
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to save the changes made to this property?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#667eea',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, Save Changes',
+            cancelButtonText: 'No, Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // If confirmed, proceed with update
+                if (typeof CKEDITOR !== 'undefined') {
+                    for (instance in CKEDITOR.instances) CKEDITOR.instances[instance].updateElement();
+                }
+
+                let formData = new FormData(this);
+                let submitBtn = document.querySelector('.btn-submit');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                submitBtn.disabled = true;
+
+                fetch(this.action, { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({ icon: 'success', title: 'Updated!', text: data.message, confirmButtonColor: '#11998e' })
+                        .then((result) => { if (result.isConfirmed) window.location.reload(); });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Oops...', text: 'Something went wrong!', confirmButtonColor: '#e74c3c' });
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({ icon: 'error', title: 'Server Error', text: 'Could not connect to the server.' });
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                    submitBtn.disabled = false;
+                });
+            }
+        });
+    });
+
+    // Function for deleting existing images
+    function removeExistingImage(imageId) {
+        document.getElementById('existing-img-' + imageId).style.display = 'none';
+        let input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'deleted_images[]';
+        input.value = imageId;
+        document.getElementById('deletedImagesContainer').appendChild(input);
+    }
+</script>
+
+
+</body>
+</html>

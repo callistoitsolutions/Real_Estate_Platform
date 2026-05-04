@@ -34,16 +34,12 @@ import traceback
 from django.urls import reverse
 import random
 
-
-
-
-
 from django.shortcuts import render
 from django.db.models import Q
 from itertools import chain
 from datetime import datetime, timedelta
 import random
-# Create your views here.
+
 
 ########### Crime Officer Views#######
 
@@ -1509,6 +1505,9 @@ def resale_industrial_form(request):
     return render(request, "Listing_Form/Resale_Property/resale_industrial_form.html",context)
 
 
+
+
+
 #######################End View Section For Resale Listing#################################
 
 
@@ -1526,4 +1525,5 @@ def post_property(request):
             context['user_obj'] = user_obj
 
     return render(request, "Post_Property_pages/post_property.html",context)
+
 

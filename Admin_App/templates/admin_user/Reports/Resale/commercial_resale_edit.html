@@ -1,0 +1,385 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<style>
+    :root { --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    body { background: #f5f7fa; font-family: 'Poppins', sans-serif; }
+    .main-content { margin-left: 280px; margin-top: 70px; padding: 30px; }
+    .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+    .section-header { background: var(--primary-gradient); color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; margin-top: 25px; }
+    .section-body { background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; }
+    .form-control { border-radius: 12px; padding: 10px 15px; border: 2px solid #e9ecef; }
+    .form-label { font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 0.9rem; }
+    .required { color: #e74c3c; font-weight:bold; }
+    
+    .preview-item { position: relative; display: inline-block; margin: 10px; }
+    .preview-item img { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .remove-image { position: absolute; top: -10px; right: -10px; background: #e74c3c; color: white; border-radius: 50%; border: none; width: 28px; height: 28px; cursor: pointer; }
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 15px; }
+    
+    .preview-sidebar { position: sticky; top: calc(70px + 30px); height: fit-content; display: flex; flex-direction: column; gap: 20px; }
+    .preview-card { background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); border-radius: 16px; padding: 20px; color: white; }
+    .preview-mock { background: white; border-radius: 12px; overflow: hidden; }
+    .preview-image { height: 140px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
+    .preview-price { position: absolute; bottom: 10px; left: 10px; background: rgba(15,23,42,0.9); color: white; font-size: 0.9rem; font-weight: 900; padding: 5px 12px; border-radius: 8px; }
+    .preview-body { padding: 15px; color: #0f172a; }
+    .preview-title { font-size: 0.95rem; font-weight: 800; margin-bottom: 5px; }
+    .preview-location { font-size: 0.75rem; color: #64748b; margin-bottom: 10px; }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<div class="main-content">
+    <div class="row">
+        <!-- Main Form Column -->
+        <div class="col-lg-8">
+            <div class="form-container">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                    <h4 class="m-0 text-dark fw-bold"><i class="fas fa-edit text-primary"></i> Edit Commercial Property</h4>
+                    <div>
+                        <button type="submit" form="commercialEditForm" class="btn btn-primary btn-submit shadow-sm rounded-3 px-4 py-2 fw-bold"><i class="fas fa-save"></i> Save Changes</button>
+                        <button onclick="history.back();" type="button" class="btn btn-light shadow-sm rounded-3 px-4 py-2 ms-2">Back</button>
+                    </div>
+                </div>
+
+                <form id="commercialEditForm" method="POST" action="{% url 'commercial_resale_edit' prop.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- 1. Basic Information -->
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-info-circle"></i> Basic Information</div>
+                        <div class="section-body row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Title <span class="required">*</span></label>
+                                <input type="text" class="form-control live-preview" data-target="previewTitle" name="title" value="{{ prop.title }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Property Type <span class="required">*</span></label>
+                                <select class="form-control" name="property_type" required>
+                                    <option value="office" {% if prop.property_type == 'office' %}selected{% endif %}>Office Space</option>
+                                    <option value="shop" {% if prop.property_type == 'shop' %}selected{% endif %}>Shop/Showroom</option>
+                                    <option value="warehouse" {% if prop.property_type == 'warehouse' %}selected{% endif %}>Warehouse</option>
+                                    <option value="industrial" {% if prop.property_type == 'industrial' %}selected{% endif %}>Industrial</option>
+                                    <option value="land" {% if prop.property_type == 'land' %}selected{% endif %}>Land</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Zone Type <span class="required">*</span></label>
+                                <select class="form-control" name="zone_type" required>
+                                    <option value="industrial" {% if prop.zone_type == 'industrial' %}selected{% endif %}>Industrial</option>
+                                    <option value="commercial" {% if prop.zone_type == 'commercial' %}selected{% endif %}>Commercial</option>
+                                    <option value="residential" {% if prop.zone_type == 'residential' %}selected{% endif %}>Residential</option>
+                                    <option value="sez" {% if prop.zone_type == 'sez' %}selected{% endif %}>SEZ</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Location Hub</label>
+                                <select class="form-control" name="location_hub">
+                                    <option value="">Select</option>
+                                    <option value="it" {% if prop.location_hub == 'it' %}selected{% endif %}>IT Park</option>
+                                    <option value="business" {% if prop.location_hub == 'business' %}selected{% endif %}>Business District</option>
+                                    <option value="mall" {% if prop.location_hub == 'mall' %}selected{% endif %}>Mall</option>
+                                    <option value="standalone" {% if prop.location_hub == 'standalone' %}selected{% endif %}>Standalone</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Condition</label>
+                                <select class="form-control" name="property_condition">
+                                    <option value="new" {% if prop.property_condition == 'new' %}selected{% endif %}>Brand New</option>
+                                    <option value="excellent" {% if prop.property_condition == 'excellent' %}selected{% endif %}>Excellent</option>
+                                    <option value="good" {% if prop.property_condition == 'good' %}selected{% endif %}>Good</option>
+                                    <option value="renovation" {% if prop.property_condition == 'renovation' %}selected{% endif %}>Needs Renovation</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Ownership Type <span class="required">*</span></label>
+                                <select class="form-control" name="ownership_type" required>
+                                    <option value="freehold" {% if prop.ownership_type == 'freehold' %}selected{% endif %}>Freehold</option>
+                                    <option value="leasehold" {% if prop.ownership_type == 'leasehold' %}selected{% endif %}>Leasehold</option>
+                                    <option value="cooperative" {% if prop.ownership_type == 'cooperative' %}selected{% endif %}>Co-operative</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Age</label>
+                                <select class="form-control" name="age_of_property">
+                                    <option value="0-1" {% if prop.age_of_property == '0-1' %}selected{% endif %}>0-1 Year</option>
+                                    <option value="1-3" {% if prop.age_of_property == '1-3' %}selected{% endif %}>1-3 Years</option>
+                                    <option value="3-5" {% if prop.age_of_property == '3-5' %}selected{% endif %}>3-5 Years</option>
+                                    <option value="5-10" {% if prop.age_of_property == '5-10' %}selected{% endif %}>5-10 Years</option>
+                                    <option value="10+" {% if prop.age_of_property == '10+' %}selected{% endif %}>10+ Years</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Available From</label>
+                                <input type="date" class="form-control" name="available_from" value="{{ prop.available_from|date:'Y-m-d' }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Commercial Specs -->
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-building"></i> Commercial Specifications</div>
+                        <div class="section-body row">
+                            <div class="col-md-3 mb-3"><label class="form-label">Staircases</label><input type="number" class="form-control" name="num_staircases" value="{{ prop.num_staircases|default:'' }}"></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">Passenger Lifts</label><input type="number" class="form-control" name="passenger_lifts" value="{{ prop.passenger_lifts|default:'' }}"></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">Service Lifts</label><input type="number" class="form-control" name="service_lifts" value="{{ prop.service_lifts|default:'' }}"></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">Cabins</label><input type="number" class="form-control" name="num_cabins" value="{{ prop.num_cabins|default:'' }}"></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">Meeting Rooms</label><input type="number" class="form-control" name="meeting_rooms" value="{{ prop.meeting_rooms|default:'' }}"></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">Min Seats</label><input type="number" class="form-control" name="min_seats" value="{{ prop.min_seats|default:'' }}"></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">Max Seats</label><input type="number" class="form-control" name="max_seats" value="{{ prop.max_seats|default:'' }}"></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">Pvt. Parking</label><input type="number" class="form-control" name="private_parking" value="{{ prop.private_parking|default:'' }}"></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">Pub. Parking</label><input type="number" class="form-control" name="public_parking" value="{{ prop.public_parking|default:'' }}"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Area & Pricing -->
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-rupee-sign"></i> Area & Pricing</div>
+                        <div class="section-body row">
+                            <div class="col-md-4 mb-3"><label class="form-label">Built-up Area (sqft) <span class="required">*</span></label><input type="number" class="form-control live-preview" data-target="prevArea" name="builtup_area" value="{{ prop.builtup_area|floatformat:0 }}" required></div>
+                            <div class="col-md-4 mb-3"><label class="form-label">Carpet Area</label><input type="number" class="form-control" name="carpet_area" value="{{ prop.carpet_area|floatformat:0|default:'' }}"></div>
+                            <div class="col-md-4 mb-3"><label class="form-label">Plot Area</label><input type="number" class="form-control" name="plot_area" value="{{ prop.plot_area|floatformat:0|default:'' }}"></div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Brokerage</label>
+                                <select class="form-control" name="brokerage">
+                                    <option value="no" {% if prop.brokerage == 'no' %}selected{% endif %}>No</option>
+                                    <option value="yes" {% if prop.brokerage == 'yes' %}selected{% endif %}>Yes</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3"><label class="form-label">Brokerage %</label><input type="text" class="form-control" name="brokerage_percentage" value="{{ prop.brokerage_percentage|default:'' }}"></div>
+                            <div class="col-md-4 mb-3"><label class="form-label">Manual Brokerage</label><input type="text" class="form-control" name="manual_brokerage" value="{{ prop.manual_brokerage|default:'' }}"></div>
+
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
+                                <input type="number" class="form-control live-preview" data-target="previewPrice" name="expected_price" value="{{ prop.expected_price|floatformat:0 }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Legal Details -->
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-gavel"></i> Ownership & Legal</div>
+                        <div class="section-body row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">No. Owners <span class="required">*</span></label>
+                                <select class="form-control" name="num_owners" required>
+                                    <option value="1" {% if prop.num_owners == '1' %}selected{% endif %}>1</option>
+                                    <option value="2" {% if prop.num_owners == '2' %}selected{% endif %}>2</option>
+                                    <option value="3" {% if prop.num_owners == '3' %}selected{% endif %}>3</option>
+                                    <option value="4+" {% if prop.num_owners == '4+' %}selected{% endif %}>4+</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Loan on Property?</label>
+                                <div><input type="radio" name="loan_on_property" value="no" {% if prop.loan_on_property == 'no' %}checked{% endif %}> No &nbsp; <input type="radio" name="loan_on_property" value="yes" {% if prop.loan_on_property == 'yes' %}checked{% endif %}> Yes</div>
+                            </div>
+                            <div class="col-md-5 mb-3"><label class="form-label">Loan Amount</label><input type="number" class="form-control" name="loan_amount" value="{{ prop.loan_amount|floatformat:0|default:'' }}"></div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Existing Tenants?</label>
+                                <div><input type="radio" name="existing_tenants" value="no" {% if prop.existing_tenants == 'no' %}checked{% endif %}> No &nbsp; <input type="radio" name="existing_tenants" value="yes" {% if prop.existing_tenants == 'yes' %}checked{% endif %}> Yes</div>
+                            </div>
+                            <div class="col-md-8 mb-3"><label class="form-label">Tenant Details</label><input type="text" class="form-control" name="tenant_details" value="{{ prop.tenant_details|default:'' }}"></div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Legal Dispute?</label>
+                                <div><input type="radio" name="legal_dispute" value="no" {% if prop.legal_dispute == 'no' %}checked{% endif %}> No &nbsp; <input type="radio" name="legal_dispute" value="yes" {% if prop.legal_dispute == 'yes' %}checked{% endif %}> Yes</div>
+                            </div>
+                            <div class="col-md-8 mb-3"><label class="form-label">Dispute Details</label><input type="text" class="form-control" name="dispute_details" value="{{ prop.dispute_details|default:'' }}"></div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Tax Due?</label>
+                                <div><input type="radio" name="tax_due" value="no" {% if prop.tax_due == 'no' %}checked{% endif %}> No &nbsp; <input type="radio" name="tax_due" value="yes" {% if prop.tax_due == 'yes' %}checked{% endif %}> Yes</div>
+                            </div>
+                            <div class="col-md-4 mb-3"><label class="form-label">Pending Tax Amt</label><input type="number" class="form-control" name="pending_tax_amount" value="{{ prop.pending_tax_amount|floatformat:0|default:'' }}"></div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Fire NOC?</label>
+                                <div><input type="radio" name="fire_noc" value="no" {% if prop.fire_noc == 'no' %}checked{% endif %}> No &nbsp; <input type="radio" name="fire_noc" value="yes" {% if prop.fire_noc == 'yes' %}checked{% endif %}> Yes</div>
+                            </div>
+
+                            <div class="col-md-12 mb-3"><label class="form-label">Property Description</label><textarea class="form-control" name="property_description">{{ prop.property_description }}</textarea></div>
+                            <div class="col-md-12 mb-3"><label class="form-label">Sanctioning Authority</label><input type="text" class="form-control" name="sanctioning_authority" value="{{ prop.sanctioning_authority|default:'' }}"></div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Facilities & Amenities -->
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-list"></i> Facilities & Amenities</div>
+                        <div class="section-body">
+                            <label class="form-label text-primary">Nearby Facilities</label>
+                            <div class="checkbox-group mb-4">
+                                {% for facility in facilities_obj %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="facilities[]" value="{{facility.facilities_name}}" {% if facility.facilities_name in prop_facilities_list %}checked{% endif %}>
+                                    <label class="form-check-label">{{facility.facilities_name}}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <label class="form-label text-primary">Amenities</label>
+                            <div class="checkbox-group">
+                                {% for amenity in ameneties_obj %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="amenities[]" value="{{amenity.amenties_name}}" {% if amenity.amenties_name in prop_amenities_list %}checked{% endif %}>
+                                    <label class="form-check-label">{{amenity.amenties_name}}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. Address & Contact -->
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-address-book"></i> Address & Owner Info</div>
+                        <div class="section-body row">
+                            <div class="col-md-4 mb-3"><label class="form-label">City <span class="required">*</span></label><input type="text" class="form-control live-preview" data-target="previewCity" name="city" value="{{ prop.city }}" required></div>
+                            <div class="col-md-4 mb-3"><label class="form-label">Locality</label><input type="text" class="form-control live-preview" data-target="previewLocality" name="locality" value="{{ prop.locality }}"></div>
+                            <div class="col-md-4 mb-3"><label class="form-label">Building Name</label><input type="text" class="form-control" name="building_name" value="{{ prop.building_name|default:'' }}"></div>
+                            <div class="col-md-12 mb-3"><label class="form-label">Complete Address</label><textarea class="form-control" name="property_address">{{ prop.property_address }}</textarea></div>
+
+                            <div class="col-md-3 mb-3"><label class="form-label">Owner Name <span class="required">*</span></label><input type="text" class="form-control" name="owner_name" value="{{ prop.owner_name }}" required></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">Owner Contact <span class="required">*</span></label><input type="text" class="form-control" name="owner_contact" value="{{ prop.owner_contact }}" required></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">Owner Email</label><input type="email" class="form-control" name="owner_email" value="{{ prop.owner_email|default:'' }}"></div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Res. Status <span class="required">*</span></label>
+                                <select class="form-control" name="residential_status" required>
+                                    <option value="resident" {% if prop.residential_status == 'resident' %}selected{% endif %}>Resident</option>
+                                    <option value="nri" {% if prop.residential_status == 'nri' %}selected{% endif %}>NRI</option>
+                                    <option value="pio" {% if prop.residential_status == 'pio' %}selected{% endif %}>PIO</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Media -->
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-camera"></i> Media Uploads</div>
+                        <div class="section-body row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Existing Images</label>
+                                <div id="deletedImagesContainer"></div>
+                                <div class="image-preview" style="display:grid; margin-bottom:15px;">
+                                    {% for img in existing_images %}
+                                    <div class="preview-item" id="img-{{ img.id }}">
+                                        <img src="{{ img.image.url }}">
+                                        <button type="button" class="remove-image" onclick="removeImg('{{ img.id }}')"><i class="fas fa-times"></i></button>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3"><label class="form-label">Add New Images</label><input type="file" class="form-control" name="property_images" multiple accept="image/*"></div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Update Floor Plan</label>
+                                <input type="file" class="form-control" name="floor_plan" accept="image/*">
+                                {% if prop.floor_plan %}<small class="text-success">{{ prop.floor_plan.name }}</small>{% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Update Property Video</label>
+                                <input type="file" class="form-control" name="property_video" accept="video/*">
+                            </div>
+                        </div>
+                    </div>
+
+                </form>  <!-- ✅ FIXED: was </div> before -->
+            </div>
+        </div>
+        
+        <!-- SIDEBAR PREVIEW -->
+        <div class="col-lg-4 d-none d-lg-block">
+            <div class="preview-sidebar">
+                <div class="preview-card">
+                    <div class="preview-header"><i class="fas fa-eye"></i> Live Preview</div>
+                    <div class="preview-mock">
+                        <div class="preview-image">🏢<div class="preview-price">₹ <span id="previewPrice">{{ prop.expected_price|floatformat:0 }}</span></div></div>
+                        <div class="preview-body">
+                            <div class="preview-title" id="previewTitle">{{ prop.title }}</div>
+                            <div class="preview-location"><i class="fas fa-map-marker-alt"></i> <span id="previewLocality">{{ prop.locality }}</span>, <span id="previewCity">{{ prop.city }}</span></div>
+                            <div class="preview-specs"><span id="prevArea">{{ prop.builtup_area|floatformat:0 }}</span> sqft</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script>
+    // Delete existing image
+    function removeImg(id) {
+        document.getElementById('img-' + id).style.display = 'none';
+        let inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'deleted_images[]'; inp.value = id;
+        document.getElementById('deletedImagesContainer').appendChild(inp);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // LIVE PREVIEW
+        document.querySelectorAll('.live-preview').forEach(function(input) {
+            input.addEventListener('input', function () {
+                var targetEl = document.getElementById(this.getAttribute('data-target'));
+                if (!targetEl) return;
+                if (this.getAttribute('data-target') === 'previewPrice') {
+                    targetEl.textContent = (parseFloat(this.value) || 0).toLocaleString('en-IN');
+                } else {
+                    targetEl.textContent = this.value || '-';
+                }
+            });
+        });
+
+        // FORM SUBMIT WITH SWEETALERT  ✅ FIXED
+        document.getElementById('commercialEditForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var form = this;
+            var btn = document.querySelector('.btn-submit');  // ✅ FIXED: class added to button
+
+            Swal.fire({
+                title: 'Confirm Update?',
+                text: "Are you sure you want to save changes to this commercial property?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#667eea',
+                cancelButtonColor: '#ef4444',
+                confirmButtonText: '<i class="fas fa-save"></i> Yes, Update it'
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                    btn.disabled = true;
+
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (data.status === 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Updated!',
+                                text: data.message,
+                                confirmButtonColor: '#10b981'
+                            }).then(function() {
+                                window.location.href = "{% url 'commercial_resale_list' %}";  // ✅ FIXED: redirects to list
+                            });
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Error', text: data.message });
+                            btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                            btn.disabled = false;
+                        }
+                    })
+                    .catch(function() {
+                        Swal.fire({ icon: 'error', title: 'Network Error', text: 'Something went wrong. Please try again.' });
+                        btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+                        btn.disabled = false;
+                    });
+                }
+            });
+        });
+
+    });
+</script>
