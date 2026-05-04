@@ -720,57 +720,99 @@ def get_featured_queryset(model):
     ).order_by('-created_at')[:6]
 
 
+
+
+
+
+
+
 def index(request):
+    today = datetime.now().date()
+    fifteen_days_ago = today - timedelta(days=15)
+    
+    # ═══════════════════════════════════════════════════════
+    # FETCH RENTAL PROPERTIES
+    # ═══════════════════════════════════════════════════════
+    rental_residential = RentalResidentialProperty.objects.prefetch_related('images').all().order_by('-id')[:10]
+    rental_commercial = CommercialRentalProperty.objects.prefetch_related('images').all().order_by('-id')[:10]
+    rental_pg = PGColivingProperty.objects.prefetch_related('images').all().order_by('-id')[:10]
+
+    resale_residential = ResaleResidentialProperty.objects.prefetch_related('images').all().order_by('-id')[:10]
+    resale_commercial = CommercialResaleProperty.objects.prefetch_related('images').filter(is_active=True).order_by('-id')[:10]
+    resale_plot = PlotSaleProperty.objects.prefetch_related('images').all().order_by('-id')[:10]
+    resale_industrial = IndustrialResaleProperty.objects.prefetch_related('images').all().order_by('-id')[:10]
+    resale_agricultural = AgriculturalResaleProperty.objects.prefetch_related('images').all().order_by('-id')[:10]
+    
+    # ═══════════════════════════════════════════════════════
+    # COMBINE RENTAL PROPERTIES
+    # ═══════════════════════════════════════════════════════
+    all_rental_props = list(chain(
+        [{"data": p, "type": "rental_residential", "listing_type": "rent", "category": "Residential"} for p in rental_residential],
+        [{"data": p, "type": "rental_commercial", "listing_type": "rent", "category": "Commercial"} for p in rental_commercial],
+        [{"data": p, "type": "rental_pg", "listing_type": "rent", "category": "PG"} for p in rental_pg]
+    ))
+    
+    # ═══════════════════════════════════════════════════════
+    # COMBINE RESALE PROPERTIES
+    # ═══════════════════════════════════════════════════════
+    all_resale_props = list(chain(
+        [{"data": p, "type": "resale_residential", "listing_type": "sale", "category": "Residential"} for p in resale_residential],
+        [{"data": p, "type": "resale_commercial", "listing_type": "sale", "category": "Commercial"} for p in resale_commercial],
+        [{"data": p, "type": "resale_plot", "listing_type": "sale", "category": "Plots/Land"} for p in resale_plot],
+        [{"data": p, "type": "resale_industrial", "listing_type": "sale", "category": "Industrial"} for p in resale_industrial],
+        [{"data": p, "type": "resale_agricultural", "listing_type": "sale", "category": "Agricultural"} for p in resale_agricultural]
+    ))
+    
+    # ═══════════════════════════════════════════════════════
+    # GET FEATURED PROPERTIES (RENT + SALE)
+    # ═══════════════════════════════════════════════════════
+    all_props = all_rental_props + all_resale_props
+    featured_props = [p for p in all_props if hasattr(p["data"], 'is_featured') and p["data"].is_featured]
+    random.shuffle(featured_props)
+    featured_props = featured_props[:6]
+    
+    # ═══════════════════════════════════════════════════════
+    # GET RECENT PROPERTIES (LAST 30 DAYS)
+    # ═══════════════════════════════════════════════════════
+    recent_props = sorted(all_props, key=lambda x: x["data"].id, reverse=True)[:8]
+    
+    # ═══════════════════════════════════════════════════════
+    # OTHER DATA
+    # ═══════════════════════════════════════════════════════
     hero = HeroSection.objects.filter(is_active=True).first()
-    blogs = Blog.objects.all().order_by("-date_posted")
-    faqs = FAQ.objects.all().order_by('-created_at')
-
-    # ✅ CORRECT FUNCTION CALL
-    residential = list(get_featured_queryset(ResidentialProperty))
-    commercial = list(get_featured_queryset(CommercialProperty))
-    pg = list(get_featured_queryset(PGProperty))
-
-    # Combine
-    all_props = (
-        [{"data": prop, "type": "Residential"} for prop in residential] +
-        [{"data": prop, "type": "Commercial"} for prop in commercial] +
-        [{"data": prop, "type": "PG"} for prop in pg]
-    )
-
-    random.shuffle(all_props)
-    featured_props = all_props[:6]
-
-    props = sorted(
-        chain(residential, commercial, pg),
-        key=lambda x: getattr(x, 'created_at', None),
-        reverse=True
-    )
-
+    blogs = Blog.objects.all().order_by("-date_posted")[:3]
+    faqs = FAQ.objects.all().order_by('-created_at')[:4]
+    
+    # ═══════════════════════════════════════════════════════
+    # CONTEXT
+    # ═══════════════════════════════════════════════════════
     context = {
         "featured_props": featured_props,
-        "props": props,
+        "recent_props": recent_props,
+        "all_rental_props": all_rental_props[:6],
+        "all_resale_props": all_resale_props[:6],
         "hero": hero,
         "blogs": blogs,
         "faqs": faqs,
-        'user_obj':None
+        "today": today,
+        "fifteen_days_ago": fifteen_days_ago,
+        'user_obj': None
     }
-
-    # 🔹 3. Handle the logged-in user logic safely
+    
+    # ═══════════════════════════════════════════════════════
+    # HANDLE LOGGED-IN USER
+    # ═══════════════════════════════════════════════════════
     session_id = request.session.get('User_id')
     if session_id:
-        
         user_obj = User_Details.objects.filter(id=session_id).first()
         if user_obj:
             context['user_obj'] = user_obj
-
+    
     return render(request, "home_page/index.html", context)
 
 
-def blog_details(request, key):
-    seo = get_object_or_404(LocationSEO, key=key, pagetype="blog", is_active=True)
-    blog = seo.content_object
 
-    return render(request, "home_page/blog_details.html", {"seo": seo, "blog": blog})
+
 
 
 
@@ -1527,3 +1569,13 @@ def post_property(request):
     return render(request, "Post_Property_pages/post_property.html",context)
 
 
+#############################START VIEW SECTON OF BLOGS##########################
+
+def blog_details(request, key):
+    seo = get_object_or_404(LocationSEO, key=key, pagetype="blog", is_active=True)
+    blog = seo.content_object
+
+    return render(request, "home_page/blog_details.html", {"seo": seo, "blog": blog})
+
+    
+#############################END VIEW SECTON OF BLOGS##########################

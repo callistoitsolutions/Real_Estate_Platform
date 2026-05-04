@@ -1,118 +1,254 @@
-{% extends 'home_page/base.html' %}
+{% include 'home_page/header.html' %}
 
-{% block title %}Services | YourBrand{% endblock %}
+{% block title %}Services | PropCRM{% endblock %}
 
 {% block extra_css %}
 <style>
-/* SERVICES PAGE - Fixed 1200px Layout */
-.services-fixed {
-    min-width: 1200px;
+:root {
+  --bg-main:#f8fafc; --bg-card:#ffffff; --primary:#006ce4; --primary-dark:#0050a8;
+  --accent:#f59e0b; --text-dark:#1e293b; --text-body:#475569; --text-muted:#64748b;
+  --border:#e2e8f0; --shadow-1:0 4px 12px rgba(0,0,0,.06); --shadow-2:0 12px 30px rgba(0,0,0,.1); --radius:12px;
 }
 
-.services-fixed .container {
-    max-width: 1200px !important;
-    width: 1200px !important;
+/* PAGE HERO */
+.page-hero {
+  background:linear-gradient(135deg, #002347 0%, #004282 50%, #0059b3 100%);
+  padding:70px 20px 55px; text-align:center; position:relative; overflow:hidden;
 }
-
-.services-fixed .row {
-    display: flex !important;
-    flex-wrap: nowrap !important;
+.page-hero::before {
+  content:''; position:absolute; inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='1' fill='rgba(255,255,255,.04)'/%3E%3C/svg%3E");
 }
+.page-hero h1 { font-size:2.6rem; font-weight:900; color:#fff; margin-bottom:12px; position:relative; }
+.page-hero h1 em { font-style:normal; color:#f9b449; }
+.page-hero p { font-size:1rem; color:rgba(255,255,255,.82); max-width:580px; margin:0 auto 28px; position:relative; font-weight:500; }
+.hero-stats { display:flex; justify-content:center; gap:40px; flex-wrap:wrap; position:relative; }
+.hs-item { text-align:center; }
+.hs-v { font-size:1.4rem; font-weight:900; color:#fff; }
+.hs-l { font-size:.73rem; color:rgba(255,255,255,.7); margin-top:3px; font-weight:500; }
 
-.services-fixed .col-md-4 {
-    width: 33.33% !important;
-}
+/* TRUST BAR */
+.trust-bar { background:#fff; border-bottom:1px solid var(--border); }
+.trust-inner { max-width:1280px; margin:0 auto; padding:18px 20px;
+  display:flex; justify-content:center; gap:40px; flex-wrap:wrap; }
+.trust-item { display:flex; align-items:center; gap:10px; font-size:.85rem;
+  font-weight:600; color:var(--text-body); }
+.trust-item i { color:var(--primary); font-size:1.1rem; }
 
-/* Service Cards */
+/* SECTION WRAP */
+.section-wrap { max-width:1280px; margin:0 auto; padding:50px 20px 80px; }
+.sec-header { text-align:center; margin-bottom:48px; }
+.sec-header h2 { font-size:1.8rem; font-weight:900; color:var(--text-dark); margin-bottom:8px; }
+.sec-header p { font-size:.95rem; color:var(--text-muted); font-weight:500; }
+
+/* SERVICE GRID */
+.service-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+@media(max-width:1050px){ .service-grid{ grid-template-columns:1fr 1fr; } }
+@media(max-width:640px){ .service-grid{ grid-template-columns:1fr; } }
+
+/* SERVICE CARD */
 .service-card {
-    background: rgba(255,255,255,0.05);
-    border-radius: 20px;
-    padding: 30px;
-    border: 1px solid rgba(255,255,255,0.08);
-    backdrop-filter: blur(14px);
-    transition: 0.35s ease;
-    position: relative;
-    overflow: hidden;
-    height: 100%;
+  background:var(--bg-card); border-radius:var(--radius); border:1px solid var(--border);
+  padding:0; overflow:hidden; transition:.3s; box-shadow:var(--shadow-1);
+  display:flex; flex-direction:column; height:100%;
 }
+.service-card:hover { transform:translateY(-6px); box-shadow:var(--shadow-2);
+  border-color:rgba(0,108,228,.3); }
 
-.service-card::before {
-    content: "";
-    position: absolute;
-    top: -2px; left: -2px;
-    right: -2px; bottom: -2px;
-    border-radius: 22px;
-    padding: 2px;
-    background: linear-gradient(135deg, rgba(79,115,255,0.4), rgba(79,115,255,0), rgba(79,115,255,0.3));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0.4;
-    transition: 0.4s;
-}
+/* Card top accent strip */
+.sc-strip { height:5px; background:linear-gradient(90deg, var(--primary), #38bdf8); }
 
-.service-card:hover::before { opacity: 1; }
-.service-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 12px 30px rgba(79,115,255,0.35);
-}
+.sc-body { padding:28px; flex:1; display:flex; flex-direction:column; }
 
-.service-icon {
-    font-size: 45px;
-    color: var(--primary);
-    margin-bottom: 20px;
-    text-align: center;
-    display: block;
-}
+.sc-icon-wrap { width:60px; height:60px; border-radius:14px; background:rgba(0,108,228,.08);
+  display:flex; align-items:center; justify-content:center; margin-bottom:18px;
+  transition:.3s; }
+.service-card:hover .sc-icon-wrap { background:var(--primary); }
+.sc-icon-wrap i { font-size:1.6rem; color:var(--primary); transition:.3s; }
+.service-card:hover .sc-icon-wrap i { color:#fff; }
 
-.page-title {
-    font-size: 2.4rem;
-    font-weight: 900;
-    text-align: center;
-    margin: 40px 0;
-    background: linear-gradient(90deg, #4f73ff, #92a5ff);
-    -webkit-background-clip: text;
-    color: transparent;
-}
+.sc-title { font-size:1.08rem; font-weight:800; color:var(--text-dark); margin-bottom:10px; line-height:1.35; }
+.sc-desc { font-size:.875rem; color:var(--text-body); line-height:1.65; margin-bottom:18px; flex:1;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 
-.service-card .btn {
-    background: var(--primary);
-    border: none;
-    font-weight: 600;
-    border-radius: 50px;
-    padding: 10px 20px;
-    color: white !important;
-}
+/* Feature bullets */
+.sc-features { list-style:none; padding:0; margin:0 0 20px; border-top:1px solid var(--border); padding-top:16px; }
+.sc-features li { display:flex; align-items:center; gap:8px; font-size:.82rem;
+  font-weight:600; color:var(--text-body); padding:5px 0; }
+.sc-features li i { color:#10b981; font-size:.85rem; flex-shrink:0; }
 
-.service-card .btn:hover {
-    background: var(--primary-dark);
-    transform: translateY(-3px);
+.sc-btn {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  background:var(--primary); color:#fff; border-radius:8px; font-weight:700;
+  font-size:.88rem; padding:12px 18px; text-decoration:none; transition:.2s; margin-top:auto;
 }
+.sc-btn:hover { background:var(--primary-dark); color:#fff; transform:translateY(-1px);
+  box-shadow:0 4px 14px rgba(0,108,228,.3); }
+
+/* FEATURED card (spans 2 cols) */
+.service-card.featured { grid-column:span 2; flex-direction:row; }
+.service-card.featured .sc-strip { width:5px; height:auto; background:linear-gradient(180deg, var(--primary), #38bdf8); }
+.service-card.featured .sc-body { padding:32px; }
+.service-card.featured .sc-title { font-size:1.25rem; }
+.service-card.featured .sc-desc { -webkit-line-clamp:4; }
+@media(max-width:1050px){ .service-card.featured{ grid-column:span 1; flex-direction:column; }
+  .service-card.featured .sc-strip{ width:100%; height:5px; } }
+
+/* WHY SECTION */
+.why-section { background:#f1f5f9; border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  padding:60px 20px; }
+.why-inner { max-width:1280px; margin:0 auto; }
+.why-inner h2 { font-size:1.6rem; font-weight:900; color:var(--text-dark); text-align:center; margin-bottom:36px; }
+.why-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:24px; }
+@media(max-width:900px){ .why-grid{ grid-template-columns:1fr 1fr; } }
+@media(max-width:480px){ .why-grid{ grid-template-columns:1fr; } }
+.why-card { background:#fff; border-radius:var(--radius); padding:28px 20px; text-align:center;
+  border:1px solid var(--border); box-shadow:var(--shadow-1); transition:.3s; }
+.why-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-2); }
+.why-num { width:48px; height:48px; background:rgba(0,108,228,.1); color:var(--primary);
+  border-radius:13px; display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; font-weight:900; margin:0 auto 16px; }
+.why-title { font-size:.95rem; font-weight:700; color:var(--text-dark); margin-bottom:8px; }
+.why-desc { font-size:.82rem; color:var(--text-muted); line-height:1.6; }
+
+/* EMPTY */
+.empty-state { grid-column:1/-1; text-align:center; padding:80px 20px; }
+.empty-state i { font-size:3.5rem; color:#cbd5e1; display:block; margin-bottom:16px; }
+.empty-state h4 { font-size:1.2rem; font-weight:700; color:var(--text-dark); margin-bottom:8px; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container services-fixed">
-    <h2 class="page-title">Our Professional Services</h2>
 
-    <div class="row g-4">
-        {% for seo in services %}
-        <div class="col-md-4">
-            <div class="service-card">
-                <span class="service-icon"><i class="bi bi-stars"></i></span>
-                <h5>{{ seo.meta_title|default:seo.content_object.title }}</h5>
-                <p>{{ seo.meta_description|truncatechars:120 }}</p>
-                <a href="{% url 'services_details' key=seo.key %}" class="btn btn-primary w-100">
-                    Explore {{ seo.content_object.title }}
-                </a>
+<!-- HERO -->
+<section class="page-hero">
+  <h1>Our <em>Professional</em> Services</h1>
+  <p>End-to-end real estate services for buyers, sellers, tenants, and investors in Nagpur.</p>
+  <div class="hero-stats">
+    <div class="hs-item"><div class="hs-v">{{ services|length }}+</div><div class="hs-l">Services</div></div>
+    <div class="hs-item"><div class="hs-v">87</div><div class="hs-l">Expert RMs</div></div>
+    <div class="hs-item"><div class="hs-v">50K+</div><div class="hs-l">Happy Clients</div></div>
+    <div class="hs-item"><div class="hs-v">5★</div><div class="hs-l">Avg. Rating</div></div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-inner">
+    <div class="trust-item"><i class="bi bi-shield-check-fill"></i> 100% Verified</div>
+    <div class="trust-item"><i class="bi bi-lightning-fill"></i> Quick Response</div>
+    <div class="trust-item"><i class="bi bi-people-fill"></i> Expert Team</div>
+    <div class="trust-item"><i class="bi bi-award-fill"></i> Award Winning</div>
+    <div class="trust-item"><i class="bi bi-chat-dots-fill"></i> 24/7 Support</div>
+  </div>
+</div>
+
+<!-- SERVICES GRID -->
+<div class="section-wrap">
+  <div class="sec-header">
+    <h2>What We Offer</h2>
+    <p>Comprehensive real estate solutions tailored to your needs</p>
+  </div>
+
+  <div class="service-grid">
+    {% for seo in services %}
+    <div class="service-card {% if forloop.first %}featured{% endif %}">
+      <div class="sc-strip"></div>
+      <div class="sc-body">
+        <div class="sc-icon-wrap">
+          <i class="bi bi-stars"></i>
+        </div>
+        <div class="sc-title">{{ seo.meta_title|default:seo.content_object.title }}</div>
+        <div class="sc-desc">{{ seo.meta_description|truncatechars:140 }}</div>
+        <ul class="sc-features">
+          <li><i class="bi bi-check-circle-fill"></i> Expert Consultation</li>
+          <li><i class="bi bi-check-circle-fill"></i> Verified Listings Access</li>
+          <li><i class="bi bi-check-circle-fill"></i> End-to-End Support</li>
+        </ul>
+        <a href="{% url 'services_details' key=seo.key %}" class="sc-btn">
+          Explore Service <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+      <i class="bi bi-tools"></i>
+      <h4>No services available yet.</h4>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- WHY CHOOSE US -->
+<section class="why-section">
+  <div class="why-inner">
+    <h2>Why Choose PropCRM?</h2>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-num">01</div>
+        <div class="why-title">Verified Properties</div>
+        <div class="why-desc">Every listing is personally verified by our team of 87 relationship managers.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">02</div>
+        <div class="why-title">No Hidden Charges</div>
+        <div class="why-desc">Transparent pricing with zero brokerage and no hidden fees ever.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">03</div>
+        <div class="why-title">Expert Guidance</div>
+        <div class="why-desc">Dedicated relationship managers to guide you at every step of the journey.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">04</div>
+        <div class="why-title">Fast Closings</div>
+        <div class="why-desc">Verified listings close in an average of 18 days with our process.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div>
+                <div class="fl-brand">🏠 PropCRM</div>
+                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
+                <div class="footer-social mt-4 d-flex gap-3">
+                    <a href="#"><i class="bi bi-facebook"></i></a>
+                    <a href="#"><i class="bi bi-instagram"></i></a>
+                    <a href="#"><i class="bi bi-whatsapp"></i></a>
+                    <a href="#"><i class="bi bi-twitter-x"></i></a>
+                </div>
+            </div>
+            <div>
+                <div class="fl-title">For Tenants</div>
+                <a href="/listingpage/?type=rent" class="fl-link">Flats for Rent</a>
+                <a href="/listingpage/?category=pg" class="fl-link">PG / Hostels</a>
+                <a href="#" class="fl-link">Short-term Stays</a>
+                <a href="#" class="fl-link">Rent Agreement</a>
+            </div>
+            <div>
+                <div class="fl-title">For Buyers</div>
+                <a href="/listingpage/?type=sale" class="fl-link">Flats for Sale</a>
+                <a href="#" class="fl-link">New Projects</a>
+                <a href="#" class="fl-link">Plots &amp; Land</a>
+                <a href="#" class="fl-link">Home Loans</a>
+            </div>
+            <div>
+                <div class="fl-title">For Owners</div>
+                <a href="{% url 'post_property' %}" class="fl-link">Post Property FREE</a>
+                <a href="#" class="fl-link">Agent Registration</a>
+                <a href="#" class="fl-link">PropCRM Plans</a>
+                <a href="#" class="fl-link">Contact Support</a>
             </div>
         </div>
-        {% empty %}
-        <div class="col-12 text-center py-5">
-            <h4>No Services available yet.</h4>
+        <div class="footer-bottom">
+            <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
+            <span>Privacy Policy · Terms · Sitemap</span>
         </div>
-        {% endfor %}
     </div>
-</div>
+</footer>
+
 {% endblock %}

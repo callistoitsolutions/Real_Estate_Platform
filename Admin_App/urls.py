@@ -301,25 +301,21 @@ urlpatterns = [
      path("hero-sections/<int:pk>/toggle/", views.hero_section_toggle, name="hero_section_toggle"),
      
      
-     path("admin/add-blog/", views.add_blog, name="add_blog"),
-     path("admin/blog-list/", views.blog_list, name="blog_list"),
-     path("admin/blog-delete/<int:id>/", views.blog_delete, name="blog_delete"),
-     path("admin/blog-edit/<int:id>/", views.blog_edit, name="blog_edit"),
-     path("add_service", views.add_service, name="add_service"),
+  
+   
      path("about/add/", views.add_about, name="add_about"),
    
      path("achievements/", views.achievements_page, name="achievements_page"),
      path('admin/faqs/add/', views.faq_add, name='faq_add'),
      path("timeline/", views.timeline_page, name="timeline_page"),
-     path("services-list/", views.services_list, name="services_list"),
-     path("delete-service/<int:service_id>/", views.delete_service, name="delete_service"),
+   
      
     #path("ads/", views.ad_list, name="ad_list"),
     path("ads/add/", views.add_ad, name="add_ad"),
 
 
    # path("<str:page_type>/<slug:key>/", views.seo_landing_page, name="seo_landing_page"),
-    path("services/", views.services_list1, name="services_list1"),
+   
     
     
     path("seo_list", views.seo_list, name="seo_list"),
@@ -487,6 +483,46 @@ urlpatterns = [
 
     
     ################END URL SECTION RESALE AGRICULTURAL LISTING######################################################
+
+
+#########################START URL SECTION Blogs##############################################################
+
+     path("admin/add-blog/", views.add_blog, name="add_blog"),
+     path("admin/blog-list/", views.blog_list, name="blog_list"),
+     path("admin/blog-delete/<int:id>/", views.blog_delete, name="blog_delete"),
+     path("admin/blog-edit/<int:id>/", views.blog_edit, name="blog_edit"),
+  
+    path('services/edit/<int:id>/', views.edit_service, name='edit_service'),
+
+
+  
+    path('blogs/import/', views.import_blog_excel, name='import_blog_excel'),
+
+
+#########################START URL SECTION Blogs##############################################################
+
+
+
+#########################START URL SECTION Services Landing Page##############################################################
+
+
+     path("add_service", views.add_service, name="add_service"),
+    
+   
+     path('services/import/', views.import_services_excel, name='import_services_excel'),
+     path("services-list/", views.services_list, name="services_list"),
+     path("delete-service/<int:service_id>/", views.delete_service, name="delete_service"),
+     path("services/", views.services_list1, name="services_list1"),
+    
+    
+    
+    
+    
+     
+ 
+
+#########################END URL SECTION Services Landing Page##############################################################
+
 ]
 
 

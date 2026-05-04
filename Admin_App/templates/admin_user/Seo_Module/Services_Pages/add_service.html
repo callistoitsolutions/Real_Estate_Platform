@@ -1,0 +1,121 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 30px; border-radius: 15px; margin-bottom: 30px; color: white; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.2);">
+        <div class="page-header-content d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="page-title" style="margin: 0; font-size: 1.75rem; font-weight: 700;">
+                    <i class="fas fa-plus-circle"></i> Add Service Detail
+                </h1>
+                <p style="margin: 5px 0 0; opacity: 0.8;">Create a new service offering</p>
+            </div>
+            <div class="page-actions">
+                <a href="{% url 'services_list' %}" class="btn" style="background: white; color: #0284c7; font-weight: 600; border-radius: 8px; padding: 10px 20px; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Back to Services
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="properties-section" style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <h3 style="font-size: 1.2rem; color: #1e293b; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                <i class="fas fa-info-circle text-primary"></i> General Information
+            </h3>
+
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Title <span style="color:red;">*</span></label>
+                    <input type="text" name="title" class="form-control" placeholder="e.g. Property Management" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Icon (Bootstrap class) <span style="color:red;">*</span></label>
+                    <input type="text" name="icon" class="form-control" placeholder="e.g. bi bi-house" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Short Description <span style="color:red;">*</span></label>
+                    <textarea name="short_description" class="form-control" rows="3" placeholder="Brief summary of the service..." style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required></textarea>
+                </div>
+            </div>
+
+            <h3 style="font-size: 1.2rem; color: #1e293b; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                <i class="fas fa-image text-success"></i> Media & Content
+            </h3>
+
+            <div class="row mb-4">
+                <div class="col-md-12 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Featured Image</label>
+                    <div style="border: 2px dashed #cbd5e1; padding: 20px; border-radius: 8px; background: #f8fafc; text-align: center;">
+                        <input type="file" name="featured_image" accept="image/*" class="form-control-file" style="display: inline-block;">
+                    </div>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Content <span style="color:red;">*</span></label>
+                    <div style="border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
+                        <textarea name="content" id="editor" required></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: right; margin-top: 30px;">
+                <button type="submit" class="btn" style="background: #0ea5e9; color: white; padding: 12px 30px; border-radius: 8px; font-weight: 700; font-size: 1rem; border: none; box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);">
+                    <i class="fas fa-save"></i> Save Service
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- ESSENTIAL SCRIPTS -->
+<!-- ============================================== -->
+
+<!-- CKEditor Setup -->
+<script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
+<script>
+  CKEDITOR.replace('editor', {
+    height: 300,
+    extraPlugins: 'colorbutton,font',
+    toolbar: [
+      { name: 'styles', items: ['Format', 'Font', 'FontSize'] },
+      { name: 'colors', items: ['TextColor', 'BGColor'] },
+      { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline'] },
+      { name: 'paragraph', items: ['NumberedList', 'BulletedList'] },
+      { name: 'insert', items: ['Image', 'Table'] },
+      { name: 'links', items: ['Link', 'Unlink'] },
+      { name: 'document', items: ['Source'] }
+    ]
+  });
+</script>
+
+<!-- Sidebar Menu Fix -->
+<script>
+    function toggleSubmenu(event, element) {
+        event.preventDefault(); 
+        event.stopPropagation();
+        
+        const submenu = element.nextElementSibling;
+        
+        document.querySelectorAll('.submenu').forEach(s => { 
+            if(s !== submenu) s.classList.remove('active'); 
+        });
+        
+        document.querySelectorAll('.menu-link').forEach(l => { 
+            if(l !== element) l.classList.remove('dropdown-open'); 
+        });
+        
+        if (submenu) {
+            submenu.classList.toggle('active');
+            element.classList.toggle('dropdown-open');
+        }
+    }
+</script>

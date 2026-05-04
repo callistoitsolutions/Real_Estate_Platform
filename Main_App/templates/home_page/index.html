@@ -19,10 +19,10 @@
     --bg-main: #f8fafc;
     --bg-section: #ffffff;
     --bg-card: #ffffff;
-    --primary: #006ce4; /* Trustworthy Corporate Blue */
+    --primary: #006ce4;
     --primary-dark: #0050a8;
     --accent: #f59e0b;
-    --pr: #f97316; /* Action Orange */
+    --pr: #f97316;
     --pr2: #ea580c;
     --text-dark: #1e293b;
     --text-body: #475569;
@@ -58,10 +58,10 @@ body {
 #hero > p { font-size: 1.1rem; color: rgba(255,255,255,.8); margin-bottom: 28px; position: relative; font-weight: 500; }
 
 /* ============================================
-   ADVANCED 99ACRES STYLE SEARCH BAR (UNTOUCHED)
+   ADVANCED 99ACRES STYLE SEARCH BAR
 ============================================ */
 .search-container-99a {
-    max-width: 1200px; /* INCREASED OVERALL WIDTH */
+    max-width: 1200px;
     margin: 20px auto 0;
     position: relative;
     z-index: 50; 
@@ -267,6 +267,25 @@ body {
     .sb-btn-99a { margin-left: 0; width: 100%; justify-content: center; border-radius: 12px; margin-top: 15px; padding: 14px; }
 }
 
+/* Voice Button Styles */
+#voiceSearchBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 10px;
+    color: #006ce4;
+    font-size: 1.1rem;
+    transition: 0.2s;
+}
+#voiceSearchBtn:hover {
+    color: #0050a8;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
 /* ============================================
    REMAINING STYLES (UPDATED FOR LIGHT THEME)
 ============================================ */
@@ -459,6 +478,11 @@ footer { background: #0f172a; padding: 60px 20px 30px; margin-top: 0; border-top
                     <div id="locality-tags" class="loc-tags-container"></div>
                     <input type="text" id="sb-location-input" placeholder="Search up to 3 localities (Press Enter)">
                 </div>
+                <button type="button" id="voiceSearchBtn" onclick="event.stopPropagation(); toggleVoiceSearch();" 
+                        style="background:none; border:none; cursor:pointer; padding:0 10px; color:#006ce4; font-size:1.1rem;"
+                        title="Voice Search">
+                    <i class="bi bi-mic-fill"></i>
+                </button>
             </div>
 
             <div class="sb-field-99a sb-custom-dropdown" id="type-trigger">
@@ -522,7 +546,7 @@ footer { background: #0f172a; padding: 60px 20px 30px; margin-top: 0; border-top
         <div class="cat-pill active" onclick="filterCat('all',this)"><i class="bi bi-grid-fill"></i> All Properties</div>
         <div class="cat-pill" onclick="filterCat('rent',this)"><i class="bi bi-house-fill"></i> For Rent</div>
         <div class="cat-pill" onclick="filterCat('sale',this)"><i class="bi bi-tag-fill"></i> For Sale</div>
-        <div class="cat-pill" onclick="filterCat('1bhk',this)"><i class="bi bi-door-open"></i> Residential</div>
+        <div class="cat-pill" onclick="filterCat('residential',this)"><i class="bi bi-door-open"></i> Residential</div>
         <div class="cat-pill" onclick="filterCat('commercial',this)"><i class="bi bi-buildings-fill"></i> Commercial</div>
         <div class="cat-pill" onclick="filterCat('pg',this)"><i class="bi bi-person-fill"></i> PG/Co-living</div>
         <div class="cat-pill" onclick="filterCat('verified',this)"><i class="bi bi-shield-check"></i> ✅ Verified Only</div>
@@ -530,103 +554,296 @@ footer { background: #0f172a; padding: 60px 20px 30px; margin-top: 0; border-top
     </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     FEATURED PROPERTIES SECTION (DYNAMIC)
+═══════════════════════════════════════════════════════════════════════════ -->
 <div class="section-wrap" style="padding-top:10px;">
     <div class="sec-header">
         <div>
             <div class="section-title">⭐ Featured Properties</div>
             <div class="section-subtitle">Hand-picked premium listings — verified, high-quality &amp; best priced</div>
         </div>
-        <a href="/listingpage/?type=rent" class="sec-link">View All Featured →</a>
+        <a href="/listingpage/?featured=true" class="sec-link">View All Featured →</a>
     </div>
 
-    {% if featured_props %}
     <div class="prop-grid" id="featuredGrid">
         {% for item in featured_props %}
-        {% with prop=item.data %}
-        <a href="/property/{{ prop.id }}/" class="pcard">
+        <a href="/property/{{ item.data.id }}/?type={{ item.type }}" class="pcard">
             <div class="pc-img">
-                {% if prop.property_images %}
-                <img src="{{ prop.property_images.url }}" alt="{{ prop.property_title }}">
+                {% if item.data.images.first %}
+                    <img src="{{ item.data.images.first.image.url }}" alt="{{ item.data.property_title|default:item.data.title|default:item.data.pg_name }}">
                 {% else %}
-                <div class="pc-img-placeholder">🏠</div>
+                    <div class="pc-img-placeholder" style="background:#e2e8f0;">🏠</div>
                 {% endif %}
+                
                 <div class="pc-badges">
-                    {% if prop.is_featured|lower == "yes" or prop.is_featured == True %}
+                    {% if item.listing_type == 'rent' %}
+                        <span class="badge-tag b-rent">FOR RENT</span>
+                    {% elif item.listing_type == 'sale' %}
+                        <span class="badge-tag b-sale">FOR SALE</span>
+                    {% endif %}
+                    
                     <span class="badge-tag b-feat">⭐ Featured</span>
+                    
+                    {% if item.data.is_verified %}
+                        <span class="badge-tag b-verif">✅ Verified</span>
                     {% endif %}
-                    {% if prop.is_verified|lower == "yes" or prop.is_verified == True %}
-                    <span class="badge-tag b-verif">✅ Verified</span>
-                    {% endif %}
-                    {% if prop.exclusive_property %}
-                    <span class="badge-tag b-excl">💎 Exclusive</span>
-                    {% endif %}
-                    <span class="badge-tag b-rent">FOR RENT</span>
                 </div>
-                <button class="pc-save" onclick="event.preventDefault();">
+                
+                <button class="pc-save" onclick="event.preventDefault();toggleSave({{ item.data.id }},'{{ item.type }}',this)">
                     <i class="bi bi-heart"></i>
                 </button>
-                <div class="pc-price-tag">₹{{ prop.rent_price|floatformat:0 }}</div>
-            </div>
-            <div class="pc-body">
-                <div class="pc-title">{{ prop.property_title|default:"Untitled Property" }}</div>
-                <div class="pc-addr"><i class="bi bi-geo-alt-fill"></i> {{ prop.city }}{% if prop.area %}, {{ prop.area }}{% endif %}</div>
-                <div class="pc-specs">
-                    <div class="spec"><i class="bi bi-door-open"></i> {{ prop.bedrooms|default:"-" }} Bed</div>
-                    <div class="spec"><i class="bi bi-droplet"></i> {{ prop.bathrooms|default:"-" }} Bath</div>
-                    <div class="spec"><i class="bi bi-aspect-ratio"></i> {{ prop.builtup_area|default:"-" }} sqft</div>
-                </div>
-                <div class="pc-meta">
-                    {% if prop.created_at.date == today %}
-                        <span style="color:#10b981;font-weight:700;">🆕 Just Added</span>
-                    {% elif prop.created_at.date >= fifteen_days_ago %}
-                        <span style="color:#f59e0b;font-weight:700;">🔥 Latest</span>
+                
+                <div class="pc-price-tag">
+                    {% if item.listing_type == 'rent' %}
+                        ₹{{ item.data.monthly_rent|default:item.data.expected_rent|default:"N/A"|floatformat:0 }}/mo
                     {% else %}
-                        {{ prop.created_at|timesince }} ago
+                        ₹{{ item.data.expected_price|default:item.data.plot_price|default:"N/A"|floatformat:0 }}
                     {% endif %}
                 </div>
+            </div>
+            
+            <div class="pc-body">
+                <div class="pc-title">{{ item.data.property_title|default:item.data.title|default:item.data.pg_name|truncatechars:50 }}</div>
+                <div class="pc-addr">
+                    <i class="bi bi-geo-alt-fill"></i> 
+                    {{ item.data.city }}{% if item.data.locality %}, {{ item.data.locality }}{% elif item.data.area_locality %}, {{ item.data.area_locality }}{% endif %}
+                </div>
+                
+                <div class="pc-specs">
+                    {% if item.data.bhk_type or item.data.bhk %}
+                        <div class="spec"><i class="bi bi-door-open"></i> {{ item.data.bhk_type|default:item.data.bhk }}</div>
+                    {% endif %}
+                    {% if item.data.bathrooms %}
+                        <div class="spec"><i class="bi bi-droplet"></i> {{ item.data.bathrooms }} Bath</div>
+                    {% endif %}
+                    {% if item.data.built_up_area or item.data.builtup_area %}
+                        <div class="spec"><i class="bi bi-aspect-ratio"></i> {{ item.data.built_up_area|default:item.data.builtup_area|floatformat:0 }} sqft</div>
+                    {% elif item.data.plot_area or item.data.land_area %}
+                        <div class="spec"><i class="bi bi-aspect-ratio"></i> {{ item.data.plot_area|default:item.data.land_area|floatformat:0 }} sqft</div>
+                    {% endif %}
+                </div>
+                
+                <div class="pc-meta">
+                    {% if item.data.created_at.date == today %}
+                        <span style="color:#10b981;font-weight:700;">🆕 Just Added</span>
+                    {% elif item.data.created_at.date >= fifteen_days_ago %}
+                        <span style="color:#f59e0b;font-weight:700;">🔥 Latest</span>
+                    {% else %}
+                        {{ item.data.created_at|timesince }} ago
+                    {% endif %}
+                </div>
+                
                 <div class="pc-footer">
                     <div class="pc-agent">
-                        <div class="pa-av" style="background:#f97316;">OW</div>
+                        <div class="pa-av" style="background:#f97316;">
+                            {{ item.data.owner_name|default:"Owner"|slice:":2"|upper }}
+                        </div>
                         <div>
-                            <div class="pa-name">Owner</div>
+                            <div class="pa-name">{{ item.data.owner_name|default:"Owner"|truncatechars:20 }}</div>
                             <div class="pa-role">Verified Owner</div>
                         </div>
                     </div>
                     <div class="pc-actions">
-                        <button class="pca" onclick="event.preventDefault();" title="Call"><i class="bi bi-telephone"></i></button>
-                        <button class="pca wa" onclick="event.preventDefault();" title="WhatsApp"><i class="bi bi-whatsapp"></i></button>
+                        <button class="pca" onclick="event.preventDefault();callListing('{{ item.data.contact_number|default:item.data.owner_contact }}')" title="Call">
+                            <i class="bi bi-telephone"></i>
+                        </button>
+                        <button class="pca wa" onclick="event.preventDefault();waListing('{{ item.data.contact_number|default:item.data.owner_contact }}')" title="WhatsApp">
+                            <i class="bi bi-whatsapp"></i>
+                        </button>
                     </div>
                 </div>
             </div>
         </a>
-        {% endwith %}
+        {% empty %}
+        <div class="col-12 text-center" style="padding:40px;color:var(--text-muted);grid-column: 1/-1;">
+            <i class="bi bi-inbox" style="font-size:3rem;"></i>
+            <p class="mt-3">No featured properties available at the moment.</p>
+        </div>
         {% endfor %}
     </div>
-    {% else %}
-    <div class="prop-grid" id="featuredGrid"></div>
-    {% endif %}
 
     <div class="text-center mt-4">
-        <a href="/listingpage/?type=rent" class="btn-primary">View All Featured Properties →</a>
+        <a href="/listingpage/?featured=true" class="btn-primary">View All Featured Properties →</a>
     </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     RECENTLY ADDED LISTINGS SECTION (DYNAMIC)
+═══════════════════════════════════════════════════════════════════════════ -->
 <div class="bg-band" style="padding:10px 0 40px;">
     <div class="section-wrap" style="padding-top:40px;padding-bottom:10px;">
-        <div class="sec-header">
+        
+        <div class="sec-header" style="display:flex;justify-content:space-between;align-items:center;">
             <div>
                 <div class="section-title">🆕 Recently Added Listings</div>
                 <div class="section-subtitle">Freshly listed properties — be the first to enquire</div>
             </div>
-            <a href="/listingpage/" class="sec-link">See All New →</a>
+            <a href="/listingpage/?sort=newest" class="sec-link">See All New →</a>
         </div>
-        <div class="prop-grid" id="recentGrid"></div>
+
+      
+
+        <!-- CAROUSEL -->
+        <div class="prop-grid" id="recentGrid">
+            {% for item in recent_props %}
+            <a href="/property/{{ item.data.id }}/?type={{ item.type }}" class="pcard">
+                
+                <div class="pc-img">
+                    {% if item.data.images.first %}
+                        <img src="{{ item.data.images.first.image.url }}" alt="{{ item.data.property_title }}">
+                    {% else %}
+                        <div class="pc-img-placeholder" style="background:#e2e8f0;">🏠</div>
+                    {% endif %}
+                    
+                    <div class="pc-badges">
+                        {% if item.listing_type == 'rent' %}
+                            <span class="badge-tag b-rent">FOR RENT</span>
+                        {% else %}
+                            <span class="badge-tag b-sale">FOR SALE</span>
+                        {% endif %}
+                        
+                        <span class="badge-tag b-new">🆕 New</span>
+                        
+                        {% if item.data.is_verified %}
+                            <span class="badge-tag b-verif">✅ Verified</span>
+                        {% endif %}
+                    </div>
+
+                    <button class="pc-save" onclick="event.preventDefault();toggleSave({{ item.data.id }},'{{ item.type }}',this)">
+                        <i class="bi bi-heart"></i>
+                    </button>
+
+                    <div class="pc-price-tag">
+                        {% if item.listing_type == 'rent' %}
+                            ₹{{ item.data.monthly_rent }}/mo
+                        {% else %}
+                            ₹{{ item.data.expected_price }}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="pc-body">
+                    <div class="pc-title">{{ item.data.property_title }}</div>
+
+                    <div class="pc-addr">
+                        <i class="bi bi-geo-alt-fill"></i> 
+                        {{ item.data.city }}{% if item.data.locality %}, {{ item.data.locality }}{% elif item.data.area_locality %}, {{ item.data.area_locality }}{% endif %}
+                    </div>
+
+                    <div class="pc-specs">
+                        {% if item.data.bhk_type %}
+                            <div class="spec"><i class="bi bi-door-open"></i> {{ item.data.bhk_type }}</div>
+                        {% endif %}
+                        {% if item.data.bathrooms %}
+                            <div class="spec"><i class="bi bi-droplet"></i> {{ item.data.bathrooms }} Bath</div>
+                        {% endif %}
+                        {% if item.data.built_up_area %}
+                            <div class="spec"><i class="bi bi-aspect-ratio"></i> {{ item.data.built_up_area }} sqft</div>
+                        {% elif item.data.plot_area %}
+                            <div class="spec"><i class="bi bi-aspect-ratio"></i> {{ item.data.plot_area }} sqft</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- REMOVED created_at BLOCK (NO ERROR NOW) -->
+                    <div class="pc-meta">
+                        <span style="color:#10b981;font-weight:700;">🆕 Latest Listing</span>
+                    </div>
+
+                    <div class="pc-footer">
+                        <div class="pc-agent">
+                            <div class="pa-av" style="background:#f97316;">
+                                {{ item.data.owner_name|default:"Owner"|slice:":2"|upper }}
+                            </div>
+                            <div>
+                                <div class="pa-name">{{ item.data.owner_name|default:"Owner"|truncatechars:20 }}</div>
+                                <div class="pa-role">Verified Owner</div>
+                            </div>
+                        </div>
+
+                        <div class="pc-actions">
+                            <button class="pca" onclick="event.preventDefault();callListing('{{ item.data.contact_number }}')">
+                                <i class="bi bi-telephone"></i>
+                            </button>
+                            <button class="pca wa" onclick="event.preventDefault();waListing('{{ item.data.contact_number }}')">
+                                <i class="bi bi-whatsapp"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <div style="padding:40px;text-align:center;width:100%;">
+                No recent properties available.
+            </div>
+            {% endfor %}
+        </div>
+
+          <div style="display:flex; justify-content:center; gap:15px; margin:20px 0;">
+    <button onclick="scrollRecent(-1)" class="slider-btn">Prev</button>
+    <button onclick="scrollRecent(1)" class="slider-btn">Next</button>
+</div>
         <div class="text-center mt-5">
-            <a href="/listingpage/" class="btn-primary">View All Listings →</a>
+            <a href="/listingpage/?sort=newest" class="btn-primary">View All Listings →</a>
         </div>
     </div>
 </div>
 
+<!-- STYLE -->
+<style>
+.prop-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 16px;
+    padding-bottom: 10px;
+}
+.prop-grid::-webkit-scrollbar {
+    display: none;
+}
+.pcard {
+    min-width: 300px;
+    max-width: 300px;
+    flex: 0 0 auto;
+}
+.slider-btn {
+    padding: 6px 12px;
+    border: none;
+    background: #111;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+
+.slider-btn {
+    padding: 10px 18px;
+    border: none;
+    background: #2563eb;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+.slider-btn:hover {
+    background: #1d4ed8;
+}
+
+</style>
+
+<!-- SCRIPT -->
+<script>
+function scrollRecent(direction) {
+    const container = document.getElementById('recentGrid');
+    container.scrollBy({
+        left: direction * 320,
+        behavior: 'smooth'
+    });
+}
+</script>
+
+<!-- REST OF THE PAGE REMAINS SAME -->
 <div class="section-wrap">
     <div class="feat-banner">
         <div class="fb-left">
@@ -726,7 +943,7 @@ footer { background: #0f172a; padding: 60px 20px 30px; margin-top: 0; border-top
             {% for blog in blogs %}
             <div class="col-md-4 col-sm-6">
                 <div class="blog-card">
-                    <img src="{{ blog.featured_image.url }}" alt="{{ blog.title }}">
+                    <img src="{{ blog.featured_image }}" alt="{{ blog.title }}">
                     <div class="blog-body">
                         <h6>{{ blog.title|truncatechars:70 }}</h6>
                         <p>{{ blog.short_description|default_if_none:blog.content|truncatechars:110 }}</p>
@@ -934,44 +1151,42 @@ footer { background: #0f172a; padding: 60px 20px 30px; margin-top: 0; border-top
     </div>
 </footer>
 
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
 <script>
-// ── Popover Toggle & Event Delegation ──────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// POPOVER TOGGLE & EVENT DELEGATION
+// ═══════════════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Toggle popovers using event delegation attached to triggers
     document.querySelectorAll('.sb-custom-dropdown').forEach(dropdown => {
         dropdown.addEventListener('click', function(e) {
             e.stopPropagation();
             const popover = this.querySelector('.custom-popover');
             
-            // Close all others
             document.querySelectorAll('.custom-popover').forEach(p => {
                 if (p !== popover) p.classList.remove('show-popover');
             });
             
-            // Toggle current
             if (popover) popover.classList.toggle('show-popover');
         });
     });
 
-    // Prevent closing when clicking INSIDE the popover
     document.querySelectorAll('.custom-popover').forEach(popover => {
         popover.addEventListener('click', function(e) {
             e.stopPropagation();
         });
     });
 
-    // Close all popovers when clicking ANYWHERE OUTSIDE
     document.addEventListener('click', () => {
         document.querySelectorAll('.custom-popover').forEach(p => p.classList.remove('show-popover'));
     });
-    
 });
 
-// Event delegation for Checkboxes and Radio buttons (to update display text instantly)
+// ═══════════════════════════════════════════════════════════════════════════
+// EVENT DELEGATION FOR CHECKBOXES AND RADIO BUTTONS
+// ═══════════════════════════════════════════════════════════════════════════
 document.addEventListener('change', function(e) {
 
     // City Radios
@@ -979,7 +1194,6 @@ document.addEventListener('change', function(e) {
         const display = document.getElementById('city-display');
         display.innerText = e.target.value;
         
-        // Auto close city dropdown when selecting
         const popover = document.getElementById('city-popover');
         if(popover) popover.classList.remove('show-popover');
     }
@@ -1012,14 +1226,14 @@ document.addEventListener('change', function(e) {
             display.style.color = "var(--primary-dark)";
         }
         
-        // Auto close budget dropdown when selecting
         const popover = document.getElementById('budget-popover');
         if(popover) popover.classList.remove('show-popover');
     }
 });
 
-
-// ── Search Multi-Locality Tag Logic (FIXED SCROLLING) ───────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// SEARCH MULTI-LOCALITY TAG LOGIC (FIXED SCROLLING)
+// ═══════════════════════════════════════════════════════════════════════════
 const locInput = document.getElementById('sb-location-input');
 const tagsContainer = document.getElementById('locality-tags');
 let selectedLocalities = []; 
@@ -1039,13 +1253,12 @@ function addLocality(val) {
         selectedLocalities.push(text);
         
         if (selectedLocalities.length >= 3) {
-            locInput.style.display = 'none'; // CRITICAL: Hides the input so space opens up for the 3 tags
+            locInput.style.display = 'none';
         }
         
         renderTags();
         locInput.value = ''; 
         
-        // Auto-scroll logic so the newest tag is always visible
         const localityBox = document.getElementById('loc-scroll-wrapper');
         if(localityBox) {
             setTimeout(() => {
@@ -1053,13 +1266,13 @@ function addLocality(val) {
             }, 10);
         }
     } else if (selectedLocalities.length >= 3) {
-        locInput.value = ''; // Just clear if full
+        locInput.value = '';
     }
 }
 
 function removeLocality(index) {
     selectedLocalities.splice(index, 1);
-    locInput.style.display = 'block'; // Ensure input returns when tag removed
+    locInput.style.display = 'block';
     renderTags();
 }
 
@@ -1080,7 +1293,9 @@ function renderTags() {
     }
 }
 
-// ── Dynamic Tab Switching Logic (Update Popover Options) ───────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// DYNAMIC TAB SWITCHING LOGIC (UPDATE POPOVER OPTIONS)
+// ═══════════════════════════════════════════════════════════════════════════
 const TYPE_OPTIONS = {
     rent: `
         <label class="check-item"><input type="checkbox" class="ptype-cb" value="Residential"> <span>Residential</span></label>
@@ -1097,15 +1312,12 @@ const TYPE_OPTIONS = {
 };
 
 function switchTab(tab, el) {
-    // Remove active class from all tabs, add to clicked
     document.querySelectorAll('.tab-99a').forEach(t => t.classList.remove('active-tab'));
     if(el) el.classList.add('active-tab');
     
-    // Inject new checkboxes into the Property Type popover
     const typeContainer = document.getElementById('type-checkboxes');
     if(typeContainer) typeContainer.innerHTML = TYPE_OPTIONS[tab] || TYPE_OPTIONS['rent'];
     
-    // Reset the Search Box display text
     const typeDisplay = document.getElementById('type-display');
     if(typeDisplay) {
         typeDisplay.innerText = "Property Sub-Type";
@@ -1113,7 +1325,9 @@ function switchTab(tab, el) {
     }
 }
 
-// ── Search Submission Logic ────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// SEARCH SUBMISSION LOGIC
+// ═══════════════════════════════════════════════════════════════════════════
 function doSearch(e) {
     if (e) e.preventDefault();
     
@@ -1123,24 +1337,20 @@ function doSearch(e) {
     const cityRadio = document.querySelector('input[name="city_select"]:checked');
     const city = cityRadio ? cityRadio.value : 'Nagpur';
     
-    // Get ALL Checked Property Types as comma separated string
-    const checkedTypes = Array.from(document.querySelectorAll('.ptype-cb:checked')).map(cb => cb.value).join(',');
+    const checkedTypes = Array.from(document.querySelectorAll('.ptype-cb:checked')).map(cb => cb.value);
     
-    // Get Selected Budget
     const budgetRadio = document.querySelector('input[name="budget_range"]:checked');
     const budget = budgetRadio ? budgetRadio.value : 'Any Budget';
     
     const params = new URLSearchParams();
 
-    // Check if user typed a location but didn't press enter
     const locInputElem = document.getElementById('sb-location-input');
     if (locInputElem && locInputElem.style.display !== 'none') {
         const pendingText = locInputElem.value.trim();
-        if (pendingText) addLocality(pendingText); // Convert to tag
+        if (pendingText) addLocality(pendingText);
     }
-    const locationStr = selectedLocalities.join(','); // Join tags
+    const locationStr = selectedLocalities.join(',');
 
-    // Logic based on tabs
     if (tabText.includes('rent')) {
         params.set('type', 'rent');
     } else {
@@ -1148,37 +1358,225 @@ function doSearch(e) {
     }
 
     params.set('city', city);
-    if (locationStr) params.set('area', locationStr);
+    if (locationStr) params.set('locality', locationStr);
     
-    // Pass custom selections
-    if (checkedTypes) params.set('category', checkedTypes.toLowerCase()); // Passing as 'category' parameter
+    if (checkedTypes.length > 0) {
+        params.set('categories', checkedTypes.join(','));
+    }
+    
     if (budget && budget !== 'Any Budget') params.set('budget', budget);
 
     window.location.href = '/listingpage/?' + params.toString();
 }
 
-// ── Static Listings & Interactions ─────────────────────────────────────────
-const LISTINGS = [
-  {id:1,title:'Spacious 2BHK with Modular Kitchen',type:'rent',cat:'2bhk',price:'₹18,000/mo',
-   area:'920 sqft',beds:2,baths:2,parking:1,floor:'3rd/7',
-   location:'Civil Lines, Nagpur',furnished:'Semi Furnished',available:'Available Now',
-   badges:['featured','verified'],listingType:'rent',
-   owner:'Ramesh Verma',ownerRole:'Verified Owner',ownerColor:'#f97316',ownerInitials:'RV',
-   rmPhone:'9876543210',emoji:'🏠',bgColor:'#e2e8f0',isNew:false},
-  {id:2,title:'Premium 3BHK — Ready Possession',type:'sale',cat:'3bhk',price:'₹65,00,000',
-   area:'1,240 sqft',beds:3,baths:3,parking:2,floor:'2nd/5',
-   location:'Wardha Road, Nagpur',furnished:'Semi Furnished',available:'Ready Possession',
-   badges:['featured','verified','exclusive'],listingType:'sale',
-   owner:'Rajesh Khanna Realty',ownerRole:'Gold Agent',ownerColor:'#7c3aed',ownerInitials:'RK',
-   rmPhone:'9823456789',emoji:'🏢',bgColor:'#cbd5e1',isNew:false},
-  {id:3,title:'Cozy 1BHK — Fully Furnished',type:'rent',cat:'1bhk',price:'₹10,000/mo',
-   area:'480 sqft',beds:1,baths:1,parking:0,floor:'1st/3',
-   location:'Sadar, Nagpur',furnished:'Fully Furnished',available:'Available Now',
-   badges:['new'],listingType:'rent',
-   owner:'Pooja Desai',ownerRole:'Owner',ownerColor:'#0ea5e9',ownerInitials:'PD',
-   rmPhone:'9812345678',emoji:'🏡',bgColor:'#f1f5f9',isNew:true},
-];
+// ═══════════════════════════════════════════════════════════════════════════
+// CATEGORY FILTER
+// ═══════════════════════════════════════════════════════════════════════════
+function filterCat(cat, el) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    
+    let url = '/listingpage/?';
+    
+    if (cat === 'all') {
+        url += '';
+    } else if (cat === 'rent') {
+        url += 'type=rent';
+    } else if (cat === 'sale') {
+        url += 'type=sale';
+    } else if (cat === 'residential') {
+        url += 'category=Residential';
+    } else if (cat === 'commercial') {
+        url += 'category=Commercial';
+    } else if (cat === 'pg') {
+        url += 'category=PG';
+    } else if (cat === 'verified') {
+        url += 'verified=true';
+    } else if (cat === 'featured') {
+        url += 'featured=true';
+    }
+    
+    window.location.href = url;
+}
 
+// ═══════════════════════════════════════════════════════════════════════════
+// PROPERTY ACTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+function toggleSave(id, propType, btn) {
+    btn.classList.toggle('saved');
+    const icon = btn.querySelector('i');
+    
+    if (btn.classList.contains('saved')) {
+        icon.className = 'bi bi-heart-fill';
+        
+        let saved = JSON.parse(localStorage.getItem('savedProperties') || '[]');
+        saved.push({id: id, type: propType});
+        localStorage.setItem('savedProperties', JSON.stringify(saved));
+        
+        Swal.fire({
+            icon:'success',
+            title:'Saved!',
+            text:'Property added to your wishlist.',
+            background:'#ffffff',
+            color:'#1e293b',
+            confirmButtonColor:'#006ce4',
+            timer:1500,
+            showConfirmButton:false
+        });
+    } else {
+        icon.className = 'bi bi-heart';
+        
+        let saved = JSON.parse(localStorage.getItem('savedProperties') || '[]');
+        saved = saved.filter(p => !(p.id === id && p.type === propType));
+        localStorage.setItem('savedProperties', JSON.stringify(saved));
+    }
+}
+
+function callListing(phone) {
+    Swal.fire({
+        title: 'Contact Owner',
+        html: `<div style="text-align:center;padding:8px;">
+                <div style="font-size:1.4rem;font-weight:900;color:#006ce4;margin:12px 0;">
+                    📞 ${phone}
+                </div>
+                <div style="font-size:.8rem;color:#64748b;font-weight:500;">
+                    PropCRM Verified · Available 9AM–7PM
+                </div>
+               </div>`,
+        background: '#ffffff',
+        color: '#1e293b',
+        confirmButtonColor: '#006ce4',
+        confirmButtonText: 'Call Now',
+        showCancelButton: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = `tel:${phone}`;
+        }
+    });
+}
+
+function waListing(phone) {
+    const message = encodeURIComponent("Hi, I'm interested in your property listed on PropCRM. Can we discuss?");
+    window.open(`https://wa.me/91${phone}?text=${message}`, '_blank');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 🎤 VOICE SEARCH FUNCTIONALITY
+// ═══════════════════════════════════════════════════════════════════════════
+let recognition;
+let isListening = false;
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-IN';
+    
+    recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        const input = document.getElementById('sb-location-input');
+        
+        if (input) {
+            addLocality(transcript);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Voice Recognized!',
+                text: `Added: "${transcript}"`,
+                timer: 2000,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+        
+        isListening = false;
+        updateVoiceButton();
+    };
+    
+    recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+        isListening = false;
+        updateVoiceButton();
+        
+        Swal.fire({
+            icon: 'error',
+            title: 'Voice Error',
+            text: 'Could not recognize speech. Please try again.',
+            timer: 2000,
+            toast: true,
+            position: 'top-end'
+        });
+    };
+    
+    recognition.onend = function() {
+        isListening = false;
+        updateVoiceButton();
+    };
+}
+
+function toggleVoiceSearch() {
+    if (!recognition) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Not Supported',
+            text: 'Voice search is not supported in your browser. Please use Chrome or Edge.',
+            confirmButtonColor: '#006ce4'
+        });
+        return;
+    }
+    
+    if (isListening) {
+        recognition.stop();
+        isListening = false;
+    } else {
+        if (selectedLocalities.length >= 3) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Limit Reached',
+                text: 'You can only add up to 3 localities.',
+                timer: 2000,
+                toast: true,
+                position: 'top-end'
+            });
+            return;
+        }
+        
+        recognition.start();
+        isListening = true;
+        
+        Swal.fire({
+            icon: 'info',
+            title: 'Listening...',
+            text: 'Speak the locality name now',
+            timer: 3000,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end',
+            timerProgressBar: true
+        });
+    }
+    
+    updateVoiceButton();
+}
+
+function updateVoiceButton() {
+    const btn = document.getElementById('voiceSearchBtn');
+    if (btn) {
+        if (isListening) {
+            btn.innerHTML = '<i class="bi bi-mic-fill" style="color:#ef4444;"></i>';
+            btn.style.animation = 'pulse 1.5s infinite';
+        } else {
+            btn.innerHTML = '<i class="bi bi-mic-fill"></i>';
+            btn.style.animation = 'none';
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CHECK FOR NEW LISTING BANNER
+// ═══════════════════════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
     const newL = localStorage.getItem('newListingAdded');
     if (newL) {
@@ -1189,88 +1587,8 @@ window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('newListingMsg').textContent = `"${data.title}" is now live! Visible to 1,248+ users on PropCRM.`;
         }
         localStorage.removeItem('newListingAdded');
-        LISTINGS.unshift({...data, isNew:true, badges:['new'], listingType:'rent', bgColor:'#f1f5f9', emoji:'🏠'});
     }
-    renderRecent();
 });
-
-function buildCard(l) {
-    const badgeHTML = l.badges.map(b => {
-        const map = { featured: '<span class="badge-tag b-feat">⭐ Featured</span>', verified: '<span class="badge-tag b-verif">✅ Verified</span>', exclusive: '<span class="badge-tag b-excl">💎 Exclusive</span>', new: '<span class="badge-tag b-new">🆕 New</span>' };
-        return map[b] || '';
-    }).join('');
-
-    const typeBadge = l.listingType === 'rent' ? '<span class="badge-tag b-rent">FOR RENT</span>' : l.listingType === 'sale' ? '<span class="badge-tag b-sale">FOR SALE</span>' : '<span class="badge-tag b-both">RENT + SALE</span>';
-
-    const specs = [];
-    if (l.beds > 0) specs.push(`<div class="spec"><i class="bi bi-door-open"></i> ${l.beds} Bed</div>`);
-    specs.push(`<div class="spec"><i class="bi bi-droplet"></i> ${l.baths} Bath</div>`);
-    specs.push(`<div class="spec"><i class="bi bi-aspect-ratio"></i> ${l.area}</div>`);
-    if (l.parking > 0) specs.push(`<div class="spec"><i class="bi bi-car-front"></i> Parking</div>`);
-
-    return `
-    <a href="/listing_detail/?id=${l.id}" class="pcard">
-        <div class="pc-img">
-            <div class="pc-img-placeholder" style="background:${l.bgColor};">${l.emoji}</div>
-            <div class="pc-badges">${typeBadge} ${badgeHTML}</div>
-            <button class="pc-save" onclick="event.preventDefault();toggleSave(${l.id},this)"><i class="bi bi-heart"></i></button>
-            <div class="pc-price-tag">${l.price}</div>
-        </div>
-        <div class="pc-body">
-            <div class="pc-title">${l.title}</div>
-            <div class="pc-addr"><i class="bi bi-geo-alt-fill"></i> ${l.location}</div>
-            <div class="pc-specs">${specs.join('')}</div>
-            <div class="pc-meta">${l.furnished} &nbsp;·&nbsp; ${l.floor} Floor &nbsp;·&nbsp; ${l.available}</div>
-            <div class="pc-footer">
-                <div class="pc-agent"><div class="pa-av" style="background:${l.ownerColor};">${l.ownerInitials}</div><div><div class="pa-name">${l.owner}</div><div class="pa-role">${l.ownerRole}</div></div></div>
-                <div class="pc-actions">
-                    <button class="pca" onclick="event.preventDefault();callListing(${l.id})" title="Call"><i class="bi bi-telephone"></i></button>
-                    <button class="pca wa" onclick="event.preventDefault();waListing(${l.id})" title="WhatsApp"><i class="bi bi-whatsapp"></i></button>
-                </div>
-            </div>
-        </div>
-    </a>`;
-}
-
-function renderRecent() {
-    const recentGrid = document.getElementById('recentGrid');
-    if (!recentGrid) return;
-    const recent = [...LISTINGS].sort((a,b) => b.id - a.id).slice(0, 6);
-    recentGrid.innerHTML = recent.map(buildCard).join('');
-}
-
-function filterCat(cat, el) {
-    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-    el.classList.add('active');
-    let filtered;
-    if (cat === 'all') filtered = LISTINGS;
-    else if (cat === 'rent') filtered = LISTINGS.filter(l => l.listingType === 'rent' || l.listingType === 'both');
-    else if (cat === 'sale') filtered = LISTINGS.filter(l => l.listingType === 'sale' || l.listingType === 'both');
-    else if (cat === 'featured') filtered = LISTINGS.filter(l => l.badges.includes('featured'));
-    else if (cat === 'verified') filtered = LISTINGS.filter(l => l.badges.includes('verified'));
-    else filtered = LISTINGS.filter(l => l.cat === cat || l.type === cat);
-    document.getElementById('recentGrid').innerHTML = (filtered.length ? filtered : LISTINGS).slice(0,6).map(buildCard).join('');
-}
-
-function toggleSave(id, btn) {
-    btn.classList.toggle('saved');
-    const icon = btn.querySelector('i');
-    if (btn.classList.contains('saved')) {
-        icon.className = 'bi bi-heart-fill';
-        Swal.fire({icon:'success',title:'Saved!',text:'Property added to your wishlist.', background:'#ffffff',color:'#1e293b',confirmButtonColor:'#006ce4', timer:1500,showConfirmButton:false});
-    } else {
-        icon.className = 'bi bi-heart';
-    }
-}
-
-function callListing(id) {
-    const l = LISTINGS.find(x => x.id === id);
-    Swal.fire({ title: 'Contact Owner', html: `<div style="text-align:center;padding:8px;"><div style="font-size:1rem;font-weight:700;color:#1e293b;">${l ? l.owner : 'Owner'}</div><div style="font-size:1.4rem;font-weight:900;color:#006ce4;margin:12px 0;">📞 ${l ? l.rmPhone : '9876543210'}</div><div style="font-size:.8rem;color:#64748b;font-weight:500;">PropCRM Verified · Available 9AM–7PM</div></div>`, background: '#ffffff', color: '#1e293b', confirmButtonColor: '#006ce4', confirmButtonText: 'Call Now' });
-}
-
-function waListing(id) {
-    Swal.fire({icon:'success',title:'Opening WhatsApp', text:'Connecting you with the property owner.', background:'#ffffff',color:'#1e293b',timer:1500,showConfirmButton:false});
-}
 </script>
 
 </body>

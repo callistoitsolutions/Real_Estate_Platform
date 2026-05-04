@@ -1947,92 +1947,11 @@ from django.utils.text import slugify
 
 
 
-def add_blog(request):
-    if request.method == "POST":
-        blog = Blog.objects.create(
-            title=request.POST.get("title"),
-            category=request.POST.get("category"),
-            reading_time=request.POST.get("reading_time"),
-            content=request.POST.get("content"),
-            featured_image=request.FILES.get("featured_image"),
-            author=request.POST.get("author"),
-        )
-        return redirect("blog_list")
-
-    return render(request, "admin_user/blog_add.html")
-
-
-
-
-
-
-def blog_list(request):
-    blogs = Blog.objects.all().order_by("-date_posted")
-    return render(request, "admin_user/blog_list.html", {"blogs": blogs})
-
-
-def blog_delete(request, id):
-    blog = get_object_or_404(Blog, id=id)
-    blog.delete()
-    return redirect("blog_list")
-
-
-def blog_edit(request, id):
-    blog = get_object_or_404(Blog, id=id)
-    if request.method == "POST":
-        blog.title = request.POST.get("title")
-        blog.category = request.POST.get("category")
-        blog.reading_time = request.POST.get("reading_time")
-        blog.content = request.POST.get("content")
-        if request.FILES.get("featured_image"):
-            blog.featured_image = request.FILES.get("featured_image")
-        blog.author = request.POST.get("author")
-        blog.slug = slugify(blog.title)
-        blog.save()
-        return redirect("blog_list")
-
-    return render(request, "admin_user/blog_edit.html", {"blog": blog})
-
 
 
 # services/views.py
 
 
-def add_service(request):
-    if request.method == "POST":
-        title = request.POST.get("title")
-        icon = request.POST.get("icon")
-        short_description = request.POST.get("short_description")
-        content = request.POST.get("content")   # CKEditor sends HTML
-        featured_image = request.FILES.get("featured_image")
-        active = bool(request.POST.get('is_active'))
-
-        service = Service(
-            title=title,
-            icon=icon,
-            short_description=short_description,
-            content=content,
-            featured_image=featured_image,
-           # is_active=active
-            #active = bool(request.POST.get('is_active'))
-        )
-        service.save()
-       # return redirect("services_list")  # after save go to list page
-
-    return render(request, "admin_user/add_service.html")
-
-
-def delete_service(request, service_id):
-    service = get_object_or_404(Service, id=service_id)
-    service.delete()
-    return redirect("services_list")
-
-
-
-
-def services_list(request):
-    services = Service.objects.all().order_by('-id')
-    return render(request, 'admin_user/services_list.html', {'services': services})
 
 # ADD view
 def add_about(request):
@@ -2239,9 +2158,6 @@ def add_ad(request):
 # seo/views.py
 
 
-def seo_list(request):
-    seo_pages = LocationSEO.objects.all().order_by('-id')
-    return render(request, "admin_user/seo_list.html", {"seo_pages": seo_pages})
 
 
 def toggle_seo_status(request, pk):
@@ -4277,6 +4193,7 @@ def download_pg_template(request):
     return response
 
 
+
 @csrf_exempt
 def pg_edit(request, pk):
     sid, admin_obj = _get_admin(request) # Use your standard auth check
@@ -4349,17 +4266,13 @@ def pg_edit(request, pk):
             pg.drinking_allowed = True if request.POST.get("drinking_allowed") else False
             pg.smoking_allowed = True if request.POST.get("smoking_allowed") else False
 
-            # ✅ 5. CONTACT & UPLOADER
+            # ✅ 5. CONTACT
             pg.owner_name = request.POST.get("owner_name")
             pg.contact_number = request.POST.get("contact_number")
             pg.email = request.POST.get("email")
             pg.alternate_contact = request.POST.get("alternate_contact")
 
-            # We usually keep original uploader data, but map it if needed
-            pg.uploaded_by_name = request.POST.get("uploaded_by_name", pg.uploaded_by_name)
-            pg.uploaded_by_email = request.POST.get("uploaded_by_email", pg.uploaded_by_email)
-            pg.uploaded_by_contact = request.POST.get("uploaded_by_contact", pg.uploaded_by_contact)
-            pg.uploaded_by_role = request.POST.get("uploaded_by_role", pg.uploaded_by_role)
+            # REMOVED UPLOADER FIELDS AS THEY DO NOT EXIST IN THE PG MODEL
 
             # ✅ 6. MEDIA
             if "floor_plan" in request.FILES:
@@ -4381,7 +4294,7 @@ def pg_edit(request, pk):
             return JsonResponse({
                 "status": "success",
                 "message": "PG Updated Successfully",
-                "redirect_url": reverse('pg_list') # Replace with your actual list URL name
+                "redirect_url": reverse('pg_list') # Ensure 'pg_list' matches your urls.py
             })
 
         except Exception as e:
@@ -4413,9 +4326,6 @@ def pg_edit(request, pk):
         "ameneties_obj": Ameneties_Details.objects.all(),
         "facilities_obj": Facilities_Details.objects.all(),
     })
-
-   
-
 
 
 
@@ -7172,3 +7082,232 @@ def view_agricultural_property(request, pk):
     return render(request, 'admin_user/Resale//view_agricultural_resale.html', context)
 
 ####################END Views Section For AGRICULTURAL Resale Property #######################################
+
+
+
+#######################Start View SEO MODULE SECTION###################################
+
+def seo_list(request):
+    seo_pages = LocationSEO.objects.all().order_by('-id')
+    return render(request, "admin_user/Seo_Module/seo_list.html", {"seo_pages": seo_pages})
+
+
+
+
+#######################End View SEO MODULE SECTION###################################
+
+
+
+#######################Start View BLOG MODULE SECTION###################################
+
+
+def add_blog(request):
+    if request.method == "POST":
+        blog = Blog.objects.create(
+            title=request.POST.get("title"),
+            category=request.POST.get("category"),
+            reading_time=request.POST.get("reading_time"),
+            content=request.POST.get("content"),
+            featured_image=request.FILES.get("featured_image"),
+            author=request.POST.get("author"),
+        )
+        return redirect("blog_list")
+
+    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_add.html")
+
+
+
+
+
+
+def blog_list(request):
+    blogs = Blog.objects.all().order_by("-date_posted")
+    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_list.html", {"blogs": blogs})
+
+
+def blog_delete(request, id):
+    blog = get_object_or_404(Blog, id=id)
+    blog.delete()
+    return redirect("blog_list")
+
+
+def blog_edit(request, id):
+    blog = get_object_or_404(Blog, id=id)
+    if request.method == "POST":
+        blog.title = request.POST.get("title")
+        blog.category = request.POST.get("category")
+        blog.reading_time = request.POST.get("reading_time")
+        blog.content = request.POST.get("content")
+        if request.FILES.get("featured_image"):
+            blog.featured_image = request.FILES.get("featured_image")
+        blog.author = request.POST.get("author")
+        blog.slug = slugify(blog.title)
+        blog.save()
+        return redirect("blog_list")
+
+    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_edit.html", {"blog": blog})
+
+
+
+def import_blog_excel(request):
+    if request.method == 'POST':
+        excel_file = request.FILES.get('file')
+        
+        # Validation
+        if not excel_file or not excel_file.name.endswith('.xlsx'):
+            return JsonResponse({'status': 'error', 'message': 'Please upload a valid .xlsx file.'})
+
+        try:
+            wb = openpyxl.load_workbook(excel_file)
+            sheet = wb.active
+            
+            # Assuming Excel columns are: [Title, Category, Author, Reading Time, Content]
+            imported_count = 0
+            for row in sheet.iter_rows(min_row=2, values_only=True): # Start from row 2 to skip headers
+                if len(row) >= 5:
+                    title = row[0]
+                    category = row[1] if row[1] else ""
+                    author = row[2] if row[2] else ""
+                    reading_time = str(row[3]) if row[3] else ""
+                    content = row[4] if row[4] else ""
+                    
+                    if title: # Only save if title exists
+                        Blog.objects.create(
+                            title=title,
+                            category=category,
+                            author=author,
+                            reading_time=reading_time,
+                            content=content
+                        )
+                        imported_count += 1
+            
+            return JsonResponse({'status': 'success', 'imported': imported_count})
+            
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+#######################END View BLOG MODULE SECTION###################################
+
+
+#######################START View SERVICES LANDING PAGE  MODULE SECTION###################################
+
+def add_service(request):
+    if request.method == "POST":
+        title = request.POST.get("title")
+        icon = request.POST.get("icon")
+        short_description = request.POST.get("short_description")
+        content = request.POST.get("content")   # CKEditor sends HTML
+        featured_image = request.FILES.get("featured_image")
+        active = bool(request.POST.get('is_active'))
+
+        service = Service(
+            title=title,
+            icon=icon,
+            short_description=short_description,
+            content=content,
+            featured_image=featured_image,
+           # is_active=active
+            #active = bool(request.POST.get('is_active'))
+        )
+        service.save()
+       # return redirect("services_list")  # after save go to list page
+
+    return render(request, "admin_user/Seo_Module/Services_Pages/add_service.html")
+
+
+def delete_service(request, service_id):
+    service = get_object_or_404(Service, id=service_id)
+    service.delete()
+    return redirect("services_list")
+
+
+
+def edit_service(request, id):
+    # Fetch the existing service using its ID
+    service = get_object_or_404(Service, id=id)
+
+    if request.method == "POST":
+        # Get data from the form
+        title = request.POST.get("title")
+        icon = request.POST.get("icon")
+        short_description = request.POST.get("short_description")
+        content = request.POST.get("content")
+        featured_image = request.FILES.get("featured_image")
+        
+        # Update the object
+        service.title = title
+        service.icon = icon
+        service.short_description = short_description
+        service.content = content
+        
+        # Only update the image if a new one was uploaded
+        if featured_image:
+            service.featured_image = featured_image
+            
+        # service.is_active = bool(request.POST.get('is_active')) # Uncomment if using active status
+
+        # Save to database
+        service.save()
+        
+        # Redirect back to the services list
+        return redirect("services_list")
+
+    # For a GET request, pass the service object to the template
+    context = {
+        'service': service
+    }
+    return render(request, "admin_user/Seo_Module/Services_Pages/edit_service.html", context)
+
+
+def services_list(request):
+    services = Service.objects.all().order_by('-id')
+    return render(request, 'admin_user/Seo_Module/Services_Pages/services_list.html', {'services': services})
+
+
+
+
+
+def import_services_excel(request):
+    if request.method == 'POST':
+        excel_file = request.FILES.get('file')
+        
+        # Validation
+        if not excel_file or not excel_file.name.endswith('.xlsx'):
+            return JsonResponse({'status': 'error', 'message': 'Please upload a valid .xlsx file.'})
+
+        try:
+            wb = openpyxl.load_workbook(excel_file)
+            sheet = wb.active
+            
+            # Assuming Excel columns are: [Title, Icon, Short Description, Content]
+            imported_count = 0
+            for row in sheet.iter_rows(min_row=2, values_only=True): # Start from row 2 to skip headers
+                if len(row) >= 4:
+                    title = row[0]
+                    icon = row[1] if row[1] else "bi bi-check-circle" # Default icon fallback
+                    short_description = row[2] if row[2] else ""
+                    content = row[3] if row[3] else ""
+                    
+                    if title: # Only save if title exists
+                        Service.objects.create(
+                            title=title,
+                            icon=icon,
+                            short_description=short_description,
+                            content=content
+                        )
+                        imported_count += 1
+            
+            return JsonResponse({'status': 'success', 'imported': imported_count})
+            
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+
+
+
+
+#######################END View SERVICES LANDING PAGE  MODULE SECTION###################################

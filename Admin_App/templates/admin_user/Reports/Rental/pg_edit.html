@@ -1714,11 +1714,11 @@
                   </div>
                 </div>
                 
-                <!-- Preserve Uploader Info -->
-                <input type="hidden" name="uploaded_by_name" value="{{ pg.uploaded_by_name }}">
-                <input type="hidden" name="uploaded_by_email" value="{{ pg.uploaded_by_email }}">
-                <input type="hidden" name="uploaded_by_contact" value="{{ pg.uploaded_by_contact }}">
-                <input type="hidden" name="uploaded_by_role" value="{{ pg.uploaded_by_role }}">
+              <!-- Preserve Uploader Info - REMOVE THESE -->
+<input type="hidden" name="uploaded_by_name" value="{{ pg.uploaded_by_name }}">
+<input type="hidden" name="uploaded_by_email" value="{{ pg.uploaded_by_email }}">
+<input type="hidden" name="uploaded_by_contact" value="{{ pg.uploaded_by_contact }}">
+<input type="hidden" name="uploaded_by_role" value="{{ pg.uploaded_by_role }}">
 
               </div>
             </div>
@@ -1783,20 +1783,116 @@
 
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<!-- SCRIPTS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <script>
   let currentStep = 1;
   let roomCount = {{ parsed_rooms|length|default:1 }};
+  let selectedFiles = [];
   
-  // (Keep your existing goToStep and validateStep logic from the Add form here)
-  function goToStep(n) { /* ... */ }
-  function validateStep(n) { return true; /* Implement based on your fields */ }
+  // ── STEPPER NAVIGATION ──
+  function goToStep(n) {
+    // Basic validation before moving forward
+    if (n > currentStep) {
+        let isValid = true;
+        const currentSection = document.getElementById('step' + currentStep);
+        
+        // Simple check for required fields in current step
+        currentSection.querySelectorAll('[required]').forEach(field => {
+            field.style.border = '2px solid #e9ecef';
+            if (!field.value.trim() && field.type !== 'file') {
+                field.style.border = '2px solid #e74c3c';
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Incomplete Fields',
+                text: 'Please fill out all required fields before proceeding.',
+                confirmButtonColor: '#667eea'
+            });
+            return;
+        }
+    }
 
-  // MEALS TOGGLE
-  document.getElementById('mealsToggle').addEventListener('change', function() {
-    document.getElementById('mealOfferings').style.display = this.checked ? 'block' : 'none';
+    // Hide all steps
+    document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+    
+    // Show target step
+    document.getElementById('step' + n).classList.add('active');
+    
+    // Update Stepper UI (Circles and Lines)
+    for (let i = 1; i <= 4; i++) {
+      const sc = document.getElementById('sc' + i);
+      const sl = document.getElementById('sl' + i);
+      const line = document.getElementById('line' + i);
+      
+      sc.className = 'step-circle';
+      sl.className = 'step-label';
+      if (line) line.className = 'step-line';
+      
+      if (i < n) {
+        sc.classList.add('done');
+        sl.classList.add('done');
+        sc.innerHTML = '<i class="fas fa-check" style="font-size:.65rem;"></i>';
+        if (line) line.classList.add('done');
+      } else if (i === n) {
+        sc.classList.add('active');
+        sl.classList.add('active');
+        sc.textContent = i;
+      } else {
+        sc.textContent = i;
+      }
+    }
+    
+    currentStep = n;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updatePreview();
+  }
+
+  // ── LIVE PREVIEW & CHECKLIST ──
+  function updatePreview() {
+    const city = document.querySelector('input[name="city"]')?.value || '';
+    const loc = document.querySelector('input[name="locality"]')?.value || '';
+    const pgName = document.querySelector('input[name="pg_name"]')?.value || 'PG Property';
+    const beds = document.querySelector('input[name="total_beds"]')?.value;
+    
+    // Get rent from the first room card if it exists
+    const firstRentInput = document.querySelector('.room-rent');
+    const rent = firstRentInput ? firstRentInput.value : '';
+
+    document.getElementById('previewTitle').textContent = pgName;
+    document.getElementById('previewLoc').innerHTML = '<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ' + (loc || 'Area') + (city ? ', ' + city : '');
+    document.getElementById('previewPrice').textContent = rent ? '₹' + parseInt(rent).toLocaleString('en-IN') + ' /mo' : '₹ — /mo';
+    document.getElementById('prevBeds').textContent = beds ? beds + ' beds' : '— beds';
+
+    // Checklist updates
+    setCheck('cl-pgname', !!pgName && pgName !== 'PG Property');
+    setCheck('cl-location', !!loc && !!city);
+    setCheck('cl-beds', !!beds);
+    setCheck('cl-rooms', !!rent);
+    setCheck('cl-owner', !!document.querySelector('input[name="owner_name"]')?.value);
+  }
+
+  function setCheck(id, done) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'cl-item' + (done ? ' done' : '');
+    el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+  }
+
+  // Attach preview listeners
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+      el.addEventListener('input', updatePreview);
+      el.addEventListener('change', updatePreview);
   });
+  window.addEventListener('DOMContentLoaded', updatePreview);
 
-  // PILL BUTTONS (Updating hidden inputs correctly)
+  // ── PILL BUTTONS (Updating hidden inputs) ──
   document.querySelectorAll('.pill-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.preventDefault();
@@ -1805,16 +1901,22 @@
       }
       this.classList.toggle('active');
       
-      const parentGroup = this.closest('.form-group');
+      const parentGroup = this.closest('.col-md-6') || this.closest('.form-group');
       const hiddenInput = parentGroup.querySelector('input[type="hidden"]');
       if (hiddenInput) {
           const actives = Array.from(parentGroup.querySelectorAll('.pill-btn.active')).map(b => b.dataset.value);
           hiddenInput.value = actives.join(',');
       }
+      updatePreview();
     });
   });
 
-  // BROKERAGE
+  // ── MEALS TOGGLE ──
+  document.getElementById('mealsToggle').addEventListener('change', function() {
+    document.getElementById('mealOfferings').style.display = this.checked ? 'block' : 'none';
+  });
+
+  // ── DYNAMIC BROKERAGE DISPLAY ──
   document.addEventListener('change', function(e) {
     if (e.target.classList.contains('brokerageSelect')) {
       const parent = e.target.closest('.room-card');
@@ -1826,16 +1928,134 @@
     }
   });
 
-  // ROOM GENERATOR (If needed to add more rooms)
-  function addRoom() { /* ... Keep your existing Add Room JS ... */ }
+  // ── ADD ROOM DYNAMICALLY ──
+  function addRoom() {
+    roomCount++;
+    const container = document.getElementById('rooms-container');
+    const newRoom = document.createElement('div');
+    newRoom.className = 'room-card';
+    newRoom.innerHTML = `
+      <div class="room-card-header"><div class="room-card-title">Room ${roomCount}</div></div>
+      <div class="row">
+        <div class="col-md-6 mb-2">
+          <label class="form-label">Room Type <span class="required">*</span></label>
+          <select class="form-select" name="room_type[]" required>
+            <option value="">Select</option><option value="single">Single Occupancy</option><option value="double">Double Sharing</option><option value="triple">Triple Sharing</option><option value="quad">4+ Sharing</option>
+          </select>
+        </div>
+        <div class="col-md-6 mb-2">
+          <label class="form-label">Total Beds <span class="required">*</span></label>
+          <input type="number" class="form-control" name="room_beds[]" min="1" required>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-6">
+          <label class="form-label">Rent (₹/mo) <span class="required">*</span></label>
+          <input type="number" class="form-control room-rent" name="room_rent[]" min="0" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Security Deposit (₹) <span class="required">*</span></label>
+          <input type="number" class="form-control" name="room_deposit[]" min="0" required>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-6">
+          <label class="form-label">Brokerage</label>
+          <select class="form-select brokerageSelect" name="room_brokerage[]">
+            <option value="">Select Option</option><option value="Yes">Yes</option><option value="No">No</option>
+          </select>
+        </div>
+        <div class="col-md-6 brokerageSection" style="display:none;">
+          <label class="form-label">Brokerage %</label>
+          <select class="form-select brokeragePercentage" name="room_brokerage_percent[]">
+            <option value="">Select Brokerage</option><option value="1%">1%</option><option value="2%">2%</option><option value="Manual">Manual</option>
+          </select>
+        </div>
+      </div>
+      <div class="row mt-2 manualBrokerage" style="display:none;">
+        <div class="col-md-6">
+          <label class="form-label">Enter Brokerage (₹)</label>
+          <input type="text" class="form-control" name="room_manual_brokerage[]">
+        </div>
+      </div>
+    `;
+    container.appendChild(newRoom);
+    
+    // Add listener to new rent input for preview
+    newRoom.querySelector('.room-rent').addEventListener('input', updatePreview);
+  }
 
-  // FILE UPLOAD (Keep your existing Image Preview JS here)
+  // ── CHECKBOX TRACKERS ──
+  $(document).on('change', 'input[name="amenities[]"]', function() {
+    setCheck('cl-amenities', $('input[name="amenities[]"]:checked').length > 0);
+  });
+  $(document).on('change', 'input[name="facilities[]"]', function() {
+    setCheck('cl-facilities', $('input[name="facilities[]"]:checked').length > 0);
+  });
 
-  // SWEETALERT CONFIRMATION FOR EDIT
+  // ── NEW IMAGE UPLOAD HANDLING ──
+  const uploadArea = document.getElementById('uploadArea');
+  const imageInput = document.getElementById('imageInput');
+  const imagePreview = document.getElementById('imagePreview');
+
+  uploadArea.addEventListener('click', () => imageInput.click());
+  uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = '#667eea'; });
+  uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = '#cbd5e0'; });
+  uploadArea.addEventListener('drop', (e) => { 
+      e.preventDefault(); 
+      uploadArea.style.borderColor = '#cbd5e0'; 
+      handleFiles(e.dataTransfer.files); 
+  });
+  imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+  function handleFiles(files) {
+    const dt = new DataTransfer();
+    Array.from(files).forEach(f => { if(f.type.startsWith('image/')) selectedFiles.push(f); });
+    
+    // Limit to 10 max additional images
+    if(selectedFiles.length > 10) selectedFiles = selectedFiles.slice(0, 10);
+    
+    selectedFiles.forEach(f => dt.items.add(f));
+    imageInput.files = dt.files;
+    
+    imagePreview.innerHTML = "";
+    if(selectedFiles.length > 0) {
+        imagePreview.style.display = 'grid';
+        selectedFiles.forEach(f => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                imagePreview.innerHTML += `
+                <div class="preview-item">
+                    <img src="${e.target.result}">
+                    <button type="button" class="remove-image" onclick="removeNewImage('${f.name}', this)"><i class="fas fa-times"></i></button>
+                </div>`;
+            };
+            reader.readAsDataURL(f);
+        });
+    } else {
+        imagePreview.style.display = 'none';
+    }
+  }
+
+  function removeNewImage(fname, btn) {
+    selectedFiles = selectedFiles.filter(f => f.name !== fname);
+    const dt = new DataTransfer();
+    selectedFiles.forEach(f => dt.items.add(f));
+    imageInput.files = dt.files;
+    btn.parentElement.remove();
+    if(selectedFiles.length === 0) imagePreview.style.display = 'none';
+  }
+
+  // ── SWEETALERT FORM SUBMISSION ──
   document.getElementById('pgEditForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
-    // if(!validateStep(4)) return; // Ensure last step is valid
+    // Final check before submission
+    const ownerName = document.querySelector('input[name="owner_name"]').value;
+    if(!ownerName) {
+        Swal.fire('Incomplete', 'Please provide the Owner Name in Step 4.', 'warning');
+        return;
+    }
 
     Swal.fire({
       title: 'Update PG Property?',
@@ -1844,7 +2064,7 @@
       showCancelButton: true,
       confirmButtonColor: '#667eea',
       cancelButtonColor: '#e74c3c',
-      confirmButtonText: 'Yes, update it!'
+      confirmButtonText: '<i class="fas fa-save"></i> Yes, update it!'
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire({ title: 'Updating...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -1864,7 +2084,10 @@
             Swal.fire('Error!', data.message, 'error');
           }
         })
-        .catch(() => Swal.fire('Error!', 'Server connection failed.', 'error'));
+        .catch((err) => {
+            console.error(err);
+            Swal.fire('Error!', 'Server connection failed.', 'error');
+        });
       }
     });
   });

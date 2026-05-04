@@ -1,276 +1,270 @@
-{% extends 'home_page/base.html' %}
+{% include 'home_page/header.html' %}
 
-{% block title %}All Blogs | YourBrand{% endblock %}
 
 {% block extra_css %}
 <style>
-/* ==========================================
-   BLOG PAGE SPECIFIC STYLES
-========================================== */
-.page-title-section {
+:root {
+  --bg-main:#f8fafc; --bg-card:#ffffff; --primary:#006ce4; --primary-dark:#0050a8;
+  --accent:#f59e0b; --text-dark:#1e293b; --text-body:#475569; --text-muted:#64748b;
+  --border:#e2e8f0; --shadow-1:0 4px 12px rgba(0,0,0,.06); --shadow-2:0 12px 30px rgba(0,0,0,.1); --radius:12px;
+}
+
+/* PAGE HERO */
+.page-hero {
+  background: linear-gradient(135deg, #002347 0%, #004282 50%, #0059b3 100%);
+  padding: 70px 20px 55px;
   text-align: center;
-  padding: 80px 0 50px;
-  background: linear-gradient(135deg, #4f73ff, #1fa2ff);
-  margin: 20px 0;
-  border-radius: 25px;
-}
-
-.page-title {
-  font-size: 2.8rem;
-  font-weight: 900;
-  color: white;
-  margin-bottom: 15px;
-}
-
-.page-subtitle {
-  font-size: 1.1rem;
-  color: rgba(255,255,255,0.9);
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.blog-cards-container {
-  padding: 60px 0;
-}
-
-.block-card {
-  background: var(--bg-card);
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.07);
-  overflow: hidden;
-  height: 100%;
-  transition: 0.35s ease;
-  box-shadow: var(--shadow-1);
-  display: flex;
-  flex-direction: column;
-}
-
-.block-card:hover {
-  transform: translateY(-12px);
-  box-shadow: var(--shadow-2);
-  border-color: rgba(79,115,255,0.3);
-}
-
-.blog-image-container {
   position: relative;
-  width: 100%;
-  height: 240px;
   overflow: hidden;
-  background: linear-gradient(135deg, #1a1f2e, #0d1117);
+}
+.page-hero::before {
+  content:''; position:absolute; inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='1' fill='rgba(255,255,255,.04)'/%3E%3C/svg%3E");
+}
+.page-hero h1 { font-size:2.6rem; font-weight:900; color:#fff; margin-bottom:12px; position:relative; }
+.page-hero h1 em { font-style:normal; color:#f9b449; }
+.page-hero p { font-size:1rem; color:rgba(255,255,255,.82); max-width:580px; margin:0 auto 28px; position:relative; font-weight:500; }
+
+/* STATS ROW */
+.hero-stats { display:flex; justify-content:center; gap:40px; flex-wrap:wrap; position:relative; }
+.hs-item { text-align:center; }
+.hs-v { font-size:1.4rem; font-weight:900; color:#fff; }
+.hs-l { font-size:0.73rem; color:rgba(255,255,255,.7); margin-top:3px; font-weight:500; }
+
+/* FILTER PILLS */
+.filter-wrap { max-width:1280px; margin:0 auto; padding:28px 20px 0; }
+.cat-scroll { display:flex; gap:10px; overflow-x:auto; padding:4px 0 12px; scrollbar-width:none; }
+.cat-scroll::-webkit-scrollbar { display:none; }
+.cat-pill { padding:8px 20px; border-radius:30px; font-size:.85rem; font-weight:600; cursor:pointer;
+  border:1px solid var(--border); background:#fff; color:var(--text-body); transition:.2s; white-space:nowrap;
+  flex-shrink:0; box-shadow:0 2px 4px rgba(0,0,0,.02); }
+.cat-pill:hover { border-color:var(--primary); color:var(--primary); }
+.cat-pill.active { background:rgba(0,108,228,.1); color:var(--primary); border-color:var(--primary); }
+.cat-pill i { margin-right:5px; }
+
+/* SECTION WRAP */
+.section-wrap { max-width:1280px; margin:0 auto; padding:36px 20px 70px; }
+.sec-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:28px; flex-wrap:wrap; gap:10px; }
+.section-title { font-size:1.5rem; font-weight:800; color:var(--text-dark); margin-bottom:4px; }
+.section-subtitle { font-size:.88rem; color:var(--text-muted); font-weight:500; }
+.sec-count { font-size:.85rem; font-weight:700; color:var(--text-muted); }
+
+/* BLOG GRID — 3 cols */
+.blog-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+@media(max-width:1050px){ .blog-grid{ grid-template-columns:1fr 1fr; } }
+@media(max-width:640px){ .blog-grid{ grid-template-columns:1fr; } }
+
+/* BLOG CARD */
+.blog-card {
+  background:var(--bg-card); border-radius:var(--radius); border:1px solid var(--border);
+  overflow:hidden; transition:.3s; height:100%; box-shadow:var(--shadow-1);
+  display:flex; flex-direction:column; text-decoration:none; color:inherit;
+}
+.blog-card:hover { transform:translateY(-6px); box-shadow:var(--shadow-2); border-color:rgba(0,108,228,.3); }
+
+/* Image */
+.bc-img { height:210px; position:relative; overflow:hidden; background:#e2e8f0; flex-shrink:0; }
+.bc-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s ease; }
+.blog-card:hover .bc-img img { transform:scale(1.06); }
+.bc-img-placeholder { width:100%; height:100%; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; font-size:3rem; color:#94a3b8; gap:8px; }
+.bc-img-placeholder span { font-size:.8rem; font-weight:600; color:#94a3b8; }
+
+/* Category pill on image */
+.bc-cat {
+  position:absolute; top:12px; left:12px;
+  background:var(--primary); color:#fff; font-size:.7rem; font-weight:700;
+  padding:4px 12px; border-radius:20px; letter-spacing:.3px;
+}
+/* Reading time badge */
+.bc-time {
+  position:absolute; bottom:12px; right:12px;
+  background:rgba(0,0,0,.65); color:#fff; font-size:.72rem; font-weight:600;
+  padding:4px 10px; border-radius:8px; display:flex; align-items:center; gap:5px;
+  backdrop-filter:blur(6px);
 }
 
-.blog-featured-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
+/* Body */
+.bc-body { padding:20px; flex:1; display:flex; flex-direction:column; }
+.bc-icon { width:44px; height:44px; border-radius:10px; background:rgba(0,108,228,.08);
+  display:flex; align-items:center; justify-content:center; color:var(--primary);
+  font-size:1.2rem; margin-bottom:14px; flex-shrink:0; }
+.bc-title { font-size:1rem; font-weight:700; color:var(--text-dark); line-height:1.45;
+  margin-bottom:8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden; min-height:52px; }
+.bc-desc { font-size:.85rem; color:var(--text-body); line-height:1.65; margin-bottom:14px;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; flex:1; }
 
-.block-card:hover .blog-featured-img {
-  transform: scale(1.1);
-}
+/* Meta row */
+.bc-meta { display:flex; align-items:center; gap:10px; font-size:.78rem; color:var(--text-muted);
+  font-weight:500; padding:12px 0; border-top:1px solid var(--border); margin-bottom:14px; flex-wrap:wrap; }
+.bc-meta i { color:var(--primary); font-size:.8rem; }
+.bc-meta-dot { color:var(--border); }
 
-.category-badge-overlay {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: rgba(79,115,255,0.95);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  z-index: 2;
+/* CTA */
+.bc-btn {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  background:var(--primary); color:#fff; border-radius:8px; font-weight:700;
+  font-size:.88rem; padding:11px 18px; text-decoration:none; transition:.2s; margin-top:auto;
 }
+.bc-btn:hover { background:var(--primary-dark); color:#fff; transform:translateY(-1px);
+  box-shadow:0 4px 14px rgba(0,108,228,.3); }
 
-.blog-image-placeholder {
-  width: 100%;
-  height: 240px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, rgba(79,115,255,0.1), rgba(127,153,255,0.05));
-  color: var(--text-muted);
-}
+/* FEATURED CARD — spans 2 cols on first item */
+.blog-card.featured-card { grid-column: span 2; flex-direction:row; }
+.blog-card.featured-card .bc-img { width:48%; height:auto; min-height:260px; flex-shrink:0; border-radius:0; }
+.blog-card.featured-card .bc-body { padding:28px; }
+.blog-card.featured-card .bc-title { font-size:1.25rem; min-height:auto; -webkit-line-clamp:3; }
+.blog-card.featured-card .bc-desc { -webkit-line-clamp:4; }
+@media(max-width:1050px){ .blog-card.featured-card { grid-column:span 1; flex-direction:column; }
+  .blog-card.featured-card .bc-img { width:100%; height:210px; } }
 
-.blog-image-placeholder i {
-  font-size: 3.5rem;
-  opacity: 0.3;
-  margin-bottom: 10px;
-}
+/* EMPTY STATE */
+.empty-state { grid-column:1/-1; text-align:center; padding:80px 20px; }
+.empty-state i { font-size:3.5rem; color:#cbd5e1; display:block; margin-bottom:16px; }
+.empty-state h4 { font-size:1.2rem; font-weight:700; color:var(--text-dark); margin-bottom:8px; }
+.empty-state p { color:var(--text-muted); font-size:.9rem; }
 
-.blog-card-content {
-  padding: 25px;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
 
-.icon-box {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  background: rgba(79,115,255,0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 15px;
-}
 
-.icon-box i {
-  font-size: 28px;
-  color: #7f99ff;
-}
 
-.blog-card-content h5 {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--text-light);
-  line-height: 1.4;
-  margin-bottom: 12px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  min-height: 70px;
-}
-
-.blog-card-content p {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  line-height: 1.7;
-  margin-bottom: 15px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  flex-grow: 1;
-}
-
-.blog-meta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-bottom: 20px;
-  padding-top: 15px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-}
-
-.blog-meta .meta-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.blog-meta .meta-divider {
-  color: rgba(255,255,255,0.2);
-}
-
-.blog-card-content .btn {
-  background: var(--primary);
-  border: none;
-  border-radius: 50px;
-  font-weight: 600;
-  padding: 12px 24px;
-  font-size: 0.95rem;
-  color: white;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  text-decoration: none;
-  margin-top: auto;
-}
-
-.blog-card-content .btn:hover {
-  background: #7f99ff;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(79,115,255,0.4);
-}
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- PAGE TITLE SECTION -->
-<section class="page-title-section">
-    <div class="container">
-        <h1 class="page-title">All Blogs</h1>
-        <p class="page-subtitle">Discover insights, tips, and stories about real estate, rentals, and property management</p>
-    </div>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <h1>Insights &amp; <em>Blog</em></h1>
+  <p>Real estate tips, market trends, and expert guides for buyers, renters &amp; landlords.</p>
+  <div class="hero-stats">
+    <div class="hs-item"><div class="hs-v">{{ blogs|length }}+</div><div class="hs-l">Articles</div></div>
+    <div class="hs-item"><div class="hs-v">10+</div><div class="hs-l">Categories</div></div>
+    <div class="hs-item"><div class="hs-v">50K+</div><div class="hs-l">Monthly Readers</div></div>
+  </div>
 </section>
 
-<!-- BLOG CARDS SECTION -->
-<div class="container blog-cards-container">
-    <div class="row g-4">
-        {% for blog in blogs %}
-        <div class="col-lg-4 col-md-6 col-12">
-            <div class="block-card">
-                <!-- Featured Image Section -->
-                {% if blog.featured_image %}
-                <div class="blog-image-container">
-                    <img src="{{ blog.featured_image.url }}"
-                         class="blog-featured-img"
-                         alt="{{ blog.title }}"
-                         loading="lazy">
-                    {% if blog.category %}
-                    <span class="category-badge-overlay">{{ blog.category }}</span>
-                    {% endif %}
-                </div>
-                {% else %}
-                <!-- Placeholder if no image -->
-                <div class="blog-image-placeholder">
-                    <i class="bi bi-image"></i>
-                    <p>No Image</p>
-                </div>
-                {% endif %}
+<!-- FILTER PILLS -->
+<div class="filter-wrap">
+  <div class="cat-scroll">
+    <div class="cat-pill active"><i class="bi bi-grid-fill"></i> All Articles</div>
+    <div class="cat-pill"><i class="bi bi-house-fill"></i> Buying</div>
+    <div class="cat-pill"><i class="bi bi-key-fill"></i> Renting</div>
+    <div class="cat-pill"><i class="bi bi-graph-up-arrow"></i> Investment</div>
+    <div class="cat-pill"><i class="bi bi-tools"></i> Home Tips</div>
+    <div class="cat-pill"><i class="bi bi-building"></i> Commercial</div>
+    <div class="cat-pill"><i class="bi bi-patch-check-fill"></i> Legal</div>
+  </div>
+</div>
 
-                <!-- Card Content -->
-                <div class="blog-card-content">
-                    <!-- Icon Box -->
-                    <div class="icon-box">
-                        <i class="bi bi-journal-text"></i>
-                    </div>
+<!-- BLOG GRID -->
+<div class="section-wrap">
+  <div class="sec-header">
+    <div>
+      <div class="section-title">📖 Latest Articles</div>
+      <div class="section-subtitle">Fresh content published every week</div>
+    </div>
+    <div class="sec-count">{{ blogs|length }} article{{ blogs|length|pluralize }}</div>
+  </div>
 
-                    <!-- Blog Title -->
-                    <h5>{{ blog.title }}</h5>
+  <div class="blog-grid">
+    {% for blog in blogs %}
+    <a href="{% url 'blog_details' blog.key %}"
+       class="blog-card {% if forloop.first %}featured-card{% endif %}">
 
-                    <!-- Meta Description -->
-                    <p>{{ blog.meta_description|truncatechars:120 }}</p>
+      <!-- Image -->
+      <div class="bc-img">
+        {% if blog.featured_image %}
+          <img src="{{ blog.featured_image.url }}" alt="{{ blog.title }}" loading="lazy">
+        {% else %}
+          <div class="bc-img-placeholder">
+            <i class="bi bi-newspaper"></i>
+            <span>No Image</span>
+          </div>
+        {% endif %}
+        {% if blog.category %}
+          <span class="bc-cat">{{ blog.category }}</span>
+        {% endif %}
+        <span class="bc-time"><i class="bi bi-clock"></i> {{ blog.reading_time|default:"5" }} min</span>
+      </div>
 
-                    <!-- Reading Time & Date -->
-                    <div class="blog-meta">
-                        <span class="meta-item">
-                            <i class="bi bi-clock"></i> {{ blog.reading_time|default:"5" }} min
-                        </span>
-                        <span class="meta-divider">•</span>
-                        <span class="meta-item">
-                            <i class="bi bi-calendar3"></i> {{ blog.created_at|date:"M d, Y" }}
-                        </span>
-                    </div>
+      <!-- Body -->
+      <div class="bc-body">
+        <div class="bc-icon"><i class="bi bi-journal-richtext"></i></div>
+        <div class="bc-title">{{ blog.title }}</div>
+        <div class="bc-desc">{{ blog.meta_description|truncatechars:150 }}</div>
+        <div class="bc-meta">
+          <i class="bi bi-calendar3"></i>
+          <span>{{ blog.created_at|date:"M d, Y" }}</span>
+          <span class="bc-meta-dot">•</span>
+          <i class="bi bi-person-fill"></i>
+          <span>{{ blog.author|default:"PropCRM Team" }}</span>
+        </div>
+        <div class="bc-btn">
+          Read Article <i class="bi bi-arrow-right"></i>
+        </div>
+      </div>
+    </a>
+    {% empty %}
+    <div class="empty-state">
+      <i class="bi bi-journal-x"></i>
+      <h4>No articles yet</h4>
+      <p>Check back soon — new content is published every week.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
 
-                    <!-- View Blog Button -->
-                    <a href="{% url 'blog_details' blog.key %}" class="btn w-100">
-                        <i class="bi bi-arrow-right-circle"></i> Read Article
-                    </a>
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div>
+                <div class="fl-brand">🏠 PropCRM</div>
+                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
+                <div class="footer-social mt-4 d-flex gap-3">
+                    <a href="#"><i class="bi bi-facebook"></i></a>
+                    <a href="#"><i class="bi bi-instagram"></i></a>
+                    <a href="#"><i class="bi bi-whatsapp"></i></a>
+                    <a href="#"><i class="bi bi-twitter-x"></i></a>
                 </div>
             </div>
+            <div>
+                <div class="fl-title">For Tenants</div>
+                <a href="/listingpage/?type=rent" class="fl-link">Flats for Rent</a>
+                <a href="/listingpage/?category=pg" class="fl-link">PG / Hostels</a>
+                <a href="#" class="fl-link">Short-term Stays</a>
+                <a href="#" class="fl-link">Rent Agreement</a>
+            </div>
+            <div>
+                <div class="fl-title">For Buyers</div>
+                <a href="/listingpage/?type=sale" class="fl-link">Flats for Sale</a>
+                <a href="#" class="fl-link">New Projects</a>
+                <a href="#" class="fl-link">Plots &amp; Land</a>
+                <a href="#" class="fl-link">Home Loans</a>
+            </div>
+            <div>
+                <div class="fl-title">For Owners</div>
+                <a href="{% url 'post_property' %}" class="fl-link">Post Property FREE</a>
+                <a href="#" class="fl-link">Agent Registration</a>
+                <a href="#" class="fl-link">PropCRM Plans</a>
+                <a href="#" class="fl-link">Contact Support</a>
+            </div>
         </div>
-        {% endfor %}
+        <div class="footer-bottom">
+            <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
+            <span>Privacy Policy · Terms · Sitemap</span>
+        </div>
     </div>
-</div>
+</footer>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-function toggleMenu() {
-    document.getElementById("mobileMenu").classList.toggle("d-none");
-}
+document.querySelectorAll('.cat-pill').forEach(pill => {
+  pill.addEventListener('click', function(){
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
 </script>
 {% endblock %}

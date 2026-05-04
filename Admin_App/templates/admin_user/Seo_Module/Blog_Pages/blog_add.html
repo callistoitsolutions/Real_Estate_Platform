@@ -1,0 +1,86 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 30px; border-radius: 15px; margin-bottom: 30px; color: white; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);">
+        <div class="page-header-content d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="page-title" style="margin: 0; font-size: 1.75rem; font-weight: 700;">
+                    <i class="fas fa-pen-fancy"></i> Add Blog Detail
+                </h1>
+                <p style="margin: 5px 0 0; opacity: 0.8;">Create and publish a new blog post</p>
+            </div>
+            <div class="page-actions">
+                <a href="{% url 'blog_list' %}" class="btn" style="background: white; color: #4f46e5; font-weight: 600; border-radius: 8px; padding: 10px 20px; text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> Back to Reports
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="properties-section" style="background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <h3 style="font-size: 1.2rem; color: #1e293b; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                <i class="fas fa-info-circle text-primary"></i> General Information
+            </h3>
+
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Title <span style="color:red;">*</span></label>
+                    <input type="text" name="title" class="form-control" placeholder="e.g. Rental Tips" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Category <span style="color:red;">*</span></label>
+                    <select name="category" class="form-control" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
+                        <option value="">-- Select Category --</option>
+                        <option value="Residential">Residential</option>
+                        <option value="Commercial">Commercial</option>
+                        <option value="PG/Coliving">PG / Coliving</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Reading Time <span style="color:red;">*</span></label>
+                    <input type="text" name="reading_time" class="form-control" placeholder="e.g. 5 Mins" style="border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;" required>
+                </div>
+            </div>
+
+            <h3 style="font-size: 1.2rem; color: #1e293b; font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+                <i class="fas fa-image text-success"></i> Media & Content
+            </h3>
+
+            <div class="row mb-4">
+                <div class="col-md-12 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Featured Image</label>
+                    <div style="border: 2px dashed #cbd5e1; padding: 20px; border-radius: 8px; background: #f8fafc; text-align: center;">
+                        <input type="file" name="featured_image" accept="image/*" class="form-control-file" style="display: inline-block;">
+                    </div>
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label style="font-weight: 600; color: #475569;">Content <span style="color:red;">*</span></label>
+                    <div style="border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1;">
+                        <textarea name="content" id="editor" required></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: right; margin-top: 30px;">
+                <button type="submit" class="btn" style="background: #6366f1; color: white; padding: 12px 30px; border-radius: 8px; font-weight: 700; font-size: 1rem; border: none; box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);">
+                    <i class="fas fa-save"></i> Publish Blog
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.ckeditor.com/4.20.2/standard/ckeditor.js"></script>
+<script>
+    CKEDITOR.replace('editor');
+</script>

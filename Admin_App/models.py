@@ -1211,6 +1211,7 @@ class AgriculturalResaleImage(models.Model):
     property = models.ForeignKey(AgriculturalResaleProperty, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='property/images/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+   # created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Image for {self.property.title}"
