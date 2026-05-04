@@ -111,6 +111,12 @@ def property_detail_view(request, listing_type, category, pk):
         if category == 'residential':
             obj = get_object_or_404(RentalResidentialProperty, pk=pk)
             p = _normalize_rental(obj)
+            amenities_list = []
+            facilities_list = []
+            if obj.amenities:
+                amenities_list = [a.strip() for a in obj.amenities.split(',') if a.strip()]
+                facilities_list = [a.strip() for a in obj.facilities.split(',') if a.strip()]
+
         elif category == 'commercial':
             obj = get_object_or_404(CommercialRentalProperty, pk=pk)
             p = _normalize_commercial_rental(obj)
@@ -126,7 +132,7 @@ def property_detail_view(request, listing_type, category, pk):
             obj = get_object_or_404(CommercialResaleProperty, pk=pk)
             p = _normalize_commercial_resale(obj)
 
-    return render(request, 'home_page/property_detail.html', {'p': p, 'original': obj})
+    return render(request, 'home_page/property_detail.html', {'p': p, 'original': obj,'amenities_list':amenities_list,'facilities_list':facilities_list})
 
 
 def listings_view(request):
@@ -786,6 +792,32 @@ def index(request):
     # ═══════════════════════════════════════════════════════
     # CONTEXT
     # ═══════════════════════════════════════════════════════
+    blogs = Blog.objects.all().order_by("-date_posted")
+    faqs = FAQ.objects.all().order_by('-created_at')
+
+    subscriptions = Subscription_Details.objects.all()
+
+    # ✅ CORRECT FUNCTION CALL
+    residential = list(get_featured_queryset(ResidentialProperty))
+    commercial = list(get_featured_queryset(CommercialProperty))
+    pg = list(get_featured_queryset(PGProperty))
+
+    # Combine
+    all_props = (
+        [{"data": prop, "type": "Residential"} for prop in residential] +
+        [{"data": prop, "type": "Commercial"} for prop in commercial] +
+        [{"data": prop, "type": "PG"} for prop in pg]
+    )
+
+    random.shuffle(all_props)
+    featured_props = all_props[:6]
+
+    props = sorted(
+        chain(residential, commercial, pg),
+        key=lambda x: getattr(x, 'created_at', None),
+        reverse=True
+    )
+
     context = {
         "featured_props": featured_props,
         "recent_props": recent_props,
@@ -796,7 +828,9 @@ def index(request):
         "faqs": faqs,
         "today": today,
         "fifteen_days_ago": fifteen_days_ago,
-        'user_obj': None
+        'user_obj': None,
+       
+        'subscriptions':subscriptions
     }
     
     # ═══════════════════════════════════════════════════════

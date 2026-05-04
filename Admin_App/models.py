@@ -326,6 +326,31 @@ class User_Details(models.Model):
 
     def __str__(self):
         return str(self.user_name)+"-"+self.user_role
+    
+
+########### Modal starts for subscription details model #########################
+
+class Subscription_Details(models.Model):
+   
+    package_name = models.CharField(max_length=200,blank=True,null=True)
+    plan_type = models.CharField(max_length=200,blank=True,null=True)
+    plan_duration = models.CharField(max_length=200,blank=True,null=True)
+    plan_for = models.CharField(max_length=200,blank=True,null=True)
+    plan_base_price = models.CharField(max_length=200,blank=True,null=True)
+    plan_offer_price = models.CharField(max_length=200,blank=True,null=True)
+    plan_discount = models.CharField(max_length=200,blank=True,null=True)
+    plan_max_listings = models.CharField(max_length=200,blank=True,null=True)
+
+    plan_offer_start_date = models.DateField(blank=True,null=True)
+    plan_offer_end_date = models.DateField(blank=True,null=True)
+    plan_desc = models.TextField(blank=True, null=True)
+
+
+    plan_upload_date = models.DateField(blank=True,null=True)
+    plan_upload_time = models.TimeField(blank=True,null=True)
+
+    def __str__(self):
+        return str(self.package_name)+"-"+self.plan_type+"-"+self.plan_for
 
         
     

@@ -344,7 +344,7 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
 
     <div class="listings-grid" id="listingsGrid">
       {% for p in properties %}
-      <a href="/listing/{{ p.listing_type }}/{{ p.id }}/" class="pcard">
+      <a href="/listing/{{ p.listing_type }}/{{p.category}}/{{ p.id }}" class="pcard">
         
         <div class="pc-img">
           {% if p.image_url %}
@@ -362,7 +362,7 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
             {% endfor %}
           </div>
           <button class="pc-save" onclick="event.preventDefault();toggleSave({{ p.id }},this)">
-            <i class="far fa-heart" style="color:#ef4444;"></i>
+            <i class="bi bi-heart" style="color:#ef4444;"></i>
           </button>
           
           <div class="pc-price-tag">{{ p.price_display|default:"--" }}</div>

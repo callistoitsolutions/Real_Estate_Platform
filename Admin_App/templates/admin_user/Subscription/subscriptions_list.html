@@ -6,11 +6,11 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="page-header-content">
-            <h1 class="page-title"><i class="fas fa-gear"></i> Service Type Listings</h1>
+            <h1 class="page-title"><i class="fas fa-money-bill-wave"></i> Subscriptions Listings</h1>
             <div class="page-actions">
-                <button class="btn-primary-custom" data-toggle="modal" data-target="#AmenetiesModalCenter">
-                    <i class="fas fa-plus-circle"></i> Add Service Types
-                </button>
+                <a href="{% url "Add_Subscriptions" %}"><button class="btn-primary-custom">
+                    <i class="fas fa-plus-circle"></i> Add Subscriptions
+                </button></a>
                 <button class="btn-primary-custom"
                     style="background: transparent; border: 2px solid white; color: white;" data-toggle="modal"
                     data-target="#exampleModalCenter">
@@ -31,7 +31,7 @@
 
         <!-- TABLE SCROLL AREA -->
         <div class="table-responsive">
-            {{services_list}}
+            {{subscriptions_list}}
         </div>
 
     </div>
@@ -40,59 +40,7 @@
 </div>
 
 
-<!-- Modal -->
-<div class="modal fade" id="AmenetiesModalCenter" tabindex="-1" role="dialog"
-    aria-labelledby="AmenetiesModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Service Type</h5>
 
-            </div>
-            <div class="modal-body">
-                <div class="row">
-
-
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label class="form-label">
-                                Service Type Id <span style="color:red;">*</span>
-                            </label>
-
-                            <div class="input-group">
-                                <input type="text" class="form-control amenity_icon" placeholder="Enter Service Type Id"
-                                    id="service_id" name="service_id">
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div class="col-md-12 mt-2">
-                        <div class="form-group">
-                            <label class="form-label">
-                                Service Type Name <span style="color:red;">*</span>
-                            </label>
-
-                            <div class="input-group">
-                                <input type="text" class="form-control amenity_icon" placeholder="Enter Service Type Name"
-                                    id="service_name" name="service_name">
-
-                            </div>
-
-
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" style="background-color:#667eea;"
-                    onclick="Add_Services(this)"><i class="fas fa-add"></i> Add Service Types</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
@@ -109,9 +57,9 @@
 
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label class="form-label">Upload Service Type Data Excel File <span class="required"
+                            <label class="form-label">Upload Subscriptions Data Excel File <span class="required"
                                     style="color:red;">*</span></label>
-                            <input type="file" class="form-control" id="services_file" name="services_file"
+                            <input type="file" class="form-control" id="subscriptions_file" name="subscriptions_file"
                                 placeholder="Enter Confirm Password" required onchange="checkSelectedFileSize(this)"
                                 accept=".xlsx">
                         </div>
@@ -122,7 +70,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" style="background-color:#667eea;"
-                    onclick="Import_Services_Data(this)">Upload</button>
+                    onclick="Import_Subscriptions_Data(this)">Upload</button>
             </div>
         </div>
     </div>
@@ -132,7 +80,7 @@
 
 <script>
 
-    $("#Services").addClass("active");
+    $("#Subscriptions").addClass("active");
 
     document.querySelectorAll(".amenity_icon").forEach(function (input) {
 
@@ -500,76 +448,13 @@
 
 <script>
 
-    {% comment %} Ajax and Jquery to add service types {% endcomment %}
+    {% comment %} Ajax and Jquery to upload subscriptions data {% endcomment %}
 
+    function Import_Subscriptions_Data(_this) {
 
-    function Add_Services(_this) {
-        var service_id = $("#service_id").val();
-        var service_name = $("#service_name").val();
+        var subscriptions_file = $("#subscriptions_file")[0].files;
 
-        if (service_id == '') {
-            alert("Please Enter Service Type id");
-        }
-        else if (service_name == '') {
-            alert("Please Enter Service Type Name");
-        }
-        else {
-            var fd = new FormData();
-            fd.append('id', '');
-            fd.append('service_id', service_id);
-            fd.append('service_name', service_name);
-
-            $(_this).prop("disabled", true);
-            _this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Adding...`;
-
-            $.ajax({
-                method: "POST",
-                url: "{% url 'Services_Ajax' %}",
-                enctype: "multipart/form-data",
-                processData: false,
-                contentType: false,
-                cache: false,
-                data: fd,
-                mode: 'same-origin',
-                success: function (response) {
-                    $(_this).prop("disabled", false);
-                    _this.innerHTML = `<i class="fas fa-add mr-1"></i> Add Service Types`;
-
-                    if (response.status == '1') {
-                        swal({
-                            title: response.msg,
-                            icon: 'success',
-                            confirmButtonColor: '#3085d6',
-                            confirmButtonText: 'OK',
-                        }).then((result) => {
-                            if (result) {
-                                window.location.href = "{% url 'Services_List' %}"
-                            }
-                        })
-                    } else {
-                        swal({
-                            title: response.msg,
-                            icon: 'error',
-                            showCancelButton: true,
-                            cancelButtonColor: '#d33',
-                            showConfirmButton: false,
-                        })
-                    }
-                }
-            });
-        }
-    }
-</script>
-
-<script>
-
-    {% comment %} Ajax and Jquery to upload service types data {% endcomment %}
-
-    function Import_Services_Data(_this) {
-
-        var services_file = $("#services_file")[0].files;
-
-        if (services_file.length == 0) {
+        if (subscriptions_file.length == 0) {
             alert("Please Upload Excel File");
 
         }
@@ -577,13 +462,13 @@
 
         else {
             var fd = new FormData();
-            fd.append('services_file', services_file[0]);
+            fd.append('subscriptions_file', subscriptions_file[0]);
 
             $(_this).prop("disabled", true);
             _this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`;
             $.ajax({
                 method: "POST",
-                url: "{% url 'Services_Data' %}",
+                url: "{% url 'Subscriptions_Data' %}",
                 enctype: "mutipart/form_data",
                 processData: false,
                 contentType: false,
@@ -603,7 +488,7 @@
                             confirmButtonText: 'Thank You!',
                         }).then((result) => {
                             if (result) {
-                                window.location.href = "{% url 'Services_List' %}"
+                                window.location.href = "{% url 'Subscriptions_List' %}"
                             }
                         })
                     }
@@ -624,16 +509,16 @@
 </script>
 
 
-{% comment %} Ajax Jquery and Javascript for delete service details {% endcomment %}
+{% comment %} Ajax Jquery and Javascript for delete subscriptions {% endcomment %}
 
 <script>
 
 
-    function Delete_Services(services_id)
+    function Delete_Subscriptions(subscription_id)
     {
         swal({
             title: "DELETE",
-            text: "Are you sure, you want to delete the services detail ?",
+            text: "Are you sure, you want to delete the subscriptions detail ?",
             icon: "warning",
             buttons: ["No", "Yes"],	
             closeOnClickOutside: false,
@@ -644,8 +529,8 @@
             {	
                 $.ajax({
                     type:"POST",
-                    url: "{% url 'Delete_Services' %}",
-                    data: {'services_id' : services_id},
+                    url: "{% url 'Delete_Subscriptions' %}",
+                    data: {'subscription_id' : subscription_id},
                     success: function (response) 
                     {
                         if (response.status == '1'){

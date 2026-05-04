@@ -24,6 +24,9 @@ admin.site.register(Service_Type_Details)
 
 admin.site.register(User_Details)
 
+############# Register Subscription Details Table/Modal ####################
+
+admin.site.register(Subscription_Details)
 
 ########### Register  RentalResidentialProperty Table/Modal ###############
 
