@@ -73,26 +73,43 @@ def calculate_profile_strength(user_obj):
 
 
 def landlord_dashboard(request):
-    # 1. Retrieve identity from browser session
+    # 1. Retrieve BOTH possible session IDs from the browser
     user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Landlord":
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
         return redirect('login') 
 
-    # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
 
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # (Your original logic stays untouched here!)
     completion_score = calculate_profile_strength(user_obj)
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
+        # Pass the object's role so the template behaves normally for the Landlord UI
+        'user_role': user_obj.user_role, 
         'profile_completion_percentage': completion_score,
     }
     
-    return render(request, "landlord/landlord_dashboard.html", context) 
+    return render(request, "landlord/landlord_dashboard.html", context)
+
+
 
 def commercialform(request):
     return render(request,"landlord/commercialform.html") 

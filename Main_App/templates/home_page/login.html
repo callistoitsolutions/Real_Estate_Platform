@@ -272,39 +272,48 @@
                 url : "{% url 'login' %}",
                 contentType: "application/json",
                 data:JSON.stringify({
-                "user_identifier":user_identifier,
-                "user_password":user_password,
-                "user_role":user_role,
+                    "user_identifier":user_identifier,
+                    "user_password":user_password,
+                    "user_role":user_role,
                 }),
                 success : function (response){
-                $(_this).prop("disabled", false);
+                    $(_this).prop("disabled", false);
                     _this.innerHTML = `Sign In`;
-                    if (response.status == '1'){
-                        
-                          // If browser blocks popup, fallback to same tab
-                          window.location.href = "{% url 'index' %}";
-                  }
-                else
-                {
-                    swal( 
-                    {
-                        content: {
-                            element: "div",
-                            attributes: {
-                                innerHTML: '<span style="font-weight:bold; color:#ef4444;font-size:16px;">' + response.msg + '</span>'
-                            }
-                        },
-                        icon: "error",
-                        title: "Login Failed",
-                        closeOnClickOutside: false,
-                    }) 
-                }
-    
+                    
+                    if (response.status == '1' || response.status == 'success'){
+                        // NEW LOGIC: Check the role and open in a new tab if it's RM
+                        if (user_role === "Relationship Manager") {
+                            window.open(response.redirect_url, '_blank'); // Opens in new tab
+                            
+                            // Optional: Redirect the original tab to the home page or refresh it
+                            window.location.href = "{% url 'index' %}"; 
+                        } else {
+                            window.location.href = response.redirect_url; // Opens in current tab
+                        }
+                    }
+                    else {
+                        swal({
+                            content: {
+                                element: "div",
+                                attributes: {
+                                    innerHTML: '<span style="font-weight:bold; color:#ef4444;font-size:16px;">' + response.msg + '</span>'
+                                }
+                            },
+                            icon: "error",
+                            title: "Login Failed",
+                            closeOnClickOutside: false,
+                        });
+                    }
+                },
+                error: function() {
+                    $(_this).prop("disabled", false);
+                    _this.innerHTML = `Sign In`;
+                    swal({icon: "error", title: "Server Error", text: "Something went wrong. Please try again."});
                 }
             });
         }
     }
-  </script>
+</script>
 
 </body>
 </html>

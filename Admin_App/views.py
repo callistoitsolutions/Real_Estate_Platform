@@ -212,6 +212,47 @@ def admin_page(request):
 def index2(request):
     return render(request,"admin_user/index2.html")
 
+
+########## Views start for impersonation url for super admin ######################
+
+@csrf_exempt
+def Impersonate(request):
+    if request.method == "POST" and request.session.get('user_type') == 'Admin':
+        target_id = request.POST.get('target_user_id')
+
+        
+        
+        if target_id:
+            # 1. Save ID to session securely
+            request.session['impersonate_id'] = target_id
+            
+            target_user = User_Details.objects.get(id=target_id)
+
+            
+            
+            # 2. Determine the correct URL based on their role
+            if target_user.user_role == 'Relationship Manager':
+                url = reverse('rm_dashboard')
+            elif target_user.user_role == 'Landlord':
+                url = reverse('landlord_dashboard')
+            elif target_user.user_role == 'Tenant':
+                url = reverse('Tenant_App:tenant_Dashboard')
+            elif target_user.user_role == 'Buyer':
+                url = reverse('Buyer_Dashboard')
+            elif target_user.user_role == 'Agent':
+                url = reverse('agent_dashboard')
+            elif target_user.user_role == 'Agency/Builder':
+                url = reverse('Agency_Dashboard')
+            elif target_user.user_role == 'Vendor':
+                url = reverse('Vendors:vendors_Dashboard')            
+            
+            # 3. Send the URL back to the JavaScript
+            return JsonResponse({'status': 'success', 'redirect_url': url})
+            
+    return JsonResponse({'status': 'error', 'msg': 'Unauthorized request'})
+
+############ Views end for impersonation url for super admin ##########################
+
 def index3(request):
     return render(request,"admin_user/index3.html")
 

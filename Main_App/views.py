@@ -537,7 +537,6 @@ def Adminlogin(request):
 def Admin_Logout(request):
     try:
         del request.session['Admin_id']
-        del request.session['user_type']
         return JsonResponse({"status":"1",'msg': 'Logout Successfully '})
     except:
         print(traceback.format_exc())
@@ -619,13 +618,21 @@ def signup_view(request):
     return render(request, 'home_page/signup.html')
 
 
+import json
+import traceback
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q 
+
 @csrf_exempt
 def login_view(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body.decode('utf-8'))
-            user_identifier = data['user_identifier']
-            user_password = data['user_password']
+            user_identifier = data.get('user_identifier', '').strip()
+            user_password = data.get('user_password', '')
             user_role = data.get('user_role') 
 
             user_qs = User_Details.objects.filter(
@@ -638,21 +645,26 @@ def login_view(request):
                 user_obj = user_qs.first()
                 
                 # --- SESSION LOGIC ---
-                # Note: Logging in a new person will overwrite these session keys
                 request.session['User_id'] = str(user_obj.id)
                 request.session['user_type'] = user_role
-
-                url = reverse('index')
-                
                 
 
+                # --- DYNAMIC REDIRECT LOGIC ---
+
+                if user_role == 'Relationship Manager':
+                    # Make sure 'rm_dashboard' matches the exact name in your urls.py!
+                    url = reverse('rm_dashboard') 
+                else:
+                    url = reverse('index')
+                
                 return JsonResponse({
                     'status': '1', 
                     'msg': 'Success!',
                     'user_name': user_obj.user_name, 
                     'user_role': user_obj.user_role,
-                    'user_mobile':user_obj.user_phone, 
-                    'user_email':user_obj.user_email,
+                    'user_mobile': user_obj.user_phone, 
+                    'user_email': user_obj.user_email,
+                    'redirect_url': url 
                 })
 
             return JsonResponse({'status': 0, 'msg': 'Invalid Credentials or Role Selection'})
@@ -661,9 +673,6 @@ def login_view(request):
             print(traceback.format_exc())
             return JsonResponse({'status': 0, 'msg': 'Something went wrong'})
     
-    # --- UPDATED GET LOGIC ---
-    # We remove the auto-redirect here so that the login page 
-    # is ALWAYS accessible for new users to log in.
     return render(request, 'home_page/login.html')
 
 
