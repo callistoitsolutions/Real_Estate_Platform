@@ -1,14 +1,11 @@
 {% include "admin_user/admin_header.html" %}
 {% load static %}
 
-<!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
 
-        <!-- Main Content -->
         <div class="main-content">
 
-            <!-- Page Header -->
             <div class="page-header">
                 <div class="page-header-content">
                     <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Sell Residential Property Listings</h1>
@@ -23,11 +20,13 @@
                                 data-toggle="modal" data-target="#exampleModalCenter">
                             <i class="fas fa-download"></i> Import Excel
                         </button>
+                        <button class="btn-primary-custom" data-toggle="modal" data-target="#bulkDeleteModal" style="background: #ef4444; border-color: #ef4444; color: white;">
+                            <i class="fas fa-trash-alt"></i> Bulk Delete
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Statistics Cards -->
             <div class="stats-grid">
                 <div class="stat-card primary">
                     <div class="stat-icon primary"><i class="fas fa-home"></i></div>
@@ -71,7 +70,6 @@
                 </div>
             </div>
 
-            <!-- Analytics Section -->
             <div class="analytics-section">
                 <div class="chart-container">
                     <div class="chart-header">
@@ -110,7 +108,6 @@
                 </div>
             </div>
 
-            <!-- Properties Table -->
             <div class="properties-section">
                 <div class="section-header">
                     <h3 class="section-title"><i class="fas fa-list"></i> Resale Residential Property Listings</h3>
@@ -181,11 +178,10 @@
 
 <tbody>
 {% for prop in properties %}
-<tr>
+<tr id="row-{{ prop.pk }}">
 
 <td>{{ forloop.counter }}</td>
 
-<!-- IMAGES -->
 <td>
 {% if prop.thumbnail %}
 <div style="position:relative;">
@@ -224,7 +220,6 @@
 <td>{{ prop.get_ownership_type_display }}</td>
 <td>{{ prop.num_owners }}</td>
 
-<!-- YES/NO FIX -->
 <td>{% if prop.has_loan == 'yes' %}Yes{% else %}No{% endif %}</td>
 <td>{{ prop.loan_amount|default:"—" }}</td>
 
@@ -249,7 +244,6 @@
 {% else %}—{% endif %}
 </td>
 
-<!-- FACILITIES -->
 <td>
     {% if prop.nearby_facilities_list %}
         {% for f in prop.nearby_facilities_list %}
@@ -260,7 +254,6 @@
     {% endif %}
 </td>
 
-<!-- AMENITIES -->
 <td>
     {% if prop.amenities_list %}
         {% for a in prop.amenities_list %}
@@ -285,14 +278,12 @@
 <td>{{ prop.uploaded_by_email|default:"—" }}</td>
 <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
 
-<!-- FLOOR PLAN -->
 <td>
 {% if prop.floor_plan %}
 <a href="{{ prop.floor_plan.url }}" target="_blank">View</a>
 {% else %}—{% endif %}
 </td>
 
-<!-- VIDEO -->
 <td>
 {% if prop.property_video %}
 <a href="{{ prop.property_video.url }}" target="_blank">View</a>
@@ -303,17 +294,14 @@
 
 <td class="text-center">
     <div class="d-flex justify-content-center gap-2">
-        <!-- VIEW BUTTON -->
         <a href="{% url 'resale_residential_view' prop.pk %}" class="btn-action btn-view" title="View">
             <i class="fas fa-eye"></i>
         </a>
 
-        <!-- EDIT BUTTON -->
         <a href="{% url 'resale_residential_edit' prop.pk %}" class="btn-action btn-edit" title="Edit">
             <i class="fas fa-edit"></i>
         </a>
 
-        <!-- DELETE BUTTON -->
         <button class="btn-action btn-delete" title="Delete" onclick="Delete_Property({{ prop.pk }})">
             <i class="fas fa-trash"></i>
         </button>
@@ -335,7 +323,6 @@
         </div>
     </div>
 
-    <!-- Image Preview Modal -->
     <div class="modal fade" id="imagePreviewModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -350,7 +337,6 @@
         </div>
     </div>
 
-    <!-- Import Excel Modal -->
     <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
          aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -393,6 +379,70 @@
         </div>
     </div>
 
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 10000;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="border-radius:12px; overflow:hidden; border:none; box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+                <div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none; padding:20px 24px;">
+                    <h5 class="modal-title" style="color:white; font-weight:700; font-size:16px;">
+                        <i class="fas fa-trash-alt" style="margin-right:8px;"></i> Advanced Bulk Delete (Resale)
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:1;">&times;</button>
+                </div>
+                <div class="modal-body" style="padding:24px;">
+                    <form id="bulkDeleteForm">
+                        <div class="form-group mb-3">
+                            <label style="font-size:13px; font-weight:600;">Delete Criteria <span style="color:red;">*</span></label>
+                            <select class="form-control mt-1" id="deleteType" name="delete_type" onchange="toggleDeleteInputs()" style="font-size:13px;">
+                                <option value="">-- Select Option --</option>
+                                <option value="current_page">Delete Current Page Data</option>
+                                <option value="date_range">Delete by Date Range</option>
+                                <option value="latest_month">Delete Latest Month Data</option>
+                                <option value="old_data">Delete Data Older Than 6 Months</option>
+                                <option value="by_uploader">Delete by Uploaded User Source</option>
+                                <option value="by_file">Delete by Specific Excel File</option>
+                                <option value="delete_all" style="color: red; font-weight: bold;">Delete ALL Data</option>
+                            </select>
+                        </div>
+
+                        <div id="dateRangeInputs" style="display:none; gap: 10px; margin-top: 10px;">
+                            <div style="flex: 1;">
+                                <label style="font-size:12px;">From Date</label>
+                                <input type="date" id="fromDate" name="from_date" class="form-control mt-1">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size:12px;">To Date</label>
+                                <input type="date" id="toDate" name="to_date" class="form-control mt-1">
+                            </div>
+                        </div>
+
+                        <div id="uploaderInput" style="display:none; margin-top: 10px;">
+                            <label style="font-size:12px;">Uploaded By (Name/Email/Role)</label>
+                            <input type="text" id="uploaderText" name="uploader_text" class="form-control mt-1" placeholder="e.g. Admin or admin@example.com">
+                        </div>
+
+                        <div id="fileInput" style="display:none; margin-top: 10px;">
+                            <label style="font-size:12px;">Select Uploaded Excel File</label>
+                            <select id="selectedFile" name="selected_file" class="form-control mt-1" style="font-size:13px;">
+                                <option value="">-- Select File --</option>
+                                {% for file in uploaded_files %}
+                                    <option value="{{ file }}">{{ file }}</option>
+                                {% empty %}
+                                    <option value="" disabled>No files found in database (Ensure your import script saves the filename)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #F3F4F6; padding:16px 24px; gap:10px;">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="executeBulkDelete()" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none;">
+                        <i class="fas fa-exclamation-triangle"></i> Confirm Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="imageModal" style="display:none; position:fixed; top:0; left:0;
 width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999;
 justify-content:center; align-items:center; flex-direction:column;">
@@ -409,7 +459,6 @@ justify-content:center; align-items:center; flex-direction:column;">
     </div>
 </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
@@ -491,7 +540,14 @@ justify-content:center; align-items:center; flex-direction:column;">
                                     icon: "success",
                                     button: "Ok",
                                     closeOnClickOutside: false,
-                                }).then(() => { location.reload(); });
+                                }).then(() => { 
+                                    const row = document.getElementById(`row-${prop_id}`);
+                                    if(row) {
+                                        $('#resaleTable').DataTable().row($(row)).remove().draw();
+                                    } else {
+                                        location.reload(); 
+                                    }
+                                });
                             } else {
                                 swal("" + response.message + "", {
                                     icon: "info",
@@ -560,6 +616,91 @@ justify-content:center; align-items:center; flex-direction:column;">
                 });
             }
         }
+
+        // ==========================================
+        // BULK DELETE LOGIC
+        // ==========================================
+        function toggleDeleteInputs() {
+            const type = document.getElementById('deleteType').value;
+            document.getElementById('dateRangeInputs').style.display = (type === 'date_range') ? 'flex' : 'none';
+            document.getElementById('uploaderInput').style.display = (type === 'by_uploader') ? 'block' : 'none';
+            document.getElementById('fileInput').style.display = (type === 'by_file') ? 'block' : 'none';
+        }
+
+        function executeBulkDelete() {
+            const type = document.getElementById('deleteType').value;
+            if (!type) {
+                swal('Warning', 'Please select a delete criteria.', 'warning');
+                return;
+            }
+
+            let payload = { delete_type: type };
+
+            if (type === 'date_range') {
+                payload.from_date = document.getElementById('fromDate').value;
+                payload.to_date = document.getElementById('toDate').value;
+                if (!payload.from_date || !payload.to_date) {
+                    swal('Warning', 'Please select both From and To dates.', 'warning');
+                    return;
+                }
+            } else if (type === 'by_uploader') {
+                payload.uploader_text = document.getElementById('uploaderText').value;
+                if (!payload.uploader_text) {
+                    swal('Warning', 'Please enter the uploader detail.', 'warning');
+                    return;
+                }
+            } else if (type === 'by_file') {
+                payload.file_name = document.getElementById('selectedFile').value;
+                if (!payload.file_name) {
+                    swal('Warning', 'Please select an Excel file from the list.', 'warning');
+                    return;
+                }
+            } else if (type === 'current_page') {
+                // Since this uses DataTables, we get the IDs of the currently visible rows
+                const table = $('#resaleTable').DataTable();
+                const currentRows = table.rows({ page: 'current' }).nodes();
+                const ids = Array.from(currentRows).map(row => row.id.split('-')[1]);
+                
+                if (ids.length === 0) {
+                    swal('Warning', 'No data on the current page to delete.', 'warning');
+                    return;
+                }
+                payload.page_ids = ids;
+            }
+
+            swal({
+                title: "Are you absolutely sure?",
+                text: "This action will permanently delete the selected Resale records and their media!",
+                icon: "warning",
+                buttons: ["Cancel", "Yes, delete them!"],
+                dangerMode: true,
+            }).then((willDelete) => {
+                if (willDelete) {
+                    
+                    fetch("{% url 'resale_residential_bulk_delete' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            swal("Deleted!", data.message, "success").then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            swal("Error", data.message, "error");
+                        }
+                    })
+                    .catch(err => swal("Error", "Server error occurred.", "error"));
+                }
+            });
+        }
+
 
         // Charts
         const propertyTypeData = {
@@ -669,8 +810,6 @@ justify-content:center; align-items:center; flex-direction:column;">
             if (this.classList.contains('active')) document.body.style.overflow = 'hidden';
         });
 
-
-        
     </script>
 
     <script>

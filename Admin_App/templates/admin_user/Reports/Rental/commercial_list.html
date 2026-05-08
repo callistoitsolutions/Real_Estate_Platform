@@ -1,24 +1,24 @@
 {% include "admin_user/admin_header.html" %}
 {% load static %}
 
-        <!-- Main Content -->
         <div class="main-content">
-            <!-- Page Header -->
             <div class="page-header">
                 <div class="page-header-content">
                     <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Commercial Property Listings</h1>
                     <div class="page-actions">
-                        <a href="{% url "commercial" %}"><button class="btn-primary-custom">
+                        <a href="{% url 'commercial' %}"><button class="btn-primary-custom">
                             <i class="fas fa-plus-circle"></i> Add Commercial (Rent) Property
                         </button></a>
                          <button class="btn-primary-custom" style="background: transparent; border: 2px solid white; color: white;" data-toggle="modal" data-target="#exampleModalCenter">
                             <i class="fas fa-download"></i> Import Excel
                         </button>
+                        <button class="btn-primary-custom" data-toggle="modal" data-target="#bulkDeleteModal" style="background: #ef4444; border-color: #ef4444; color: white;">
+                            <i class="fas fa-trash-alt"></i> Bulk Delete
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Statistics Cards -->
             <div class="stats-grid">
                 <div class="stat-card primary">
                     <div class="stat-icon primary">
@@ -31,16 +31,11 @@
                     </span>
                 </div>
 
-              
-              
-
-                
-
                 <div class="stat-card danger">
                     <div class="stat-icon danger" style="background: var(--success-gradient);">
                         <i class="fas fa-check-circle"></i>
                     </div>
-<div class="stat-value">{{ active_listings }}</div>
+                    <div class="stat-value">{{ active_listings }}</div>
                     <div class="stat-label">Active Listings</div>
                     <span class="stat-change positive">
                         <i class="fas fa-chart-line"></i> Good
@@ -59,9 +54,7 @@
                 </div>
             </div>
 
-            <!-- Analytics Section with Charts -->
             <div class="analytics-section">
-                <!-- Pie Chart - Property Distribution -->
                 <div class="chart-container">
                     <div class="chart-header">
                         <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Property Distribution</h3>
@@ -71,7 +64,6 @@
                     </div>
                 </div>
 
-                <!-- Bar Chart - Monthly Rental Income -->
                 <div class="chart-container">
                     <div class="chart-header">
                         <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Monthly Rental Income</h3>
@@ -85,7 +77,6 @@
                     </div>
                 </div>
 
-                <!-- Doughnut Chart - Occupancy Status -->
                 <div class="chart-container">
                     <div class="chart-header">
                         <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Occupancy Status</h3>
@@ -95,7 +86,6 @@
                     </div>
                 </div>
 
-                <!-- Bar Chart - Rent Range Distribution -->
                 <div class="chart-container">
                     <div class="chart-header">
                         <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Rent Range Distribution</h3>
@@ -106,7 +96,6 @@
                 </div>
             </div>
 
-            <!-- Quick Stats Section -->
             <div class="quick-stats">
                 <h3 class="quick-stats-title"><i class="fas fa-chart-line"></i> Performance Insights</h3>
                 <div class="stats-row">
@@ -144,15 +133,8 @@
                 </div>
             </div>
 
-          <!-- ═══════════════════════════════════════════════════
-     REPLACE the entire "Properties Table" section
-     in your commercial list HTML with this block
-     ═══════════════════════════════════════════════════ -->
-
-<!-- Properties Section -->
 <div class="properties-section">
 
-    <!-- Search + Download Bar -->
     <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
         <form method="GET" action="" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
             <input type="text" name="search" value="{{ search_query }}"
@@ -186,19 +168,16 @@
             <tr>
                 <th>Sr.No</th>
                 
-                <!-- ALL MEDIA (3) -->
                 <th>Images</th>
                 <th>Floor Plan</th>
                 <th>Video</th>
 
-                <!-- BASIC (5) -->
                 <th>Property Type</th>
                 <th>City</th>
                 <th>Area / Locality</th>
                 <th>Address</th>
                 <th>Building Name</th>
 
-                <!-- AVAILABILITY & CONDITION (8) -->
                 <th>Possession Status</th>
                 <th>Available From</th>
                 <th>Age</th>
@@ -208,51 +187,42 @@
                 <th>Ownership</th>
                 <th>Construction</th>
 
-                <!-- AREA (2) -->
                 <th>Builtup Area</th>
                 <th>Carpet Area</th>
 
-                <!-- PRICING (3) -->
                 <th>Expected Rent</th>
                 <th>Deposit</th>
                 <th>Maintenance</th>
 
-                <!-- NEGOTIABLE & BROKERAGE (4) -->
                 <th>Negotiable</th>
                 <th>Brokerage (Type / % / Manual)</th>
 
-                <!-- UTILITIES (5) -->
                 <th>DG/UPS</th>
                 <th>Electricity</th>
                 <th>Water</th>
                 <th>Lock-in (Months)</th>
                 <th>Rent Increase %</th>
 
-                <!-- BUILDING (6) -->
                 <th>Total Floors</th>
                 <th>Your Floor</th>
                 <th>Staircases</th>
                 <th>Lifts (Pass / Serv)</th>
                 <th>Private Parking</th>
 
-                <!-- OFFICE (7) -->
                 <th>Seats (Min - Max)</th>
                 <th>Cabins</th>
                 <th>Meeting Rooms</th>
                 <th>Washroom (Pvt / Public)</th>
                 <th>Flooring</th>
 
-                <!-- JSON LISTS (2) -->
                 <th>Amenities</th>
                 <th>Nearby Facilities</th>
 
-                <!-- OWNER (4) -->
                 <th>Owner Name</th>
                 <th>Contact</th>
                 <th>Email</th>
                 <th>Alt. Contact</th>
 
-                <!-- UPLOADER (4) -->
                 <th>UB Name</th>
                 <th>UB Email</th>
                 <th>UB Contact</th>
@@ -265,16 +235,13 @@
 
         <tbody>
         {% for prop in page_obj %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
+            <tr id="row-{{ prop.id }}">
+                <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
 
-                <!-- MEDIA -->
-           <!-- 1. MULTIPLE IMAGES PREVIEW (FIXED) -->
-<td>
+                <td>
     <div style="display:flex; gap:4px; flex-wrap:wrap; min-width: 100px;">
     {% if prop.images.all %}
         
-        <!-- Safely build the JavaScript array of URLs and pass it to previewGallery -->
         <div style="display: flex; cursor: pointer; position: relative;" 
              onclick="previewGallery([{% for img in prop.images.all %}'{{ img.image.url }}'{% if not forloop.last %}, {% endif %}{% endfor %}], '{{ prop.building_name|escapejs|default:'Property' }}')">
              
@@ -319,14 +286,12 @@
                     {% endif %}
                 </td>
 
-                <!-- BASIC -->
                 <td>{{ prop.property_type }}</td>
                 <td>{{ prop.city }}</td>
                 <td>{{ prop.area_locality }}</td>
                 <td>{{ prop.property_address }}</td>
                 <td>{{ prop.building_name }}</td>
 
-                <!-- AVAILABILITY & CONDITION -->
                 <td>{{ prop.possession_status }}</td>
                 <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
                 <td>{{ prop.age_of_property }}</td>
@@ -336,16 +301,13 @@
                 <td>{{ prop.ownership_type }}</td>
                 <td>{{ prop.construction_status|default:"—" }}</td>
 
-                <!-- AREA -->
                 <td>{{ prop.builtup_area }}</td>
                 <td>{{ prop.carpet_area|default:"—" }}</td>
 
-                <!-- PRICING -->
                 <td>₹{{ prop.expected_rent }}</td>
                 <td>₹{{ prop.security_deposit|default:"—" }}</td>
                 <td>₹{{ prop.maintenance_charges|default:"—" }}</td>
 
-                <!-- NEGOTIABLE & BROKERAGE -->
                 <td>{% if prop.negotiable %}Yes{% else %}No{% endif %}</td>
                 <td>
                     {{ prop.brokerage|default:"—" }} 
@@ -353,28 +315,24 @@
                     {% if prop.manual_brokerage %} / {{ prop.manual_brokerage }}{% endif %}
                 </td>
 
-                <!-- UTILITIES -->
                 <td>{% if prop.dg_ups_included %}✔{% else %}✘{% endif %}</td>
                 <td>{% if prop.electricity_included %}✔{% else %}✘{% endif %}</td>
                 <td>{% if prop.water_included %}✔{% else %}✘{% endif %}</td>
                 <td>{{ prop.lockin_period|default:"—" }}</td>
                 <td>{{ prop.rent_increase|default:"—" }}</td>
 
-                <!-- BUILDING -->
                 <td>{{ prop.total_floors|default:"—" }}</td>
                 <td>{{ prop.your_floor|default:"—" }}</td>
                 <td>{{ prop.staircases|default:"—" }}</td>
                 <td>{{ prop.passenger_lifts|default:"0" }} / {{ prop.service_lifts|default:"0" }}</td>
                 <td>{{ prop.private_parking|default:"0" }}</td>
 
-                <!-- OFFICE -->
                 <td>{{ prop.min_seats|default:"—" }} - {{ prop.max_seats|default:"—" }}</td>
                 <td>{{ prop.cabins|default:"—" }}</td>
                 <td>{{ prop.meeting_rooms|default:"—" }}</td>
                 <td>{{ prop.private_washroom|default:"0" }} / {{ prop.public_washroom|default:"0" }}</td>
                 <td>{{ prop.flooring_type|default:"—" }}</td>
 
-                <!-- JSON LISTS -->
                 <td>
                     {% if prop.amenities %}
                         {{ prop.amenities|join:", " }}
@@ -386,13 +344,11 @@
                     {% else %}—{% endif %}
                 </td>
 
-                <!-- OWNER -->
                 <td>{{ prop.owner_name }}</td>
                 <td>{{ prop.contact_number }}</td>
                 <td>{{ prop.email }}</td>
                 <td>{{ prop.alternate_contact|default:"—" }}</td>
 
-                <!-- UPLOADER -->
                 <td>{{ prop.uploaded_by_name|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_email|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
@@ -400,7 +356,6 @@
 
                 <td>{{ prop.created_at|date:"d M Y" }}</td>
 
-                <!-- ACTIONS -->
                 <td>
                     <div style="display: flex; gap: 5px;">
                         <a class="btn-action btn-view" title="View" href="{% url 'commercial_view' prop.id %}">
@@ -429,7 +384,6 @@
     </table>
 </div>
 
-    <!-- Pagination -->
     {% if page_obj.paginator.num_pages > 1 %}
     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; flex-wrap:wrap; gap:10px;">
         <small style="color:#888;">
@@ -477,9 +431,6 @@
 </div>
 
 
-<!-- ═══════════════════════════════════════
-     Import Excel Modal
-     ═══════════════════════════════════════ -->
 <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content" style="border-radius:12px; overflow:hidden; border:none; box-shadow:0 20px 60px rgba(0,0,0,0.15);">
@@ -497,7 +448,6 @@
 
             <div class="modal-body" style="padding:24px;">
 
-                <!-- Download Template Banner -->
                 <div style="background:#FFF1F2; border:1px solid #FECACA; border-radius:8px;
                             padding:12px 16px; margin-bottom:20px; display:flex;
                             align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
@@ -516,7 +466,6 @@
                     </a>
                 </div>
 
-                <!-- File Upload -->
                 <div class="form-group">
                     <label style="font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; display:block;">
                         Upload Excel File <span style="color:red;">*</span>
@@ -553,7 +502,6 @@
                     </div>
                 </div>
 
-                <!-- Progress -->
                 <div id="commercial-import-progress" style="display:none; margin-top:16px;">
                     <div style="height:6px; background:#E5E7EB; border-radius:3px; overflow:hidden;">
                         <div id="commercial-progress-bar"
@@ -580,12 +528,72 @@
     </div>
 </div>
 
+<div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius:12px; overflow:hidden; border:none; box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none; padding:20px 24px;">
+                <h5 class="modal-title" style="color:white; font-weight:700; font-size:16px;">
+                    <i class="fas fa-trash-alt" style="margin-right:8px;"></i> Advanced Bulk Delete (Commercial)
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:1;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:24px;">
+                <form id="bulkDeleteForm">
+                    <div class="form-group">
+                        <label style="font-size:13px; font-weight:600;">Delete Criteria <span style="color:red;">*</span></label>
+                        <select class="form-control" id="deleteType" name="delete_type" onchange="toggleDeleteInputs()" style="font-size:13px;">
+                            <option value="">-- Select Option --</option>
+                            <option value="current_page">Delete Current Page Data</option>
+                            <option value="date_range">Delete by Date Range</option>
+                            <option value="latest_month">Delete Latest Month Data</option>
+                            <option value="old_data">Delete Data Older Than 6 Months</option>
+                            <option value="by_uploader">Delete by Uploaded User Source</option>
+                            <option value="by_file">Delete by Specific Excel File</option>
+                            <option value="delete_all" style="color: red; font-weight: bold;">Delete ALL Data</option>
+                        </select>
+                    </div>
 
-<!-- ═══════════════════════════════════════
-     JavaScript
-     ═══════════════════════════════════════ -->
+                    <div id="dateRangeInputs" style="display:none; gap: 10px; margin-top: 10px;">
+                        <div style="flex: 1;">
+                            <label style="font-size:12px;">From Date</label>
+                            <input type="date" id="fromDate" name="from_date" class="form-control">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size:12px;">To Date</label>
+                            <input type="date" id="toDate" name="to_date" class="form-control">
+                        </div>
+                    </div>
+
+                    <div id="uploaderInput" style="display:none; margin-top: 10px;">
+                        <label style="font-size:12px;">Uploaded By (Name/Email/Role)</label>
+                        <input type="text" id="uploaderText" name="uploader_text" class="form-control" placeholder="e.g. Admin or admin@example.com">
+                    </div>
+
+                    <div id="fileInput" style="display:none; margin-top: 10px;">
+                        <label style="font-size:12px;">Select Uploaded Excel File</label>
+                        <select id="selectedFile" name="selected_file" class="form-control" style="font-size:13px;">
+                            <option value="">-- Select File --</option>
+                            {% for file in uploaded_files %}
+                                <option value="{{ file }}">{{ file }}</option>
+                            {% empty %}
+                                <option value="" disabled>No files found in database (Ensure your import script saves the filename)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border-top:1px solid #F3F4F6; padding:16px 24px; gap:10px;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="executeBulkDelete()" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none;">
+                    <i class="fas fa-exclamation-triangle"></i> Confirm Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-
+    // ... [Your existing Import Excel JS code remains untouched here] ...
     function handleCommercialFileSelect(input) {
         if (input.files && input.files[0]) showCommercialFilePreview(input.files[0]);
     }
@@ -716,38 +724,6 @@
                 </button>
             </div>`;
     }
-
-    // Delete Commercial Property
-    const csrfToken = '{{ csrf_token }}';
-
-    function deleteCommercial(id) {
-        Swal.fire({
-            title: 'Are you sure?',
-            text: 'This commercial property will be permanently deleted!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#aaa',
-            confirmButtonText: 'Yes, Delete!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(`/Admin_App/commercial/delete/${id}/`, {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': csrfToken }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire('Deleted!', data.message, 'success')
-                            .then(() => document.getElementById(`row-${id}`).remove());
-                    } else {
-                        Swal.fire('Error!', 'Something went wrong.', 'error');
-                    }
-                });
-            }
-        });
-    }
-
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -770,34 +746,23 @@ new Chart(ctx, {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+// --- Single Delete ---
 function deleteCommercial(propertyId) {
-    // 1. Show the SweetAlert confirmation
     Swal.fire({
         title: 'Are you sure?',
         text: "You won't be able to revert this! All associated images and media will be deleted.",
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#ef4444', // Red for delete
-        cancelButtonColor: '#94a3b8',  // Grey for cancel
+        confirmButtonColor: '#ef4444', 
+        cancelButtonColor: '#94a3b8',  
         confirmButtonText: '<i class="fas fa-trash-alt"></i> Yes, delete it!'
     }).then((result) => {
         if (result.isConfirmed) {
-            
-            // 2. Show a loading spinner
-            Swal.fire({ 
-                title: 'Deleting...', 
-                allowOutsideClick: false, 
-                didOpen: () => { Swal.showLoading(); } 
-            });
+            Swal.fire({ title: 'Deleting...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
 
-            // 3. Grab the CSRF token securely
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
-
-            // 4. Set the exact URL for your Django delete view
-            // NOTE: Ensure this URL exactly matches your urls.py route!
             const deleteUrl = `/Admin_App/commercial/delete/${propertyId}/`;
 
-            // 5. Send the AJAX request to Django
             fetch(deleteUrl, {
                 method: 'POST',
                 headers: {
@@ -806,43 +771,110 @@ function deleteCommercial(propertyId) {
                 }
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Server returned HTTP ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Server returned HTTP ${response.status}`);
                 return response.json();
             })
             .then(data => {
                 if (data.status === 'success') {
-                    // Show success popup
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Deleted!',
-                        text: 'The commercial property has been deleted.',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    
-                    // Smoothly remove the row from the table
-                    // Make sure your <tr> tag has id="row-{{ prop.id }}"
+                    Swal.fire({ icon: 'success', title: 'Deleted!', text: 'The commercial property has been deleted.', timer: 1500, showConfirmButton: false });
                     const row = document.getElementById(`row-${propertyId}`);
                     if (row) {
                         row.style.transition = "all 0.4s ease";
                         row.style.opacity = "0";
                         row.style.transform = "translateX(-20px)";
-                        setTimeout(() => row.remove(), 400); // Remove after animation finishes
+                        setTimeout(() => row.remove(), 400); 
                     } else {
-                        // Fallback if the row ID isn't found
                         setTimeout(() => window.location.reload(), 1500); 
                     }
-                    
                 } else {
                     Swal.fire('Error!', data.message || 'Could not delete property.', 'error');
                 }
             })
             .catch(error => {
-                console.error("Delete error:", error);
                 Swal.fire('Error!', `Server connection failed: ${error.message}`, 'error');
             });
+        }
+    });
+}
+
+// --- Bulk Delete JS ---
+function toggleDeleteInputs() {
+    const type = document.getElementById('deleteType').value;
+    document.getElementById('dateRangeInputs').style.display = (type === 'date_range') ? 'flex' : 'none';
+    document.getElementById('uploaderInput').style.display = (type === 'by_uploader') ? 'block' : 'none';
+    document.getElementById('fileInput').style.display = (type === 'by_file') ? 'block' : 'none';
+}
+
+function executeBulkDelete() {
+    const type = document.getElementById('deleteType').value;
+    if (!type) {
+        Swal.fire('Warning', 'Please select a delete criteria.', 'warning');
+        return;
+    }
+
+    let payload = { delete_type: type };
+
+    if (type === 'date_range') {
+        payload.from_date = document.getElementById('fromDate').value;
+        payload.to_date = document.getElementById('toDate').value;
+        if (!payload.from_date || !payload.to_date) {
+            Swal.fire('Warning', 'Please select both From and To dates.', 'warning');
+            return;
+        }
+    } else if (type === 'by_uploader') {
+        payload.uploader_text = document.getElementById('uploaderText').value;
+        if (!payload.uploader_text) {
+            Swal.fire('Warning', 'Please enter the uploader detail.', 'warning');
+            return;
+        }
+    } else if (type === 'by_file') {
+        payload.file_name = document.getElementById('selectedFile').value;
+        if (!payload.file_name) {
+            Swal.fire('Warning', 'Please select an Excel file from the list.', 'warning');
+            return;
+        }
+    } else if (type === 'current_page') {
+        const rows = document.querySelectorAll('tr[id^="row-"]');
+        const ids = Array.from(rows).map(row => row.id.split('-')[1]);
+        if (ids.length === 0) {
+            Swal.fire('Warning', 'No data on the current page to delete.', 'warning');
+            return;
+        }
+        payload.page_ids = ids;
+    }
+
+    Swal.fire({
+        title: 'Are you absolutely sure?',
+        text: "This action will permanently delete the selected Commercial records and their media!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, delete them!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+
+            fetch("{% url 'commercial_bulk_delete' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire('Deleted!', data.message, 'success').then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            })
+            .catch(err => Swal.fire('Error', 'Server error occurred.', 'error'));
         }
     });
 }
@@ -850,61 +882,40 @@ function deleteCommercial(propertyId) {
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-
-    // 1. Monthly Rental Income (Bar Chart)
     new Chart(document.getElementById('rentalIncomeChart'), {
         type: 'bar',
         data: {
             labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-            datasets: [{
-                label: 'Rent',
-                data: [50000, 60000, 55000, 70000],
-                backgroundColor: '#3b82f6'
-            }]
+            datasets: [{ label: 'Rent', data: [50000, 60000, 55000, 70000], backgroundColor: '#3b82f6' }]
         }
     });
 
-    // 2. Occupancy (Doughnut Chart)
     new Chart(document.getElementById('occupancyDoughnutChart'), {
         type: 'doughnut',
         data: {
             labels: ['Occupied', 'Vacant'],
-            datasets: [{
-                data: [80, 20],
-                backgroundColor: ['#10b981', '#ef4444']
-            }]
+            datasets: [{ data: [80, 20], backgroundColor: ['#10b981', '#ef4444'] }]
         }
     });
 
-    // 3. Rent Range (Bar Chart)
     new Chart(document.getElementById('rentRangeChart'), {
         type: 'bar',
         data: {
             labels: ['0-10k', '10-25k', '25k+'],
-            datasets: [{
-                label: 'Properties',
-                data: [10, 20, 5],
-                backgroundColor: '#f59e0b'
-            }]
+            datasets: [{ label: 'Properties', data: [10, 20, 5], backgroundColor: '#f59e0b' }]
         }
     });
-
 });
 </script>
 
 <script>
-
-    // Global variable to keep track of gallery index
 let currentGalleryIndex = 0;
 let currentGalleryImages = [];
 
 function previewGallery(urls_array, title) {
-    // If it's a string from capture, split it. Otherwise use the array directly.
     currentGalleryImages = typeof urls_array === 'string' ? urls_array.split(',') : urls_array;
     currentGalleryIndex = 0;
-
     if (currentGalleryImages.length === 0) return;
-
     showGalleryModal(title);
 }
 
@@ -912,7 +923,6 @@ function showGalleryModal(title) {
     const total = currentGalleryImages.length;
     const currentUrl = currentGalleryImages[currentGalleryIndex];
 
-    // Build navigation buttons if there's more than 1 image
     let navHtml = '';
     if (total > 1) {
         navHtml = `
@@ -931,8 +941,6 @@ function showGalleryModal(title) {
             <img id="swalGalleryImage" src="${currentUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.3s ease;">
             ${navHtml}
         </div>
-        
-        <!-- Thumbnail strip at bottom -->
         <div style="display: flex; gap: 8px; margin-top: 15px; overflow-x: auto; padding-bottom: 5px;">
             ${currentGalleryImages.map((img, idx) => `
                 <img src="${img}" 
@@ -951,28 +959,18 @@ function showGalleryModal(title) {
         padding: '1.5em',
         background: '#fff',
         backdrop: 'rgba(0,0,0,0.85)',
-        didOpen: () => {
-            // Prevent SweetAlert from auto-focusing elements and scrolling weirdly
-            document.activeElement.blur();
-        }
+        didOpen: () => { document.activeElement.blur(); }
     });
 }
 
-// Navigation helpers
 function changeGalleryImage(direction) {
     currentGalleryIndex += direction;
-    // Loop around
     if (currentGalleryIndex >= currentGalleryImages.length) currentGalleryIndex = 0;
     if (currentGalleryIndex < 0) currentGalleryIndex = currentGalleryImages.length - 1;
-    
-    // Update the image source without closing the modal
     const imgEl = document.getElementById('swalGalleryImage');
     if (imgEl) {
         imgEl.style.opacity = '0';
-        setTimeout(() => {
-            // Re-render the modal to update counter and thumbnails
-            showGalleryModal(Swal.getTitle().textContent);
-        }, 150);
+        setTimeout(() => { showGalleryModal(Swal.getTitle().textContent); }, 150);
     }
 }
 
@@ -981,7 +979,6 @@ function jumpToGalleryImage(index) {
     currentGalleryIndex = index;
     showGalleryModal(Swal.getTitle().textContent);
 }
-
 </script>
 </body>
 </html>

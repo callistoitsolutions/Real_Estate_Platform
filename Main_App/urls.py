@@ -8,6 +8,9 @@ urlpatterns = [
       ##########urls for Lanlord#####
    
     path('',views.index,name="index"),
+   
+   # path('api/advanced-search/', views.advanced_search_api, name='advanced_search'),
+
     path('portalpage',views.portalpage,name="portalpage"),
     
     path('signup/', views.signup_view, name='signup'),

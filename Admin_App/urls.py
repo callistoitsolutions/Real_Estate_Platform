@@ -366,6 +366,7 @@ urlpatterns = [
     
 
 ################## START URL SECTION OF RENTAL RESIDENTIAL LISTING ###############################
+
     path('residential_list/', views.rental_list, name='residential_list'),
 
     path('rental_residential_add', views.rental_residential_add, name='rental_residential_add'),
@@ -375,6 +376,9 @@ urlpatterns = [
     path('rental-residential/delete/<int:pk>/', views.rental_residential_delete, name='rental_residential_delete'),
 
   
+    path('rental-residential/bulk-delete/', views.rental_bulk_delete, name='rental_bulk_delete'),
+
+
   
     path('residential_import_excel/', views.import_residential_excel, name='import_residential_excel'),
 
@@ -389,6 +393,9 @@ urlpatterns = [
     path('Admin_App/commercial/download-template/', views.download_commercial_rental__template, name='download_commercial_rental__template'),
     
     path('commercial/list/',           views.commercial_list,   name='commercial_list'),
+  
+    path('commercial/bulk-delete/', views.commercial_bulk_delete, name='commercial_bulk_delete'),
+
     path('commercial/view/<int:pk>/',  views.commercial_view,   name='commercial_view'),
     path('commercial/edit/<int:pk>/',  views.commercial_edit,   name='commercial_edit'),
     path('commercial/delete/<int:pk>/', views.commercial_delete, name='commercial_delete'),
@@ -404,7 +411,9 @@ urlpatterns = [
     path('Admin_App/pg/import-excel/',       views.import_pg_excel,       name='import_pg_excel'),
     path('Admin_App/pg/download-template/',  views.download_pg_template,  name='download_pg_template'),
     
-    
+   
+    path('pg-coliving/bulk-delete/', views.pg_bulk_delete, name='pg_bulk_delete'),
+
     path('pg-coliving/view/<int:pk>/', views.pg_coliving_view, name='pg_coliving_view'),
 
     path('pg-coliving/delete/<int:pk>/', views.pg_coliving_delete, name='pg_coliving_delete'),
@@ -416,7 +425,9 @@ urlpatterns = [
 
       ####################Start Urls Section For Resindential Resale Property #######################################
     
-    
+
+    path('resale-residential/bulk-delete/', views.resale_residential_bulk_delete, name='resale_residential_bulk_delete'),
+
    
     path('resale_residential_add',  views.resale_residential_add,    name='resale_residential_add'),
   #  path('resale_residential_list',            views.resale_residential_list,   name='resale_residential_list'),

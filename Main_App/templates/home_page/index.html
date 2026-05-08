@@ -42,6 +42,37 @@ body {
     overflow-x: hidden;
 }
 
+.voice-btn-inline {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    padding: 0 10px;
+    font-size: 1.2rem;
+    transition: 0.3s;
+}
+
+.voice-btn-inline:hover {
+    color: #ef4444;
+    transform: scale(1.1);
+}
+
+.loc-tags-container {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.loc-tag {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
 /* ============================================
    HERO 
 ============================================ */
@@ -552,22 +583,21 @@ footer { background: #0f172a; padding: 60px 20px 30px; margin-top: 0; border-top
 
 <section id="hero">
     <h1>Find Your <em>Perfect Property</em><br>in Nagpur</h1>
-    <p>2,400+ verified listings · Trusted by 50,000+ buyers, tenants &amp; landlords</p>
+    <p>2,400+ verified listings · Trusted by 50,000+ buyers, tenants & landlords</p>
 
     <div class="search-container-99a">
         <div class="search-tabs-99a premium-tabs">
-            <button class="tab-99a active-tab" onclick="switchTab('rent', this); event.preventDefault();">Rent</button>
-            <button class="tab-99a" onclick="switchTab('resale', this); event.preventDefault();">Buy / Resale</button>
+            <button class="tab-99a active-tab" onclick="switchTab('rent', this)">Rent</button>
+            <button class="tab-99a" onclick="switchTab('resale', this)">Buy / Resale</button>
         </div>
 
         <form class="search-box-99a" id="searchForm" onsubmit="doSearch(event)">
             
-            <div class="sb-field-99a sb-custom-dropdown city-dropdown" id="city-trigger">
-                <i class="bi bi-geo-alt" style="margin-right: 6px;"></i>
-                <div class="sb-field-text" id="city-display" style="flex-grow: 1; text-align: left;">Nagpur</div>
+            <div class="sb-field-99a sb-custom-dropdown" id="city-trigger">
+                <i class="bi bi-geo-alt"></i>
+                <div class="sb-field-text" id="city-display">Nagpur</div>
                 <i class="bi bi-chevron-down"></i>
-                
-                <div class="custom-popover" id="city-popover" style="width: 200px;">
+                <div class="custom-popover">
                     <div class="popover-title">Select City</div>
                     <div id="city-radios">
                         <label class="check-item"><input type="radio" name="city_select" value="Nagpur" checked> <span>Nagpur</span></label>
@@ -577,45 +607,36 @@ footer { background: #0f172a; padding: 60px 20px 30px; margin-top: 0; border-top
                 </div>
             </div>
 
-            <div class="sb-field-99a sb-locality" onclick="document.getElementById('sb-location-input').focus()">
+            <div class="sb-field-99a sb-locality">
                 <div class="loc-scroll-wrapper" id="loc-scroll-wrapper">
                     <div id="locality-tags" class="loc-tags-container"></div>
-                    <input type="text" id="sb-location-input" placeholder="Search up to 3 localities (Press Enter)">
+                    <input type="text" id="sb-location-input" placeholder="Type locality or '3 BHK'...">
                 </div>
-                <button type="button" id="voiceSearchBtn" onclick="event.stopPropagation(); toggleVoiceSearch();" 
-                        style="background:none; border:none; cursor:pointer; padding:0 10px; color:#006ce4; font-size:1.1rem;"
-                        title="Voice Search">
-                    <i class="bi bi-mic-fill"></i>
+                <button id="voiceSearchBtn" type="button" onclick="startVoiceSearch();" class="voice-btn-inline">
+                    <i class="bi bi-mic"></i>
                 </button>
             </div>
 
             <div class="sb-field-99a sb-custom-dropdown" id="type-trigger">
-                <div class="sb-field-text" id="type-display">Property Sub-Type</div>
+                <div class="sb-field-text" id="type-display">Property Type</div>
                 <i class="bi bi-chevron-down"></i>
-                
-                <div class="custom-popover" id="type-popover">
-                    <div class="popover-title" id="type-title">Select Sub-Types</div>
+                <div class="custom-popover">
+                    <div class="popover-title">Categories</div>
                     <div id="type-checkboxes">
-                        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Residential"> <span>Residential</span></label>
-                        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Commercial"> <span>Commercial</span></label>
-                        <label class="check-item"><input type="checkbox" class="ptype-cb" value="PG/Co-living"> <span>PG / Co-living</span></label>
-                    </div>
+                        </div>
                 </div>
             </div>
 
             <div class="sb-field-99a sb-custom-dropdown" id="budget-trigger">
                 <div class="sb-field-text" id="budget-display">Budget</div>
                 <i class="bi bi-chevron-down"></i>
-                
-                <div class="custom-popover" id="budget-popover">
-                    <div class="popover-title">Select Budget Range</div>
+                <div class="custom-popover">
+                    <div class="popover-title">Max Budget</div>
                     <div id="budget-radios">
                         <label class="check-item"><input type="radio" name="budget_range" value="Any Budget" checked> <span>Any Budget</span></label>
                         <label class="check-item"><input type="radio" name="budget_range" value="Under ₹30L"> <span>Under ₹30L</span></label>
                         <label class="check-item"><input type="radio" name="budget_range" value="₹30L–60L"> <span>₹30L–60L</span></label>
-                        <label class="check-item"><input type="radio" name="budget_range" value="₹60L–1Cr"> <span>₹60L–1Cr</span></label>
-                        <label class="check-item"><input type="radio" name="budget_range" value="₹1Cr–2Cr"> <span>₹1Cr–2Cr</span></label>
-                        <label class="check-item"><input type="radio" name="budget_range" value="₹2Cr+"> <span>₹2Cr+</span></label>
+                        <label class="check-item"><input type="radio" name="budget_range" value="₹1Cr+"> <span>₹1Cr+</span></label>
                     </div>
                 </div>
             </div>
@@ -630,34 +651,8 @@ footer { background: #0f172a; padding: 60px 20px 30px; margin-top: 0; border-top
         <div class="hs-item"><div class="hs-v">2,420+</div><div class="hs-l">Active Listings</div></div>
         <div class="hs-item"><div class="hs-v">1,248</div><div class="hs-l">Verified Owners</div></div>
         <div class="hs-item"><div class="hs-v">50K+</div><div class="hs-l">Happy Users</div></div>
-        <div class="hs-item"><div class="hs-v">87</div><div class="hs-l">Expert RMs</div></div>
     </div>
 </section>
-
-<div style="max-width:1300px;margin:0 auto;padding:0 20px;">
-    <div class="la-banner mt-4" id="newListingBanner" style="display:none;">
-        <div class="la-icon"><i class="bi bi-check-lg"></i></div>
-        <div>
-            <div style="font-size:1rem;font-weight:700;color:#065f46;">🎉 New Listing Added Successfully!</div>
-            <div style="font-size:0.85rem;color:#047857;margin-top:4px;" id="newListingMsg">Your property is now live and visible to buyers and tenants.</div>
-        </div>
-        <button onclick="document.getElementById('newListingBanner').style.display='none'"
-            style="margin-left:auto;background:none;border:none;color:#059669;cursor:pointer;font-size:1.2rem;">✕</button>
-    </div>
-
-    <div style="margin-top:40px;margin-bottom:12px;font-size:0.85rem;font-weight:700;color:var(--text-dark);letter-spacing:1px;text-transform:uppercase;">Browse by Category</div>
-    <div class="cat-scroll" id="catScroll">
-        <div class="cat-pill active" onclick="filterCat('all',this)"><i class="bi bi-grid-fill"></i> All Properties</div>
-        <div class="cat-pill" onclick="filterCat('rent',this)"><i class="bi bi-house-fill"></i> For Rent</div>
-        <div class="cat-pill" onclick="filterCat('sale',this)"><i class="bi bi-tag-fill"></i> For Sale</div>
-        <div class="cat-pill" onclick="filterCat('residential',this)"><i class="bi bi-door-open"></i> Residential</div>
-        <div class="cat-pill" onclick="filterCat('commercial',this)"><i class="bi bi-buildings-fill"></i> Commercial</div>
-        <div class="cat-pill" onclick="filterCat('pg',this)"><i class="bi bi-person-fill"></i> PG/Co-living</div>
-        <div class="cat-pill" onclick="filterCat('verified',this)"><i class="bi bi-shield-check"></i> ✅ Verified Only</div>
-        <div class="cat-pill" onclick="filterCat('featured',this)"><i class="bi bi-star-fill" style="color:#f59e0b;"></i> ⭐ Featured</div>
-    </div>
-</div>
-
 <!-- ═══════════════════════════════════════════════════════════════════════════
      FEATURED PROPERTIES SECTION (DYNAMIC)
 ═══════════════════════════════════════════════════════════════════════════ -->
@@ -1286,494 +1281,154 @@ function scrollRecent(direction) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
+
+
+
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
-// POPOVER TOGGLE & EVENT DELEGATION
+// 1. GLOBAL DATA & CONFIGURATION
+// ═══════════════════════════════════════════════════════════════════════════
+let selectedLocalities = []; 
+
+const TYPE_OPTIONS = {
+    rent: `
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Residential Data"> <span>Residential</span></label>
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Commercial Data"> <span>Commercial</span></label>
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="PG Data"> <span>PG / Co-living</span></label>
+    `,
+    resale: `
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Resale Residential"> <span>Residential</span></label>
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Commercial Resale"> <span>Commercial</span></label>
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Plot Resale"> <span>Plots / Land</span></label>
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Agricultural Data"> <span>Agricultural</span></label>
+        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Industrial Resale"> <span>Industrial</span></label>
+    `
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 2. INITIALIZATION (No Auto-Search)
 // ═══════════════════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-    
+    // A. Dropdown Toggles
     document.querySelectorAll('.sb-custom-dropdown').forEach(dropdown => {
         dropdown.addEventListener('click', function(e) {
             e.stopPropagation();
             const popover = this.querySelector('.custom-popover');
-            
             document.querySelectorAll('.custom-popover').forEach(p => {
                 if (p !== popover) p.classList.remove('show-popover');
             });
-            
             if (popover) popover.classList.toggle('show-popover');
-        });
-    });
-
-    document.querySelectorAll('.custom-popover').forEach(popover => {
-        popover.addEventListener('click', function(e) {
-            e.stopPropagation();
         });
     });
 
     document.addEventListener('click', () => {
         document.querySelectorAll('.custom-popover').forEach(p => p.classList.remove('show-popover'));
     });
+
+    // B. Locality Tags (Enter to add)
+    const locInput = document.getElementById('sb-location-input');
+    if (locInput) {
+        locInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = this.value.trim();
+                if (val && !selectedLocalities.includes(val)) {
+                    selectedLocalities.push(val);
+                    renderTags();
+                    this.value = '';
+                }
+            }
+        });
+    }
+
+    // Set default categories
+    const container = document.getElementById('type-checkboxes');
+    if (container) container.innerHTML = TYPE_OPTIONS['rent'];
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// EVENT DELEGATION FOR CHECKBOXES AND RADIO BUTTONS
+// 3. VOICE SEARCH (Manual Start)
 // ═══════════════════════════════════════════════════════════════════════════
-document.addEventListener('change', function(e) {
-
-    // City Radios
-    if (e.target && e.target.name === 'city_select') {
-        const display = document.getElementById('city-display');
-        display.innerText = e.target.value;
-        
-        const popover = document.getElementById('city-popover');
-        if(popover) popover.classList.remove('show-popover');
-    }
-    
-    // Property Type Checkboxes
-    if (e.target && e.target.classList.contains('ptype-cb')) {
-        const checkedBoxes = document.querySelectorAll('.ptype-cb:checked');
-        const display = document.getElementById('type-display');
-        
-        if (checkedBoxes.length === 0) {
-            display.innerText = "Property Sub-Type";
-            display.style.color = "#333";
-        } else if (checkedBoxes.length === 1) {
-            display.innerText = checkedBoxes[0].value;
-            display.style.color = "var(--primary-dark)";
-        } else {
-            display.innerText = checkedBoxes.length + " Types Selected";
-            display.style.color = "var(--primary-dark)";
-        }
-    }
-    
-    // Budget Radios
-    if (e.target && e.target.name === 'budget_range') {
-        const display = document.getElementById('budget-display');
-        if (e.target.value === "Any Budget") {
-            display.innerText = "Budget";
-            display.style.color = "#333";
-        } else {
-            display.innerText = e.target.value;
-            display.style.color = "var(--primary-dark)";
-        }
-        
-        const popover = document.getElementById('budget-popover');
-        if(popover) popover.classList.remove('show-popover');
-    }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// SEARCH MULTI-LOCALITY TAG LOGIC (FIXED SCROLLING)
-// ═══════════════════════════════════════════════════════════════════════════
-const locInput = document.getElementById('sb-location-input');
-const tagsContainer = document.getElementById('locality-tags');
-let selectedLocalities = []; 
-
-if (locInput) {
-    locInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault();
-            addLocality(this.value);
-        }
-    });
-}
-
-function addLocality(val) {
-    const text = val.trim().replace(',', '');
-    if (text && selectedLocalities.length < 3 && !selectedLocalities.includes(text)) {
-        selectedLocalities.push(text);
-        
-        if (selectedLocalities.length >= 3) {
-            locInput.style.display = 'none';
-        }
-        
-        renderTags();
-        locInput.value = ''; 
-        
-        const localityBox = document.getElementById('loc-scroll-wrapper');
-        if(localityBox) {
-            setTimeout(() => {
-                localityBox.scrollLeft = localityBox.scrollWidth;
-            }, 10);
-        }
-    } else if (selectedLocalities.length >= 3) {
-        locInput.value = '';
-    }
-}
-
-function removeLocality(index) {
-    selectedLocalities.splice(index, 1);
-    locInput.style.display = 'block';
-    renderTags();
-}
-
-function renderTags() {
-    if(!tagsContainer) return;
-    tagsContainer.innerHTML = '';
-    selectedLocalities.forEach((loc, i) => {
-        const tag = document.createElement('span');
-        tag.className = 'loc-tag';
-        tag.innerHTML = `${loc} <i class="bi bi-x-circle-fill" style="cursor:pointer;" onclick="removeLocality(${i})"></i>`;
-        tagsContainer.appendChild(tag);
-    });
-
-    if (selectedLocalities.length > 0) {
-        locInput.placeholder = "";
-    } else {
-        locInput.placeholder = "Search up to 3 localities (Press Enter)";
-    }
+function startVoiceSearch() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return alert("Browser not supported.");
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.onresult = (event) => {
+        document.getElementById('sb-location-input').value = event.results[0][0].transcript;
+    };
+    recognition.start();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// DYNAMIC TAB SWITCHING LOGIC (UPDATE POPOVER OPTIONS)
+// 4. UI UPDATE FUNCTIONS
 // ═══════════════════════════════════════════════════════════════════════════
-const TYPE_OPTIONS = {
-    rent: `
-        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Residential"> <span>Residential</span></label>
-        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Commercial"> <span>Commercial</span></label>
-        <label class="check-item"><input type="checkbox" class="ptype-cb" value="PG/Co-living"> <span>PG / Co-living</span></label>
-    `,
-    resale: `
-        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Residential"> <span>Residential</span></label>
-        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Commercial"> <span>Commercial</span></label>
-        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Plots/Land"> <span>Plots / Land</span></label>
-        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Agricultural"> <span>Agricultural</span></label>
-        <label class="check-item"><input type="checkbox" class="ptype-cb" value="Industrial"> <span>Industrial</span></label>
-    `
-};
-
-function switchTab(tab, el) {
+function switchTab(mode, el) {
     document.querySelectorAll('.tab-99a').forEach(t => t.classList.remove('active-tab'));
     if(el) el.classList.add('active-tab');
-    
-    const typeContainer = document.getElementById('type-checkboxes');
-    if(typeContainer) typeContainer.innerHTML = TYPE_OPTIONS[tab] || TYPE_OPTIONS['rent'];
-    
-    const typeDisplay = document.getElementById('type-display');
-    if(typeDisplay) {
-        typeDisplay.innerText = "Property Sub-Type";
-        typeDisplay.style.color = "#333";
+    document.getElementById('type-checkboxes').innerHTML = TYPE_OPTIONS[mode];
+    document.getElementById('type-display').innerText = "Property Type";
+}
+
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.name === 'city_select') document.getElementById('city-display').innerText = e.target.value;
+    if (e.target && e.target.name === 'budget_range') document.getElementById('budget-display').innerText = e.target.value;
+    if (e.target && e.target.classList.contains('ptype-cb')) {
+        const checked = document.querySelectorAll('.ptype-cb:checked');
+        document.getElementById('type-display').innerText = checked.length === 0 ? "Property Type" : 
+            (checked.length === 1 ? checked[0].value : checked.length + " Selected");
     }
+});
+
+function renderTags() {
+    const container = document.getElementById('locality-tags');
+    if(!container) return;
+    container.innerHTML = selectedLocalities.map((loc, i) => `
+        <span class="loc-tag">${loc} <i class="bi bi-x-circle-fill" onclick="selectedLocalities.splice(${i},1);renderTags();"></i></span>
+    `).join('');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SEARCH SUBMISSION LOGIC
+// 5. MASTER SEARCH ENGINE (Final Bridge)
 // ═══════════════════════════════════════════════════════════════════════════
 function doSearch(e) {
     if (e) e.preventDefault();
     
-    const activeTab = document.querySelector('.tab-99a.active-tab');
-    const tabText = activeTab ? activeTab.textContent.trim().toLowerCase() : 'rent';
+    const intent = document.querySelector('.tab-99a.active-tab').innerText;
+    const city = document.querySelector('input[name="city_select"]:checked')?.value || "Nagpur";
+    const typedLocation = document.getElementById('sb-location-input').value;
     
-    const cityRadio = document.querySelector('input[name="city_select"]:checked');
-    const city = cityRadio ? cityRadio.value : 'Nagpur';
-    
-    const checkedTypes = Array.from(document.querySelectorAll('.ptype-cb:checked')).map(cb => cb.value);
-    
-    const budgetRadio = document.querySelector('input[name="budget_range"]:checked');
-    const budget = budgetRadio ? budgetRadio.value : 'Any Budget';
-    
+    // STRICT FILTERING: Get checked categories (Residential Data, Plot Resale, etc.)
+    const selectedTypes = Array.from(document.querySelectorAll('.ptype-cb:checked'))
+                               .map(cb => cb.value).join(',');
+
+    // 🏗️ Build AI Sentence
+    let aiQuery = `I am looking to ${intent} ${selectedTypes || 'any'} property`;
+    let locs = [...selectedLocalities];
+    if (typedLocation) locs.push(typedLocation);
+    if (locs.length > 0) aiQuery += ` in ${locs.join(', ')}`;
+    aiQuery += ` in ${city}`;
+
+    // Redirect to Python View
     const params = new URLSearchParams();
-
-    const locInputElem = document.getElementById('sb-location-input');
-    if (locInputElem && locInputElem.style.display !== 'none') {
-        const pendingText = locInputElem.value.trim();
-        if (pendingText) addLocality(pendingText);
-    }
-    const locationStr = selectedLocalities.join(',');
-
-    if (tabText.includes('rent')) {
-        params.set('type', 'rent');
-    } else {
-        params.set('type', 'sale');
-    }
-
-    params.set('city', city);
-    if (locationStr) params.set('locality', locationStr);
-    
-    if (checkedTypes.length > 0) {
-        params.set('categories', checkedTypes.join(','));
-    }
-    
-    if (budget && budget !== 'Any Budget') params.set('budget', budget);
+    params.set('ai_query', aiQuery);
+    params.set('types', selectedTypes); // Tell Python exactly which categories to show
+    params.set('city_filter', city);    // Tell Python exactly which city to show
 
     window.location.href = '/listingpage/?' + params.toString();
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// CATEGORY FILTER
-// ═══════════════════════════════════════════════════════════════════════════
-function filterCat(cat, el) {
-    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
-    el.classList.add('active');
-    
-    let url = '/listingpage/?';
-    
-    if (cat === 'all') {
-        url += '';
-    } else if (cat === 'rent') {
-        url += 'type=rent';
-    } else if (cat === 'sale') {
-        url += 'type=sale';
-    } else if (cat === 'residential') {
-        url += 'category=Residential';
-    } else if (cat === 'commercial') {
-        url += 'category=Commercial';
-    } else if (cat === 'pg') {
-        url += 'category=PG';
-    } else if (cat === 'verified') {
-        url += 'verified=true';
-    } else if (cat === 'featured') {
-        url += 'featured=true';
-    }
-    
-    window.location.href = url;
+// Call & Save Utilities
+function callListing(phone) {
+    if (!phone) return alert("Phone number not available");
+    window.location.href = `tel:${phone}`;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PROPERTY ACTIONS
-// ═══════════════════════════════════════════════════════════════════════════
-function toggleSave(id, propType, btn) {
+function toggleSave(id, btn) {
     btn.classList.toggle('saved');
     const icon = btn.querySelector('i');
-    
-    if (btn.classList.contains('saved')) {
-        icon.className = 'bi bi-heart-fill';
-        
-        let saved = JSON.parse(localStorage.getItem('savedProperties') || '[]');
-        saved.push({id: id, type: propType});
-        localStorage.setItem('savedProperties', JSON.stringify(saved));
-        
-        Swal.fire({
-            icon:'success',
-            title:'Saved!',
-            text:'Property added to your wishlist.',
-            background:'#ffffff',
-            color:'#1e293b',
-            confirmButtonColor:'#006ce4',
-            timer:1500,
-            showConfirmButton:false
-        });
-    } else {
-        icon.className = 'bi bi-heart';
-        
-        let saved = JSON.parse(localStorage.getItem('savedProperties') || '[]');
-        saved = saved.filter(p => !(p.id === id && p.type === propType));
-        localStorage.setItem('savedProperties', JSON.stringify(saved));
-    }
+    icon.className = icon.className.includes('fill') ? 'bi bi-heart' : 'bi bi-heart-fill';
 }
-
-function callListing(phone) {
-    Swal.fire({
-        title: 'Contact Owner',
-        html: `<div style="text-align:center;padding:8px;">
-                <div style="font-size:1.4rem;font-weight:900;color:#006ce4;margin:12px 0;">
-                    📞 ${phone}
-                </div>
-                <div style="font-size:.8rem;color:#64748b;font-weight:500;">
-                    PropCRM Verified · Available 9AM–7PM
-                </div>
-               </div>`,
-        background: '#ffffff',
-        color: '#1e293b',
-        confirmButtonColor: '#006ce4',
-        confirmButtonText: 'Call Now',
-        showCancelButton: true
-    }).then((result) => {
-        if (result.isConfirmed) {
-            window.location.href = `tel:${phone}`;
-        }
-    });
-}
-
-function waListing(phone) {
-    const message = encodeURIComponent("Hi, I'm interested in your property listed on PropCRM. Can we discuss?");
-    window.open(`https://wa.me/91${phone}?text=${message}`, '_blank');
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// 🎤 VOICE SEARCH FUNCTIONALITY
-// ═══════════════════════════════════════════════════════════════════════════
-let recognition;
-let isListening = false;
-
-if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-IN';
-    
-    recognition.onresult = function(event) {
-        const transcript = event.results[0][0].transcript;
-        const input = document.getElementById('sb-location-input');
-        
-        if (input) {
-            addLocality(transcript);
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'Voice Recognized!',
-                text: `Added: "${transcript}"`,
-                timer: 2000,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
-        }
-        
-        isListening = false;
-        updateVoiceButton();
-    };
-    
-    recognition.onerror = function(event) {
-        console.error('Speech recognition error:', event.error);
-        isListening = false;
-        updateVoiceButton();
-        
-        Swal.fire({
-            icon: 'error',
-            title: 'Voice Error',
-            text: 'Could not recognize speech. Please try again.',
-            timer: 2000,
-            toast: true,
-            position: 'top-end'
-        });
-    };
-    
-    recognition.onend = function() {
-        isListening = false;
-        updateVoiceButton();
-    };
-}
-
-function toggleVoiceSearch() {
-    if (!recognition) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Not Supported',
-            text: 'Voice search is not supported in your browser. Please use Chrome or Edge.',
-            confirmButtonColor: '#006ce4'
-        });
-        return;
-    }
-    
-    if (isListening) {
-        recognition.stop();
-        isListening = false;
-    } else {
-        if (selectedLocalities.length >= 3) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Limit Reached',
-                text: 'You can only add up to 3 localities.',
-                timer: 2000,
-                toast: true,
-                position: 'top-end'
-            });
-            return;
-        }
-        
-        recognition.start();
-        isListening = true;
-        
-        Swal.fire({
-            icon: 'info',
-            title: 'Listening...',
-            text: 'Speak the locality name now',
-            timer: 3000,
-            showConfirmButton: false,
-            toast: true,
-            position: 'top-end',
-            timerProgressBar: true
-        });
-    }
-    
-    updateVoiceButton();
-}
-
-function updateVoiceButton() {
-    const btn = document.getElementById('voiceSearchBtn');
-    if (btn) {
-        if (isListening) {
-            btn.innerHTML = '<i class="bi bi-mic-fill" style="color:#ef4444;"></i>';
-            btn.style.animation = 'pulse 1.5s infinite';
-        } else {
-            btn.innerHTML = '<i class="bi bi-mic-fill"></i>';
-            btn.style.animation = 'none';
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// CHECK FOR NEW LISTING BANNER
-// ═══════════════════════════════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-    const newL = localStorage.getItem('newListingAdded');
-    if (newL) {
-        const data = JSON.parse(newL);
-        const banner = document.getElementById('newListingBanner');
-        if (banner) {
-            banner.style.display = 'flex';
-            document.getElementById('newListingMsg').textContent = `"${data.title}" is now live! Visible to 1,248+ users on PropCRM.`;
-        }
-        localStorage.removeItem('newListingAdded');
-    }
-});
 </script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const badges = document.querySelectorAll(".plan-badge");
-    const durationSelect = document.getElementById("durationSelect");
-    const items = document.querySelectorAll(".plan-item");
-    const noPlansMsg = document.getElementById("noPlansMsg");
-
-    // The filtering logic
-    function filterPlans() {
-        const activeAudience = document.querySelector(".plan-badge.active").getAttribute("data-target");
-        const activeDuration = durationSelect.value;
-        let visibleCount = 0;
-
-        items.forEach(item => {
-            const planFor = item.getAttribute("data-for");
-            const planDuration = item.getAttribute("data-duration");
-
-            // Check if card matches BOTH the Audience Badge and the Duration Dropdown
-            if (planFor === activeAudience && planDuration === activeDuration) {
-                item.style.display = "block";
-                visibleCount++;
-            } else {
-                item.style.display = "none";
-            }
-        });
-
-        // Show/Hide the "No Plans" message
-        if (visibleCount === 0) {
-            noPlansMsg.style.display = "block";
-        } else {
-            noPlansMsg.style.display = "none";
-        }
-    }
-
-    // When a Badge is clicked
-    badges.forEach(badge => {
-        badge.addEventListener("click", function() {
-            // Remove active class from all, add to clicked
-            badges.forEach(b => b.classList.remove("active"));
-            this.classList.add("active");
-            filterPlans(); // Re-run filter
-        });
-    });
-
-    // When the Duration Dropdown is changed
-    durationSelect.addEventListener("change", filterPlans);
-
-    // Run immediately on page load to set the initial state
-    filterPlans();
-});
-</script>
-
 </body>
 </html>

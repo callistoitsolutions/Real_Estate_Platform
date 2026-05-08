@@ -48,6 +48,14 @@ from itertools import chain
 
 
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.forms.models import model_to_dict
+import json
+from .apps import MainAppConfig
+
+
+
 
 
 
@@ -135,189 +143,153 @@ def property_detail_view(request, listing_type, category, pk):
     return render(request, 'home_page/property_detail.html', {'p': p, 'original': obj,'amenities_list':amenities_list,'facilities_list':facilities_list})
 
 
-def listings_view(request):
-    listing_type = request.GET.get('type',     'rent').strip()
-    category     = request.GET.get('category', 'residential').strip()
-    bhk          = request.GET.get('bhk',      '').strip()
-    budget       = request.GET.get('budget',   '').strip()
-    furnishing   = request.GET.get('furnishing','').strip()
-    area         = request.GET.get('area',     '').strip()
-    sort         = request.GET.get('sort',     'relevant').strip()
 
-    # Normalize BHK: "2BHK" → "2 BHK" (Case-insensitive)
-    bhk = re.sub(r'(\d)\s*(BHK|RK)', r'\1 \2', bhk, flags=re.IGNORECASE).upper()
 
-    properties  = []
-    page_title  = 'Properties'
 
-    # ── RENT → RESIDENTIAL ───────────────────────────────────────────────────
-    if listing_type == 'rent' and category == 'residential':
-        page_title = 'Flats & Houses for Rent'
-        qs = RentalResidentialProperty.objects.all()
+from django.shortcuts import render
+from django.db.models import Q
+import re
+from rapidfuzz import process, fuzz
+from .apps import MainAppConfig
 
-        if bhk:
-            qs = qs.filter(bhk_type__icontains=bhk)
-        if budget:
-            low, high = _parse_rent_budget(budget)
-            if low  is not None: qs = qs.filter(monthly_rent__gte=low)
-            if high is not None: qs = qs.filter(monthly_rent__lte=high)
-        if furnishing:
-            qs = qs.filter(furnishing_status__icontains=furnishing)
-        if area:
-            qs = qs.filter(Q(locality__icontains=area) | Q(city__icontains=area))
+# Ensure your property models and normalizer functions are imported here
+# from .models import RentalResidentialProperty, ...
+# from .utils import _normalize_rental, ...
 
-        qs = _sort_qs(qs, sort, 'monthly_rent')
-        for p in qs:
-            properties.append(_normalize_rental(p))
+# ═══════════════════════════════════════════════════════════════════════
+# 1. AI HELPER FUNCTIONS (Must be defined BEFORE listings_view)
+# ═══════════════════════════════════════════════════════════════════════
+def correct_query_text(query):
+    query = query.lower().strip()
+    query = re.sub(r'[^\w\s]', '', query) # Remove punctuation
+    return query
 
-    # ── RENT → COMMERCIAL ────────────────────────────────────────────────────
-    elif listing_type == 'rent' and category == 'commercial':
-        page_title = 'Commercial Spaces for Rent'
-        qs = CommercialRentalProperty.objects.all()
+def apply_fuzzy_correction(query):
+    words = query.split()
+    corrected_words = []
+    
+    valid_keywords = []
+    # Check if cities loaded successfully in apps.py
+    if hasattr(MainAppConfig, 'cities') and MainAppConfig.cities:
+        valid_keywords = MainAppConfig.cities
+        
+    for word in words:
+        if valid_keywords:
+            match = process.extractOne(word, valid_keywords, scorer=fuzz.ratio)
+            if match and match[1] > 80: # 80% similarity threshold
+                corrected_words.append(match[0])
+            else:
+                corrected_words.append(word)
+        else:
+            corrected_words.append(word)
+            
+    return " ".join(corrected_words)
 
-        if area:
-            qs = qs.filter(Q(area_locality__icontains=area) | Q(city__icontains=area))
-        if budget:
-            low, high = _parse_rent_budget(budget)
-            if low  is not None: qs = qs.filter(expected_rent__gte=low)
-            if high is not None: qs = qs.filter(expected_rent__lte=high)
+def extract_entities(query):
+    # Sends the fuzzy-corrected text straight to the Sentence Transformer
+    return query
 
-        qs = _sort_qs(qs, sort, 'expected_rent')
-        for p in qs:
-            properties.append(_normalize_commercial_rental(p))
 
-    # ── RENT → PG / CO-LIVING ────────────────────────────────────────────────
-    elif listing_type == 'rent' and category == 'pg':
-        page_title = 'PG & Co-living Spaces'
-        qs = PGColivingProperty.objects.all()
 
-        if area:
-            qs = qs.filter(Q(locality__icontains=area) | Q(city__icontains=area))
-        if budget:
-            low, high = _parse_rent_budget(budget)
-            if low  is not None: qs = qs.filter(rent__gte=low)
-            if high is not None: qs = qs.filter(rent__lte=high)
-        if furnishing:
-            qs = qs.filter(furnishing_type__icontains=furnishing)
 
-        qs = _sort_qs(qs, sort, 'rent')
-        for p in qs:
-            properties.append(_normalize_pg(p))
+def _normalize_any_property(obj, source):
+    """Bridges all 8 models to the same HTML card layout"""
+    # 1. Image Logic
+    img_url = None
+    if hasattr(obj, 'images') and obj.images.exists():
+        img_url = obj.images.first().image.url
+    elif hasattr(obj, 'property_image') and obj.property_image:
+        img_url = obj.property_image.url
 
-    # ── SALE → RESIDENTIAL ───────────────────────────────────────────────────
-    elif listing_type == 'sale' and category == 'residential':
-        page_title = 'Flats & Houses for Sale'
-        qs = ResaleResidentialProperty.objects.all()
+    # 2. Price Logic
+    price = "Price on Request"
+    if hasattr(obj, 'monthly_rent') and obj.monthly_rent:
+        price = f"₹{obj.monthly_rent}/mo"
+    elif hasattr(obj, 'expected_price') and obj.expected_price:
+        price = f"₹{obj.expected_price}"
+    elif hasattr(obj, 'rent') and obj.rent:
+        price = f"₹{obj.rent}/mo"
 
-        if bhk:
-            qs = qs.filter(bhk__icontains=bhk)
-        if budget:
-            low, high = _parse_sale_budget(budget)
-            if low  is not None: qs = qs.filter(expected_price__gte=low)
-            if high is not None: qs = qs.filter(expected_price__lte=high)
-        if furnishing:
-            qs = qs.filter(furnishing_type__icontains=furnishing)
-        if area:
-            qs = qs.filter(Q(locality__icontains=area) | Q(city__icontains=area))
+    # 3. Specification Logic
+    beds = getattr(obj, 'bhk_type', None)
+    area = getattr(obj, 'total_area', getattr(obj, 'plot_area', getattr(obj, 'built_up_area', None)))
 
-        qs = _sort_qs(qs, sort, 'expected_price')
-        for p in qs:
-            properties.append(_normalize_resale(p))
-
-    # ── SALE → COMMERCIAL ────────────────────────────────────────────────────
-    elif listing_type == 'sale' and category == 'commercial':
-        page_title = 'Commercial Properties for Sale'
-        qs = CommercialResaleProperty.objects.filter(is_active=True)
-
-        if area:
-            qs = qs.filter(Q(locality__icontains=area) | Q(city__icontains=area))
-        if budget:
-            low, high = _parse_sale_budget(budget)
-            if low  is not None: qs = qs.filter(expected_price__gte=low)
-            if high is not None: qs = qs.filter(expected_price__lte=high)
-
-        qs = _sort_qs(qs, sort, 'expected_price')
-        for p in qs:
-            properties.append(_normalize_commercial_resale(p))
-
-    # ── SALE → PLOT ──────────────────────────────────────────────────────────
-    # elif listing_type == 'sale' and category == 'plot':
-    #     page_title = 'Plots & Land for Sale'
-    #     qs = ResalePlotProperty.objects.all()
-
-    #     if area:
-    #         qs = qs.filter(Q(locality__icontains=area) | Q(city__icontains=area))
-    #     if budget:
-    #         low, high = _parse_sale_budget(budget)
-    #         if low  is not None: qs = qs.filter(expected_price__gte=low)
-    #         if high is not None: qs = qs.filter(expected_price__lte=high)
-
-    #     qs = _sort_qs(qs, sort, 'expected_price')
-    #     for p in qs:
-    #         properties.append(_normalize_plot(p))
-
-    # # ── SALE → AGRICULTURE ───────────────────────────────────────────────────
-    # elif listing_type == 'sale' and category == 'agriculture':
-    #     page_title = 'Agricultural Land for Sale'
-    #     qs = ResaleAgriculturalProperty.objects.all()
-
-    #     if area:
-    #         # Agriculture usually searches by village/taluka instead of pure locality
-    #         qs = qs.filter(Q(village__icontains=area) | Q(taluka__icontains=area) | Q(district__icontains=area))
-    #     if budget:
-    #         low, high = _parse_sale_budget(budget)
-    #         if low  is not None: qs = qs.filter(expected_price__gte=low)
-    #         if high is not None: qs = qs.filter(expected_price__lte=high)
-
-    #     qs = _sort_qs(qs, sort, 'expected_price')
-    #     for p in qs:
-    #         properties.append(_normalize_agriculture(p))
-
-    # # ── SALE → INDUSTRIAL ────────────────────────────────────────────────────
-    # elif listing_type == 'sale' and category == 'industrial':
-    #     page_title = 'Industrial Properties for Sale'
-    #     qs = ResaleIndustrialProperty.objects.all()
-
-    #     if area:
-    #         qs = qs.filter(Q(locality__icontains=area) | Q(city__icontains=area))
-    #     if budget:
-    #         low, high = _parse_sale_budget(budget)
-    #         if low  is not None: qs = qs.filter(expected_price__gte=low)
-    #         if high is not None: qs = qs.filter(expected_price__lte=high)
-
-    #     qs = _sort_qs(qs, sort, 'expected_price')
-    #     for p in qs:
-    #         properties.append(_normalize_industrial(p))
-
-    # ── CONTEXT ──────────────────────────────────────────────────────────────
-    context = {
-        'properties':         properties,
-        'listing_type':       listing_type,
-        'category':           category,
-        'page_title':         page_title,
-        'total':              len(properties),
-        'current_bhk':        bhk,
-        'current_budget':     budget,
-        'current_furnishing': furnishing,
-        'current_area':       area,
-        'current_sort':       sort,
+    return {
+        'id': obj.id,
+        'category': source, 
+        'listing_type': 'rent' if 'Data' in source or 'PG' in source else 'sale',
+        'title': f"{beds if beds else source} in {getattr(obj, 'locality', 'this area')}",
+        'location': f"{getattr(obj, 'locality', '')}, {getattr(obj, 'city', '')}",
+        'price_display': price,
+        'image_url': img_url,
+        'beds': beds,
+        'area': f"{area} sqft" if area else None,
+        'owner': getattr(obj, 'owner_name', 'Owner'),
+        'phone': getattr(obj, 'contact_number', ''),
+        'is_ai_match': True,
     }
 
-    # 🔹 3. Handle the logged-in user logic safely
-    session_id = request.session.get('User_id')
-    if session_id:
-        
-        user_obj = User_Details.objects.filter(id=session_id).first()
-        if user_obj:
-            context['user_obj'] = user_obj
-            
+def listings_view(request):
+    ai_query = request.GET.get('ai_query', '').strip()
+    selected_types = request.GET.get('types', '').split(',') # From JS checkboxes
+    city_filter = request.GET.get('city_filter', '').strip() # From JS dropdown
+    
+    normalized_properties = []
+    
+    if ai_query:
+        df = MainAppConfig.get_ai_df()
+        model = MainAppConfig.get_ai_model()
+        faiss_index = MainAppConfig.get_ai_faiss()
 
+        # 1. Get more matches so we have room to filter
+        query_vector = model.encode([ai_query]).astype('float32')
+        distances, indices = faiss_index.search(query_vector, k=100) 
+        results_df = df.iloc[indices[0]].copy()
+
+        # 2. FILTER CATEGORIES: Only keep what the user selected (Residential, Plot, etc.)
+        if any(selected_types) and selected_types != ['']:
+            results_df = results_df[results_df['source_sheet'].isin(selected_types)]
+
+        # 3. Process matches into Real Database Objects
+        for _, row in results_df.iterrows():
+            if len(normalized_properties) >= 20: break 
+            
+            p_id = row.get('db_id')
+            source = row.get('source_sheet')
+            
+            # THE 8-MODEL MAPPING
+            model_map = {
+                "Residential Data": RentalResidentialProperty,
+                "Commercial Data": CommercialRentalProperty,
+                "PG Data": PGColivingProperty,
+                "Resale Residential": ResaleResidentialProperty,
+                "Commercial Resale": CommercialResaleProperty,
+                "Plot Resale": PlotSaleProperty,
+                "Agricultural Data": AgriculturalResaleProperty,
+                "Industrial Resale": IndustrialResaleProperty,
+            }
+
+            db_model = model_map.get(source)
+            if db_model:
+                # ❗ THE CITY FIX: Strict check against the UI selection
+                obj_query = db_model.objects.filter(id=p_id)
+                if city_filter:
+                    obj_query = obj_query.filter(city__icontains=city_filter)
+                
+                property_obj = obj_query.first()
+                if property_obj:
+                    normalized_properties.append(_normalize_any_property(property_obj, source))
+                else:
+                    # Debug: This means CSV ID exists but DB ID doesn't
+                    print(f"⚠️ ID {p_id} not found in DB for {source}")
+
+    context = {
+        'properties': normalized_properties,
+        'total': len(normalized_properties),
+        'ai_query_used': ai_query
+    }
     return render(request, 'home_page/listingpage.html', context)
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  SORT HELPER
-# ─────────────────────────────────────────────────────────────────────────────
 
 def _sort_qs(qs, sort, price_field):
     if sort == 'newest':

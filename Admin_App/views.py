@@ -56,7 +56,7 @@ import io
 from django.urls import reverse
 
 from openpyxl.styles import Font, PatternFill
-
+from datetime import timedelta
 ########### Crime Officer Views#######
 
 def _float(val):
@@ -1400,9 +1400,7 @@ def agricultural_resale(request):
 
 
 
-
 def residential_resale_list(request):
-
     session_id = request.session.get('Admin_id')
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
@@ -1462,6 +1460,15 @@ def residential_resale_list(request):
         .values_list('zone', 'count')
     )
 
+    # ── Fetch unique uploaded file names for the Bulk Delete modal ──
+    try:
+        # Note: Replace 'upload_file_name' with your actual model field name if different
+        uploaded_files = properties.exclude(
+            upload_file_name__isnull=True
+        ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
+    except Exception:
+        uploaded_files = []
+
     context = {
         'admin_obj': admin_obj,
         'properties': properties,
@@ -1477,9 +1484,90 @@ def residential_resale_list(request):
         'semi_furnished': semi_furnished,
         'unfurnished': unfurnished,
         'zone_counts': zone_counts,
+        'uploaded_files': uploaded_files, # Passed files to template here
     }
 
     return render(request, 'admin_user/Reports/Resale/residential_resale_list.html', context)
+
+
+def resale_residential_bulk_delete(request):
+    """Handles Advanced Bulk Deletions for Resale Residential Properties."""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+        
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
+
+    try:
+        data = json.loads(request.body)
+        delete_type = data.get('delete_type')
+        properties = ResaleResidentialProperty.objects.all()
+        
+        if delete_type == 'delete_all':
+            count = properties.count()
+            properties.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted ALL {count} resale properties.'})
+            
+        elif delete_type == 'current_page':
+            page_ids = data.get('page_ids', [])
+            target_props = properties.filter(id__in=page_ids) # Or pk__in
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} resale properties from current page.'})
+            
+        elif delete_type == 'date_range':
+            from_date = data.get('from_date')
+            to_date = data.get('to_date')
+            # Using created_at for accurate date ranges, change to available_from if needed
+            target_props = properties.filter(created_at__range=[from_date, to_date])
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} resale properties in date range.'})
+            
+        elif delete_type == 'latest_month':
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            target_props = properties.filter(created_at__gte=thirty_days_ago)
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} resale properties from the last 30 days.'})
+            
+        elif delete_type == 'old_data':
+            six_months_ago = timezone.now() - timedelta(days=180)
+            target_props = properties.filter(created_at__lt=six_months_ago)
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} older resale properties.'})
+            
+        elif delete_type == 'by_uploader':
+            uploader = data.get('uploader_text', '')
+            target_props = properties.filter(
+                Q(uploaded_by_name__icontains=uploader) | 
+                Q(uploaded_by_email__icontains=uploader) |
+                Q(uploaded_by_role__icontains=uploader)
+            )
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} resale properties uploaded by {uploader}.'})
+
+        elif delete_type == 'by_file':
+            file_name = data.get('file_name', '')
+            # Replace 'upload_file_name' with your exact database field name for tracking files
+            target_props = properties.filter(upload_file_name=file_name) 
+            count = target_props.count()
+            if count == 0:
+                return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} resale properties from {file_name}.'})
+            
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+
 
 
 
@@ -3142,8 +3230,14 @@ def rental_residential_add(request):
 
 
 
-def rental_list(request):
 
+
+
+
+
+
+
+def rental_list(request):
     session_id = request.session.get('Admin_id')
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
@@ -3154,9 +3248,7 @@ def rental_list(request):
     # ── Base queryset ──
     try:
         properties = RentalResidentialProperty.objects.all().order_by('-id')
-        print("STEP 1 - properties count:", properties.count())
     except Exception as e:
-        print("STEP 1 FAILED:", e)
         properties = RentalResidentialProperty.objects.none()
 
     # ── Search filter ──
@@ -3171,9 +3263,7 @@ def rental_list(request):
                 Q(owner_name__icontains=search_query) |
                 Q(possession_status__icontains=search_query)
             )
-            print(" STEP 2 - search filter ok:", properties.count())
         except Exception as e:
-            print(" STEP 2 FAILED:", e)
             properties = RentalResidentialProperty.objects.none()
 
     # ── CSV Download ──
@@ -3223,88 +3313,55 @@ def rental_list(request):
         paginator = Paginator(properties, 10)
         page_number = request.GET.get('page', 1)
         page_obj = paginator.get_page(page_number)
-        print(" STEP 3 - page_obj count:", page_obj.object_list.count())
     except Exception as e:
-        print("STEP 3 FAILED:", e)
         page_obj = Paginator(RentalResidentialProperty.objects.none(), 10).get_page(1)
 
     total_count = properties.count()
-    print(" STEP 4 - total_count:", total_count)
 
     # ════════════════════════════════════════════════
     # STATS — computed on the FULL unfiltered queryset
-    # so cards/charts always show global numbers
     # ════════════════════════════════════════════════
     all_props = RentalResidentialProperty.objects.all()
 
-    # ── Summary stat cards ──
-    active_count = all_props.exclude(
-        possession_status__isnull=True
-    ).exclude(possession_status='').count()
+    active_count = all_props.exclude(possession_status__isnull=True).exclude(possession_status='').count()
+    furnished_count = all_props.filter(furnishing_status__iexact='Furnished').count()
+    available_count = all_props.filter(possession_status__iexact='Ready to Move').count()
+    city_count = all_props.exclude(city__isnull=True).exclude(city='').values('city').distinct().count()
 
-    furnished_count = all_props.filter(
-        furnishing_status__iexact='Furnished'
-    ).count()
-
-    available_count = all_props.filter(
-        possession_status__iexact='Ready to Move'
-    ).count()
-
-    city_count = all_props.exclude(
-        city__isnull=True
-    ).exclude(city='').values('city').distinct().count()
-
-    # ── Rent aggregates (ignore nulls) ──
-    rent_stats = all_props.exclude(
-        monthly_rent__isnull=True
-    ).aggregate(
+    rent_stats = all_props.exclude(monthly_rent__isnull=True).aggregate(
         avg_rent=Avg('monthly_rent'),
         max_rent=Max('monthly_rent'),
         min_rent=Min('monthly_rent'),
     )
-    avg_rent   = rent_stats['avg_rent']
-    max_rent   = rent_stats['max_rent']
-    min_rent   = rent_stats['min_rent']
+    avg_rent = rent_stats['avg_rent']
+    max_rent = rent_stats['max_rent']
+    min_rent = rent_stats['min_rent']
 
-    # ── Deposit average ──
-    deposit_stats = all_props.exclude(
-        security_deposit__isnull=True
-    ).aggregate(avg_deposit=Avg('security_deposit'))
+    deposit_stats = all_props.exclude(security_deposit__isnull=True).aggregate(avg_deposit=Avg('security_deposit'))
     avg_deposit = deposit_stats['avg_deposit']
 
-    # ── Average built-up area ──
-    area_stats = all_props.exclude(
-        built_up_area__isnull=True
-    ).aggregate(avg_area=Avg('built_up_area'))
+    area_stats = all_props.exclude(built_up_area__isnull=True).aggregate(avg_area=Avg('built_up_area'))
     avg_area = area_stats['avg_area']
 
-    # ── With owner info ──
-    with_owner_count = all_props.exclude(
-        owner_name__isnull=True
-    ).exclude(owner_name='').count()
-
-    # ── ✅ FIXED: With at least one image ──
-    # Using Django's related name filter logic (checks if related 'images' exist)
+    with_owner_count = all_props.exclude(owner_name__isnull=True).exclude(owner_name='').count()
     with_images_count = all_props.filter(images__isnull=False).distinct().count()
+
+    # ── Fetch unique uploaded file names for the Bulk Delete modal ──
+    try:
+        # Note: Replace 'upload_file_name' with your actual model field name if different
+        uploaded_files = all_props.exclude(
+            upload_file_name__isnull=True
+        ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
+    except Exception:
+        uploaded_files = []
 
     # ════════════════════════════════════════════════
     # CHART DATA
     # ════════════════════════════════════════════════
-
-    # ── Chart 1: BHK Distribution (Doughnut) ──
-    bhk_qs = (
-        all_props
-        .exclude(bhk_type__isnull=True)
-        .exclude(bhk_type='')
-        .values('bhk_type')
-        .annotate(count=Count('id'))
-        .order_by('-count')
-    )
+    bhk_qs = all_props.exclude(bhk_type__isnull=True).exclude(bhk_type='').values('bhk_type').annotate(count=Count('id')).order_by('-count')
     bhk_labels = json.dumps([item['bhk_type'] for item in bhk_qs])
     bhk_data   = json.dumps([item['count']    for item in bhk_qs])
 
-    # ── Chart 2: Rent Range Distribution (Bar) ──
-    # Bucket properties into rent brackets
     rent_buckets = [
         ('Under ₹5k',    0,      5000),
         ('₹5k–10k',      5000,   10000),
@@ -3316,34 +3373,15 @@ def rental_list(request):
     ]
     rent_range_labels = json.dumps([b[0] for b in rent_buckets])
     rent_range_data   = json.dumps([
-        all_props.filter(
-            monthly_rent__gte=lo,
-            monthly_rent__lt=hi
-        ).count()
+        all_props.filter(monthly_rent__gte=lo, monthly_rent__lt=hi).count()
         for _, lo, hi in rent_buckets
     ])
 
-    # ── Chart 3: Furnishing Status (Doughnut) ──
-    furnish_qs = (
-        all_props
-        .exclude(furnishing_status__isnull=True)
-        .exclude(furnishing_status='')
-        .values('furnishing_status')
-        .annotate(count=Count('id'))
-        .order_by('-count')
-    )
+    furnish_qs = all_props.exclude(furnishing_status__isnull=True).exclude(furnishing_status='').values('furnishing_status').annotate(count=Count('id')).order_by('-count')
     furnishing_labels = json.dumps([item['furnishing_status'] for item in furnish_qs])
     furnishing_data   = json.dumps([item['count']             for item in furnish_qs])
 
-    # ── Chart 4: Property Type (Bar) ──
-    prop_type_qs = (
-        all_props
-        .exclude(property_type__isnull=True)
-        .exclude(property_type='')
-        .values('property_type')
-        .annotate(count=Count('id'))
-        .order_by('-count')
-    )
+    prop_type_qs = all_props.exclude(property_type__isnull=True).exclude(property_type='').values('property_type').annotate(count=Count('id')).order_by('-count')
     prop_type_labels = json.dumps([item['property_type'] for item in prop_type_qs])
     prop_type_data   = json.dumps([item['count']         for item in prop_type_qs])
 
@@ -3351,43 +3389,109 @@ def rental_list(request):
     # CONTEXT
     # ════════════════════════════════════════════════
     context = {
-        # Auth
         'admin_obj': admin_obj,
-
-        # Table
         'page_obj': page_obj,
         'search_query': search_query,
         'total_count': total_count,
-
-        # Stat cards
-        'active_count':      active_count,
-        'furnished_count':   furnished_count,
-        'available_count':   available_count,
-        'city_count':        city_count,
-        'avg_rent':          avg_rent,
-        'max_rent':          max_rent,
-        'min_rent':          min_rent,
-        'avg_deposit':       avg_deposit,
-        'avg_area':          avg_area,
-        'with_owner_count':  with_owner_count,
+        'active_count': active_count,
+        'furnished_count': furnished_count,
+        'available_count': available_count,
+        'city_count': city_count,
+        'avg_rent': avg_rent,
+        'max_rent': max_rent,
+        'min_rent': min_rent,
+        'avg_deposit': avg_deposit,
+        'avg_area': avg_area,
+        'with_owner_count': with_owner_count,
         'with_images_count': with_images_count,
-
-        # Chart data (JSON strings — safe to dump into JS variables)
-        'bhk_labels':         bhk_labels,
-        'bhk_data':           bhk_data,
-        'rent_range_labels':  rent_range_labels,
-        'rent_range_data':    rent_range_data,
-        'furnishing_labels':  furnishing_labels,
-        'furnishing_data':    furnishing_data,
-        'prop_type_labels':   prop_type_labels,
-        'prop_type_data':     prop_type_data,
+        'uploaded_files': uploaded_files, # Added the files here
+        'bhk_labels': bhk_labels,
+        'bhk_data': bhk_data,
+        'rent_range_labels': rent_range_labels,
+        'rent_range_data': rent_range_data,
+        'furnishing_labels': furnishing_labels,
+        'furnishing_data': furnishing_data,
+        'prop_type_labels': prop_type_labels,
+        'prop_type_data': prop_type_data,
     }
 
-    print(" STEP 5 - context keys:", list(context.keys()))
     return render(request, 'admin_user/Reports/Rental/rental_list.html', context)
 
 
+def rental_bulk_delete(request):
+    """Handles Advanced Bulk Deletions for Rental Properties."""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+        
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
 
+    try:
+        data = json.loads(request.body)
+        delete_type = data.get('delete_type')
+        properties = RentalResidentialProperty.objects.all()
+        
+        if delete_type == 'delete_all':
+            count = properties.count()
+            properties.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted ALL {count} properties.'})
+            
+        elif delete_type == 'current_page':
+            page_ids = data.get('page_ids', [])
+            target_props = properties.filter(id__in=page_ids)
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties from current page.'})
+            
+        elif delete_type == 'date_range':
+            from_date = data.get('from_date')
+            to_date = data.get('to_date')
+            target_props = properties.filter(available_from__range=[from_date, to_date])
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties in date range.'})
+            
+        elif delete_type == 'latest_month':
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            target_props = properties.filter(available_from__gte=thirty_days_ago)
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties from the last 30 days.'})
+            
+        elif delete_type == 'old_data':
+            six_months_ago = timezone.now() - timedelta(days=180)
+            target_props = properties.filter(available_from__lt=six_months_ago)
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} older properties.'})
+            
+        elif delete_type == 'by_uploader':
+            uploader = data.get('uploader_text', '')
+            target_props = properties.filter(
+                Q(uploaded_by_name__icontains=uploader) | 
+                Q(uploaded_by_email__icontains=uploader) |
+                Q(uploaded_by_role__icontains=uploader)
+            )
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties uploaded by {uploader}.'})
+
+        elif delete_type == 'by_file':
+            file_name = data.get('file_name', '')
+            # Replace 'upload_file_name' with your exact database field name for tracking files
+            target_props = properties.filter(upload_file_name=file_name) 
+            count = target_props.count()
+            if count == 0:
+                return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties from {file_name}.'})
+            
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 
 
@@ -4410,6 +4514,10 @@ def download_commercial_rental__template(request):
 
 from django.db.models import Sum, Count
 
+
+
+
+
 def commercial_list(request):
     session_id = request.session.get('Admin_id')
     if not session_id:
@@ -4433,7 +4541,6 @@ def commercial_list(request):
     # =========================
     # 📊 DASHBOARD STATS
     # =========================
-
     total_properties = properties.count()
 
     residential_count = properties.filter(property_type__icontains="residential").count()
@@ -4460,6 +4567,15 @@ def commercial_list(request):
         "PG/Co-living": pg_count
     }
 
+    # ── Fetch unique uploaded file names for the Bulk Delete modal ──
+    try:
+        # Note: Replace 'upload_file_name' with your actual model field name if different
+        uploaded_files = properties.exclude(
+            upload_file_name__isnull=True
+        ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
+    except Exception:
+        uploaded_files = []
+
     paginator = Paginator(properties, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -4482,8 +4598,85 @@ def commercial_list(request):
         'pending_payments': pending_payments,
         'maintenance_req': maintenance_req,
         'pie_data': pie_data,
+        'uploaded_files': uploaded_files, # Passed files to template here
     })
 
+
+def commercial_bulk_delete(request):
+    """Handles Advanced Bulk Deletions for Commercial Properties."""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+        
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
+
+    try:
+        data = json.loads(request.body)
+        delete_type = data.get('delete_type')
+        properties = CommercialRentalProperty.objects.all()
+        
+        if delete_type == 'delete_all':
+            count = properties.count()
+            properties.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted ALL {count} properties.'})
+            
+        elif delete_type == 'current_page':
+            page_ids = data.get('page_ids', [])
+            target_props = properties.filter(id__in=page_ids)
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties from current page.'})
+            
+        elif delete_type == 'date_range':
+            from_date = data.get('from_date')
+            to_date = data.get('to_date')
+            # Using created_at for accurate date ranges, change to available_from if needed
+            target_props = properties.filter(created_at__range=[from_date, to_date])
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties in date range.'})
+            
+        elif delete_type == 'latest_month':
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            target_props = properties.filter(created_at__gte=thirty_days_ago)
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties from the last 30 days.'})
+            
+        elif delete_type == 'old_data':
+            six_months_ago = timezone.now() - timedelta(days=180)
+            target_props = properties.filter(created_at__lt=six_months_ago)
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} older properties.'})
+            
+        elif delete_type == 'by_uploader':
+            uploader = data.get('uploader_text', '')
+            target_props = properties.filter(
+                Q(uploaded_by_name__icontains=uploader) | 
+                Q(uploaded_by_email__icontains=uploader) |
+                Q(uploaded_by_role__icontains=uploader)
+            )
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties uploaded by {uploader}.'})
+
+        elif delete_type == 'by_file':
+            file_name = data.get('file_name', '')
+            # Replace 'upload_file_name' with your exact database field name for tracking files
+            target_props = properties.filter(upload_file_name=file_name) 
+            count = target_props.count()
+            if count == 0:
+                return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties from {file_name}.'})
+            
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 #######################END VIEW SECTION RENTAL COMMERCIAL PROPERTY##################################
 
@@ -4638,10 +4831,9 @@ def _date(val):
 
 
 
-
-
 def pg_list(request):
-    if not request.session.get('Admin_id'):
+    session_id = request.session.get('Admin_id')
+    if not session_id:
         return render(request, 'home_page/Adminlogin.html')
 
     search = request.GET.get('search', '')
@@ -4663,6 +4855,15 @@ def pg_list(request):
         for p in qs:
             w.writerow([p.pg_name, p.city, p.total_beds, p.owner_name, p.contact_number])
         return res
+
+    # ── Fetch unique uploaded file names for the Bulk Delete modal ──
+    try:
+        # Note: Replace 'upload_file_name' with your actual model field name if different
+        uploaded_files = PGColivingProperty.objects.exclude(
+            upload_file_name__isnull=True
+        ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
+    except Exception:
+        uploaded_files = []
 
     paginator = Paginator(qs, 10)
     page = paginator.get_page(request.GET.get('page'))
@@ -4706,8 +4907,89 @@ def pg_list(request):
         "pg_count": pg_count,
         "total_pg_beds": total_pg_beds,
         "active_listings": total_properties, # Assuming all are active for now
-        "chart_data_json": json.dumps(chart_data) # Send secure JSON to JS
+        "chart_data_json": json.dumps(chart_data), # Send secure JSON to JS
+        "uploaded_files": uploaded_files, # Passed files to template here
     })
+
+
+def pg_bulk_delete(request):
+    """Handles Advanced Bulk Deletions for PG / Co-living Properties."""
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+        
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
+
+    try:
+        data = json.loads(request.body)
+        delete_type = data.get('delete_type')
+        properties = PGColivingProperty.objects.all()
+        
+        if delete_type == 'delete_all':
+            count = properties.count()
+            properties.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted ALL {count} PG properties.'})
+            
+        elif delete_type == 'current_page':
+            page_ids = data.get('page_ids', [])
+            target_props = properties.filter(id__in=page_ids)
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} PG properties from current page.'})
+            
+        elif delete_type == 'date_range':
+            from_date = data.get('from_date')
+            to_date = data.get('to_date')
+            # Adjust 'created_at' if your model uses a different date field
+            target_props = properties.filter(created_at__range=[from_date, to_date])
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} PG properties in date range.'})
+            
+        elif delete_type == 'latest_month':
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            target_props = properties.filter(created_at__gte=thirty_days_ago)
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} PG properties from the last 30 days.'})
+            
+        elif delete_type == 'old_data':
+            six_months_ago = timezone.now() - timedelta(days=180)
+            target_props = properties.filter(created_at__lt=six_months_ago)
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} older PG properties.'})
+            
+        elif delete_type == 'by_uploader':
+            uploader = data.get('uploader_text', '')
+            target_props = properties.filter(
+                Q(owner_name__icontains=uploader) | # Using owner_name as fallback if uploaded_by isn't present
+                Q(email__icontains=uploader) 
+                # Add Q(uploaded_by_name__icontains=uploader) if your PG model has this field
+            )
+            count = target_props.count()
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} PG properties uploaded by {uploader}.'})
+
+        elif delete_type == 'by_file':
+            file_name = data.get('file_name', '')
+            # Replace 'upload_file_name' with your exact database field name
+            target_props = properties.filter(upload_file_name=file_name) 
+            count = target_props.count()
+            if count == 0:
+                return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
+            target_props.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} PG properties from {file_name}.'})
+            
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+
 
 
 COLUMN_MAP = [

@@ -343,83 +343,93 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
     </div>
 
     <div class="listings-grid" id="listingsGrid">
-      {% for p in properties %}
-      <a href="/listing/{{ p.listing_type }}/{{p.category}}/{{ p.id }}" class="pcard">
-        
-        <div class="pc-img">
-          {% if p.image_url %}
-          <img src="{{ p.image_url }}" alt="Property" style="width:100%;height:100%;object-fit:cover;">
-          {% else %}
-          <div class="pc-img-placeholder">
-            {{ p.emoji|default:"🏠" }}
-          </div>
-          {% endif %}
-          
-          <div class="pc-badges">
-            {% if p.is_new %}<span class="badge b-new">🆕 New</span>{% endif %}
-            {% for badge in p.badges %}
-              <span class="badge b-feat">{{ badge }}</span>
-            {% endfor %}
-          </div>
-          <button class="pc-save" onclick="event.preventDefault();toggleSave({{ p.id }},this)">
-            <i class="bi bi-heart" style="color:#ef4444;"></i>
-          </button>
-          
-          <div class="pc-price-tag">{{ p.price_display|default:"--" }}</div>
-        </div>
-
-        <div class="pc-body">
-          <div class="pc-title">{{ p.title|default:"Property Listing" }}</div>
-          <div class="pc-addr">
-            <i class="fas fa-map-marker-alt" style="color:var(--primary);font-size:0.8rem;"></i>
-            {{ p.location|default:"Location Not Provided" }}
-          </div>
-          <div class="pc-specs">
-            {% if p.beds and p.beds != '—' %}
-            <div class="spec"><i class="fas fa-bed"></i> {{ p.beds }}</div>
-            {% endif %}
-            {% if p.area and p.area != '—' %}
-            <div class="spec"><i class="fas fa-vector-square"></i> {{ p.area }}</div>
-            {% endif %}
-            {% if p.baths %}
-            <div class="spec"><i class="fas fa-bath"></i> {{ p.baths }} Bath</div>
-            {% endif %}
-          </div>
-          
-          <div class="pc-tags">
-            {% if p.furnished and p.furnished != '—' %}
-            <span class="pt">{{ p.furnished }}</span>
-            {% endif %}
-            {% if p.floor and p.floor != '—' %}
-            <span class="pt">Floor {{ p.floor }}</span>
-            {% endif %}
-          </div>
-
-          <div class="pc-footer">
-            <div class="pc-agent">
-              <div class="pa-av" style="background:var(--accent);">{{ p.owner_initials|default:"O" }}</div>
-              <div>
-                <div class="pa-name">{{ p.owner|default:"Owner" }}</div>
-                <div class="pa-role">{{ p.owner_role|default:"Owner" }}</div>
-              </div>
-            </div>
-            <div class="pc-contact-btns">
-              <button class="cb" onclick="event.preventDefault();contactListing('{{ p.phone }}')">
-                <i class="fas fa-phone"></i> Call
-              </button>
-            </div>
-          </div>
-
-        </div>
-      </a>
-      {% empty %}
-      <div style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted);background:white;border-radius:12px;border:1px solid var(--border);">
-        <i class="fas fa-search" style="font-size:2.5rem;margin-bottom:16px;display:block;color:var(--primary);"></i>
-        <div style="font-size:1.1rem;font-weight:700;color:var(--sec);">No properties found matching your criteria.</div>
-        <div style="font-size:0.9rem;margin-top:8px;">Try adjusting your filters or search area.</div>
+  {% for p in properties %}
+  <a href="/listing/{{ p.listing_type }}/{{ p.category }}/{{ p.id }}" class="pcard">
+    
+    <div class="pc-img">
+      {% if p.image_url %}
+      <img src="{{ p.image_url }}" alt="Property" style="width:100%;height:100%;object-fit:cover;">
+      {% else %}
+      <div class="pc-img-placeholder">
+        {{ p.emoji|default:"🏠" }}
       </div>
-      {% endfor %}
+      {% endif %}
+      
+      <div class="pc-badges">
+        {% if p.is_ai_match %}
+        <span class="badge" style="background: linear-gradient(45deg, #6366f1, #a855f7); color: white;">
+          <i class="bi bi-robot"></i> AI Match
+        </span>
+        {% endif %}
+
+        {% if p.is_new %}<span class="badge b-new">🆕 New</span>{% endif %}
+        
+        <span class="badge b-feat">{{ p.category }}</span>
+      </div>
+
+      <button class="pc-save" onclick="event.preventDefault();toggleSave({{ p.id }}, '{{ p.category }}', this)">
+        <i class="bi bi-heart" style="color:#ef4444;"></i>
+      </button>
+      
+      <div class="pc-price-tag">{{ p.price_display }}</div>
     </div>
+
+    <div class="pc-body">
+      <div class="pc-title">{{ p.title }}</div>
+      
+      <div class="pc-addr">
+        <i class="fas fa-map-marker-alt" style="color:var(--primary);font-size:0.8rem;"></i>
+        {{ p.location }}
+      </div>
+
+      <div class="pc-specs">
+        {% if p.beds %}
+        <div class="spec"><i class="fas fa-bed"></i> {{ p.beds }}</div>
+        {% endif %}
+        
+        {% if p.area %}
+        <div class="spec"><i class="fas fa-vector-square"></i> {{ p.area }}</div>
+        {% endif %}
+        
+        {% if p.baths %}
+        <div class="spec"><i class="fas fa-bath"></i> {{ p.baths }}</div>
+        {% endif %}
+      </div>
+      
+      <div class="pc-tags">
+        {% if p.furnished %}
+        <span class="pt">{{ p.furnished }}</span>
+        {% endif %}
+        {% if p.property_type %}
+        <span class="pt">{{ p.property_type }}</span>
+        {% endif %}
+      </div>
+
+      <div class="pc-footer">
+        <div class="pc-agent">
+          <div class="pa-av" style="background:var(--accent);">{{ p.owner_initials|default:"O" }}</div>
+          <div>
+            <div class="pa-name">{{ p.owner|default:"Owner" }}</div>
+            <div class="pa-role">{{ p.category }}</div>
+          </div>
+        </div>
+        <div class="pc-contact-btns">
+          <button class="cb" onclick="event.preventDefault();callListing('{{ p.phone }}')">
+            <i class="fas fa-phone"></i> Call
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </a>
+  {% empty %}
+  <div style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted);background:white;border-radius:12px;border:1px solid var(--border);">
+    <i class="bi bi-robot" style="font-size:3rem;margin-bottom:16px;display:block;color:#a855f7;"></i>
+    <div style="font-size:1.1rem;font-weight:700;color:var(--sec);">The AI couldn't find a perfect match.</div>
+    <div style="font-size:0.9rem;margin-top:8px;">Try broadening your budget or searching in a nearby locality.</div>
+  </div>
+  {% endfor %}
+</div>
 
   </div>
 </div>
