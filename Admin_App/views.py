@@ -56,6 +56,8 @@ import io
 from django.urls import reverse
 
 from openpyxl.styles import Font, PatternFill
+from datetime import timedelta
+
 
 ########### Crime Officer Views#######
 
@@ -252,6 +254,137 @@ def Impersonate(request):
     return JsonResponse({'status': 'error', 'msg': 'Unauthorized request'})
 
 ############ Views end for impersonation url for super admin ##########################
+
+
+############ Views start for live statistical tracking #####################
+
+def get_live_traffic(request):
+    if request.session.get('user_type') != 'Admin':
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    five_minutes_ago = now() - timedelta(minutes=5)
+    
+    # Clean up old users
+    ActiveVisitor.objects.filter(last_seen__lt=five_minutes_ago).delete()
+
+    # Count active users from SQL
+    return JsonResponse({
+        'desktop': ActiveVisitor.objects.filter(device_type='desktop').count(),
+        'mobile': ActiveVisitor.objects.filter(device_type='mobile').count(),
+        'tablet': ActiveVisitor.objects.filter(device_type='tablet').count()
+    })
+
+############# Production Version ##############################
+
+# from django.core.cache import cache
+
+# def get_live_traffic(request):
+#     if request.session.get('user_type') != 'Admin':
+#         return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+#     # Ask Redis for all active user keys
+#     active_keys = cache.keys("active_user_*")
+    
+#     desktop_count, mobile_count, tablet_count = 0, 0, 0
+
+#     # Tally them up from RAM
+#     for key in active_keys:
+#         device = cache.get(key)
+#         if device == 'desktop': desktop_count += 1
+#         elif device == 'mobile': mobile_count += 1
+#         elif device == 'tablet': tablet_count += 1
+
+#     return JsonResponse({
+#         'desktop': desktop_count,
+#         'mobile': mobile_count,
+#         'tablet': tablet_count
+#     })
+
+############ Views end for live statistical tracking #############################
+
+
+############# Views start for global search ########################
+
+def global_search(request):
+    query = request.GET.get('q', '')
+    results_list = []
+
+    if len(query) >= 2:
+        
+        property_tables = [
+            {'model': RentalResidentialProperty, 'label': 'Residential (Rent)', 'url_name': 'residential_detail'},
+            {'model': CommercialRentalProperty, 'label': 'Commercial (Rent)', 'url_name': 'commercial_detail'},
+            # {'model': PGColivingProperty, 'label': 'PG / Co-living', 'url_name': 'pg_detail'},
+            {'model': ResaleResidentialProperty, 'label': 'Residential (Resale)', 'url_name': 'residential_resale_detail'},
+            {'model': ResaleResidentialProperty, 'label': 'Commercial (Resale)', 'url_name': 'commercial_resale_detail'},
+            {'model': PlotSaleProperty, 'label': 'Plot / Land', 'url_name': 'plot_detail'},
+            {'model': IndustrialResaleProperty, 'label': 'Industrial', 'url_name': 'industrial_detail'},
+            {'model': AgriculturalResaleProperty, 'label': 'Agricultural', 'url_name': 'agricultural_detail'},
+        ]
+
+        # 🟢 1. SEARCH PROPERTIES (By Title, Location, Price, City, Status, etc.)
+        for table in property_tables:
+            ModelClass = table['model']
+            
+            matches = ModelClass.objects.filter(            # Search by City       # Search by Rent/Price amount
+                Q(uploaded_by_name=query) |          # Search by Status (e.g., "Active")
+                Q(uploaded_by_email=query) |           # Search by Status (e.g., "Active")
+                Q(uploaded_by_contact=query)|            # Search by Status (e.g., "Active")
+                Q(uploaded_by_role=query)            # Search by Status (e.g., "Active")
+                # Add as many Q() | as you want here!
+            )[:3] 
+            
+            for match in matches:
+                results_list.append({
+                    'title': f"{match.title} - {match.location}",
+                    'type': table['label'],
+                    'url': reverse(table['url_name'], args=[match.id]) 
+                })
+        
+        # 🟢 2. SEARCH USERS (By Name, Email, Phone, Role, etc.)
+        users = User_Details.objects.filter(
+            Q(user_name__icontains=query) | 
+            Q(user_email__icontains=query) |
+            Q(user_phone__icontains=query) |       # Search Last Name  # Search Phone Number
+            Q(user_state__icontains=query) |        # Search by Role (e.g., "Tenant")
+            Q(user_city__icontains=query)  |       # Search by Role (e.g., "Tenant")
+            Q(user_role__icontains=query)         # Search by Role (e.g., "Tenant")
+        )[:5]
+        
+       # 🟢 Create a map that connects the exact database role to its URLs.py name
+        role_url_map = {
+            'Tenant': 'Update_Tenant',     # Replace 'tenant_detail' with actual url name
+            'Landlord': 'Update_Landlord', # Replace 'landlord_detail' with actual url name
+            'Buyer': 'Update_Buyer',
+            'Agent': 'Update_Agent',
+            'Agency': 'Update_Agency',
+            'Vendor': 'Update_Vendor',
+            'Relationship Manager': 'Update_RM',
+        }
+
+        for user in users:
+            # 🟢 Look up the correct URL name based on the user's role
+            url_name = role_url_map.get(user.user_role)
+            
+            # If the role exists in our map, generate the real link. 
+            # If not, fall back to '#' so the server doesn't crash.
+            if url_name:
+                final_url = reverse(url_name, args=[user.id])
+            else:
+                final_url = '#'
+
+            results_list.append({
+                'title': f"{user.user_name} ({user.user_email})",
+                'type': user.user_role, 
+                'url': final_url 
+            })
+
+        results_list = results_list[:10]
+
+    return JsonResponse({'results': results_list})
+
+########## Views end for global search ########################
+
 
 def index3(request):
     return render(request,"admin_user/index3.html")

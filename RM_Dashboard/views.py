@@ -119,19 +119,30 @@ def User_Logout(request):
 
 def Update_Profile_Rm(request):
     # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    # If they are an Admin, we only care that they have an impersonate_id.
+    # We don't care if their standard 'User_id' is missing.
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
-    # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
+    # 4. Data Fetching
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_obj.user_role
     }
     
     return render(request, "rm_panel/Profile/rm_profile.html", context)

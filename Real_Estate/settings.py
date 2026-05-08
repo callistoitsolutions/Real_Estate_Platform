@@ -101,7 +101,29 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    #  1. The User-Agent package middleware
+    'django_user_agents.middleware.UserAgentMiddleware',
+
+    #  2. YOUR custom middleware (adjust 'your_app_name' to where the file actually lives!)
+    'Main_App.middleware.LocalActiveUserMiddleware',
 ]
+
+
+# Add this so Django knows how to talk to your Redis server In Production
+
+# pip install django-redis
+
+
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379/1",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         }
+#     }
+# }
 
 ROOT_URLCONF = 'Real_Estate.urls'
 

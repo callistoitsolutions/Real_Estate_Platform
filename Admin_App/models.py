@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import now
 
 
 
@@ -248,6 +249,21 @@ class Admin_Login(models.Model):
 
     def __str__(self):
         return str(self.email)
+    
+
+################ Active Visitors modal starts here ########################
+
+######## Remove it in production ##############################
+class ActiveVisitor(models.Model):
+    session_key = models.CharField(max_length=255, unique=True)
+    device_type = models.CharField(max_length=50) 
+    last_seen = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.device_type} - {self.last_seen}"
+    
+############### Active Visitors modal ends here ##########################
+
 
 ################ Models start for ameneties details ########################
 class Ameneties_Details(models.Model):
