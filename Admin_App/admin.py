@@ -7,6 +7,9 @@ from Admin_App.models import *
 
 admin.site.register(Admin_Login)
 
+############## Register Active Visitors Modal #######################
+
+admin.site.register(ActiveVisitor)
 
 ######### Register Ameneties Details Model #####################
 

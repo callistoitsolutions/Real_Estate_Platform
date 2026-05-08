@@ -2,10 +2,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
 /* ============================================
@@ -158,16 +159,60 @@
 .hdr-mobile-menu a:last-child { border-bottom: none; }
 .hdr-mobile-menu a:hover { color: #006ce4; background: #f8fafc; }
 
+/* 🟢 BULLETPROOF DROPDOWN UTILITY */
+.custom-dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    min-width: 200px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    z-index: 10001;
+    padding: 8px 0;
+    margin-top: 10px;
+    border: 1px solid #e2e8f0;
+}
+.custom-dropdown-menu.show {
+    display: block;
+}
+.custom-dropdown-menu a,
+.custom-dropdown-menu button {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    color: #475569;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    transition: 0.2s;
+}
+.custom-dropdown-menu a:hover,
+.custom-dropdown-menu button:hover {
+    background: #f8fafc;
+    color: #006ce4;
+}
+.custom-dropdown-menu a i,
+.custom-dropdown-menu button i {
+    margin-right: 10px;
+    color: #006ce4;
+    font-size: 1.1rem;
+}
+
 /* ============================================
    RESPONSIVE ADJUSTMENTS 
 ============================================ */
 @media(max-width:900px) {
-    .premium-header { padding: 0 15px; } /* Reduce padding for tablets */
+    .premium-header { padding: 0 15px; } 
     .premium-header .desktop-menu { display: none; }
     .premium-header .mobile-menu-btn { display: block; }
     .premium-header .nav-right .btn-nav-outline { display: none; }
     
-    /* Ensure the username dropdown button doesn't overflow */
     .premium-header .btn-nav-pr {
         max-width: 180px;
         overflow: hidden;
@@ -177,11 +222,10 @@
 }
 
 @media(max-width: 500px) {
-    .premium-header { padding: 0 10px; } /* Reduce padding for small mobiles */
+    .premium-header { padding: 0 10px; } 
     .premium-header .logo { font-size: 1.2rem; gap: 4px; }
-    .premium-header .logo-badge { display: none; } /* Hide badge to make room for long usernames */
+    .premium-header .logo-badge { display: none; } 
     
-    /* Shrink the right side buttons */
     .premium-header .btn-nav-pr {
         max-width: 140px; 
         padding: 6px 12px;
@@ -201,7 +245,6 @@
 
     <nav class="desktop-menu">
         <a href="{% url 'index' %}" class="{% if request.path == '/' %}active{% endif %}">Home</a>
-        {% comment %} <a href="{% url 'portalpage' %}">Portal Page</a> {% endcomment %}
         <a href="/listingpage/?type=rent">For Rent</a>
         <a href="/listingpage/?type=sale">For Sale</a>
         <a href="{% url 'services' %}">Services</a>
@@ -213,54 +256,49 @@
         <a href="{% url 'post_property' %}" class="btn-nav-outline">
             <i class="bi bi-plus-lg"></i> Post Property FREE
         </a>
+        
         {% if user_obj %}
-            <div class="dropdown d-inline-block">
-                <a href="#" class="btn-nav-pr dropdown-toggle text-decoration-none" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person"></i> Hello {{user_obj.user_name}}-{{user_obj.user_role}}
+        <div class="dropdown d-inline-block" style="position: relative;">
+            
+            <a href="#" class="btn-nav-pr text-decoration-none" id="loginDropdown" onclick="toggleProfileMenu(event)">
+                <i class="bi bi-person"></i> Hello {{user_obj.user_name}}-{{user_obj.user_role}}
+                <i class="bi bi-chevron-down" style="font-size: 0.7rem; margin-left: 4px;"></i>
+            </a>
+
+            <div class="custom-dropdown-menu" id="profileMenu">
+                {% if user_obj.user_role == "Landlord" %}
+                    <a href="{% url 'landlord_dashboard' %}" target="_blank">
+                {% elif user_obj.user_role == "Tenant" %}
+                    <a href="{% url 'Tenant_App:tenant_Dashboard' %}" target="_blank">
+                {% elif user_obj.user_role == "Buyer" %}
+                    <a href="{% url 'Buyer_Dashboard' %}" target="_blank">
+                {% elif user_obj.user_role == "Agent" %}
+                    <a href="{% url 'agent_dashboard' %}" target="_blank">
+                {% elif user_obj.user_role == "Agency/Builder" %}
+                    <a href="{% url 'Agency_Dashboard' %}" target="_blank">
+                {% elif user_obj.user_role == "Vendor" %}
+                    <a href="{% url 'Vendors:vendors_Dashboard' %}" target="_blank">
+                {% elif user_obj.user_role == "Relationship Manager" %}
+                    <a href="{% url 'rm_dashboard' %}" target="_blank">
+                {% endif %}
+                    <i class="bi bi-send"></i> Access Dashboard
                 </a>
-    
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="loginDropdown" style="border-radius: 12px; min-width: 200px;">
-                    <li>
-                        {% if user_obj.user_role == "Landlord" %}
-                            <a class="dropdown-item py-2 fw-medium text-secondary" href="{% url 'landlord_dashboard' %}" target="_blank">
-                        {% elif user_obj.user_role == "Tenant" %}
-                            <a class="dropdown-item py-2 fw-medium text-secondary" href="{% url 'Tenant_App:tenant_Dashboard' %}" target="_blank">
-                        {% elif user_obj.user_role == "Buyer" %}
-                            <a class="dropdown-item py-2 fw-medium text-secondary" href="{% url 'Buyer_Dashboard' %}" target="_blank">
-                        {% elif user_obj.user_role == "Agent" %}
-                            <a class="dropdown-item py-2 fw-medium text-secondary" href="{% url 'agent_dashboard' %}" target="_blank">
-                        {% elif user_obj.user_role == "Agency/Builder" %}
-                            <a class="dropdown-item py-2 fw-medium text-secondary" href="{% url 'Agency_Dashboard' %}" target="_blank">
-                        {% elif user_obj.user_role == "Vendor" %}
-                            <a class="dropdown-item py-2 fw-medium text-secondary" href="{% url 'Vendors:vendors_Dashboard' %}" target="_blank">
-                        {% endif %}
-                            <i class="bi bi-send me-2 text-primary"></i> Access Dashboard
-                        </a>
-                    </li>
 
-                    <li>    
-                        <a class="dropdown-item py-2 fw-medium text-secondary" href="#" target="_blank">
-                         <i class="bi bi-heart me-2 text-primary"></i> Wishlist Properties
-                        </a>
-                    </li>
+                <a href="#">
+                    <i class="bi bi-heart"></i> Wishlist Properties
+                </a>
 
-                    <li>    
-                        <a class="dropdown-item py-2 fw-medium text-secondary" href="#" target="_blank">
-                         <i class="bi bi-search me-2 text-primary"></i> Searched Properties
-                        </a>
-                    </li>
-                    
-                    <li>
-                        <button class="dropdown-item py-2 fw-medium text-secondary" onclick="User_Logout()">
-                            <i class="bi bi-door-closed me-2 text-primary"></i> Logout
-                        </button>
-                    </li>
-                    
-                </ul>
+                <a href="#">
+                    <i class="bi bi-search"></i> Searched Properties
+                </a>
+                
+                <button onclick="User_Logout()">
+                    <i class="bi bi-door-closed"></i> Logout
+                </button>
             </div>
+        </div>
 
         {% else %}
-
             <a href="{% url 'login' %}" class="btn-nav-pr">
                 <i class="bi bi-box-arrow-in-right"></i> Login
             </a>
@@ -273,7 +311,6 @@
 
     <div id="hdrMobileMenu" class="hdr-mobile-menu">
         <a href="{% url 'index' %}">Home</a>
-        {% comment %} <a href="{% url 'portalpage' %}">Portal Page</a> {% endcomment %}
         <a href="/listingpage/?type=rent">For Rent</a>
         <a href="/listingpage/?type=sale">For Sale</a>
         <a href="{% url 'services' %}">Services</a>
@@ -286,74 +323,99 @@
 </header>
 
 <script>
-// Isolated mobile menu script so it works perfectly wherever included
+// Mobile Menu Script
 function toggleHdrMenu(e) { 
+    e.preventDefault();
     e.stopPropagation();
     document.getElementById("hdrMobileMenu").classList.toggle("show"); 
+    
+    // Close profile menu if it is currently open
+    const profileMenu = document.getElementById("profileMenu");
+    if(profileMenu) profileMenu.classList.remove("show");
 }
 
+//  Profile Dropdown Script
+function toggleProfileMenu(e) { 
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById("profileMenu").classList.toggle("show"); 
+    
+    // Close mobile menu if it is currently open
+    const mobileMenu = document.getElementById("hdrMobileMenu");
+    if(mobileMenu) mobileMenu.classList.remove("show");
+}
+
+//  Close menus when clicking outside
 document.addEventListener('click', function(e) {
-    const menu = document.getElementById('hdrMobileMenu');
-    if (menu && menu.classList.contains('show') && !menu.contains(e.target)) {
-        menu.classList.remove('show');
+    const mobileMenu = document.getElementById('hdrMobileMenu');
+    const profileMenu = document.getElementById('profileMenu');
+    const profileBtn = document.getElementById('loginDropdown');
+    const mobileBtn = document.querySelector('.mobile-menu-btn');
+    
+    // Handle mobile menu close
+    if (mobileMenu && mobileMenu.classList.contains('show')) {
+        if (!mobileMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
+            mobileMenu.classList.remove('show');
+        }
+    }
+    
+    // Handle profile menu close
+    if (profileMenu && profileMenu.classList.contains('show')) {
+        if (!profileMenu.contains(e.target) && !profileBtn.contains(e.target)) {
+            profileMenu.classList.remove('show');
+        }
     }
 });
-</script>
 
-{% comment %} Ajax Jquery and Javascript for user Logout {% endcomment %}
-
-<script>
-    function User_Logout() {
-        Swal.fire({
-            title: "LOGOUT",
-            text: "Are you sure you want to logout from the user panel?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#ef4444", 
-            cancelButtonColor: "#64748b",  
-            confirmButtonText: "Yes, Logout",
-            cancelButtonText: "No, Cancel",
-            allowOutsideClick: false
-        }).then((result) => {
-            
-            if (result.isConfirmed) {   
-                $.ajax({
-                    type: "POST",
-                    url: "{% url 'User_Logout' %}",
-                    data: {
-                        'user_id': '{{user_obj.id}}',
-                        'csrfmiddlewaretoken': '{{ csrf_token }}' // ✅ ADDED: This is required by Django to allow POST requests
-                    },
-                    success: function (response) {
-                        if (response.status == '1') {
-                            Swal.fire({
-                                text: response.msg,
-                                icon: "success",
-                                confirmButtonText: "Ok",
-                                allowOutsideClick: false
-                            }).then(() => {
-                                // Redirect to login page after clicking Ok
-                                window.location.href = "{% url 'index' %}";
-                            });
-                        } else {
-                            Swal.fire({
-                                text: response.msg,
-                                icon: "info",
-                                confirmButtonText: "Ok",
-                                allowOutsideClick: false
-                            });
-                        }
-                    },
-                    error: function() {
-                        // Failsafe if the server throws a 500 error
+// User Logout Script using SweetAlert2
+function User_Logout() {
+    Swal.fire({
+        title: "LOGOUT",
+        text: "Are you sure you want to logout from the user panel?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#ef4444", 
+        cancelButtonColor: "#64748b",  
+        confirmButtonText: "Yes, Logout",
+        cancelButtonText: "No, Cancel",
+        allowOutsideClick: false
+    }).then((result) => {
+        if (result.isConfirmed) {   
+            $.ajax({
+                type: "POST",
+                url: "{% url 'User_Logout' %}",
+                data: {
+                    'user_id': '{{user_obj.id}}',
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.status == '1') {
                         Swal.fire({
-                            title: "Error",
-                            text: "Something went wrong. Please try again.",
-                            icon: "error"
+                            text: response.msg,
+                            icon: "success",
+                            confirmButtonText: "Ok",
+                            allowOutsideClick: false
+                        }).then(() => {
+                            window.location.href = "{% url 'index' %}";
+                        });
+                    } else {
+                        Swal.fire({
+                            text: response.msg,
+                            icon: "info",
+                            confirmButtonText: "Ok",
+                            allowOutsideClick: false
                         });
                     }
-                });
-            }
-        });
-    }
+                },
+                error: function() {
+                    Swal.fire({
+                        title: "Error",
+                        text: "Something went wrong. Please try again.",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+    });
+}
 </script>

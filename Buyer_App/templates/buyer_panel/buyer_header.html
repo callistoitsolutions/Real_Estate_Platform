@@ -1370,6 +1370,85 @@
             border:1px solid #d946ef; /* Buyer Primary */
             box-shadow:none;
         }
+
+        /* Ensure the parent is positioned relatively */
+        .user-profile {
+            position: relative;
+            cursor: pointer;
+            /* Assuming you already have display: flex; align-items: center; etc. */
+        }
+
+        /* The Dropdown Menu Styles */
+        .custom-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px); /* 10px below the profile div */
+            right: 0;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-width: 220px;
+            display: none; /* Hidden by default */
+            z-index: 1000;
+            padding: 8px 0;
+        }
+
+        /* Class added by JS to show the menu */
+        .custom-dropdown-menu.show {
+            display: block;
+            animation: dropFadeIn 0.2s ease-out forwards;
+        }
+
+        .dropdown-header {
+            padding: 10px 20px;
+            color: #1e293b;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8fafc;
+            color: #0066FF; /* Matches your brand primary color */
+        }
+
+        .dropdown-item.text-danger {
+            color: #ef4444;
+        }
+
+        .dropdown-item.text-danger:hover {
+            background-color: #fef2f2;
+            color: #ef4444;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background-color: #e2e8f0;
+            margin: 8px 0;
+        }
+
+        /* Smooth dropdown animation */
+        @keyframes dropFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
 </style>
 </head>
 <body>
@@ -1393,32 +1472,6 @@
                 <a href="{% url "Buyer_Dashboard" %}" class="menu-link" id="Buyer_Dashboard">
                     <i class="fas fa-tachometer-alt menu-icon"></i>
                     <span class="menu-text" style="color:white;">Dashboard</span>
-                </a>
-            </li>
-
-            
-
-
-            <li class="menu-section-title">SETTINGS</li>
-
-            <li class="menu-item">
-                <a href="{% url "Update_Profile_Buyer" %}" class="menu-link" id="Profile">
-                    <i class="fas fa-user-circle menu-icon"></i>
-                    <span class="menu-text">Profile</span>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="fas fa-cog menu-icon"></i>
-                    <span class="menu-text">Settings</span>
-                </a>
-            </li>
-
-            <li class="menu-item">
-                <a class="menu-link" onclick="User_Logout()">
-                    <i class="fas fa-sign-out-alt menu-icon"></i>
-                    <span class="menu-text">Logout</span>
                 </a>
             </li>
         </ul>
@@ -1450,16 +1503,50 @@
                     <span class="notification-badge">3</span>
                 </div>
 
-                <div class="user-profile">
+                <div class="user-profile" onclick="toggleUserDropdown(event)">
                     <div class="user-avatar">RS</div>
                     <div class="user-info">
-                        <div class="user-name">{{user_obj.user_name}}-{{user_obj.user_email}}</div>
+                        <div class="user-name">{{user_obj.user_email}}</div>
                         <div class="user-role">{{user_obj.user_role}}</div>
                     </div>
                     <i class="fas fa-chevron-down" style="color: #adb5bd; font-size: 0.8rem;"></i>
+
+                    <div class="custom-dropdown-menu" id="userDropdown">
+                        <div class="dropdown-header">
+                            <strong>Logged in as:</strong><br>
+                            <span style="font-size: 0.85rem; color: #6c757d;">{{user_obj.user_email}}</span>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url "Update_Profile_Buyer" %}" class="dropdown-item"><i class="fas fa-user"></i> My Profile</a>
+                        {% comment %} <a href="#" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a> {% endcomment %}
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item text-danger" onclick="User_Logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    </div>
                 </div>
+
             </div>
         </div>
+
+
+<script>
+    function toggleUserDropdown(event) {
+        // Stop the click from immediately propagating to the window
+        event.stopPropagation();
+        
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+    }
+
+    // Close the dropdown if the user clicks anywhere outside of it
+    window.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('userDropdown');
+        // Check if dropdown exists and is currently showing
+        if (dropdown && dropdown.classList.contains('show')) {
+            dropdown.classList.remove('show');
+        }
+    });
+</script>
+
 
 {% comment %} Ajax Jquery and Javascript for buyer Logout {% endcomment %}
 

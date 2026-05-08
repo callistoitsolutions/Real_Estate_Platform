@@ -40,8 +40,9 @@
     <thead>
         <tr>
             <th>Actions</th>
-            <th>Sr. No.</th>
             <th>Role</th>
+            <th>Sr. No.</th>
+            <th>Profile</th>
             <th>Name</th>
             <th>Email Address</th>
             <th>Phone Number</th>
@@ -84,6 +85,12 @@
             </td>
 
             <td>{{ forloop.counter }}</td>
+
+            <td>
+                <a href="#" onclick="viewDashboardCleanly(event, '{{ agency.id }}')" style="color: #667eea;font-weight:bold;text-decoration:none;">
+                    View Profile
+                </a>
+            </td>
 
             <td>
                 {{ agency.user_role }}

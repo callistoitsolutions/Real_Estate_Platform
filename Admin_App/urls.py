@@ -10,6 +10,18 @@ urlpatterns = [
      path('index3',views.index3,name="index3"),
      path('index2',views.index2,name="index2"),
 
+     ############# Impersonation Url for super admin ###############
+
+    path('Impersonate', views.Impersonate, name='Impersonate'),
+
+    ############ urls for live statistical tracking ###################
+
+    path('api/live-traffic/', views.get_live_traffic, name='api_live_traffic'),
+
+    ########### urls for global search ###########################
+
+    path('api/global-search/', views.global_search, name='global_search'),
+
      ############ urls for rental forms ##########################
 
      path('residential',views.residential,name="residential"),

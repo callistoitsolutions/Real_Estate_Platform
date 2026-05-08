@@ -1,9 +1,22 @@
 {% include "admin_user/admin_header.html" %}
 {% load static %}
 
-        <!-- Main Content -->
+<style>
+    /* Pulse Animation for Live Traffic Dots */
+    @keyframes pulse-live {
+        0% { opacity: 1; transform: scale(1); color: #10b981; }
+        50% { opacity: 0.4; transform: scale(1.3); color: #34d399; }
+        100% { opacity: 1; transform: scale(1); color: #10b981; }
+    }
+    
+    .live-dot {
+        animation: pulse-live 1.5s infinite;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+</style>
+
         <div class="main-content">
-            <!-- Page Header -->
             <div class="page-header">
                 <div class="page-header-content">
                     <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
@@ -19,8 +32,88 @@
                 </div>
             </div>
 
-            <!-- Statistics Cards -->
+            <div class="row">
+
+                        <div class="col-4">
+
+                            <div class="stat-card info">
+                                <div class="stat-icon info">
+                                    <i class="fas fa-desktop"></i>
+                                </div>
+                                <div class="stat-value" id="live-desktop">42</div>
+                                <div class="stat-label">Desktop (Live)</div>
+                                <span class="stat-change">
+                                    <i class="fas fa-circle live-dot"></i> Active Now
+                                </span>
+                            </div>
+                        </div>
+
+
+                        <div class="col-4">
+
+                            <div class="stat-card warning">
+                                <div class="stat-icon warning">
+                                    <i class="fas fa-mobile-alt"></i>
+                                </div>
+                                <div class="stat-value" id="live-mobile">86</div>
+                                <div class="stat-label">Mobile (Live)</div>
+                                <span class="stat-change">
+                                    <i class="fas fa-circle live-dot"></i> Active Now
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-4">
+
+                            <div class="stat-card primary">
+                                <div class="stat-icon primary">
+                                    <i class="fas fa-tablet-alt"></i>
+                                </div>
+                                <div class="stat-value" id="live-tablet">12</div>
+                                <div class="stat-label">Tablet (Live)</div>
+                                <span class="stat-change">
+                                    <i class="fas fa-circle live-dot"></i> Active Now
+                                </span>
+                            </div>
+                        </div>
+
+                    
+
+                    
+
+                    {% comment %} <div class="col-md-4">
+                        <div class="stat-card warning">
+                            <div class="stat-icon warning">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="stat-value" id="live-mobile">86</div>
+                            <div class="stat-label">Mobile (Live)</div>
+                            <span class="stat-change">
+                                <i class="fas fa-circle live-dot"></i> Active Now
+                            </span>
+                        </div>
+                    </div> {% endcomment %}
+
+                    {% comment %} <div class="col-md-4">
+
+                        <div class="stat-card primary">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-tablet-alt"></i>
+                        </div>
+                        <div class="stat-value" id="live-tablet">12</div>
+                        <div class="stat-label">Tablet (Live)</div>
+                        <span class="stat-change">
+                            <i class="fas fa-circle live-dot"></i> Active Now
+                        </span>
+                    </div> {% endcomment %}
+
+            </div>
+
+            <br>
+
             <div class="stats-grid">
+
+
                 <div class="stat-card primary">
                     <div class="stat-icon primary">
                         <i class="fas fa-home"></i>
@@ -86,11 +179,11 @@
                         <i class="fas fa-arrow-up"></i> +20%
                     </span>
                 </div>
+
+                
             </div>
 
-            <!-- Analytics Section with Charts -->
             <div class="analytics-section">
-                <!-- Pie Chart - Property Distribution -->
                 <div class="chart-container">
                     <div class="chart-header">
                         <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Property Distribution</h3>
@@ -100,7 +193,6 @@
                     </div>
                 </div>
 
-                <!-- Bar Chart - Monthly Rental Income -->
                 <div class="chart-container">
                     <div class="chart-header">
                         <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Monthly Rental Income</h3>
@@ -114,7 +206,6 @@
                     </div>
                 </div>
 
-                <!-- Doughnut Chart - Occupancy Status -->
                 <div class="chart-container">
                     <div class="chart-header">
                         <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Occupancy Status</h3>
@@ -124,7 +215,6 @@
                     </div>
                 </div>
 
-                <!-- Bar Chart - Rent Range Distribution -->
                 <div class="chart-container">
                     <div class="chart-header">
                         <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Rent Range Distribution</h3>
@@ -135,7 +225,6 @@
                 </div>
             </div>
 
-            <!-- Quick Stats Section -->
             <div class="quick-stats">
                 <h3 class="quick-stats-title"><i class="fas fa-chart-line"></i> Performance Insights</h3>
                 <div class="stats-row">
@@ -173,7 +262,6 @@
                 </div>
             </div>
 
-            <!-- Properties Table -->
             <div class="properties-section">
                 <div class="section-header">
                     <h3 class="section-title"><i class="fas fa-list"></i> Recent Property Listings</h3>
@@ -738,6 +826,41 @@
                 document.body.style.overflow = 'hidden';
             }
         });
+
+        // ==========================================
+        // 🟢 REAL LIVE TRAFFIC FETCH (AJAX)
+        // ==========================================
+        function fetchLiveTraffic() {
+            // Get the elements
+            let desktopEl = document.getElementById('live-desktop');
+            let mobileEl = document.getElementById('live-mobile');
+            let tabletEl = document.getElementById('live-tablet');
+
+            // Only run if the dashboard cards actually exist on the page
+            if (desktopEl && mobileEl && tabletEl) {
+                $.ajax({
+                    type: "GET",
+                    url: "{% url 'api_live_traffic' %}", // This talks to your new Django view
+                    success: function(response) {
+                        // The server responded! Update the HTML with REAL numbers
+                        desktopEl.innerText = response.desktop;
+                        mobileEl.innerText = response.mobile;
+                        tabletEl.innerText = response.tablet;
+                    },
+                    error: function(xhr, status, error) {
+                        // If the server is down or restarts, silently log it instead of crashing
+                        console.error("Live traffic sync paused:", error);
+                    }
+                });
+            }
+        }
+
+        // 1. Fetch the real numbers immediately when the page loads
+        fetchLiveTraffic();
+
+        // 2. Ask the server for fresh numbers every 5 seconds
+        setInterval(fetchLiveTraffic, 5000);
+
     </script>
 
 </body>
