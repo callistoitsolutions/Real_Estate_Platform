@@ -114,7 +114,13 @@
                     <div class="col-md-12">
                         <div class="form-group">
                             <label class="form-label">Upload Facilities Data Excel File <span class="required"
-                                    style="color:red;">*</span></label>
+                                    style="color:red;">*</span>
+                                
+                                <a href="{% static 'excel_templates/Facilities_Excel.xlsx' %}" download class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-file-excel"></i> Download Template
+                                </a>
+                                
+                            </label>
                             <input type="file" class="form-control" id="facilities_file" name="facilities_file"
                                 placeholder="Enter Confirm Password" required onchange="checkSelectedFileSize(this)"
                                 accept=".xlsx">

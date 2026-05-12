@@ -1282,7 +1282,119 @@ function scrollRecent(direction) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
 
+<script>
+$(document).ready(function() {
+    
+    // 1. We create a master function to check both the Buttons AND the Dropdown
+    function filterPlans() {
+        // Find which button currently has the 'active' class
+        let selectedAudience = $('.plan-badge.active').attr('data-target');
+        
+        // Find what duration is currently selected in the dropdown
+        let selectedDuration = $('#durationSelect').val();
+        
+        let visibleCount = 0;
+        
+        // Loop through every single plan card
+        $('.plan-item').each(function() {
+            let planAudience = $(this).attr('data-for');
+            let planDuration = $(this).attr('data-duration');
+            
+            // If BOTH the audience and the duration match, show it!
+            if (planAudience === selectedAudience && planDuration === selectedDuration) {
+                $(this).fadeIn(200); // Smooth fade in
+                visibleCount++;
+            } else {
+                $(this).hide(); // Hide the ones that don't match
+            }
+        });
+        
+        // Show the "No plans available" message if the count is 0
+        if (visibleCount === 0) {
+            $('#noPlansMsg').fadeIn(200);
+        } else {
+            $('#noPlansMsg').hide();
+        }
+    }
 
+    // 2. Listen for clicks on the top buttons (Landlords, Vendors, etc.)
+    $('.plan-badge').on('click', function() {
+        // Move the 'active' highlight to the button you just clicked
+        $('.plan-badge').removeClass('active');
+        $(this).addClass('active');
+        
+        // Run the filter!
+        filterPlans();
+    });
+
+    // 3. Listen for changes on the duration dropdown
+    $('#durationSelect').on('change', function() {
+        // Run the filter!
+        filterPlans();
+    });
+
+    // 4. Run the filter instantly when the page loads so it doesn't show everything at once
+    filterPlans();
+});
+</script>
+
+<script>
+
+    
+$(document).ready(function() {
+    
+    // 1. We create a master function to check both the Buttons AND the Dropdown
+    function filterPlans() {
+        // Find which button currently has the 'active' class
+        let selectedAudience = $('.plan-badge.active').attr('data-target');
+        
+        // Find what duration is currently selected in the dropdown
+        let selectedDuration = $('#durationSelect').val();
+        
+        let visibleCount = 0;
+        
+        // Loop through every single plan card
+        $('.plan-item').each(function() {
+            let planAudience = $(this).attr('data-for');
+            let planDuration = $(this).attr('data-duration');
+            
+            // If BOTH the audience and the duration match, show it!
+            if (planAudience === selectedAudience && planDuration === selectedDuration) {
+                $(this).fadeIn(200); // Smooth fade in
+                visibleCount++;
+            } else {
+                $(this).hide(); // Hide the ones that don't match
+            }
+        });
+        
+        // Show the "No plans available" message if the count is 0
+        if (visibleCount === 0) {
+            $('#noPlansMsg').fadeIn(200);
+        } else {
+            $('#noPlansMsg').hide();
+        }
+    }
+
+    // 2. Listen for clicks on the top buttons (Landlords, Vendors, etc.)
+    $('.plan-badge').on('click', function() {
+        // Move the 'active' highlight to the button you just clicked
+        $('.plan-badge').removeClass('active');
+        $(this).addClass('active');
+        
+        // Run the filter!
+        filterPlans();
+    });
+
+    // 3. Listen for changes on the duration dropdown
+    $('#durationSelect').on('change', function() {
+        // Run the filter!
+        filterPlans();
+    });
+
+    // 4. Run the filter instantly when the page loads so it doesn't show everything at once
+    filterPlans();
+});
+</script>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════════

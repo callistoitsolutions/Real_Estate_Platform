@@ -14,9 +14,33 @@
                         <button class="btn-primary-custom" style="background: transparent; border: 2px solid white; color: white;" data-toggle="modal" data-target="#exampleModalCenter">
                             <i class="fas fa-download"></i> Import Excel
                         </button>
+                        <button class="btn-primary-custom" style="background: #fee2e2; border: 2px solid #ef4444; color: #dc2626;" data-toggle="modal" data-target="#bulkDeleteModal">
+                            <i class="fas fa-trash-alt"></i> Bulk Delete
+                        </button>
                     </div>
                 </div>
             </div>
+
+            <div class="properties-section">
+
+
+                <!-- TABLE SCROLL AREA -->
+                <div class="row">
+                    <div class="col-md-4 mt-2">
+                        <label class="form-label">Start Date <span class="required" style="color:red;">*</span></label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" placeholder="Enter Name" pattern="[A-Za-z ]+" required>
+                    </div>
+                    <div class="col-md-4 mt-2">
+                        <label class="form-label">End Date <span class="required" style="color:red;">*</span></label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" placeholder="Enter Email Address" required>
+                    </div>
+                    <div class="col-md-4 mt-5" >
+                        <button class="btn btn-primary" style="margin-top:-12px;" onclick="Generate_Tenant_Reports()">Generate Reports</button>
+                    </div>
+                    </div>
+
+            </div>
+            <br>
 
         
             <!-- Properties Table -->
@@ -24,7 +48,7 @@
 
 
                 <!-- TABLE SCROLL AREA -->
-                <div class="table-responsive">
+                <div class="table-responsive" id="tenant_div">
                     {{tenants_list}}
                 </div>
 
@@ -63,7 +87,101 @@
     </div>
     </div>
 
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-labelledby="bulkDeleteModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-danger">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="bulkDeleteModalTitle"><i class="fas fa-exclamation-triangle"></i> Bulk Delete Records</h5>
+                    <button type="button" class="btn-close btn-close-white" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="form-group p-3">
+                        <label class="form-label fw-bold text-danger">Select Deletion Criteria <span class="required">*</span></label>
+                        
+                        <select class="form-control" id="delete_user_type" name="delete_user_type" onchange="toggle_Delete_Users()" style="font-size:13px;">
+                            <option value="">-- Select Option --</option>
+                            <option value="date_range">Delete by Date Range</option>
+                            <option value="latest_month">Delete Latest Month Data</option>
+                            <option value="old_data">Delete Data Older Than 6 Months</option>
+                            {% comment %} <option value="by_file">Delete by Specific Excel File</option> {% endcomment %}
+                            <option value="delete_all" style="color: red; font-weight: bold;">Delete ALL Data</option>
+                        </select>
+                        
+                        <input type="hidden" id="delete_user_role" name="delete_user_role" value="Tenant">
+
+                        <div id="Date_Inputs_User" style="display:none; gap: 10px; margin-top: 10px;">
+                            <div style="flex: 1;">
+                                <label style="font-size:12px;">From Date</label>
+                                <input type="date" id="fromDate" name="from_date" class="form-control">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size:12px;">To Date</label>
+                                <input type="date" id="toDate" name="to_date" class="form-control">
+                            </div>
+                        </div>
+                        
+                        <small class="form-text text-muted mt-3 d-block">
+                            <strong>Warning:</strong> This action is permanent and cannot be undone. Ensure you have selected the correct criteria before proceeding.
+                        </small>
+                    </div>
+
+                    
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="Bulk_Delete_Users(this)">
+                        <i class="fas fa-trash"></i> Confirm Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+    // Ajax and Jquery to generate tenant Reports
+
+    function Generate_Tenant_Reports(){
+        var start_date = $("#start_date").val();
+        var end_date = $("#end_date").val();  
+        if(start_date==''){
+          alert("Please Select Start Date")
+        }
+        else if(end_date==''){
+          alert("Please Select End Date")
+        }
+        else{
+            $.ajax({
+                method: "POST",
+                url: "{% url 'Tenant_List' %}",
+                data: {
+                    'start_date':start_date,
+                    'end_date':end_date,
+                },
+                 success : function(response){
+                  $("#loading").hide();
+                  console.log(response)
+                  if (response == "error"){
+                      swal({
+                          title:"Sorry, the  search did not have any tenant information ",
+                          icon: "warning",
+                          button: "Ok",
+                          closeOnClickOutside: false,
+                          })
+                      }
+                  else{
+                      $('#tenant_div').html("")
+                      $('#tenant_div').html(response)  
+                      }			  
+                  }
+            });
+        }
+    }
+</script>
     
     <script>
 
