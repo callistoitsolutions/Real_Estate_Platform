@@ -2,391 +2,384 @@
 <html lang="en">
 {% load static %}
 <head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Contact - TheProperty Bootstrap Template</title>
-  <meta name="description" content="">
-  <meta name="keywords" content="">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Contact Us | PropCRM Nagpur</title>
 
-  <!-- Favicons -->
-  <link href="{% static "assets/img/favicon.png" %}" rel="icon">
-  <link href="{% static "assets/img/apple-touch-icon.png" %}" rel="apple-touch-icon">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   GLOBAL VARIABLES 
+============================================ */
+:root {
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --primary: #006ce4;
+    --primary-dark: #0050a8;
+    --accent: #f59e0b;
+    --text-dark: #1e293b;
+    --text-body: #475569;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --shadow-1: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-2: 0 12px 30px rgba(0,0,0,0.1);
+    --radius: 16px;
+}
 
-  <!-- Vendor CSS Files -->
-  <link href="{% static "assets/vendor/bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/bootstrap-icons/bootstrap-icons.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/aos/aos.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/glightbox/css/glightbox.min.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/swiper/swiper-bundle.min.css" %}" rel="stylesheet">
-  <link href="{% static "assets/vendor/drift-zoom/drift-basic.css" %}" rel="stylesheet">
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <!-- Main CSS File -->
-  <link href={% static "assets/css/main.css" %} rel="stylesheet">
+body {
+    font-family: "Poppins", sans-serif;
+    background: var(--bg-main);
+    color: var(--text-body);
+    overflow-x: hidden;
+}
 
-  <!-- =======================================================
-  * Template Name: TheProperty
-  * Template URL: https://bootstrapmade.com/theproperty-bootstrap-real-estate-template/
-  * Updated: Aug 05 2025 with Bootstrap v5.3.7
-  * Author: BootstrapMade.com
-  * License: https://bootstrapmade.com/license/
-  ======================================================== -->
+/* ============================================
+   HERO SECTION
+============================================ */
+.contact-hero {
+    padding: 80px 20px 60px;
+    text-align: center;
+    background: linear-gradient(135deg, #002347 0%, #004282 50%, #0059b3 100%);
+    color: white;
+    position: relative;
+}
+.contact-hero::before { 
+    content: ''; position: absolute; inset: 0; 
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='1' fill='rgba(255,255,255,.04)'/%3E%3C/svg%3E"); 
+    pointer-events: none; 
+}
+.contact-hero h1 { font-size: 2.8rem; font-weight: 800; margin-bottom: 15px; position: relative; }
+.contact-hero p { font-size: 1.1rem; color: rgba(255,255,255,0.8); max-width: 600px; margin: 0 auto; position: relative; }
+
+/* ============================================
+   CONTACT CARDS
+============================================ */
+.contact-wrapper { max-width: 1200px; margin: -40px auto 60px; position: relative; z-index: 10; padding: 0 20px; }
+.info-card {
+    background: var(--bg-card);
+    padding: 30px 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-1);
+    text-align: center;
+    transition: 0.3s;
+    height: 100%;
+}
+.info-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-2); border-color: rgba(0, 108, 228, 0.3); }
+.info-icon {
+    width: 60px; height: 60px;
+    background: rgba(0, 108, 228, 0.1);
+    color: var(--primary);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin: 0 auto 20px;
+}
+.info-card h4 { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 10px; }
+.info-card p { font-size: 0.95rem; color: var(--text-body); margin: 0; line-height: 1.6; }
+
+/* ============================================
+   FORM & MAP SECTION
+============================================ */
+.content-section { max-width: 1200px; margin: 0 auto 80px; padding: 0 20px; }
+.contact-form-box {
+    background: white;
+    padding: 40px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-1);
+}
+.contact-form-box h3 { font-weight: 800; color: var(--text-dark); margin-bottom: 25px; font-size: 1.8rem;}
+
+.form-control, .form-select {
+    border: 2px solid #e2e8f0;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    transition: 0.3s;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(0, 108, 228, 0.1);
+}
+.form-label { font-weight: 600; color: var(--text-dark); font-size: 0.9rem; margin-bottom: 8px; }
+
+.btn-primary-custom {
+    background: var(--primary);
+    border: none;
+    padding: 14px 30px;
+    border-radius: 10px;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.3s;
+}
+.btn-primary-custom:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,108,228,0.3); }
+
+.map-box {
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-1);
+    height: 100%;
+    min-height: 400px;
+}
+
+/* Footer matching index.html */
+footer { background: #0f172a; padding: 60px 20px 30px; border-top: 1px solid var(--border); color: rgba(255,255,255,.7); }
+.footer-inner { max-width: 1300px; margin: 0 auto; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 50px; margin-bottom: 40px; }
+.fl-brand { font-size: 1.4rem; font-weight: 900; color: white; margin-bottom: 14px; }
+.fl-desc { font-size: 0.85rem; line-height: 1.7; }
+.fl-title { font-size: 0.85rem; font-weight: 700; color: white; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.fl-link { display: block; font-size: 0.85rem; color: rgba(255,255,255,.6); text-decoration: none; padding: 6px 0; transition: 0.2s; }
+.fl-link:hover { color: white; padding-left: 4px; }
+.footer-social a { width: 36px; height: 36px; background: rgba(255,255,255,.1); border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 0.9rem; text-decoration: none; transition: .2s; }
+.footer-social a:hover { background: var(--primary); transform: translateY(-2px); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 24px; display: flex; justify-content: space-between; font-size: 0.8rem; flex-wrap: wrap; gap: 10px; }
+
+
+/* ============================================
+   🟢 MOBILE RESPONSIVENESS FIXES
+============================================ */
+@media (max-width: 991px) {
+    .contact-hero { padding: 60px 15px 80px; }
+    .contact-hero h1 { font-size: 2.3rem; }
+    .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px; }
+    .map-box { height: 350px; margin-top: 30px; min-height: unset; }
+}
+
+@media (max-width: 768px) {
+    /* Reduce overlapping margin on tablets */
+    .contact-wrapper { margin-top: -20px; }
+    .contact-form-box { padding: 30px 20px; }
+    .contact-form-box h3 { font-size: 1.5rem; margin-bottom: 20px; }
+}
+
+@media (max-width: 576px) {
+    /* Remove overlapping margin entirely on phones */
+    .contact-wrapper { margin-top: 20px; padding: 0 15px; }
+    .content-section { padding: 0 15px; margin-bottom: 50px; }
+    
+    /* Scale down hero */
+    .contact-hero { padding: 40px 15px 40px; }
+    .contact-hero h1 { font-size: 1.8rem; }
+    .contact-hero p { font-size: 0.95rem; }
+    
+    /* Scale down cards */
+    .info-card { padding: 20px 15px; }
+    .info-icon { width: 50px; height: 50px; font-size: 1.2rem; }
+    
+    /* Form adjustments */
+    .contact-form-box { padding: 25px 15px; }
+    .form-control, .form-select { padding: 12px 15px; font-size: 0.9rem; }
+    .btn-primary-custom { padding: 12px 20px; font-size: 0.95rem; }
+    
+    .footer-grid { grid-template-columns: 1fr; }
+    .map-box { height: 300px; }
+}
+</style>
 </head>
 
-<body class="contact-page">
+<body>
 
-  <header id="header" class="header d-flex align-items-center fixed-top">
-    <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
+{% include 'home_page/header.html' %}
 
-      <a href="index.html" class="logo d-flex align-items-center me-auto me-xl-0">
-        <!-- Uncomment the line below if you also wish to use an image logo -->
-        <!-- <img src="assets/img/logo.webp" alt=""> -->
-        <h1 class="sitename">TheProperty</h1>
-      </a>
+<section class="contact-hero">
+    <h1>Get in Touch</h1>
+    <p>Whether you're looking to buy, rent, or list a property, our team of experts in Nagpur is here to help you every step of the way.</p>
+</section>
 
-      <nav id="navmenu" class="navmenu">
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="properties.html">Properties</a></li>
-          <li><a href="services.html">Services</a></li>
-          <li><a href="agents.html">Agents</a></li>
-          <li><a href="blog.html">Blog</a></li>
-          <li class="dropdown"><a href="#"><span>More Pages</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="property-details.html">Property Details</a></li>
-              <li><a href="service-details.html">Service Details</a></li>
-              <li><a href="agent-profile.html">Agent Profile</a></li>
-              <li><a href="blog-details.html">Blog Details</a></li>
-              <li><a href="terms.html">Terms</a></li>
-              <li><a href="privacy.html">Privacy</a></li>
-              <li><a href="404.html">404</a></li>
-            </ul>
-          </li>
-
-          <li class="dropdown"><a href="#"><span>Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-            <ul>
-              <li><a href="#">Dropdown 1</a></li>
-              <li class="dropdown"><a href="#"><span>Deep Dropdown</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                <ul>
-                  <li><a href="#">Deep Dropdown 1</a></li>
-                  <li><a href="#">Deep Dropdown 2</a></li>
-                  <li><a href="#">Deep Dropdown 3</a></li>
-                  <li><a href="#">Deep Dropdown 4</a></li>
-                  <li><a href="#">Deep Dropdown 5</a></li>
-                </ul>
-              </li>
-              <li><a href="#">Dropdown 2</a></li>
-              <li><a href="#">Dropdown 3</a></li>
-              <li><a href="#">Dropdown 4</a></li>
-            </ul>
-          </li>
-          <li><a href="contact.html" class="active">Contact</a></li>
-        </ul>
-        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-      </nav>
-
-      <a class="btn-getstarted" href="properties.html">Get Started</a>
-
+<div class="contact-wrapper">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="info-card">
+                <div class="info-icon"><i class="bi bi-geo-alt-fill"></i></div>
+                <h4>Visit Our Office</h4>
+                <p>PropCRM Headquarters<br>Civil Lines, Nagpur<br>Maharashtra 440001, India</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="info-card">
+                <div class="info-icon"><i class="bi bi-telephone-fill"></i></div>
+                <h4>Call Us Directly</h4>
+                <p>Support: +91 98765 43210<br>Sales: +91 98765 01234<br>Mon-Sat: 9:00 AM - 7:00 PM</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="info-card">
+                <div class="info-icon"><i class="bi bi-envelope-paper-fill"></i></div>
+                <h4>Email Support</h4>
+                <p>General: hello@propcrm.com<br>Support: support@propcrm.com<br>Response within 24 hours</p>
+            </div>
+        </div>
     </div>
-  </header>
+</div>
 
-  <main class="main">
-
-    <!-- Page Title -->
-    <div class="page-title">
-      <div class="heading">
-        <div class="container">
-          <div class="row d-flex justify-content-center text-center">
-            <div class="col-lg-8">
-              <h1 class="heading-title">Contact</h1>
-              <p class="mb-0">
-                Odio et unde deleniti. Deserunt numquam exercitationem. Officiis quo
-                odio sint voluptas consequatur ut a odio voluptatem. Sit dolorum
-                debitis veritatis natus dolores. Quasi ratione sint. Sit quaerat
-                ipsum dolorem.
-              </p>
+<div class="content-section">
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="contact-form-box">
+                <h3>Send Us a Message</h3>
+                <form id="contactForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="contact_name" name="contact_name" required placeholder="John Doe">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="contact_phone" name="contact_phone" required placeholder="+91 XXXXX XXXXX">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Email Address </label>
+                            <input type="email" class="form-control" id="contact_email" name="contact_email" required placeholder="john@example.com">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">I am looking to... <span class="text-danger">*</span></label>
+                            <select class="form-select" id="contact_en_title" name="contact_en_title" required>
+                                <option value="" selected disabled>Select an option</option>
+                                <option value="Rent a property">Rent a property</option>
+                                <option value="Buy a property">Buy a property</option>
+                                <option value="List my property">List my property for Rent/Sale</option>
+                                <option value="General Inquiry">General Enquiry / Support</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Message</label>
+                            <textarea class="form-control" id="contact_message" name="contact_message" rows="4" placeholder="How can we help you today?"></textarea>
+                        </div>
+                        <div class="col-md-12 mt-4">
+                            <button type="button" class="btn-primary-custom" id="submitBtn" onclick="Send_Contact_Enquiry(this)">
+                                <i class="bi bi-send me-2"></i> Send Message
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-          </div>
-        </div>
-      </div>
-      <nav class="breadcrumbs">
-        <div class="container">
-          <ol>
-            <li><a href="index.html">Home</a></li>
-            <li class="current">Contact</li>
-          </ol>
-        </div>
-      </nav>
-    </div><!-- End Page Title -->
-
-    <!-- Contact 2 Section -->
-    <section id="contact-2" class="contact-2 section">
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <!-- Contact Info Boxes -->
-        <div class="row gy-4 mb-5">
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
-            <div class="contact-info-box">
-              <div class="icon-box">
-                <i class="bi bi-geo-alt"></i>
-              </div>
-              <div class="info-content">
-                <h4>Our Address</h4>
-                <p>1842 Maple Avenue, Portland, Oregon 97204</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
-            <div class="contact-info-box">
-              <div class="icon-box">
-                <i class="bi bi-envelope"></i>
-              </div>
-              <div class="info-content">
-                <h4>Email Address</h4>
-                <p>info@example.com</p>
-                <p>contact@example.com</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
-            <div class="contact-info-box">
-              <div class="icon-box">
-                <i class="bi bi-headset"></i>
-              </div>
-              <div class="info-content">
-                <h4>Hours of Operation</h4>
-                <p>Sunday-Fri: 9 AM - 6 PM</p>
-                <p>Saturday: 9 AM - 4 PM</p>
-              </div>
-            </div>
-          </div>
         </div>
 
-      </div>
+        <div class="col-lg-5">
+            <div class="map-box">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3721.970363663334!2d79.08986467477152!3d21.113747684855042!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bd4bf5c70d1ef2f%3A0x924dafe09820653c!2sCallisto%20IT%20Solutions%20-%20Best%20Software%20Development%20%2C%20Web%20Application%20Development%20and%20Training%20%26%20IT%20InternshipCompany!5e0!3m2!1sen!2sin!4v1778657981087!5m2!1sen!2sin" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
 
-      <!-- Google Maps (Full Width) -->
-      <div class="map-section" data-aos="fade-up" data-aos-delay="200">
-        <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d48389.78314118045!2d-74.006138!3d40.710059!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a22a3bda30d%3A0xb89d1fe6bc499443!2sDowntown%20Conference%20Center!5e0!3m2!1sen!2sus!4v1676961268712!5m2!1sen!2sus" width="100%" height="500" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      </div>
-
-      <!-- Contact Form Section (Overlapping) -->
-      <div class="container form-container-overlap">
-        <div class="row justify-content-center" data-aos="fade-up" data-aos-delay="300">
-          <div class="col-lg-10">
-            <div class="contact-form-wrapper">
-              <h2 class="text-center mb-4">Get in Touch</h2>
-
-              <form action="forms/contact.php" method="post" class="php-email-form">
-                <div class="row g-3">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <div class="input-with-icon">
-                        <i class="bi bi-person"></i>
-                        <input type="text" class="form-control" name="name" placeholder="First Name" required="">
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <div class="input-with-icon">
-                        <i class="bi bi-envelope"></i>
-                        <input type="email" class="form-control" name="email" placeholder="Email Address" required="">
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-md-12">
-                    <div class="form-group">
-                      <div class="input-with-icon">
-                        <i class="bi bi-text-left"></i>
-                        <input type="text" class="form-control" name="subject" placeholder="Subject" required="">
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-12">
-                    <div class="form-group">
-                      <div class="input-with-icon">
-                        <i class="bi bi-chat-dots message-icon"></i>
-                        <textarea class="form-control" name="message" placeholder="Write Message..." style="height: 180px" required=""></textarea>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-12">
-                    <div class="loading">Loading</div>
-                    <div class="error-message"></div>
-                    <div class="sent-message">Your message has been sent. Thank you!</div>
-                  </div>
-
-                  <div class="col-12 text-center">
-                    <button type="submit" class="btn btn-primary btn-submit">SEND MESSAGE</button>
-                  </div>
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div>
+                <div class="fl-brand">🏠 PropCRM</div>
+                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
+                <div class="footer-social mt-4 d-flex gap-3">
+                    <a href="#"><i class="bi bi-facebook"></i></a>
+                    <a href="#"><i class="bi bi-instagram"></i></a>
+                    <a href="#"><i class="bi bi-whatsapp"></i></a>
+                    <a href="#"><i class="bi bi-twitter-x"></i></a>
                 </div>
-              </form>
             </div>
-          </div>
+            <div>
+                <div class="fl-title">For Tenants</div>
+                <a href="/listingpage/?type=rent" class="fl-link">Flats for Rent</a>
+                <a href="/listingpage/?category=pg" class="fl-link">PG / Hostels</a>
+                <a href="#" class="fl-link">Short-term Stays</a>
+                <a href="#" class="fl-link">Rent Agreement</a>
+            </div>
+            <div>
+                <div class="fl-title">For Buyers</div>
+                <a href="/listingpage/?type=sale" class="fl-link">Flats for Sale</a>
+                <a href="#" class="fl-link">New Projects</a>
+                <a href="#" class="fl-link">Plots & Land</a>
+                <a href="#" class="fl-link">Home Loans</a>
+            </div>
+            <div>
+                <div class="fl-title">For Owners</div>
+                <a href="{% url 'post_property' %}" class="fl-link">Post Property FREE</a>
+                <a href="#" class="fl-link">Agent Registration</a>
+                <a href="#" class="fl-link">PropCRM Plans</a>
+                <a href="#" class="fl-link">Contact Support</a>
+            </div>
         </div>
-
-      </div>
-
-    </section><!-- /Contact 2 Section -->
-
-  </main>
-
-  <footer id="footer" class="footer position-relative">
-
-    <div class="container">
-      <div class="row gy-5">
-
-        <div class="col-lg-4">
-          <div class="footer-content">
-            <a href="index.html" class="logo d-flex align-items-center mb-4">
-              <span class="sitename">TheProperty</span>
-            </a>
-            <p class="mb-4">Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae. Donec velit neque auctor sit amet aliquam vel ullamcorper sit amet ligula.</p>
-
-            <div class="newsletter-form">
-              <h5>Stay Updated</h5>
-              <form action="forms/newsletter.php" method="post" class="php-email-form">
-                <div class="input-group">
-                  <input type="email" name="email" class="form-control" placeholder="Enter your email" required="">
-                  <button type="submit" class="btn-subscribe">
-                    <i class="bi bi-send"></i>
-                  </button>
-                </div>
-                <div class="loading">Loading</div>
-                <div class="error-message"></div>
-                <div class="sent-message">Thank you for subscribing!</div>
-              </form>
-            </div>
-          </div>
+        <div class="footer-bottom">
+            <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
+            <span>Privacy Policy · Terms · Sitemap</span>
         </div>
-
-        <div class="col-lg-2 col-6">
-          <div class="footer-links">
-            <h4>Company</h4>
-            <ul>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> About</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Careers</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Press</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Blog</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Contact</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="col-lg-2 col-6">
-          <div class="footer-links">
-            <h4>Solutions</h4>
-            <ul>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Digital Strategy</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Cloud Computing</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Data Analytics</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> AI Solutions</a></li>
-              <li><a href="#"><i class="bi bi-chevron-right"></i> Cybersecurity</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="col-lg-4">
-          <div class="footer-contact">
-            <h4>Get in Touch</h4>
-            <div class="contact-item">
-              <div class="contact-icon">
-                <i class="bi bi-geo-alt"></i>
-              </div>
-              <div class="contact-info">
-                <p>2847 Maple Avenue<br>Los Angeles, CA 90210<br>United States</p>
-              </div>
-            </div>
-
-            <div class="contact-item">
-              <div class="contact-icon">
-                <i class="bi bi-telephone"></i>
-              </div>
-              <div class="contact-info">
-                <p>+1 (555) 987-6543</p>
-              </div>
-            </div>
-
-            <div class="contact-item">
-              <div class="contact-icon">
-                <i class="bi bi-envelope"></i>
-              </div>
-              <div class="contact-info">
-                <p>contact@example.com</p>
-              </div>
-            </div>
-
-            <div class="social-links">
-              <a href="#"><i class="bi bi-facebook"></i></a>
-              <a href="#"><i class="bi bi-twitter-x"></i></a>
-              <a href="#"><i class="bi bi-linkedin"></i></a>
-              <a href="#"><i class="bi bi-youtube"></i></a>
-              <a href="#"><i class="bi bi-github"></i></a>
-            </div>
-          </div>
-        </div>
-
-      </div>
     </div>
+</footer>
 
-    <div class="footer-bottom">
-      <div class="container">
-        <div class="row align-items-center">
-          <div class="col-lg-6">
-            <div class="copyright">
-              <p>© <span>Copyright</span> <strong class="px-1 sitename">MyWebsite</strong> <span>All Rights Reserved</span></p>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="footer-bottom-links">
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
-              <a href="#">Cookie Policy</a>
-            </div>
-            <div class="credits">
-              <!-- All the links in the footer should remain intact. -->
-              <!-- You can delete the links only if you've purchased the pro version. -->
-              <!-- Licensing information: https://bootstrapmade.com/license/ -->
-              <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-              Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
-  </footer>
+<script>
+    // Contact Enquiry Form Ajax
+    function Send_Contact_Enquiry(_this) {
+        // 1. Grab the values from the form
+        var contact_name = $("#contact_name").val();
+        var contact_email = $("#contact_email").val();
+        var contact_phone = $("#contact_phone").val();
+        var contact_en_title = $("#contact_en_title").val(); 
+        var contact_message = $("#contact_message").val();
 
-  <!-- Scroll Top -->
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+        // 2. Validate
+        if (!contact_name || !contact_phone) {
+            Swal.fire("Error", "Please fill out all required fields.", "error");
+            return;
+        }
 
-  <!-- Preloader -->
-  <div id="preloader"></div>
+        // 3. Package the data
+        var fd = new FormData();
+        fd.append('contact_name', contact_name);
+        fd.append('contact_email', contact_email);
+        fd.append('contact_phone', contact_phone);
+        fd.append('contact_en_title', contact_en_title);
+        fd.append('contact_message', contact_message);
 
-  <!-- Vendor JS Files -->
-  <script src="{% static "assets/vendor/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
-  <script src="{% static "assets/vendor/php-email-form/validate.js" %}"></script>
-  <script src="{% static "assets/vendor/aos/aos.js" %}"></script>
-  <script src="{% static "assets/vendor/purecounter/purecounter_vanilla.js" %}"></script>
-  <script src="{% static "assets/vendor/glightbox/js/glightbox.min.js" %}"></script>
-  <script src="{% static "assets/vendor/swiper/swiper-bundle.min.js" %}"></script>
-  <script src="{% static "assets/vendor/drift-zoom/Drift.min.js" %}"></script>
+        // 4. Change button to loading state
+        var originalText = _this.innerHTML; 
+        $(_this).prop("disabled", true);
+        _this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Sending...`;
 
-  <!-- Main JS File -->
-  <script src="{% static "assets/js/main.js" %}"></script>
+        // 5. Send the AJAX request
+        $.ajax({
+            method: "POST",
+            url: "{% url 'Contact_Ajax' %}",
+            data: fd,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                // Restore button
+                $(_this).prop("disabled", false);
+                _this.innerHTML = originalText;
+                
+                if (response.status == '1' || response.status == 'success') {
+                    // 🟢 FIX: Changed to Swal.fire()
+                    Swal.fire("Success!", "Your message has been sent. We will contact you shortly.", "success").then(() => {
+                       location.reload();
+                    });
+                } else {
+                    Swal.fire("Error", response.msg || response.message || "Something went wrong.", "error");
+                }
+            },
+            error: function() {
+                // Handle server crashes
+                $(_this).prop("disabled", false);
+                _this.innerHTML = originalText;
+                Swal.fire("Server Error", "Could not connect to the server. Please try again later.", "error");
+            }
+        });
+    }
+</script>
 
 </body>
-
 </html>

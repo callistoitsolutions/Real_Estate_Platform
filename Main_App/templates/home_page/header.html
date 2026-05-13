@@ -254,6 +254,7 @@
     <a href="{% url 'dynamic_property_faq' %}">FAQs</a>
 </li>
         <a href="{% url 'Adminlogin' %}">Admin</a>
+        <a href="{% url 'Contact_Us' %}">Contact Us</a>
     </nav>
 
     <div class="nav-right">
@@ -321,8 +322,9 @@
         <a href="{% url 'blog' %}">Blogs</a>
         <a href="{% url 'login' %}">Login</a>
         <a href="{% url 'Adminlogin' %}">Admin Login</a>
+        <a href="{% url 'Contact_Us' %}">Contact Us</a>
         <a href="{% url 'post_property' %}">Post Property FREE</a>
-        <a href="{% url 'lead_capture' %}">Lead Capture</a>
+        {% comment %} <a href="{% url 'lead_capture' %}">Lead Capture</a> {% endcomment %}
     </div>
 </header>
 

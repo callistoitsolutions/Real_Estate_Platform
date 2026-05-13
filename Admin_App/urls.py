@@ -22,12 +22,24 @@ urlpatterns = [
 
     path('api/global-search/', views.global_search, name='global_search'),
 
+    ############ urls for notifications ############################
+
+    path('api/notifications/today/', views.get_todays_notifications, name='get_todays_notifications'),
+
      ############ urls for rental forms ##########################
 
      path('residential',views.residential,name="residential"),
      path('commercial',views.commercial,name="commercial"),
      path('pg_coliving',views.pg_coliving,name="pg_coliving"),
 
+
+     ############ urls for contact enquiries list ##########################
+
+     path('Contact_Enquiries_List',views.Contact_Enquiries_List,name="Contact_Enquiries_List"),
+
+     ############ urls for view contact enquiries ########################
+
+     path('View_Contact_Enquiry/<int:id>',views.View_Contact_Enquiry,name="View_Contact_Enquiry"),
 
      ############# urls for ameneties list ############################
 
@@ -162,6 +174,10 @@ urlpatterns = [
     ########### urls for ajax for add/update rm functionality ###############
 
     path('User_Ajax',views.User_Ajax,name="User_Ajax"),
+
+    ########### urls for ajax for delete bulk users #########################
+
+    path('Users_Bulk_Delete', views.Users_Bulk_Delete, name='Users_Bulk_Delete'),
 
 
 

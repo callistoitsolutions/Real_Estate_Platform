@@ -53,7 +53,7 @@ from openpyxl import Workbook
 from django.db import transaction
 import pandas as pd
 import io
-from django.urls import reverse
+from django.urls import reverse,NoReverseMatch
 
 from openpyxl.styles import Font, PatternFill
 from datetime import timedelta
@@ -385,6 +385,96 @@ def global_search(request):
 ########## Views end for global search ########################
 
 
+############## Views start for notifications ########################
+
+def get_todays_notifications(request):
+    today = datetime.today()
+    master_feed = []
+
+    # 🟢 1. Create the Map linking Roles to their specific URLs
+    role_url_map = {
+        'Relationship Manager': 'Update_RM',             
+        'Landlord': 'Update_Landlord', 
+        'Tenant': 'Update_Tenant',     
+        'Buyer': 'Update_Buyer',
+        'Agent': 'Update_Agent',
+        'Agency/Builder': 'Update_Agency',
+        'Vendor': 'Update_Vendor',
+    }
+
+    # ==========================================
+    # 2. FETCH NEW USERS
+    # ==========================================
+    recent_users = User_Details.objects.filter(user_register_date=today).order_by('-id')[:10]
+    
+    for user in recent_users:
+        
+        #  3. Look up the correct URL name based on the user's role
+        url_name = role_url_map.get(user.user_role)
+        user_url = '#' # Default fallback
+
+        if url_name:
+            try:    
+                user_url = reverse(url_name, args=[user.id])
+            except NoReverseMatch:
+                pass # If URL isn't built yet, it stays '#' safely
+
+        master_feed.append({
+            'category': 'user', 
+            'title': f"New {user.user_role} Registered",
+            'desc': user.user_email, # Or user_name, whichever you prefer
+            'timestamp': user.user_register_date, 
+            'time': user.user_register_time, 
+            'url': user_url #  Plugs in the dynamic URL!
+        })
+
+
+    # ==========================================
+    # 3. FETCH NEW CONTACTS ENQUIRIES 
+    # ==========================================
+    recent_contacts = Contact_Enquiry.objects.filter(contact_enquiry_date=today).order_by('-contact_enquiry_date')[:10]
+    for con in recent_contacts:
+
+        contact_url = reverse("View_Contact_Enquiry", args=[con.id])
+        
+        master_feed.append({
+            'category': 'contact', 
+            'title': "New Contact Enquiry",
+            'desc': f"{con.contact_name} and number {con.contact_phone}",
+            'timestamp': con.contact_enquiry_date,
+            'time': con.contact_enquiry_time,
+            'url': contact_url 
+        })
+
+
+    # ==========================================
+    # 3. FETCH NEW SUBSCRIPTIONS (Optional)
+    # ==========================================
+    # recent_subs = Subscriptions.objects.filter(purchased_at__date=today).order_by('-purchased_at')[:10]
+    # for sub in recent_subs:
+    #     master_feed.append({
+    #         'category': 'sub', 
+    #         'title': "Plan Purchased",
+    #         'desc': f"{sub.plan_name} by User ID {sub.user_id}",
+    #         'timestamp': sub.purchased_at,
+    #         'time': timezone.localtime(sub.purchased_at).strftime("%I:%M %p"),
+    #         'url': '#' 
+    #     })
+
+
+    # ==========================================
+    # 4. SORT AND FINALIZE
+    # ==========================================
+    master_feed.sort(key=lambda x: x['timestamp'], reverse=True)
+    final_feed = master_feed[:10]
+
+    return JsonResponse({
+        'notifications': final_feed
+    })
+
+############# Views endd for notifications ###############################
+
+
 def index3(request):
     return render(request,"admin_user/index3.html")
 
@@ -438,6 +528,45 @@ def pg_coliving(request):
         return render(request,"admin_user/pg_coliving.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
+
+
+############### Views start for contact enquiries list #####################
+
+def Contact_Enquiries_List(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        contacts_en_obj = Contact_Enquiry.objects.all().order_by('-id')
+        contacts_en_obj_count = Contact_Enquiry.objects.all().count()
+
+        rendered = render_to_string("admin_user/render_to_string/R_Contact/r_t_s_enquiry.html",{'contacts_en_obj':contacts_en_obj,'contacts_en_obj_count':contacts_en_obj_count})
+
+        context = {'admin_obj':admin_obj,'contact_enquiries_list':rendered}
+
+        return render(request,"admin_user/Contact_Enquiry/contact_enquiry.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############ Views end for contact enquiries list ###########################
+
+
+############ Views start for view contact enquiries ####################
+
+def  View_Contact_Enquiry(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        contact = Contact_Enquiry.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'contact':contact}
+
+        return render(request,"admin_user/Contact_Enquiry/view_enquiry.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############## Views end for view contact enquiries ######################
    
 
 ############## Views start for ameneties list ##########################
@@ -1750,7 +1879,21 @@ def resale_residential_bulk_delete(request):
 
 ########### Views start for display rm list ##########################
 
+@csrf_exempt
 def rm_list(request):
+
+    if request.method=="POST":
+        start_date= request.POST.get('start_date')
+        end_date= request.POST.get('end_date')
+        rm_obj = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Relationship Manager").order_by("-id")
+        if User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Relationship Manager").exists():
+            rm_obj_count = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Relationship Manager").count()
+            rendered = render_to_string("admin_user/render_to_string/R_RM/r_t_s_rm.html",{'rm_obj':rm_obj,'rm_obj_count':rm_obj_count,'Role':'Relationship Manager'})
+            return HttpResponse(rendered)
+        else:
+            return HttpResponse("error")
+
+            
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
@@ -1938,9 +2081,92 @@ def User_Ajax(request):
 ########### Views end for ajax for add/update rm functionality ###################
 
 
+############ Views start for ajax for delete bulk users #####################
+
+@csrf_exempt
+def Users_Bulk_Delete(request):
+    try:
+        data = json.loads(request.body)
+        delete_type = data.get('delete_type')
+        
+        #  BUG FIX 1: This was incorrectly pulling 'delete_type' before
+        role = data.get('role') 
+        
+        # Base query: Get all users of the selected role
+        users = User_Details.objects.filter(user_role=role)
+
+        print(f"--- Bulk Delete Request: Type={delete_type}, Role={role} ---")
+        
+        if delete_type == 'delete_all':
+            count = users.count()
+            users.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted ALL {count} users ({role}).'})
+
+            
+        elif delete_type == 'date_range':
+            from_date = data.get('from_date')
+            to_date = data.get('to_date')
+            # Assuming your date field is 'user_register_date'. Adjust if necessary.
+            target_users = users.filter(user_register_date__range=[from_date, to_date])
+            count = target_users.count()
+            target_users.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} users ({role}) in date range.'})
+            
+            
+        elif delete_type == 'latest_month':
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            #  BUG FIX 2 & 3: Used the base 'users' queryset so it respects the role filter
+            target_users = users.filter(user_register_date__gte=thirty_days_ago)
+            count = target_users.count()
+            target_users.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} users ({role}) from the last 30 days.'})
+            
+            
+        elif delete_type == 'old_data':
+            six_months_ago = timezone.now() - timedelta(days=180)
+            #  BUG FIX 2 & 3: Used the base 'users' queryset so it respects the role filter
+            target_users = users.filter(user_register_date__lt=six_months_ago)
+            count = target_users.count()
+            target_users.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} older users ({role}).'})
+            
+
+        elif delete_type == 'current_page':
+            # This handles the front-end 'current_page' logic if you pass page_ids
+            page_ids = data.get('page_ids', [])
+            target_users = users.filter(id__in=page_ids)
+            count = target_users.count()
+            target_users.delete()
+            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} users ({role}) from the current page.'})
+
+            
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Server error: {str(e)}'})
+
+############# Views end for ajax for delete bulk users #######################
+
+
 ########### Views start for display landlords list ###################
 
+@csrf_exempt
 def Landlord_List(request):
+
+    if request.method=="POST":
+        start_date= request.POST.get('start_date')
+        end_date= request.POST.get('end_date')
+        landlord_obj = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Landlord").order_by("-id")
+        if User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Landlord").exists():
+            landlord_obj_count = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Landlord").count()
+            rendered = render_to_string("admin_user/render_to_string/R_Landlord/r_t_s_landlord.html",{'landlord_obj':landlord_obj,'landlord_obj_count':landlord_obj_count,'Role':'Landlord'})
+
+            return HttpResponse(rendered)
+        else:
+            return HttpResponse("error")
+
+
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
@@ -2075,7 +2301,23 @@ def Update_Landlord(request,id):
 
 ######### Views start for display tenants list #####################
 
+@csrf_exempt
 def Tenant_List(request):
+
+    if request.method=="POST":
+        start_date= request.POST.get('start_date')
+        end_date= request.POST.get('end_date')
+        tenant_obj = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Tenant").order_by("-id")
+        if User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Tenant").exists():
+            tenant_obj_count = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Tenant").count()
+
+            rendered = render_to_string("admin_user/render_to_string/R_Tenant/r_t_s_tenant.html",{'tenant_obj':tenant_obj,'tenant_obj_count':tenant_obj_count,'Role':'Tenant'})
+            
+            return HttpResponse(rendered)
+        else:
+            return HttpResponse("error")
+
+
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
@@ -2208,7 +2450,23 @@ def Update_Tenant(request,id):
 
 ############### Views start for display buyers list ####################
 
+@csrf_exempt
 def Buyer_List(request):
+
+    if request.method=="POST":
+        start_date= request.POST.get('start_date')
+        end_date= request.POST.get('end_date')
+        buyer_obj = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Buyer").order_by("-id")
+        if User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Buyer").exists():
+            buyer_obj_count = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Buyer").count()
+
+            rendered = render_to_string("admin_user/render_to_string/R_Buyer/r_t_s_buyer.html",{'buyer_obj':buyer_obj,'buyer_obj_count':buyer_obj_count,'Role':'Buyer'})
+
+            return HttpResponse(rendered)
+        else:
+            return HttpResponse("error")
+
+
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
@@ -2343,7 +2601,22 @@ def Update_Buyer(request,id):
 
 ######### Views start for display agents list ##################
 
+@csrf_exempt
 def Agent_List(request):
+
+    if request.method=="POST":
+        start_date= request.POST.get('start_date')
+        end_date= request.POST.get('end_date')
+        agent_obj = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Agent").order_by("-id")
+        if User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Agent").exists():
+            agent_obj_count = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Agent").count()
+
+            rendered = render_to_string("admin_user/render_to_string/R_Agent/r_t_s_agent.html",{'agent_obj':agent_obj,'agent_obj_count':agent_obj_count,'Role':'Agent'})
+
+            return HttpResponse(rendered)
+        else:
+            return HttpResponse("error")
+        
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
@@ -2482,7 +2755,23 @@ def Update_Agent(request,id):
 
 ########## Views start for display agency list #########################
 
+@csrf_exempt
 def Agency_List(request):
+
+    if request.method=="POST":
+        start_date= request.POST.get('start_date')
+        end_date= request.POST.get('end_date')
+        agency_obj = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Agency/Builder").order_by("-id")
+        if User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Agency/Builder").exists():
+            agency_obj_count = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Agency/Builder").count()
+
+            rendered = render_to_string("admin_user/render_to_string/R_Agency/r_t_s_agency.html",{'agency_obj':agency_obj,'agency_obj_count':agency_obj_count,'Role':'Agency'})
+
+            return HttpResponse(rendered)
+        else:
+            return HttpResponse("error")
+
+
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
@@ -2620,7 +2909,24 @@ def Update_Agency(request,id):
 
 ########## Views start for display vendors list ##################
 
+@csrf_exempt
 def Vendor_List(request):
+
+
+    if request.method=="POST":
+        start_date= request.POST.get('start_date')
+        end_date= request.POST.get('end_date')
+        vendor_obj = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Vendor").order_by("-id")
+        if User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Vendor").exists():
+            vendor_obj_count = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Vendor").count()
+
+            rendered = render_to_string("admin_user/render_to_string/R_Vendor/r_t_s_vendor.html",{'vendor_obj':vendor_obj,'vendor_obj_count':vendor_obj_count,'Role':'Vendor'})
+
+            return HttpResponse(rendered)
+        else:
+            return HttpResponse("error")
+
+
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
