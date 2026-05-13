@@ -5,4 +5,4 @@ class AdminAppConfig(AppConfig):
     name = 'Admin_App'
 
     def ready(self):
-        import Admin_App.signals  # load signals when app is ready
+        import seo.signals  # load signals when app is ready

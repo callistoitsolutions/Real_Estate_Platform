@@ -1641,6 +1641,20 @@
                 </ul>
             </li>
 
+
+  <li class="menu-section-title" style="color:white;">Recyle Bin</li>
+            <li class="menu-item">
+    <a href="javascript:void(0)" class="menu-link" onclick="toggleSubmenu(event, this)" id="RecycleBin">
+        <i class="fas fa-trash-restore menu-icon"></i>
+        <span class="menu-text" style="color:white;">Recycle Bin</span>
+        <i class="fas fa-chevron-down dropdown-icon"></i>
+    </a>
+
+    <ul class="submenu">
+        <li><a href="{% url 'global_recycle_bin' %}" class="submenu-link" style="color:white;">Deleted Properties</a></li>
+      
+    </ul>
+</li>
         </ul>
     </div>
 

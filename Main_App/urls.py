@@ -62,8 +62,14 @@ urlpatterns = [
 
     path('Admin_Logout',views.Admin_Logout,name='Admin_Logout'),
   
-    
-    
+  
+   
+
+    path(
+    "faqs/",
+    views.dynamic_property_faq,
+    name="dynamic_property_faq"
+),
   
     path("categories/", views.category_list, name="category_list"),
     
@@ -149,6 +155,34 @@ urlpatterns = [
    
     path('listing/<str:listing_type>/<str:category>/<int:pk>/', views.property_detail_view, name='property_detail'),
 
+    path(
+        'submit-enquiry/<int:property_id>/',
+        views.submit_enquiry,
+        name='submit_enquiry'
+    ),
+
+    # =====================================================
+    # REVEAL PHONE
+    # =====================================================
+
+    path(
+        'reveal-phone/<int:property_id>/',
+        views.reveal_phone,
+        name='reveal_phone'
+    ),
+
+    path(
+    'subscription-checkout/<int:plan_id>/',
+    views.subscription_checkout,
+    name='subscription_checkout'
+),
+    
+    
+      path(
+        'subscription-plans/',
+        views.subscription_plans,
+        name='subscription_plans'
+    ),
 
    # path('listings/', views.listings_view, name='listings'),
 

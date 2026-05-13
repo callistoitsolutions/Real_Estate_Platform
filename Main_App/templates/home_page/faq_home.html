@@ -1,0 +1,369 @@
+{% include 'home_page/header.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+
+:root{
+    --primary:#0f172a;
+    --secondary:#1e293b;
+    --accent:#2563eb;
+    --light:#f8fafc;
+    --border:#e2e8f0;
+    --text:#334155;
+    --white:#ffffff;
+    --shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* =========================
+PAGE HERO
+========================= */
+
+.faq-hero{
+    background:linear-gradient(135deg,#0f172a,#1e3a8a);
+    padding:80px 20px;
+    text-align:center;
+    color:#fff;
+}
+
+.faq-hero h1{
+    font-size:42px;
+    font-weight:800;
+    margin-bottom:15px;
+}
+
+.faq-hero p{
+    max-width:750px;
+    margin:auto;
+    font-size:17px;
+    line-height:1.7;
+    color:rgba(255,255,255,0.85);
+}
+
+/* =========================
+MAIN
+========================= */
+
+.faq-main{
+    max-width:1400px;
+    margin:auto;
+    padding:60px 20px;
+}
+
+/* =========================
+SECTION TITLE
+========================= */
+
+.section-title{
+    margin-bottom:30px;
+}
+
+.section-title h2{
+    font-size:30px;
+    font-weight:800;
+    color:var(--primary);
+    margin-bottom:10px;
+}
+
+.section-title p{
+    color:var(--text);
+    font-size:15px;
+}
+
+/* =========================
+GRID
+========================= */
+
+.faq-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:25px;
+    margin-bottom:70px;
+}
+
+/* =========================
+CARD
+========================= */
+
+.faq-card{
+    background:var(--white);
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    transition:0.3s;
+    border:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+}
+
+.faq-card:hover{
+    transform:translateY(-8px);
+}
+
+/* =========================
+IMAGE
+========================= */
+
+.faq-image{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+    background:#f1f5f9;
+}
+
+/* =========================
+CONTENT
+========================= */
+
+.faq-content{
+    padding:25px;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+.faq-content h3{
+    font-size:22px;
+    font-weight:700;
+    color:var(--primary);
+    margin-bottom:15px;
+    line-height:1.4;
+}
+
+.faq-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.meta-badge{
+    background:#eff6ff;
+    color:#2563eb;
+    padding:7px 14px;
+    border-radius:30px;
+    font-size:13px;
+    font-weight:600;
+}
+
+/* =========================
+BUTTON
+========================= */
+
+.faq-btn{
+    margin-top:auto;
+    display:inline-block;
+    text-decoration:none;
+    background:linear-gradient(135deg,#2563eb,#1d4ed8);
+    color:#fff;
+    padding:14px 22px;
+    border-radius:10px;
+    font-weight:700;
+    transition:0.3s;
+    text-align:center;
+}
+
+.faq-btn:hover{
+    background:linear-gradient(135deg,#1d4ed8,#1e40af);
+    color:#fff;
+}
+
+/* =========================
+EMPTY
+========================= */
+
+.empty-box{
+    background:#fff;
+    padding:40px;
+    border-radius:18px;
+    text-align:center;
+    border:1px dashed #cbd5e1;
+    margin-bottom:50px;
+}
+
+.empty-box h4{
+    color:#0f172a;
+    margin-bottom:10px;
+}
+
+/* =========================
+RESPONSIVE
+========================= */
+
+@media(max-width:768px){
+
+    .faq-hero h1{
+        font-size:32px;
+    }
+
+    .section-title h2{
+        font-size:24px;
+    }
+
+}
+
+</style>
+
+<!-- =========================
+HERO
+========================= -->
+
+<section class="faq-hero">
+
+    <h1>Property FAQ Center</h1>
+
+    <p>
+        Explore dynamic FAQs for Residential, Commercial,
+        PG, Plot, Industrial, Agricultural and Resale properties.
+        Get instant answers about pricing, amenities, location,
+        furnishing, ownership, area and more.
+    </p>
+
+</section>
+
+<!-- =========================
+MAIN
+========================= -->
+
+<div class="faq-main">
+
+    {% for type, properties in faq_properties.items %}
+
+        <div class="section-title">
+
+            <h2>{{ type|title }}</h2>
+
+            <p>
+                Browse FAQs generated dynamically from live property listings.
+            </p>
+
+        </div>
+
+        {% if properties %}
+
+            <div class="faq-grid">
+
+                {% for property in properties %}
+
+                    <div class="faq-card">
+
+                        <!-- IMAGE -->
+
+                        {% if property.images.first %}
+
+                            <img src="{{ property.images.first.image.url }}"
+                                 class="faq-image">
+
+                        {% elif property.featured_image %}
+
+                            <img src="{{ property.featured_image.url }}"
+                                 class="faq-image">
+
+                        {% else %}
+
+                            <img src="{% static 'assets/img/no-image.jpg' %}"
+                                 class="faq-image">
+
+                        {% endif %}
+
+                        <!-- CONTENT -->
+
+                        <div class="faq-content">
+
+                            <h3>
+
+                                {% if property.property_title %}
+
+                                    {{ property.property_title }}
+
+                                {% elif property.title %}
+
+                                    {{ property.title }}
+
+                                {% elif property.pg_name %}
+
+                                    {{ property.pg_name }}
+
+                                {% elif property.plot_title %}
+
+                                    {{ property.plot_title }}
+
+                                {% else %}
+
+                                    Property {{ property.id }}
+
+                                {% endif %}
+
+                            </h3>
+
+                            <div class="faq-meta">
+
+                                {% if property.city %}
+                                    <span class="meta-badge">
+                                        📍 {{ property.city }}
+                                    </span>
+                                {% endif %}
+
+                                {% if property.locality %}
+                                    <span class="meta-badge">
+                                        🏢 {{ property.locality }}
+                                    </span>
+                                {% endif %}
+
+                                {% if property.expected_price %}
+                                    <span class="meta-badge">
+                                        ₹ {{ property.expected_price }}
+                                    </span>
+                                {% endif %}
+
+                                {% if property.monthly_rent %}
+                                    <span class="meta-badge">
+                                        ₹ {{ property.monthly_rent }}/month
+                                    </span>
+                                {% endif %}
+
+                                {% if property.bhk %}
+                                    <span class="meta-badge">
+                                        {{ property.bhk }}
+                                    </span>
+                                {% endif %}
+
+                            </div>
+
+                            <a href="{% url 'dynamic_property_faq' type property.id %}"
+                               class="faq-btn">
+
+                                Explore FAQ →
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty-box">
+
+                <h4>No Properties Available</h4>
+
+                <p>
+                    No listings found for this category.
+                </p>
+
+            </div>
+
+        {% endif %}
+
+    {% endfor %}
+
+</div>
+
+{% include 'home_page/footer.html' %}
+
+{% endblock %}

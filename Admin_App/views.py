@@ -3250,6 +3250,29 @@ def addon_create(request):
 
 
 
+def _get_deleter_name(request):
+    """Helper function to get the name of the person deleting the property."""
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+
+    if admin_id:
+        try:
+            admin = Admin_Login.objects.get(id=admin_id)
+            return f"{admin.name} (Admin)"
+        except Admin_Login.DoesNotExist:
+            return "Unknown Admin"
+            
+    elif user_id:
+        try:
+            user = User_Details.objects.get(id=user_id)
+            return f"{user.user_name} (User)"
+        except User_Details.DoesNotExist:
+            return "Unknown User"
+            
+    return "System"
+
+
+
 def rental_residential_add(request):
 
     admin_id = request.session.get('Admin_id')
@@ -3420,7 +3443,7 @@ def rental_list(request):
 
     # ── Base queryset ──
     try:
-        properties = RentalResidentialProperty.objects.all().order_by('-id')
+        properties = RentalResidentialProperty.objects.filter(is_deleted=False).order_by('-id')
     except Exception as e:
         properties = RentalResidentialProperty.objects.none()
 
@@ -3591,53 +3614,64 @@ def rental_list(request):
     return render(request, 'admin_user/Reports/Rental/rental_list.html', context)
 
 
+
+
+
 def rental_bulk_delete(request):
-    """Handles Advanced Bulk Deletions for Rental Properties."""
+    """Handles Advanced Bulk Deletions for Rental Properties (Soft Delete)."""
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
         
-    session_id = request.session.get('Admin_id')
-    if not session_id:
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+    
+    if not admin_id and not user_id:
         return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
 
     try:
         data = json.loads(request.body)
         delete_type = data.get('delete_type')
-        properties = RentalResidentialProperty.objects.all()
+        
+        # 👈 1. Get the deleter's name
+        deleter_name = _get_deleter_name(request)
+        
+        # IMPORTANT: Only target properties that are NOT currently in the Recycle Bin
+        properties = RentalResidentialProperty.objects.filter(is_deleted=False)
         
         if delete_type == 'delete_all':
             count = properties.count()
-            properties.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted ALL {count} properties.'})
+            # 👈 2. Add deleted_by=deleter_name to the update query
+            properties.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved ALL {count} properties to Recycle Bin.'})
             
         elif delete_type == 'current_page':
             page_ids = data.get('page_ids', [])
             target_props = properties.filter(id__in=page_ids)
             count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties from current page.'})
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from current page to Recycle Bin.'})
             
         elif delete_type == 'date_range':
             from_date = data.get('from_date')
             to_date = data.get('to_date')
             target_props = properties.filter(available_from__range=[from_date, to_date])
             count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties in date range.'})
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties in date range to Recycle Bin.'})
             
         elif delete_type == 'latest_month':
             thirty_days_ago = timezone.now() - timedelta(days=30)
             target_props = properties.filter(available_from__gte=thirty_days_ago)
             count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties from the last 30 days.'})
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from the last 30 days to Recycle Bin.'})
             
         elif delete_type == 'old_data':
             six_months_ago = timezone.now() - timedelta(days=180)
             target_props = properties.filter(available_from__lt=six_months_ago)
             count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} older properties.'})
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} older properties to Recycle Bin.'})
             
         elif delete_type == 'by_uploader':
             uploader = data.get('uploader_text', '')
@@ -3647,18 +3681,17 @@ def rental_bulk_delete(request):
                 Q(uploaded_by_role__icontains=uploader)
             )
             count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties uploaded by {uploader}.'})
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties uploaded by {uploader} to Recycle Bin.'})
 
         elif delete_type == 'by_file':
             file_name = data.get('file_name', '')
-            # Replace 'upload_file_name' with your exact database field name for tracking files
             target_props = properties.filter(upload_file_name=file_name) 
             count = target_props.count()
             if count == 0:
                 return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} properties from {file_name}.'})
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from {file_name} to Recycle Bin.'})
             
         else:
             return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
@@ -3669,6 +3702,123 @@ def rental_bulk_delete(request):
 
 
 
+@require_POST
+def rental_residential_delete(request, pk): # 👈 MUST BE 'pk' TO MATCH THE URL!
+    """Soft deletes a single property from the table's action column."""
+    try:
+        # Check if the helper function exists, if not, use a default
+        try:
+            deleter_name = _get_deleter_name(request)
+        except NameError:
+            deleter_name = "Unknown Admin"
+
+        # Fetch using pk
+        prop = RentalResidentialProperty.objects.get(id=pk) 
+        
+        prop.is_deleted = True
+        prop.deleted_at = timezone.now()
+        
+        # Only try to save deleted_by if the column actually exists in the database
+        if hasattr(prop, 'deleted_by'):
+            prop.deleted_by = deleter_name 
+            
+        prop.save()
+        
+        return JsonResponse({'status': 'success', 'message': 'Moved to Recycle Bin successfully!'})
+        
+    except RentalResidentialProperty.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Property not found.'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+
+def global_recycle_bin(request):
+    """Unified Recycle Bin displaying deleted items from all 8 property modules."""
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    # Fetch deleted properties for each of the 8 modules
+    rental_deleted = RentalResidentialProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
+    commercial_deleted = CommercialRentalProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
+    pg_deleted = PGColivingProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
+    resale_deleted = ResaleResidentialProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
+    
+    commercial_resale_deleted = CommercialResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
+    plot_sale_deleted = PlotSaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
+    industrial_resale_deleted = IndustrialResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
+    agricultural_resale_deleted = AgriculturalResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
+
+    context = {
+        # 1. Rental Residential
+        'rental_deleted': rental_deleted,
+        'rental_count': rental_deleted.count(),
+        
+        # 2. Commercial Rental
+        'commercial_deleted': commercial_deleted,
+        'commercial_count': commercial_deleted.count(),
+        
+        # 3. PG / Co-living
+        'pg_deleted': pg_deleted,
+        'pg_count': pg_deleted.count(),
+        
+        # 4. Resale Residential
+        'resale_deleted': resale_deleted,
+        'resale_count': resale_deleted.count(),
+        
+        # 5. Commercial Resale
+        'commercial_resale_deleted': commercial_resale_deleted,
+        'commercial_resale_count': commercial_resale_deleted.count(),
+        
+        # 6. Plot Sale
+        'plot_sale_deleted': plot_sale_deleted,
+        'plot_sale_count': plot_sale_deleted.count(),
+        
+        # 7. Industrial Resale
+        'industrial_resale_deleted': industrial_resale_deleted,
+        'industrial_resale_count': industrial_resale_deleted.count(),
+        
+        # 8. Agricultural Resale
+        'agricultural_resale_deleted': agricultural_resale_deleted,
+        'agricultural_resale_count': agricultural_resale_deleted.count(),
+        
+        # Calculate absolute total for the header
+        'total_deleted_all': (
+            rental_deleted.count() + 
+            commercial_deleted.count() + 
+            pg_deleted.count() + 
+            resale_deleted.count() +
+            commercial_resale_deleted.count() +
+            plot_sale_deleted.count() +
+            industrial_resale_deleted.count() +
+            agricultural_resale_deleted.count()
+        )
+    }
+    
+    return render(request, 'admin_user/Reports/Rental/global_recycle_bin.html', context)
+
+def rental_restore(request, id):
+    """Restores a property back to the main list."""
+    if request.method == 'POST':
+        try:
+            prop = RentalResidentialProperty.objects.get(id=id, is_deleted=True)
+            prop.is_deleted = False
+            prop.deleted_at = None
+            prop.save()
+            return JsonResponse({'status': 'success', 'message': 'Property successfully restored!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+def rental_hard_delete(request, id):
+    """Permanently deletes a property from the database."""
+    if request.method == 'POST':
+        try:
+            prop = RentalResidentialProperty.objects.get(id=id, is_deleted=True)
+            prop.delete() # This permanently wipes it from the database!
+            return JsonResponse({'status': 'success', 'message': 'Property permanently deleted.'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
 # ─────────────────────────────────────────────
 #  Helper converters
 # ─────────────────────────────────────────────
@@ -4092,25 +4242,6 @@ def rental_residential_edit(request, pk):
 
 
 
-@require_POST # Security practice: only allow POST requests to delete data
-def rental_residential_delete(request, pk):
-    try:
-        # Find the property
-        prop = get_object_or_404(RentalResidentialProperty, pk=pk)
-        
-        # Delete it (this automatically deletes related images due to CASCADE)
-        prop.delete()
-        
-        return JsonResponse({
-            'status': 'success',
-            'message': 'Property deleted successfully!'
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        }, status=400)
 
 
 ##################################RESIDENTIAL RENTAL LISTING VEIW SECTION END##############################
@@ -4456,22 +4587,32 @@ def commercial_edit(request, pk):
 # DELETE
 @require_POST
 def commercial_delete(request, pk):
+    # Auth check
     sid, _ = _get_admin(request)
     if not sid:
         return JsonResponse({'status': 'error'}, status=401)
 
+    # Grab the deleter's name using our helper!
+    deleter_name = _get_deleter_name(request)
+
     prop = get_object_or_404(CommercialRentalProperty, pk=pk)
-    prop.delete()
+    prop.is_deleted = True
+    prop.deleted_at = timezone.now()
+    prop.deleted_by = deleter_name # 👈 SAVE THE NAME HERE
+    prop.save()
 
-    return JsonResponse({'status': 'success'})
-
-
-
-
-
+    return JsonResponse({'status': 'success', 'message': 'Moved to Recycle Bin successfully!'})
 
 
+@require_POST
+def commercial_restore(request, id):
+    CommercialRentalProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
+    return JsonResponse({'status': 'success', 'message': 'Commercial property restored!'})
 
+@require_POST
+def commercial_hard_delete(request, id):
+    CommercialRentalProperty.objects.filter(id=id).delete()
+    return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
 
 
 
@@ -5502,24 +5643,36 @@ def pg_edit(request, pk):
 
 
 
-
 @require_POST
 def pg_coliving_delete(request, pk):
-    # Check if admin/user is logged in (using your standard auth logic)
     sid, _ = _get_admin(request)
     if not sid:
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 
     try:
-        # Find the PG and delete it
+        deleter_name = _get_deleter_name(request)
+
         pg = get_object_or_404(PGColivingProperty, pk=pk)
-        pg.delete()
+        pg.is_deleted = True
+        pg.deleted_at = timezone.now()
+        pg.deleted_by = deleter_name # 👈 SAVE THE NAME HERE
+        pg.save()
         
-        return JsonResponse({'status': 'success'})
-        
+        return JsonResponse({'status': 'success', 'message': 'Moved to Recycle Bin successfully!'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 
+@require_POST
+def pg_restore(request, id):
+    PGColivingProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
+    return JsonResponse({'status': 'success', 'message': 'PG property restored!'})
+
+
+
+@require_POST
+def pg_hard_delete(request, id):
+    PGColivingProperty.objects.filter(id=id).delete()
+    return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
 
 
 
@@ -5767,28 +5920,122 @@ def plot_sale_edit(request, id):
 
 
 
-# 1. UPDATED LIST VIEW
+# ── 1. MAIN LIST VIEW ──
 def plot_resale_list(request):
     session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-        
-        # Fetch properties newest first
-        properties = PlotSaleProperty.objects.all().order_by('-created_at')
-        
-        # Calculate stats (optional but good for your top cards)
-        total_properties = properties.count()
-        active_listings = properties.filter(plot_price__gt=0).count()
-        
-        context = {
-            'admin_obj': admin_obj,
-            'properties': properties,
-            'total_properties': total_properties,
-            'active_listings': active_listings
-        }
-        return render(request, 'admin_user/Reports/Resale/plot_list.html', context)
-    else:
+    if not session_id:
         return render(request, 'home_page/Adminlogin.html')
+        
+    admin_obj = Admin_Login.objects.get(id=session_id)
+    
+    # 👈 1. Filter out deleted properties!
+    base_qs = PlotSaleProperty.objects.filter(is_deleted=False)
+    
+    # Fetch properties newest first
+    properties = PlotSaleProperty.objects.filter(is_deleted=False).order_by('-created_at')
+    
+    # Calculate stats
+    total_properties = base_qs.count()
+    active_listings = base_qs.filter(plot_price__gt=0).count()
+    
+    # 👈 2. Fetch unique uploaded file names for the Bulk Delete modal
+    try:
+        uploaded_files = base_qs.exclude(
+            upload_file_name__isnull=True
+        ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
+    except Exception:
+        uploaded_files = []
+    
+    context = {
+        'admin_obj': admin_obj,
+        'properties': properties,
+        'total_properties': total_properties,
+        'active_listings': active_listings,
+        'uploaded_files': uploaded_files # 👈 Passed to template here
+    }
+    return render(request, 'admin_user/Reports/Resale/plot_list.html', context)
+
+
+# ── 2. BULK DELETE VIEW (Soft Delete) ──
+@require_POST
+def plot_sale_bulk_delete(request):
+    """Handles Advanced Bulk Deletions for Plot/Land Properties."""
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+    
+    if not admin_id and not user_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
+
+    try:
+        data = json.loads(request.body)
+        delete_type = data.get('delete_type')
+        deleter_name = _get_deleter_name(request) # Using the helper we made earlier
+        
+        properties = PlotSaleProperty.objects.filter(is_deleted=False)
+        
+        if delete_type == 'delete_all':
+            count = properties.count()
+            properties.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved ALL {count} plots to Recycle Bin.'})
+            
+        elif delete_type == 'current_page':
+            page_ids = data.get('page_ids', [])
+            target_props = properties.filter(id__in=page_ids)
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} plots from current page to Recycle Bin.'})
+            
+        elif delete_type == 'date_range':
+            from_date = data.get('from_date')
+            to_date = data.get('to_date')
+            target_props = properties.filter(created_at__date__range=[from_date, to_date])
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} plots in date range to Recycle Bin.'})
+            
+        elif delete_type == 'latest_month':
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            target_props = properties.filter(created_at__gte=thirty_days_ago)
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} plots from the last 30 days to Recycle Bin.'})
+            
+        elif delete_type == 'old_data':
+            six_months_ago = timezone.now() - timedelta(days=180)
+            target_props = properties.filter(created_at__lt=six_months_ago)
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} older plots to Recycle Bin.'})
+            
+        elif delete_type == 'by_uploader':
+            uploader = data.get('uploader_text', '')
+            target_props = properties.filter(
+                Q(uploaded_by_name__icontains=uploader) | 
+                Q(uploaded_by_email__icontains=uploader) |
+                Q(uploaded_by_role__icontains=uploader)
+            )
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} plots uploaded by {uploader} to Recycle Bin.'})
+
+        elif delete_type == 'by_file':
+            file_name = data.get('file_name', '')
+            target_props = properties.filter(upload_file_name=file_name) 
+            count = target_props.count()
+            if count == 0:
+                return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} plots from {file_name} to Recycle Bin.'})
+            
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+
+
 
 # 2. GENERATE SAMPLE EXCEL TEMPLATE
 def download_plot_resale_template(request):
@@ -5924,20 +6171,33 @@ def plot_sale_view(request, id):
     return render(request, 'admin_user/Reports/Resale/plot_view.html', context)
 
 
-# ==========================================
-# 2. DELETE FUNCTION (AJAX)
-# ==========================================
+
+
+
+@require_POST
 def plot_sale_delete(request, id):
-    # Ensure it's a POST request for security
-    if request.method == "POST":
-        try:
-            prop = get_object_or_404(PlotSaleProperty, id=id)
-            prop.delete() # This will automatically delete related images due to on_delete=models.CASCADE
-            return JsonResponse({"status": "success", "message": "Property deleted successfully."})
-        except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
-            
-    return JsonResponse({"status": "error", "message": "Invalid Request Method."})
+    try:
+        deleter_name = _get_deleter_name(request)
+        
+        prop = get_object_or_404(PlotSaleProperty, id=id)
+        prop.is_deleted = True
+        prop.deleted_at = timezone.now()
+        prop.deleted_by = deleter_name # 👈 SAVE THE NAME HERE
+        prop.save() 
+        return JsonResponse({"status": "success", "message": "Moved to Recycle Bin successfully!"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
+
+
+@require_POST
+def plot_sale_restore(request, id):
+    PlotSaleProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
+    return JsonResponse({'status': 'success', 'message': 'Plot restored!'})
+
+@require_POST
+def plot_sale_hard_delete(request, id):
+    PlotSaleProperty.objects.filter(id=id).delete()
+    return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
 
     #####################END VIEW SECTION PLOT RESALE LISTING################
 
@@ -6165,8 +6425,7 @@ def industrial_resale_list(request):
         admin_obj = Admin_Login.objects.get(id=session_id)
         
         # Fetch all properties in descending order (newest first)
-        properties = IndustrialResaleProperty.objects.all().order_by('-created_at')
-        
+        properties = IndustrialResaleProperty.objects.filter(is_deleted=False).order_by('-created_at')
         context = {
             'admin_obj': admin_obj,
             'properties': properties
@@ -6195,35 +6454,122 @@ def industrial_resale_view(request, id):
     return render(request, 'admin_user/Resale/industrial_view.html', context)
 
 
+@require_POST
+def industrial_resale_hard_delete(request, id):
+    IndustrialResaleProperty.objects.filter(id=id).delete()
+    return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
 
-# ==========================================
+@require_POST
+def industrial_resale_restore(request, id):
+    IndustrialResaleProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
+    return JsonResponse({'status': 'success', 'message': 'Industrial property restored!'})
+
+# ── 1. SINGLE DELETE VIEW (Soft Delete) ──
+@require_POST
 def industrial_resale_delete(request, id):
-    # Security check: Ensure it's a POST request triggered by our frontend JS
-    if request.method == "POST":
-        try:
-            # Fetch the property
-            prop = get_object_or_404(IndustrialResaleProperty, id=id)
-            
-            # Delete it (Cascades to related images)
-            prop.delete() 
-            
-            return JsonResponse({
-                "status": "success", 
-                "message": "Industrial Property deleted successfully."
-            })
-            
-        except Exception as e:
-            return JsonResponse({
-                "status": "error", 
-                "message": f"Failed to delete: {str(e)}"
-            })
-            
-    # Fallback for non-POST requests
-    return JsonResponse({
-        "status": "error", 
-        "message": "Invalid Request Method. Must use POST."
-    })
+    try:
+        # Get the name of the user/admin deleting the property
+        deleter_name = _get_deleter_name(request)
+        
+        # Fetch the property
+        prop = get_object_or_404(IndustrialResaleProperty, id=id)
+        
+        # Soft Delete
+        prop.is_deleted = True
+        prop.deleted_at = timezone.now()
+        prop.deleted_by = deleter_name
+        prop.save() 
+        
+        return JsonResponse({
+            "status": "success", 
+            "message": "Moved to Recycle Bin successfully."
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            "status": "error", 
+            "message": f"Failed to delete: {str(e)}"
+        })
 
+
+# ── 2. BULK DELETE VIEW (Soft Delete) ──
+@require_POST
+def industrial_bulk_delete(request):
+    """Handles Advanced Bulk Deletions for Industrial Properties."""
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+    
+    if not admin_id and not user_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
+
+    try:
+        data = json.loads(request.body)
+        delete_type = data.get('delete_type')
+        deleter_name = _get_deleter_name(request)
+        
+        # Target only properties not currently in the Recycle Bin
+        properties = IndustrialResaleProperty.objects.filter(is_deleted=False)
+        
+        if delete_type == 'delete_all':
+            count = properties.count()
+            properties.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved ALL {count} properties to Recycle Bin.'})
+            
+        elif delete_type == 'current_page':
+            page_ids = data.get('page_ids', [])
+            target_props = properties.filter(id__in=page_ids)
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from current page to Recycle Bin.'})
+            
+        elif delete_type == 'date_range':
+            from_date = data.get('from_date')
+            to_date = data.get('to_date')
+            target_props = properties.filter(created_at__date__range=[from_date, to_date])
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties in date range to Recycle Bin.'})
+            
+        elif delete_type == 'latest_month':
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            target_props = properties.filter(created_at__gte=thirty_days_ago)
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from the last 30 days to Recycle Bin.'})
+            
+        elif delete_type == 'old_data':
+            six_months_ago = timezone.now() - timedelta(days=180)
+            target_props = properties.filter(created_at__lt=six_months_ago)
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} older properties to Recycle Bin.'})
+            
+        elif delete_type == 'by_uploader':
+            uploader = data.get('uploader_text', '')
+            target_props = properties.filter(
+                Q(uploaded_by_name__icontains=uploader) | 
+                Q(uploaded_by_email__icontains=uploader) |
+                Q(uploaded_by_role__icontains=uploader)
+            )
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties uploaded by {uploader} to Recycle Bin.'})
+
+        elif delete_type == 'by_file':
+            file_name = data.get('file_name', '')
+            # Replace 'upload_file_name' with your exact DB field name
+            target_props = properties.filter(upload_file_name=file_name) 
+            count = target_props.count()
+            if count == 0:
+                return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from {file_name} to Recycle Bin.'})
+            
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 
 def download_industrial_resale_template(request):
@@ -6295,6 +6641,8 @@ def download_industrial_resale_template(request):
     wb.save(response)
     return response
 
+
+
 def import_industrial_resale_excel(request):
     session_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
@@ -6319,6 +6667,8 @@ def import_industrial_resale_excel(request):
                 uploader_role = uploader.role
 
             excel_file = request.FILES['excel_file']
+            file_name = excel_file.name # 👈 1. GRAB THE FILE NAME HERE
+
             wb = openpyxl.load_workbook(excel_file, data_only=True)
             sheet = wb.active
 
@@ -6399,11 +6749,14 @@ def import_industrial_resale_excel(request):
                     owner_email=row[30],
                     residency_status=row[31],
 
-                    # ✅ Uploader fields (CORRECT)
+                    # ✅ Uploader fields 
                     uploaded_by_name=uploader_name,
                     uploaded_by_email=uploader_email,
                     uploaded_by_contact=uploader_contact,
-                    uploaded_by_role=uploader_role
+                    uploaded_by_role=uploader_role,
+                    
+                    # 👈 2. SAVE THE EXCEL FILE NAME IN THE DATABASE
+                    upload_file_name=file_name
                 )
 
                 added_count += 1
@@ -6797,23 +7150,37 @@ def resale_residential_view(request, pk):
 # ─────────────────────────────────────────────────────────
 # DELETE
 # ─────────────────────────────────────────────────────────
-def resale_residential_delete(request, pk):
 
+@require_POST
+def resale_residential_delete(request, pk):
     uploader = _get_uploader(request)
     if uploader is None:
         return redirect('login')
+        
+    deleter_name = _get_deleter_name(request)
 
     prop = get_object_or_404(ResaleResidentialProperty, pk=pk)
-    prop.delete()  # CASCADE automatically deletes all ResalePropertyImage rows too
+    prop.is_deleted = True
+    prop.deleted_at = timezone.now()
+    prop.deleted_by = deleter_name # 👈 SAVE THE NAME HERE
+    prop.save()
 
-    return JsonResponse({
-        "status" : "success",
-        "message": "Property deleted successfully"
-    })
+    return JsonResponse({"status" : "success", "message": "Moved to Recycle Bin successfully!"})
    
+
    
+@require_POST
+def resale_restore(request, id):
+    ResaleResidentialProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
+    return JsonResponse({'status': 'success', 'message': 'Resale property restored!'})
+
+@require_POST
+def resale_hard_delete(request, id):
+    ResaleResidentialProperty.objects.filter(id=id).delete()
+    return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
    
-   
+
+
 def resale_residential_import_excel(request):
 
     session_id = request.session.get('Admin_id')
@@ -7107,7 +7474,7 @@ def commercial_resale_list(request):
             return render(request, 'home_page/Adminlogin.html')
 
     # ── Queryset ───────────────────────────────────────────
-    props = CommercialResaleProperty.objects.all().order_by('-id')
+    props = CommercialResaleProperty.objects.filter(is_deleted=False).order_by('-id')
 
     # ── Stat cards ─────────────────────────────────────────
     total_properties = props.count()
@@ -7598,21 +7965,113 @@ def toggle_commercial_property(request):
 
 
 # ── DELETE ───────────────────────────────────────────────────
+
 @csrf_exempt
 def delete_commercial_property(request):
     if request.method == 'POST':
         prop_id = request.POST.get('prop_id')
         try:
+            deleter_name = _get_deleter_name(request)
+            
             prop = CommercialResaleProperty.objects.get(id=prop_id)
-            prop.delete()
-            return JsonResponse({'status': '1', 'msg': 'Property deleted successfully.'})
+            prop.is_deleted = True
+            prop.deleted_at = timezone.now()
+            prop.deleted_by = deleter_name # 👈 SAVE THE NAME HERE
+            prop.save()
+            
+            return JsonResponse({'status': 'success', '1': '1', 'msg': 'Moved to Recycle Bin successfully.'})
         except CommercialResaleProperty.DoesNotExist:
-            return JsonResponse({'status': '0', 'msg': 'Property not found.'})
-    return JsonResponse({'status': '0', 'msg': 'Invalid request.'})
+            return JsonResponse({'status': 'error', '0': '0', 'msg': 'Property not found.'})
+    return JsonResponse({'status': 'error', 'msg': 'Invalid request.'})
 
 
 
+@require_POST
+def commercial_resale_bulk_delete(request):
+    """Handles Advanced Bulk Deletions for Commercial Resale Properties."""
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+    
+    if not admin_id and not user_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
 
+    try:
+        data = json.loads(request.body)
+        delete_type = data.get('delete_type')
+        deleter_name = _get_deleter_name(request)
+        
+        # Target only properties not currently in the Recycle Bin
+        properties = CommercialResaleProperty.objects.filter(is_deleted=False)
+        
+        if delete_type == 'delete_all':
+            count = properties.count()
+            properties.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved ALL {count} properties to Recycle Bin.'})
+            
+        elif delete_type == 'current_page':
+            page_ids = data.get('page_ids', [])
+            target_props = properties.filter(id__in=page_ids)
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from current page to Recycle Bin.'})
+            
+        elif delete_type == 'date_range':
+            from_date = data.get('from_date')
+            to_date = data.get('to_date')
+            target_props = properties.filter(created_at__date__range=[from_date, to_date])
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties in date range to Recycle Bin.'})
+            
+        elif delete_type == 'latest_month':
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            target_props = properties.filter(created_at__gte=thirty_days_ago)
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from the last 30 days to Recycle Bin.'})
+            
+        elif delete_type == 'old_data':
+            six_months_ago = timezone.now() - timedelta(days=180)
+            target_props = properties.filter(created_at__lt=six_months_ago)
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} older properties to Recycle Bin.'})
+            
+        elif delete_type == 'by_uploader':
+            uploader = data.get('uploader_text', '')
+            target_props = properties.filter(
+                Q(uploaded_by_name__icontains=uploader) | 
+                Q(uploaded_by_email__icontains=uploader) |
+                Q(uploaded_by_role__icontains=uploader)
+            )
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties uploaded by {uploader} to Recycle Bin.'})
+
+        elif delete_type == 'by_file':
+            file_name = data.get('file_name', '')
+            target_props = properties.filter(upload_file_name=file_name) 
+            count = target_props.count()
+            if count == 0:
+                return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from {file_name} to Recycle Bin.'})
+            
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+@require_POST
+def commercial_resale_hard_delete(request, id):
+    CommercialResaleProperty.objects.filter(id=id).delete()
+    return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
+
+@require_POST
+def commercial_resale_restore(request, id):
+    CommercialResaleProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
+    return JsonResponse({'status': 'success', 'message': 'Commercial Resale restored!'})
 
 # --- 1. COMMERCIAL VIEW PAGE ---
 def commercial_resale_view(request, id):
@@ -7846,6 +8305,8 @@ def add_agricultural_property(request):
 
 
 
+
+
 def agricultural_resale_list(request):
     session_id = request.session.get('Admin_id')
     if not session_id:
@@ -7858,6 +8319,7 @@ def agricultural_resale_list(request):
     # ============================
     if request.method == 'POST' and 'excel_file' in request.FILES:
         excel_file = request.FILES['excel_file']
+        file_name = excel_file.name  # 👈 1. Grab the file name here
 
         try:
             df = pd.read_excel(excel_file)
@@ -7880,33 +8342,28 @@ def agricultural_resale_list(request):
 
             for index, row in df.iterrows():
 
-                # ============================
-                # DUPLICATE CHECK (FIXED)
-                # ============================
+                # DUPLICATE CHECK
                 exists = AgriculturalResaleProperty.objects.filter(
                     village=get_string(row.get('village')),
                     city=get_string(row.get('city')),
                     owner_contact=get_string(row.get('owner_contact')),
-                    address=get_string(row.get('address'))   # FIXED
+                    address=get_string(row.get('address'))
                 ).exists()
 
                 if exists:
                     skipped_count += 1
                     continue
 
-                # ============================
                 # CREATE OBJECT
-                # ============================
                 AgriculturalResaleProperty.objects.create(
-
                     # STEP 1
                     title=get_string(row.get('title'), 'Agricultural Land Listing'),
                     agriculture_property_type=get_string(row.get('agriculture_property_type'), 'agriculture_land'),
 
-                    land_area = (
-                    get_decimal(row.get('land_area'))
-                    or get_decimal(row.get('area'))
-                    or 0
+                    land_area=(
+                        get_decimal(row.get('land_area'))
+                        or get_decimal(row.get('area'))
+                        or 0
                     ),
 
                     state=get_string(row.get('state')),
@@ -7914,10 +8371,10 @@ def agricultural_resale_list(request):
                     district=get_string(row.get('district')),
                     taluka=get_string(row.get('taluka')),
                     village=get_string(row.get('village')),
-                    address = (
-    get_string(row.get('address'))
-    or get_string(row.get('property_address'))
-),
+                    address=(
+                        get_string(row.get('address'))
+                        or get_string(row.get('property_address'))
+                    ),
 
                     # STEP 2
                     soil_type=get_string(row.get('soil_type')),
@@ -7957,13 +8414,14 @@ def agricultural_resale_list(request):
                     uploaded_by_email=get_string(row.get('uploaded_by_email')) or admin_obj.email,
                     uploaded_by_contact=get_string(row.get('uploaded_by_contact')) or admin_obj.phone,
                     uploaded_by_role=get_string(row.get('uploaded_by_role')) or admin_obj.role,
+                    
+                    # 👈 2. Save the filename so the Bulk Delete Dropdown works!
+                    upload_file_name=file_name 
                 )
 
                 added_count += 1
 
-            # ============================
             # MESSAGES
-            # ============================
             if added_count > 0 and skipped_count == 0:
                 messages.success(request, f"{added_count} records imported successfully!")
             elif added_count > 0 and skipped_count > 0:
@@ -7981,7 +8439,11 @@ def agricultural_resale_list(request):
     # ============================
     # LIST + SEARCH + PAGINATION
     # ============================
-    properties = AgriculturalResaleProperty.objects.all().order_by('-created_at')
+    
+    # 👈 3. Filter out deleted items from the main query
+    base_qs = AgriculturalResaleProperty.objects.filter(is_deleted=False)
+    
+    properties = base_qs.order_by('-created_at')
     search_query = request.GET.get('search', '')
 
     if search_query:
@@ -7996,19 +8458,30 @@ def agricultural_resale_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    total_properties = AgriculturalResaleProperty.objects.count()
-    agri_land_count = AgriculturalResaleProperty.objects.filter(agriculture_property_type='agriculture_land').count()
-    farm_land_count = AgriculturalResaleProperty.objects.filter(agriculture_property_type='farm_land').count()
-    orchard_land_count = AgriculturalResaleProperty.objects.filter(agriculture_property_type='orchard_land').count()
+    # 👈 4. Ensure stats only calculate active (non-deleted) items
+    total_properties = base_qs.count()
+    agri_land_count = base_qs.filter(agriculture_property_type='agriculture_land').count()
+    farm_land_count = base_qs.filter(agriculture_property_type='farm_land').count()
+    orchard_land_count = base_qs.filter(agriculture_property_type='orchard_land').count()
 
-    total_value = AgriculturalResaleProperty.objects.aggregate(
+    total_value = base_qs.aggregate(
         Sum('expected_price')
     )['expected_price__sum'] or 0
+
+    # 👈 5. Fetch unique uploaded file names for the Bulk Delete modal
+    try:
+        # Check if upload_file_name exists on this model. If not, this returns empty list safely.
+        uploaded_files = base_qs.exclude(
+            upload_file_name__isnull=True
+        ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
+    except Exception:
+        uploaded_files = []
 
     context = {
         'admin_obj': admin_obj,
         'page_obj': page_obj,
         'search_query': search_query,
+        'uploaded_files': uploaded_files, # 👈 Passed to template here
         'stats': {
             'total': total_properties,
             'agri_land': agri_land_count,
@@ -8019,8 +8492,6 @@ def agricultural_resale_list(request):
     }
 
     return render(request, 'admin_user/Reports/Resale/agricultural_list.html', context)
-
-
 
 
 
@@ -8221,20 +8692,120 @@ def download_agri_sample_excel(request):
     response['Content-Disposition'] = 'attachment; filename="Agricultural_Template.xlsx"'
     return response
 
+
+@require_POST
+def agricultural_resale_restore(request, id):
+    AgriculturalResaleProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
+    return JsonResponse({'status': 'success', 'message': 'Agricultural property restored!'})
+
+@require_POST
+def agricultural_resale_hard_delete(request, id):
+    AgriculturalResaleProperty.objects.filter(id=id).delete()
+    return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
+
+
+# ── 1. SINGLE DELETE VIEW (Soft Delete) ──
+@require_POST
 def delete_agricultural_property(request, pk):
-    if request.method == 'POST':
-        try:
-            property_obj = get_object_or_404(AgriculturalResaleProperty, pk=pk)
-            property_obj.delete()
+    try:
+        # Get the name of the user/admin deleting the property
+        deleter_name = _get_deleter_name(request)
+        
+        property_obj = get_object_or_404(AgriculturalResaleProperty, pk=pk)
+        
+        # Soft Delete
+        property_obj.is_deleted = True
+        property_obj.deleted_at = timezone.now()
+        property_obj.deleted_by = deleter_name
+        property_obj.save()
+        
+        return JsonResponse({
+            'status': 'success', 
+            'message': 'Moved to Recycle Bin successfully.'
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+
+# ── 2. BULK DELETE VIEW (Soft Delete) ──
+@require_POST
+def agricultural_bulk_delete(request):
+    """Handles Advanced Bulk Deletions for Agricultural Properties."""
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+    
+    if not admin_id and not user_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
+
+    try:
+        data = json.loads(request.body)
+        delete_type = data.get('delete_type')
+        deleter_name = _get_deleter_name(request)
+        
+        # Target only properties not currently in the Recycle Bin
+        properties = AgriculturalResaleProperty.objects.filter(is_deleted=False)
+        
+        if delete_type == 'delete_all':
+            count = properties.count()
+            properties.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved ALL {count} properties to Recycle Bin.'})
             
-            return JsonResponse({
-                'status': 'success', 
-                'message': 'Property has been permanently deleted.'
-            })
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
+        elif delete_type == 'current_page':
+            page_ids = data.get('page_ids', [])
+            target_props = properties.filter(id__in=page_ids)
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from current page to Recycle Bin.'})
             
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+        elif delete_type == 'date_range':
+            from_date = data.get('from_date')
+            to_date = data.get('to_date')
+            # Assuming you want to filter by the created date
+            target_props = properties.filter(created_at__date__range=[from_date, to_date])
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties in date range to Recycle Bin.'})
+            
+        elif delete_type == 'latest_month':
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+            target_props = properties.filter(created_at__gte=thirty_days_ago)
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from the last 30 days to Recycle Bin.'})
+            
+        elif delete_type == 'old_data':
+            six_months_ago = timezone.now() - timedelta(days=180)
+            target_props = properties.filter(created_at__lt=six_months_ago)
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} older properties to Recycle Bin.'})
+            
+        elif delete_type == 'by_uploader':
+            uploader = data.get('uploader_text', '')
+            target_props = properties.filter(
+                Q(uploaded_by_name__icontains=uploader) | 
+                Q(uploaded_by_email__icontains=uploader) |
+                Q(uploaded_by_role__icontains=uploader)
+            )
+            count = target_props.count()
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties uploaded by {uploader} to Recycle Bin.'})
+
+        elif delete_type == 'by_file':
+            file_name = data.get('file_name', '')
+            # Replace 'upload_file_name' with your exact DB field name
+            target_props = properties.filter(upload_file_name=file_name) 
+            count = target_props.count()
+            if count == 0:
+                return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
+            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
+            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from {file_name} to Recycle Bin.'})
+            
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 
 

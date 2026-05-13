@@ -591,60 +591,37 @@ footer { background: #0f172a; padding: 60px 20px 30px; margin-top: 0; border-top
             <button class="tab-99a" onclick="switchTab('resale', this)">Buy / Resale</button>
         </div>
 
-        <form class="search-box-99a" id="searchForm" onsubmit="doSearch(event)">
-            
-            <div class="sb-field-99a sb-custom-dropdown" id="city-trigger">
-                <i class="bi bi-geo-alt"></i>
-                <div class="sb-field-text" id="city-display">Nagpur</div>
-                <i class="bi bi-chevron-down"></i>
-                <div class="custom-popover">
-                    <div class="popover-title">Select City</div>
-                    <div id="city-radios">
-                        <label class="check-item"><input type="radio" name="city_select" value="Nagpur" checked> <span>Nagpur</span></label>
-                        <label class="check-item"><input type="radio" name="city_select" value="Pune"> <span>Pune</span></label>
-                        <label class="check-item"><input type="radio" name="city_select" value="Mumbai"> <span>Mumbai</span></label>
-                    </div>
-                </div>
-            </div>
+       <form class="search-box-99a" id="searchForm" onsubmit="doSearch(event)">
+    
+    <div class="sb-field-99a sb-locality" style="flex: 0 0 25%; border-right: 1px solid #e2e8f0;">
+        <i class="bi bi-geo-alt"></i>
+        <input type="text" id="sb-city-input" placeholder="Enter City (Nagpur, Pune...)" value="Nagpur">
+    </div>
 
-            <div class="sb-field-99a sb-locality">
-                <div class="loc-scroll-wrapper" id="loc-scroll-wrapper">
-                    <div id="locality-tags" class="loc-tags-container"></div>
-                    <input type="text" id="sb-location-input" placeholder="Type locality or '3 BHK'...">
-                </div>
-                <button id="voiceSearchBtn" type="button" onclick="startVoiceSearch();" class="voice-btn-inline">
-                    <i class="bi bi-mic"></i>
-                </button>
-            </div>
+    <div class="sb-field-99a sb-locality" style="flex: 1;">
+        <div class="loc-scroll-wrapper" id="loc-scroll-wrapper">
+            <div id="locality-tags" class="loc-tags-container"></div>
+            <input type="text" id="sb-location-input" placeholder="Locality, Area or '3 BHK'...">
+        </div>
+        <button id="voiceSearchBtn" type="button" onclick="startVoiceSearch();" class="voice-btn-inline">
+            <i class="bi bi-mic"></i>
+        </button>
+    </div>
 
-            <div class="sb-field-99a sb-custom-dropdown" id="type-trigger">
-                <div class="sb-field-text" id="type-display">Property Type</div>
-                <i class="bi bi-chevron-down"></i>
-                <div class="custom-popover">
-                    <div class="popover-title">Categories</div>
-                    <div id="type-checkboxes">
-                        </div>
+    <div class="sb-field-99a sb-custom-dropdown" id="type-trigger" style="width: 200px;">
+        <div class="sb-field-text" id="type-display">Property Type</div>
+        <i class="bi bi-chevron-down"></i>
+        <div class="custom-popover">
+            <div class="popover-title">Categories</div>
+            <div id="type-checkboxes">
                 </div>
-            </div>
+        </div>
+    </div>
 
-            <div class="sb-field-99a sb-custom-dropdown" id="budget-trigger">
-                <div class="sb-field-text" id="budget-display">Budget</div>
-                <i class="bi bi-chevron-down"></i>
-                <div class="custom-popover">
-                    <div class="popover-title">Max Budget</div>
-                    <div id="budget-radios">
-                        <label class="check-item"><input type="radio" name="budget_range" value="Any Budget" checked> <span>Any Budget</span></label>
-                        <label class="check-item"><input type="radio" name="budget_range" value="Under ₹30L"> <span>Under ₹30L</span></label>
-                        <label class="check-item"><input type="radio" name="budget_range" value="₹30L–60L"> <span>₹30L–60L</span></label>
-                        <label class="check-item"><input type="radio" name="budget_range" value="₹1Cr+"> <span>₹1Cr+</span></label>
-                    </div>
-                </div>
-            </div>
-
-            <button type="submit" class="sb-btn-99a">
-                <i class="bi bi-search"></i> Search
-            </button>
-        </form>
+    <button type="submit" class="sb-btn-99a">
+        <i class="bi bi-search"></i> Search
+    </button>
+</form>
     </div>
 
     <div class="hero-stats">
@@ -1391,29 +1368,39 @@ function renderTags() {
 // ═══════════════════════════════════════════════════════════════════════════
 // 5. MASTER SEARCH ENGINE (Final Bridge)
 // ═══════════════════════════════════════════════════════════════════════════
+// Replace your doSearch function
 function doSearch(e) {
     if (e) e.preventDefault();
     
-    const intent = document.querySelector('.tab-99a.active-tab').innerText;
-    const city = document.querySelector('input[name="city_select"]:checked')?.value || "Nagpur";
-    const typedLocation = document.getElementById('sb-location-input').value;
+    const activeTab = document.querySelector('.tab-99a.active-tab');
+    const intent = activeTab.innerText.trim(); // "Rent" or "Buy / Resale"
     
-    // STRICT FILTERING: Get checked categories (Residential Data, Plot Resale, etc.)
-    const selectedTypes = Array.from(document.querySelectorAll('.ptype-cb:checked'))
-                               .map(cb => cb.value).join(',');
+    const city = document.getElementById('sb-city-input').value.trim();
+    const typedLocation = document.getElementById('sb-location-input').value.trim();
+    
+    // Get Checked Types
+    const checkedBoxes = Array.from(document.querySelectorAll('.ptype-cb:checked'));
+    const selectedTypes = checkedBoxes.map(cb => cb.value).join(',');
 
-    // 🏗️ Build AI Sentence
-    let aiQuery = `I am looking to ${intent} ${selectedTypes || 'any'} property`;
-    let locs = [...selectedLocalities];
-    if (typedLocation) locs.push(typedLocation);
-    if (locs.length > 0) aiQuery += ` in ${locs.join(', ')}`;
-    aiQuery += ` in ${city}`;
+    // If NO checkboxes are selected, we must force the search to stay in the correct Tab
+    // This prevents Rent and Resale from mixing
+    let forceCategories = selectedTypes;
+    if (!selectedTypes) {
+        if (intent === "Rent") {
+            forceCategories = "Residential Data,Commercial Data,PG Data";
+        } else {
+            forceCategories = "Resale Residential,Commercial Resale,Plot Resale,Agricultural Data,Industrial Resale";
+        }
+    }
 
-    // Redirect to Python View
+    let aiQuery = `I am looking for ${intent} property in ${city}`;
+    if (typedLocation) aiQuery += ` specifically in ${typedLocation}`;
+    if (selectedTypes) aiQuery += ` of type ${selectedTypes}`;
+
     const params = new URLSearchParams();
     params.set('ai_query', aiQuery);
-    params.set('types', selectedTypes); // Tell Python exactly which categories to show
-    params.set('city_filter', city);    // Tell Python exactly which city to show
+    params.set('types', forceCategories); // Pass strict categories to Python
+    params.set('city_filter', city);
 
     window.location.href = '/listingpage/?' + params.toString();
 }
