@@ -393,12 +393,12 @@ def get_todays_notifications(request):
 
     # 🟢 1. Create the Map linking Roles to their specific URLs
     role_url_map = {
-        'RM': 'Update_RM',             
+        'Relationship Manager': 'Update_RM',             
         'Landlord': 'Update_Landlord', 
         'Tenant': 'Update_Tenant',     
         'Buyer': 'Update_Buyer',
         'Agent': 'Update_Agent',
-        'Agency': 'Update_Agency',
+        'Agency/Builder': 'Update_Agency',
         'Vendor': 'Update_Vendor',
     }
 
@@ -414,7 +414,7 @@ def get_todays_notifications(request):
         user_url = '#' # Default fallback
 
         if url_name:
-            try:
+            try:    
                 user_url = reverse(url_name, args=[user.id])
             except NoReverseMatch:
                 pass # If URL isn't built yet, it stays '#' safely
@@ -426,6 +426,24 @@ def get_todays_notifications(request):
             'timestamp': user.user_register_date, 
             'time': user.user_register_time, 
             'url': user_url #  Plugs in the dynamic URL!
+        })
+
+
+    # ==========================================
+    # 3. FETCH NEW CONTACTS ENQUIRIES 
+    # ==========================================
+    recent_contacts = Contact_Enquiry.objects.filter(contact_enquiry_date=today).order_by('-contact_enquiry_date')[:10]
+    for con in recent_contacts:
+
+        contact_url = reverse("View_Contact_Enquiry", args=[con.id])
+        
+        master_feed.append({
+            'category': 'contact', 
+            'title': "New Contact Enquiry",
+            'desc': f"{con.contact_name} and number {con.contact_phone}",
+            'timestamp': con.contact_enquiry_date,
+            'time': con.contact_enquiry_time,
+            'url': contact_url 
         })
 
 
@@ -510,6 +528,45 @@ def pg_coliving(request):
         return render(request,"admin_user/pg_coliving.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
+
+
+############### Views start for contact enquiries list #####################
+
+def Contact_Enquiries_List(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        contacts_en_obj = Contact_Enquiry.objects.all().order_by('-id')
+        contacts_en_obj_count = Contact_Enquiry.objects.all().count()
+
+        rendered = render_to_string("admin_user/render_to_string/R_Contact/r_t_s_enquiry.html",{'contacts_en_obj':contacts_en_obj,'contacts_en_obj_count':contacts_en_obj_count})
+
+        context = {'admin_obj':admin_obj,'contact_enquiries_list':rendered}
+
+        return render(request,"admin_user/Contact_Enquiry/contact_enquiry.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############ Views end for contact enquiries list ###########################
+
+
+############ Views start for view contact enquiries ####################
+
+def  View_Contact_Enquiry(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        contact = Contact_Enquiry.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'contact':contact}
+
+        return render(request,"admin_user/Contact_Enquiry/view_enquiry.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############## Views end for view contact enquiries ######################
    
 
 ############## Views start for ameneties list ##########################

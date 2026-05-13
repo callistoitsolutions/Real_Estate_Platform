@@ -1195,11 +1195,15 @@
             position: relative;
         }
         
+        /* 🟢 The Main Dropdown Box */
         .notification-dropdown {
             position: absolute;
             top: calc(100% + 15px);
             right: -10px;
-            width: 320px;
+            
+            /* 🟢 FIX 1: Increased from 320px to 360px so 5 tabs fit perfectly */
+            width: 360px; 
+            
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
@@ -1207,6 +1211,7 @@
             display: none;
             z-index: 1050;
             cursor: default;
+            overflow: hidden; 
         }
 
         .notification-dropdown.show {
@@ -1261,31 +1266,45 @@
             color: #64748b;
         }
 
-        /* 🟢 Scrolling Tabs 🟢 */
+        /* 🟢 Scrolling Tabs (FIXED OVERFLOW) 🟢 */
         .noti-tabs {
             display: flex;
+            flex-wrap: nowrap;
+            width: 100%;
+            overflow-x: auto;
             border-bottom: 1px solid #e2e8f0;
             background: #f8fafc;
-            padding: 0 10px;
+            padding: 0 5px;
             
-            overflow-x: auto;
-            white-space: nowrap;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE/Edge */
-        }
-        .noti-tabs::-webkit-scrollbar {
-            display: none; /* Hide scrollbar for Chrome, Safari, Opera */
+            /* 🟢 FIX 2: Modern thin scrollbar for Firefox */
+            scrollbar-width: thin; 
+            scrollbar-color: #cbd5e1 transparent;
         }
 
+        .noti-tabs::-webkit-scrollbar {
+            height: 4px; /* Very thin horizontal scrollbar */
+        }
+        .noti-tabs::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .noti-tabs::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        /* 🟢 Individual Tabs */
         .noti-tab {
-            padding: 10px 15px;
+            padding: 10px 14px;
             font-size: 0.8rem;
             font-weight: 600;
             color: #64748b;
             cursor: pointer;
             border-bottom: 2px solid transparent;
             transition: all 0.2s;
-            flex-shrink: 0; /* Prevents squishing */
+            
+            /* 🟢 Prevents text from squishing or wrapping */
+            flex-shrink: 0; 
+            white-space: nowrap; 
         }
 
         .noti-tab.active {
@@ -1293,11 +1312,12 @@
             border-bottom-color: #4f46e5;
         }
 
-        /* Colors for different alert types */
+        /* 🟢 Colors for different alert types (INCLUDING CONTACTS) */
         .noti-icon.bg-user { background: #e0e7ff; color: #4f46e5; }
         .noti-icon.bg-sub { background: #d1fae5; color: #059669; }
         .noti-icon.bg-alert { background: #fee2e2; color: #dc2626; }
         .noti-icon.bg-prop { background: #ffedd5; color: #ea580c; }
+        .noti-icon.bg-contact { background: #f3e8ff; color: #7e22ce; } /* Purple background for contacts */
 
 
         /* 🟢 MOBILE RESPONSIVE FIXES FOR DROPDOWNS 🟢 */
@@ -1497,6 +1517,15 @@
                 </a>
             </li>
 
+            <li class="menu-section-title" style="color:white;">ENQUIRIES DETAILS</li>
+
+            <li class="menu-item">
+                <a href="{% url "Contact_Enquiries_List" %}" class="menu-link" id="Contacts">
+                    <i class="fas fa-envelope menu-icon"></i>
+                    <span class="menu-text" style="color:white;">Contacts</span>
+                </a>
+            </li>
+
             <li class="menu-section-title" style="color:white;">ADD SECTION DETAILS</li>
 
             <li class="menu-item">
@@ -1631,6 +1660,7 @@
                             <div class="noti-tab" data-filter="user">Users</div>
                             <div class="noti-tab" data-filter="sub">Subs</div>
                             <div class="noti-tab" data-filter="property">Properties</div> 
+                            <div class="noti-tab" data-filter="contact">Contacts</div> 
                         </div>
                         
                         <div id="notificationList" style="max-height: 320px; overflow-y: auto;">
@@ -1908,6 +1938,7 @@ function viewDashboardCleanly(event, userId) {
                 let bgClass = 'bg-alert'; 
                 let iconHtml = '<i class="fas fa-bell"></i>'; 
 
+                // 🟢 ADDED: Logic for assigning icons and colors
                 if (item.category === 'user') {
                     bgClass = 'bg-user';
                     iconHtml = '<i class="fas fa-user"></i>';
@@ -1917,6 +1948,9 @@ function viewDashboardCleanly(event, userId) {
                 } else if (item.category === 'property') {
                     bgClass = 'bg-prop';
                     iconHtml = '<i class="fas fa-building"></i>';
+                } else if (item.category === 'contact') {
+                    bgClass = 'bg-contact';
+                    iconHtml = '<i class="fas fa-envelope"></i>';
                 }
 
                 html += `
@@ -1935,20 +1969,16 @@ function viewDashboardCleanly(event, userId) {
     
     $(document).ready(function() {
         fetchNotifications();
-        setInterval(fetchNotifications, 60000); 
+        setInterval(fetchNotifications, 5000); 
     });
 </script>
 
-
 <script>
-
-    /* ─── Toogle Delete Inputs from dropdown ─── */
-
+/* ─── Toogle Delete Inputs from dropdown ─── */
 function toggle_Delete_Users() {
     const type = document.getElementById('delete_user_type').value;
     document.getElementById('Date_Inputs_User').style.display = (type === 'date_range') ? 'flex' : 'none';
 }
-
 </script>
 
 <script>
@@ -1983,7 +2013,7 @@ function toggle_Delete_Users() {
         }).then((willDelete) => {
             if (willDelete) {
                 
-                // Show a standard Swal1 loading message without buttons
+                // Show a standard swal loading message without buttons
                 swal({
                     text: "Processing your request, please wait...",
                     icon: "info",

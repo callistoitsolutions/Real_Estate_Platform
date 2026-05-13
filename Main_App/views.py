@@ -1003,6 +1003,42 @@ def about(request):
     timeline_items = TimelineItem.objects.all
     achievements = Achievement.objects.all()# fetch the first record
     return render(request, "home_page/about.html", {"about": about,"achievements": achievements, "timeline_items" : timeline_items,})
+
+
+############## Views start for contact us page #########################
+
+def Contact_Us(request):
+
+    context = {}
+    # ═══════════════════════════════════════════════════════
+    # HANDLE LOGGED-IN USER
+    # ═══════════════════════════════════════════════════════
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+            
+    return render(request,'home_page/contact.html',context)
+
+############# Views end for contact us page ##############################
+
+
+############ Views start for contact us page ########################
+
+@csrf_exempt
+def Contact_Ajax(request):
+    data = request.POST.dict()
+
+    data.pop("id", None)     
+    data['contact_enquiry_date'] = datetime.today()
+    data['contact_enquiry_time'] = datetime.now()
+        
+    Contact_Enquiry.objects.create(**data)
+    return JsonResponse({"status":"1", "msg" : f"Contact Enquiry Details added successfully"})
+
+
+########## Views end for contact us page ###########################
    
 
 def contact(request):

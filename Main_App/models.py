@@ -20,6 +20,22 @@ class Agent(models.Model):
     def __str__(self):
         return self.agency_name
     
+
+############### Contact Enquiries Table/Modal Starts Here #####################
+
+class Contact_Enquiry(models.Model):
+    contact_name = models.CharField(max_length=200)
+    contact_phone = models.CharField(max_length=200)
+    contact_email = models.CharField(max_length=20)
+    contact_en_title = models.CharField(max_length=100, blank=True)
+    contact_message = models.TextField(blank=True)
+
+    contact_enquiry_date = models.DateField(blank=True,null=True)
+    contact_enquiry_time = models.TimeField(blank=True,null=True)
+
+    def __str__(self):
+        return f"{self.contact_name} - {self.contact_phone} - {self.contact_en_title}"
+    
     
     
 

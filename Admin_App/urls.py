@@ -33,6 +33,14 @@ urlpatterns = [
      path('pg_coliving',views.pg_coliving,name="pg_coliving"),
 
 
+     ############ urls for contact enquiries list ##########################
+
+     path('Contact_Enquiries_List',views.Contact_Enquiries_List,name="Contact_Enquiries_List"),
+
+     ############ urls for view contact enquiries ########################
+
+     path('View_Contact_Enquiry/<int:id>',views.View_Contact_Enquiry,name="View_Contact_Enquiry"),
+
      ############# urls for ameneties list ############################
 
      path('Ameneties_List',views.Ameneties_List,name="Ameneties_List"),

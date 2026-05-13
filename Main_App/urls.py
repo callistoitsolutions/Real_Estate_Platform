@@ -26,6 +26,15 @@ urlpatterns = [
     path('services',views.services,name="services"),
     path('agents',views.agents,name="agents"),
     path('about',views.about,name="about"),
+
+    ############## urls for contact us page ##########################
+
+    path('Contact_Us',views.Contact_Us,name="Contact_Us"),
+
+    ############## urls for ajax for contact us page ##################
+
+    path('Contact_Ajax',views.Contact_Ajax,name="Contact_Ajax"),
+
     #path('agent/create/', views.agent_create, name='agent_create'),
     path('complaint_form', views.complaint_form, name='complaint_form'),
     #('blog', views.blog, name='blog'),
