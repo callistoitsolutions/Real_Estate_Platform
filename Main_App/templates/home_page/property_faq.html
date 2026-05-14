@@ -1,39 +1,198 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ property.property_title }} - FAQs</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="p-4">
+{% include 'home_page/header.html' %}
+{% load static %}
 
-<h2 class="mb-3">{{ type }} - {{ property.property_title }}</h2>
+<style>
 
-<h4 class="text-primary">Frequently Asked Questions</h4>
+body{
+    background:#f8fafc;
+}
 
-{% if faq_list %}
-    <div class="accordion mt-3" id="faqAccordion">
-        {% for faq in faq_list %}
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
-                    <button class="accordion-button collapsed" type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapse{{ forloop.counter }}">
-                        {{ faq.question }}
-                    </button>
-                </h2>
-                <div id="collapse{{ forloop.counter }}"
-                     class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                        {{ faq.answer }}
-                    </div>
+.faq-hero{
+    background:linear-gradient(135deg,#0f172a,#1e3a8a);
+    padding:70px 20px;
+    text-align:center;
+    color:#fff;
+}
+
+.faq-hero h1{
+    font-size:42px;
+    font-weight:800;
+    margin-bottom:15px;
+}
+
+.faq-hero p{
+    max-width:800px;
+    margin:auto;
+    color:rgba(255,255,255,0.85);
+    line-height:1.8;
+}
+
+/* ===================== */
+
+.faq-wrapper{
+    max-width:1100px;
+    margin:60px auto;
+    padding:0 20px;
+}
+
+.faq-box{
+    background:#fff;
+    border-radius:16px;
+    margin-bottom:30px;
+    overflow:hidden;
+    box-shadow:0 8px 25px rgba(0,0,0,0.08);
+}
+
+.faq-head{
+    background:#0f172a;
+    color:#fff;
+    padding:25px;
+}
+
+.faq-head h2{
+    font-size:24px;
+    margin-bottom:8px;
+    font-weight:700;
+}
+
+.faq-category{
+    font-size:14px;
+    opacity:0.8;
+}
+
+/* ===================== */
+
+.accordion-item{
+    border-bottom:1px solid #e2e8f0;
+}
+
+.accordion-header{
+    width:100%;
+    background:#fff;
+    border:none;
+    outline:none;
+    text-align:left;
+    padding:22px 25px;
+    font-size:17px;
+    font-weight:700;
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.accordion-header:hover{
+    background:#f8fafc;
+}
+
+.accordion-content{
+    display:none;
+    padding:0 25px 25px;
+    color:#475569;
+    line-height:1.8;
+    font-size:15px;
+}
+
+.accordion-item.active .accordion-content{
+    display:block;
+}
+
+.icon{
+    font-size:22px;
+    transition:0.3s;
+}
+
+.accordion-item.active .icon{
+    transform:rotate(45deg);
+}
+
+/* ===================== */
+
+@media(max-width:768px){
+
+    .faq-hero h1{
+        font-size:32px;
+    }
+
+    .accordion-header{
+        font-size:15px;
+    }
+
+}
+
+</style>
+
+<!-- HERO -->
+
+<section class="faq-hero">
+
+    <h1>Property Frequently Asked Questions</h1>
+
+    <p>
+        Explore dynamic property FAQs for Residential,
+        Commercial, PG, Plot, Agricultural and Industrial properties.
+    </p>
+
+</section>
+
+<!-- FAQ SECTION -->
+
+<div class="faq-wrapper">
+
+    {% for section in faq_sections %}
+
+        <div class="faq-box">
+
+            <div class="faq-head">
+
+                <h2>{{ section.title }}</h2>
+
+                <div class="faq-category">
+                    {{ section.category }}
                 </div>
-            </div>
-        {% endfor %}
-    </div>
-{% else %}
-    <p>No FAQs found.</p>
-{% endif %}
 
-</body>
-</html>
+            </div>
+
+            {% for faq in section.faqs %}
+
+                <div class="accordion-item">
+
+                    <button class="accordion-header">
+
+                        {{ faq.question }}
+
+                        <span class="icon">+</span>
+
+                    </button>
+
+                    <div class="accordion-content">
+
+                        {{ faq.answer }}
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+<script>
+
+document.querySelectorAll(".accordion-header").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        const item = button.parentElement;
+
+        item.classList.toggle("active");
+
+    });
+
+});
+
+</script>

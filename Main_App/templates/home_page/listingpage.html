@@ -325,9 +325,11 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
     </div>
 
     <div class="results-header">
-      <div class="rh-count">
-        Showing <span id="resultCount">{{ total|default:"0" }}</span> properties in <strong>Nagpur</strong>
-      </div>
+    <div class="rh-count" style="font-size: 1.1rem; font-weight: 700;">
+                    Showing <span class="text-primary">{{ total|default:"0" }}</span> 
+                    <strong>{{ category|title }}</strong> properties in 
+                    <strong>{{ current_city|default:"Nagpur"|title }}</strong>
+                </div>
       <div class="rh-sort">
         <select class="sort-select" onchange="sortRedirect(this.value)">
           <option value="relevant"  {% if current_sort == 'relevant'   %}selected{% endif %}>Most Relevant</option>

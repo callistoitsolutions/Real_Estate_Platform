@@ -3,6 +3,7 @@ from django.utils.timezone import now
 
 
 
+
 class SeoMetaTag(models.Model):
     page_name = models.CharField(max_length=60)
     meta_title = models.CharField(max_length=60)
@@ -192,15 +193,41 @@ class Achievement(models.Model):
 
 
 
-class FAQ(models.Model):
-    question = models.CharField(max_length=255)
-    answer = models.TextField()  # Will use CKEditor widget
+
+
+from django.db import models
+
+
+class PropertyFAQ(models.Model):
+
+    PROPERTY_TYPES = (
+
+        ("residential", "Residential"),
+        ("commercial", "Commercial"),
+        ("industrial", "Industrial"),
+        ("plot", "Plot"),
+        ("pg", "PG"),
+        ("villa", "Villa"),
+        ("coworking", "Coworking"),
+        ("agriculture", "Agriculture"),
+
+    )
+
+    property_type = models.CharField(
+        max_length=50,
+        choices=PROPERTY_TYPES
+    )
+
+    question = models.CharField(max_length=500)
+
+    answer = models.TextField()
+
+    is_active = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.question
-    
+        return f"{self.property_type} - {self.question}"
     
     
 
@@ -458,6 +485,15 @@ class RentalResidentialProperty(models.Model):
     uploaded_by_email = models.CharField(max_length=150, blank=True, null=True)
     uploaded_by_contact = models.CharField(max_length=20, blank=True, null=True)
     uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
+    
+    upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+   
+
+    
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.CharField(max_length=150, blank=True, null=True)
+
 
     def __str__(self):
         return str(self.property_title) if self.property_title else f"Property #{self.id}"
@@ -563,6 +599,11 @@ class CommercialRentalProperty(models.Model):
     uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    deleted_by = models.CharField(max_length=150, blank=True, null=True) # 👈 ADD THIS
+
 
     def __str__(self):
         return f"{self.property_type} - {self.city}"
@@ -647,7 +688,10 @@ class PGColivingProperty(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    deleted_by = models.CharField(max_length=150, blank=True, null=True) # 👈 ADD THIS
 
 class PGPropertyImage(models.Model):
     property = models.ForeignKey(PGColivingProperty, on_delete=models.CASCADE, related_name='images')
@@ -804,6 +848,8 @@ class ResaleResidentialProperty(models.Model):
     # ── Timestamps ─────────────────────────────────────────
     created_at  = models.DateTimeField(auto_now_add=True)
     updated_at  = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name        = 'Resale Residential Property'
@@ -975,9 +1021,12 @@ class CommercialResaleProperty(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
-    # ... all your existing fields ...
+    
+    upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    deleted_by = models.CharField(max_length=150, blank=True, null=True) # 👈 ADD THIS
 
     is_active = models.BooleanField(default=True)   # ← ADD THIS
 
@@ -1048,6 +1097,11 @@ class PlotSaleProperty(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    deleted_by = models.CharField(max_length=150, blank=True, null=True) # 👈 ADD THIS
 
     def __str__(self):
         return f"{self.plot_title} - {self.plot_locality}"
@@ -1122,9 +1176,13 @@ class IndustrialResaleProperty(models.Model):
     uploaded_by_email   = models.EmailField(blank=True, null=True)
     uploaded_by_contact = models.CharField(max_length=15, blank=True, null=True)
     uploaded_by_role    = models.CharField(max_length=50, blank=True, null=True)
-
+    upload_file_name = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
+    
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.CharField(max_length=150, blank=True, null=True) # 👈 ADD THIS
 
     def __str__(self):
         return f"{self.property_type} in {self.locality}"
@@ -1241,6 +1299,11 @@ class AgriculturalResaleProperty(models.Model):
     uploaded_by_role = models.CharField(max_length=50, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    # Add this to RentalResidentialProperty, CommercialRentalProperty, PGColivingProperty, etc...
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.CharField(max_length=150, blank=True, null=True) # 👈 ADD THIS
+    upload_file_name = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return f"{self.agriculture_property_type} - {self.village}"

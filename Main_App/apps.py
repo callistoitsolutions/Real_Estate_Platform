@@ -34,4 +34,4 @@ class MainAppConfig(AppConfig):
         return cls._index
 
     def ready(self):
-        print("🚀 Django Server Started Successfully")
+        print("Django Server Started Successfully")

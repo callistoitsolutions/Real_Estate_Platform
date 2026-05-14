@@ -558,7 +558,7 @@
                 <tbody>
                     {% for prop in page_obj %}
                     <tr id="row-{{ prop.id }}">
-                        <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                       <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
 
                         <td>
                             <div style="display:flex; gap:4px; flex-wrap:wrap;">
@@ -641,6 +641,7 @@
                                 <button class="btn-action btn-delete" onclick="deleteProperty({{ prop.id }})" title="Delete Property">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
+                             
                             </div>
                         </td>
                     </tr>
