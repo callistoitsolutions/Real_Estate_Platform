@@ -90,6 +90,7 @@
                     <table class="properties-table">
                         <thead>
                             <tr>
+                                  <th>Sr.No</th>
                                 <th>Original ID</th>
                                 <th>Property Title</th>
                                 <th>City</th>
@@ -101,6 +102,7 @@
                         <tbody>
                             {% for prop in rental_deleted %}
                             <tr id="rental-row-{{ prop.id }}">
+                                  <td><strong>{{ forloop.counter }}</strong></td>
                                 <td><strong>#{{ prop.id }}</strong></td>
                                 <td>{{ prop.property_title }}</td>
                                 <td>{{ prop.city }}</td>

@@ -1,6 +1,5 @@
 {% include 'home_page/header.html' %}
 
-
 {% block extra_css %}
 <style>
 :root {
@@ -8,6 +7,9 @@
   --accent:#f59e0b; --text-dark:#1e293b; --text-body:#475569; --text-muted:#64748b;
   --border:#e2e8f0; --shadow-1:0 4px 12px rgba(0,0,0,.06); --shadow-2:0 12px 30px rgba(0,0,0,.1); --radius:12px;
 }
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg-main); color:var(--text-body); line-height:1.6; }
 
 /* PAGE HERO */
 .page-hero {
@@ -20,8 +22,11 @@
 .page-hero::before {
   content:''; position:absolute; inset:0;
   background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='1' fill='rgba(255,255,255,.04)'/%3E%3C/svg%3E");
+  animation:drift 60s linear infinite;
 }
-.page-hero h1 { font-size:2.6rem; font-weight:900; color:#fff; margin-bottom:12px; position:relative; }
+@keyframes drift { to { background-position:60px 60px; } }
+
+.page-hero h1 { font-size:2.6rem; font-weight:900; color:#fff; margin-bottom:12px; position:relative; letter-spacing:-0.5px; }
 .page-hero h1 em { font-style:normal; color:#f9b449; }
 .page-hero p { font-size:1rem; color:rgba(255,255,255,.82); max-width:580px; margin:0 auto 28px; position:relative; font-weight:500; }
 
@@ -29,7 +34,7 @@
 .hero-stats { display:flex; justify-content:center; gap:40px; flex-wrap:wrap; position:relative; }
 .hs-item { text-align:center; }
 .hs-v { font-size:1.4rem; font-weight:900; color:#fff; }
-.hs-l { font-size:0.73rem; color:rgba(255,255,255,.7); margin-top:3px; font-weight:500; }
+.hs-l { font-size:0.73rem; color:rgba(255,255,255,.7); margin-top:3px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
 
 /* FILTER PILLS */
 .filter-wrap { max-width:1280px; margin:0 auto; padding:28px 20px 0; }
@@ -62,19 +67,77 @@
 }
 .blog-card:hover { transform:translateY(-6px); box-shadow:var(--shadow-2); border-color:rgba(0,108,228,.3); }
 
+
+
+/* Make sure images are visible and properly sized */
+.bc-img { 
+  height:210px; 
+  position:relative; 
+  overflow:hidden; 
+  background:#e2e8f0; 
+  flex-shrink:0; 
+}
+
+.bc-img img { 
+  width:100% !important; 
+  height:100% !important; 
+  object-fit:cover; 
+  transition:transform .4s ease;
+  display:block; /* Ensure image displays as block */
+  position:absolute; /* Position absolute for proper layering */
+  top:0;
+  left:0;
+}
+
+/* Ensure badges show over images */
+.bc-cat, .bc-time {
+  position:absolute;
+  z-index:2;
+}
+
+.bc-cat {
+  top:12px; 
+  left:12px;
+  background:var(--primary); 
+  color:#fff; 
+  font-size:.7rem; 
+  font-weight:700;
+  padding:4px 12px; 
+  border-radius:20px; 
+  letter-spacing:.3px; 
+  text-transform:uppercase;
+}
+
+.bc-time {
+  bottom:12px; 
+  right:12px;
+  background:rgba(0,0,0,.65); 
+  color:#fff; 
+  font-size:.72rem; 
+  font-weight:600;
+  padding:4px 10px; 
+  border-radius:8px; 
+  display:flex; 
+  align-items:center; 
+  gap:5px;
+  backdrop-filter:blur(6px);
+}
 /* Image */
-.bc-img { height:210px; position:relative; overflow:hidden; background:#e2e8f0; flex-shrink:0; }
-.bc-img img { width:100%; height:100%; object-fit:cover; transition:transform .4s ease; }
+
+
 .blog-card:hover .bc-img img { transform:scale(1.06); }
-.bc-img-placeholder { width:100%; height:100%; display:flex; flex-direction:column; align-items:center;
-  justify-content:center; font-size:3rem; color:#94a3b8; gap:8px; }
+.bc-img-placeholder { 
+  width:100%; height:100%; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; font-size:3rem; color:#94a3b8; gap:8px; 
+  background:linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+}
 .bc-img-placeholder span { font-size:.8rem; font-weight:600; color:#94a3b8; }
 
 /* Category pill on image */
 .bc-cat {
   position:absolute; top:12px; left:12px;
   background:var(--primary); color:#fff; font-size:.7rem; font-weight:700;
-  padding:4px 12px; border-radius:20px; letter-spacing:.3px;
+  padding:4px 12px; border-radius:20px; letter-spacing:.3px; text-transform:uppercase;
 }
 /* Reading time badge */
 .bc-time {
@@ -83,6 +146,7 @@
   padding:4px 10px; border-radius:8px; display:flex; align-items:center; gap:5px;
   backdrop-filter:blur(6px);
 }
+.bc-time i { font-size:.7rem; }
 
 /* Body */
 .bc-body { padding:20px; flex:1; display:flex; flex-direction:column; }
@@ -106,28 +170,57 @@
   display:flex; align-items:center; justify-content:center; gap:8px;
   background:var(--primary); color:#fff; border-radius:8px; font-weight:700;
   font-size:.88rem; padding:11px 18px; text-decoration:none; transition:.2s; margin-top:auto;
+  box-shadow:0 4px 12px rgba(0,108,228,.2);
 }
 .bc-btn:hover { background:var(--primary-dark); color:#fff; transform:translateY(-1px);
-  box-shadow:0 4px 14px rgba(0,108,228,.3); }
+  box-shadow:0 6px 20px rgba(0,108,228,.35); }
+.bc-btn i { font-size:.9rem; }
 
 /* FEATURED CARD — spans 2 cols on first item */
 .blog-card.featured-card { grid-column: span 2; flex-direction:row; }
-.blog-card.featured-card .bc-img { width:48%; height:auto; min-height:260px; flex-shrink:0; border-radius:0; }
+.blog-card.featured-card .bc-img { width:48%; height:auto; min-height:280px; flex-shrink:0; border-radius:0; }
 .blog-card.featured-card .bc-body { padding:28px; }
 .blog-card.featured-card .bc-title { font-size:1.25rem; min-height:auto; -webkit-line-clamp:3; }
 .blog-card.featured-card .bc-desc { -webkit-line-clamp:4; }
-@media(max-width:1050px){ .blog-card.featured-card { grid-column:span 1; flex-direction:column; }
-  .blog-card.featured-card .bc-img { width:100%; height:210px; } }
+@media(max-width:1050px){ 
+  .blog-card.featured-card { grid-column:span 1; flex-direction:column; }
+  .blog-card.featured-card .bc-img { width:100%; height:210px; } 
+}
 
 /* EMPTY STATE */
-.empty-state { grid-column:1/-1; text-align:center; padding:80px 20px; }
+.empty-state { grid-column:1/-1; text-align:center; padding:80px 20px; 
+  background:#fff; border-radius:var(--radius); border:2px dashed var(--border); }
 .empty-state i { font-size:3.5rem; color:#cbd5e1; display:block; margin-bottom:16px; }
 .empty-state h4 { font-size:1.2rem; font-weight:700; color:var(--text-dark); margin-bottom:8px; }
 .empty-state p { color:var(--text-muted); font-size:.9rem; }
 
+/* FOOTER STYLES */
+footer { background:#1e293b; color:rgba(255,255,255,.7); padding:60px 20px 30px; margin-top:0; }
+.footer-inner { max-width:1280px; margin:0 auto; }
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; margin-bottom:40px; }
+@media(max-width:992px){ .footer-grid{ grid-template-columns:1fr 1fr; gap:30px; } }
+@media(max-width:640px){ .footer-grid{ grid-template-columns:1fr; gap:25px; } }
 
+.fl-brand { font-size:1.5rem; font-weight:900; color:#fff; margin-bottom:14px; }
+.fl-desc { font-size:.9rem; line-height:1.7; margin-bottom:20px; }
+.footer-social { display:flex; gap:12px; }
+.footer-social a { width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,.1);
+  display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.7);
+  text-decoration:none; transition:.3s; font-size:1.1rem; }
+.footer-social a:hover { background:var(--primary); color:#fff; transform:translateY(-3px); }
 
+.fl-title { font-size:.85rem; font-weight:700; color:#fff; margin-bottom:16px; text-transform:uppercase; letter-spacing:0.5px; }
+.fl-link { display:block; color:rgba(255,255,255,.7); text-decoration:none; font-size:.9rem;
+  margin-bottom:10px; transition:.3s; font-weight:500; }
+.fl-link:hover { color:var(--primary); padding-left:8px; }
 
+.footer-bottom { border-top:1px solid rgba(255,255,255,.1); padding-top:25px;
+  display:flex; justify-content:space-between; align-items:center; font-size:.85rem;
+  flex-wrap:wrap; gap:15px; }
+.footer-bottom a { color:rgba(255,255,255,.7); text-decoration:none; margin:0 8px; }
+.footer-bottom a:hover { color:var(--primary); }
+
+@media(max-width:640px){ .footer-bottom{ flex-direction:column; text-align:center; } }
 </style>
 {% endblock %}
 
@@ -158,6 +251,7 @@
 </div>
 
 <!-- BLOG GRID -->
+<!-- BLOG GRID -->
 <div class="section-wrap">
   <div class="sec-header">
     <div>
@@ -174,25 +268,33 @@
 
       <!-- Image -->
       <div class="bc-img">
-        {% if blog.featured_image %}
-          <img src="{{ blog.featured_image.url }}" alt="{{ blog.title }}" loading="lazy">
+        {% if blog.featured_image and blog.featured_image.url %}
+          <img src="{{ blog.featured_image.url }}" 
+               alt="{{ blog.title }}" 
+               loading="lazy"
+               onerror="this.parentElement.innerHTML='<div class=\'bc-img-placeholder\'><i class=\'bi bi-newspaper\'></i><span>No Image</span></div>'">
+          
+          {% if blog.category %}
+            <span class="bc-cat">{{ blog.category }}</span>
+          {% endif %}
+          <span class="bc-time"><i class="bi bi-clock"></i> {{ blog.reading_time|default:"5" }} min</span>
         {% else %}
           <div class="bc-img-placeholder">
             <i class="bi bi-newspaper"></i>
             <span>No Image</span>
           </div>
+          {% if blog.category %}
+            <span class="bc-cat">{{ blog.category }}</span>
+          {% endif %}
+          <span class="bc-time"><i class="bi bi-clock"></i> {{ blog.reading_time|default:"5" }} min</span>
         {% endif %}
-        {% if blog.category %}
-          <span class="bc-cat">{{ blog.category }}</span>
-        {% endif %}
-        <span class="bc-time"><i class="bi bi-clock"></i> {{ blog.reading_time|default:"5" }} min</span>
       </div>
 
       <!-- Body -->
       <div class="bc-body">
         <div class="bc-icon"><i class="bi bi-journal-richtext"></i></div>
         <div class="bc-title">{{ blog.title }}</div>
-        <div class="bc-desc">{{ blog.meta_description|truncatechars:150 }}</div>
+        <div class="bc-desc">{{ blog.meta_description }}</div>
         <div class="bc-meta">
           <i class="bi bi-calendar3"></i>
           <span>{{ blog.created_at|date:"M d, Y" }}</span>
@@ -215,17 +317,18 @@
   </div>
 </div>
 
+<!-- FOOTER -->
 <footer>
     <div class="footer-inner">
         <div class="footer-grid">
             <div>
                 <div class="fl-brand">🏠 PropCRM</div>
                 <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
-                <div class="footer-social mt-4 d-flex gap-3">
-                    <a href="#"><i class="bi bi-facebook"></i></a>
-                    <a href="#"><i class="bi bi-instagram"></i></a>
-                    <a href="#"><i class="bi bi-whatsapp"></i></a>
-                    <a href="#"><i class="bi bi-twitter-x"></i></a>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                    <a href="#" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
                 </div>
             </div>
             <div>
@@ -252,10 +355,15 @@
         </div>
         <div class="footer-bottom">
             <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
-            <span>Privacy Policy · Terms · Sitemap</span>
+            <div>
+                <a href="/privacy">Privacy Policy</a> ·
+                <a href="/terms">Terms of Service</a> ·
+                <a href="/sitemap">Sitemap</a>
+            </div>
         </div>
     </div>
 </footer>
+
 {% endblock %}
 
 {% block extra_js %}

@@ -109,30 +109,59 @@ def portalpage(request):
 
 def _normalize_rental(p):
     """Normalize rental residential property"""
+
     image_url = ""
+
     first_image = p.images.first()
     if first_image and first_image.image:
         image_url = first_image.image.url
 
     return {
         'id': p.id,
-        'title': f"{p.bhk_type} in {p.locality}" if hasattr(p, 'bhk_type') and p.bhk_type else (p.property_type or "Residential Property"),
-        'price_display': f"₹{p.expected_rent or 0}",
+
+        'title': (
+            f"{p.bhk_type} in {p.locality}"
+            if p.bhk_type
+            else (p.property_type or "Residential Property")
+        ),
+
+        # ✅ Correct field
+        'price_display': f"₹{p.monthly_rent or 0}",
+
         'location': f"{p.locality}, {p.city}",
-        'beds': p.bhk_type if hasattr(p, 'bhk_type') else "—",
-        'baths': p.bathrooms if hasattr(p, 'bathrooms') else "—",
-        'area': f"{p.carpet_area or '—'} sq.ft" if hasattr(p, 'carpet_area') else "—",
-        'floor': f"{p.floor_number or '—'}" if hasattr(p, 'floor_number') else "—",
-        'furnished': p.furnishing or "Not Specified",
+
+        'beds': p.bhk_type or "—",
+
+        'baths': p.bathrooms or "—",
+
+        'area': f"{p.carpet_area or '—'} sq.ft",
+
+        'floor': p.floor_number or "—",
+
+        # ✅ Correct field
+        'furnished': p.furnishing_status or "Not Specified",
+
         'property_type': p.property_type or "Residential",
+
         'listing_type': 'rent',
+
         'category': 'residential',
+
         'owner': p.owner_name or "Owner",
+
         'owner_role': "Property Owner",
-        'owner_initials': p.owner_name[:2].upper() if p.owner_name else "OW",
+
+        'owner_initials': (
+            p.owner_name[:2].upper()
+            if p.owner_name else "OW"
+        ),
+
         'phone': p.contact_number or "",
+
         'image_url': image_url,
+
         'is_new': True,
+
         'is_ai_match': True,
     }
 
@@ -243,33 +272,58 @@ def _normalize_pg(p):
 
 def _normalize_resale(p):
     """Normalize resale residential property"""
+
     image_url = ""
-    first_image = p.images.first()
+
+    first_image = p.images.first() if hasattr(p, 'images') else None
+
     if first_image and first_image.image:
         image_url = first_image.image.url
 
     return {
         'id': p.id,
-        'title': f"{p.bhk_type} in {p.locality}" if hasattr(p, 'bhk_type') and p.bhk_type else (p.property_type or "Residential Property"),
+
+        'title': f"{p.bhk} in {p.locality}" if p.bhk else (
+            p.property_type or "Residential Property"
+        ),
+
         'price_display': f"₹{p.expected_price or 0}",
+
         'location': f"{p.locality}, {p.city}",
-        'beds': p.bhk_type if hasattr(p, 'bhk_type') else "—",
-        'baths': p.bathrooms if hasattr(p, 'bathrooms') else "—",
-        'area': f"{p.carpet_area or '—'} sq.ft" if hasattr(p, 'carpet_area') else "—",
-        'floor': f"{p.floor_number or '—'}" if hasattr(p, 'floor_number') else "—",
-        'furnished': p.furnishing or "Not Specified",
+
+        'beds': p.bhk or "—",
+
+        'baths': p.bathrooms or "—",
+
+        'area': f"{p.carpet_area or '—'} sq.ft",
+
+        'floor': f"{p.floor_no or '—'}",
+
+        'furnished': p.furnishing_type or "Not Specified",
+
         'property_type': p.property_type or "Residential",
+
         'listing_type': 'sale',
+
         'category': 'residential',
+
         'owner': p.owner_name or "Owner",
+
         'owner_role': "Property Owner",
-        'owner_initials': p.owner_name[:2].upper() if p.owner_name else "OW",
-        'phone': p.contact_number or "",
+
+        'owner_initials': (
+            p.owner_name[:2].upper()
+            if p.owner_name else "OW"
+        ),
+
+        'phone': p.owner_contact or "",
+
         'image_url': image_url,
+
         'is_new': True,
+
         'is_ai_match': True,
     }
-
 
 def _normalize_commercial_resale(p):
     """Normalize commercial resale property"""
@@ -401,26 +455,123 @@ def _normalize_agriculture(p):
 # ACTIVE USER SUBSCRIPTION
 # =========================================================
 
-def get_active_subscription(user_details):
 
-    today = date.today()
-
-    return (
-        User_Subscription.objects
-        .filter(
-            user=user_details,
-            is_active=True,
-            expiry_date__gte=today,
-            remaining_contacts__gt=0
-        )
-        .select_related('subscription')
-        .first()
-    )
 
 
 # =========================================================
 # PROPERTY DETAIL VIEW
 # =========================================================
+
+
+
+
+
+
+# =====================================================
+# SAVE ENQUIRY
+# =====================================================
+
+def save_property_enquiry(request):
+
+    if request.method == "POST":
+
+        PropertyEnquiry.objects.create(
+
+            # USER
+            name=request.POST.get("name"),
+            phone=request.POST.get("phone"),
+            email=request.POST.get("email"),
+            message=request.POST.get("message"),
+
+            # PROPERTY
+            property_id=request.POST.get("property_id"),
+            property_title=request.POST.get("property_title"),
+            property_type=request.POST.get("property_type"),
+            property_location=request.POST.get("property_location"),
+            property_price=request.POST.get("property_price"),
+
+            # TRACKING
+            lead_source=request.POST.get("lead_source"),
+            seo_slug=request.POST.get("seo_slug"),
+            page_url=request.POST.get("page_url"),
+
+            # USER INFO
+            user_ip=get_client_ip(request),
+            user_device=request.META.get("HTTP_USER_AGENT"),
+            referrer_url=request.META.get("HTTP_REFERER"),
+
+        )
+
+        messages.success(
+
+            request,
+            "Enquiry sent successfully."
+
+        )
+
+        return redirect(request.META.get("HTTP_REFERER"))
+
+    return redirect("/")
+
+
+# =====================================================
+# CLIENT IP
+# =====================================================
+
+def get_client_ip(request):
+
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+
+    if x_forwarded_for:
+
+        ip = x_forwarded_for.split(",")[0]
+
+    else:
+
+        ip = request.META.get("REMOTE_ADDR")
+
+    return ip
+
+
+# =====================================================
+# ENQUIRY REPORT PAGE
+# =====================================================
+
+def enquiry_report(request):
+
+    enquiries = PropertyEnquiry.objects.all().order_by("-id")
+
+    total_enquiries = enquiries.count()
+
+    new_enquiries = enquiries.filter(
+        enquiry_status="New"
+    ).count()
+
+    closed_enquiries = enquiries.filter(
+        enquiry_status="Closed"
+    ).count()
+
+    context = {
+
+        "enquiries": enquiries,
+
+        "total_enquiries": total_enquiries,
+
+        "new_enquiries": new_enquiries,
+
+        "closed_enquiries": closed_enquiries,
+
+    }
+
+    return render(
+
+        request,
+        "home_page/enquiry_report.html",
+        context
+
+    )
+
+
 
 def property_detail_view(request, listing_type, category, pk):
 
@@ -430,6 +581,8 @@ def property_detail_view(request, listing_type, category, pk):
     amenities_list = []
     facilities_list = []
     property_images = []
+
+    seo_page_type = ""
 
     # =====================================================
     # RENT PROPERTIES
@@ -441,14 +594,18 @@ def property_detail_view(request, listing_type, category, pk):
         # RENT RESIDENTIAL
         # =================================================
 
-        if category in ['residential', 'Residential Data']:
+        if category in ['residential', 'residential-data']:
 
             obj = get_object_or_404(
                 RentalResidentialProperty,
                 pk=pk
             )
 
+            seo_page_type = "rental_residential"
+
             p = _normalize_rental(obj)
+
+            property_images = obj.images.all()
 
             if hasattr(obj, 'amenities') and obj.amenities:
 
@@ -466,20 +623,22 @@ def property_detail_view(request, listing_type, category, pk):
                     if x.strip()
                 ]
 
-            property_images = obj.images.all()
-
         # =================================================
-        # RENT COMMERCIAL
+        # COMMERCIAL RENTAL
         # =================================================
 
-        elif category in ['commercial', 'Commercial Data']:
+        elif category in ['commercial', 'commercial-data']:
 
             obj = get_object_or_404(
                 CommercialRentalProperty,
                 pk=pk
             )
 
+            seo_page_type = "commercial_rental"
+
             p = _normalize_commercial_rental(obj)
+
+            property_images = obj.images.all()
 
             if hasattr(obj, 'amenities') and obj.amenities:
 
@@ -497,20 +656,22 @@ def property_detail_view(request, listing_type, category, pk):
                     if x.strip()
                 ]
 
-            property_images = obj.images.all()
-
         # =================================================
         # PG PROPERTY
         # =================================================
 
-        elif category in ['pg', 'PG Data']:
+        elif category in ['pg', 'pg-data']:
 
             obj = get_object_or_404(
                 PGColivingProperty,
                 pk=pk
             )
 
+            seo_page_type = "pg_coliving"
+
             p = _normalize_pg(obj)
+
+            property_images = obj.images.all()
 
             if hasattr(obj, 'amenities') and obj.amenities:
 
@@ -527,8 +688,6 @@ def property_detail_view(request, listing_type, category, pk):
                     for x in obj.nearby_facilities.split(',')
                     if x.strip()
                 ]
-
-            property_images = obj.images.all()
 
     # =====================================================
     # SALE PROPERTIES
@@ -537,17 +696,21 @@ def property_detail_view(request, listing_type, category, pk):
     elif listing_type == 'sale':
 
         # =================================================
-        # RESIDENTIAL SALE
+        # RESALE RESIDENTIAL
         # =================================================
 
-        if category in ['residential', 'Resale Residential']:
+        if category in ['residential', 'resale-residential']:
 
             obj = get_object_or_404(
                 ResaleResidentialProperty,
                 pk=pk
             )
 
+            seo_page_type = "resale_residential"
+
             p = _normalize_resale(obj)
+
+            property_images = obj.images.all()
 
             if hasattr(obj, 'amenities') and obj.amenities:
 
@@ -565,20 +728,22 @@ def property_detail_view(request, listing_type, category, pk):
                     if x.strip()
                 ]
 
-            property_images = obj.images.all()
-
         # =================================================
-        # COMMERCIAL SALE
+        # COMMERCIAL RESALE
         # =================================================
 
-        elif category in ['commercial', 'Commercial Resale']:
+        elif category in ['commercial', 'commercial-resale']:
 
             obj = get_object_or_404(
                 CommercialResaleProperty,
                 pk=pk
             )
 
+            seo_page_type = "commercial_resale"
+
             p = _normalize_commercial_resale(obj)
+
+            property_images = obj.images.all()
 
             if hasattr(obj, 'amenities') and obj.amenities:
 
@@ -596,18 +761,18 @@ def property_detail_view(request, listing_type, category, pk):
                     if x.strip()
                 ]
 
-            property_images = obj.images.all()
-
         # =================================================
         # PLOT SALE
         # =================================================
 
-        elif category in ['plot', 'Plot Resale']:
+        elif category in ['plot', 'plot-resale']:
 
             obj = get_object_or_404(
                 PlotSaleProperty,
                 pk=pk
             )
+
+            seo_page_type = "plot_sale"
 
             p = _normalize_plot(obj)
 
@@ -617,27 +782,31 @@ def property_detail_view(request, listing_type, category, pk):
         # INDUSTRIAL SALE
         # =================================================
 
-        elif category in ['industrial', 'Industrial Resale']:
+        elif category in ['industrial', 'industrial-resale']:
 
             obj = get_object_or_404(
                 IndustrialResaleProperty,
                 pk=pk
             )
 
+            seo_page_type = "industrial_sale"
+
             p = _normalize_industrial(obj)
 
             property_images = obj.images.all()
 
         # =================================================
-        # AGRICULTURE SALE
+        # AGRICULTURAL SALE
         # =================================================
 
-        elif category in ['agriculture', 'Agricultural Data']:
+        elif category in ['agriculture', 'agricultural-data']:
 
             obj = get_object_or_404(
                 AgriculturalResaleProperty,
                 pk=pk
             )
+
+            seo_page_type = "agriculture_sale"
 
             p = _normalize_agriculture(obj)
 
@@ -653,6 +822,22 @@ def property_detail_view(request, listing_type, category, pk):
             request,
             'home_page/property_not_found.html'
         )
+
+    # =====================================================
+    # SEO DATA
+    # =====================================================
+
+    seo = LocationSEO.objects.filter(
+
+        content_type=ContentType.objects.get_for_model(obj),
+
+        object_id=obj.id,
+
+        pagetype=seo_page_type,
+
+        is_active=True
+
+    ).first()
 
     # =====================================================
     # LOGIN USER
@@ -676,30 +861,19 @@ def property_detail_view(request, listing_type, category, pk):
 
     if logged_user:
 
-        user_subscription = get_active_subscription(logged_user)
+        user_subscription = get_active_subscription(
+            logged_user
+        )
 
     # =====================================================
-    # ALREADY ENQUIRED
+    # CONTACT ACCESS
     # =====================================================
 
-    already_enquired = False
-
-    if logged_user:
-
-        already_enquired = Property_Enquiry.objects.filter(
-            property_id=pk,
-            user=logged_user
-        ).exists()
-
-    # =====================================================
-    # REMAINING CONTACTS
-    # =====================================================
-
-    remaining_contacts = 0
+    can_view_contact = False
 
     if user_subscription:
 
-        remaining_contacts = user_subscription.remaining_contacts
+        can_view_contact = True
 
     # =====================================================
     # MASK PHONE NUMBER
@@ -720,22 +894,6 @@ def property_detail_view(request, listing_type, category, pk):
             )
 
     # =====================================================
-    # SUBSCRIPTION PLANS
-    # =====================================================
-
-    subscription_plans = Subscription_Details.objects.filter(
-      
-    )
-
-    # =====================================================
-    # DATE HELPERS
-    # =====================================================
-
-    today = date.today()
-
-    fifteen_days_ago = today - timedelta(days=15)
-
-    # =====================================================
     # SIMILAR PROPERTIES
     # =====================================================
 
@@ -747,52 +905,40 @@ def property_detail_view(request, listing_type, category, pk):
 
     context = {
 
-        'p': p,
-        'original': obj,
+        # PROPERTY
+        "p": p,
+        "original": obj,
 
-        'listing_type': listing_type,
-        'category': category,
+        # URL
+        "listing_type": listing_type,
+        "category": category,
 
-        'amenities_list': amenities_list,
-        'facilities_list': facilities_list,
+        # IMAGES
+        "property_images": property_images,
 
-        'property_images': property_images,
+        # FEATURES
+        "amenities_list": amenities_list,
+        "facilities_list": facilities_list,
 
-        'similar': similar,
+        # SIMILAR
+        "similar": similar,
 
-        # =============================================
+        # SEO
+        "seo": seo,
+
         # USER
-        # =============================================
+        "logged_user": logged_user,
 
-        'logged_user': logged_user,
-
-        # =============================================
         # SUBSCRIPTION
-        # =============================================
+        "user_subscription": user_subscription,
 
-        'user_subscription': user_subscription,
-        'subscription_plans': subscription_plans,
-        'remaining_contacts': remaining_contacts,
+        # CONTACT
+        "can_view_contact": can_view_contact,
+        "masked_phone": masked_phone,
 
-        # =============================================
-        # ENQUIRY
-        # =============================================
-
-        'already_enquired': already_enquired,
-
-        # =============================================
-        # PHONE
-        # =============================================
-
-        'masked_phone': masked_phone,
-
-        # =============================================
         # DATE
-        # =============================================
-
-        'today': today,
-        'fifteen_days_ago': fifteen_days_ago,
-        'now': now(),
+        "today": date.today(),
+        "now": now(),
     }
 
     return render(
@@ -800,420 +946,6 @@ def property_detail_view(request, listing_type, category, pk):
         'home_page/property_detail.html',
         context
     )
-
-
-# =========================================================
-# SUBMIT ENQUIRY
-# =========================================================
-
-@require_POST
-def submit_enquiry(request, property_id):
-
-    name = request.POST.get('name', '').strip()
-    phone = request.POST.get('phone', '').strip()
-    message = request.POST.get('message', '').strip()
-
-    if not name or not phone:
-
-        return JsonResponse({
-            'success': False,
-            'error': 'Name and phone are required.'
-        })
-
-    # =====================================================
-    # USER
-    # =====================================================
-
-    user_id = request.session.get('user_id')
-
-    logged_user = None
-
-    if user_id:
-
-        logged_user = User_Details.objects.filter(
-            id=user_id
-        ).first()
-
-    # =====================================================
-    # PROPERTY OBJECT FIND
-    # =====================================================
-
-    property_obj = None
-
-    models_list = [
-
-        RentalResidentialProperty,
-        CommercialRentalProperty,
-        PGColivingProperty,
-
-        ResaleResidentialProperty,
-        CommercialResaleProperty,
-        PlotSaleProperty,
-        IndustrialResaleProperty,
-        AgriculturalResaleProperty,
-    ]
-
-    for model in models_list:
-
-        try:
-
-            property_obj = model.objects.get(id=property_id)
-            break
-
-        except:
-
-            pass
-
-    if not property_obj:
-
-        return JsonResponse({
-            'success': False,
-            'error': 'Property not found.'
-        })
-
-    # =====================================================
-    # ALREADY ENQUIRED
-    # =====================================================
-
-    if logged_user:
-
-        already = Property_Enquiry.objects.filter(
-            property_id=property_id,
-            user=logged_user
-        ).exists()
-
-        if already:
-
-            return _build_reveal_response(
-                property_obj,
-                logged_user,
-                deduct=False
-            )
-
-    # =====================================================
-    # USER SUBSCRIPTION
-    # =====================================================
-
-    user_subscription = None
-
-    if logged_user:
-
-        user_subscription = get_active_subscription(logged_user)
-
-    # =====================================================
-    # OWNER DETAILS
-    # =====================================================
-
-    owner_name = getattr(
-        property_obj,
-        'owner_name',
-        'Owner'
-    )
-
-    owner_phone = getattr(
-        property_obj,
-        'phone',
-        ''
-    )
-
-    # =====================================================
-    # ENQUIRY TYPE
-    # =====================================================
-
-    enquiry_type = 'General Enquiry'
-
-    if user_subscription:
-
-        enquiry_type = 'Phone Reveal'
-
-    # =====================================================
-    # SAVE ENQUIRY
-    # =====================================================
-
-    Property_Enquiry.objects.create(
-
-        property_id=property_id,
-
-        user=logged_user,
-
-        owner_name=owner_name,
-        owner_phone=owner_phone,
-
-        enquiry_name=name,
-        enquiry_phone=phone,
-        enquiry_message=message,
-
-        enquiry_type=enquiry_type,
-
-        ip_address=_get_client_ip(request),
-    )
-
-    # =====================================================
-    # PHONE REVEAL
-    # =====================================================
-
-    if user_subscription:
-
-        user_subscription.used_contacts += 1
-        user_subscription.remaining_contacts -= 1
-
-        if user_subscription.remaining_contacts <= 0:
-
-            user_subscription.is_active = False
-
-        user_subscription.save()
-
-        return JsonResponse({
-
-            'success': True,
-            'phone_revealed': True,
-
-            'owner_phone': owner_phone,
-            'masked_phone': _mask_phone(owner_phone),
-
-            'owner_name': owner_name,
-
-            'contacts_remaining':
-                user_subscription.remaining_contacts,
-        })
-
-    else:
-
-        return JsonResponse({
-
-            'success': True,
-            'phone_revealed': False,
-
-            'owner_phone': None,
-
-            'masked_phone':
-                _mask_phone(owner_phone),
-
-            'owner_name': owner_name,
-
-            'contacts_remaining': 0,
-        })
-
-
-
-
-
-def subscription_plans(request):
-
-    subscriptions = Subscription_Details.objects.filter(
-        is_active=True
-    ).order_by('plan_offer_price')
-
-    context = {
-        'subscriptions': subscriptions
-    }
-
-    return render(
-        request,
-        'home_page/subscription_plans.html',
-        context
-    )
-
-def subscription_checkout(request, plan_id):
-
-    plan = get_object_or_404(
-        Subscription_Details,
-        id=plan_id
-    )
-
-    context = {
-        'plan': plan
-    }
-
-    return render(
-        request,
-        'home_page/subscription_checkout.html',
-        context
-    )
-# =========================================================
-# REVEAL PHONE
-# =========================================================
-
-@login_required
-def reveal_phone(request, property_id):
-
-    user_id = request.session.get('user_id')
-
-    logged_user = User_Details.objects.filter(
-        id=user_id
-    ).first()
-
-    if not logged_user:
-
-        return JsonResponse({
-            'success': False,
-            'error': 'User not found.'
-        })
-
-    # =====================================================
-    # PROPERTY FIND
-    # =====================================================
-
-    property_obj = None
-
-    models_list = [
-
-        RentalResidentialProperty,
-        CommercialRentalProperty,
-        PGColivingProperty,
-
-        ResaleResidentialProperty,
-        CommercialResaleProperty,
-        PlotSaleProperty,
-        IndustrialResaleProperty,
-        AgriculturalResaleProperty,
-    ]
-
-    for model in models_list:
-
-        try:
-
-            property_obj = model.objects.get(id=property_id)
-            break
-
-        except:
-
-            pass
-
-    if not property_obj:
-
-        return JsonResponse({
-            'success': False,
-            'error': 'Property not found.'
-        })
-
-    return _build_reveal_response(
-        property_obj,
-        logged_user,
-        deduct=False
-    )
-
-
-# =========================================================
-# INTERNAL RESPONSE
-# =========================================================
-
-def _build_reveal_response(property_obj, logged_user, deduct=False):
-
-    owner_name = getattr(
-        property_obj,
-        'owner_name',
-        'Owner'
-    )
-
-    owner_phone = getattr(
-        property_obj,
-        'phone',
-        ''
-    )
-
-    user_subscription = get_active_subscription(logged_user)
-
-    if user_subscription:
-
-        if deduct:
-
-            user_subscription.used_contacts += 1
-            user_subscription.remaining_contacts -= 1
-
-            if user_subscription.remaining_contacts <= 0:
-
-                user_subscription.is_active = False
-
-            user_subscription.save()
-
-        return JsonResponse({
-
-            'success': True,
-            'phone_revealed': True,
-
-            'owner_phone': owner_phone,
-
-            'masked_phone':
-                _mask_phone(owner_phone),
-
-            'owner_name': owner_name,
-
-            'contacts_remaining':
-                user_subscription.remaining_contacts,
-        })
-
-    else:
-
-        return JsonResponse({
-
-            'success': True,
-            'phone_revealed': False,
-
-            'owner_phone': None,
-
-            'masked_phone':
-                _mask_phone(owner_phone),
-
-            'owner_name': owner_name,
-
-            'contacts_remaining': 0,
-        })
-
-
-# =========================================================
-# MASK PHONE
-# =========================================================
-
-def _mask_phone(phone):
-
-    if not phone:
-
-        return '***** *****'
-
-    phone = str(phone).strip()
-
-    if len(phone) >= 10:
-
-        return (
-            phone[:2]
-            + '*' * (len(phone) - 4)
-            + phone[-2:]
-        )
-
-    return '***' + phone[-2:]
-
-
-# =========================================================
-# CLIENT IP
-# =========================================================
-
-def _get_client_ip(request):
-
-    x_forwarded = request.META.get(
-        'HTTP_X_FORWARDED_FOR'
-    )
-
-    if x_forwarded:
-
-        return x_forwarded.split(',')[0].strip()
-
-    return request.META.get(
-        'REMOTE_ADDR',
-        ''
-    )
-
-
-
-
-
-
-
-
-
-
-
-
 
 # ═══════════════════════════════════════════════════════════════════════
 # 1. AI HELPER FUNCTIONS (Must be defined BEFORE listings_view)
@@ -1292,42 +1024,48 @@ def _normalize_any_property(obj, source):
 
 def listings_view(request):
     ai_query = request.GET.get('ai_query', '').strip()
-    selected_types = request.GET.get('types', '').split(',') 
+    
+    # Clean up the types list to avoid ['']
+    raw_types = request.GET.get('types', '')
+    selected_types = [t.strip() for t in raw_types.split(',')] if raw_types else []
+    
     city_filter = request.GET.get('city_filter', '').strip()
     
     normalized_properties = []
-    
+
+    # Moved this outside the if-statement so both AI and standard search can use it
+    model_map = {
+        "Residential Data": RentalResidentialProperty,
+        "Commercial Data": CommercialRentalProperty,
+        "PG Data": PGColivingProperty,
+        "Resale Residential": ResaleResidentialProperty,
+        "Commercial Resale": CommercialResaleProperty,
+        "Plot Resale": PlotSaleProperty,
+        "Agricultural Data": AgriculturalResaleProperty,
+        "Industrial Resale": IndustrialResaleProperty,
+    }
+
     if ai_query:
+        # ==========================================
+        # 1. AI VECTOR SEARCH (When user types a query)
+        # ==========================================
         df = MainAppConfig.get_ai_df()
         model = MainAppConfig.get_ai_model()
         faiss_index = MainAppConfig.get_ai_faiss()
 
-        # 1. AI Vector Search
         query_vector = model.encode([ai_query]).astype('float32')
         _, indices = faiss_index.search(query_vector, k=100) 
         results_df = df.iloc[indices[0]].copy()
 
-        # 2. Strict Category Filtering (Prevents mixing Rent/Resale)
-        if selected_types and selected_types != ['']:
+        # Strict Category Filtering
+        if selected_types:
             results_df = results_df[results_df['source_sheet'].isin(selected_types)]
-
-        model_map = {
-            "Residential Data": RentalResidentialProperty,
-            "Commercial Data": CommercialRentalProperty,
-            "PG Data": PGColivingProperty,
-            "Resale Residential": ResaleResidentialProperty,
-            "Commercial Resale": CommercialResaleProperty,
-            "Plot Resale": PlotSaleProperty,
-            "Agricultural Data": AgriculturalResaleProperty,
-            "Industrial Resale": IndustrialResaleProperty,
-        }
 
         for _, row in results_df.iterrows():
             if len(normalized_properties) >= 20: break 
             
             db_model = model_map.get(row.get('source_sheet'))
             if db_model:
-                # ❗ STRICT CITY FILTER: Ensures results match the user's city exactly
                 obj_query = db_model.objects.filter(id=row.get('db_id'))
                 if city_filter:
                     obj_query = obj_query.filter(city__icontains=city_filter)
@@ -1336,15 +1074,40 @@ def listings_view(request):
                 if real_obj:
                     normalized_properties.append(_normalize_any_property(real_obj, row.get('source_sheet')))
 
+    else:
+        # ==========================================
+        # 2. STANDARD DATABASE SEARCH (Default Browsing)
+        # ==========================================
+        # If user selected specific types, only search those. Otherwise, search all.
+        models_to_search = [(k, v) for k, v in model_map.items() if k in selected_types] if selected_types else model_map.items()
+
+        for sheet_name, db_model in models_to_search:
+            if len(normalized_properties) >= 20: break
+            
+            # Get properties, optionally order by newest if you have a created_at field
+            # e.g., db_model.objects.all().order_by('-id')
+            obj_query = db_model.objects.all() 
+            
+            # Apply the Strict City Filter
+            if city_filter:
+                obj_query = obj_query.filter(city__icontains=city_filter)
+            
+            # Fetch a small chunk from this model to mix results, up to remaining capacity
+            remaining_spots = 20 - len(normalized_properties)
+            for real_obj in obj_query[:remaining_spots]:
+                normalized_properties.append(_normalize_any_property(real_obj, sheet_name))
+
+
     # Send all variables to the template
     context = {
         'properties': normalized_properties,
         'total': len(normalized_properties),
-        'category': selected_types[0] if selected_types and selected_types != [''] else "All",
+        'category': selected_types[0] if selected_types else "All",
         'current_city': city_filter if city_filter else "Nagpur",
         'listing_type': 'rent' if any(x in ai_query.lower() for x in ['rent', 'pg']) else 'sale'
     }
     return render(request, 'home_page/listingpage.html', context)
+
 
 
 def _sort_qs(qs, sort, price_field):
@@ -1689,16 +1452,19 @@ def index(request):
     # OTHER DATA
     # ═══════════════════════════════════════════════════════
     hero = HeroSection.objects.filter(is_active=True).first()
-    blogs = Blog.objects.all().order_by("-date_posted")[:3]
+    
+    seo_pages = LocationSEO.objects.filter(is_active=True, pagetype="blog")
+    
    # faqs = FAQ.objects.all().order_by('-created_at')[:4]
     
     # ═══════════════════════════════════════════════════════
     # CONTEXT
     # ═══════════════════════════════════════════════════════
-    blogs = Blog.objects.all().order_by("-date_posted")
+    
    # faqs = FAQ.objects.all().order_by('-created_at')
 
     subscriptions = Subscription_Details.objects.all()
+    services = LocationSEO.objects.filter(pagetype="service", is_active=True)
 
     # ✅ CORRECT FUNCTION CALL
     residential = list(get_featured_queryset(ResidentialProperty))
@@ -1727,12 +1493,12 @@ def index(request):
         "all_rental_props": all_rental_props[:6],
         "all_resale_props": all_resale_props[:6],
         "hero": hero,
-        "blogs": blogs,
+        "seo_pages":seo_pages,
        # "faqs": faqs,
         "today": today,
         "fifteen_days_ago": fifteen_days_ago,
         'user_obj': None,
-       
+        'services': services,
         'subscriptions':subscriptions
     }
     

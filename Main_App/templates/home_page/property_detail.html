@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>{{ p.title }} — PropCRM</title>
+<title>
+    {% if seo %}
+        {{ seo.meta_title }}
+    {% else %}
+        {{ p.title }}
+    {% endif %}
+
+    
+</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -77,6 +85,54 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 @media(max-width:1024px){.detail-layout{grid-template-columns:1fr;}.gallery{grid-template-columns:1fr;grid-template-rows:300px;}.gal-cell{display:none;}.spec-grid{grid-template-columns:repeat(2,1fr);}.similar-grid{grid-template-columns:1fr 1fr;}}
 @media(max-width:768px){.similar-grid{grid-template-columns:1fr;}}
 </style>
+
+
+
+
+
+
+<meta
+name="description"
+content="{% if seo %}{{ seo.meta_description }}{% endif %}">
+
+<meta
+name="keywords"
+content="{% if seo %}{{ seo.primary_keyword }}, {{ seo.secondary_keywords }}{% endif %}">
+
+{% if seo.canonical_url %}
+<link
+rel="canonical"
+href="{{ request.build_absolute_uri }}">
+{% endif %}
+
+<!-- OPEN GRAPH -->
+
+<meta property="og:title" content="{{ seo.meta_title }}">
+<meta property="og:description" content="{{ seo.meta_description }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+
+{% if property_images %}
+<meta property="og:image" content="{{ property_images.0.image.url }}">
+{% endif %}
+
+<!-- TWITTER -->
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ seo.meta_title }}">
+<meta name="twitter:description" content="{{ seo.meta_description }}">
+
+<!-- SCHEMA -->
+
+{% if seo.schema_json %}
+
+<script type="application/ld+json">
+
+{{ seo.schema_json|safe }}
+
+</script>
+
+{% endif %}
 </head>
 <body>
 
@@ -190,24 +246,74 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
       </div>
     </div>
 
-    <!-- DESCRIPTION SECTION -->
-    <div class="detail-section">
-      <div class="ds-title">
-        <i class="fas fa-align-left" style="color:var(--pr);"></i> 
+<!-- DESCRIPTION SECTION -->
+<div class="detail-section">
+
+    <div class="ds-title">
+        <i class="fas fa-align-left" style="color:var(--pr);"></i>
         About This Property
-      </div>
-      <div style="font-size:.85rem;color:#475569;line-height:1.8;">
-        {% if original.rent_residential_desc %}
-          {{ original.rent_residential_desc|linebreaks }}
-        {% elif original.description %}
-          {{ original.description|linebreaks }}
-        {% elif original.pg_description %}
-          {{ original.pg_description|linebreaks }}
-        {% else %}
-          <p class="text-muted">No detailed description provided for this property.</p>
-        {% endif %}
-      </div>
     </div>
+
+    <div
+    style="
+    font-size:.85rem;
+    color:#475569;
+    line-height:1.8;
+    ">
+
+        <!-- PROPERTY DESCRIPTION -->
+
+        {% if original.rent_residential_desc %}
+
+            {{ original.rent_residential_desc|linebreaks }}
+
+        {% elif original.description %}
+
+            {{ original.description|linebreaks }}
+
+        {% elif original.pg_description %}
+
+            {{ original.pg_description|linebreaks }}
+
+        {% elif seo.meta_description %}
+
+            <p>
+
+                {{ seo.meta_description }}
+
+            </p>
+
+        {% else %}
+
+            <p class="text-muted">
+
+                No detailed description provided for this property.
+
+            </p>
+
+        {% endif %}
+
+
+        <!-- SEO INTRO CONTENT -->
+
+        {% if seo.intro_html %}
+
+            <div
+            style="
+            margin-top:20px;
+            padding-top:15px;
+            border-top:1px solid #e2e8f0;
+            ">
+
+                {{ seo.intro_html|safe }}
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
 
     <!-- AMENITIES SECTION -->
     {% if amenities_list %}
@@ -523,49 +629,96 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e2
 
             </div>
 
-            <form method="POST">
+          <form
+method="POST"
+action="{% url 'save_property_enquiry' %}">
 
-                {% csrf_token %}
+    {% csrf_token %}
 
-                <input
-                type="hidden"
-                name="property_id"
-                value="{{ original.id }}">
+    <!-- PROPERTY DETAILS -->
+    <input
+    type="hidden"
+    name="property_id"
+    value="{{ original.id }}">
 
+    <input
+    type="hidden"
+    name="property_title"
+    value="{{ p.title }}">
 
-                <input
-                type="text"
-                name="name"
-                class="ef-input"
-                placeholder="Your Name"
-                required>
+    <input
+    type="hidden"
+    name="property_type"
+    value="{{ listing_type }}">
 
+    <input
+    type="hidden"
+    name="property_location"
+    value="{{ p.location }}">
 
-                <input
-                type="tel"
-                name="phone"
-                class="ef-input"
-                placeholder="Phone Number"
-                required>
+    <input
+    type="hidden"
+    name="property_price"
+    value="{{ p.price_display }}">
 
+    <!-- SOURCE TRACKING -->
+    <input
+    type="hidden"
+    name="lead_source"
+    value="property_detail_page">
 
-                <textarea
-                name="message"
-                class="ef-input"
-                rows="3"
-                placeholder="I am interested in this property"></textarea>
+    <input
+    type="hidden"
+    name="page_url"
+    value="{{ request.build_absolute_uri }}">
 
+    <input
+    type="hidden"
+    name="seo_slug"
+    value="{{ seo.slug }}">
 
-                <button
-                type="submit"
-                name="send_enquiry"
-                class="btn btn-dark w-100 btn-sm py-2">
+    <!-- USER INPUTS -->
 
-                    Send Enquiry
+    <input
+    type="text"
+    name="name"
+    class="ef-input"
+    placeholder="Your Name"
+    required>
 
-                </button>
+    <input
+    type="tel"
+    name="phone"
+    class="ef-input"
+    placeholder="Phone Number"
+    required>
 
-            </form>
+    <input
+    type="email"
+    name="email"
+    class="ef-input"
+    placeholder="Email Address">
+
+    <textarea
+    name="message"
+    class="ef-input"
+    rows="3"
+    placeholder="I am interested in this property"></textarea>
+
+    <!-- SUBMIT BUTTON -->
+
+    <button
+    type="submit"
+    name="send_enquiry"
+    class="btn btn-dark w-100 btn-sm py-2">
+
+        <i class="fas fa-paper-plane"></i>
+
+        Send Enquiry
+
+    </button>
+
+</form>
 
         </div>
 

@@ -860,8 +860,25 @@ class ResaleResidentialProperty(models.Model):
         return f"{self.title} - {self.city} ({self.bhk})"
 
     def save(self, *args, **kwargs):
-        if self.expected_price and self.builtup_area and self.builtup_area > 0:
-            self.price_per_sqft = round(float(self.expected_price) / float(self.builtup_area), 2)
+
+        try:
+
+            if self.expected_price and self.builtup_area:
+
+                expected_price = float(self.expected_price)
+                builtup_area = float(self.builtup_area)
+
+                if builtup_area > 0:
+
+                    self.price_per_sqft = round(
+                    expected_price / builtup_area,
+                    2
+                )
+
+        except (ValueError, TypeError, ZeroDivisionError):
+
+            self.price_per_sqft = None
+
         super().save(*args, **kwargs)
 
 

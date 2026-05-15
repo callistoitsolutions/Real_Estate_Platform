@@ -1,0 +1,179 @@
+{% include "admin_user/admin_header.html" %}
+
+<div class="main-content">
+
+    <div
+    style="
+    background:white;
+    padding:25px;
+    border-radius:14px;
+    ">
+
+        <h2
+        style="
+        font-weight:800;
+        margin-bottom:20px;
+        ">
+
+            Property Enquiry Report
+
+        </h2>
+
+
+        <!-- STATS -->
+
+        <div
+        style="
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:20px;
+        margin-bottom:25px;
+        ">
+
+            <div
+            style="
+            background:#eff6ff;
+            padding:20px;
+            border-radius:12px;
+            ">
+
+                <div>Total Enquiries</div>
+
+                <h2>{{ total_enquiries }}</h2>
+
+            </div>
+
+            <div
+            style="
+            background:#fef9c3;
+            padding:20px;
+            border-radius:12px;
+            ">
+
+                <div>New Leads</div>
+
+                <h2>{{ new_enquiries }}</h2>
+
+            </div>
+
+            <div
+            style="
+            background:#dcfce7;
+            padding:20px;
+            border-radius:12px;
+            ">
+
+                <div>Closed Leads</div>
+
+                <h2>{{ closed_enquiries }}</h2>
+
+            </div>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered">
+
+                <thead>
+
+                    <tr>
+
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Property</th>
+                        <th>Location</th>
+                        <th>Price</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                        <th>Date</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for enquiry in enquiries %}
+
+                    <tr>
+
+                        <td>{{ forloop.counter }}</td>
+
+                        <td>
+
+                            {{ enquiry.name }}
+
+                        </td>
+
+                        <td>
+
+                            {{ enquiry.phone }}
+
+                        </td>
+
+                        <td>
+
+                            {{ enquiry.property_title }}
+
+                        </td>
+
+                        <td>
+
+                            {{ enquiry.property_location }}
+
+                        </td>
+
+                        <td>
+
+                            {{ enquiry.property_price }}
+
+                        </td>
+
+                        <td>
+
+                            {{ enquiry.lead_source }}
+
+                        </td>
+
+                        <td>
+
+                            {{ enquiry.enquiry_status }}
+
+                        </td>
+
+                        <td>
+
+                            {{ enquiry.created_at }}
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="9">
+
+                            No enquiries found.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

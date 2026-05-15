@@ -9136,11 +9136,37 @@ def view_agricultural_property(request, pk):
 
 #######################Start View SEO MODULE SECTION###################################
 
+
+
+
+
+
+
 def seo_list(request):
-    seo_pages = LocationSEO.objects.all().order_by('-id')
-    return render(request, "admin_user/Seo_Module/seo_list.html", {"seo_pages": seo_pages})
+    # --- Handle Bulk Action Logic ---
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        selected_ids = request.POST.getlist('ids[]')
+        action = request.POST.get('action')
+        
+        if action == 'active':
+            LocationSEO.objects.filter(id__in=selected_ids).update(is_active=True)
+        elif action == 'pause':
+            LocationSEO.objects.filter(id__in=selected_ids).update(is_active=False)
+            
+        return JsonResponse({'status': 'success', 'message': f'Items updated to {action}'})
 
+    # --- Regular List Logic ---
+    # Retrieve all pages ordered by type for consistent grouping
+    seo_pages = LocationSEO.objects.all().order_by('pagetype', '-id')
 
+    # Get distinct page types and their counts for the menu/cards
+    type_counts = LocationSEO.objects.values('pagetype').annotate(total=Count('id')).order_by('pagetype')
+
+    context = {
+        "seo_pages": seo_pages,
+        "type_counts": type_counts,
+    }
+    return render(request, "admin_user/Seo_Module/seo_list.html", context)
 
 
 #######################End View SEO MODULE SECTION###################################

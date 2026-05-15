@@ -163,35 +163,28 @@ urlpatterns = [
     path('listingpage/', views.listings_view, name='listings'),
    
     path('listing/<str:listing_type>/<str:category>/<int:pk>/', views.property_detail_view, name='property_detail'),
+    path(
+        "save-property-enquiry/",
+        views.save_property_enquiry,
+        name="save_property_enquiry"
+    ),
 
     path(
-        'submit-enquiry/<int:property_id>/',
-        views.submit_enquiry,
-        name='submit_enquiry'
+        "enquiry-report/",
+        views.enquiry_report,
+        name="enquiry_report"
     ),
+
+    
 
     # =====================================================
     # REVEAL PHONE
     # =====================================================
 
-    path(
-        'reveal-phone/<int:property_id>/',
-        views.reveal_phone,
-        name='reveal_phone'
-    ),
 
-    path(
-    'subscription-checkout/<int:plan_id>/',
-    views.subscription_checkout,
-    name='subscription_checkout'
-),
+  
     
-    
-      path(
-        'subscription-plans/',
-        views.subscription_plans,
-        name='subscription_plans'
-    ),
+     
 
    # path('listings/', views.listings_view, name='listings'),
 
