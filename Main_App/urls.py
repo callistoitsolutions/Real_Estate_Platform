@@ -164,11 +164,11 @@ urlpatterns = [
    
     path('listing/<str:listing_type>/<str:category>/<int:pk>/', views.property_detail_view, name='property_detail'),
 
-    path(
-        'submit-enquiry/<int:property_id>/',
-        views.submit_enquiry,
-        name='submit_enquiry'
-    ),
+    ######### urls for ajax for send property enquiry #####################
+
+    path('Send_Property_Enquiry', views.Send_Property_Enquiry, name='Send_Property_Enquiry'),
+
+    
 
     # =====================================================
     # REVEAL PHONE

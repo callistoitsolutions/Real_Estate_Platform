@@ -60,6 +60,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 import json
 from .apps import MainAppConfig
+from datetime import datetime
 
 
 
@@ -109,30 +110,59 @@ def portalpage(request):
 
 def _normalize_rental(p):
     """Normalize rental residential property"""
+
     image_url = ""
+
     first_image = p.images.first()
     if first_image and first_image.image:
         image_url = first_image.image.url
 
     return {
         'id': p.id,
-        'title': f"{p.bhk_type} in {p.locality}" if hasattr(p, 'bhk_type') and p.bhk_type else (p.property_type or "Residential Property"),
-        'price_display': f"₹{p.expected_rent or 0}",
+
+        'title': (
+            f"{p.bhk_type} in {p.locality}"
+            if p.bhk_type
+            else (p.property_type or "Residential Property")
+        ),
+
+        #  Correct field
+        'price_display': f"₹{p.monthly_rent or 0}",
+
         'location': f"{p.locality}, {p.city}",
-        'beds': p.bhk_type if hasattr(p, 'bhk_type') else "—",
-        'baths': p.bathrooms if hasattr(p, 'bathrooms') else "—",
-        'area': f"{p.carpet_area or '—'} sq.ft" if hasattr(p, 'carpet_area') else "—",
-        'floor': f"{p.floor_number or '—'}" if hasattr(p, 'floor_number') else "—",
-        'furnished': p.furnishing or "Not Specified",
+
+        'beds': p.bhk_type or "—",
+
+        'baths': p.bathrooms or "—",
+
+        'area': f"{p.carpet_area or '—'} sq.ft",
+
+        'floor': p.floor_number or "—",
+
+        #  Correct field
+        'furnished': p.furnishing_status or "Not Specified",
+
         'property_type': p.property_type or "Residential",
+
         'listing_type': 'rent',
+
         'category': 'residential',
+
         'owner': p.owner_name or "Owner",
+
         'owner_role': "Property Owner",
-        'owner_initials': p.owner_name[:2].upper() if p.owner_name else "OW",
+
+        'owner_initials': (
+            p.owner_name[:2].upper()
+            if p.owner_name else "OW"
+        ),
+
         'phone': p.contact_number or "",
+
         'image_url': image_url,
+
         'is_new': True,
+
         'is_ai_match': True,
     }
 
@@ -795,6 +825,14 @@ def property_detail_view(request, listing_type, category, pk):
         'now': now(),
     }
 
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
     return render(
         request,
         'home_page/property_detail.html',
@@ -802,197 +840,36 @@ def property_detail_view(request, listing_type, category, pk):
     )
 
 
-# =========================================================
-# SUBMIT ENQUIRY
-# =========================================================
+########### Views start for ajax for send property enquiry ########################
 
-@require_POST
-def submit_enquiry(request, property_id):
+@csrf_exempt
+def Send_Property_Enquiry(request):
+    data = request.POST.dict()   
+    
+    real_property = None
 
-    name = request.POST.get('name', '').strip()
-    phone = request.POST.get('phone', '').strip()
-    message = request.POST.get('message', '').strip()
+    if data['listing_type'] == "rent" and data['category'] == "residential":
+        real_property = RentalResidentialProperty.objects.get(id=data['property_id'])
 
-    if not name or not phone:
+    elif data['listing_type'] == "rent" and data['category'] == "pg":
+        real_property = PGColivingProperty.objects.get(id=data['property_id'])
 
-        return JsonResponse({
-            'success': False,
-            'error': 'Name and phone are required.'
-        })
+    elif data['listing_type'] == "rent" and data['category'] == "commercial":
+        real_property = CommercialProperty.objects.get(id=data['property_id'])
 
-    # =====================================================
-    # USER
-    # =====================================================
+    # If we couldn't find a matching property type, stop here.
+    if not real_property:
+        return JsonResponse({"status": "0", "msg": "Invalid property type or category."})
 
-    user_id = request.session.get('user_id')
+    user_data = User_Details.objects.get(id=data['user_id'])
+    Property_Enquiry.objects.create(property_object=real_property,user=user_data,enquiry_name=data['enquiry_name'],enquiry_phone=data['enquiry_phone'],enquiry_email=data['enquiry_email'],enquiry_message=data['enquiry_message'],enquiry_date=datetime.today(),enquiry_time=datetime.now())
 
-    logged_user = None
+    return JsonResponse({"status":"1", "msg" : f"Enquiry submiited successfully we will get back to you soon"})
 
-    if user_id:
 
-        logged_user = User_Details.objects.filter(
-            id=user_id
-        ).first()
+########### Views end for ajax for send property enquiry ######################
 
-    # =====================================================
-    # PROPERTY OBJECT FIND
-    # =====================================================
 
-    property_obj = None
-
-    models_list = [
-
-        RentalResidentialProperty,
-        CommercialRentalProperty,
-        PGColivingProperty,
-
-        ResaleResidentialProperty,
-        CommercialResaleProperty,
-        PlotSaleProperty,
-        IndustrialResaleProperty,
-        AgriculturalResaleProperty,
-    ]
-
-    for model in models_list:
-
-        try:
-
-            property_obj = model.objects.get(id=property_id)
-            break
-
-        except:
-
-            pass
-
-    if not property_obj:
-
-        return JsonResponse({
-            'success': False,
-            'error': 'Property not found.'
-        })
-
-    # =====================================================
-    # ALREADY ENQUIRED
-    # =====================================================
-
-    if logged_user:
-
-        already = Property_Enquiry.objects.filter(
-            property_id=property_id,
-            user=logged_user
-        ).exists()
-
-        if already:
-
-            return _build_reveal_response(
-                property_obj,
-                logged_user,
-                deduct=False
-            )
-
-    # =====================================================
-    # USER SUBSCRIPTION
-    # =====================================================
-
-    user_subscription = None
-
-    if logged_user:
-
-        user_subscription = get_active_subscription(logged_user)
-
-    # =====================================================
-    # OWNER DETAILS
-    # =====================================================
-
-    owner_name = getattr(
-        property_obj,
-        'owner_name',
-        'Owner'
-    )
-
-    owner_phone = getattr(
-        property_obj,
-        'phone',
-        ''
-    )
-
-    # =====================================================
-    # ENQUIRY TYPE
-    # =====================================================
-
-    enquiry_type = 'General Enquiry'
-
-    if user_subscription:
-
-        enquiry_type = 'Phone Reveal'
-
-    # =====================================================
-    # SAVE ENQUIRY
-    # =====================================================
-
-    Property_Enquiry.objects.create(
-
-        property_id=property_id,
-
-        user=logged_user,
-
-        owner_name=owner_name,
-        owner_phone=owner_phone,
-
-        enquiry_name=name,
-        enquiry_phone=phone,
-        enquiry_message=message,
-
-        enquiry_type=enquiry_type,
-
-        ip_address=_get_client_ip(request),
-    )
-
-    # =====================================================
-    # PHONE REVEAL
-    # =====================================================
-
-    if user_subscription:
-
-        user_subscription.used_contacts += 1
-        user_subscription.remaining_contacts -= 1
-
-        if user_subscription.remaining_contacts <= 0:
-
-            user_subscription.is_active = False
-
-        user_subscription.save()
-
-        return JsonResponse({
-
-            'success': True,
-            'phone_revealed': True,
-
-            'owner_phone': owner_phone,
-            'masked_phone': _mask_phone(owner_phone),
-
-            'owner_name': owner_name,
-
-            'contacts_remaining':
-                user_subscription.remaining_contacts,
-        })
-
-    else:
-
-        return JsonResponse({
-
-            'success': True,
-            'phone_revealed': False,
-
-            'owner_phone': None,
-
-            'masked_phone':
-                _mask_phone(owner_phone),
-
-            'owner_name': owner_name,
-
-            'contacts_remaining': 0,
-        })
 
 
 
@@ -1292,42 +1169,48 @@ def _normalize_any_property(obj, source):
 
 def listings_view(request):
     ai_query = request.GET.get('ai_query', '').strip()
-    selected_types = request.GET.get('types', '').split(',') 
+    
+    # Clean up the types list to avoid ['']
+    raw_types = request.GET.get('types', '')
+    selected_types = [t.strip() for t in raw_types.split(',')] if raw_types else []
+    
     city_filter = request.GET.get('city_filter', '').strip()
     
     normalized_properties = []
-    
+
+    # Moved this outside the if-statement so both AI and standard search can use it
+    model_map = {
+        "Residential Data": RentalResidentialProperty,
+        "Commercial Data": CommercialRentalProperty,
+        "PG Data": PGColivingProperty,
+        "Resale Residential": ResaleResidentialProperty,
+        "Commercial Resale": CommercialResaleProperty,
+        "Plot Resale": PlotSaleProperty,
+        "Agricultural Data": AgriculturalResaleProperty,
+        "Industrial Resale": IndustrialResaleProperty,
+    }
+
     if ai_query:
+        # ==========================================
+        # 1. AI VECTOR SEARCH (When user types a query)
+        # ==========================================
         df = MainAppConfig.get_ai_df()
         model = MainAppConfig.get_ai_model()
         faiss_index = MainAppConfig.get_ai_faiss()
 
-        # 1. AI Vector Search
         query_vector = model.encode([ai_query]).astype('float32')
         _, indices = faiss_index.search(query_vector, k=100) 
         results_df = df.iloc[indices[0]].copy()
 
-        # 2. Strict Category Filtering (Prevents mixing Rent/Resale)
-        if selected_types and selected_types != ['']:
+        # Strict Category Filtering
+        if selected_types:
             results_df = results_df[results_df['source_sheet'].isin(selected_types)]
-
-        model_map = {
-            "Residential Data": RentalResidentialProperty,
-            "Commercial Data": CommercialRentalProperty,
-            "PG Data": PGColivingProperty,
-            "Resale Residential": ResaleResidentialProperty,
-            "Commercial Resale": CommercialResaleProperty,
-            "Plot Resale": PlotSaleProperty,
-            "Agricultural Data": AgriculturalResaleProperty,
-            "Industrial Resale": IndustrialResaleProperty,
-        }
 
         for _, row in results_df.iterrows():
             if len(normalized_properties) >= 20: break 
             
             db_model = model_map.get(row.get('source_sheet'))
             if db_model:
-                # ❗ STRICT CITY FILTER: Ensures results match the user's city exactly
                 obj_query = db_model.objects.filter(id=row.get('db_id'))
                 if city_filter:
                     obj_query = obj_query.filter(city__icontains=city_filter)
@@ -1336,11 +1219,35 @@ def listings_view(request):
                 if real_obj:
                     normalized_properties.append(_normalize_any_property(real_obj, row.get('source_sheet')))
 
+    else:
+        # ==========================================
+        # 2. STANDARD DATABASE SEARCH (Default Browsing)
+        # ==========================================
+        # If user selected specific types, only search those. Otherwise, search all.
+        models_to_search = [(k, v) for k, v in model_map.items() if k in selected_types] if selected_types else model_map.items()
+
+        for sheet_name, db_model in models_to_search:
+            if len(normalized_properties) >= 20: break
+            
+            # Get properties, optionally order by newest if you have a created_at field
+            # e.g., db_model.objects.all().order_by('-id')
+            obj_query = db_model.objects.all() 
+            
+            # Apply the Strict City Filter
+            if city_filter:
+                obj_query = obj_query.filter(city__icontains=city_filter)
+            
+            # Fetch a small chunk from this model to mix results, up to remaining capacity
+            remaining_spots = 20 - len(normalized_properties)
+            for real_obj in obj_query[:remaining_spots]:
+                normalized_properties.append(_normalize_any_property(real_obj, sheet_name))
+
+
     # Send all variables to the template
     context = {
         'properties': normalized_properties,
         'total': len(normalized_properties),
-        'category': selected_types[0] if selected_types and selected_types != [''] else "All",
+        'category': selected_types[0] if selected_types else "All",
         'current_city': city_filter if city_filter else "Nagpur",
         'listing_type': 'rent' if any(x in ai_query.lower() for x in ['rent', 'pg']) else 'sale'
     }
