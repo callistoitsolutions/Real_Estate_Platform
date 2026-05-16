@@ -60,6 +60,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
 import json
 from .apps import MainAppConfig
+from datetime import datetime
 
 
 
@@ -126,6 +127,7 @@ def _normalize_rental(p):
         ),
 
         # ✅ Correct field
+        #  Correct field
         'price_display': f"₹{p.monthly_rent or 0}",
 
         'location': f"{p.locality}, {p.city}",
@@ -138,10 +140,7 @@ def _normalize_rental(p):
 
         'floor': p.floor_number or "—",
 
-        # ✅ Correct field
-        'furnished': p.furnishing_status or "Not Specified",
 
-        'property_type': p.property_type or "Residential",
 
         'listing_type': 'rent',
 
@@ -941,11 +940,272 @@ def property_detail_view(request, listing_type, category, pk):
         "now": now(),
     }
 
+    # 🔹 3. Handle the logged-in user logic safely
+    session_id = request.session.get('User_id')
+    if session_id:
+        
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
     return render(
         request,
         'home_page/property_detail.html',
         context
     )
+
+
+########### Views start for ajax for send property enquiry ########################
+
+@csrf_exempt
+def Send_Property_Enquiry(request):
+    data = request.POST.dict()   
+    
+    real_property = None
+
+    if data['listing_type'] == "rent" and data['category'] == "residential":
+        real_property = RentalResidentialProperty.objects.get(id=data['property_id'])
+
+    elif data['listing_type'] == "rent" and data['category'] == "pg":
+        real_property = PGColivingProperty.objects.get(id=data['property_id'])
+
+    elif data['listing_type'] == "rent" and data['category'] == "commercial":
+        real_property = CommercialProperty.objects.get(id=data['property_id'])
+
+    # If we couldn't find a matching property type, stop here.
+    if not real_property:
+        return JsonResponse({"status": "0", "msg": "Invalid property type or category."})
+
+    user_data = User_Details.objects.get(id=data['user_id'])
+    Property_Enquiry.objects.create(property_object=real_property,user=user_data,enquiry_name=data['enquiry_name'],enquiry_phone=data['enquiry_phone'],enquiry_email=data['enquiry_email'],enquiry_message=data['enquiry_message'],enquiry_date=datetime.today(),enquiry_time=datetime.now())
+
+    return JsonResponse({"status":"1", "msg" : f"Enquiry submiited successfully we will get back to you soon"})
+
+
+########### Views end for ajax for send property enquiry ######################
+
+
+
+
+
+
+
+def subscription_plans(request):
+
+    subscriptions = Subscription_Details.objects.filter(
+        is_active=True
+    ).order_by('plan_offer_price')
+
+    context = {
+        'subscriptions': subscriptions
+    }
+
+    return render(
+        request,
+        'home_page/subscription_plans.html',
+        context
+    )
+
+def subscription_checkout(request, plan_id):
+
+    plan = get_object_or_404(
+        Subscription_Details,
+        id=plan_id
+    )
+
+    context = {
+        'plan': plan
+    }
+
+    return render(
+        request,
+        'home_page/subscription_checkout.html',
+        context
+    )
+# =========================================================
+# REVEAL PHONE
+# =========================================================
+
+@login_required
+def reveal_phone(request, property_id):
+
+    user_id = request.session.get('user_id')
+
+    logged_user = User_Details.objects.filter(
+        id=user_id
+    ).first()
+
+    if not logged_user:
+
+        return JsonResponse({
+            'success': False,
+            'error': 'User not found.'
+        })
+
+    # =====================================================
+    # PROPERTY FIND
+    # =====================================================
+
+    property_obj = None
+
+    models_list = [
+
+        RentalResidentialProperty,
+        CommercialRentalProperty,
+        PGColivingProperty,
+
+        ResaleResidentialProperty,
+        CommercialResaleProperty,
+        PlotSaleProperty,
+        IndustrialResaleProperty,
+        AgriculturalResaleProperty,
+    ]
+
+    for model in models_list:
+
+        try:
+
+            property_obj = model.objects.get(id=property_id)
+            break
+
+        except:
+
+            pass
+
+    if not property_obj:
+
+        return JsonResponse({
+            'success': False,
+            'error': 'Property not found.'
+        })
+
+    return _build_reveal_response(
+        property_obj,
+        logged_user,
+        deduct=False
+    )
+
+
+# =========================================================
+# INTERNAL RESPONSE
+# =========================================================
+
+def _build_reveal_response(property_obj, logged_user, deduct=False):
+
+    owner_name = getattr(
+        property_obj,
+        'owner_name',
+        'Owner'
+    )
+
+    owner_phone = getattr(
+        property_obj,
+        'phone',
+        ''
+    )
+
+    user_subscription = get_active_subscription(logged_user)
+
+    if user_subscription:
+
+        if deduct:
+
+            user_subscription.used_contacts += 1
+            user_subscription.remaining_contacts -= 1
+
+            if user_subscription.remaining_contacts <= 0:
+
+                user_subscription.is_active = False
+
+            user_subscription.save()
+
+        return JsonResponse({
+
+            'success': True,
+            'phone_revealed': True,
+
+            'owner_phone': owner_phone,
+
+            'masked_phone':
+                _mask_phone(owner_phone),
+
+            'owner_name': owner_name,
+
+            'contacts_remaining':
+                user_subscription.remaining_contacts,
+        })
+
+    else:
+
+        return JsonResponse({
+
+            'success': True,
+            'phone_revealed': False,
+
+            'owner_phone': None,
+
+            'masked_phone':
+                _mask_phone(owner_phone),
+
+            'owner_name': owner_name,
+
+            'contacts_remaining': 0,
+        })
+
+
+# =========================================================
+# MASK PHONE
+# =========================================================
+
+def _mask_phone(phone):
+
+    if not phone:
+
+        return '***** *****'
+
+    phone = str(phone).strip()
+
+    if len(phone) >= 10:
+
+        return (
+            phone[:2]
+            + '*' * (len(phone) - 4)
+            + phone[-2:]
+        )
+
+    return '***' + phone[-2:]
+
+
+# =========================================================
+# CLIENT IP
+# =========================================================
+
+def _get_client_ip(request):
+
+    x_forwarded = request.META.get(
+        'HTTP_X_FORWARDED_FOR'
+    )
+
+    if x_forwarded:
+
+        return x_forwarded.split(',')[0].strip()
+
+    return request.META.get(
+        'REMOTE_ADDR',
+        ''
+    )
+
+
+
+
+
+
+
+
+
+
+
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # 1. AI HELPER FUNCTIONS (Must be defined BEFORE listings_view)

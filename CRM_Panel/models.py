@@ -1,139 +1,43 @@
 from django.db import models
+from django.utils.timezone import now
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+from Admin_App.models import *
+
+
+################### Property Enquiry Modal Starts Here ######################
 
 
 class PropertyEnquiry(models.Model):
 
-    # ==========================================
-    # USER DETAILS
-    # ==========================================
+    # 1. The type of property (PG, Commercial, etc.)
+    content_type = models.ForeignKey(
+        ContentType, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True
+    )
+    
+    # 2. The ID of that specific property
+    object_id = models.PositiveIntegerField(null=True, blank=True)
 
-    name = models.CharField(
-        max_length=200
+    # 3. The Generic Foreign Key (Combines the two above)
+    property_object = GenericForeignKey('content_type', 'object_id')
+
+    # --- Your existing fields stay the same ---
+    user = models.ForeignKey(User_Details,on_delete=models.CASCADE,blank=True,null=True
     )
 
-    phone = models.CharField(
-        max_length=20
-    )
+    enquiry_name = models.CharField(max_length=200, blank=True, null=True)
+    enquiry_phone = models.CharField(max_length=20, blank=True, null=True)
+    enquiry_email = models.CharField(max_length=20, blank=True, null=True)
 
-    email = models.EmailField(
-        blank=True,
-        null=True
-    )
+    enquiry_message = models.TextField(blank=True, null=True)
 
-    message = models.TextField(
-        blank=True,
-        null=True
-    )
-
-
-    # ==========================================
-    # PROPERTY DETAILS
-    # ==========================================
-
-    property_id = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-    property_title = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True
-    )
-
-    property_type = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-    property_location = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True
-    )
-
-    property_price = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-
-    # ==========================================
-    # SEO / SOURCE TRACKING
-    # ==========================================
-
-    lead_source = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True
-    )
-
-    seo_slug = models.CharField(
-        max_length=255,
-        blank=True,
-        null=True
-    )
-
-    page_url = models.URLField(
-        blank=True,
-        null=True
-    )
-
-    user_ip = models.GenericIPAddressField(
-        blank=True,
-        null=True
-    )
-
-    user_device = models.TextField(
-        blank=True,
-        null=True
-    )
-
-    referrer_url = models.URLField(
-        blank=True,
-        null=True
-    )
-
-
-    # ==========================================
-    # STATUS
-    # ==========================================
-
-    enquiry_status = models.CharField(
-
-        max_length=50,
-
-        choices=[
-
-            ("New", "New"),
-            ("Contacted", "Contacted"),
-            ("Site Visit", "Site Visit"),
-            ("Closed", "Closed"),
-            ("Rejected", "Rejected"),
-
-        ],
-
-        default="New"
-
-    )
-
-
-    # ==========================================
-    # DATES
-    # ==========================================
-
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-
-    updated_at = models.DateTimeField(
-        auto_now=True
-    )
-
+    enquiry_date = models.DateField(blank=True,null=True)
+    enquiry_time = models.TimeField(blank=True,null=True)
 
     def __str__(self):
-
-        return f"{self.name} - {self.property_title}"
+        return str(self.enquiry_name)+"-"+self.enquiry_phone
+    
+############### Property Enquiry Modal Ends Here ############################

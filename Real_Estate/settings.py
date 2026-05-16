@@ -103,10 +103,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     #  1. The User-Agent package middleware
-    'django_user_agents.middleware.UserAgentMiddleware',
+    # 'django_user_agents.middleware.UserAgentMiddleware',
 
     #  2. YOUR custom middleware (adjust 'your_app_name' to where the file actually lives!)
-    'Main_App.middleware.LocalActiveUserMiddleware',
+    # 'Main_App.middleware.LocalActiveUserMiddleware',
 ]
 
 

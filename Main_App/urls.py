@@ -174,6 +174,11 @@ urlpatterns = [
         views.enquiry_report,
         name="enquiry_report"
     ),
+    ######### urls for ajax for send property enquiry #####################
+
+    path('Send_Property_Enquiry', views.Send_Property_Enquiry, name='Send_Property_Enquiry'),
+
+    
 
     
 
