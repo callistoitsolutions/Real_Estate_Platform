@@ -46,6 +46,7 @@ from django.db.models import Q
 import re
 from rapidfuzz import process, fuzz
 from .apps import MainAppConfig
+from django.core.mail import send_mail
 
 
 ########### Crime Officer Views#######
@@ -61,6 +62,9 @@ from django.forms.models import model_to_dict
 import json
 from .apps import MainAppConfig
 from datetime import datetime
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.utils.crypto import get_random_string
 
 
 
@@ -856,13 +860,7 @@ def property_detail_view(request, listing_type, category, pk):
     # USER SUBSCRIPTION
     # =====================================================
 
-    user_subscription = None
-
-    if logged_user:
-
-        user_subscription = get_active_subscription(
-            logged_user
-        )
+    
 
     # =====================================================
     # CONTACT ACCESS
@@ -870,9 +868,6 @@ def property_detail_view(request, listing_type, category, pk):
 
     can_view_contact = False
 
-    if user_subscription:
-
-        can_view_contact = True
 
     # =====================================================
     # MASK PHONE NUMBER
@@ -928,8 +923,6 @@ def property_detail_view(request, listing_type, category, pk):
         # USER
         "logged_user": logged_user,
 
-        # SUBSCRIPTION
-        "user_subscription": user_subscription,
 
         # CONTACT
         "can_view_contact": can_view_contact,
@@ -1545,50 +1538,6 @@ from django.db.models import Q
 
 @csrf_exempt
 def login_view(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body.decode('utf-8'))
-            user_identifier = data.get('user_identifier', '').strip()
-            user_password = data.get('user_password', '')
-            user_role = data.get('user_role') 
-
-            user_qs = User_Details.objects.filter(
-                Q(user_email=user_identifier) | Q(user_phone=user_identifier),
-                user_password=user_password, 
-                user_role=user_role
-            )
-            
-            if user_qs.exists():
-                user_obj = user_qs.first()
-                
-                # --- SESSION LOGIC ---
-                request.session['User_id'] = str(user_obj.id)
-                request.session['user_type'] = user_role
-                
-
-                # --- DYNAMIC REDIRECT LOGIC ---
-
-                if user_role == 'Relationship Manager':
-                    # Make sure 'rm_dashboard' matches the exact name in your urls.py!
-                    url = reverse('rm_dashboard') 
-                else:
-                    url = reverse('index')
-                
-                return JsonResponse({
-                    'status': '1', 
-                    'msg': 'Success!',
-                    'user_name': user_obj.user_name, 
-                    'user_role': user_obj.user_role,
-                    'user_mobile': user_obj.user_phone, 
-                    'user_email': user_obj.user_email,
-                    'redirect_url': url 
-                })
-
-            return JsonResponse({'status': 0, 'msg': 'Invalid Credentials or Role Selection'})
-
-        except Exception:
-            print(traceback.format_exc())
-            return JsonResponse({'status': 0, 'msg': 'Something went wrong'})
     
     return render(request, 'home_page/login.html')
 
@@ -1632,6 +1581,208 @@ def lead_capture_view(request):
 
 
 # ---------------- POST PROPERTY ----------------
+
+
+############### Views start for check email already exists or not ####################
+
+@csrf_exempt
+def Check_Email_Api(request):
+    if request.method == "POST":
+        email = request.POST.get('email', '').strip()
+        # Check database for email
+        user_exists = User_Details.objects.filter(user_email=email).exists()
+        return JsonResponse({'exists': user_exists})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+########### Views end for check email already exists or not ##########################
+
+
+########### Views start for if email exits directly login #########################
+
+@csrf_exempt
+def Prop_Login_Api(request):
+    if request.method == "POST":
+        try:
+            user_identifier = request.POST.get('email', '').strip()
+            password = request.POST.get('password', '')
+            
+            # Find the user by Email OR Phone
+            user_qs = User_Details.objects.filter(
+                Q(user_email=user_identifier) | Q(user_phone=user_identifier),
+                user_password=password
+            )
+            
+            if user_qs.exists():
+                user_obj = user_qs.first()
+                
+                # 🟢 EXACT MATCH TO YOUR ORIGINAL SESSION LOGIC
+                request.session['User_id'] = str(user_obj.id)
+                request.session['user_type'] = user_obj.user_role
+                
+                # 🟢 DYNAMIC REDIRECT LOGIC
+                if user_obj.user_role == 'Relationship Manager':
+                    url = reverse('rm_dashboard') 
+                else:
+                    url = reverse('index')
+                
+                return JsonResponse({
+                    'status': '1', 
+                    'msg': 'Success!',
+                    'redirect_url': url,
+                    'user_name': user_obj.user_name,   
+                    'user_role': user_obj.user_role,
+                    'user_email': user_obj.user_email
+                })
+
+            return JsonResponse({'status': '0', 'msg': 'Incorrect password or user not found.'})
+
+        except Exception as e:
+            print(traceback.format_exc())
+            return JsonResponse({'status': '0', 'msg': 'Something went wrong'})
+            
+    return JsonResponse({'status': '0', 'msg': 'Invalid request.'})
+
+############ Views end for if email exists directly login ############################
+
+
+############ Views start for send otp to email #############################
+
+@csrf_exempt
+def Send_Otp_Api(request):
+    if request.method == "POST":
+        user_identifier = request.POST.get('email', '').strip()
+        otp = str(random.randint(1000, 9999))
+        
+        request.session['auth_otp'] = otp
+        request.session['auth_identifier'] = user_identifier
+        
+        # 🟢 CRITICAL FIX: Force Django to save the session immediately
+        request.session.modified = True 
+        
+        if '@' in user_identifier:
+            try:
+                send_mail(
+                    subject='Your PropCRM Verification Code',
+                    message=f'Hello!\n\nYour 4-digit verification code is: {otp}\n\nDo not share this code with anyone.',
+                    from_email=None, 
+                    recipient_list=[user_identifier],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                print(f"Mail Error: {e}")
+                
+        print(f" OTP FOR {user_identifier}: {otp}")
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+########## Views end for send otp to email ###########################
+
+
+########## Views start for verify otp for email ########################
+
+@csrf_exempt
+def Verify_Otp_Api(request):
+    if request.method == "POST":
+        user_identifier = request.POST.get('email', '').strip()
+        submitted_otp = request.POST.get('otp', '').strip()
+        
+        actual_otp = request.session.get('auth_otp')
+        session_identifier = request.session.get('auth_identifier')
+        
+        if submitted_otp == actual_otp and user_identifier == session_identifier:
+            #  CRITICAL FIX: Set a dedicated success flag and save immediately
+            request.session['otp_verified_for'] = user_identifier
+            request.session.modified = True
+            return JsonResponse({'valid': True})
+        else:
+            return JsonResponse({'valid': False})
+            
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+########### Views end for verify otp for email #############################
+
+
+############# Views start for user registration #########################
+
+@csrf_exempt
+def Prop_Register_Api(request):
+    if request.method == "POST":
+        user_identifier = request.POST.get('email', '').strip()
+        name = request.POST.get('name', '').strip()
+        mobile = request.POST.get('mobile', '').strip()
+        role = request.POST.get('role', '').strip()
+        
+        #  CRITICAL FIX: Check the new success flag instead of the raw email
+        verified_user = request.session.get('otp_verified_for')
+        if verified_user != user_identifier:
+             return JsonResponse({'status': '0', 'msg': 'Security timeout. Please request a new OTP.'})
+             
+        try:
+            email_val = user_identifier if '@' in user_identifier else ''
+
+            generated_password = get_random_string(
+                length=12, 
+                allowed_chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^*'
+            )
+            
+            # 1. Save user object details
+            new_user = User_Details(
+                user_email=email_val,
+                user_name=name,
+                user_phone=mobile,
+                user_role=role,
+                user_password=generated_password,
+                user_register_date=datetime.today(),
+                user_register_time=datetime.now()
+            )
+            new_user.save()
+            
+            # 2.  RENDER AND SEND EXTERNAL HTML EMAIL TEMPLATE
+            if email_val:
+                subject = "Welcome to PropCRM! "
+                login_link = request.build_absolute_uri('/') 
+                
+                # Context variables to map directly into the template
+                context = {
+                    'name': name,
+                    'email': email_val,
+                    'role': role,
+                    'login_link': login_link
+                }
+                
+                # Compiles the standalone HTML file with our context data
+                html_message = render_to_string('emails/welcome_mail.html', context)
+                
+                # Plain text version fallback for strict email clients
+                plain_message = strip_tags(html_message)
+
+                send_mail(
+                    subject=subject,
+                    message=plain_message,
+                    from_email=None, 
+                    recipient_list=[email_val],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+            
+            # 3. Handle active user sessions setups
+            request.session['User_id'] = str(new_user.id)
+            request.session['user_type'] = new_user.user_role
+            
+            request.session.pop('auth_otp', None)
+            request.session.pop('auth_identifier', None)
+            request.session.pop('otp_verified_for', None)
+            request.session.modified = True
+            
+            return JsonResponse({'status': '1', 'msg': 'Account Created Successfully!'})
+            
+        except Exception as e:
+            print(traceback.format_exc())
+            return JsonResponse({'status': '0', 'msg': f"Server Error: {str(e)}"})
+            
+    return JsonResponse({'status': '0', 'msg': 'Invalid request.'})
+
+############ Views end for user registration ##############################
 
 
 

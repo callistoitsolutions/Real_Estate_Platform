@@ -173,6 +173,18 @@
       color: var(--primary-dark);
       text-decoration: underline;
     }
+
+    /* PROGRESSIVE FLOW UTILS */
+    .auth-step { display: none; }
+    .auth-step.active-step { display: block; animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .back-btn { background: none; border: none; color: var(--text-body); font-size: 0.85rem; font-weight: 600; padding: 0; margin-bottom: 15px; transition: 0.2s; }
+    .back-btn:hover { color: var(--primary); }
+    .otp-container { display: flex; gap: 12px; justify-content: center; margin: 20px 0; }
+    .otp-input { width: 50px; height: 55px; text-align: center; font-size: 1.5rem; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--border); color: var(--text-dark); background: white; }
+    .otp-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1); }
+
+
   </style>
 </head>
 
@@ -191,44 +203,73 @@
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ next|default:'' }}">
 
-      <label class="form-label-top">
-        Email Address/Phone Number <span class="required">*</span>
-      </label>
-      <div class="form-floating mb-3">
-        <input name="user_identifier" id="user_identifier" type="text" class="form-control" placeholder="Enter Email Address/Phone Number" required>
-        <label>Email Address/Phone Number</label>
+      <div id="step-1-email" class="auth-step active-step">
+        <label class="form-label-top">Email Address <span class="required">*</span></label>
+        <div class="form-floating mb-4">
+          <input type="email" id="flow_email" class="form-control" placeholder="name@example.com" required>
+          <label>Email Address</label>
+        </div>
+        <button type="button" class="btn-login" onclick="checkEmailExists(this)">Continue</button>
       </div>
 
-      <label class="form-label-top">
-        Password <span class="required">*</span>
-      </label>
-      <div class="form-floating mb-3 position-relative">
-        <input name="user_password" id="user_password" type="password" class="form-control" style="padding-right: 45px;" placeholder="Enter Password" required>
-        <label>Enter Password</label>
-        <i class="bi bi-eye-slash password-toggle" id="togglePassword"></i>
+      <div id="step-2-login" class="auth-step">
+        <button type="button" class="back-btn" onclick="goToStepAuth('step-1-email')"><i class="bi bi-arrow-left"></i> Change Email</button>
+        <label class="form-label-top">Password <span class="required">*</span></label>
+        <div class="form-floating mb-4 position-relative">
+          <input type="password" id="flow_password" class="form-control" style="padding-right: 45px;" placeholder="Enter Password">
+          <label>Enter Password</label>
+          <i class="bi bi-eye-slash password-toggle" id="togglePassword"></i>
+        </div>
+        <button type="button" class="btn-login" onclick="processProgLogin(this)">Sign In</button>
       </div>
 
-      <label class="form-label-top">
-        Account Role <span class="required">*</span>
-      </label>
-      <div class="form-floating mb-4">
-        <select name="user_role" class="form-select" id="user_role" required>
-          <option value="SelectRole" selected disabled>Choose a role...</option>
-          <option value="Relationship Manager">Relationship Manager (RM)</option>
-          <option value="Landlord">Landlord</option>
-          <option value="Tenant">Tenant</option>
-          <option value="Buyer">Buyer</option>
-          <option value="Agent">Agent</option>
-          <option value="Agency/Builder">Agencies / Builder</option>
-          <option value="Vendor">Vendor</option>
-        </select>
-        <label for="user_role">Select User Role</label>
+      <div id="step-2-otp" class="auth-step">
+        <button type="button" class="back-btn" onclick="goToStepAuth('step-1-email')"><i class="bi bi-arrow-left"></i> Change Email</button>
+        <div class="form-subtitle text-start mb-2">We've sent a 4-digit verification code to <strong id="display_otp_email" class="text-dark"></strong>.</div>
+        
+        <div class="otp-container">
+          <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+          <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+          <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+          <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+        </div>
+        <button type="button" class="btn-login" onclick="verifyOTP(this)" style="background: var(--accent);">Verify OTP</button>
       </div>
 
-      <button type="button" class="btn-login" onclick="User_Login(this)">Sign In</button>
+      <div id="step-3-details" class="auth-step">
+        <div class="form-subtitle text-start text-success fw-bold mb-3"><i class="bi bi-check-circle-fill"></i> Email Verified! Fill details to finalize account.</div>
+        
+        <label class="form-label-top">Full Name <span class="required">*</span></label>
+        <div class="form-floating mb-3">
+          <input type="text" id="flow_reg_name" class="form-control" placeholder="John Doe">
+          <label>Full Name</label>
+        </div>
+
+        <label class="form-label-top">Mobile Number <span class="required">*</span></label>
+        <div class="form-floating mb-3">
+          <input type="tel" id="flow_reg_mobile" class="form-control" placeholder="10 Digits" maxlength="10">
+          <label>Mobile Number</label>
+        </div>
+
+        <label class="form-label-top">Account Role <span class="required">*</span></label>
+        <div class="form-floating mb-4">
+          <select class="form-select" id="flow_reg_role">
+            <option value="SelectRole" selected disabled>Choose a role...</option>
+            <option value="Relationship Manager">Relationship Manager (RM)</option>
+            <option value="Landlord">Landlord</option>
+            <option value="Tenant">Tenant</option>
+            <option value="Buyer">Buyer</option>
+            <option value="Agent">Agent</option>
+            <option value="Agency/Builder">Agencies / Builder</option>
+            <option value="Vendor">Vendor</option>
+          </select>
+          <label>Select User Role</label>
+        </div>
+        <button type="button" class="btn-login" onclick="processProgRegistration(this)" style="background: #10b981;">Create Account & Sign In</button>
+      </div>
 
       <div class="bottom-link">
-        New to PropCRM? <a href="{% url 'signup' %}">Create an Account</a>
+        Need assistance? <a href="{% url 'index' %}">Return to Home</a>
       </div>
     </form>
 
@@ -236,7 +277,7 @@
 
   <script>
     document.getElementById('togglePassword').addEventListener('click', function () {
-        const passwordInput = document.getElementById('user_password');
+        const passwordInput = document.getElementById('flow_password');
         
         // Toggle the type attribute
         const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
@@ -248,72 +289,164 @@
     });
   </script>
 
-  <script>
-    function User_Login(_this){
-        var user_identifier = $("#user_identifier").val();
-        var user_password = $("#user_password").val();
-        var user_role = $("#user_role").val();
-        
-        if (user_identifier == "") {
-            swal({icon: "warning", title: "Missing Input", text: "Please Enter Email Address/Phone Number"});
+<script>
+    // Tab switching engine
+    function goToStepAuth(stepId) {
+        $('.auth-step').removeClass('active-step');
+        $('#' + stepId).addClass('active-step');
+    }
+
+    // Auto-tab assistant for verification boxes
+    function moveToNext(current, event) {
+        if (current.value.length >= current.maxLength) {
+            let next = $(current).next('.otp-input');
+            if (next.length) next.focus();
         }
-        else if(user_password == "") {
-            swal({icon: "warning", title: "Missing Input", text: "Please Enter Password"});
-        }
-        else if(user_role == "SelectRole" || user_role == null) {
-            swal({icon: "warning", title: "Missing Input", text: "Please Select a Role"});
-        }
-        else {
-            _this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing in...`;
-            $(_this).prop("disabled", true);
-            
-            $.ajax({
-                method:"POST",
-                url : "{% url 'login' %}",
-                contentType: "application/json",
-                data:JSON.stringify({
-                    "user_identifier":user_identifier,
-                    "user_password":user_password,
-                    "user_role":user_role,
-                }),
-                success : function (response){
-                    $(_this).prop("disabled", false);
-                    _this.innerHTML = `Sign In`;
-                    
-                    if (response.status == '1' || response.status == 'success'){
-                        // NEW LOGIC: Check the role and open in a new tab if it's RM
-                        if (user_role === "Relationship Manager") {
-                            window.open(response.redirect_url, '_blank'); // Opens in new tab
-                            
-                            // Optional: Redirect the original tab to the home page or refresh it
-                            window.location.href = "{% url 'index' %}"; 
-                        } else {
-                            window.location.href = response.redirect_url; // Opens in current tab
-                        }
-                    }
-                    else {
-                        swal({
-                            content: {
-                                element: "div",
-                                attributes: {
-                                    innerHTML: '<span style="font-weight:bold; color:#ef4444;font-size:16px;">' + response.msg + '</span>'
-                                }
-                            },
-                            icon: "error",
-                            title: "Login Failed",
-                            closeOnClickOutside: false,
-                        });
-                    }
-                },
-                error: function() {
-                    $(_this).prop("disabled", false);
-                    _this.innerHTML = `Sign In`;
-                    swal({icon: "error", title: "Server Error", text: "Something went wrong. Please try again."});
-                }
-            });
+        if (event.key === "Backspace" && current.value.length === 0) {
+            let prev = $(current).prev('.otp-input');
+            if (prev.length) prev.focus();
         }
     }
-</script>
+
+    // STEP 1: Verify Profile Existence
+    function checkEmailExists(_this) {
+        let email = $('#flow_email').val().trim();
+        if (!email) return swal({icon: "warning", title: "Missing Input", text: "Please enter your email address."});
+
+        let btnText = _this.innerHTML;
+        _this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Checking...`;
+        $(_this).prop("disabled", true);
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Check_Email_Api' %}", 
+            data: { 'email': email },
+            success: function(response) {
+                $(_this).prop("disabled", false).html(btnText);
+                if(response.exists) {
+                    goToStepAuth('step-2-login');
+                } else {
+                    sendOTP(email);
+                }
+            },
+            error: function() {
+                $(_this).prop("disabled", false).html(btnText);
+                swal({icon: "error", title: "Server Error", text: "Could not access profile records."});
+            }
+        });
+    }
+
+    // STEP 2B (Trigger): Request Verification Token
+    function sendOTP(email) {
+        $('#display_otp_email').text(email);
+        goToStepAuth('step-2-otp'); 
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Send_Otp_Api' %}",
+            data: { 'email': email }
+        });
+    }
+
+    // STEP 2A (Execution): Password Login Path
+    function processProgLogin(_this) {
+        let email = $('#flow_email').val();
+        let password = $('#flow_password').val();
+        if (!password) return swal({icon: "warning", title: "Missing Input", text: "Please enter your password."});
+
+        let btnText = _this.innerHTML;
+        _this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Verifying...`;
+        $(_this).prop("disabled", true);
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Prop_Login_Api' %}", 
+            data: { 'email': email, 'password': password },
+            success: function(response) {
+                if(response.status == '1' || response.status == 'success') {
+                    // Match original window execution behavior
+                    let userRole = response.user_role;
+                    if (userRole === "Relationship Manager") {
+                        window.open(response.redirect_url || "{% url 'index' %}", '_blank');
+                        window.location.href = "{% url 'index' %}";
+                    } else {
+                        window.location.href = response.redirect_url || "{% url 'index' %}";
+                    }
+                } else {
+                    $(_this).prop("disabled", false).html(btnText);
+                    swal({icon: "error", title: "Authentication Failed", text: response.msg || "Invalid password."});
+                }
+            },
+            error: function() {
+                $(_this).prop("disabled", false).html(btnText);
+                swal({icon: "error", title: "Server Error", text: "Connection dropped during login handling."});
+            }
+        });
+    }
+
+    // STEP 2B (Execution): Code Validation Path
+    function verifyOTP(_this) {
+        let otp = "";
+        $('.otp-input').each(function() { otp += $(this).val(); });
+        if(otp.length < 4) return swal({icon: "warning", title: "Incomplete Code", text: "Please supply the entire token."});
+
+        let btnText = _this.innerHTML;
+        _this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Checking...`;
+        $(_this).prop("disabled", true);
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Verify_Otp_Api' %}", 
+            data: { 'email': $('#flow_email').val(), 'otp': otp },
+            success: function(response) {
+                $(_this).prop("disabled", false).html(btnText);
+                if(response.valid) {
+                    goToStepAuth('step-3-details');
+                } else {
+                    swal({icon: "error", title: "Validation Failed", text: "Token code mismatch. Check again."});
+                }
+            }
+        });
+    }
+
+    // STEP 3 (Execution): Account Onboarding Path
+    function processProgRegistration(_this) {
+        let email = $('#flow_email').val();
+        let name = $('#flow_reg_name').val().trim();
+        let mobile = $('#flow_reg_mobile').val().trim();
+        let role = $('#flow_reg_role').val();
+
+        if(!name || !mobile || role === "SelectRole" || !role) {
+            return swal({icon: "warning", title: "Missing Details", text: "Please complete all fields to sign up."});
+        }
+
+        let btnText = _this.innerHTML;
+        _this.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Provisioning...`;
+        $(_this).prop("disabled", true);
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'Prop_Register_Api' %}", 
+            data: { 'email': email, 'name': name, 'mobile': mobile, 'role': role},
+            success: function(response) {
+                if(response.status == '1' || response.status == 'success') {
+                    if (role === "Relationship Manager") {
+                        window.open(response.redirect_url || "{% url 'index' %}", '_blank');
+                        window.location.href = "{% url 'index' %}";
+                    } else {
+                        window.location.href = response.redirect_url || "{% url 'index' %}";
+                    }
+                } else {
+                    $(_this).prop("disabled", false).html(btnText);
+                    swal({icon: "error", title: "Profile Creation Denied", text: response.msg || "Registration rejected."});
+                }
+            },
+            error: function() {
+                $(_this).prop("disabled", false).html(btnText);
+                swal({icon: "error", title: "Server Error", text: "Onboarding tracking encountered a failure."});
+            }
+        });
+    }
+  </script>
 
 </body>
 </html>

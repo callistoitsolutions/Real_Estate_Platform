@@ -426,3 +426,160 @@ function User_Logout() {
     });
 }
 </script>
+
+<script>
+
+// STEP 1: CHECK EMAIL
+function checkEmailExists(_this) {
+    let email = $('#flow_email').val().trim();
+    if (!email) {
+        Swal.fire("Wait", "Please enter a valid email address.", "info");
+        return;
+    }
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Checking...`);
+
+    $.ajax({
+        type: "POST",
+        url: "{% url 'Check_Email_Api' %}", 
+        data: { 'email': email },
+        success: function(response) {
+            $(_this).prop("disabled", false).html(btnText);
+            
+            if(response.exists) {
+                // Email exists -> Go to Login
+                goToStep('step-2-login');
+            } else {
+                // Email is new -> Send OTP
+                sendOTP(email);
+            }
+        },
+        error: function() {
+            $(_this).prop("disabled", false).html(btnText);
+            Swal.fire("Error", "Server error. Try again.", "error");
+        }
+    });
+}
+
+// STEP 2A: LOGIN
+function processProgLogin(_this) {
+    let email = $('#flow_email').val();
+    let password = $('#flow_password').val();
+    
+    if (!password) return Swal.fire("Wait", "Please enter your password.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Logging in...`);
+
+    $.ajax({
+        type: "POST",
+        url: "{% url 'Prop_Login_Api' %}", 
+        data: { 
+            'email': email, 
+            'password': password,
+        },
+        success: function(response) {
+            if(response.status == '1') {
+                $('#authModal').modal('hide');
+                Swal.fire("Success", "Logged in successfully!", "success").then(() => {
+                    location.reload(); 
+                });
+            } else {
+                $(_this).prop("disabled", false).html(btnText);
+                Swal.fire("Error", response.msg || "Incorrect password", "error");
+            }
+        },
+        error: function() {
+            $(_this).prop("disabled", false).html(btnText);
+            Swal.fire("Error", "Login request failed.", "error");
+        }
+    });
+}
+
+// STEP 2B: SEND & VERIFY OTP
+function sendOTP(email) {
+    $('#display_otp_email').text(email);
+    goToStep('step-2-otp');
+    
+    $.ajax({
+        type: "POST",
+        url: "{% url 'Send_Otp_Api' %}", 
+        data: { 'email': email}
+    });
+}
+
+function verifyOTP(_this) {
+    let otp = "";
+    $('.otp-input').each(function() { otp += $(this).val(); });
+    
+    if(otp.length < 4) return Swal.fire("Wait", "Please enter the full 4-digit OTP.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Verifying...`);
+
+    $.ajax({
+        type: "POST",
+        url: "{% url 'Verify_Otp_Api' %}", 
+        data: { 
+            'email': $('#flow_email').val(), 
+            'otp': otp,
+        },
+        success: function(response) {
+            $(_this).prop("disabled", false).html(btnText);
+            if(response.valid) {
+                goToStep('step-3-details');
+            } else {
+                Swal.fire("Error", "Invalid OTP. Try again.", "error");
+            }
+        },
+        error: function() {
+            $(_this).prop("disabled", false).html(btnText);
+            Swal.fire("Error", "Verification failed.", "error");
+        }
+    });
+}
+
+// STEP 3: FINAL REGISTRATION
+function processProgRegistration(_this) {
+    let email = $('#flow_email').val();
+    let name = $('#flow_reg_name').val();
+    let mobile = $('#flow_reg_mobile').val();
+    let role = $('#flow_reg_role').val();
+
+    if(!name || !mobile || role === "SelectRole") {
+        return Swal.fire("Wait", "Please fill in all details.", "info");
+    }
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Creating Account...`);
+
+    $.ajax({
+        type: "POST",
+        url: "{% url 'Prop_Register_Api' %}", 
+        data: { 
+            'email': email,
+            'name': name,
+            'mobile': mobile,
+            'role': role,
+        },
+        success: function(response) {
+            if(response.status == '1') {
+                $('#authModal').modal('hide');
+                Swal.fire("Success", "Account created and logged in!", "success").then(() => {
+                    location.reload(); 
+                });
+            } else {
+                $(_this).prop("disabled", false).html(btnText);
+                Swal.fire("Error", response.msg || "Registration failed.", "error");
+            }
+        },
+        error: function() {
+            $(_this).prop("disabled", false).html(btnText);
+            Swal.fire("Error", "Registration request failed.", "error");
+        }
+    });
+}
+
+
+</script>

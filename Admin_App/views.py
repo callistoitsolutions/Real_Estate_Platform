@@ -2050,8 +2050,10 @@ def User_Ajax(request):
         data['user_profile'] = request.FILES.get('user_profile')        
         data['user_register_date'] = datetime.today()
         data['user_register_time'] = datetime.now()
-        if User_Details.objects.filter(user_role=data['user_role'],user_phone=data['user_phone']).exists():
+        if User_Details.objects.filter(user_phone=data['user_phone']).exists():
             return JsonResponse({"status":"0", "msg" : f"User with this phone number already exists"})
+        elif User_Details.objects.filter(user_email=data['user_email']).exists():
+            return JsonResponse({"status":"0", "msg" : f"User with this email address already exists"})
         else:
             User_Details.objects.create(**data)
             return JsonResponse({"status":"1", "msg" : f"User Details added successfully"})

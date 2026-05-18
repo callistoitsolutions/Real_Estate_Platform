@@ -18,6 +18,26 @@ urlpatterns = [
     path('login', views.login_view, name='login'),
     path('dashboard/', views.dashboard_view, name='dashboard12'),
     path('lead-capture/', views.lead_capture_view, name='lead_capture'),
+
+    ######### urls for check email alreay exists or not ######################
+
+    path('Check_Email_Api', views.Check_Email_Api, name='Check_Email_Api'),
+
+    ####### urls for if email exists directly login #######################
+
+    path('Prop_Login_Api', views.Prop_Login_Api, name='Prop_Login_Api'),
+
+    ######### urls for send otp to email ##########################
+
+    path('Send_Otp_Api', views.Send_Otp_Api, name='Send_Otp_Api'),
+
+    ########### urls for verify otp for email ###########################
+
+    path('Verify_Otp_Api', views.Verify_Otp_Api, name='Verify_Otp_Api'),
+
+    ######### urls for user registration ##############################
+
+    path('Prop_Register_Api', views.Prop_Register_Api, name='Prop_Register_Api'),
   
 #path('property_details',views.property_details,name="property_details"),
    
@@ -163,6 +183,7 @@ urlpatterns = [
     path('listingpage/', views.listings_view, name='listings'),
    
     path('listing/<str:listing_type>/<str:category>/<int:pk>/', views.property_detail_view, name='property_detail'),
+    
     path(
         "save-property-enquiry/",
         views.save_property_enquiry,
