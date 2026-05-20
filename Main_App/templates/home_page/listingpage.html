@@ -369,9 +369,22 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
         <span class="badge b-feat">{{ p.category }}</span>
       </div>
 
-      <button class="pc-save" onclick="event.preventDefault();toggleSave({{ p.id }}, '{{ p.category }}', this)">
-        <i class="bi bi-heart" style="color:#ef4444;"></i>
-      </button>
+      {% if user_obj %}
+          <button class="pc-save" onclick="event.preventDefault(); Add_Wishlist({{ p.id }}, '{{ p.category }}', '{{ p.listing_type }}', '{{ user_obj.id }}', this)">
+    
+            {% if "residential" in p.category|lower and p.id in wishlist_records.residential %}
+                <i class="bi bi-heart-fill" style="color:#ef4444;"></i>
+            {% elif "pg" in p.category|lower and p.id in wishlist_records.pg %}
+                <i class="bi bi-heart-fill" style="color:#ef4444;"></i>
+            {% elif "commercial" in p.category|lower and p.id in wishlist_records.commercial %}
+                <i class="bi bi-heart-fill" style="color:#ef4444;"></i>
+            {% else %}
+                <i class="bi bi-heart" style="color:#ef4444;"></i>
+            {% endif %}
+
+          </button>
+          
+      {% endif %}
       
       <div class="pc-price-tag">{{ p.price_display }}</div>
     </div>

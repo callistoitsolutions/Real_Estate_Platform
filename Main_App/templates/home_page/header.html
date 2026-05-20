@@ -289,7 +289,7 @@
                     <i class="bi bi-send"></i> Access Dashboard
                 </a>
 
-                <a href="#">
+                <a href="{% url "Wishlist_Property" %}">
                     <i class="bi bi-heart"></i> Wishlist Properties
                 </a>
 
@@ -577,6 +577,68 @@ function processProgRegistration(_this) {
         error: function() {
             $(_this).prop("disabled", false).html(btnText);
             Swal.fire("Error", "Registration request failed.", "error");
+        }
+    });
+}
+
+
+// Ajax and Jquery function for wislist properties
+
+function Add_Wishlist(propertyId, category,listingtype,user, btnElement) {
+    // 1. Check if the heart icon is already filled
+    let icon = btnElement.querySelector('i');
+    let isAlreadySaved = icon.classList.contains('bi-heart-fill');
+
+    console.log("------------------",category)
+    console.log("------------------",listingtype)
+
+    // 2. Setup the dynamic alert text
+    let alertTitle = isAlreadySaved ? 'Remove from Wishlist?' : 'Wishlist this Property?';
+    let alertText = isAlreadySaved 
+        ? "Do you want to remove this property from your saved list?" 
+        : "Do you want to save this property to view it later?";
+    let confirmBtnText = isAlreadySaved ? 'Yes, remove it' : 'Yes, save it!';
+
+    // 3. Trigger the SweetAlert Modal
+    Swal.fire({
+        title: alertTitle,
+        text: alertText,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#f97316', 
+        cancelButtonColor: '#64748b',  
+        confirmButtonText: confirmBtnText,
+        cancelButtonText: 'Cancel',
+        background: '#fff',
+        color: '#1e293b',
+        borderRadius: '16px'
+    }).then((result) => {
+        
+        // 4. If the user clicks "Yes"
+        if (result.isConfirmed) {
+            
+            // --- PUT YOUR AJAX CALL HERE ---
+            
+            $.ajax({
+                type: "POST",
+                url: "{% url 'Wishlist_Ajax' %}",
+                data: { 'property_id': propertyId, 'category': category,'listing_type':listingtype,'user_id':user },
+                success: function(response) {
+            
+            
+                    // Toggle the visual heart icon immediately
+                    if (isAlreadySaved) {
+                        icon.classList.remove('bi-heart-fill');
+                        icon.classList.add('bi-heart');
+                        Swal.fire({icon: 'info', title: 'Removed', text: 'Property removed from wishlist.', timer: 1500, showConfirmButton: false});
+                    } else {
+                        icon.classList.remove('bi-heart');
+                        icon.classList.add('bi-heart-fill');
+                        Swal.fire({icon: 'success', title: 'Saved!', text: 'Property added to your wishlist.', timer: 1500, showConfirmButton: false});
+                    }
+
+            } // End of AJAX success
+            });
         }
     });
 }

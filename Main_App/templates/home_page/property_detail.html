@@ -529,7 +529,7 @@ function Send_Enquiry(_this) {
 
   $.ajax({
     method: "POST",
-    url: "{% url 'Impersonate' %}",
+    url: "{% url 'Send_Property_Enquiry' %}",
     data: fd,
     processData: false,
     contentType: false,

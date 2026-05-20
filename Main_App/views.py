@@ -65,6 +65,8 @@ from datetime import datetime
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils.crypto import get_random_string
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.contenttypes.models import ContentType
 
 
 
@@ -956,21 +958,23 @@ def Send_Property_Enquiry(request):
     
     real_property = None
 
+    property_id = data['property_id']
+
     if data['listing_type'] == "rent" and data['category'] == "residential":
-        real_property = RentalResidentialProperty.objects.get(id=data['property_id'])
+        real_property = RentalResidentialProperty.objects.get(id=property_id)
 
     elif data['listing_type'] == "rent" and data['category'] == "pg":
-        real_property = PGColivingProperty.objects.get(id=data['property_id'])
+        real_property = PGColivingProperty.objects.get(id=property_id)
 
     elif data['listing_type'] == "rent" and data['category'] == "commercial":
-        real_property = CommercialProperty.objects.get(id=data['property_id'])
+            real_property = CommercialProperty.objects.get(id=property_id)
 
     # If we couldn't find a matching property type, stop here.
     if not real_property:
         return JsonResponse({"status": "0", "msg": "Invalid property type or category."})
 
     user_data = User_Details.objects.get(id=data['user_id'])
-    Property_Enquiry.objects.create(property_object=real_property,user=user_data,enquiry_name=data['enquiry_name'],enquiry_phone=data['enquiry_phone'],enquiry_email=data['enquiry_email'],enquiry_message=data['enquiry_message'],enquiry_date=datetime.today(),enquiry_time=datetime.now())
+    PropertyEnquiry.objects.create(property_object=real_property,user=user_data,enquiry_name=data['enquiry_name'],enquiry_phone=data['enquiry_phone'],enquiry_email=data['enquiry_email'],enquiry_message=data['enquiry_message'],enquiry_date=datetime.today(),enquiry_time=datetime.now())
 
     return JsonResponse({"status":"1", "msg" : f"Enquiry submiited successfully we will get back to you soon"})
 
@@ -1359,6 +1363,39 @@ def listings_view(request):
         'current_city': city_filter if city_filter else "Nagpur",
         'listing_type': 'rent' if any(x in ai_query.lower() for x in ['rent', 'pg']) else 'sale'
     }
+
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
+            # 1. Initialize a structured dictionary of sets for fast lookup
+            wishlist_records = {
+                'residential': set(),
+                'pg': set(),
+                'commercial': set()
+            }
+
+            # 2. Fetch the items along with their ContentType details
+            wishlist_items = WishlistProperty.objects.filter(user=user_obj).select_related('content_type')
+        
+            # 3. Sort the object_ids into their matching categories
+            for item in wishlist_items:
+                model_name = item.content_type.model  # e.g., 'rentalresidentialproperty'
+                
+                if 'residential' in model_name:
+                    wishlist_records['residential'].add(item.object_id)
+                elif 'pg' in model_name:
+                    wishlist_records['pg'].add(item.object_id)
+                elif 'commercial' in model_name:
+                    wishlist_records['commercial'].add(item.object_id)
+
+            # 4. Save the structured records into the context instead of the flat list
+            context['wishlist_records'] = wishlist_records
+
+
+
     return render(request, 'home_page/listingpage.html', context)
 
 
@@ -1785,6 +1822,101 @@ def Prop_Register_Api(request):
 ############ Views end for user registration ##############################
 
 
+############# Views start for wishlist properties ######################
+
+def Wishlist_Property(request):
+    context = {}
+    # ═══════════════════════════════════════════════════════
+    # HANDLE LOGGED-IN USER
+    # ═══════════════════════════════════════════════════════
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:     
+            wishlist_property = WishlistProperty.objects.filter(user=user_obj).order_by('-id')
+            context = {'user_obj':user_obj,
+            'wishlist_property':wishlist_property}
+
+    return render(request,'home_page/Wishlist/wishlist.html',context)
+
+############## Views end for wishlist properties #######################
+
+
+############# Views start for ajax for add property to wishlist ##################
+
+@csrf_exempt
+def Wishlist_Ajax(request):
+    if request.method == "POST":
+        data = request.POST.dict()   
+        
+        # 1.  SECURITY FIX: Get the user ID from the secure session, NOT the frontend data
+        user_id = request.session.get('User_id')
+        if not user_id:
+            return JsonResponse({"status": "0", "msg": "User not authenticated. Please log in."})
+
+        try:
+            user_data = User_Details.objects.get(id=user_id)
+        except User_Details.DoesNotExist:
+            return JsonResponse({"status": "0", "msg": "Invalid user session."})
+
+        real_property = None
+        property_id = data.get('property_id')
+        
+        # 2.  CRASH PREVENTION: Safely try to get the property
+        try:
+            if data['listing_type'] == "rent" and data['category'] == "Residential Data":
+                real_property = RentalResidentialProperty.objects.get(id=property_id)
+
+            elif data['listing_type'] == "rent" and data['category'] == "PG Data":
+                real_property = PGColivingProperty.objects.get(id=property_id)
+
+            elif data['listing_type'] == "rent" and data['category'] == "Commercial Data":
+                real_property = CommercialProperty.objects.get(id=property_id)
+
+        except ObjectDoesNotExist:
+            return JsonResponse({"status": "0", "msg": "Property not found in the database."})
+
+        if not real_property:
+            return JsonResponse({"status": "0", "msg": "Invalid property type or category."})
+        
+        property_content_type = ContentType.objects.get_for_model(real_property)
+
+        # 3. TOGGLE LOGIC: Check if it's already in the wishlist
+        # If it exists, delete it (Remove from wishlist)
+        wishlist_item = WishlistProperty.objects.filter(
+            content_type=property_content_type, 
+            object_id=real_property.id, 
+            user=user_data
+        ).first()
+        
+        if wishlist_item:
+            wishlist_item.delete()
+            return JsonResponse({
+                "status": "1", 
+                "action": "removed", 
+                "msg": "Property removed from wishlist."
+            })
+            
+        # If it doesn't exist, create it (Add to wishlist)
+        else:
+            WishlistProperty.objects.create(
+                content_type=property_content_type, # Passes the model type (e.g. CommercialProperty)
+                object_id=real_property.id,         # Passes the ID (e.g. 5)
+                user=user_data,
+                wishlist_date=datetime.today(),
+                wishlist_time=datetime.now()
+            )
+            return JsonResponse({
+                "status": "1", 
+                "action": "added", 
+                "msg": "Property added to wishlist successfully!"
+            })
+
+    return JsonResponse({"status": "0", "msg": "Invalid request method."})
+
+############ Views end for ajax for add property to wishlist #########################
+
+
 
 
 
@@ -1898,6 +2030,10 @@ def index(request):
         reverse=True
     )
 
+    ########### Normal FAQ Table call ###########################
+
+    faqs_obj = NormalFAQ.objects.all().order_by('-id')
+
     context = {
         "featured_props": featured_props,
         "recent_props": recent_props,
@@ -1905,12 +2041,12 @@ def index(request):
         "all_resale_props": all_resale_props[:6],
         "hero": hero,
         "seo_pages":seo_pages,
-       # "faqs": faqs,
         "today": today,
         "fifteen_days_ago": fifteen_days_ago,
         'user_obj': None,
         'services': services,
-        'subscriptions':subscriptions
+        'subscriptions':subscriptions,
+        'faqs_obj':faqs_obj
     }
     
     # ═══════════════════════════════════════════════════════
@@ -2066,7 +2202,18 @@ def properties(request):
 
 def services(request):
     services = LocationSEO.objects.filter(pagetype="service", is_active=True)
-    return render(request, "home_page/services.html", {"services": services})
+
+    context = {
+        'services':services
+    }
+
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
+    return render(request, "home_page/services.html",context)
 
 
 
@@ -2113,6 +2260,13 @@ def blog(request):
     context = {
         "blogs": seo_pages,
     }
+
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
     return render(request, "home_page/blog.html", context)
 
 
@@ -2887,6 +3041,14 @@ def dynamic_property_faq(request):
             ]
         })
 
-    return render(request, "home_page/property_faq.html", {
-        "faq_sections": faq_sections
-    })
+    context = {
+        'faq_sections':faq_sections
+    }
+
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
+    return render(request, "home_page/property_faq.html",context)

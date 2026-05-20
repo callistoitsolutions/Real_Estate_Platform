@@ -38,6 +38,14 @@ urlpatterns = [
     ######### urls for user registration ##############################
 
     path('Prop_Register_Api', views.Prop_Register_Api, name='Prop_Register_Api'),
+
+    ############ urls for wishlist properties #############################
+
+    path('Wishlist_Property', views.Wishlist_Property, name='Wishlist_Property'),
+
+    ########## urls for ajax for add property to wishlist ###################
+
+    path('Wishlist_Ajax', views.Wishlist_Ajax, name='Wishlist_Ajax'),
   
 #path('property_details',views.property_details,name="property_details"),
    
