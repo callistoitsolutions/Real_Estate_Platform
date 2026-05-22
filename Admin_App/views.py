@@ -218,7 +218,7 @@ def index2(request):
 
 @csrf_exempt
 def Impersonate(request):
-    if request.method == "POST" and request.session.get('user_type') == 'Admin':
+    if request.method == "POST":
         target_id = request.POST.get('target_user_id')
 
         
@@ -228,9 +228,8 @@ def Impersonate(request):
             request.session['impersonate_id'] = target_id
             
             target_user = User_Details.objects.get(id=target_id)
-
             
-            
+                
             # 2. Determine the correct URL based on their role
             if target_user.user_role == 'Relationship Manager':
                 url = reverse('rm_dashboard')

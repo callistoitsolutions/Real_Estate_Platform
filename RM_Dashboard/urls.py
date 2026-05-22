@@ -46,6 +46,26 @@ urlpatterns = [
     ############## urls for resale property list #########################
 
     path('residential_resale_rm_list',views.residential_resale_rm_list,name="residential_resale_rm_list"),
+
+    ########### urls for resale property form residential ################
+
+    path('residential_resale_rm',views.residential_resale_rm,name="residential_resale_rm"),
+
+    ######### urls for resale commercial property list #########################
+
+    path('commercial_resale_rm_list',views.commercial_resale_rm_list,name="commercial_resale_rm_list"),
+
+    ######## urls for resale property from commercial ######################
+
+    path('commercial_resale_rm',views.commercial_resale_rm,name="commercial_resale_rm"),
+
+    ######### urls for resale plot property list #######################
+
+    path('plot_resale_rm_list',views.plot_resale_rm_list,name="plot_resale_rm_list"),
+
+    ########## urls for resale property from plot #########################
+
+    path('plot_resale_rm',views.plot_resale_rm,name="plot_resale_rm"),
       
     path('affilate_page',views.affilate_page,name="affilate_page"),
     

@@ -960,6 +960,9 @@ def Send_Property_Enquiry(request):
 
     property_id = data['property_id']
 
+    print("--------------------",data['listing_type'])
+    print("--------------------",data['category'])
+
     if data['listing_type'] == "rent" and data['category'] == "residential":
         real_property = RentalResidentialProperty.objects.get(id=property_id)
 
@@ -968,6 +971,9 @@ def Send_Property_Enquiry(request):
 
     elif data['listing_type'] == "rent" and data['category'] == "commercial":
             real_property = CommercialProperty.objects.get(id=property_id)
+    
+    elif data['listing_type'] == "sale" and data['category'] == "residential":
+            real_property = ResaleResidentialProperty.objects.get(id=property_id)
 
     # If we couldn't find a matching property type, stop here.
     if not real_property:
