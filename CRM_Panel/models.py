@@ -29,10 +29,10 @@ class PropertyEnquiry(models.Model):
     )
 
     enquiry_name = models.CharField(max_length=200, blank=True, null=True)
+    country_code = models.CharField(max_length=10, default="+91", blank=True, null=True)
     enquiry_phone = models.CharField(max_length=20, blank=True, null=True)
-    enquiry_email = models.CharField(max_length=20, blank=True, null=True)
 
-    enquiry_message = models.TextField(blank=True, null=True)
+    whatsapp_consent = models.BooleanField(default=False)
 
     enquiry_date = models.DateField(blank=True,null=True)
     enquiry_time = models.TimeField(blank=True,null=True)

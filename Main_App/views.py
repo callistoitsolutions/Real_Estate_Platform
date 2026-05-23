@@ -954,35 +954,81 @@ def property_detail_view(request, listing_type, category, pk):
 
 @csrf_exempt
 def Send_Property_Enquiry(request):
-    data = request.POST.dict()   
-    
-    real_property = None
+    if request.method == "POST":
+        data = request.POST.dict()   
+        
+        # 1. SECURITY: Retrieve user authentication from the secure session container
+        user_id = request.session.get('User_id') or data.get('user_id')
+        if not user_id:
+            return JsonResponse({"status": "0", "msg": "User session expired. Please log in."})
 
-    property_id = data['property_id']
+        try:
+            user_data = User_Details.objects.get(id=user_id)
+        except (User_Details.DoesNotExist, ValueError):
+            return JsonResponse({"status": "0", "msg": "Invalid user account verification."})
 
-    print("--------------------",data['listing_type'])
-    print("--------------------",data['category'])
+        # 2. Extract Data Context Parameters Safely
+        property_id = data.get('property_id')
+        listing_type = data.get('listing_type', '')
+        category = data.get('category', '')
+        
+        # New country parameters and consent evaluation
+        country_code = data.get('country_code', '+91')
+        whatsapp_consent_raw = data.get('whatsapp_consent', 'no')
+        whatsapp_consent = True if whatsapp_consent_raw == 'yes' else False
 
-    if data['listing_type'] == "rent" and data['category'] == "residential":
-        real_property = RentalResidentialProperty.objects.get(id=property_id)
+        real_property = None
 
-    elif data['listing_type'] == "rent" and data['category'] == "pg":
-        real_property = PGColivingProperty.objects.get(id=property_id)
+        # 3. CRASH PREVENTION: Safely lookup target records using model-specific tables
+        try:
+            if listing_type == "rent" and category == "residential":
+                real_property = RentalResidentialProperty.objects.get(id=property_id)
 
-    elif data['listing_type'] == "rent" and data['category'] == "commercial":
-            real_property = CommercialProperty.objects.get(id=property_id)
-    
-    elif data['listing_type'] == "sale" and data['category'] == "residential":
-            real_property = ResaleResidentialProperty.objects.get(id=property_id)
+            elif listing_type == "rent" and category == "pg":
+                real_property = PGColivingProperty.objects.get(id=property_id)
 
-    # If we couldn't find a matching property type, stop here.
-    if not real_property:
-        return JsonResponse({"status": "0", "msg": "Invalid property type or category."})
+            elif listing_type == "rent" and category == "commercial":
+                real_property = CommercialProperty.objects.get(id=property_id)
+                
+            elif listing_type == "sale" and category == "residential":
+                real_property = ResaleResidentialProperty.objects.get(id=property_id)
+                
+        except ObjectDoesNotExist:
+            return JsonResponse({"status": "0", "msg": "The requested property could not be found."})
 
-    user_data = User_Details.objects.get(id=data['user_id'])
-    PropertyEnquiry.objects.create(property_object=real_property,user=user_data,enquiry_name=data['enquiry_name'],enquiry_phone=data['enquiry_phone'],enquiry_email=data['enquiry_email'],enquiry_message=data['enquiry_message'],enquiry_date=datetime.today(),enquiry_time=datetime.now())
+        if not real_property:
+            return JsonResponse({"status": "0", "msg": "Invalid property type or category arrangement."})
+        
+        # 4. GENERIC FOREIGN KEY STABILITY: Resolve explicit content type model definitions
+        property_content_type = ContentType.objects.get_for_model(real_property)
 
-    return JsonResponse({"status":"1", "msg" : f"Enquiry submiited successfully we will get back to you soon"})
+        # 5. Persist the Enquiry Form Submission
+        try:
+            PropertyEnquiry.objects.create(
+                content_type=property_content_type,   # Stores table map target
+                object_id=real_property.id,           # Stores row primary key ID 
+                user=user_data,
+                enquiry_name=data.get('enquiry_name', '').strip(),
+                country_code=country_code,
+                enquiry_phone=data.get('enquiry_phone', '').strip(),
+                whatsapp_consent=whatsapp_consent,
+                enquiry_date=datetime.today(),
+                enquiry_time=datetime.now()
+            )
+            
+            return JsonResponse({
+                "status": "1", 
+                "msg": "Enquiry submitted successfully! We will get back to you soon."
+            })
+            
+        except Exception as e:
+            print(f"Enquiry DB Save Failure: {str(e)}")
+            return JsonResponse({
+                "status": "0", 
+                "msg": "Could not save your request. Please try again later."
+            })
+
+    return JsonResponse({"status": "0", "msg": "Invalid HTTP communication architecture."})
 
 
 ########### Views end for ajax for send property enquiry ######################

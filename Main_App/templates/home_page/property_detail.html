@@ -309,28 +309,63 @@ footer { background:#1e293b; color:rgba(255,255,255,.7); padding:60px 20px 30px;
         {% endif %}
 
         <div class="mt-4">
-            <div class="fw-bold small mb-2">Send Enquiry</div>
-            <form method="POST" action="{% url 'save_property_enquiry' %}">
-                {% csrf_token %}
-                <input type="hidden" name="property_id" value="{{ original.id }}">
-                <input type="hidden" name="property_title" value="{{ p.title }}">
-                <input type="hidden" name="property_type" value="{{ listing_type }}">
-                <input type="hidden" name="property_location" value="{{ p.location }}">
-                <input type="hidden" name="lead_source" value="property_detail_page">
-                <input type="hidden" name="seo_slug" value="{{ seo.slug }}">
+    <div class="fw-bold small mb-2">Get Contact Details</div>
+        <form method="POST" id="enquiryForm" action="{% url 'save_property_enquiry' %}">
+            {% csrf_token %}
+            <input type="hidden" name="property_id" value="{{ original.id }}">
+            <input type="hidden" name="property_title" value="{{ p.title }}">
+            <input type="hidden" name="property_type" value="{{ listing_type }}">
+            <input type="hidden" name="property_location" value="{{ p.location }}">
+            <input type="hidden" name="lead_source" value="property_detail_page">
+            <input type="hidden" name="seo_slug" value="{{ seo.slug }}">
 
-                <input type="text" name="enquiry_name" id="enquiry_name" class="ef-input" placeholder="Your Name" required value="{{user_obj.user_name}}">
-                <input type="tel" name="enquiry_phone" id="enquiry_phone" class="ef-input" placeholder="Phone Number" required value="{{user_obj.user_phone}}">
-                <input type="email" name="enquiry_email" id="enquiry_email" class="ef-input" placeholder="Email Address" required value="{{user_obj.user_email}}">
-                <textarea name="enquiry_message" id="enquiry_message" class="ef-input" rows="3" placeholder="I am interested in this property"></textarea>
+            <input type="text" name="enquiry_name" id="enquiry_name" class="ef-input mb-2" placeholder="Your Name" required value="{{ user_obj.user_name }}">
 
-                {% if user_obj %}
-                  <button type="button" name="send_enquiry" class="btn btn-dark w-100 btn-sm py-2" onclick="Send_Enquiry(this)">Send Enquiry</button>
+            <div class="input-group mb-3">
+                <select name="country_code" id="country_code" class="form-select" style="max-width: 110px; border-radius: 12px 0 0 12px; height: 46px; font-size: 0.9rem; border: 1.5px solid #e2e8f0; background-color: #fff;">
+                    <option value="+91" selected>🇮🇳 +91</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+971">🇦🇪 +971</option>
+                    <option value="+65">🇸🇬 +65</option>
+                    <option value="+61">🇦🇺 +61</option>
+                    <option value="+1">🇨🇦 +1</option>
+                </select>
+                <input type="tel" name="enquiry_phone" id="enquiry_phone" class="form-control" placeholder="Phone Number" required value="{{ user_obj.user_phone }}" style="border-radius: 0 12px 12px 0; height: 46px; font-size: 0.9rem; border: 1.5px solid #e2e8f0; border-left: none;">
+            </div>
+
+            <div class="form-check mb-3 text-start">
+                <input class="form-check-input" type="checkbox" id="whatsappConsent" name="whatsapp_consent" checked style="cursor: pointer; accent-color: #006ce4;">
+                <label class="form-check-label text-muted" for="whatsappConsent" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
+                    I consent to receive property alerts and owner details directly on WhatsApp/SMS. 
+                </label>
+            </div>
+
+            <div class="form-check mb-2 text-start">
+                <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required style="cursor: pointer; accent-color: #006ce4;">
+                {% if p.listing_type == "rent" %}
+
+                  <label class="form-check-label text-muted" for="agreeTerms" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
+                    I am interested in vendor services</span>
+                  </label>
+
                 {% else %}
-                  <button type="button" class="btn btn-dark w-100 btn-sm py-2" data-bs-toggle="modal" data-bs-target="#authModal">Send Enquiry</button>
+
+                  <label class="form-check-label text-muted" for="agreeTerms" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
+                      I am interested in home loan services
+                  </label>
+
                 {% endif %}
-            </form>
-        </div>
+            </div>
+
+            
+
+            {% if user_obj %}
+              <button type="button" name="send_enquiry" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" onclick="Send_Enquiry(this)">Get Contact Details</button>
+            {% else %}
+              <button type="button" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#authModal">Get Contact Details</button>
+            {% endif %}
+        </form>
     </div>
 
     <div class="detail-section mt-3 p-3">
@@ -507,26 +542,52 @@ function callOwner(phone){
 function Send_Enquiry(_this) {
   var enquiry_name = $("#enquiry_name").val().trim();
   var enquiry_phone = $("#enquiry_phone").val().trim();
-  var enquiry_email = $("#enquiry_email").val().trim();
-  var enquiry_message = $("#enquiry_message").val().trim();
+  
+  // Optional field tracks
+  var enquiry_email = $("#enquiry_email").length ? $("#enquiry_email").val().trim() : "";
+  var enquiry_message = $("#enquiry_message").length ? $("#enquiry_message").val().trim() : "";
 
+  // 1. Read Country Code and Checkbox states
+  var country_code = $("#country_code").val();
+  var agree_terms = $("#agreeTerms").is(":checked");
+  var whatsapp_consent = $("#whatsappConsent").is(":checked");
+
+  // 2. Validate standard fields
   if (enquiry_name === "" || enquiry_phone === "") {
-    Swal.fire({title: 'Error', text: 'Please fill the required fields', icon: 'error'});
+    Swal.fire({title: 'Error', text: 'Please fill the required fields.', icon: 'error'});
     return;
   }
 
+  // 3. Validate mandatory Terms & Conditions checkbox
+  if (!whatsapp_consent) {
+    Swal.fire({
+      title: 'Agreement Required', 
+      text: 'You must agree to the Terms of Service and Privacy Policy to proceed.', 
+      icon: 'warning',
+      confirmButtonColor: '#1e293b'
+    });
+    return;
+  }
+
+  // 4. Build the Form Data Object
   var fd = new FormData();
   fd.append('enquiry_name', enquiry_name);
+  fd.append('country_code', country_code); 
   fd.append('enquiry_phone', enquiry_phone);
   fd.append('enquiry_email', enquiry_email);
   fd.append('enquiry_message', enquiry_message);
-  fd.append('listing_type', '{{p.listing_type}}');
-  fd.append('category', '{{p.category}}');
-  fd.append('property_id', '{{p.id}}');
-  fd.append('user_id', '{{user_obj.id}}');
+  fd.append('whatsapp_consent', whatsapp_consent ? 'yes' : 'no'); 
+  
+  // Django Context variables
+  fd.append('listing_type', '{{ p.listing_type }}');
+  fd.append('category', '{{ p.category }}');
+  fd.append('property_id', '{{ p.id }}');
+  fd.append('user_id', '{{ user_obj.id }}');
 
-  $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Sending...`);
+  // Change button state to loading spinner
+  $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Processing...`);
 
+  // 5. Execute AJAX Request
   $.ajax({
     method: "POST",
     url: "{% url 'Send_Property_Enquiry' %}",
@@ -534,7 +595,9 @@ function Send_Enquiry(_this) {
     processData: false,
     contentType: false,
     success: function (response) {
-      $(_this).prop("disabled", false).html(`Send Enquiry`);
+      // Restore original button layout
+      $(_this).prop("disabled", false).html(`Get Contact Details`);
+      
       if (response.status == '1') {
         Swal.fire({title: 'Success!', text: response.msg, icon: 'success'}).then((result) => {
           if (result.isConfirmed) { location.reload(); }
@@ -544,7 +607,7 @@ function Send_Enquiry(_this) {
       }
     },
     error: function() {
-      $(_this).prop("disabled", false).html(`Send Enquiry`);
+      $(_this).prop("disabled", false).html(`Get Contact Details`);
       Swal.fire({title: 'Network Error', text: 'Something went wrong. Please try again.', icon: 'error'});
     }
   });

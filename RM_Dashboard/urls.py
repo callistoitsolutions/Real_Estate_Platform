@@ -66,6 +66,22 @@ urlpatterns = [
     ########## urls for resale property from plot #########################
 
     path('plot_resale_rm',views.plot_resale_rm,name="plot_resale_rm"),
+
+    ############ urls for resale industrial property list ##########################
+
+    path('industry_resale_rm_list',views.industry_resale_rm_list,name="industry_resale_rm_list"),
+
+    ######## urls for industrial resale property form ######################
+
+    path('industry_resale_rm',views.industry_resale_rm,name="industry_resale_rm"),
+
+    ########## urls for resale agricultural property list ###################
+
+    path('agriculture_resale_rm_list',views.agriculture_resale_rm_list,name="agriculture_resale_rm_list"),
+
+    ######### urls for agricutural resale property form ######################
+
+    path('agriculture_resale_rm',views.agriculture_resale_rm,name="agriculture_resale_rm"),
       
     path('affilate_page',views.affilate_page,name="affilate_page"),
     

@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
 
     <script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
 
@@ -1542,8 +1542,8 @@
                     <li><a href="{% url 'residential_resale_rm_list' %}" class="submenu-link" style="color:white;">Residential</a></li>
                     <li><a href="{% url 'commercial_resale_rm_list' %}" class="submenu-link" style="color:white;">Commercial</a></li>
                     <li><a href="{% url 'plot_resale_rm_list' %}" class="submenu-link" style="color:white;">Plot/Land</a></li>
-                    <li><a href="{% url 'industrial_resale_list' %}" class="submenu-link" style="color:white;">Industrial</a></li>
-                    <li><a href="{% url 'agricultural_resale_list' %}" class="submenu-link" style="color:white;">Agricultural</a></li>
+                    <li><a href="{% url 'industry_resale_rm_list' %}" class="submenu-link" style="color:white;">Industrial</a></li>
+                    <li><a href="{% url 'agriculture_resale_rm_list' %}" class="submenu-link" style="color:white;">Agricultural</a></li>
                 </ul>
             </li>
         </ul>
@@ -1648,46 +1648,38 @@
         submenu.classList.toggle('active');
     }
 
-    function User_Logout()
-    {
-        swal({
-            title: "LOGOUT",
-            text: "Are you sure, you want to logout from rm panel ?",
-            icon: "warning",
-            buttons: ["No", "Yes"],	
-            closeOnClickOutside: false,
-            dangerMode: true,
-        })
-        .then((willUpdate) => {
-            if (willUpdate) 
-            {	
-                $.ajax({
-                    type:"POST",
-                    url: "{% url 'User_Logout' %}",
-                    data: {'user_id' : '{{user_obj.id}}'},
-                    success: function (response) 
-                    {
-                        if (response.status == '1'){
-                            swal(""+response.msg+"", { 
-                                icon: "success",
-                                button: "Ok",
-                                closeOnClickOutside: false,
-                            }).then((addcat)=>{
-                                window.location.href = "{% url 'login' %}"
-                            });
-                        }
-                        else{
-                            swal(""+response.msg+"", {
-                            icon: "info",
-                            button: "Ok",
-                            closeOnClickOutside: false,
-                            });
-                        }
+    function User_Logout() {
+    swal({
+        title: "LOGOUT",
+        text: "Are you sure you want to logout from the RM panel?",
+        icon: "warning",
+        buttons: ["No, Cancel", "Yes, Logout"], // Beautifully labeled buttons
+        dangerMode: true,                       // Makes the confirm button red
+        closeOnClickOutside: false,             // Forces them to make a choice
+    })
+    .then((willLogout) => {
+        // willLogout is strictly 'true' ONLY if they click the 'Yes' button
+        if (willLogout) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'User_Logout' %}",
+                data: {'user_id': '{{user_obj.id}}'},
+                success: function (response) {
+                    if (response.status == '1') {
+                        swal("Success", response.msg, "success").then(() => {
+                            window.location.href = "{% url 'login' %}";
+                        });
+                    } else {
+                        swal("Notice", response.msg, "info");
                     }
-                })
-            }
-        });
-    }
+                },
+                error: function() {
+                    swal("Error", "Could not connect to the server.", "error");
+                }
+            });
+        }
+    });
+}
 
     function toggleUserDropdown(event) {
         event.stopPropagation();
