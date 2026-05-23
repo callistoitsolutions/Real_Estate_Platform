@@ -1910,6 +1910,20 @@
             </div>
 
             <div class="form-section">
+    <div class="section-header"><i class="fas fa-align-left"></i> Property Description</div>
+    <div class="section-body">
+        <div class="form-group">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Detailed Description</label>
+                <button type="button" class="btn-back btn-sm" style="padding: 5px 12px; font-size: 0.85rem;" onclick="generateAIDetails(true)">
+                    <i class="fas fa-magic" style="color: #667eea;"></i> Auto-Generate
+                </button>
+            </div>
+            <textarea class="form-control" name="property_description" id="property_description" rows="6">{{ pg.property_description|default:'' }}</textarea>
+        </div>
+    </div>
+</div>
+            <div class="form-section">
               <div class="section-header">
                 <i class="fas fa-star"></i>
                 Amenities & Features
@@ -2813,6 +2827,43 @@
     overlay.classList.remove('active');
     document.body.style.overflow = '';
   }
+
+
+
+function generateAIDetails(force = false) {
+    const pgName = document.querySelector('input[name="pg_name"]')?.value || 'this PG';
+    const city = document.querySelector('input[name="city"]')?.value || '';
+    const locality = document.querySelector('input[name="locality"]')?.value || '';
+    const totalBeds = document.querySelector('input[name="total_beds"]')?.value || '';
+    const furnish = document.querySelector('select[name="furnishing_type"]')?.value || '';
+    
+    let amenities = [];
+    document.querySelectorAll('input[name="amenities[]"]:checked').forEach(el => amenities.push(el.value));
+
+    let desc = `<p>Experience comfortable living at <strong>${pgName}</strong>, located in the prime area of <strong>${locality}${city ? ', ' + city : ''}</strong>.</p>`;
+    desc += `<p>This property features <strong>${totalBeds} beds</strong> and is <strong>${furnish}</strong>, providing a perfect home-like atmosphere for tenants.</p>`;
+    
+    if (amenities.length > 0) {
+        desc += `<h3>Key Amenities:</h3><p>We provide modern facilities including: <strong>${amenities.join(', ')}</strong>.</p>`;
+    }
+    
+    desc += `<p>Located conveniently, this property offers excellent connectivity to major hubs. Book your stay today for a hassle-free living experience!</p>`;
+
+    // Insert into CKEditor if active, else textarea
+    if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.property_description) {
+        if (force || CKEDITOR.instances.property_description.getData().trim() === '') {
+            CKEDITOR.instances.property_description.setData(desc);
+        }
+    } else {
+        const field = document.querySelector('textarea[name="property_description"]');
+        if (field && (force || field.value.trim() === '')) {
+            field.value = desc.replace(/<[^>]*>?/gm, '\n').trim();
+        }
+    }
+}
+
+
+
 
   function toggleSubmenu(event, element) {
     event.preventDefault();

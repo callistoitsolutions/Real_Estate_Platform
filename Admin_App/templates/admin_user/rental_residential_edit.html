@@ -47,32 +47,34 @@
     textarea.form-control { min-height: 100px; resize: vertical; }
 
     /* Buttons */
-    .btn-step, .btn-submit, .btn-back { padding: 12px 25px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+    .btn-step, .btn-submit, .btn-back { padding: 12px 25px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; }
     .btn-next, .btn-submit { background: var(--primary-gradient); color: white; }
-    .btn-prev, .btn-back { background: #e9ecef; color: #2d3748; text-decoration: none; display: inline-block; }
+    .btn-prev, .btn-back { background: #e9ecef; color: #2d3748; text-decoration: none; }
     .step-nav { display: flex; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 2px solid #f0f0f0; }
 
     /* Radios & Checkboxes */
     .checkbox-group, .radio-group { display: flex; flex-wrap: wrap; gap: 15px; }
-    .checkbox-item { flex: 1; min-width: 150px; }
-    .form-check { padding: 10px 15px; background: white; border-radius: 8px; border: 2px solid #e9ecef; display: flex; align-items: center; gap: 10px; }
-    .form-check-input { width: 18px; height: 18px; cursor: pointer; }
-    .form-check-label { font-weight: 600; color: #2d3748; cursor: pointer; margin: 0; font-size: 0.85rem;}
+    .checkbox-item, .radio-item { flex: 1; min-width: 150px; }
+    .form-check { padding: 15px; background: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef; display: flex; align-items: center; }
+    .form-check-input { width: 20px; height: 20px; border: 2px solid #cbd5e0; border-radius: 6px; cursor: pointer; }
+    .form-check-input:checked { background-color: #667eea; border-color: #667eea; }
+    .form-check-label { font-weight: 600; color: #2d3748; margin-left: 10px; cursor: pointer; font-size: 0.9rem;}
 
     /* Image Upload */
     .image-upload-area { border: 3px dashed #cbd5e0; border-radius: 15px; padding: 40px; text-align: center; background: white; cursor: pointer; transition: all 0.3s ease; }
     .image-upload-area:hover { border-color: #667eea; background: #f0f4ff; }
-    .image-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 15px; }
-    .preview-item { position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 1; border: 2px solid #e9ecef;}
+    .image-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
+    .preview-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; border: 2px solid #e9ecef; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
     .preview-item img { width: 100%; height: 100%; object-fit: cover; }
-    .existing-image-badge { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: white; font-size: 0.7rem; text-align: center; padding: 2px 0;}
+    .existing-image-badge { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: white; font-size: 0.75rem; text-align: center; padding: 4px 0; font-weight: 600;}
+    .remove-image { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; background: #e74c3c; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; }
+    .remove-image:hover { background: #c0392b; transform: scale(1.1); }
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 <div class="main-content">
     
-    <!-- Stepper Container -->
     <div class="stepper-container">
         <div class="stepper" id="stepper">
             <div class="step-item"><div class="step-circle active" id="sc1">1</div><div class="step-label active" id="sl1">Basic & Details</div><div class="step-line" id="line1"></div></div>
@@ -82,218 +84,549 @@
         </div>
     </div>
 
-    <!-- Page Wrapper for Grid Layout -->
     <div class="page-wrapper">
 
-        <!-- Form Container -->
         <div class="form-container">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                <h2 style="font-size: 1.5rem; font-weight: 700;"><i class="fas fa-edit"></i> Edit Property #{{ property.id }}</h2>
-                <a href="" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0;">
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: #2d3748; display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-edit" style="width: 45px; height: 45px; background: var(--primary-gradient); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center;"></i>
+                    Edit Property #{{ property.id }}
+                </h2>
+                <a href="#" onclick="history.back()" class="btn-back"><i class="fas fa-arrow-left"></i> Back to List</a>
             </div>
 
             <form method="POST" enctype="multipart/form-data" id="rentalEditForm" action="{% url 'rental_residential_edit' property.id %}" novalidate>
                 {% csrf_token %}
 
-                <!-- ========================================== -->
-                <!-- STEP 1: BASIC & DETAILS                    -->
-                <!-- ========================================== -->
                 <div class="step-content active" id="step1">
+                    
                     <div class="form-section">
                         <div class="section-header"><i class="fas fa-info-circle"></i> Basic Information</div>
                         <div class="section-body">
                             <div class="row">
-                                <div class="col-md-12">
-                                    <label class="form-label">Property Title <span class="required-star">*</span></label>
-                                    <input type="text" class="form-control" name="property_title" value="{{ property.property_title|default:'' }}" required>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">Purpose <span class="required-star">*</span></label>
-                                    <select class="form-select" name="property_purpose" required>
-                                        <option value="rent" {% if property.property_purpose == 'rent' %}selected{% endif %}>Rent</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Property Type <span class="required-star">*</span></label>
-                                    <select class="form-select" name="property_type" required>
-                                        <option value="Apartment" {% if property.property_type == 'Apartment' %}selected{% endif %}>Apartment</option>
-                                        <option value="Independent House" {% if property.property_type == 'Independent House' %}selected{% endif %}>Independent House</option>
-                                        <option value="Villa" {% if property.property_type == 'Villa' %}selected{% endif %}>Villa</option>
-                                        <option value="Studio Apartment" {% if property.property_type == 'Studio Apartment' %}selected{% endif %}>Studio Apartment</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">BHK Type <span class="required-star">*</span></label>
-                                    <select class="form-select" name="bhk_type" required>
-                                        <option value="1 RK" {% if property.bhk_type == '1 RK' %}selected{% endif %}>1 RK</option>
-                                        <option value="1 BHK" {% if property.bhk_type == '1 BHK' %}selected{% endif %}>1 BHK</option>
-                                        <option value="2 BHK" {% if property.bhk_type == '2 BHK' %}selected{% endif %}>2 BHK</option>
-                                        <option value="3 BHK" {% if property.bhk_type == '3 BHK' %}selected{% endif %}>3 BHK</option>
-                                        <option value="4+ BHK" {% if property.bhk_type == '4+ BHK' %}selected{% endif %}>4+ BHK</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Built-up Area (sq.ft) <span class="required-star">*</span></label>
-                                    <input type="number" class="form-control" name="built_up_area" value="{{ property.built_up_area|default:'' }}" required>
+                                <div class="col-md-6" hidden>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-heading"></i> Property Title</label>
+                                        <input type="text" class="form-control" name="property_title" value="{{ property.property_title|default:'' }}">
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Furnishing Status <span class="required-star">*</span></label>
-                                    <select class="form-select" name="furnishing_status" required>
-                                        <option value="Fully Furnished" {% if property.furnishing_status == 'Fully Furnished' %}selected{% endif %}>Fully Furnished</option>
-                                        <option value="Semi Furnished" {% if property.furnishing_status == 'Semi Furnished' %}selected{% endif %}>Semi Furnished</option>
-                                        <option value="Unfurnished" {% if property.furnishing_status == 'Unfurnished' %}selected{% endif %}>Unfurnished</option>
-                                    </select>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-tag"></i> Property Purpose <span class="required-star">*</span></label>
+                                        <select class="form-select form-control" name="property_purpose" required>
+                                            <option value="">Select Purpose</option>
+                                            <option value="rent" {% if property.property_purpose == 'rent' %}selected{% endif %}>Rent</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <!-- Include hidden/other basic fields here if necessary to keep step 1 clean -->
-                            <div class="row mt-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">Bathrooms</label>
-                                    <input type="number" class="form-control" name="bathrooms" value="{{ property.bathrooms|default:'' }}">
+
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-home"></i> Property Type <span class="required-star">*</span></label>
+                                        <select class="form-select form-control" name="property_type" required>
+                                            <option value="">Select Property Type</option>
+                                            <option value="Apartment" {% if property.property_type == 'Apartment' %}selected{% endif %}>Apartment</option>
+                                            <option value="Independent House" {% if property.property_type == 'Independent House' %}selected{% endif %}>Independent House</option>
+                                            <option value="Villa" {% if property.property_type == 'Villa' %}selected{% endif %}>Villa</option>
+                                            <option value="Duplex" {% if property.property_type == 'Duplex' %}selected{% endif %}>Duplex</option>
+                                            <option value="Penthouse" {% if property.property_type == 'Penthouse' %}selected{% endif %}>Penthouse</option>
+                                            <option value="Studio Apartment" {% if property.property_type == 'Studio Apartment' %}selected{% endif %}>Studio Apartment</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Floor Number</label>
-                                    <input type="text" class="form-control" name="floor_number" value="{{ property.floor_number|default:'' }}">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Total Floors</label>
-                                    <input type="number" class="form-control" name="total_floors" value="{{ property.total_floors|default:'' }}">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-bed"></i> BHK Type <span class="required-star">*</span></label>
+                                        <select class="form-select form-control" name="bhk_type" required>
+                                            <option value="">Select BHK</option>
+                                            <option value="1 RK" {% if property.bhk_type == '1 RK' %}selected{% endif %}>1 RK</option>
+                                            <option value="1 BHK" {% if property.bhk_type == '1 BHK' %}selected{% endif %}>1 BHK</option>
+                                            <option value="2 BHK" {% if property.bhk_type == '2 BHK' %}selected{% endif %}>2 BHK</option>
+                                            <option value="3 BHK" {% if property.bhk_type == '3 BHK' %}selected{% endif %}>3 BHK</option>
+                                            <option value="4 BHK" {% if property.bhk_type == '4 BHK' %}selected{% endif %}>4 BHK</option>
+                                            <option value="5+ BHK" {% if property.bhk_type == '5+ BHK' %}selected{% endif %}>5+ BHK</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                            <input type="hidden" name="renting_option" value="{{ property.renting_option }}">
-                            <input type="hidden" name="available_for" value="{{ property.available_for }}">
+
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-key"></i> Renting Option <span class="required-star">*</span></label>
+                                        <select class="form-select form-control" name="renting_option" required>
+                                            <option value="">Select Option</option>
+                                            <option value="Full Property" {% if property.renting_option == 'Full Property' %}selected{% endif %}>Full Property</option>
+                                            <option value="Single Room" {% if property.renting_option == 'Single Room' %}selected{% endif %}>Single Room</option>
+                                            <option value="Shared Room" {% if property.renting_option == 'Shared Room' %}selected{% endif %}>Shared Room</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-expand"></i> Built-up Area (sq.ft) <span class="required-star">*</span></label>
+                                        <input type="number" class="form-control" name="built_up_area" value="{{ property.built_up_area|default:'' }}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-bath"></i> Bathrooms <span class="required-star">*</span></label>
+                                        <input type="number" class="form-control" name="bathrooms" value="{{ property.bathrooms|default:'' }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-couch"></i> Balconies</label>
+                                        <input type="number" class="form-control" name="balconies" value="{{ property.balconies|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-layer-group"></i> Floor Number <span class="required-star">*</span></label>
+                                        <input type="text" class="form-control" name="floor_number" value="{{ property.floor_number|default:'' }}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-building"></i> Total Floors in Building</label>
+                                        <input type="number" class="form-control" name="total_floors" value="{{ property.total_floors|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-compass"></i> Facing Direction</label>
+                                        <select class="form-select form-control" name="facing">
+                                            <option value="">Select Direction</option>
+                                            <option value="North" {% if property.facing == 'North' %}selected{% endif %}>North</option>
+                                            <option value="South" {% if property.facing == 'South' %}selected{% endif %}>South</option>
+                                            <option value="East" {% if property.facing == 'East' %}selected{% endif %}>East</option>
+                                            <option value="West" {% if property.facing == 'West' %}selected{% endif %}>West</option>
+                                            <option value="North-East" {% if property.facing == 'North-East' %}selected{% endif %}>North-East</option>
+                                            <option value="North-West" {% if property.facing == 'North-West' %}selected{% endif %}>North-West</option>
+                                            <option value="South-East" {% if property.facing == 'South-East' %}selected{% endif %}>South-East</option>
+                                            <option value="South-West" {% if property.facing == 'South-West' %}selected{% endif %}>South-West</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-warehouse"></i> Furnishing Status <span class="required-star">*</span></label>
+                                        <select class="form-select form-control" name="furnishing_status" required>
+                                            <option value="">Select Status</option>
+                                            <option value="Fully Furnished" {% if property.furnishing_status == 'Fully Furnished' %}selected{% endif %}>Fully Furnished</option>
+                                            <option value="Semi Furnished" {% if property.furnishing_status == 'Semi Furnished' %}selected{% endif %}>Semi Furnished</option>
+                                            <option value="Unfurnished" {% if property.furnishing_status == 'Unfurnished' %}selected{% endif %}>Unfurnished</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user-tie"></i> Available For <span class="required-star">*</span></label>
+                                        <select class="form-select form-control" name="available_for" required>
+                                            <option value="">Select Option</option>
+                                            <option value="Family" {% if property.available_for == 'Family' %}selected{% endif %}>Family</option>
+                                            <option value="Bachelor" {% if property.available_for == 'Bachelor' %}selected{% endif %}>Bachelor</option>
+                                            <option value="Both" {% if property.available_for == 'Both' %}selected{% endif %}>Both (Family & Bachelor)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-clipboard-list"></i> Property Details</div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-map-marked-alt"></i> Zone</label>
+                                        <select class="form-select form-control" name="zone">
+                                            <option value="">Select Zone</option>
+                                            <option value="North" {% if property.zone == 'North' %}selected{% endif %}>North</option>
+                                            <option value="South" {% if property.zone == 'South' %}selected{% endif %}>South</option>
+                                            <option value="East" {% if property.zone == 'East' %}selected{% endif %}>East</option>
+                                            <option value="West" {% if property.zone == 'West' %}selected{% endif %}>West</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-file-contract"></i> Ownership Type</label>
+                                        <select class="form-select form-control" name="ownership_type">
+                                            <option value="">Select Ownership</option>
+                                            <option value="Freehold" {% if property.ownership_type == 'Freehold' %}selected{% endif %}>Freehold</option>
+                                            <option value="Leasehold" {% if property.ownership_type == 'Leasehold' %}selected{% endif %}>Leasehold</option>
+                                            <option value="Co-operative Society" {% if property.ownership_type == 'Co-operative Society' %}selected{% endif %}>Co-operative Society</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-hard-hat"></i> Construction Status</label>
+                                        <select class="form-select form-control" name="construction_status">
+                                            <option value="">Select Status</option>
+                                            <option value="New Construction" {% if property.construction_status == 'New Construction' %}selected{% endif %}>New Construction</option>
+                                            <option value="Resale" {% if property.construction_status == 'Resale' %}selected{% endif %}>Resale</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-calendar-alt"></i> Property Age</label>
+                                        <select class="form-select form-control" name="property_age">
+                                            <option value="">Select Age</option>
+                                            <option value="0-1 Year" {% if property.property_age == '0-1 Year' %}selected{% endif %}>0-1 Year</option>
+                                            <option value="1-3 Years" {% if property.property_age == '1-3 Years' %}selected{% endif %}>1-3 Years</option>
+                                            <option value="3-5 Years" {% if property.property_age == '3-5 Years' %}selected{% endif %}>3-5 Years</option>
+                                            <option value="5-10 Years" {% if property.property_age == '5-10 Years' %}selected{% endif %}>5-10 Years</option>
+                                            <option value="10+ Years" {% if property.property_age == '10+ Years' %}selected{% endif %}>10+ Years</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-vector-square"></i> Carpet Area (sq.ft)</label>
+                                        <input type="number" class="form-control" name="carpet_area" value="{{ property.carpet_area|default:'' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-draw-polygon"></i> Plot Area (sq.ft)</label>
+                                        <input type="number" class="form-control" name="plot_area" value="{{ property.plot_area|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-city"></i> Building / Society Name</label>
+                                        <input type="text" class="form-control" name="building_name" value="{{ property.building_name|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="step-nav">
                         <div></div>
-                        <button type="button" class="btn-step btn-next" onclick="goToStep(2)">Next <i class="fas fa-arrow-right"></i></button>
+                        <button type="button" class="btn-step btn-next" onclick="goToStep(2)">Next Step <i class="fas fa-arrow-right"></i></button>
                     </div>
                 </div>
 
-                <!-- ========================================== -->
-                <!-- STEP 2: AVAILABILITY & PRICING             -->
-                <!-- ========================================== -->
                 <div class="step-content" id="step2">
+                    
                     <div class="form-section">
-                        <div class="section-header"><i class="fas fa-rupee-sign"></i> Pricing & Availability</div>
+                        <div class="section-header"><i class="fas fa-calendar-check"></i> Availability Details</div>
                         <div class="section-body">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <label class="form-label">Monthly Rent (₹) <span class="required-star">*</span></label>
-                                    <input type="number" class="form-control" name="monthly_rent" value="{{ property.monthly_rent|default:'' }}" required>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-check-circle"></i> Possession Status</label>
+                                        <select class="form-select form-control" name="possession_status">
+                                            <option value="">Select Status</option>
+                                            <option value="Ready to Move" {% if property.possession_status == 'Ready to Move' %}selected{% endif %}>Ready to Move</option>
+                                            <option value="Under Construction" {% if property.possession_status == 'Under Construction' %}selected{% endif %}>Under Construction</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Security Deposit (₹) <span class="required-star">*</span></label>
-                                    <input type="number" class="form-control" name="security_deposit" value="{{ property.security_deposit|default:'' }}" required>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Possession Status</label>
-                                    <select class="form-select" name="possession_status">
-                                        <option value="Ready to Move" {% if property.possession_status == 'Ready to Move' %}selected{% endif %}>Ready to Move</option>
-                                        <option value="Under Construction" {% if property.possession_status == 'Under Construction' %}selected{% endif %}>Under Construction</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Available From</label>
-                                    <input type="date" class="form-control" name="available_from" value="{{ property.available_from|date:'Y-m-d' }}">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-calendar"></i> Available From</label>
+                                        <input type="date" class="form-control" name="available_from" value="{{ property.available_from|date:'Y-m-d' }}">
+                                    </div>
                                 </div>
                             </div>
-                            <div class="row mt-3">
+
+                            <div class="row mt-2">
                                 <div class="col-md-6">
-                                    <label class="form-label">Maintenance Amount</label>
-                                    <input type="number" class="form-control" name="maintenance_amount" value="{{ property.maintenance_amount|default:'' }}">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-clock"></i> Lease Duration</label>
+                                        <select class="form-select form-control" name="lease_duration">
+                                            <option value="">Select Duration</option>
+                                            <option value="6 Months" {% if property.lease_duration == '6 Months' %}selected{% endif %}>6 Months</option>
+                                            <option value="11 Months" {% if property.lease_duration == '11 Months' %}selected{% endif %}>11 Months</option>
+                                            <option value="1 Year" {% if property.lease_duration == '1 Year' %}selected{% endif %}>1 Year</option>
+                                            <option value="2 Years" {% if property.lease_duration == '2 Years' %}selected{% endif %}>2 Years</option>
+                                        </select>
+                                    </div>
                                 </div>
+
                                 <div class="col-md-6">
-                                    <label class="form-label">Brokerage</label>
-                                    <select class="form-select" name="brokerage">
-                                        <option value="Yes" {% if property.brokerage == 'Yes' %}selected{% endif %}>Yes</option>
-                                        <option value="No" {% if property.brokerage == 'No' %}selected{% endif %}>No</option>
-                                    </select>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-handshake"></i> Brokerage</label>
+                                        <select class="form-select form-control" name="brokerage" id="brokerageSelect">
+                                            <option value="">Select Option</option>
+                                            <option value="Yes" {% if property.brokerage == 'Yes' %}selected{% endif %}>Yes</option>
+                                            <option value="No" {% if property.brokerage == 'No' %}selected{% endif %}>No</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6" id="brokerageSection" style="display:none;">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-percent"></i> Brokerage Percentage</label>
+                                        <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
+                                            <option value="">Select Brokerage</option>
+                                            <option value="1%" {% if property.brokerage_percentage == '1%' %}selected{% endif %}>1%</option>
+                                            <option value="1.5%" {% if property.brokerage_percentage == '1.5%' %}selected{% endif %}>1.5%</option>
+                                            <option value="2%" {% if property.brokerage_percentage == '2%' %}selected{% endif %}>2%</option>
+                                            <option value="Negotiable" {% if property.brokerage_percentage == 'Negotiable' %}selected{% endif %}>Negotiable</option>
+                                            <option value="Manual" {% if property.brokerage_percentage == 'Manual' %}selected{% endif %}>Enter Manually</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6" id="manualBrokerage" style="display:none;">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-edit"></i> Enter Brokerage</label>
+                                        <input type="text" class="form-control" name="manual_brokerage" value="{{ property.manual_brokerage|default:'' }}" placeholder="Enter Brokerage e.g. 2.5%">
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-rupee-sign"></i> Pricing Details</div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-money-bill-wave"></i> Monthly Rent (₹) <span class="required-star">*</span></label>
+                                        <div class="input-group" style="display: flex;">
+                                            <span class="input-group-text" style="background:#e9ecef; border: 2px solid #e9ecef; border-right: none; padding: 12px 15px; border-radius: 12px 0 0 12px;">₹</span>
+                                            <input type="number" class="form-control" name="monthly_rent" value="{{ property.monthly_rent|default:'' }}" style="border-radius: 0 12px 12px 0;" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-shield-alt"></i> Security Deposit (₹) <span class="required-star">*</span></label>
+                                        <div class="input-group" style="display: flex;">
+                                            <span class="input-group-text" style="background:#e9ecef; border: 2px solid #e9ecef; border-right: none; padding: 12px 15px; border-radius: 12px 0 0 12px;">₹</span>
+                                            <input type="number" class="form-control" name="security_deposit" value="{{ property.security_deposit|default:'' }}" style="border-radius: 0 12px 12px 0;" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-file-invoice-dollar"></i> Maintenance Charges</label>
+                                        <div class="radio-group">
+                                            <div class="radio-item">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="maintenance_type" id="maintenance_included" value="Included in Rent" {% if property.maintenance_type == 'Included in Rent' or not property.maintenance_type %}checked{% endif %}>
+                                                    <label class="form-check-label" for="maintenance_included">Included in Rent</label>
+                                                </div>
+                                            </div>
+                                            <div class="radio-item">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="maintenance_type" id="maintenance_extra" value="Extra" {% if property.maintenance_type == 'Extra' %}checked{% endif %}>
+                                                    <label class="form-check-label" for="maintenance_extra">Extra Charges</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-dollar-sign"></i> Maintenance Amount (₹)</label>
+                                        <div class="input-group" style="display: flex;">
+                                            <span class="input-group-text" style="background:#e9ecef; border: 2px solid #e9ecef; border-right: none; padding: 12px 15px; border-radius: 12px 0 0 12px;">₹</span>
+                                            <input type="number" class="form-control" name="maintenance_amount" value="{{ property.maintenance_amount|default:'' }}" style="border-radius: 0 12px 12px 0;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="step-nav">
-                        <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
-                        <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next <i class="fas fa-arrow-right"></i></button>
+                        <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Previous</button>
+                        <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next Step <i class="fas fa-arrow-right"></i></button>
                     </div>
                 </div>
 
-                <!-- ========================================== -->
-                <!-- STEP 3: LOCATION & FEATURES                -->
-                <!-- ========================================== -->
                 <div class="step-content" id="step3">
+                    
                     <div class="form-section">
-                        <div class="section-header"><i class="fas fa-map-marker-alt"></i> Location & Amenities</div>
+                        <div class="section-header"><i class="fas fa-map-marker-alt"></i> Location Details</div>
                         <div class="section-body">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <label class="form-label">Complete Address <span class="required-star">*</span></label>
-                                    <textarea class="form-control" name="address" rows="2" required>{{ property.address|default:'' }}</textarea>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">City <span class="required-star">*</span></label>
-                                    <input type="text" class="form-control" name="city" value="{{ property.city|default:'' }}" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Locality <span class="required-star">*</span></label>
-                                    <input type="text" class="form-control" name="locality" value="{{ property.locality|default:'' }}" required>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-map"></i> Complete Address <span class="required-star">*</span></label>
+                                        <textarea class="form-control" name="address" required>{{ property.address|default:'' }}</textarea>
+                                    </div>
                                 </div>
                             </div>
 
-                            <hr style="margin: 25px 0; border-color: #e9ecef;">
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-city"></i> City <span class="required-star">*</span></label>
+                                        <input type="text" class="form-control" name="city" value="{{ property.city|default:'' }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-map-pin"></i> Locality/Area <span class="required-star">*</span></label>
+                                        <input type="text" class="form-control" name="locality" value="{{ property.locality|default:'' }}" required>
+                                    </div>
+                                </div>
+                            </div>
 
-                            <label class="form-label"><i class="fas fa-star"></i> Amenities</label>
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-map-signs"></i> State <span class="required-star">*</span></label>
+                                        <input type="text" class="form-control" name="state" value="{{ property.state|default:'' }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-mail-bulk"></i> Pincode <span class="required-star">*</span></label>
+                                        <input type="text" class="form-control" name="pincode" value="{{ property.pincode|default:'' }}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-road"></i> Road Connectivity</label>
+                                        <input type="text" class="form-control" name="road_connectivity" value="{{ property.road_connectivity|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-star"></i> Amenities & Features</div>
+                        <div class="section-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="form-label mb-0"><i class="fas fa-star"></i> Amenities</label>
+                                <div class="selection-summary">
+                                    <span class="text-muted small" style="font-weight:bold;">Selected:</span>
+                                    <input type="text" id="amenityCounter" value="0" readonly style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #ddd; font-weight: bold; background: #f8f9fa;">
+                                </div>
+                            </div>
+
                             <div class="checkbox-group">
                                 {% for ameneties in ameneties_obj %}
                                     <div class="checkbox-item">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="amenities[]" value="{{ameneties.amenties_name}}" id="am_{{ forloop.counter }}"
+                                            <input class="form-check-input amenity-checkbox" type="checkbox" name="amenities[]" value="{{ameneties.amenties_name}}" id="amenity_{{ forloop.counter }}"
                                             {% if ameneties.amenties_name in property.amenities %}checked{% endif %}>
-                                            <label class="form-check-label" for="am_{{ forloop.counter }}"><i class="{{ameneties.amenties_icon}}"></i> {{ameneties.amenties_name}}</label>
+                                            <label class="form-check-label" for="amenity_{{ forloop.counter }}"><i class="{{ameneties.amenties_icon}}"></i> {{ameneties.amenties_name}}</label>
                                         </div>
                                     </div>
                                 {% endfor %}
                             </div>
-
-                            <label class="form-label mt-4"><i class="fas fa-align-left"></i> Description</label>
-                            <textarea class="form-control" name="description" rows="4">{{ property.description|default:'' }}</textarea>
                         </div>
                     </div>
+
+                    <div class="form-section facility-theme">
+                        <div class="section-header"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
+                        <div class="section-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <label class="form-label mb-0"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</label>
+                                <div class="selection-summary">
+                                    <span class="text-muted small" style="font-weight:bold;">Selected:</span>
+                                    <input type="text" id="facilityCounter" value="0" readonly style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #bae6fd; font-weight: bold; background: #f0f9ff; color: #0369a1;">
+                                </div>
+                            </div>
+
+                            <div class="checkbox-group">
+                                {% for facilities in facilities_obj %}
+                                    <div class="checkbox-item">
+                                        <div class="form-check">
+                                            <input class="form-check-input facility-checkbox" type="checkbox" name="facilities[]" value="{{facilities.facilities_name}}" id="facility_{{ forloop.counter }}"
+                                            {% if facilities.facilities_name in property.facilities %}checked{% endif %}>
+                                            <label class="form-check-label" for="facility_{{ forloop.counter }}"><i class="{{facilities.facilities_icon}}"></i> {{facilities.facilities_name}}</label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-align-left"></i> Property Summary</div>
+                        <div class="section-body">
+                            <div class="form-group">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Detailed Summary</label>
+                                    <button type="button" class="btn-back btn-sm" style="padding: 5px 12px; font-size: 0.85rem;" onclick="generateAIDetails(true)">
+                                        <i class="fas fa-magic" style="color: #667eea;"></i> Auto-Generate
+                                    </button>
+                                </div>
+                                <textarea class="form-control" name="description" rows="6">{{ property.description|default:'' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-file-text"></i> Property Description</div>
+                        <div class="section-body">
+                            <div class="form-group">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Detailed Description</label>
+                                    <button type="button" class="btn-back btn-sm" style="padding: 5px 12px; font-size: 0.85rem;" onclick="generateAIDetails(true)">
+                                        <i class="fas fa-magic" style="color: #667eea;"></i> Auto-Generate
+                                    </button>
+                                </div>
+                                <textarea class="form-control" name="rent_residential_desc" id="rent_residential_desc" rows="6">{{ property.rent_residential_desc|default:'' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="step-nav">
-                        <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
-                        <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Next <i class="fas fa-arrow-right"></i></button>
+                        <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Previous</button>
+                        <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Next Step <i class="fas fa-arrow-right"></i></button>
                     </div>
                 </div>
 
-                <!-- ========================================== -->
-                <!-- STEP 4: IMAGES & OWNER                     -->
-                <!-- ========================================== -->
                 <div class="step-content" id="step4">
                     
                     <div class="form-section">
                         <div class="section-header"><i class="fas fa-images"></i> Manage Images</div>
                         <div class="section-body">
                             
-                            <!-- Existing Images Preview -->
                             <label class="form-label">Current Images</label>
-                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+                            <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 25px;">
                                 {% for img in property.images.all %}
-                                    <div class="preview-item">
+                                    <div class="preview-item" style="width: 150px; height: 150px;">
                                         <img src="{{ img.image.url }}">
-                                        <div class="existing-image-badge">Saved</div>
+                                        <div class="existing-image-badge">Saved Image</div>
                                     </div>
                                 {% empty %}
-                                    <span style="color: #718096; font-size: 0.85rem;">No images uploaded yet.</span>
+                                    <span style="color: #718096; font-size: 0.9rem; font-style: italic;">No images uploaded yet.</span>
                                 {% endfor %}
                             </div>
 
@@ -301,36 +634,82 @@
                             <div class="image-upload-area" id="uploadArea">
                                 <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display: none;">
                                 <i class="fas fa-cloud-upload-alt" style="font-size:3rem; color:#667eea; margin-bottom: 10px;"></i>
-                                <div style="font-weight: 600; color: #4a5568;">Click to browse new images</div>
-                                <div style="font-size: 0.8rem; color: #718096;">Max 10 images total across existing and new.</div>
+                                <div style="font-weight: 600; color: #4a5568; font-size: 1.1rem;">Click or Drag Images Here</div>
+                                <div style="font-size: 0.9rem; color: #718096;">Upload high-quality images (JPG, PNG). Max 10 images total.</div>
                             </div>
+                            
                             <div class="image-preview" id="imagePreview"></div>
                         </div>
                     </div>
 
                     <div class="form-section">
-                        <div class="section-header"><i class="fas fa-user"></i> Owner Details</div>
+                        <div class="section-header"><i class="fas fa-address-book"></i> Contact Information</div>
                         <div class="section-body">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <label class="form-label">Owner Name <span class="required-star">*</span></label>
-                                    <input type="text" class="form-control" name="owner_name" value="{{ property.owner_name|default:'' }}" required>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user"></i> Owner Name <span class="required-star">*</span></label>
+                                        <input type="text" class="form-control" name="owner_name" value="{{ property.owner_name|default:'' }}" required>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Contact Number <span class="required-star">*</span></label>
-                                    <input type="tel" class="form-control" name="contact_number" value="{{ property.contact_number|default:'' }}" required>
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-phone"></i> Contact Number <span class="required-star">*</span></label>
+                                        <input type="tel" class="form-control" name="contact_number" value="{{ property.contact_number|default:'' }}" required>
+                                    </div>
                                 </div>
                             </div>
-                            <!-- Hidden Uploaded By Info -->
-                            <input type="hidden" name="uploaded_by_name" value="{{ property.uploaded_by_name }}">
-                            <input type="hidden" name="uploaded_by_email" value="{{ property.uploaded_by_email }}">
-                            <input type="hidden" name="uploaded_by_contact" value="{{ property.uploaded_by_contact }}">
-                            <input type="hidden" name="uploaded_by_role" value="{{ property.uploaded_by_role }}">
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-envelope"></i> Email Address <span class="required-star">*</span></label>
+                                        <input type="email" class="form-control" name="email" value="{{ property.email|default:'' }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-phone-alt"></i> Alternate Contact</label>
+                                        <input type="tel" class="form-control" name="alternate_contact" value="{{ property.alternate_contact|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-upload"></i> Listing Uploaded By</div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user"></i> Name</label>
+                                        <input type="text" class="form-control" name="uploaded_by_name" value="{{ property.uploaded_by_name|default:admin_obj.name }}" readonly style="background-color: #e9ecef;">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
+                                        <input type="email" class="form-control" name="uploaded_by_email" value="{{ property.uploaded_by_email|default:admin_obj.email }}" readonly style="background-color: #e9ecef;">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-phone"></i> Contact</label>
+                                        <input type="text" class="form-control" name="uploaded_by_contact" value="{{ property.uploaded_by_contact|default:admin_obj.phone }}" readonly style="background-color: #e9ecef;">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
+                                        <input type="text" class="form-control" name="uploaded_by_role" value="{{ property.uploaded_by_role|default:admin_obj.role }}" readonly style="background-color: #e9ecef;">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="step-nav">
-                        <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+                        <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Previous</button>
                         <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Update Property</button>
                     </div>
                 </div>
@@ -338,11 +717,7 @@
             </form>
         </div>
 
-        <!-- ========================================== -->
-        <!-- LIVE PREVIEW SIDEBAR                       -->
-        <!-- ========================================== -->
         <div class="preview-sidebar">
-            <!-- Live Preview Card -->
             <div style="background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); border-radius: 16px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin-bottom: 20px;">
                 <div style="font-size: 0.8rem; font-weight: 700; color: rgba(255, 255, 255, 0.6); margin-bottom: 15px;">
                     <i class="fas fa-eye"></i> Live Preview
@@ -360,7 +735,7 @@
                     </div>
                     <div style="padding: 15px;">
                         <div id="previewTitle" style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            Title
+                            Property Title
                         </div>
                         <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 10px;">
                             <i class="fas fa-map-marker-alt"></i> <span id="previewLocation">City, Locality</span>
@@ -372,28 +747,22 @@
                 </div>
             </div>
 
-            <!-- Checklist Card -->
             <div style="background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e9ecef;">
                 <h4 style="font-size: 1rem; font-weight: 700; color: #2d3748; margin-bottom: 15px;">
                     <i class="fas fa-clipboard-check text-success"></i> Listing Checklist
                 </h4>
                 <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #4a5568;">
                     <li style="margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #cbd5e0; transition: color 0.3s;" id="chk-basic"></i> Basic Details</li>
-                    <li style="margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #cbd5e0; transition: color 0.3s;" id="chk-price"></i> Rent Set</li>
+                    <li style="margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #cbd5e0; transition: color 0.3s;" id="chk-price"></i> Rent & Deposit</li>
                     <li style="margin-bottom: 10px;"><i class="fas fa-check-circle" style="color: #cbd5e0; transition: color 0.3s;" id="chk-loc"></i> Exact Location</li>
-                    <li><i class="fas fa-check-circle" style="color: #cbd5e0; transition: color 0.3s;" id="chk-desc"></i> Description Added</li>
+                    <li><i class="fas fa-check-circle" style="color: #cbd5e0; transition: color 0.3s;" id="chk-desc"></i> Detailed Description</li>
                 </ul>
-                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #e9ecef;">
-                    <h5 style="font-size: 0.85rem; font-weight: 700; color: #e74c3c; margin-bottom: 8px;">
-                        <i class="fas fa-lightbulb"></i> Pro Tips
-                    </h5>
-                    <p style="font-size: 0.75rem; color: #718096; margin: 0;">Highlight unique selling points like "Park Facing" or "Near Metro" in the title!</p>
-                </div>
             </div>
         </div>
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
 <script>
@@ -425,7 +794,84 @@
             }
         }
         currentStep = n;
+
+        // Auto-generate if navigating to step 3
+        if (n === 3) {
+            generateAIDetails(false);
+            updatePreview();
+        }
+
         window.scrollTo(0, 0); 
+    }
+
+    // --- AI AUTO GENERATOR LOGIC ---
+    function generateAIDetails(force = false) {
+        const type = document.querySelector('select[name="property_type"]')?.value || 'property';
+        const bhk = document.querySelector('select[name="bhk_type"]')?.value || 'A well-maintained';
+        const area = document.querySelector('input[name="built_up_area"]')?.value || '';
+        const carpet = document.querySelector('input[name="carpet_area"]')?.value || '';
+        
+        const rent = document.querySelector('input[name="monthly_rent"]')?.value || '';
+        const deposit = document.querySelector('input[name="security_deposit"]')?.value || '';
+        
+        const locality = document.querySelector('input[name="locality"]')?.value || 'a prime location';
+        const city = document.querySelector('input[name="city"]')?.value || '';
+        const buildingName = document.querySelector('input[name="building_name"]')?.value || '';
+        
+        const furnishing = document.querySelector('select[name="furnishing_status"]')?.value || 'comfortable';
+        const availableFor = document.querySelector('select[name="available_for"]')?.value || 'tenants';
+        const possession = document.querySelector('select[name="possession_status"]')?.value || 'soon';
+        const floor = document.querySelector('input[name="floor_number"]')?.value || '';
+        const totalFloors = document.querySelector('input[name="total_floors"]')?.value || '';
+        const facing = document.querySelector('select[name="facing"]')?.value || '';
+        
+        const amenitiesList = Array.from(document.querySelectorAll('input[name="amenities[]"]:checked')).map(el => el.value);
+
+        let summaryText = `${bhk} ${type} is available for rent in ${locality}${city ? ', ' + city : ''}. `;
+        if (rent) summaryText += `Available at a competitive rent of ₹${Number(rent).toLocaleString('en-IN')}/month. `;
+        if (area) summaryText += `It offers a spacious built-up area of ${area} sq.ft. `;
+        summaryText += `This property is ${furnishing} and makes for an ideal home for ${availableFor}.`;
+
+        const summaryField = document.querySelector('textarea[name="description"]');
+        if (summaryField && (force || summaryField.value.trim() === '')) {
+            summaryField.value = summaryText;
+        }
+
+        let longDesc = `<p>Experience comfortable living in this highly sought-after <strong>${bhk !== 'A well-maintained' ? bhk : ''} ${type}</strong> located in <strong>${locality}${city ? ', ' + city : ''}</strong>.</p>`;
+        
+        if (buildingName) {
+            longDesc += `<p>Situated in the prestigious residential society of <strong>${buildingName}</strong>, this home is meticulously designed to meet your lifestyle requirements while offering peace and privacy.</p>`;
+        }
+
+        longDesc += `<h3>Property Highlights:</h3><ul>`;
+        if (area) longDesc += `<li><strong>Space & Dimensions:</strong> Features a generous built-up area of ${area} sq.ft. ${carpet ? `with a highly usable carpet area of ${carpet} sq.ft.` : ''}.</li>`;
+        if (rent) longDesc += `<li><strong>Pricing:</strong> Set at a reasonable monthly rent of ₹${Number(rent).toLocaleString('en-IN')}${deposit ? ` (Security Deposit: ₹${Number(deposit).toLocaleString('en-IN')})` : ''}.</li>`;
+        longDesc += `<li><strong>Furnishing Status:</strong> The property is ${furnishing}, saving you immense setup time and cost.</li>`;
+        if (floor) longDesc += `<li><strong>Floor Details:</strong> Positioned comfortably on the ${floor} ${totalFloors ? `of a well-maintained ${totalFloors}-story building` : ''}.</li>`;
+        if (facing) longDesc += `<li><strong>Vastu & Orientation:</strong> ${facing}-facing property, ensuring ample natural sunlight.</li>`;
+        longDesc += `<li><strong>Availability:</strong> The property status is ${possession}.</li>`;
+        longDesc += `<li><strong>Preferred Tenants:</strong> Highly suited for ${availableFor}.</li>`;
+        longDesc += `</ul>`;
+
+        if (amenitiesList.length > 0) {
+            longDesc += `<h3>Top Amenities & Lifestyle:</h3><p>Residents will enjoy exclusive access to top-tier facilities including: <strong>${amenitiesList.join(', ')}</strong>.</p>`;
+        }
+
+        longDesc += `<p>This property provides seamless road connectivity to major commercial hubs, renowned educational institutions, and healthcare facilities in the area. Don't miss the chance to make this exceptional house your new home.</p>`;
+
+        if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.rent_residential_desc) {
+            const currentData = CKEDITOR.instances.rent_residential_desc.getData().trim();
+            if (force || currentData === '') {
+                CKEDITOR.instances.rent_residential_desc.setData(longDesc);
+            }
+        } else {
+            const descField = document.querySelector('textarea[name="rent_residential_desc"]');
+            if (descField && (force || descField.value.trim() === '')) {
+                descField.value = longDesc.replace(/<[^>]*>?/gm, '\n').replace(/\n\n+/g, '\n').trim();
+            }
+        }
+        
+        updatePreview();
     }
 
     // --- LIVE PREVIEW LOGIC ---
@@ -435,10 +881,15 @@
         const area = document.querySelector('input[name="built_up_area"]')?.value;
         const title = document.querySelector('input[name="property_title"]')?.value;
         const price = document.querySelector('input[name="monthly_rent"]')?.value;
+        const deposit = document.querySelector('input[name="security_deposit"]')?.value;
         const city = document.querySelector('input[name="city"]')?.value;
         const loc = document.querySelector('input[name="locality"]')?.value;
         const address = document.querySelector('textarea[name="address"]')?.value;
-        const desc = document.querySelector('textarea[name="description"]')?.value || "";
+        let desc = document.querySelector('textarea[name="description"]')?.value || "";
+
+        if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.rent_residential_desc) {
+            desc += CKEDITOR.instances.rent_residential_desc.getData();
+        }
 
         document.getElementById('previewType').innerText = type || 'Type';
         document.getElementById('previewBHK').innerText = bhk || 'BHK';
@@ -450,16 +901,71 @@
         const colorSuccess = '#10b981';
         const colorPending = '#cbd5e0';
         document.getElementById('chk-basic').style.color = (type && bhk && area) ? colorSuccess : colorPending;
-        document.getElementById('chk-price').style.color = (price) ? colorSuccess : colorPending;
+        document.getElementById('chk-price').style.color = (price && deposit) ? colorSuccess : colorPending;
         document.getElementById('chk-loc').style.color = (city && loc && address) ? colorSuccess : colorPending;
-        document.getElementById('chk-desc').style.color = (desc.length > 10) ? colorSuccess : colorPending;
+        document.getElementById('chk-desc').style.color = (desc.length > 20) ? colorSuccess : colorPending;
     }
 
     document.querySelectorAll('input, select, textarea').forEach(el => {
         el.addEventListener('input', updatePreview);
-        el.addEventListener('change', updatePreview);
+        el.addEventListener('change', () => {
+            updatePreview();
+            generateAIDetails(false); // Only generates if the fields are empty!
+        });
     });
-    updatePreview();
+
+    // --- AMENITIES & FACILITIES COUNTER ---
+    function updateAmenityCount() { $('#amenityCounter').val($('input[name="amenities[]"]:checked').length); }
+    function updateFacilityCount() { $('#facilityCounter').val($('input[name="facilities[]"]:checked').length); }
+    
+    $(document).on('change', 'input[name="amenities[]"]', updateAmenityCount);
+    $(document).on('change', 'input[name="facilities[]"]', updateFacilityCount);
+
+    // --- BROKERAGE LOGIC ---
+    function initBrokerage() {
+        const brokerageSelect = document.getElementById("brokerageSelect");
+        const brokerageSection = document.getElementById("brokerageSection");
+        const brokeragePercentage = document.getElementById("brokeragePercentage");
+        const manualBrokerage = document.getElementById("manualBrokerage");
+
+        function toggleBrokerage() {
+            if (brokerageSelect.value === "Yes") {
+                brokerageSection.style.display = "block";
+            } else {
+                brokerageSection.style.display = "none";
+                manualBrokerage.style.display = "none";
+            }
+        }
+
+        function toggleManual() {
+            if (brokeragePercentage.value === "Manual") {
+                manualBrokerage.style.display = "block";
+            } else {
+                manualBrokerage.style.display = "none";
+            }
+        }
+
+        brokerageSelect.addEventListener("change", toggleBrokerage);
+        brokeragePercentage.addEventListener("change", toggleManual);
+
+        toggleBrokerage();
+        toggleManual();
+    }
+
+    // --- INITIALIZE ALL ON LOAD ---
+    $(document).ready(function() {
+        updatePreview();
+        updateAmenityCount();
+        updateFacilityCount();
+        initBrokerage();
+
+        if (typeof CKEDITOR !== 'undefined') {
+            if (CKEDITOR.instances.rent_residential_desc) {
+                CKEDITOR.instances.rent_residential_desc.destroy();
+            }
+            CKEDITOR.replace('rent_residential_desc');
+        }
+    });
 
     // --- IMAGE UPLOAD LOGIC ---
     const uploadArea = document.getElementById('uploadArea');
@@ -468,6 +974,25 @@
     let selectedFiles = [];
 
     uploadArea.addEventListener('click', () => imageInput.click());
+    
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#667eea';
+        uploadArea.style.background = '#e6f0ff';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = '#cbd5e0';
+        uploadArea.style.background = 'white';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#cbd5e0';
+        uploadArea.style.background = 'white';
+        handleFiles(e.dataTransfer.files);
+    });
+
     imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
     function handleFiles(files) {

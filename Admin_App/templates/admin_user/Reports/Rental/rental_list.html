@@ -263,6 +263,41 @@
     }
     .chart-no-data i { font-size: 2rem; opacity: 0.3; }
 
+    /* Table Layout Fixes */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.properties-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    white-space: nowrap; /* Keeps standard cells strictly on one line */
+}
+
+.properties-table th, 
+.properties-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+    font-size: 0.85rem;
+}
+
+/* Add this class to columns with long text */
+.truncate-cell {
+    max-width: 250px; /* Prevents column from stretching infinitely */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    vertical-align: middle;
+}
+
     @media (max-width: 768px) {
         .stats-grid { grid-template-columns: repeat(2, 1fr); }
         .analytics-section { grid-template-columns: 1fr; }
@@ -488,174 +523,169 @@
         </div>
 
         <div class="table-responsive">
-            <table class="properties-table" id="rentalTable">
-                <thead>
-                    <tr>
-                        <th>Sr.No</th>
-                        <th>Images</th>
-                        
-                        <th>Property Title</th>
-                        <th>Purpose</th>
-                        <th>Type</th>
-                        <th>BHK</th>
-                        <th>Renting Option</th>
-                        <th>Furnishing</th>
-                        <th>Available For</th>
-                        <th>Built-Up Area</th>
-                        <th>Bathrooms</th>
-                        <th>Balconies</th>
-                        <th>Floor No.</th>
-                        <th>Total Floors</th>
-                        <th>Facing</th>
-                        
-                        <th>Zone</th>
-                        <th>Ownership</th>
-                        <th>Construction</th>
-                        <th>Prop. Age</th>
-                        <th>Carpet Area</th>
-                        <th>Plot Area</th>
-                        <th>Building Name</th>
-                        
-                        <th>Possession</th>
-                        <th>Available From</th>
-                        <th>Lease Duration</th>
-                        <th>Brokerage</th>
-                        <th>Brokerage %</th>
-                        <th>Manual Brokerage</th>
-                        
-                        <th>Monthly Rent</th>
-                        <th>Security Deposit</th>
-                        <th>Maintenance Type</th>
-                        <th>Maintenance Amt</th>
-                        <th>Expected Price</th>
-                        
-                        <th>Address</th>
-                        <th>City</th>
-                        <th>Locality</th>
-                        <th>State</th>
-                        <th>Pincode</th>
-                        <th>Road Connectivity</th>
-                        
-                        <th>Amenities</th>
-                        <th>Facilities</th>
-                        
-                        <th>Description</th>
-                        <th>Rent Desc</th>
-                        
-                        <th>Owner Name</th>
-                        <th>Contact</th>
-                        <th>Email</th>
-                        <th>Alt. Contact</th>
-                        
-                        <th>Uploaded By</th>
-                        <th>UB Email</th>
-                        <th>UB Contact</th>
-                        <th>UB Role</th>
-                        
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for prop in page_obj %}
-                    <tr id="row-{{ prop.id }}">
-                       <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+           <div class="table-responsive">
+    <table class="properties-table" id="rentalTable">
+        <thead>
+            <tr>
+                <th>Sr.No</th>
+                <th>Images</th>
+                <th>Property Title</th>
+                <th>Purpose</th>
+                <th>Type</th>
+                <th>BHK</th>
+                <th>Renting Option</th>
+                <th>Furnishing</th>
+                <th>Available For</th>
+                <th>Built-Up Area</th>
+                <th>Bathrooms</th>
+                <th>Balconies</th>
+                <th>Floor No.</th>
+                <th>Total Floors</th>
+                <th>Facing</th>
+                <th>Zone</th>
+                <th>Ownership</th>
+                <th>Construction</th>
+                <th>Prop. Age</th>
+                <th>Carpet Area</th>
+                <th>Plot Area</th>
+                <th>Building Name</th>
+                <th>Possession</th>
+                <th>Available From</th>
+                <th>Lease Duration</th>
+                <th>Brokerage</th>
+                <th>Brokerage %</th>
+                <th>Manual Brokerage</th>
+                <th>Monthly Rent</th>
+                <th>Security Deposit</th>
+                <th>Maintenance Type</th>
+                <th>Maintenance Amt</th>
+                <th>Expected Price</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>Locality</th>
+                <th>State</th>
+                <th>Pincode</th>
+                <th>Road Connectivity</th>
+                <th>Amenities</th>
+                <th>Facilities</th>
+                <th>Description</th>
+                <th>Rent Desc</th>
+                <th>Owner Name</th>
+                <th>Contact</th>
+                <th>Email</th>
+                <th>Alt. Contact</th>
+                <th>Uploaded By</th>
+                <th>UB Email</th>
+                <th>UB Contact</th>
+                <th>UB Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prop in page_obj %}
+            <tr id="row-{{ prop.id }}">
+                <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
 
-                        <td>
-                            <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                                {% if prop.images.all %}
-                                    {% for img in prop.images.all %}
-                                        <img src="{{ img.image.url }}" class="property-image" alt="Property Image">
-                                    {% endfor %}
-                                {% else %}
-                                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=120&h=80&fit=crop" class="property-image" alt="Placeholder">
-                                {% endif %}
-                            </div>
-                        </td>
+                <td>
+                    <div style="display:flex; gap:4px; flex-wrap:wrap; width: 60px;">
+                        {% if prop.images.all %}
+                            {% for img in prop.images.all|slice:":1" %} <img src="{{ img.image.url }}" class="property-image" alt="Property Image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                            {% endfor %}
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=120&h=80&fit=crop" class="property-image" alt="Placeholder" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                        {% endif %}
+                    </div>
+                </td>
 
-                        <td>{{ prop.property_title|default:"—" }}</td>
-                        <td>{{ prop.property_purpose|default:"—" }}</td>
-                        <td><span class="badge badge-residential">{{ prop.property_type|default:"—" }}</span></td>
-                        <td>{{ prop.bhk_type|default:"—" }}</td>
-                        <td>{{ prop.renting_option|default:"—" }}</td>
-                        <td>{{ prop.furnishing_status|default:"—" }}</td>
-                        <td>{{ prop.available_for|default:"—" }}</td>
-                        <td>{{ prop.built_up_area|default:"—" }}</td>
-                        <td>{{ prop.bathrooms|default:"—" }}</td>
-                        <td>{{ prop.balconies|default:"—" }}</td>
-                        <td>{{ prop.floor_number|default:"—" }}</td>
-                        <td>{{ prop.total_floors|default:"—" }}</td>
-                        <td>{{ prop.facing|default:"—" }}</td>
+                <td class="truncate-cell" title="{{ prop.property_title }}">{{ prop.property_title|default:"—" }}</td>
+                <td>{{ prop.property_purpose|default:"—" }}</td>
+                <td><span class="badge badge-residential" style="background:#667eea; color:white; padding:4px 8px; border-radius:6px;">{{ prop.property_type|default:"—" }}</span></td>
+                <td>{{ prop.bhk_type|default:"—" }}</td>
+                <td>{{ prop.renting_option|default:"—" }}</td>
+                <td>{{ prop.furnishing_status|default:"—" }}</td>
+                <td>{{ prop.available_for|default:"—" }}</td>
+                <td>{{ prop.built_up_area|default:"—" }}</td>
+                <td>{{ prop.bathrooms|default:"—" }}</td>
+                <td>{{ prop.balconies|default:"—" }}</td>
+                <td>{{ prop.floor_number|default:"—" }}</td>
+                <td>{{ prop.total_floors|default:"—" }}</td>
+                <td>{{ prop.facing|default:"—" }}</td>
 
-                        <td>{{ prop.zone|default:"—" }}</td>
-                        <td>{{ prop.ownership_type|default:"—" }}</td>
-                        <td>{{ prop.construction_status|default:"—" }}</td>
-                        <td>{{ prop.property_age|default:"—" }}</td>
-                        <td>{{ prop.carpet_area|default:"—" }}</td>
-                        <td>{{ prop.plot_area|default:"—" }}</td>
-                        <td>{{ prop.building_name|default:"—" }}</td>
+                <td>{{ prop.zone|default:"—" }}</td>
+                <td>{{ prop.ownership_type|default:"—" }}</td>
+                <td>{{ prop.construction_status|default:"—" }}</td>
+                <td>{{ prop.property_age|default:"—" }}</td>
+                <td>{{ prop.carpet_area|default:"—" }}</td>
+                <td>{{ prop.plot_area|default:"—" }}</td>
+                <td class="truncate-cell" title="{{ prop.building_name }}">{{ prop.building_name|default:"—" }}</td>
 
-                        <td>{{ prop.possession_status|default:"—" }}</td>
-                        <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
-                        <td>{{ prop.lease_duration|default:"—" }}</td>
-                        <td>{{ prop.brokerage|default:"—" }}</td>
-                        <td>{{ prop.brokerage_percentage|default:"—" }}</td>
-                        <td>{{ prop.manual_brokerage|default:"—" }}</td>
+                <td>{{ prop.possession_status|default:"—" }}</td>
+                <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
+                <td>{{ prop.lease_duration|default:"—" }}</td>
+                <td>{{ prop.brokerage|default:"—" }}</td>
+                <td>{{ prop.brokerage_percentage|default:"—" }}</td>
+                <td>{{ prop.manual_brokerage|default:"—" }}</td>
 
-                        <td>{{ prop.monthly_rent|default:"—" }}</td>
-                        <td>{{ prop.security_deposit|default:"—" }}</td>
-                        <td>{{ prop.maintenance_type|default:"—" }}</td>
-                        <td>{{ prop.maintenance_amount|default:"—" }}</td>
-                        <td>{{ prop.expected_price|default:"—" }}</td>
+                <td style="font-weight:bold; color:#10b981;">₹{{ prop.monthly_rent|default:"—" }}</td>
+                <td>₹{{ prop.security_deposit|default:"—" }}</td>
+                <td>{{ prop.maintenance_type|default:"—" }}</td>
+                <td>{{ prop.maintenance_amount|default:"—" }}</td>
+                <td>{{ prop.expected_price|default:"—" }}</td>
 
-                        <td>{{ prop.address|default:"—" }}</td>
-                        <td>{{ prop.city|default:"—" }}</td>
-                        <td>{{ prop.locality|default:"—" }}</td>
-                        <td>{{ prop.state|default:"—" }}</td>
-                        <td>{{ prop.pincode|default:"—" }}</td>
-                        <td>{{ prop.road_connectivity|default:"—" }}</td>
+                <td class="truncate-cell" title="{{ prop.address }}">{{ prop.address|default:"—" }}</td>
+                <td>{{ prop.city|default:"—" }}</td>
+                <td>{{ prop.locality|default:"—" }}</td>
+                <td>{{ prop.state|default:"—" }}</td>
+                <td>{{ prop.pincode|default:"—" }}</td>
+                <td>{{ prop.road_connectivity|default:"—" }}</td>
 
-                        <td>{{ prop.amenities|default:"—" }}</td>
-                        <td>{{ prop.facilities|default:"—" }}</td>
+                <td class="truncate-cell" title="{{ prop.amenities }}">{{ prop.amenities|default:"—" }}</td>
+                <td class="truncate-cell" title="{{ prop.facilities }}">{{ prop.facilities|default:"—" }}</td>
 
-                        <td>{{ prop.description|default:"—" }}</td>
-                        <td>{{ prop.rent_residential_desc|default:"—" }}</td>
+                <td class="truncate-cell" title="{{ prop.description|striptags }}">
+                    {{ prop.description|striptags|truncatechars:50|default:"—" }}
+                </td>
+                <td class="truncate-cell" title="{{ prop.rent_residential_desc|striptags }}">
+                    {{ prop.rent_residential_desc|striptags|truncatechars:50|default:"—" }}
+                </td>
 
-                        <td>{{ prop.owner_name|default:"—" }}</td>
-                        <td>{{ prop.contact_number|default:"—" }}</td>
-                        <td>{{ prop.email|default:"—" }}</td>
-                        <td>{{ prop.alternate_contact|default:"—" }}</td>
+                <td>{{ prop.owner_name|default:"—" }}</td>
+                <td>{{ prop.contact_number|default:"—" }}</td>
+                <td>{{ prop.email|default:"—" }}</td>
+                <td>{{ prop.alternate_contact|default:"—" }}</td>
 
-                        <td>{{ prop.uploaded_by_name|default:"—" }}</td>
-                        <td>{{ prop.uploaded_by_email|default:"—" }}</td>
-                        <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
-                        <td>{{ prop.uploaded_by_role|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_name|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_email|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_role|default:"—" }}</td>
 
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-action btn-view" onclick="window.location.href='{% url 'rental_residential_view' prop.id %}'" title="View Details">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn-action btn-edit" onclick="window.location.href='{% url 'rental_residential_edit' prop.id %}'" title="Edit Property">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-action btn-delete" onclick="deleteProperty({{ prop.id }})" title="Delete Property">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                             
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="52">
-                            <div class="empty-state">
-                                No properties found.
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                <td style="position: sticky; right: 0; background: white; border-left: 1px solid #e9ecef; box-shadow: -2px 0 5px rgba(0,0,0,0.02);">
+                    <div class="action-buttons" style="display:flex; gap:8px;">
+                        <button class="btn-action btn-view" style="border:none; background:#f0f9ff; color:#0369a1; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="window.location.href='{% url 'rental_residential_view' prop.id %}'" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-action btn-edit" style="border:none; background:#fef3c7; color:#d97706; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="window.location.href='{% url 'rental_residential_edit' prop.id %}'" title="Edit Property">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action btn-delete" style="border:none; background:#fee2e2; color:#dc2626; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="deleteProperty({{ prop.id }})" title="Delete Property">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="52">
+                    <div class="empty-state" style="text-align: center; padding: 40px; color: #718096;">
+                        <i class="fas fa-home" style="font-size: 3rem; color: #cbd5e0; margin-bottom: 15px; display: block;"></i>
+                        No properties found.
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
         </div>
 
         {% if page_obj.paginator.num_pages > 1 %}

@@ -3739,6 +3739,13 @@ def rental_residential_add(request):
 
 
 
+import csv
+import json
+from django.db.models import Q, Count, Avg, Max, Min
+from django.core.paginator import Paginator
+from django.http import HttpResponse
+from django.shortcuts import render
+
 def rental_list(request):
     session_id = request.session.get('Admin_id')
     if not session_id:
@@ -3747,7 +3754,7 @@ def rental_list(request):
     admin_obj = Admin_Login.objects.get(id=session_id)
     search_query = request.GET.get('search', '').strip()
 
-    # ── Base queryset ──
+    # ── Base queryset for the Table ──
     try:
         properties = RentalResidentialProperty.objects.filter(is_deleted=False).order_by('-id')
     except Exception as e:
@@ -3821,9 +3828,10 @@ def rental_list(request):
     total_count = properties.count()
 
     # ════════════════════════════════════════════════
-    # STATS — computed on the FULL unfiltered queryset
+    # STATS — computed on ACTIVE items only (THE FIX)
     # ════════════════════════════════════════════════
-    all_props = RentalResidentialProperty.objects.all()
+    # We replaced .all() with .filter(is_deleted=False)
+    all_props = RentalResidentialProperty.objects.filter(is_deleted=False)
 
     active_count = all_props.exclude(possession_status__isnull=True).exclude(possession_status='').count()
     furnished_count = all_props.filter(furnishing_status__iexact='Furnished').count()
@@ -3906,7 +3914,7 @@ def rental_list(request):
         'avg_area': avg_area,
         'with_owner_count': with_owner_count,
         'with_images_count': with_images_count,
-        'uploaded_files': uploaded_files, # Added the files here
+        'uploaded_files': uploaded_files, 
         'bhk_labels': bhk_labels,
         'bhk_data': bhk_data,
         'rent_range_labels': rent_range_labels,
@@ -4039,66 +4047,123 @@ def rental_residential_delete(request, pk): # 👈 MUST BE 'pk' TO MATCH THE URL
 
 
 
+
+def system_audit_logs(request):
+    """A completely separate view for tracking Deletion and Restore Audit Logs."""
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    deletion_logs = []
+    restore_logs = []
+
+    # Map all your 8 models
+    models_map = {
+        'Rental Residential': RentalResidentialProperty,
+        'Commercial Rental': CommercialRentalProperty,
+        'PG / Co-living': PGColivingProperty,
+        'Resale Residential': ResaleResidentialProperty,
+        'Commercial Resale': CommercialResaleProperty,
+        'Plot/Land': PlotSaleProperty,
+        'Industrial Resale': IndustrialResaleProperty,
+        'Agricultural Resale': AgriculturalResaleProperty,
+    }
+
+    for module_name, model in models_map.items():
+        # 1. Fetch Deletion Logs
+        try:
+            deleted_items = model.objects.filter(is_deleted=True).exclude(deleted_at__isnull=True)
+            for p in deleted_items:
+                # Dynamically find the title/name field since different models use different names
+                title = getattr(p, 'property_title', getattr(p, 'building_name', getattr(p, 'pg_name', getattr(p, 'title', getattr(p, 'plot_title', getattr(p, 'property_type', 'N/A'))))))
+                
+                deletion_logs.append({
+                    'module': module_name,
+                    'id': p.id,
+                    'title': title,
+                    'by': getattr(p, 'deleted_by', 'System Admin'),
+                    'date': p.deleted_at
+                })
+        except Exception:
+            pass
+
+        # 2. Fetch Restore Logs
+        try:
+            # Assumes you added restored_at and restored_by to your models!
+            restored_items = model.objects.filter(restored_at__isnull=False)
+            for p in restored_items:
+                title = getattr(p, 'property_title', getattr(p, 'building_name', getattr(p, 'pg_name', getattr(p, 'title', getattr(p, 'plot_title', getattr(p, 'property_type', 'N/A'))))))
+                
+                restore_logs.append({
+                    'module': module_name,
+                    'id': p.id,
+                    'title': title,
+                    'by': getattr(p, 'restored_by', 'System Admin'),
+                    'date': p.restored_at
+                })
+        except Exception:
+            pass
+
+    # Sort both lists by date (Newest logs first)
+    deletion_logs.sort(key=lambda x: x['date'] if x['date'] else timezone.now(), reverse=True)
+    restore_logs.sort(key=lambda x: x['date'] if x['date'] else timezone.now(), reverse=True)
+
+    context = {
+        'deletion_logs': deletion_logs,
+        'restore_logs': restore_logs,
+        'deletion_count': len(deletion_logs),
+        'restore_count': len(restore_logs),
+        'total_logs': len(deletion_logs) + len(restore_logs)
+    }
+
+    return render(request, 'admin_user/Reports/Rental/audit_logs.html', context)
+
+
+
+
+
 def global_recycle_bin(request):
     """Unified Recycle Bin displaying deleted items from all 8 property modules."""
     session_id = request.session.get('Admin_id')
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
 
-    # Fetch deleted properties for each of the 8 modules
-    rental_deleted = RentalResidentialProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
-    commercial_deleted = CommercialRentalProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
-    pg_deleted = PGColivingProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
-    resale_deleted = ResaleResidentialProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
+    # Helper function to calculate auto-delete countdown (30 days)
+    def calculate_retention(queryset):
+        now = timezone.now()
+        for prop in queryset:
+            if prop.deleted_at:
+                expiry_date = prop.deleted_at + timedelta(days=30)
+                prop.days_left = max((expiry_date - now).days, 0)
+            else:
+                prop.days_left = 30
+        return list(queryset) # Convert to list so we can attach custom attributes
+
+    # Fetch and calculate schedules for all 8 modules
+    rental_deleted = calculate_retention(RentalResidentialProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    commercial_deleted = calculate_retention(CommercialRentalProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    pg_deleted = calculate_retention(PGColivingProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    resale_deleted = calculate_retention(ResaleResidentialProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
     
-    commercial_resale_deleted = CommercialResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
-    plot_sale_deleted = PlotSaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
-    industrial_resale_deleted = IndustrialResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
-    agricultural_resale_deleted = AgriculturalResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at')
+    commercial_resale_deleted = calculate_retention(CommercialResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    plot_sale_deleted = calculate_retention(PlotSaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    industrial_resale_deleted = calculate_retention(IndustrialResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    agricultural_resale_deleted = calculate_retention(AgriculturalResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
 
     context = {
-        # 1. Rental Residential
-        'rental_deleted': rental_deleted,
-        'rental_count': rental_deleted.count(),
+        'rental_deleted': rental_deleted, 'rental_count': len(rental_deleted),
+        'commercial_deleted': commercial_deleted, 'commercial_count': len(commercial_deleted),
+        'pg_deleted': pg_deleted, 'pg_count': len(pg_deleted),
+        'resale_deleted': resale_deleted, 'resale_count': len(resale_deleted),
+        'commercial_resale_deleted': commercial_resale_deleted, 'commercial_resale_count': len(commercial_resale_deleted),
+        'plot_sale_deleted': plot_sale_deleted, 'plot_sale_count': len(plot_sale_deleted),
+        'industrial_resale_deleted': industrial_resale_deleted, 'industrial_resale_count': len(industrial_resale_deleted),
+        'agricultural_resale_deleted': agricultural_resale_deleted, 'agricultural_resale_count': len(agricultural_resale_deleted),
         
-        # 2. Commercial Rental
-        'commercial_deleted': commercial_deleted,
-        'commercial_count': commercial_deleted.count(),
-        
-        # 3. PG / Co-living
-        'pg_deleted': pg_deleted,
-        'pg_count': pg_deleted.count(),
-        
-        # 4. Resale Residential
-        'resale_deleted': resale_deleted,
-        'resale_count': resale_deleted.count(),
-        
-        # 5. Commercial Resale
-        'commercial_resale_deleted': commercial_resale_deleted,
-        'commercial_resale_count': commercial_resale_deleted.count(),
-        
-        # 6. Plot Sale
-        'plot_sale_deleted': plot_sale_deleted,
-        'plot_sale_count': plot_sale_deleted.count(),
-        
-        # 7. Industrial Resale
-        'industrial_resale_deleted': industrial_resale_deleted,
-        'industrial_resale_count': industrial_resale_deleted.count(),
-        
-        # 8. Agricultural Resale
-        'agricultural_resale_deleted': agricultural_resale_deleted,
-        'agricultural_resale_count': agricultural_resale_deleted.count(),
-        
-        # Calculate absolute total for the header
         'total_deleted_all': (
-            rental_deleted.count() + 
-            commercial_deleted.count() + 
-            pg_deleted.count() + 
-            resale_deleted.count() +
-            commercial_resale_deleted.count() +
-            plot_sale_deleted.count() +
-            industrial_resale_deleted.count() +
-            agricultural_resale_deleted.count()
+            len(rental_deleted) + len(commercial_deleted) + len(pg_deleted) + 
+            len(resale_deleted) + len(commercial_resale_deleted) + len(plot_sale_deleted) + 
+            len(industrial_resale_deleted) + len(agricultural_resale_deleted)
         )
     }
     
@@ -4429,8 +4494,13 @@ def download_residential_template(request):
 
 def rental_residential_view(request, pk):
     """View a single property detail."""
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
     prop = get_object_or_404(RentalResidentialProperty, pk=pk)
-    return render(request, 'admin_user/Reports/Rental/rental_residential_detail.html', {'property': prop})
+    return render(request, 'admin_user/Reports/Rental/rental_residential_detail.html', {'property': prop,'admin_obj':admin_obj})
 
 
 
@@ -4438,6 +4508,12 @@ def rental_residential_view(request, pk):
 
 def rental_residential_edit(request, pk):
     prop = get_object_or_404(RentalResidentialProperty, pk=pk)
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+    
 
     if request.method == 'POST':
         try:
@@ -4540,6 +4616,7 @@ def rental_residential_edit(request, pk):
     # ---------- GET ----------
     return render(request, 'admin_user/rental_residential_edit.html', {
         'property': prop,
+        'admin_obj': admin_obj,
         # YOU MUST PASS THESE SO THE CHECKBOXES RENDER!
         'ameneties_obj': Ameneties_Details.objects.all(),
         'facilities_obj': Facilities_Details.objects.all()
@@ -4587,16 +4664,10 @@ def commercial_rental_add(request):
         # =============================
         if request.method == "POST":
 
-            # ✅ FIXED: Now grabbing nearby_facilities[] to match the HTML update and DB model
             amenities_list = request.POST.getlist('amenities[]')
             facilities_list = request.POST.getlist('nearby_facilities[]')
 
-            # DEBUG (optional)
-            # print("POST:", request.POST)
-            # print("FILES:", request.FILES)
-
             prop = CommercialRentalProperty.objects.create(
-
                 property_type=request.POST.get('property_type'),
                 city=request.POST.get('city'),
                 area_locality=request.POST.get('area_locality'),
@@ -4621,14 +4692,12 @@ def commercial_rental_add(request):
                 security_deposit=request.POST.get('security_deposit') or None,
                 maintenance_charges=request.POST.get('maintenance_charges') or None,
 
-                # ✅ FIXED: Explicitly handle the 'Yes'/'No' Radio buttons from the form
                 negotiable=True if request.POST.get('negotiable') == 'Yes' else False,
 
                 brokerage=request.POST.get('brokerage'),
                 brokerage_percentage=request.POST.get('brokerage_percentage'),
                 manual_brokerage=request.POST.get('manual_brokerage'),
 
-                # ✅ FIXED: HTML checkboxes send 'on' if checked, None if unchecked
                 dg_ups_included=True if request.POST.get('dg_ups_included') == 'on' else False,
                 electricity_included=True if request.POST.get('electricity_included') == 'on' else False,
                 water_included=True if request.POST.get('water_included') == 'on' else False,
@@ -4654,9 +4723,12 @@ def commercial_rental_add(request):
 
                 flooring_type=request.POST.get('flooring_type'),
 
-                # Assign the properly fetched JSON arrays
                 amenities=amenities_list,
                 nearby_facilities=facilities_list,
+
+                # ✅ NEW FIELDS CAPTURED HERE
+                property_summary=request.POST.get('property_summary'),
+                property_description=request.POST.get('property_description'),
 
                 floor_plan=request.FILES.get('floor_plan'),
                 video=request.FILES.get('video'),
@@ -4676,11 +4748,9 @@ def commercial_rental_add(request):
             # SAVE IMAGES
             # =============================
             images = request.FILES.getlist('property_images[]')
-
             for i, img in enumerate(images):
                 if i >= 10:
                     break
-
                 CommercialRentalPropertyImage.objects.create(
                     property=prop,
                     image=img
@@ -4694,7 +4764,6 @@ def commercial_rental_add(request):
     except Exception as e:
         print("ERROR:", str(e))
         traceback.print_exc()
-
         return JsonResponse({
             "status": "error",
             "message": str(e)
@@ -4780,7 +4849,7 @@ def commercial_edit(request, pk):
 
             prop.property_condition = p.get('property_condition')
             prop.ownership_type = p.get('ownership_type')
-            prop.construction_status = p.get('construction_status') # Added missing field
+            prop.construction_status = p.get('construction_status')
 
             # AREA
             prop.builtup_area = _to_int(p.get('builtup_area')) or 0
@@ -4790,7 +4859,6 @@ def commercial_edit(request, pk):
             prop.security_deposit = _to_int(p.get('security_deposit'))
             prop.maintenance_charges = _to_int(p.get('maintenance_charges'))
 
-            # ✅ FIXED: Radio buttons send 'Yes' or 'No'
             prop.negotiable = True if p.get('negotiable') == 'Yes' else False
 
             # BROKERAGE
@@ -4798,7 +4866,7 @@ def commercial_edit(request, pk):
             prop.brokerage_percentage = p.get('brokerage_percentage')
             prop.manual_brokerage = p.get('manual_brokerage')
 
-            # UTILITIES - ✅ FIXED: Toggle switches send 'on' or None
+            # UTILITIES
             prop.dg_ups_included = True if p.get('dg_ups_included') == 'on' else False
             prop.electricity_included = True if p.get('electricity_included') == 'on' else False
             prop.water_included = True if p.get('water_included') == 'on' else False
@@ -4826,9 +4894,12 @@ def commercial_edit(request, pk):
 
             prop.flooring_type = p.get('flooring_type')
 
-            # ✅ JSON FIELDS (FIXED names to match HTML)
             prop.amenities = request.POST.getlist('amenities[]')
             prop.nearby_facilities = request.POST.getlist('nearby_facilities[]')
+
+            # ✅ NEW FIELDS SAVED HERE
+            prop.property_summary = p.get('property_summary')
+            prop.property_description = p.get('property_description')
 
             # OWNER
             prop.owner_name = p.get('owner_name')
@@ -4836,7 +4907,6 @@ def commercial_edit(request, pk):
             prop.email = p.get('email')
             prop.alternate_contact = p.get('alternate_contact')
 
-            # UPLOADER (Usually kept unchanged on edit, but updating if provided)
             prop.uploaded_by_name = p.get('uploaded_by_name', prop.uploaded_by_name)
             prop.uploaded_by_email = p.get('uploaded_by_email', prop.uploaded_by_email)
             prop.uploaded_by_contact = p.get('uploaded_by_contact', prop.uploaded_by_contact)
@@ -4851,10 +4921,8 @@ def commercial_edit(request, pk):
 
             prop.save()
 
-            # ✅ MULTIPLE IMAGES SAVE (FIXED name to match HTML)
+            # ✅ MULTIPLE IMAGES SAVE
             images = request.FILES.getlist('property_images[]')
-            
-            # Count existing images to prevent going over 10
             current_count = prop.images.count()
             
             for img in images:
@@ -4865,11 +4933,10 @@ def commercial_edit(request, pk):
                     )
                     current_count += 1
 
-            # ✅ FIXED: Return JsonResponse for SweetAlert2
             return JsonResponse({
                 'status': 'success',
                 'message': 'Property updated successfully!',
-                'redirect_url': reverse('commercial_list') # Redirects safely via JS
+                'redirect_url': reverse('commercial_list')
             })
 
         except Exception as e:
@@ -4882,11 +4949,9 @@ def commercial_edit(request, pk):
     return render(request, 'admin_user/commercial_edit.html', {
         'admin_obj': admin_obj,
         'prop': prop,
-        # ✅ VERY IMPORTANT: You must pass these so the checkboxes render!
         'ameneties_obj': Ameneties_Details.objects.all(),
         'facilities_obj': Facilities_Details.objects.all()
     })
-
 
 
 # ─────────────────────────────
@@ -5380,7 +5445,7 @@ def add_pg(request):
             guardian_allowed=True if request.POST.get("guardian_allowed") else False,
             drinking_allowed=True if request.POST.get("drinking_allowed") else False,
             smoking_allowed=True if request.POST.get("smoking_allowed") else False,
-
+            property_description=request.POST.get("property_description"),
             # MEDIA
             floor_plan=request.FILES.get("floor_plan"),
             video=request.FILES.get("video"),  # ✅ FIXED
@@ -5876,7 +5941,7 @@ def pg_edit(request, pk):
 
             pg.property_managed_by = request.POST.get("property_managed_by")
             pg.manager_stays = True if request.POST.get("manager_stays") == "true" else False
-
+            pg.property_description = request.POST.get("property_description")
             pg.non_veg_allowed = True if request.POST.get("non_veg_allowed") else False
             pg.opposite_sex_allowed = True if request.POST.get("opposite_sex_allowed") else False
             pg.any_time_allowed = True if request.POST.get("any_time_allowed") else False
@@ -8369,15 +8434,33 @@ def commercial_resale_bulk_delete(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 
-@require_POST
-def commercial_resale_hard_delete(request, id):
-    CommercialResaleProperty.objects.filter(id=id).delete()
-    return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
 
 @require_POST
 def commercial_resale_restore(request, id):
-    CommercialResaleProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
-    return JsonResponse({'status': 'success', 'message': 'Commercial Resale restored!'})
+    try:
+        # Reset the flags to put it back in the main active list
+        CommercialResaleProperty.objects.filter(id=id).update(
+            is_deleted=False, 
+            deleted_at=None, 
+            deleted_by=None
+        )
+        return JsonResponse({'status': 'success', 'message': 'Commercial Resale property restored successfully!'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+# ── 2. HARD DELETE COMMERCIAL RESALE ──
+@require_POST
+def commercial_resale_hard_delete(request, id):
+    try:
+        # Fetch the property and permanently delete it from the database
+        prop = CommercialResaleProperty.objects.get(id=id)
+        prop.delete() # This will also delete associated images if cascading is set up
+        
+        return JsonResponse({'status': 'success', 'message': 'Property permanently deleted!'})
+    except CommercialResaleProperty.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Property not found.'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
 # --- 1. COMMERCIAL VIEW PAGE ---
 def commercial_resale_view(request, id):

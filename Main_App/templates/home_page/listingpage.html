@@ -3,16 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Flats & Houses for Rent in Nagpur — PropCRM
-     {% if listing_type == 'sale' %}Flats & Houses for Sale{% elif listing_type == 'commercial' %}Commercial Properties{% else %}Flats & Houses for Rent{% endif %}
-  in Nagpur — PropCRM
-</title>
+<title>{% if listing_type == 'sale' %}Flats & Houses for Sale{% elif listing_type == 'commercial' %}Commercial Properties{% else %}Flats & Houses for Rent{% endif %} in Nagpur — PropCRM</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
 /* ============================================
@@ -45,16 +42,26 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
 .btn-outline:hover { background: var(--primary); color: white; }
 
 /* ============================================
-   SEARCH BAR
+   SEARCH BAR (99acres style)
 ============================================ */
-.search-bar { background: white; border-bottom: 1px solid var(--border); padding: 16px 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+.search-bar { background: white; border-bottom: 1px solid var(--border); padding: 16px 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); position: sticky; top: 0; z-index: 100; }
 .sb-inner { max-width: 1300px; margin: 0 auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-.sb-field { display: flex; flex-direction: column; gap: 4px; }
+.sb-field { display: flex; flex-direction: column; gap: 4px; position: relative; }
 .sb-label { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 .sb-sel, .sb-inp { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; font-weight: 500; color: var(--sec); cursor: pointer; transition: 0.2s; font-family: 'Poppins', sans-serif; }
 .sb-sel { min-width: 140px; }
 .sb-inp { min-width: 220px; }
 .sb-sel:focus, .sb-inp:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1); }
+
+/* Location Chip Style (like 99acres) */
+.location-chip { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; margin: 2px; }
+.location-chip .remove-chip { cursor: pointer; font-weight: 900; font-size: 0.9rem; }
+.location-chip .remove-chip:hover { color: #dc2626; }
+
+/* Add More Button */
+.add-more-btn { background: transparent; border: 1px dashed var(--border); color: var(--muted); padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.add-more-btn:hover { border-color: var(--primary); color: var(--primary); }
+
 .sb-search-btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 10px 24px; font-weight: 700; font-size: 0.9rem; cursor: pointer; white-space: nowrap; transition: 0.2s; }
 .sb-search-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
 
@@ -63,18 +70,25 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
 ============================================ */
 .page-layout { max-width: 1300px; margin: 0 auto; padding: 24px 20px; display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
 
-.filter-sidebar { background: white; border-radius: 12px; border: 1px solid var(--border); padding: 24px; height: fit-content; position: sticky; top: 94px; box-shadow: var(--shadow-sm); }
+.filter-sidebar { background: white; border-radius: 12px; border: 1px solid var(--border); padding: 24px; height: fit-content; position: sticky; top: 110px; box-shadow: var(--shadow-sm); max-height: calc(100vh - 130px); overflow-y: auto; }
 .fs-title { font-size: 1rem; font-weight: 800; color: var(--sec); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
 .fs-clear { font-size: 0.75rem; font-weight: 600; color: var(--primary); cursor: pointer; text-decoration: none; }
 .fs-clear:hover { text-decoration: underline; }
 
 .filter-group { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
 .filter-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-.fg-title { font-size: 0.8rem; font-weight: 700; color: var(--sec); margin-bottom: 12px; }
+.fg-title { font-size: 0.8rem; font-weight: 700; color: var(--sec); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.fg-toggle { cursor: pointer; color: var(--muted); font-size: 0.9rem; margin-left: auto; }
 
 .filter-btn { padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--body-text); transition: .2s; margin: 4px 2px; font-family: 'Poppins', sans-serif; }
 .filter-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(0, 108, 228, 0.04); }
-.filter-btn.active { background: rgba(0, 108, 228, 0.1); color: var(--primary); border-color: var(--primary); }
+.filter-btn.active { background: rgba(0, 108, 228, 0.1); color: var(--primary); border-color: var(--primary); font-weight: 700; }
+
+/* Budget Dropdowns (99acres style) */
+.budget-row { display: flex; gap: 12px; align-items: center; }
+.budget-dropdown { flex: 1; }
+.budget-dropdown select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 500; color: var(--sec); cursor: pointer; font-family: 'Poppins', sans-serif; }
+.budget-dropdown select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1); }
 
 .range-input { width: 100%; accent-color: var(--primary); cursor: pointer; }
 .range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 8px; font-weight: 500; }
@@ -98,11 +112,12 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
 .vt-btn:hover { border-color: var(--primary); color: var(--primary); }
 .vt-btn.active { background: rgba(0, 108, 228, 0.1); color: var(--primary); border-color: var(--primary); }
 
-/* APPLIED FILTERS */
-.applied-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; }
+/* APPLIED FILTERS (99acres style) */
+.applied-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; background: white; padding: 16px; border-radius: 12px; border: 1px solid var(--border); }
 .af-label { font-size: 0.8rem; color: var(--sec); font-weight: 700; margin-right: 4px; }
-.af-tag { font-size: 0.75rem; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s; }
+.af-tag { font-size: 0.75rem; font-weight: 600; padding: 6px 12px; border-radius: 20px; background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s; }
 .af-tag:hover { background: #bae6fd; }
+.af-tag i { font-size: 0.7rem; font-weight: 900; }
 
 /* ============================================
    PROPERTY CARDS
@@ -114,6 +129,7 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
 .pcard:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: rgba(0, 108, 228, 0.3); }
 
 .pc-img { height: 200px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #e2e8f0; }
+.pc-img img { width: 100%; height: 100%; object-fit: cover; }
 .pc-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; background: #f1f5f9 !important; }
 
 .pc-badges { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
@@ -164,383 +180,721 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
 
 {% include 'home_page/header.html' %}
 
+<!-- ==================== STICKY SEARCH BAR (99acres style) ==================== -->
 <div class="search-bar">
   <div class="sb-inner">
-    <div class="sb-field">
-      <div class="sb-label">Location</div>
-      <input type="text" class="sb-inp" id="loc-inp" placeholder="Area, Locality..." value="{{ current_area|default:'' }}">
-    </div>
     
+    <!-- Listing Type Dropdown -->
     <div class="sb-field">
-      <div class="sb-label">Property Type</div>
-      <select class="sb-sel" id="type-sel">
-        <option value="" {% if not current_bhk %}selected{% endif %}>Any BHK</option>
-        <option value="1BHK" {% if current_bhk == '1BHK' %}selected{% endif %}>1 BHK</option>
-        <option value="2BHK" {% if current_bhk == '2BHK' %}selected{% endif %}>2 BHK</option>
-        <option value="3BHK" {% if current_bhk == '3BHK' %}selected{% endif %}>3 BHK</option>
-        <option value="4BHK" {% if current_bhk == '4BHK' %}selected{% endif %}>4 BHK+</option>
+      <div class="sb-label">Listing Type</div>
+      <select class="sb-sel" id="header-type-sel">
+        <option value="rent" {% if listing_type == 'rent' %}selected{% endif %}>For Rent</option>
+        <option value="sale" {% if listing_type == 'sale' %}selected{% endif %}>For Sale</option>
       </select>
     </div>
 
-    <div class="sb-field">
-      <div class="sb-label">{% if listing_type == 'sale' %}Max Price{% else %}Max Rent{% endif %}</div>
-      <select class="sb-sel" id="budget-sel">
-        {% if listing_type == 'sale' %}
-        <option value="" {% if not current_budget %}selected{% endif %}>Any Budget</option>
-        <option value="Under ₹30L" {% if current_budget == 'Under ₹30L' %}selected{% endif %}>Under ₹30L</option>
-        <option value="₹30L–60L" {% if current_budget == '₹30L–60L' %}selected{% endif %}>₹30L–60L</option>
-        <option value="₹60L+" {% if current_budget == '₹60L+' %}selected{% endif %}>₹60L+</option>
-        {% else %}
-        <option value="" {% if not current_budget %}selected{% endif %}>Any Budget</option>
-        <option value="Under ₹8K" {% if current_budget == 'Under ₹8K' %}selected{% endif %}>Under ₹8K</option>
-        <option value="₹8K–15K" {% if current_budget == '₹8K–15K' %}selected{% endif %}>₹8K–15K</option>
-        <option value="₹15K–25K" {% if current_budget == '₹15K–25K' %}selected{% endif %}>₹15K–25K</option>
-        <option value="₹25K–40K" {% if current_budget == '₹25K–40K' %}selected{% endif %}>₹25K–40K</option>
-        <option value="₹40K+" {% if current_budget == '₹40K+' %}selected{% endif %}>₹40K+</option>
-        {% endif %}
-      </select>
+    <!-- Location Chips Display -->
+    <div class="sb-field" style="flex: 1; min-width: 300px;">
+      <div class="sb-label">Location</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 42px; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; background: white;">
+        <div id="location-chips-container">
+          {% if current_area %}
+            <span class="location-chip">
+              {{ current_area|title }}
+              <span class="remove-chip" onclick="removeFilter('area')">&times;</span>
+            </span>
+          {% else %}
+            <input type="text" id="header-loc-inp" placeholder="Add locality..." style="border: none; outline: none; flex: 1; min-width: 150px; font-size: 0.85rem; font-weight: 500; font-family: 'Poppins', sans-serif;">
+          {% endif %}
+        </div>
+        <button class="add-more-btn" onclick="showLocationModal()">+ Add more</button>
+      </div>
     </div>
 
-    <div class="sb-field">
-      <div class="sb-label">Furnishing</div>
-      <select class="sb-sel" id="furn-sel">
-        <option value="" {% if not current_furnishing %}selected{% endif %}>Any</option>
-        <option value="fully" {% if current_furnishing == 'fully' %}selected{% endif %}>Fully Furnished</option>
-        <option value="semi" {% if current_furnishing == 'semi' %}selected{% endif %}>Semi Furnished</option>
-        <option value="unfurnished" {% if current_furnishing == 'unfurnished' %}selected{% endif %}>Unfurnished</option>
-      </select>
-    </div>
-
-    <button class="sb-search-btn" onclick="applySearchBar()">
-      <i class="fas fa-search" style="margin-right:6px;"></i> Search
+    <!-- Search Button -->
+    <button class="sb-search-btn" onclick="applyHeaderFilters()">
+      <i class="fas fa-search"></i> Search
     </button>
-    <button class="btn btn-outline" style="font-size:0.85rem;padding:9px 16px; border-color:var(--border); color:var(--sec);" onclick="resetFilters()">
-      <i class="fas fa-times"></i> Reset
+
+    <!-- Reset Button -->
+    <button class="btn btn-outline" onclick="resetAllFilters()">
+      <i class="fas fa-redo"></i> Reset
     </button>
   </div>
 </div>
 
 <div class="page-layout">
   
+  <!-- ==================== LEFT SIDEBAR FILTERS ==================== -->
   <div class="filter-sidebar">
-    <div class="fs-title">Filters <span class="fs-clear" onclick="resetFilters()">Clear All</span></div>
+    <div class="fs-title">
+      Filters 
+      <span class="fs-clear" onclick="resetAllFilters()">Clear All</span>
+    </div>
 
+    <!-- Applied Filters Summary (inside sidebar) -->
+    <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border);">
+      <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 8px; font-weight: 600;">ACTIVE FILTERS</div>
+      <div id="sidebar-active-count" style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">
+        {{ active_filter_count|default:"0" }}
+      </div>
+    </div>
+
+    <!-- Budget Filter (99acres style with min/max) -->
     <div class="filter-group">
-      <div class="fg-title">BHK Type</div>
+      <div class="fg-title">
+        <i class="fas fa-rupee-sign" style="color: var(--primary);"></i>
+        Budget Range
+      </div>
+      <div class="budget-row">
+        <div class="budget-dropdown">
+          <select id="sidebar-budget-min" onchange="syncFilters()">
+            <option value="">No min</option>
+            <option value="5000" {% if budget_min == '5000' %}selected{% endif %}>₹5,000</option>
+            <option value="10000" {% if budget_min == '10000' %}selected{% endif %}>₹10,000</option>
+            <option value="15000" {% if budget_min == '15000' %}selected{% endif %}>₹15,000</option>
+            <option value="20000" {% if budget_min == '20000' %}selected{% endif %}>₹20,000</option>
+            <option value="30000" {% if budget_min == '30000' %}selected{% endif %}>₹30,000</option>
+            <option value="40000" {% if budget_min == '40000' %}selected{% endif %}>₹40,000</option>
+            <option value="50000" {% if budget_min == '50000' %}selected{% endif %}>₹50,000</option>
+          </select>
+        </div>
+        <span style="color: var(--muted); font-weight: 600;">to</span>
+        <div class="budget-dropdown">
+          <select id="sidebar-budget-max" onchange="syncFilters()">
+            <option value="">No max</option>
+            <option value="15000" {% if budget_max == '15000' %}selected{% endif %}>₹15,000</option>
+            <option value="20000" {% if budget_max == '20000' %}selected{% endif %}>₹20,000</option>
+            <option value="30000" {% if budget_max == '30000' %}selected{% endif %}>₹30,000</option>
+            <option value="40000" {% if budget_max == '40000' %}selected{% endif %}>₹40,000</option>
+            <option value="50000" {% if budget_max == '50000' %}selected{% endif %}>₹50,000</option>
+            <option value="75000" {% if budget_max == '75000' %}selected{% endif %}>₹75,000</option>
+            <option value="100000" {% if budget_max == '100000' %}selected{% endif %}>₹1,00,000</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- BHK Type Filter -->
+    <div class="filter-group">
+      <div class="fg-title">
+        <i class="fas fa-bed" style="color: var(--primary);"></i>
+        No. of Bedrooms
+      </div>
       <div>
-        <button class="filter-btn {% if current_bhk == '1BHK' %}active{% endif %}" onclick="toggleFilter(this,'bhk','1BHK')">1 BHK</button>
-        <button class="filter-btn {% if current_bhk == '2BHK' %}active{% endif %}" onclick="toggleFilter(this,'bhk','2BHK')">2 BHK</button>
-        <button class="filter-btn {% if current_bhk == '3BHK' %}active{% endif %}" onclick="toggleFilter(this,'bhk','3BHK')">3 BHK</button>
-        <button class="filter-btn {% if current_bhk == '4BHK' %}active{% endif %}" onclick="toggleFilter(this,'bhk','4BHK')">4 BHK+</button>
+        <button class="filter-btn {% if current_bhk == '1BHK' %}active{% endif %}" onclick="toggleBHKFilter(this, '1BHK')">
+          + 1 RK/1 BHK
+        </button>
+        <button class="filter-btn {% if current_bhk == '2BHK' %}active{% endif %}" onclick="toggleBHKFilter(this, '2BHK')">
+          + 2 BHK
+        </button>
+        <button class="filter-btn {% if current_bhk == '3BHK' %}active{% endif %}" onclick="toggleBHKFilter(this, '3BHK')">
+          + 3 BHK
+        </button>
+        <button class="filter-btn {% if current_bhk == '4BHK' %}active{% endif %}" onclick="toggleBHKFilter(this, '4BHK')">
+          + 4 BHK
+        </button>
+        <button class="filter-btn {% if current_bhk == '5BHK' %}active{% endif %}" onclick="toggleBHKFilter(this, '5BHK')">
+          + 5 BHK
+        </button>
       </div>
     </div>
 
+    <!-- Area / Locality Filter -->
     <div class="filter-group">
-      <div class="fg-title">Budget Range (₹)</div>
-      <input type="range" class="range-input" id="budgetRange"
-             min="5000" max="500000" value="50000" step="1000"
-             oninput="updateBudget(this)">
-      <div class="range-labels">
-        <span>₹5,000</span><span id="budgetVal">Up to ₹50,000</span>
+      <div class="fg-title">
+        <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+        Area / Locality
+      </div>
+      
+      <!-- Manual Input -->
+      <input type="text" class="sb-inp" id="sidebar-area-inp" 
+             placeholder="Type locality..." 
+             value="{{ current_area|default:'' }}" 
+             style="width:100%; margin-bottom:12px;"
+             oninput="handleManualAreaInput()">
+      
+      <!-- Quick Select Buttons -->
+      <div id="area-quick-select">
+        <button class="filter-btn {% if current_area == 'dharampeth' %}active{% endif %}" onclick="toggleAreaFilter(this, 'dharampeth')">Dharampeth</button>
+        <button class="filter-btn {% if current_area == 'civil-lines' %}active{% endif %}" onclick="toggleAreaFilter(this, 'civil-lines')">Civil Lines</button>
+        <button class="filter-btn {% if current_area == 'wardha' %}active{% endif %}" onclick="toggleAreaFilter(this, 'wardha')">Wardha Rd</button>
+        <button class="filter-btn {% if current_area == 'sitabuldi' %}active{% endif %}" onclick="toggleAreaFilter(this, 'sitabuldi')">Sitabuldi</button>
+        <button class="filter-btn {% if current_area == 'manewada' %}active{% endif %}" onclick="toggleAreaFilter(this, 'manewada')">Manewada</button>
+        <button class="filter-btn {% if current_area == 'sadar' %}active{% endif %}" onclick="toggleAreaFilter(this, 'sadar')">Sadar</button>
       </div>
     </div>
 
+    <!-- Furnishing Status Filter -->
     <div class="filter-group">
-      <div class="fg-title">Area / Locality</div>
+      <div class="fg-title">
+        <i class="fas fa-couch" style="color: var(--primary);"></i>
+        Furnishing Status
+      </div>
       <div>
-        <button class="filter-btn {% if current_area == 'dharampeth' %}active{% endif %}" onclick="toggleFilter(this,'area','dharampeth')">Dharampeth</button>
-        <button class="filter-btn {% if current_area == 'civil-lines' %}active{% endif %}" onclick="toggleFilter(this,'area','civil-lines')">Civil Lines</button>
-        <button class="filter-btn {% if current_area == 'wardha' %}active{% endif %}" onclick="toggleFilter(this,'area','wardha')">Wardha Rd</button>
-        <button class="filter-btn {% if current_area == 'sitabuldi' %}active{% endif %}" onclick="toggleFilter(this,'area','sitabuldi')">Sitabuldi</button>
-        <button class="filter-btn {% if current_area == 'manewada' %}active{% endif %}" onclick="toggleFilter(this,'area','manewada')">Manewada</button>
-        <button class="filter-btn {% if current_area == 'sadar' %}active{% endif %}" onclick="toggleFilter(this,'area','sadar')">Sadar</button>
+        <button class="filter-btn {% if current_furnishing == 'semi' %}active{% endif %}" onclick="toggleFurnishingFilter(this, 'semi')">Semi Furnished</button>
+        <button class="filter-btn {% if current_furnishing == 'fully' %}active{% endif %}" onclick="toggleFurnishingFilter(this, 'fully')">Fully Furnished</button>
+        <button class="filter-btn {% if current_furnishing == 'unfurnished' %}active{% endif %}" onclick="toggleFurnishingFilter(this, 'unfurnished')">Unfurnished</button>
       </div>
     </div>
 
+    <!-- Property Status Filter -->
     <div class="filter-group">
-      <div class="fg-title">Furnishing Status</div>
-      <div>
-        <button class="filter-btn {% if current_furnishing == 'semi' %}active{% endif %}" onclick="toggleFilter(this,'furn','semi')">Semi Furnished</button>
-        <button class="filter-btn {% if current_furnishing == 'fully' %}active{% endif %}" onclick="toggleFilter(this,'furn','fully')">Fully Furnished</button>
-        <button class="filter-btn {% if current_furnishing == 'unfurnished' %}active{% endif %}" onclick="toggleFilter(this,'furn','unfurnished')">Unfurnished</button>
+      <div class="fg-title">
+        <i class="fas fa-check-circle" style="color: var(--primary);"></i>
+        Property Status
       </div>
+      <label class="checkbox-item">
+        <input type="checkbox" id="f-verified" {% if filter_verified %}checked{% endif %} onchange="syncFilters()"> 
+        ✅ Verified Only
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" id="f-featured" {% if filter_featured %}checked{% endif %} onchange="syncFilters()"> 
+        ⭐ Featured Only
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" id="f-owner" {% if filter_owner %}checked{% endif %} onchange="syncFilters()"> 
+        Owner Properties Only
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" id="f-pet" {% if filter_pet %}checked{% endif %} onchange="syncFilters()"> 
+        🐕 Pet Friendly
+      </label>
     </div>
 
+    <!-- Amenities Filter -->
     <div class="filter-group">
-      <div class="fg-title">Property Status</div>
-      <label class="checkbox-item"><input type="checkbox" checked id="f-verified"> ✅ Verified Only</label>
-      <label class="checkbox-item"><input type="checkbox" id="f-featured"> ⭐ Featured Only</label>
-      <label class="checkbox-item"><input type="checkbox" id="f-owner"> Owner Properties Only</label>
-      <label class="checkbox-item"><input type="checkbox" id="f-pet"> Pet Friendly</label>
+      <div class="fg-title">
+        <i class="fas fa-star" style="color: var(--primary);"></i>
+        Amenities
+      </div>
+      <label class="checkbox-item"><input type="checkbox" onchange="syncFilters()"> Lift</label>
+      <label class="checkbox-item"><input type="checkbox" onchange="syncFilters()"> Gym</label>
+      <label class="checkbox-item"><input type="checkbox" onchange="syncFilters()"> Swimming Pool</label>
+      <label class="checkbox-item"><input type="checkbox" onchange="syncFilters()"> Power Backup</label>
+      <label class="checkbox-item"><input type="checkbox" onchange="syncFilters()"> Parking</label>
     </div>
 
-    <div class="filter-group">
-      <div class="fg-title">Amenities</div>
-      <label class="checkbox-item"><input type="checkbox" checked> Lift</label>
-      <label class="checkbox-item"><input type="checkbox"> Gym</label>
-      <label class="checkbox-item"><input type="checkbox"> Swimming Pool</label>
-      <label class="checkbox-item"><input type="checkbox"> Power Backup</label>
-      <label class="checkbox-item"><input type="checkbox"> Parking</label>
-    </div>
-
-    <button class="btn btn-pr" style="width:100%;justify-content:center;margin-top:8px;padding:12px;" onclick="applyFilters()">
-      <i class="fas fa-filter me-1"></i> Apply Filters
+    <!-- Apply Button -->
+    <button class="btn btn-pr" style="width:100%;justify-content:center;margin-top:8px;padding:12px;" onclick="applySidebarFilters()">
+      <i class="fas fa-filter"></i> Apply Filters
     </button>
   </div>
 
+  <!-- ==================== MAIN RESULTS AREA ==================== -->
   <div>
+    <!-- Breadcrumb -->
     <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px;font-weight:500;">
       <a href="/" style="color:var(--primary);text-decoration:none;">Home</a> &rsaquo;
       {{ listing_type|title }} &rsaquo; <span style="color:var(--sec);">{{ category|title }}</span>
     </div>
 
-    <div class="applied-filters" id="appliedFilters">
+    <!-- Applied Filters Tags (99acres style) -->
+    <div class="applied-filters" id="appliedFiltersMain">
       <span class="af-label">Applied Filters:</span>
-      <div class="af-tag">{{ listing_type|title }} - {{ category|title }}</div>
       
-      {% if current_bhk %}
-      <div class="af-tag">
-        {{ current_bhk }}
-        <i class="fas fa-times" style="font-size:0.7rem;" onclick="removeParam('bhk')"></i>
+      <!-- Listing Type Tag -->
+      <div class="af-tag" style="background: #dcfce7; color: #16a34a; border-color: #bbf7d0;">
+        {{ listing_type|title }}
+      </div>
+
+      <!-- Category Tag -->
+      {% if category %}
+      <div class="af-tag" style="background: #fef3c7; color: #d97706; border-color: #fde68a;">
+        {{ category|title }}
       </div>
       {% endif %}
+      
+      <!-- Location Tag -->
       {% if current_area %}
-      <div class="af-tag">
-        {{ current_area|title }}
-        <i class="fas fa-times" style="font-size:0.7rem;" onclick="removeParam('area')"></i>
+      <div class="af-tag" onclick="removeFilter('area')">
+        <i class="fas fa-map-marker-alt"></i> {{ current_area|title }}
+        <i class="fas fa-times"></i>
       </div>
       {% endif %}
-      {% if current_budget %}
-      <div class="af-tag">
-        {{ current_budget }}
-        <i class="fas fa-times" style="font-size:0.7rem;" onclick="removeParam('budget')"></i>
+
+      <!-- BHK Tag -->
+      {% if current_bhk %}
+      <div class="af-tag" onclick="removeFilter('bhk')">
+        <i class="fas fa-bed"></i> {{ current_bhk }}
+        <i class="fas fa-times"></i>
       </div>
       {% endif %}
+
+      <!-- Budget Tags -->
+      {% if budget_min %}
+      <div class="af-tag" onclick="removeFilter('budget_min')">
+        Min: ₹{{ budget_min|floatformat:0 }}
+        <i class="fas fa-times"></i>
+      </div>
+      {% endif %}
+      {% if budget_max %}
+      <div class="af-tag" onclick="removeFilter('budget_max')">
+        Max: ₹{{ budget_max|floatformat:0 }}
+        <i class="fas fa-times"></i>
+      </div>
+      {% endif %}
+
+      <!-- Furnishing Tag -->
       {% if current_furnishing %}
-      <div class="af-tag">
-        {{ current_furnishing|title }}
-        <i class="fas fa-times" style="font-size:0.7rem;" onclick="removeParam('furnishing')"></i>
+      <div class="af-tag" onclick="removeFilter('furnishing')">
+        <i class="fas fa-couch"></i> {{ current_furnishing|title }}
+        <i class="fas fa-times"></i>
       </div>
       {% endif %}
     </div>
 
+    <!-- Results Header -->
     <div class="results-header">
-    <div class="rh-count" style="font-size: 1.1rem; font-weight: 700;">
-                    Showing <span class="text-primary">{{ total|default:"0" }}</span> 
-                    <strong>{{ category|title }}</strong> properties in 
-                    <strong>{{ current_city|default:"Nagpur"|title }}</strong>
-                </div>
+      <div class="rh-count">
+        Showing <span>{{ total|default:"0" }}</span> 
+        <strong>{{ category|title }}</strong> properties in 
+        <strong>{{ current_city|default:"Nagpur"|title }}</strong>
+      </div>
+      
       <div class="rh-sort">
-        <select class="sort-select" onchange="sortRedirect(this.value)">
-          <option value="relevant"  {% if current_sort == 'relevant'   %}selected{% endif %}>Most Relevant</option>
-          <option value="newest"    {% if current_sort == 'newest'     %}selected{% endif %}>Newest First</option>
-          <option value="price-asc" {% if current_sort == 'price-asc'  %}selected{% endif %}>Price: Low to High</option>
-          <option value="price-desc"{% if current_sort == 'price-desc' %}selected{% endif %}>Price: High to Low</option>
+        <select class="sort-select" onchange="applySorting(this.value)">
+          <option value="relevant" {% if current_sort == 'relevant' %}selected{% endif %}>Most Relevant</option>
+          <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
+          <option value="price-asc" {% if current_sort == 'price-asc' %}selected{% endif %}>Price: Low to High</option>
+          <option value="price-desc" {% if current_sort == 'price-desc' %}selected{% endif %}>Price: High to Low</option>
         </select>
+        
         <div class="view-toggle">
-          <button class="vt-btn active" id="gridViewBtn" onclick="setView('grid',this)"><i class="fas fa-th"></i></button>
-          <button class="vt-btn"        id="listViewBtn" onclick="setView('list',this)"><i class="fas fa-list"></i></button>
-        </div>
-      </div>
-    </div>
-
-    <div class="listings-grid" id="listingsGrid">
-  {% for p in properties %}
-<a href="/listing/{{ p.listing_type }}/{{ p.category|lower|slugify }}/{{ p.id }}/" class="pcard">
-    
-    <div class="pc-img">
-      {% if p.image_url %}
-      <img src="{{ p.image_url }}" alt="Property" style="width:100%;height:100%;object-fit:cover;">
-      {% else %}
-      <div class="pc-img-placeholder">
-        {{ p.emoji|default:"🏠" }}
-      </div>
-      {% endif %}
-      
-      <div class="pc-badges">
-        {% if p.is_ai_match %}
-        <span class="badge" style="background: linear-gradient(45deg, #6366f1, #a855f7); color: white;">
-          <i class="bi bi-robot"></i> AI Match
-        </span>
-        {% endif %}
-
-        {% if p.is_new %}<span class="badge b-new">🆕 New</span>{% endif %}
-        
-        <span class="badge b-feat">{{ p.category }}</span>
-      </div>
-
-      <button class="pc-save" onclick="event.preventDefault();toggleSave({{ p.id }}, '{{ p.category }}', this)">
-        <i class="bi bi-heart" style="color:#ef4444;"></i>
-      </button>
-      
-      <div class="pc-price-tag">{{ p.price_display }}</div>
-    </div>
-
-    <div class="pc-body">
-      <div class="pc-title">{{ p.title }}</div>
-      
-      <div class="pc-addr">
-        <i class="fas fa-map-marker-alt" style="color:var(--primary);font-size:0.8rem;"></i>
-        {{ p.location }}
-      </div>
-
-      <div class="pc-specs">
-        {% if p.beds %}
-        <div class="spec"><i class="fas fa-bed"></i> {{ p.beds }}</div>
-        {% endif %}
-        
-        {% if p.area %}
-        <div class="spec"><i class="fas fa-vector-square"></i> {{ p.area }}</div>
-        {% endif %}
-        
-        {% if p.baths %}
-        <div class="spec"><i class="fas fa-bath"></i> {{ p.baths }}</div>
-        {% endif %}
-      </div>
-      
-      <div class="pc-tags">
-        {% if p.furnished %}
-        <span class="pt">{{ p.furnished }}</span>
-        {% endif %}
-        {% if p.property_type %}
-        <span class="pt">{{ p.property_type }}</span>
-        {% endif %}
-      </div>
-
-      <div class="pc-footer">
-        <div class="pc-agent">
-          <div class="pa-av" style="background:var(--accent);">{{ p.owner_initials|default:"O" }}</div>
-          <div>
-            <div class="pa-name">{{ p.owner|default:"Owner" }}</div>
-            <div class="pa-role">{{ p.category }}</div>
-          </div>
-        </div>
-        <div class="pc-contact-btns">
-          <button class="cb" onclick="event.preventDefault();callListing('{{ p.phone }}')">
-            <i class="fas fa-phone"></i> Call
+          <button class="vt-btn active" onclick="setView('grid', this)">
+            <i class="fas fa-th"></i>
+          </button>
+          <button class="vt-btn" onclick="setView('list', this)">
+            <i class="fas fa-list"></i>
           </button>
         </div>
       </div>
-
     </div>
-  </a>
-  {% empty %}
-  <div style="grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--muted);background:white;border-radius:12px;border:1px solid var(--border);">
-    <i class="bi bi-robot" style="font-size:3rem;margin-bottom:16px;display:block;color:#a855f7;"></i>
-    <div style="font-size:1.1rem;font-weight:700;color:var(--sec);">The AI couldn't find a perfect match.</div>
-    <div style="font-size:0.9rem;margin-top:8px;">Try broadening your budget or searching in a nearby locality.</div>
-  </div>
-  {% endfor %}
-</div>
 
+    <!-- Property Listings Grid -->
+    <div class="listings-grid" id="listingsGrid">
+      {% for p in properties %}
+        <a href="/listing/{{ p.listing_type }}/{{ p.category|lower|slugify }}/{{ p.id }}/" class="pcard">
+            
+            <div class="pc-img">
+                {% if p.image_url %}
+                <img src="{{ p.image_url }}" alt="Property">
+                {% else %}
+                <div class="pc-img-placeholder">
+                    {{ p.emoji|default:"🏠" }}
+                </div>
+                {% endif %}
+                
+                <div class="pc-badges">
+                    {% if p.is_ai_match %}
+                    <span class="badge" style="background: linear-gradient(45deg, #6366f1, #a855f7); color: white;">
+                        <i class="bi bi-robot"></i> AI Match
+                    </span>
+                    {% endif %}
+
+                    {% if p.is_new %}
+                    <span class="badge b-new">🆕 New</span>
+                    {% endif %}
+                    
+                    <span class="badge b-feat">{{ p.category|default:category }}</span>
+                </div>
+
+                <button class="pc-save" onclick="event.preventDefault();toggleSave({{ p.id }}, '{{ p.category }}', this)">
+                    <i class="bi bi-heart"></i>
+                </button>
+                
+                <div class="pc-price-tag">{{ p.price_display|default:"Price on Request" }}</div>
+            </div>
+
+            <div class="pc-body">
+                <div class="pc-title">{{ p.title }}</div>
+                
+                <div class="pc-addr">
+                    <i class="fas fa-map-marker-alt" style="color:var(--primary);"></i>
+                    {{ p.location }}
+                </div>
+
+                <div class="pc-specs">
+                    {% if p.beds %}
+                    <div class="spec"><i class="fas fa-bed"></i> {{ p.beds }}</div>
+                    {% elif p.total_beds %}
+                    <div class="spec"><i class="fas fa-bed"></i> {{ p.total_beds }} Beds</div>
+                    {% elif p.min_seats %}
+                    <div class="spec"><i class="fas fa-chair"></i> {{ p.min_seats }} Seats</div>
+                    {% endif %}
+                    
+                    {% if p.area %}
+                    <div class="spec"><i class="fas fa-vector-square"></i> {{ p.area }} Sq.Ft</div>
+                    {% elif p.land_area %}
+                    <div class="spec"><i class="fas fa-vector-square"></i> {{ p.land_area }} Acres</div>
+                    {% elif p.plot_area %}
+                    <div class="spec"><i class="fas fa-vector-square"></i> {{ p.plot_area }} Sq.Ft</div>
+                    {% endif %}
+                    
+                    {% if p.baths %}
+                    <div class="spec"><i class="fas fa-bath"></i> {{ p.baths }} Baths</div>
+                    {% elif p.kva_capacity %}
+                    <div class="spec"><i class="fas fa-bolt"></i> {{ p.kva_capacity }} KVA</div>
+                    {% endif %}
+                </div>
+                
+                <div class="pc-tags">
+                    {% if p.furnished %}
+                    <span class="pt">{{ p.furnished|title }}</span>
+                    {% endif %}
+                    
+                    {% if p.property_type %}
+                    <span class="pt">{{ p.property_type|title }}</span>
+                    {% endif %}
+
+                    {% if p.pg_for %}
+                    <span class="pt">For {{ p.pg_for|title }}</span>
+                    {% endif %}
+                    
+                    {% if p.plot_road_facing %}
+                    <span class="pt">{{ p.plot_road_facing|title }} Facing</span>
+                    {% endif %}
+                </div>
+
+                <div class="pc-footer">
+                    <div class="pc-agent">
+                        <div class="pa-av" style="background:var(--accent);">{{ p.owner_initials|default:"O" }}</div>
+                        <div>
+                            <div class="pa-name">{{ p.owner|default:"Owner" }}</div>
+                            <div class="pa-role">{{ p.category|default:category }}</div>
+                        </div>
+                    </div>
+                    <div class="pc-contact-btns">
+                        <button class="cb" onclick="event.preventDefault();callListing('{{ p.phone }}')">
+                            <i class="fas fa-phone"></i> Call
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </a>
+      {% empty %}
+        <div style="grid-column:1/-1;text-align:center;padding:80px 20px;background:white;border-radius:12px;border:1px solid var(--border);">
+            <i class="fas fa-search" style="font-size:3rem;margin-bottom:16px;display:block;color:var(--muted);"></i>
+            <div style="font-size:1.1rem;font-weight:700;color:var(--sec);">No properties found</div>
+            <div style="font-size:0.9rem;margin-top:8px;color:var(--muted);">Try adjusting your filters or search in a different area</div>
+            <button class="btn btn-pr" style="margin-top:20px;" onclick="resetAllFilters()">
+              <i class="fas fa-redo"></i> Reset All Filters
+            </button>
+        </div>
+      {% endfor %}
+    </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <script>
-// ── Active filters state tracking 
-const activeFilters = {
-  bhk:   '{{ current_bhk|escapejs }}',
-  area:  '{{ current_area|escapejs }}',
-  furn:  '{{ current_furnishing|escapejs }}',
-  budget:'{{ current_budget|escapejs }}',
+// ============================================
+// GLOBAL FILTER STATE MANAGEMENT
+// ============================================
+
+const filterState = {
+    type: '{{ listing_type|escapejs }}',
+    category: '{{ category|escapejs }}',
+    area: '{{ current_area|escapejs }}',
+    bhk: '{{ current_bhk|escapejs }}',
+    budget_min: '{{ budget_min|escapejs }}',
+    budget_max: '{{ budget_max|escapejs }}',
+    furnishing: '{{ current_furnishing|escapejs }}',
+    sort: '{{ current_sort|escapejs }}',
 };
 
-// Handle Sidebar Button Toggles
-function toggleFilter(btn, type, val) {
-  btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  activeFilters[type] = val;
+// ============================================
+// INIT: Sync UI with current state
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    updateActiveFilterCount();
+    syncUIWithState();
+});
+
+function syncUIWithState() {
+    // Update header dropdown
+    const headerTypeSel = document.getElementById('header-type-sel');
+    if (headerTypeSel) headerTypeSel.value = filterState.type;
+    
+    // Update sidebar inputs
+    const sidebarAreaInp = document.getElementById('sidebar-area-inp');
+    if (sidebarAreaInp && filterState.area) {
+        sidebarAreaInp.value = filterState.area;
+    }
 }
 
-// Update Budget Number Display when sliding
-function updateBudget(el) {
-  document.getElementById('budgetVal').textContent = 'Up to ₹' + parseInt(el.value).toLocaleString('en-IN');
+// ============================================
+// BHK FILTER TOGGLE (99acres style)
+// ============================================
+function toggleBHKFilter(btn, value) {
+    const allBtns = btn.parentElement.querySelectorAll('.filter-btn');
+    
+    if (btn.classList.contains('active')) {
+        // Deselect
+        btn.classList.remove('active');
+        filterState.bhk = '';
+    } else {
+        // Deselect all others and select this one
+        allBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterState.bhk = value;
+    }
+    
+    updateActiveFilterCount();
 }
 
-function buildURL(overrides = {}) {
-  const params = new URLSearchParams(window.location.search);
-  
-  const currentType = params.get('type') || '{{ listing_type|escapejs }}';
-  const currentCat = params.get('category') || '{{ category|escapejs }}';
-  
-  params.set('type', currentType);
-  params.set('category', currentCat);
-  
-  const state = { ...activeFilters, ...overrides };
-  
-  if(state.bhk) params.set('bhk', state.bhk); else params.delete('bhk');
-  if(state.area) params.set('area', state.area); else params.delete('area');
-  if(state.furn) params.set('furnishing', state.furn); else params.delete('furnishing');
-  if(state.budget) params.set('budget', state.budget); else params.delete('budget');
-
-  return window.location.pathname + '?' + params.toString();
+// ============================================
+// AREA FILTER TOGGLE
+// ============================================
+function toggleAreaFilter(btn, value) {
+    const allBtns = btn.parentElement.querySelectorAll('.filter-btn');
+    const areaInput = document.getElementById('sidebar-area-inp');
+    
+    if (btn.classList.contains('active')) {
+        btn.classList.remove('active');
+        filterState.area = '';
+        if (areaInput) areaInput.value = '';
+    } else {
+        allBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterState.area = value;
+        if (areaInput) areaInput.value = value;
+    }
+    
+    updateActiveFilterCount();
 }
 
-function applyFilters() {
-  window.location.href = buildURL();
+function handleManualAreaInput() {
+    const areaInput = document.getElementById('sidebar-area-inp');
+    const quickBtns = document.querySelectorAll('#area-quick-select .filter-btn');
+    
+    if (areaInput.value.trim()) {
+        // Deselect all quick buttons when typing manually
+        quickBtns.forEach(b => b.classList.remove('active'));
+        filterState.area = areaInput.value.trim();
+    } else {
+        filterState.area = '';
+    }
+    
+    updateActiveFilterCount();
 }
 
-function applySearchBar() {
-  const area = document.getElementById('loc-inp').value;
-  const bhk_element = document.getElementById('type-sel');
-  const furn_element = document.getElementById('furn-sel');
-  
-  const bhk = bhk_element ? bhk_element.value : '';
-  const furn = furn_element ? furn_element.value : '';
-  const bud = document.getElementById('budget-sel').value;
-  
-  window.location.href = buildURL({
-    area: area,
-    bhk: bhk,
-    budget: bud,
-    furn: furn
-  });
+// ============================================
+// FURNISHING FILTER TOGGLE
+// ============================================
+function toggleFurnishingFilter(btn, value) {
+    const allBtns = btn.parentElement.querySelectorAll('.filter-btn');
+    
+    if (btn.classList.contains('active')) {
+        btn.classList.remove('active');
+        filterState.furnishing = '';
+    } else {
+        allBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterState.furnishing = value;
+    }
+    
+    updateActiveFilterCount();
 }
 
-function resetFilters() {
-  const params = new URLSearchParams(window.location.search);
-  const type = params.get('type') || '{{ listing_type|escapejs }}';
-  const cat = params.get('category') || '{{ category|escapejs }}';
-  window.location.href = window.location.pathname + `?type=${type}&category=${cat}`;
+// ============================================
+// SYNC FILTERS (called on any filter change)
+// ============================================
+function syncFilters() {
+    // Update budget from sidebar
+    const budgetMin = document.getElementById('sidebar-budget-min');
+    const budgetMax = document.getElementById('sidebar-budget-max');
+    
+    if (budgetMin) filterState.budget_min = budgetMin.value;
+    if (budgetMax) filterState.budget_max = budgetMax.value;
+    
+    updateActiveFilterCount();
 }
 
-function removeParam(key) {
-  const params = new URLSearchParams(window.location.search);
-  params.delete(key);
-  window.location.href = window.location.pathname + '?' + params.toString();
+// ============================================
+// UPDATE ACTIVE FILTER COUNT
+// ============================================
+function updateActiveFilterCount() {
+    let count = 0;
+    
+    if (filterState.area) count++;
+    if (filterState.bhk) count++;
+    if (filterState.budget_min) count++;
+    if (filterState.budget_max) count++;
+    if (filterState.furnishing) count++;
+    
+    // Update checkboxes
+    if (document.getElementById('f-verified')?.checked) count++;
+    if (document.getElementById('f-featured')?.checked) count++;
+    if (document.getElementById('f-owner')?.checked) count++;
+    if (document.getElementById('f-pet')?.checked) count++;
+    
+    const countEl = document.getElementById('sidebar-active-count');
+    if (countEl) countEl.textContent = count;
 }
 
-function sortRedirect(val) {
-  const params = new URLSearchParams(window.location.search);
-  params.set('sort', val);
-  window.location.href = window.location.pathname + '?' + params.toString();
+// ============================================
+// APPLY FILTERS (Sidebar)
+// ============================================
+function applySidebarFilters() {
+    const params = new URLSearchParams();
+    
+    // Core params
+    params.set('type', filterState.type);
+    if (filterState.category) params.set('category', filterState.category);
+    
+    // Filter params
+    if (filterState.area) params.set('area', filterState.area);
+    if (filterState.bhk) params.set('bhk', filterState.bhk);
+    if (filterState.budget_min) params.set('budget_min', filterState.budget_min);
+    if (filterState.budget_max) params.set('budget_max', filterState.budget_max);
+    if (filterState.furnishing) params.set('furnishing', filterState.furnishing);
+    if (filterState.sort) params.set('sort', filterState.sort);
+    
+    // Checkboxes
+    if (document.getElementById('f-verified')?.checked) params.set('verified', '1');
+    if (document.getElementById('f-featured')?.checked) params.set('featured', '1');
+    if (document.getElementById('f-owner')?.checked) params.set('owner', '1');
+    if (document.getElementById('f-pet')?.checked) params.set('pet', '1');
+    
+    window.location.href = window.location.pathname + '?' + params.toString();
 }
 
-function setView(v, btn) {
-  document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const grid = document.getElementById('listingsGrid');
-  grid.classList.toggle('list-view', v === 'list');
+// ============================================
+// APPLY FILTERS (Header)
+// ============================================
+function applyHeaderFilters() {
+    const headerType = document.getElementById('header-type-sel')?.value;
+    const headerLoc = document.getElementById('header-loc-inp')?.value.trim();
+    
+    if (headerType) filterState.type = headerType;
+    if (headerLoc) filterState.area = headerLoc;
+    
+    applySidebarFilters();
 }
 
-function toggleSave(id, btn) {
-  btn.classList.toggle('saved');
-  const i = btn.querySelector('i');
-  i.className = btn.classList.contains('saved') ? 'fas fa-heart' : 'far fa-heart';
+// ============================================
+// REMOVE SINGLE FILTER
+// ============================================
+function removeFilter(key) {
+    const params = new URLSearchParams(window.location.search);
+    params.delete(key);
+    window.location.href = window.location.pathname + '?' + params.toString();
 }
 
-function contactListing(phone) {
-  Swal.fire({
-    title: 'Contact Owner',
-    html: `<div style="text-align:center;padding:8px;">
-      <div style="font-size:1.4rem;font-weight:900;color:#006ce4;margin:12px 0;">📞 ${phone || 'N/A'}</div>
-      <div style="font-size:.8rem;color:#64748b;font-weight:500;">PropCRM Verified · Available 9AM–7PM</div>
-    </div>`,
-    background: '#ffffff', color: '#1e293b',
-    confirmButtonColor: '#006ce4', confirmButtonText: 'Call Now',
-  });
+// ============================================
+// RESET ALL FILTERS
+// ============================================
+function resetAllFilters() {
+    const params = new URLSearchParams();
+    params.set('type', filterState.type);
+    if (filterState.category) params.set('category', filterState.category);
+    window.location.href = window.location.pathname + '?' + params.toString();
+}
+
+// ============================================
+// SORTING
+// ============================================
+function applySorting(value) {
+    const params = new URLSearchParams(window.location.search);
+    params.set('sort', value);
+    window.location.href = window.location.pathname + '?' + params.toString();
+}
+
+// ============================================
+// VIEW TOGGLE
+// ============================================
+function setView(view, btn) {
+    document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    const grid = document.getElementById('listingsGrid');
+    if (view === 'list') {
+        grid.classList.add('list-view');
+    } else {
+        grid.classList.remove('list-view');
+    }
+}
+
+// ============================================
+// SAVE PROPERTY
+// ============================================
+function toggleSave(id, category, btn) {
+    btn.classList.toggle('saved');
+    const icon = btn.querySelector('i');
+    
+    if (btn.classList.contains('saved')) {
+        icon.className = 'bi bi-heart-fill';
+        icon.style.color = '#ef4444';
+    } else {
+        icon.className = 'bi bi-heart';
+        icon.style.color = '#ef4444';
+    }
+}
+
+// ============================================
+// CALL OWNER
+// ============================================
+function callListing(phone) {
+    Swal.fire({
+        title: 'Contact Owner',
+        html: `<div style="text-align:center;padding:12px;">
+            <div style="font-size:1.6rem;font-weight:900;color:#006ce4;margin:16px 0;">
+                <i class="fas fa-phone" style="font-size:1.2rem;"></i> ${phone || 'N/A'}
+            </div>
+            <div style="font-size:0.85rem;color:#64748b;font-weight:500;">
+                PropCRM Verified · Available 9 AM – 7 PM
+            </div>
+        </div>`,
+        background: '#ffffff',
+        color: '#1e293b',
+        confirmButtonColor: '#006ce4',
+        confirmButtonText: '<i class="fas fa-phone"></i> Call Now',
+        showCancelButton: true,
+        cancelButtonText: 'Close'
+    }).then((result) => {
+        if (result.isConfirmed && phone) {
+            window.location.href = `tel:${phone}`;
+        }
+    });
+}
+
+// ============================================
+// LOCATION MODAL (for Add More functionality)
+// ============================================
+function showLocationModal() {
+    Swal.fire({
+        title: 'Add More Locations',
+        html: `
+            <input type="text" id="modal-location-input" class="swal2-input" placeholder="Enter locality name">
+            <div style="margin-top:12px;font-size:0.85rem;color:#64748b;">Popular areas:</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;justify-content:center;">
+                <button onclick="selectModalLocation('dharampeth')" class="filter-btn">Dharampeth</button>
+                <button onclick="selectModalLocation('civil-lines')" class="filter-btn">Civil Lines</button>
+                <button onclick="selectModalLocation('wardha')" class="filter-btn">Wardha Rd</button>
+                <button onclick="selectModalLocation('sitabuldi')" class="filter-btn">Sitabuldi</button>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Add Location',
+        preConfirm: () => {
+            const input = document.getElementById('modal-location-input');
+            return input.value.trim();
+        }
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            filterState.area = result.value;
+            applySidebarFilters();
+        }
+    });
+}
+
+function selectModalLocation(location) {
+    filterState.area = location;
+    Swal.close();
+    applySidebarFilters();
 }
 </script>
+
 </body>
 </html>

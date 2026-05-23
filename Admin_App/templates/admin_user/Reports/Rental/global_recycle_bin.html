@@ -24,13 +24,18 @@
     .btn-restore:hover { background: #10b981; color: white; }
     .btn-hard-delete { background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 12px; }
     .btn-hard-delete:hover { background: #ef4444; color: white; }
+    
+    /* ── Audit Badges ── */
+    .badge-safe { background:#fef3c7; color:#d97706; padding:4px 8px; border-radius:6px; font-weight:bold; font-size:11px; }
+    .badge-danger { background:#fee2e2; color:#dc2626; padding:4px 8px; border-radius:6px; font-weight:bold; font-size:11px; }
+    .deleted-by-text { font-weight: 600; color: #475569; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; }
 </style>
 
 <div class="main-content">
     <div class="page-header">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <h1 style="margin: 0; font-size: 22px; font-weight: 700;">
-                <i class="fas fa-trash-restore"></i> Global Recycle Bin
+                <i class="fas fa-trash-restore"></i> Global Recycle Bin & Audit Logs
             </h1>
             <span style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600;">
                 Total Deleted Items: {{ total_deleted_all }}
@@ -90,37 +95,41 @@
                     <table class="properties-table">
                         <thead>
                             <tr>
-                                  <th>Sr.No</th>
-                                <th>Original ID</th>
+                                <th>Sr.No</th>
+                                <th>ID</th>
                                 <th>Property Title</th>
-                                <th>City</th>
                                 <th>Owner Name</th>
-                                <th>Deleted Date & Time</th>
+                                <th><i class="fas fa-user-shield"></i> Deleted By</th>
+                                <th><i class="fas fa-clock"></i> Deleted Time</th>
+                                <th><i class="fas fa-hourglass-half"></i> Auto-Delete</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for prop in rental_deleted %}
                             <tr id="rental-row-{{ prop.id }}">
-                                  <td><strong>{{ forloop.counter }}</strong></td>
+                                <td><strong>{{ forloop.counter }}</strong></td>
                                 <td><strong>#{{ prop.id }}</strong></td>
                                 <td>{{ prop.property_title }}</td>
-                                <td>{{ prop.city }}</td>
                                 <td>{{ prop.owner_name }}</td>
-                                <td style="color: #ef4444;"><i class="fas fa-clock"></i> {{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td><span class="deleted-by-text">{{ prop.deleted_by|default:"System Admin" }}</span></td>
+                                <td style="color: #ef4444;">{{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td>
+                                    {% if prop.days_left <= 5 %}
+                                        <span class="badge-danger"><i class="fas fa-exclamation-circle"></i> {{ prop.days_left }} Days</span>
+                                    {% else %}
+                                        <span class="badge-safe">{{ prop.days_left }} Days</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <div style="display: flex; gap: 8px;">
-                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/rental-residential/restore/{{ prop.id }}/', 'rental-row-{{ prop.id }}')">
-                                            <i class="fas fa-undo"></i> Restore
-                                        </button>
-                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/rental-residential/hard-delete/{{ prop.id }}/', 'rental-row-{{ prop.id }}')">
-                                            <i class="fas fa-times"></i> Delete
-                                        </button>
+                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/rental-residential/restore/{{ prop.id }}/', 'rental-row-{{ prop.id }}')"><i class="fas fa-undo"></i> Restore</button>
+                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/rental-residential/hard-delete/{{ prop.id }}/', 'rental-row-{{ prop.id }}')"><i class="fas fa-times"></i> Delete</button>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="6" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Rental Residential Properties.</td></tr>
+                            <tr><td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Rental Residential Properties.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -132,35 +141,41 @@
                     <table class="properties-table">
                         <thead>
                             <tr>
-                                <th>Original ID</th>
+                                <th>Sr.No</th>
+                                <th>ID</th>
                                 <th>Building Name</th>
-                                <th>City</th>
                                 <th>Owner Name</th>
-                                <th>Deleted Date & Time</th>
+                                <th><i class="fas fa-user-shield"></i> Deleted By</th>
+                                <th><i class="fas fa-clock"></i> Deleted Time</th>
+                                <th><i class="fas fa-hourglass-half"></i> Auto-Delete</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for prop in commercial_deleted %}
                             <tr id="comm-row-{{ prop.id }}">
+                                <td><strong>{{ forloop.counter }}</strong></td>
                                 <td><strong>#{{ prop.id }}</strong></td>
                                 <td>{{ prop.building_name }}</td>
-                                <td>{{ prop.city }}</td>
                                 <td>{{ prop.owner_name }}</td>
-                                <td style="color: #ef4444;"><i class="fas fa-clock"></i> {{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td><span class="deleted-by-text">{{ prop.deleted_by|default:"System Admin" }}</span></td>
+                                <td style="color: #ef4444;">{{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td>
+                                    {% if prop.days_left <= 5 %}
+                                        <span class="badge-danger"><i class="fas fa-exclamation-circle"></i> {{ prop.days_left }} Days</span>
+                                    {% else %}
+                                        <span class="badge-safe">{{ prop.days_left }} Days</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <div style="display: flex; gap: 8px;">
-                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/commercial/restore/{{ prop.id }}/', 'comm-row-{{ prop.id }}')">
-                                            <i class="fas fa-undo"></i> Restore
-                                        </button>
-                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/commercial/hard-delete/{{ prop.id }}/', 'comm-row-{{ prop.id }}')">
-                                            <i class="fas fa-times"></i> Delete
-                                        </button>
+                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/commercial/restore/{{ prop.id }}/', 'comm-row-{{ prop.id }}')"><i class="fas fa-undo"></i> Restore</button>
+                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/commercial/hard-delete/{{ prop.id }}/', 'comm-row-{{ prop.id }}')"><i class="fas fa-times"></i> Delete</button>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="6" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Commercial Rental Properties.</td></tr>
+                            <tr><td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Commercial Rental Properties.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -172,35 +187,41 @@
                     <table class="properties-table">
                         <thead>
                             <tr>
-                                <th>Original ID</th>
+                                <th>Sr.No</th>
+                                <th>ID</th>
                                 <th>PG Name</th>
-                                <th>City</th>
                                 <th>Owner Name</th>
-                                <th>Deleted Date & Time</th>
+                                <th><i class="fas fa-user-shield"></i> Deleted By</th>
+                                <th><i class="fas fa-clock"></i> Deleted Time</th>
+                                <th><i class="fas fa-hourglass-half"></i> Auto-Delete</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for prop in pg_deleted %}
                             <tr id="pg-row-{{ prop.id }}">
+                                <td><strong>{{ forloop.counter }}</strong></td>
                                 <td><strong>#{{ prop.id }}</strong></td>
                                 <td>{{ prop.pg_name }}</td>
-                                <td>{{ prop.city }}</td>
                                 <td>{{ prop.owner_name }}</td>
-                                <td style="color: #ef4444;"><i class="fas fa-clock"></i> {{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td><span class="deleted-by-text">{{ prop.deleted_by|default:"System Admin" }}</span></td>
+                                <td style="color: #ef4444;">{{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td>
+                                    {% if prop.days_left <= 5 %}
+                                        <span class="badge-danger"><i class="fas fa-exclamation-circle"></i> {{ prop.days_left }} Days</span>
+                                    {% else %}
+                                        <span class="badge-safe">{{ prop.days_left }} Days</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <div style="display: flex; gap: 8px;">
-                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/pg-coliving/restore/{{ prop.id }}/', 'pg-row-{{ prop.id }}')">
-                                            <i class="fas fa-undo"></i> Restore
-                                        </button>
-                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/pg-coliving/hard-delete/{{ prop.id }}/', 'pg-row-{{ prop.id }}')">
-                                            <i class="fas fa-times"></i> Delete
-                                        </button>
+                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/pg-coliving/restore/{{ prop.id }}/', 'pg-row-{{ prop.id }}')"><i class="fas fa-undo"></i> Restore</button>
+                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/pg-coliving/hard-delete/{{ prop.id }}/', 'pg-row-{{ prop.id }}')"><i class="fas fa-times"></i> Delete</button>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="6" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted PG Properties.</td></tr>
+                            <tr><td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted PG Properties.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -212,35 +233,41 @@
                     <table class="properties-table">
                         <thead>
                             <tr>
-                                <th>Original ID</th>
+                                <th>Sr.No</th>
+                                <th>ID</th>
                                 <th>Property Title</th>
-                                <th>City</th>
                                 <th>Owner Name</th>
-                                <th>Deleted Date & Time</th>
+                                <th><i class="fas fa-user-shield"></i> Deleted By</th>
+                                <th><i class="fas fa-clock"></i> Deleted Time</th>
+                                <th><i class="fas fa-hourglass-half"></i> Auto-Delete</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for prop in resale_deleted %}
                             <tr id="resale-row-{{ prop.id }}">
+                                <td><strong>{{ forloop.counter }}</strong></td>
                                 <td><strong>#{{ prop.id }}</strong></td>
                                 <td>{{ prop.title }}</td>
-                                <td>{{ prop.city }}</td>
                                 <td>{{ prop.owner_name }}</td>
-                                <td style="color: #ef4444;"><i class="fas fa-clock"></i> {{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td><span class="deleted-by-text">{{ prop.deleted_by|default:"System Admin" }}</span></td>
+                                <td style="color: #ef4444;">{{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td>
+                                    {% if prop.days_left <= 5 %}
+                                        <span class="badge-danger"><i class="fas fa-exclamation-circle"></i> {{ prop.days_left }} Days</span>
+                                    {% else %}
+                                        <span class="badge-safe">{{ prop.days_left }} Days</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <div style="display: flex; gap: 8px;">
-                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/resale-residential/restore/{{ prop.id }}/', 'resale-row-{{ prop.id }}')">
-                                            <i class="fas fa-undo"></i> Restore
-                                        </button>
-                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/resale-residential/hard-delete/{{ prop.id }}/', 'resale-row-{{ prop.id }}')">
-                                            <i class="fas fa-times"></i> Delete
-                                        </button>
+                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/resale-residential/restore/{{ prop.id }}/', 'resale-row-{{ prop.id }}')"><i class="fas fa-undo"></i> Restore</button>
+                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/resale-residential/hard-delete/{{ prop.id }}/', 'resale-row-{{ prop.id }}')"><i class="fas fa-times"></i> Delete</button>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="6" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Resale Residential Properties.</td></tr>
+                            <tr><td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Resale Residential Properties.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -252,35 +279,41 @@
                     <table class="properties-table">
                         <thead>
                             <tr>
-                                <th>Original ID</th>
+                                <th>Sr.No</th>
+                                <th>ID</th>
                                 <th>Property Title</th>
-                                <th>City</th>
                                 <th>Owner Name</th>
-                                <th>Deleted Date & Time</th>
+                                <th><i class="fas fa-user-shield"></i> Deleted By</th>
+                                <th><i class="fas fa-clock"></i> Deleted Time</th>
+                                <th><i class="fas fa-hourglass-half"></i> Auto-Delete</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for prop in commercial_resale_deleted %}
                             <tr id="comm-resale-row-{{ prop.id }}">
+                                <td><strong>{{ forloop.counter }}</strong></td>
                                 <td><strong>#{{ prop.id }}</strong></td>
                                 <td>{{ prop.title }}</td>
-                                <td>{{ prop.city }}</td>
                                 <td>{{ prop.owner_name }}</td>
-                                <td style="color: #ef4444;"><i class="fas fa-clock"></i> {{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td><span class="deleted-by-text">{{ prop.deleted_by|default:"System Admin" }}</span></td>
+                                <td style="color: #ef4444;">{{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td>
+                                    {% if prop.days_left <= 5 %}
+                                        <span class="badge-danger"><i class="fas fa-exclamation-circle"></i> {{ prop.days_left }} Days</span>
+                                    {% else %}
+                                        <span class="badge-safe">{{ prop.days_left }} Days</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <div style="display: flex; gap: 8px;">
-                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/commercial-resale/restore/{{ prop.id }}/', 'comm-resale-row-{{ prop.id }}')">
-                                            <i class="fas fa-undo"></i> Restore
-                                        </button>
-                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/commercial-resale/hard-delete/{{ prop.id }}/', 'comm-resale-row-{{ prop.id }}')">
-                                            <i class="fas fa-times"></i> Delete
-                                        </button>
+                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/commercial-resale/restore/{{ prop.id }}/', 'comm-resale-row-{{ prop.id }}')"><i class="fas fa-undo"></i> Restore</button>
+                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/commercial-resale/hard-delete/{{ prop.id }}/', 'comm-resale-row-{{ prop.id }}')"><i class="fas fa-times"></i> Delete</button>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="6" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Commercial Resale Properties.</td></tr>
+                            <tr><td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Commercial Resale Properties.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -292,35 +325,41 @@
                     <table class="properties-table">
                         <thead>
                             <tr>
-                                <th>Original ID</th>
+                                <th>Sr.No</th>
+                                <th>ID</th>
                                 <th>Plot Title</th>
-                                <th>City</th>
                                 <th>Owner Name</th>
-                                <th>Deleted Date & Time</th>
+                                <th><i class="fas fa-user-shield"></i> Deleted By</th>
+                                <th><i class="fas fa-clock"></i> Deleted Time</th>
+                                <th><i class="fas fa-hourglass-half"></i> Auto-Delete</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for prop in plot_sale_deleted %}
                             <tr id="plot-row-{{ prop.id }}">
+                                <td><strong>{{ forloop.counter }}</strong></td>
                                 <td><strong>#{{ prop.id }}</strong></td>
                                 <td>{{ prop.plot_title }}</td>
-                                <td>{{ prop.plot_city }}</td>
                                 <td>{{ prop.plot_owner_name }}</td>
-                                <td style="color: #ef4444;"><i class="fas fa-clock"></i> {{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td><span class="deleted-by-text">{{ prop.deleted_by|default:"System Admin" }}</span></td>
+                                <td style="color: #ef4444;">{{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td>
+                                    {% if prop.days_left <= 5 %}
+                                        <span class="badge-danger"><i class="fas fa-exclamation-circle"></i> {{ prop.days_left }} Days</span>
+                                    {% else %}
+                                        <span class="badge-safe">{{ prop.days_left }} Days</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <div style="display: flex; gap: 8px;">
-                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/plot-sale/restore/{{ prop.id }}/', 'plot-row-{{ prop.id }}')">
-                                            <i class="fas fa-undo"></i> Restore
-                                        </button>
-                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/plot-sale/hard-delete/{{ prop.id }}/', 'plot-row-{{ prop.id }}')">
-                                            <i class="fas fa-times"></i> Delete
-                                        </button>
+                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/plot-sale/restore/{{ prop.id }}/', 'plot-row-{{ prop.id }}')"><i class="fas fa-undo"></i> Restore</button>
+                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/plot-sale/hard-delete/{{ prop.id }}/', 'plot-row-{{ prop.id }}')"><i class="fas fa-times"></i> Delete</button>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="6" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Plot Properties.</td></tr>
+                            <tr><td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Plot Properties.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -332,35 +371,41 @@
                     <table class="properties-table">
                         <thead>
                             <tr>
-                                <th>Original ID</th>
+                                <th>Sr.No</th>
+                                <th>ID</th>
                                 <th>Property Type</th>
-                                <th>City</th>
                                 <th>Owner Name</th>
-                                <th>Deleted Date & Time</th>
+                                <th><i class="fas fa-user-shield"></i> Deleted By</th>
+                                <th><i class="fas fa-clock"></i> Deleted Time</th>
+                                <th><i class="fas fa-hourglass-half"></i> Auto-Delete</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for prop in industrial_resale_deleted %}
                             <tr id="industrial-row-{{ prop.id }}">
+                                <td><strong>{{ forloop.counter }}</strong></td>
                                 <td><strong>#{{ prop.id }}</strong></td>
                                 <td>{{ prop.property_type }}</td>
-                                <td>{{ prop.city }}</td>
                                 <td>{{ prop.owner_name }}</td>
-                                <td style="color: #ef4444;"><i class="fas fa-clock"></i> {{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td><span class="deleted-by-text">{{ prop.deleted_by|default:"System Admin" }}</span></td>
+                                <td style="color: #ef4444;">{{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td>
+                                    {% if prop.days_left <= 5 %}
+                                        <span class="badge-danger"><i class="fas fa-exclamation-circle"></i> {{ prop.days_left }} Days</span>
+                                    {% else %}
+                                        <span class="badge-safe">{{ prop.days_left }} Days</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <div style="display: flex; gap: 8px;">
-                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/industrial-resale/restore/{{ prop.id }}/', 'industrial-row-{{ prop.id }}')">
-                                            <i class="fas fa-undo"></i> Restore
-                                        </button>
-                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/industrial-resale/hard-delete/{{ prop.id }}/', 'industrial-row-{{ prop.id }}')">
-                                            <i class="fas fa-times"></i> Delete
-                                        </button>
+                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/industrial-resale/restore/{{ prop.id }}/', 'industrial-row-{{ prop.id }}')"><i class="fas fa-undo"></i> Restore</button>
+                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/industrial-resale/hard-delete/{{ prop.id }}/', 'industrial-row-{{ prop.id }}')"><i class="fas fa-times"></i> Delete</button>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="6" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Industrial Properties.</td></tr>
+                            <tr><td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Industrial Properties.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -372,35 +417,41 @@
                     <table class="properties-table">
                         <thead>
                             <tr>
-                                <th>Original ID</th>
+                                <th>Sr.No</th>
+                                <th>ID</th>
                                 <th>Property Title</th>
-                                <th>Village</th>
                                 <th>Owner Name</th>
-                                <th>Deleted Date & Time</th>
+                                <th><i class="fas fa-user-shield"></i> Deleted By</th>
+                                <th><i class="fas fa-clock"></i> Deleted Time</th>
+                                <th><i class="fas fa-hourglass-half"></i> Auto-Delete</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for prop in agricultural_resale_deleted %}
                             <tr id="agri-row-{{ prop.id }}">
+                                <td><strong>{{ forloop.counter }}</strong></td>
                                 <td><strong>#{{ prop.id }}</strong></td>
                                 <td>{{ prop.title }}</td>
-                                <td>{{ prop.village }}</td>
                                 <td>{{ prop.owner_name }}</td>
-                                <td style="color: #ef4444;"><i class="fas fa-clock"></i> {{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td><span class="deleted-by-text">{{ prop.deleted_by|default:"System Admin" }}</span></td>
+                                <td style="color: #ef4444;">{{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td>
+                                    {% if prop.days_left <= 5 %}
+                                        <span class="badge-danger"><i class="fas fa-exclamation-circle"></i> {{ prop.days_left }} Days</span>
+                                    {% else %}
+                                        <span class="badge-safe">{{ prop.days_left }} Days</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <div style="display: flex; gap: 8px;">
-                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/agricultural-resale/restore/{{ prop.id }}/', 'agri-row-{{ prop.id }}')">
-                                            <i class="fas fa-undo"></i> Restore
-                                        </button>
-                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/agricultural-resale/hard-delete/{{ prop.id }}/', 'agri-row-{{ prop.id }}')">
-                                            <i class="fas fa-times"></i> Delete
-                                        </button>
+                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/agricultural-resale/restore/{{ prop.id }}/', 'agri-row-{{ prop.id }}')"><i class="fas fa-undo"></i> Restore</button>
+                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/agricultural-resale/hard-delete/{{ prop.id }}/', 'agri-row-{{ prop.id }}')"><i class="fas fa-times"></i> Delete</button>
                                     </div>
                                 </td>
                             </tr>
                             {% empty %}
-                            <tr><td colspan="6" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Agricultural Properties.</td></tr>
+                            <tr><td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Agricultural Properties.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -425,13 +476,13 @@
 
         if (actionType === 'restore') {
             swalTitle = 'Restore Property?';
-            swalText = 'This will move the property back to the main list in its original sequence.';
+            swalText = 'This will move the property back to the main list in its original sequence. This action is recorded in the Audit Log.';
             swalIcon = 'info';
             swalConfirmColor = '#10b981';
             swalConfirmText = 'Yes, Restore it!';
         } else {
             swalTitle = 'PERMANENTLY Delete?';
-            swalText = 'This action CANNOT be undone! The data will be wiped forever.';
+            swalText = 'This action CANNOT be undone! The data will be wiped forever from the database.';
             swalIcon = 'error';
             swalConfirmColor = '#dc2626';
             swalConfirmText = 'Permanently Delete';

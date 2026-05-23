@@ -1,6 +1,8 @@
 {% include "admin_user/admin_header.html" %}
 {% load static %}
 
+<script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+
 <style>
   :root {
     --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -17,1168 +19,82 @@
     --success:#10b981;--info:#3b82f6;--warn:#f59e0b;
   }
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  html,
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    overflow-x: hidden;
-    min-height: 100vh;
-  }
-
-  /* Sidebar Overlay */
-  .sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 998;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .sidebar-overlay.active {
-    display: block;
-    opacity: 1;
-  }
-
-  /* Sidebar Styles */
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: var(--sidebar-width);
-    height: 100vh;
-    background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
-    padding: 20px 0;
-    transition: all 0.3s ease;
-    z-index: 999;
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-
-  .sidebar.collapsed {
-    width: var(--sidebar-collapsed-width);
-  }
-
-  .sidebar::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .sidebar::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-  }
-
-  .sidebar-brand {
-    padding: 20px 25px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    color: white;
-    text-decoration: none;
-    transition: all 0.3s ease;
-  }
-
-  .sidebar-brand-icon {
-    width: 45px;
-    height: 45px;
-    background: var(--primary-gradient);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-  }
-
-  .sidebar-brand-text {
-    font-size: 1.5rem;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  .sidebar.collapsed .sidebar-brand-text {
-    display: none;
-  }
-
-  .sidebar-menu {
-    list-style: none;
-    padding: 0;
-    margin: 30px 0 0 0;
-  }
-
-  .menu-section-title {
-    padding: 15px 25px 10px;
-    color: #7f8c8d;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
-
-  .sidebar.collapsed .menu-section-title {
-    opacity: 0;
-    height: 0;
-    padding: 0;
-    margin: 0;
-  }
-
-  .menu-item {
-    position: relative;
-  }
-
-  .menu-link {
-    display: flex;
-    align-items: center;
-    padding: 15px 25px;
-    color: #bdc3c7;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    position: relative;
-    gap: 15px;
-    cursor: pointer;
-  }
-
-  .menu-link:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
-  }
-
-  .menu-link.active {
-    background: var(--primary-gradient);
-    color: white;
-  }
-
-  .menu-link.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: 4px;
-    background: white;
-  }
-
-  .menu-icon {
-    width: 24px;
-    font-size: 1.2rem;
-    flex-shrink: 0;
-    text-align: center;
-  }
-
-  .menu-text {
-    font-size: 0.95rem;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .sidebar.collapsed .menu-text {
-    display: none;
-  }
-
-  .menu-badge {
-    margin-left: auto;
-    background: #e74c3c;
-    color: white;
-    padding: 3px 8px;
-    border-radius: 10px;
-    font-size: 0.7rem;
-    font-weight: 600;
-  }
-
-  .sidebar.collapsed .menu-badge {
-    display: none;
-  }
-
-  .dropdown-icon {
-    margin-left: auto;
-    transition: transform 0.3s ease;
-    font-size: 0.8rem;
-  }
-
-  .sidebar.collapsed .dropdown-icon {
-    display: none;
-  }
-
-  .menu-link.dropdown-open .dropdown-icon {
-    transform: rotate(180deg);
-  }
-
-  .submenu {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    background: rgba(0, 0, 0, 0.2);
-  }
-
-  .submenu.active {
-    max-height: 1000px;
-  }
-
-  .submenu-link {
-    display: flex;
-    align-items: center;
-    padding: 12px 25px 12px 65px;
-    color: #95a5a6;
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-  }
-
-  .submenu-link:hover {
-    color: white;
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .submenu-link.active {
-    color: #667eea;
-  }
-
-  /* Nested Submenu */
-  .submenu .menu-item {
-    position: relative;
-  }
-
-  .submenu .submenu {
-    background: rgba(0, 0, 0, 0.3);
-  }
-
-  .submenu .submenu-link {
-    padding-left: 85px;
-  }
-
-  /* Top Bar */
-  .topbar {
-    position: fixed;
-    left: var(--sidebar-width);
-    top: 0;
-    right: 0;
-    height: var(--topbar-height);
-    background: white;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    transition: all 0.3s ease;
-    z-index: 997;
-  }
-
-  .sidebar.collapsed~.main-wrapper .topbar {
-    left: var(--sidebar-collapsed-width);
-  }
-
-  .topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-
-  .toggle-sidebar {
-    width: 40px;
-    height: 40px;
-    border: none;
-    background: #f8f9fa;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    font-size: 1.2rem;
-  }
-
-  .toggle-sidebar:hover {
-    background: var(--primary-gradient);
-    color: white;
-  }
-
-  .topbar-search {
-    position: relative;
-    width: 300px;
-  }
-
-  .topbar-search input {
-    width: 100%;
-    padding: 10px 40px 10px 15px;
-    border: 2px solid #e9ecef;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-  }
-
-  .topbar-search input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-  }
-
-  .topbar-search i {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #adb5bd;
-  }
-
-  .topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-
-  .topbar-icon {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .topbar-icon:hover {
-    background: var(--primary-gradient);
-    color: white;
-  }
-
-  .user-profile {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    padding: 6px 12px;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-  }
-
-  .user-profile:hover {
-    background: #f8f9fa;
-  }
-
-  .user-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: var(--primary-gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 600;
-    font-size: 0.9rem;
-  }
-
-  /* Main Content */
-  .main-wrapper {
-    transition: all 0.3s ease;
-    width: 100%;
-  }
-
-  .main-content {
-    margin-left: var(--sidebar-width);
-    margin-top: var(--topbar-height);
-    padding: 30px;
-    min-height: calc(100vh - var(--topbar-height));
-    transition: all 0.3s ease;
-  }
-
-  .sidebar.collapsed~.main-wrapper .main-content {
-    margin-left: var(--sidebar-collapsed-width);
-  }
-
-  /* Page Header */
-  .page-header {
-    background: var(--primary-gradient);
-    border-radius: 20px;
-    padding: 30px;
-    color: white;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    margin-bottom: 30px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .page-header::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -10%;
-    width: 300px;
-    height: 300px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-  }
-
-  .page-header-content {
-    position: relative;
-    z-index: 1;
-  }
-
-  .page-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-
-  .page-subtitle {
-    font-size: 0.95rem;
-    opacity: 0.9;
-  }
-
-  .breadcrumb {
-    background: transparent;
-    padding: 0;
-    margin: 15px 0 0 0;
-  }
-
-  .breadcrumb-item {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.85rem;
-  }
-
-  .breadcrumb-item.active {
-    color: white;
-  }
-
-  .breadcrumb-item+.breadcrumb-item::before {
-    color: rgba(255, 255, 255, 0.6);
-  }
-
-  .breadcrumb-item a {
-    color: white;
-    text-decoration: none;
-    transition: all 0.3s ease;
-  }
-
-  .breadcrumb-item a:hover {
-    opacity: 0.8;
-  }
-
-  /* Form Container */
-  .page-wrap{
-    display:grid;
-    grid-template-columns:1fr 320px;
-    gap:24px;
-    max-width:100%;
-  }
-
-  .form-container {
-    background: white;
-    border-radius: 20px;
-    padding: 35px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-  }
-
-  .form-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #f0f0f0;
-  }
-
-  .form-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #2d3748;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .form-title i {
-    width: 45px;
-    height: 45px;
-    background: var(--primary-gradient);
-    color: white;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .btn-back {
-    background: #f8f9fa;
-    color: #2d3748;
-    padding: 10px 20px;
-    border-radius: 12px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-  }
-
-  .btn-back:hover {
-    background: var(--dark-gradient);
-    color: white;
-    transform: translateY(-2px);
-  }
-
-  /* STEPPER STYLES */
-  .stepper{
-    display:flex;
-    align-items:center;
-    gap:0;
-    margin-bottom:30px;
-    padding:20px 0;
-  }
-  .step-item{
-    display:flex;
-    align-items:center;
-    flex:1;
-  }
-  .step-circle{
-    width:45px;
-    height:45px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:.9rem;
-    font-weight:900;
-    flex-shrink:0;
-    border:3px solid var(--border);
-    background:white;
-    color:var(--muted);
-    transition:.3s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  }
-  .step-circle.active{
-    background:var(--primary-gradient);
-    color:white;
-    border-color:transparent;
-    transform: scale(1.1);
-  }
-  .step-circle.done{
-    background:var(--success-gradient);
-    color:white;
-    border-color:transparent;
-  }
-  .step-label{
-    font-size:.85rem;
-    font-weight:700;
-    margin-left:10px;
-    color:var(--muted);
-    transition:.3s;
-  }
-  .step-label.active{
-    color:#667eea;
-  }
-  .step-label.done{
-    color:var(--success);
-  }
-  .step-line{
-    flex:1;
-    height:3px;
-    background:var(--border);
-    margin:0 15px;
-  }
-  .step-line.done{
-    background:var(--success-gradient);
-  }
-
-  .step-content{
-    display:none;
-  }
-  .step-content.active{
-    display:block;
-  }
-
-  /* Form Sections */
-  .form-section {
-    margin-bottom: 30px;
-  }
-
-  .section-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 15px 20px;
-    border-radius: 12px 12px 0 0;
-    font-weight: 600;
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .section-body {
-    background: #f8f9fa;
-    padding: 25px;
-    border-radius: 0 0 12px 12px;
-    border: 2px solid #e9ecef;
-    border-top: none;
-  }
-
-  /* Form Controls */
-  .form-label {
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 8px;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .form-label .required,
-  .required-star {
-    color: #e74c3c;
-    font-size: 1rem;
-  }
-
-  .form-control, .form-select {
-    border: 2px solid #e9ecef;
-    border-radius: 12px;
-    padding: 12px 15px;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-    font-family: 'Poppins', sans-serif;
-  }
-
-  .form-control:focus, .form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-    outline: none;
-  }
-
-  select.form-control, .form-select {
-    appearance: none;
-    background: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 0.75rem center;
-    background-size: 16px;
-    background-color: white;
-    padding-right: 2rem;
-  }
-
-  textarea.form-control {
-    min-height: 120px;
-    resize: vertical;
-  }
-
-  .form-control-color {
-    height: 50px;
-    cursor: pointer;
-  }
-
-  .form-text {
-    font-size: 0.8rem;
-    color: #718096;
-    margin-top: 6px;
-  }
-
-  /* Image Preview */
-  .image-preview {
-    margin-top: 15px;
-    display: none;
-  }
-
-  .image-preview.active {
-    display: block;
-  }
-
-  .image-preview img {
-    max-width: 100%;
-    border-radius: 12px;
-    border: 2px solid #e9ecef;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  }
-
-  /* Checkbox */
-  .form-check {
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 12px;
-    border: 2px solid #e9ecef;
-  }
-
-  .form-check-input {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #cbd5e0;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-
-  .form-check-input:checked {
-    background-color: #667eea;
-    border-color: #667eea;
-  }
-
-  .form-check-label {
-    font-weight: 600;
-    color: #2d3748;
-    margin-left: 10px;
-    cursor: pointer;
-  }
-
-  /* Step Navigation Buttons */
-  .step-nav{
-    display:flex;
-    justify-content:space-between;
-    margin-top:30px;
-    gap:15px;
-  }
-  
-  .btn-submit, .btn-next {
-    background: var(--primary-gradient);
-    color: white;
-    padding: 12px 35px;
-    border-radius: 12px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    font-size: 1rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn-submit:hover, .btn-next:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-  }
-
-  .btn-prev, .btn-reset {
-    background: #f8f9fa;
-    color: #2d3748;
-    padding: 12px 35px;
-    border-radius: 12px;
-    border: 2px solid #e9ecef;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 1rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn-prev:hover, .btn-reset:hover {
-    background: #e9ecef;
-  }
-
-  /* SIDEBAR PREVIEW */
-  .preview-sidebar{
-    display:flex;
-    flex-direction:column;
-    gap:20px;
-  }
-
-  .preview-card{
-    background:linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
-    border-radius:16px;
-    padding:20px;
-    color:white;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-  }
-  .pc-head{
-    font-size:.8rem;
-    font-weight:700;
-    color:rgba(255,255,255,.6);
-    margin-bottom:15px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-  .pc-mock{
-    background:white;
-    border-radius:12px;
-    overflow:hidden;
-  }
-  .pcm-img{
-    height:140px;
-    background:linear-gradient(135deg,#e0e7ff,#c7d2fe);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:3rem;
-    position:relative;
-  }
-  .pcm-badges{
-    position:absolute;
-    top:10px;
-    left:10px;
-    display:flex;
-    gap:6px;
-  }
-  .pcm-badge{
-    font-size:.65rem;
-    font-weight:800;
-    padding:4px 10px;
-    border-radius:6px;
-  }
-  .b-rent{
-    background:rgba(255,255,255,.95);
-    color:#0f172a;
-  }
-  .b-comm{
-    background:#7c3aed;
-    color:white;
-  }
-  .pcm-price{
-    position:absolute;
-    bottom:10px;
-    left:10px;
-    background:rgba(15,23,42,.9);
-    color:white;
-    font-size:.9rem;
-    font-weight:900;
-    padding:5px 12px;
-    border-radius:8px;
-  }
-  .pcm-body{
-    padding:15px;
-  }
-  .pcm-title{
-    font-size:.95rem;
-    font-weight:800;
-    color:#0f172a;
-    margin-bottom:5px;
-  }
-  .pcm-loc{
-    font-size:.75rem;
-    color:#64748b;
-    margin-bottom:10px;
-  }
-  .pcm-specs{
-    display:flex;
-    gap:12px;
-    font-size:.75rem;
-    color:#475569;
-    font-weight:600;
-  }
-
-  .checklist-card{
-    background:white;
-    border-radius:16px;
-    border:2px solid #e9ecef;
-    padding:20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  }
-  .cl-title{
-    font-size:.9rem;
-    font-weight:800;
-    color:var(--sec);
-    margin-bottom:15px;
-  }
-  .cl-item{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    padding:8px 0;
-    font-size:.8rem;
-    color:var(--muted);
-  }
-  .cl-item i{
-    font-size:.75rem;
-    width:18px;
-  }
-  .cl-item.done{
-    color:var(--success);
-  }
-  .cl-item.done i{
-    color:var(--success);
-  }
-
-  .info-card{
-    background:white;
-    border-radius:16px;
-    border:2px solid #e9ecef;
-    padding:18px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  }
-  .ic-title{
-    font-size:.85rem;
-    font-weight:800;
-    color:var(--sec);
-    margin-bottom:12px;
-  }
-  .ic-item{
-    font-size:.76rem;
-    color:#475569;
-    padding:6px 0;
-    display:flex;
-    align-items:flex-start;
-    gap:8px;
-  }
-  .ic-item i{
-    color:#667eea;
-    font-size:.75rem;
-    margin-top:3px;
-    flex-shrink:0;
-  }
-
-  /* Responsive Design */
-  @media (max-width: 1200px) {
-    .page-wrap{
-      grid-template-columns:1fr;
-    }
-    .preview-sidebar{
-      display:none;
-    }
-  }
-
-  @media (max-width: 992px) {
-    .sidebar {
-      transform: translateX(-100%);
-    }
-
-    .sidebar.active {
-      transform: translateX(0);
-    }
-
-    .topbar {
-      left: 0 !important;
-    }
-
-    .main-content {
-      margin-left: 0 !important;
-    }
-
-    .topbar-search {
-      display: none;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .page-header {
-      padding: 20px;
-    }
-
-    .page-title {
-      font-size: 1.5rem;
-    }
-
-    .form-container {
-      padding: 20px;
-    }
-
-    .section-body {
-      padding: 15px;
-    }
-
-    .step-label{
-      display:none;
-    }
-  }
-
-  .checkbox-group,
-  .radio-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-  }
-
-  .checkbox-item,
-  .radio-item {
-    flex: 1;
-    min-width: 150px;
-  }
-
-  .image-upload-area {
-    border: 3px dashed #cbd5e0;
-    border-radius: 15px;
-    padding: 40px;
-    text-align: center;
-    background: #f8f9fa;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .image-upload-area:hover {
-    border-color: #667eea;
-    background: #f0f4ff;
-    transform: scale(1.02);
-  }
-
-  .image-upload-area.dragover {
-    border-color: #667eea;
-    background: #e6f0ff;
-  }
-
-  .upload-text {
-    font-size: 1.1rem;
-    color: #4a5568;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-
-  .upload-subtext {
-    font-size: 0.9rem;
-    color: #718096;
-  }
-
-  .image-preview {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-  }
-
-  .preview-item {
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    aspect-ratio: 1;
-  }
-
-  .preview-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .remove-image {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 30px;
-    height: 30px;
-    background: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-  }
-
-  .remove-image:hover {
-    background: #c0392b;
-    transform: scale(1.1);
-  }
-
-  /* Number stepper */
-  .number-stepper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .stepper-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 2px solid #667eea;
-    background: #fff;
-    color: #667eea;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .stepper-btn:hover {
-    background: #667eea;
-    color: #fff;
-  }
-
-  .stepper-value {
-    min-width: 40px;
-    text-align: center;
-    font-weight: 600;
-    font-size: 1.1rem;
-  }
-
-  .toggle-switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 26px;
-  }
-
-  .toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-
-  .toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: 0.4s;
-    border-radius: 26px;
-  }
-
-  .toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 20px;
-    width: 20px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
-  }
-
-  .toggle-switch input:checked + .toggle-slider {
-    background-color: #667eea;
-  }
-
-  .toggle-switch input:checked + .toggle-slider:before {
-    transform: translateX(24px);
-  }
-
-  .validation-error{
-    border:2px solid #e74c3c !important;
-    background:#fff5f5 !important;
-  }
-
-  .error-message{
-    color:#e74c3c;
-    font-size:0.75rem;
-    margin-top:5px;
-    display:none;
-  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; min-height: 100vh; }
+
+  .page-wrap{ display:grid; grid-template-columns:1fr 320px; gap:24px; max-width:100%; }
+  .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
+  .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
+  .form-title { font-size: 1.5rem; font-weight: 700; color: #2d3748; display: flex; align-items: center; gap: 12px; }
+  .form-title i { width: 45px; height: 45px; background: var(--primary-gradient); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .btn-back { background: #f8f9fa; color: #2d3748; padding: 10px 20px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+  .btn-back:hover { background: var(--dark-gradient); color: white; transform: translateY(-2px); }
+
+  .stepper{ display:flex; align-items:center; gap:0; margin-bottom:30px; padding:20px 0; }
+  .step-item{ display:flex; align-items:center; flex:1; }
+  .step-circle{ width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.9rem; font-weight:900; flex-shrink:0; border:3px solid var(--border); background:white; color:var(--muted); transition:.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .step-circle.active{ background:var(--primary-gradient); color:white; border-color:transparent; transform: scale(1.1); }
+  .step-circle.done{ background:var(--success-gradient); color:white; border-color:transparent; }
+  .step-label{ font-size:.85rem; font-weight:700; margin-left:10px; color:var(--muted); transition:.3s; }
+  .step-label.active{ color:#667eea; }
+  .step-label.done{ color:var(--success); }
+  .step-line{ flex:1; height:3px; background:var(--border); margin:0 15px; }
+  .step-line.done{ background:var(--success-gradient); }
+
+  .step-content{ display:none; }
+  .step-content.active{ display:block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .form-section { margin-bottom: 30px; }
+  .section-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+  .section-body { background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; }
+  .form-label { font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
+  .required { color: #e74c3c; font-size: 1rem; }
+  .form-control, .form-select { border: 2px solid #e9ecef; border-radius: 12px; padding: 12px 15px; font-size: 0.95rem; width:100%; transition: all 0.3s ease; }
+  .form-control:focus, .form-select:focus { border-color: #667eea; outline: none; }
+  select.form-control, .form-select { appearance: none; background: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 0.75rem center; background-size: 16px; background-color: white; padding-right: 2rem; }
+  textarea.form-control { min-height: 120px; resize: vertical; }
+
+  .checkbox-group{ display: flex; flex-wrap: wrap; gap: 15px; }
+  .checkbox-item{ flex: 1; min-width: 150px; }
+  .form-check { padding: 15px; background: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef; display:flex; align-items:center;}
+  .form-check-input { width: 20px; height: 20px; border: 2px solid #cbd5e0; border-radius: 6px; cursor: pointer; }
+  .form-check-input:checked { background-color: #667eea; border-color: #667eea; }
+  .form-check-label { font-weight: 600; color: #2d3748; margin-left: 10px; cursor: pointer; }
+
+  .step-nav{ display:flex; justify-content:space-between; margin-top:30px; gap:15px; }
+  .btn-submit, .btn-next { background: var(--primary-gradient); color: white; padding: 12px 35px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-prev { background: #f8f9fa; color: #2d3748; padding: 12px 35px; border-radius: 12px; border: 2px solid #e9ecef; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; }
+
+  .preview-sidebar{ display:flex; flex-direction:column; gap:20px; position: sticky; top: 90px;}
+  .preview-card{ background:linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); border-radius:16px; padding:20px; color:white; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+  .pcm-img{ height:140px; background:linear-gradient(135deg,#e0e7ff,#c7d2fe); display:flex; align-items:center; justify-content:center; font-size:3rem; position:relative; border-radius:12px 12px 0 0;}
+  .pcm-body{ background:white; padding:15px; border-radius:0 0 12px 12px; color: #0f172a;}
+  .checklist-card{ background:white; border-radius:16px; border:2px solid #e9ecef; padding:20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+  .cl-item{ display:flex; align-items:center; gap:10px; padding:8px 0; font-size:.8rem; color:var(--muted); }
+  .cl-item.done{ color:var(--success); }
+  .cl-item.done i{ color:var(--success); }
+
+  @media (max-width: 1200px) { .page-wrap{ grid-template-columns:1fr; } .preview-sidebar{ display:none; } }
+
+  .number-stepper { display: flex; align-items: center; gap: 10px; }
+  .stepper-btn { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #667eea; background: #fff; color: #667eea; font-weight: 700; cursor: pointer; }
+  .stepper-value { min-width: 40px; text-align: center; font-weight: 600; font-size: 1.1rem; }
+  .toggle-switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.4s; border-radius: 26px; }
+  .toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: 0.4s; border-radius: 50%; }
+  .toggle-switch input:checked + .toggle-slider { background-color: #667eea; }
+  .toggle-switch input:checked + .toggle-slider:before { transform: translateX(24px); }
+  .validation-error{ border:2px solid #e74c3c !important; background:#fff5f5 !important; }
 </style>
 
-<!-- SweetAlert2 -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
-<div class="main-content">
+<div class="main-content" style="margin-left: 280px; margin-top: 70px; padding: 30px;">
   <div class="page-wrap">
     
-    <!-- MAIN FORM -->
     <div>
       <div class="form-container">
         
@@ -1199,11 +115,9 @@
           <div class="step-item"><div class="step-circle" id="sc4">4</div><div class="step-label" id="sl4">Media & Contact</div></div>
         </div>
 
-        <!-- Note: Replace 'commercial_edit' with your actual URL name for updating -->
         <form id="commercialEditForm" action="{% url 'commercial_edit' prop.id %}" method="POST" enctype="multipart/form-data">
           {% csrf_token %}
 
-          <!-- STEP 1 -->
           <div class="step-content active" id="step1">
             <div class="form-section">
               <div class="section-header"><i class="fas fa-info-circle"></i> Basic Information</div>
@@ -1310,7 +224,6 @@
             </div>
           </div>
 
-          <!-- STEP 2 -->
           <div class="step-content" id="step2">
             <div class="form-section">
               <div class="section-header"><i class="fa-solid fa-ruler-combined"></i> Area, Pricing & Building</div>
@@ -1337,7 +250,6 @@
                     <input type="number" class="form-control" name="maintenance_charges" value="{{ prop.maintenance_charges|default:'' }}">
                   </div>
 
-                  <!-- Radio for Negotiable -->
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Negotiable</label>
                     <div class="mt-2">
@@ -1376,7 +288,6 @@
                     <input type="text" class="form-control" name="manual_brokerage" value="{{ prop.manual_brokerage|default:'' }}">
                   </div>
 
-                  <!-- Utilities Toggles -->
                   <div class="col-md-4 mb-3">
                     <label class="form-label">DG & UPS Included?</label>
                     <label class="toggle-switch">
@@ -1408,12 +319,10 @@
                     <input type="number" class="form-control" name="rent_increase" step="0.1" value="{{ prop.rent_increase|default:'' }}">
                   </div>
 
-                  <!-- Building Numerics -->
                   <div class="col-md-4 mb-3"><label class="form-label">Total Floors</label><input type="number" class="form-control" name="total_floors" value="{{ prop.total_floors|default:'' }}"></div>
                   <div class="col-md-4 mb-3"><label class="form-label">Your Floor</label><input type="number" class="form-control" name="your_floor" value="{{ prop.your_floor|default:'' }}"></div>
                   <div class="col-md-4 mb-3"><label class="form-label">Staircases</label><input type="number" class="form-control" name="staircases" value="{{ prop.staircases|default:'' }}"></div>
 
-                  <!-- Number Steppers -->
                   <div class="col-md-4 mb-3">
                     <label class="form-label">Passenger Lifts</label>
                     <div class="number-stepper">
@@ -1487,7 +396,6 @@
             </div>
           </div>
 
-          <!-- STEP 3 -->
           <div class="step-content" id="step3">
             <div class="form-section">
               <div class="section-header"><i class="fas fa-star"></i> Amenities & Facilities</div>
@@ -1497,7 +405,6 @@
                   {% for am in ameneties_obj %}
                     <div class="checkbox-item">
                       <div class="form-check">
-                        <!-- Check if am.name is in the prop.amenities list -->
                         <input class="form-check-input" type="checkbox" name="amenities[]" value="{{ am.amenties_name }}" id="am_{{ forloop.counter }}" {% if am.amenties_name in prop.amenities %}checked{% endif %}>
                         <label class="form-check-label" for="am_{{ forloop.counter }}"><i class="{{ am.amenties_icon }}"></i> {{ am.amenties_name }}</label>
                       </div>
@@ -1506,7 +413,7 @@
                 </div>
 
                 <label class="form-label mt-3"><i class="fas fa-map-marker-alt text-info"></i> Nearby Facilities</label>
-                <div class="checkbox-group">
+                <div class="checkbox-group mb-4">
                   {% for fa in facilities_obj %}
                     <div class="checkbox-item">
                       <div class="form-check">
@@ -1518,20 +425,38 @@
                 </div>
               </div>
             </div>
+
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-align-left"></i> Property Descriptions</div>
+              <div class="section-body">
+                <div class="form-group mb-4">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Auto-Generated Summary</label>
+                    <button type="button" class="btn-back btn-sm" style="padding: 5px 12px; font-size: 0.85rem;" onclick="generateAIDetails(true)">
+                      <i class="fas fa-magic" style="color: #667eea;"></i> Auto-Generate
+                    </button>
+                  </div>
+                  <textarea class="form-control" name="property_summary" rows="3">{{ prop.property_summary|default:'' }}</textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label mb-2"><i class="fas fa-file-alt"></i> Full Detailed Description</label>
+                  <textarea class="form-control" name="property_description" id="property_description" rows="6">{{ prop.property_description|default:'' }}</textarea>
+                </div>
+              </div>
+            </div>
+
             <div class="step-nav">
               <button type="button" class="btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
               <button type="button" class="btn-next" onclick="goToStep(4)">Next <i class="fas fa-arrow-right"></i></button>
             </div>
           </div>
 
-          <!-- STEP 4 -->
           <div class="step-content" id="step4">
             <div class="form-section">
               <div class="section-header"><i class="fas fa-images"></i> Media & Contact</div>
               <div class="section-body">
                 <div class="row">
                   
-                  <!-- Current Images -->
                   <div class="col-md-12 mb-3">
                       <label class="form-label">Current Property Images</label>
                       <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
@@ -1545,13 +470,13 @@
                       </div>
 
                       <label class="form-label">Upload Additional Images</label>
-                      <div class="image-upload-area" id="uploadArea" style="padding: 20px; border-radius: 8px;">
+                      <div class="image-upload-area" id="uploadArea" style="padding: 20px; border-radius: 8px; border:2px dashed #667eea; text-align:center; background:#f8f9ff; cursor:pointer;">
                         <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display: none;">
                         <i class="fas fa-cloud-upload-alt" style="font-size:2rem; color:#667eea;"></i>
                         <div style="font-weight: 600; color: #4a5568;">Click or drag new images here</div>
                         <div style="font-size: 0.8rem; color: #718096;">These will be added to the property gallery</div>
                       </div>
-                      <div class="image-preview" id="imagePreview"></div>
+                      <div class="image-preview" id="imagePreview" style="display: flex; gap:10px; flex-wrap:wrap; margin-top:10px;"></div>
                   </div>
 
                   <div class="col-md-6 mb-3">
@@ -1583,7 +508,6 @@
                   <div class="col-md-6 mb-3"><label class="form-label">Alternate Contact</label><input type="text" class="form-control" name="alternate_contact" value="{{ prop.alternate_contact|default:'' }}"></div>
                 </div>
                 
-                <!-- Hidden original uploader details -->
                 <input type="hidden" name="uploaded_by_name" value="{{ prop.uploaded_by_name }}">
                 <input type="hidden" name="uploaded_by_email" value="{{ prop.uploaded_by_email }}">
                 <input type="hidden" name="uploaded_by_contact" value="{{ prop.uploaded_by_contact }}">
@@ -1601,7 +525,6 @@
       </div>
     </div>
 
-    <!-- PREVIEW SIDEBAR -->
     <div class="preview-sidebar">
       <div class="preview-card">
         <div style="font-size: 0.8rem; font-weight: 700; color: rgba(255, 255, 255, 0.6); margin-bottom: 15px;"><i class="fas fa-eye"></i> Live Preview</div>
@@ -1626,13 +549,23 @@
         <h4 style="font-size: 1rem; font-weight: 700; color: #2d3748; margin-bottom: 15px;"><i class="fas fa-clipboard-check text-success"></i> Edit Checklist</h4>
         <div class="cl-item" id="cl-basic"><i class="fas fa-circle"></i> Basic details reviewed</div>
         <div class="cl-item" id="cl-price"><i class="fas fa-circle"></i> Pricing & Area updated</div>
-        <div class="cl-item" id="cl-amen"><i class="fas fa-circle"></i> Amenities verified</div>
+        <div class="cl-item" id="cl-desc"><i class="fas fa-circle"></i> Description verified</div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
+// --- CKEDITOR ---
+window.onload = function() {
+    if (typeof CKEDITOR !== 'undefined') {
+        if (CKEDITOR.instances.property_description) {
+            CKEDITOR.instances.property_description.destroy();
+        }
+        CKEDITOR.replace('property_description');
+    }
+};
+
 // --- STEPPER ---
 let currentStep = 1;
 function goToStep(n) {
@@ -1646,6 +579,12 @@ function goToStep(n) {
     else { sc.className = 'step-circle'; sl.className = 'step-label'; sc.innerHTML = i; if(line) line.className='step-line'; }
   }
   currentStep = n;
+
+  // Trigger AI if we reach step 3
+  if(n === 3) {
+      generateAIDetails(false);
+  }
+
   window.scrollTo(0, 0);
   updatePreview();
 }
@@ -1660,6 +599,69 @@ function validateStep(step) {
   return isValid;
 }
 
+// --- AI AUTO GENERATOR ---
+function generateAIDetails(force = false) {
+    const pType = document.querySelector('select[name="property_type"]');
+    const type = (pType && pType.value) ? pType.options[pType.selectedIndex].text : 'commercial space';
+    
+    const pCond = document.querySelector('select[name="property_condition"]');
+    const condition = (pCond && pCond.value) ? pCond.options[pCond.selectedIndex].text : 'well-maintained';
+    
+    const area = document.querySelector('input[name="builtup_area"]')?.value || '';
+    const rent = document.querySelector('input[name="expected_rent"]')?.value || '';
+    const deposit = document.querySelector('input[name="security_deposit"]')?.value || '';
+    const locality = document.querySelector('input[name="area_locality"]')?.value || 'a prime location';
+    const city = document.querySelector('input[name="city"]')?.value || '';
+    const building = document.querySelector('input[name="building_name"]')?.value || '';
+    const floor = document.querySelector('input[name="your_floor"]')?.value || '';
+    const totalFloors = document.querySelector('input[name="total_floors"]')?.value || '';
+    
+    const amenitiesList = Array.from(document.querySelectorAll('input[name="amenities[]"]:checked')).map(el => el.value);
+
+    let summaryText = `A premium ${condition.toLowerCase()} ${type.toLowerCase()} is available for rent in ${locality}${city ? ', ' + city : ''}. `;
+    if (rent) summaryText += `Available at a highly competitive rent of ₹${Number(rent).toLocaleString('en-IN')}/month. `;
+    if (area) summaryText += `This property offers a spacious built-up area of ${area} sq.ft. `;
+    summaryText += `It is highly suitable for setting up a professional workspace or retail business.`;
+
+    const summaryField = document.querySelector('textarea[name="property_summary"]');
+    if (summaryField && (force || summaryField.value.trim() === '')) {
+        summaryField.value = summaryText;
+    }
+
+    let longDesc = `<p>Elevate your business presence with this strategically located <strong>${condition.toLowerCase()} ${type.toLowerCase()}</strong> in <strong>${locality}${city ? ', ' + city : ''}</strong>.</p>`;
+
+    if (building) {
+        longDesc += `<p>Situated within the highly sought-after commercial complex of <strong>${building}</strong>, this property ensures excellent visibility and professional appeal for your brand.</p>`;
+    }
+
+    longDesc += `<h3>Property Highlights:</h3><ul>`;
+    if (area) longDesc += `<li><strong>Space & Dimensions:</strong> Generous built-up area of ${area} sq.ft., offering flexibility for diverse commercial layouts.</li>`;
+    if (rent) longDesc += `<li><strong>Pricing:</strong> Competitively priced at ₹${Number(rent).toLocaleString('en-IN')}/month ${deposit ? `(Security Deposit: ₹${Number(deposit).toLocaleString('en-IN')})` : ''}.</li>`;
+    longDesc += `<li><strong>Condition:</strong> The space is currently provided in a ${condition.toLowerCase()} status.</li>`;
+    if (floor) longDesc += `<li><strong>Floor Details:</strong> Conveniently located on floor ${floor} ${totalFloors ? `out of a total ${totalFloors} floors` : ''}.</li>`;
+    longDesc += `</ul>`;
+
+    if (amenitiesList.length > 0) {
+        longDesc += `<h3>Facilities & Amenities:</h3><p>The building provides excellent amenities to support your daily operations, including: <strong>${amenitiesList.join(', ')}</strong>.</p>`;
+    }
+
+    longDesc += `<p>Don't miss out on this fantastic opportunity to establish your business in a thriving hub. Contact us today to schedule a site visit or to discuss further details.</p>`;
+
+    if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.property_description) {
+        const currentData = CKEDITOR.instances.property_description.getData().trim();
+        if (force || currentData === '') {
+            CKEDITOR.instances.property_description.setData(longDesc);
+        }
+    } else {
+        const descField = document.querySelector('textarea[name="property_description"]');
+        if (descField && (force || descField.value.trim() === '')) {
+            descField.value = longDesc.replace(/<[^>]*>?/gm, '\n').replace(/\n\n+/g, '\n').trim();
+        }
+    }
+
+    updatePreview();
+}
+
 // --- LIVE PREVIEW ---
 function updatePreview() {
   const city = document.getElementById('cityInput')?.value;
@@ -1667,14 +669,20 @@ function updatePreview() {
   const rent = document.getElementById('monthlyRent')?.value;
   const area = document.getElementById('builtArea')?.value;
   const pType = document.getElementById('property_type');
+  let typeStr = pType.options[pType.selectedIndex]?.text || 'Commercial';
+
+  let desc = document.querySelector('textarea[name="property_summary"]')?.value || "";
+  if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.property_description) {
+      desc += CKEDITOR.instances.property_description.getData();
+  }
   
-  document.getElementById('previewType').innerText = pType.options[pType.selectedIndex].text;
+  document.getElementById('previewType').innerText = typeStr;
   document.getElementById('previewTitle').textContent = loc ? loc + ' Commercial Property' : 'Commercial Property';
   document.getElementById('previewLoc').innerHTML = '<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ' + (loc||'Area') + ', ' + (city||'City');
   document.getElementById('previewPrice').textContent = rent ? '₹' + parseInt(rent).toLocaleString('en-IN') + '/mo' : '₹ — /mo';
   document.getElementById('prevArea').textContent = area ? area + ' sqft' : '— sqft';
 
-  // Update Checklist
+  const colorSuccess = '#10b981', colorPending = '#cbd5e0';
   const donestyle = 'cl-item done', pendstyle = 'cl-item';
   const doneicon = 'fas fa-check-circle', pendicon = 'fas fa-circle';
   
@@ -1686,14 +694,14 @@ function updatePreview() {
   document.getElementById('cl-price').className = b2 ? donestyle : pendstyle;
   document.getElementById('cl-price').querySelector('i').className = b2 ? doneicon : pendicon;
   
-  const b3 = (document.querySelectorAll('input[name="amenities[]"]:checked').length > 0);
-  document.getElementById('cl-amen').className = b3 ? donestyle : pendstyle;
-  document.getElementById('cl-amen').querySelector('i').className = b3 ? doneicon : pendicon;
+  const b3 = (desc.length > 20);
+  document.getElementById('cl-desc').className = b3 ? donestyle : pendstyle;
+  document.getElementById('cl-desc').querySelector('i').className = b3 ? doneicon : pendicon;
 }
 
 document.querySelectorAll('input, select, textarea').forEach(el => {
   el.addEventListener('input', updatePreview);
-  el.addEventListener('change', updatePreview);
+  el.addEventListener('change', () => { updatePreview(); generateAIDetails(false); });
 });
 window.addEventListener('DOMContentLoaded', updatePreview);
 
@@ -1737,7 +745,7 @@ function handleFiles(files) {
   selectedFiles.forEach(f => {
     const reader = new FileReader();
     reader.onload = e => {
-      imagePreview.innerHTML += `<div style="position:relative; width:80px; height:80px; border-radius:8px; overflow:hidden; display:inline-block; margin-right:10px; margin-bottom:10px; border:2px solid #e2e8f0;"><img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;"><button type="button" onclick="removeImage('${f.name}', this)" style="position:absolute; top:2px; right:2px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer;">✖</button></div>`;
+      imagePreview.innerHTML += `<div style="position:relative; width:80px; height:80px; border-radius:8px; overflow:hidden; display:inline-block; border:2px solid #e2e8f0;"><img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;"><button type="button" onclick="removeImage('${f.name}', this)" style="position:absolute; top:2px; right:2px; background:red; color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer;">✖</button></div>`;
     };
     reader.readAsDataURL(f);
   });
@@ -1769,6 +777,8 @@ form.addEventListener('submit', function(e) {
     if (result.isConfirmed) {
       Swal.fire({ title: 'Updating...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
       
+      if(typeof CKEDITOR !== 'undefined') { for(instance in CKEDITOR.instances) CKEDITOR.instances[instance].updateElement(); }
+
       fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest' } })
       .then(res => res.json())
       .then(data => {

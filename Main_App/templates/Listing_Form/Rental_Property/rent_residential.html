@@ -237,26 +237,100 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
     <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Listing Type</div><div class="sd-line"></div></div>
     <div class="fg fg-2" style="margin-bottom:16px;">
 
-      <div class="field">
-        <label>Property Purpose <span class="req">*</span></label>
-        <select name="property_purpose" required>
-          <option value="">Select Purpose</option>
-          <option value="rent">Rent</option>
-        </select>
-      </div>
+     <div class="field">
+    <label>
+        Listing Purpose 
+        <span class="req">*</span>
+    </label>
+
+    <select 
+        name="property_purpose"
+        id="propertyPurpose"
+        onchange="toggleOtherPurposeField()"
+        required
+    >
+        <option value="">Select Purpose</option>
+
+        <option value="rent">Rent</option>
+
+        <option value="sale">Sale</option>
+
+        <option value="lease">Lease</option>
+
+        <option value="other">Other</option>
+    </select>
+
+    <!-- OTHER FIELD -->
+    <input
+        type="text"
+        name="property_purpose"
+        id="otherPurposeField"
+        placeholder="Enter Other Purpose"
+        style="display:none; margin-top:10px;"
+    >
+</div>
+
+
 
       <div class="field">
-        <label>Property Type <span class="req">*</span></label>
-        <select name="property_type" required>
-          <option value="">Select Property Type</option>
-          <option value="Apartment">Apartment</option>
-          <option value="Independent House">Independent House</option>
-          <option value="Villa">Villa</option>
-          <option value="Duplex">Duplex</option>
-          <option value="Penthouse">Penthouse</option>
-          <option value="Studio Apartment">Studio Apartment</option>
+
+        <label>
+            Property Type 
+            <span class="req">*</span>
+        </label>
+
+        <select 
+            name="property_type"
+            id="propertyType"
+            onchange="toggleOtherPropertyType()"
+            required
+        >
+
+            <option value="">
+                Select Property Type
+            </option>
+
+            <option value="Apartment">
+                Apartment
+            </option>
+
+            <option value="Independent House">
+                Independent House
+            </option>
+
+            <option value="Villa">
+                Villa
+            </option>
+
+            <option value="Duplex">
+                Duplex
+            </option>
+
+            <option value="Penthouse">
+                Penthouse
+            </option>
+
+            <option value="Studio Apartment">
+                Studio Apartment
+            </option>
+
+            <option value="other">
+                Other
+            </option>
+
         </select>
-      </div>
+
+        <!-- OTHER PROPERTY TYPE -->
+        <input
+            type="text"
+            name="property_type"
+            id="otherPropertyType"
+            placeholder="Enter Property Type"
+            style="display:none; margin-top:10px;"
+        >
+
+    </div>
+
     </div>
 
     <div class="fg fg-2" style="margin-bottom:16px;">
@@ -274,14 +348,52 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
       </div>
 
       <div class="field">
-        <label>Renting Option <span class="req">*</span></label>
-        <select name="renting_option" required>
-          <option value="">Select Option</option>
-          <option value="Full Property">Full Property</option>
-          <option value="Single Room">Single Room</option>
-          <option value="Shared Room">Shared Room</option>
+
+        <label>
+            Renting Option 
+            <span class="req">*</span>
+        </label>
+
+        <select 
+            name="renting_option"
+            id="rentingOption"
+            onchange="toggleOtherRentingOption()"
+            required
+        >
+
+            <option value="">
+                Select Option
+            </option>
+
+            <option value="Full Property">
+                Full Property
+            </option>
+
+            <option value="Single Room">
+                Single Room
+            </option>
+
+            <option value="Shared Room">
+                Shared Room
+            </option>
+
+            <option value="other">
+                Other
+            </option>
+
         </select>
-      </div>
+
+        <!-- OTHER RENTING OPTION -->
+        <input
+            type="text"
+            name="renting_option"
+            id="otherRentingOption"
+            placeholder="Enter Renting Option"
+            style="display:none; margin-top:10px;"
+        >
+
+    </div>
+
     </div>
 
     <div class="section-divider"><div class="sd-line"></div><div class="sd-label">Property Identity</div><div class="sd-line"></div></div>
@@ -313,22 +425,26 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
         <label>Plot Area (sq.ft) <span class="opt">(Optional)</span></label>
         <input type="number" name="plot_area" placeholder="e.g., 1500">
       </div>
+  
+
       <div class="field">
-        <label>Floor Number <span class="req">*</span></label>
-        <select name="floor_number" required>
-          <option value="">— Select —</option>
-          <option value="Ground">Ground</option>
-          <option value="1st Floor">1st Floor</option>
-          <option value="2nd Floor">2nd Floor</option>
-          <option value="3rd Floor">3rd Floor</option>
-          <option value="4th Floor">4th Floor</option>
-          <option value="5th Floor">5th Floor</option>
-          <option value="6th Floor">6th Floor</option>
-          <option value="7th Floor">7th Floor</option>
-          <option value="8th+ Floor">8th+ Floor</option>
-          <option value="Penthouse / Top Floor">Penthouse / Top Floor</option>
-        </select>
-      </div>
+
+    <label>
+        Floor Number 
+        <span class="req">*</span>
+    </label>
+
+    <input
+        type="text"
+        name="floor_number"
+        id="floorInput"
+        placeholder="Example: Ground or 1 or 10"
+        required
+    >
+
+</div>
+
+
     </div>
     <div class="fg fg-3" style="margin-top:16px;">
       <div class="field">
@@ -355,6 +471,7 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
           <option value="South">South</option>
           <option value="East">East</option>
           <option value="West">West</option>
+             <option value="Central">Central</option>
           <option value="North-East">North-East</option>
           <option value="North-West">North-West</option>
           <option value="South-East">South-East</option>
@@ -369,39 +486,134 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
           <option value="South">South</option>
           <option value="East">East</option>
           <option value="West">West</option>
+             <option value="Central">Central</option>
         </select>
       </div>
     </div>
     <div class="fg fg-2" style="margin-top:16px;">
       <div class="field">
         <label>Ownership Type <span class="opt">(Optional)</span></label>
-        <select name="ownership_type">
-          <option value="">Select Ownership</option>
-          <option value="Freehold">Freehold</option>
-          <option value="Leasehold">Leasehold</option>
-          <option value="Co-operative Society">Co-operative Society</option>
+         <select name="ownership_type">
+
+            <option value="">
+                Select Ownership
+            </option>
+
+            <!-- COMMON OPTIONS -->
+            <option value="Freehold">
+                Freehold
+            </option>
+
+            <option value="Leasehold">
+                Leasehold
+            </option>
+
+            <option value="Co-operative Society">
+                Co-operative Society
+            </option>
+
+            <!-- REAL ESTATE PORTAL OPTIONS -->
+            <option value="Power of Attorney">
+                Power of Attorney
+            </option>
+
+            <option value="Joint Ownership">
+                Joint Ownership
+            </option>
+
+            <option value="Company Owned">
+                Company Owned
+            </option>
+
+            <option value="Government Lease">
+                Government Lease
+            </option>
+
+            <option value="Builder Floor">
+                Builder Floor
+            </option>
+
+            <option value="Inherited Property">
+                Inherited Property
+            </option>
+
+            <option value="Trust Ownership">
+                Trust Ownership
+            </option>
+
+            <option value="other">
+                Other
+            </option>
+
         </select>
+
       </div>
       <div class="field">
         <label>Construction Status <span class="opt">(Optional)</span></label>
         <select name="construction_status">
-          <option value="">Select Status</option>
-          <option value="New Construction">New Construction</option>
-          <option value="Resale">Resale</option>
+
+            <option value="">
+                Select Status
+            </option>
+
+            <!-- MOST COMMON -->
+            <option value="Under Construction">
+                Under Construction
+            </option>
+
+            <option value="Ready to Move">
+                Ready to Move
+            </option>
+
+            <option value="New Launch">
+                New Launch
+            </option>
+
+            <option value="New Construction">
+                New Construction
+            </option>
+
+            <option value="Resale">
+                Resale
+            </option>
+
+            <!-- EXTRA REAL ESTATE OPTIONS -->
+            <option value="Possession Soon">
+                Possession Soon
+            </option>
+
+            <option value="Partially Constructed">
+                Partially Constructed
+            </option>
+
+            <option value="Fully Renovated">
+                Fully Renovated
+            </option>
+
+            <option value="Old Property">
+                Old Property
+            </option>
+
+            <option value="Pre Launch">
+                Pre Launch
+            </option>
+
+            <option value="Immediate Possession">
+                Immediate Possession
+            </option>
+
+            <option value="other">
+                Other
+            </option>
+
         </select>
       </div>
     </div>
     <div class="fg fg-2" style="margin-top:16px;">
       <div class="field">
-        <label>Property Age <span class="opt">(Optional)</span></label>
-        <select name="property_age">
-          <option value="">Select Age</option>
-          <option value="0-1 Year">0-1 Year</option>
-          <option value="1-3 Years">1-3 Years</option>
-          <option value="3-5 Years">3-5 Years</option>
-          <option value="5-10 Years">5-10 Years</option>
-          <option value="10+ Years">10+ Years</option>
-        </select>
+        <label>Property Age <span class="opt"></span></label>
+      
+          <input type="text" name="property_age"  placeholder="e.g.1 Year">
       </div>
       <div class="field">
         <label>Furnishing Status <span class="req">*</span></label>
@@ -452,7 +664,7 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
         <input type="text" name="pincode" placeholder="e.g., 440010" maxlength="6" required>
       </div>
       <div class="field">
-        <label>Road Connectivity <span class="req">*</span></label>
+        <label>Main Road Connectivity <span class="req">*</span></label>
         <input type="text" name="road_connectivity" placeholder="e.g., Under 2km" required>
       </div>
     </div>
@@ -1213,6 +1425,263 @@ function publishListing() {
     background: '#fff', color: '#1e293b', confirmButtonColor: '#f97316', confirmButtonText: 'View Portal →'
   }).then(() => { window.location.href = '/listingpage/?type=rent'; });
 }
+</script>
+
+<script>
+
+    // =========================================
+    // PROPERTY TYPE
+    // =========================================
+
+    function toggleOtherPropertyType() {
+
+        const select = document.getElementById(
+            'propertyType'
+        );
+
+        const field = document.getElementById(
+            'otherPropertyType'
+        );
+
+        if (select.value === 'other') {
+
+            field.style.display = 'block';
+
+            field.required = true;
+
+        } 
+        
+        else {
+
+            field.style.display = 'none';
+
+            field.required = false;
+
+            field.value = '';
+        }
+    }
+
+    // =========================================
+    // BHK TYPE
+    // =========================================
+
+    function toggleOtherBhk() {
+
+        const select = document.getElementById(
+            'bhkType'
+        );
+
+        const field = document.getElementById(
+            'otherBhkField'
+        );
+
+        if (select.value === 'other') {
+
+            field.style.display = 'block';
+
+            field.required = true;
+
+        } 
+        
+        else {
+
+            field.style.display = 'none';
+
+            field.required = false;
+
+            field.value = '';
+        }
+    }
+
+    // =========================================
+    // RENTING OPTION
+    // =========================================
+
+    function toggleOtherRentingOption() {
+
+        const select = document.getElementById(
+            'rentingOption'
+        );
+
+        const field = document.getElementById(
+            'otherRentingOption'
+        );
+
+        if (select.value === 'other') {
+
+            field.style.display = 'block';
+
+            field.required = true;
+
+        } 
+        
+        else {
+
+            field.style.display = 'none';
+
+            field.required = false;
+
+            field.value = '';
+        }
+    }
+
+</script>
+
+<script>
+
+document.getElementById(
+    'floorInput'
+).addEventListener('input', function () {
+
+    let value = this.value;
+
+    // Allow "Ground"
+    if (
+        value.toLowerCase() === 'ground'
+    ) {
+        return;
+    }
+
+    // Otherwise allow only numbers
+    this.value = value.replace(
+        /[^0-9]/g,
+        ''
+    );
+
+});
+
+</script>
+
+<script>
+
+function toggleOtherPurposeField() {
+
+    const purposeSelect = document.getElementById(
+        'propertyPurpose'
+    );
+
+    const otherField = document.getElementById(
+        'otherPurposeField'
+    );
+
+    if (purposeSelect.value === 'other') {
+
+        otherField.style.display = 'block';
+
+        otherField.required = true;
+
+    } 
+    
+    else {
+
+        otherField.style.display = 'none';
+
+        otherField.required = false;
+
+        otherField.value = '';
+    }
+}
+
+</script>
+
+<script>
+
+    // =========================================
+    // PROPERTY TYPE
+    // =========================================
+
+    function toggleOtherPropertyType() {
+
+        const select = document.getElementById(
+            'propertyType'
+        );
+
+        const field = document.getElementById(
+            'otherPropertyType'
+        );
+
+        if (select.value === 'other') {
+
+            field.style.display = 'block';
+
+            field.required = true;
+
+        } 
+        
+        else {
+
+            field.style.display = 'none';
+
+            field.required = false;
+
+            field.value = '';
+        }
+    }
+
+    // =========================================
+    // BHK TYPE
+    // =========================================
+
+    function toggleOtherBhk() {
+
+        const select = document.getElementById(
+            'bhkType'
+        );
+
+        const field = document.getElementById(
+            'otherBhkField'
+        );
+
+        if (select.value === 'other') {
+
+            field.style.display = 'block';
+
+            field.required = true;
+
+        } 
+        
+        else {
+
+            field.style.display = 'none';
+
+            field.required = false;
+
+            field.value = '';
+        }
+    }
+
+    // =========================================
+    // RENTING OPTION
+    // =========================================
+
+    function toggleOtherRentingOption() {
+
+        const select = document.getElementById(
+            'rentingOption'
+        );
+
+        const field = document.getElementById(
+            'otherRentingOption'
+        );
+
+        if (select.value === 'other') {
+
+            field.style.display = 'block';
+
+            field.required = true;
+
+        } 
+        
+        else {
+
+            field.style.display = 'none';
+
+            field.required = false;
+
+            field.value = '';
+        }
+    }
+
 </script>
 </body>
 </html>

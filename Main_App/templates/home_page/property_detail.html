@@ -3,1346 +3,1110 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>
-    {% if seo %}
-        {{ seo.meta_title }}
-    {% else %}
-        {{ p.title }}
-    {% endif %}
-
-    
-</title>
+<title>{% if seo %}{{ seo.meta_title }}{% else %}{{ p.title }}{% endif %} | PropCRM</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <style>
-:root{--pr:#f97316;--pr2:#ea580c;--sec:#0f172a;--muted:#64748b;--border:#e2e8f0;--bg:#f8fafc;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#1e293b;}
-.nav{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:500;box-shadow:0 1px 8px rgba(0,0,0,.06);}
-.nav-inner{max-width:1300px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:16px;height:60px;}
-.logo{font-weight:900;font-size:1.2rem;color:var(--sec);text-decoration:none;}
-.logo span{color:var(--pr);}
-.nav-right{margin-left:auto;display:flex;gap:8px;}
-.btn{padding:7px 16px;border-radius:8px;font-weight:700;font-size:.81rem;cursor:pointer;border:none;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
-.btn-pr{background:var(--pr);color:white;}.btn-pr:hover{background:var(--pr2);}
-.btn-outline{background:white;border:1.5px solid var(--border);color:var(--sec);}
+:root {
+  --pr: #e84118; --pr2: #c0392b; --sec: #12263a; --muted: #6b7280;
+  --border: #e5e7eb; --bg: #f4f6f9; --card: #ffffff;
+  --green: #059669; --blue: #2563eb; --radius: 14px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.07);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--sec); }
+a { text-decoration: none; color: inherit; }
 
-/* GALLERY */
-.gallery{max-width:1300px;margin:20px auto;padding:0 20px;display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:220px 220px;gap:10px;}
-.gal-main{grid-row:1/3;border-radius:16px 0 0 16px;overflow:hidden;cursor:pointer;position:relative;}
-.gal-cell{border-radius:4px;overflow:hidden;cursor:pointer;position:relative;}
-.gal-cell:nth-child(3){border-radius:0 16px 0 0;}
-.gal-cell:nth-child(5){border-radius:0 0 16px 0;}
-.gal-img{width:100%;height:100%;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:3rem;transition:.3s;background:#f1f5f9;}
-.gal-img:hover{transform:scale(1.03);}
-.main-property-image, .side-property-image{width:100%;height:100%;object-fit:cover;}
-.gal-count{position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.65);color:white;padding:5px 12px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;}
-.gal-badges{position:absolute;top:14px;left:14px;display:flex;gap:6px;flex-wrap:wrap;}
-.badge{font-size:.65rem;font-weight:800;padding:3px 9px;border-radius:6px;}
-.b-feat{background:#f59e0b;color:white;}.b-verif{background:#10b981;color:white;}
+.breadcrumb-bar {
+  max-width: 1380px; margin: 0 auto; padding: 14px 24px 0;
+  font-size: .78rem; color: var(--muted); display: flex; align-items: center; gap: 6px;
+}
+.breadcrumb-bar a { color: var(--pr); font-weight: 600; }
 
-/* BREADCRUMB */
-.breadcrumb-bar{max-width:1300px;margin:0 auto;padding:12px 20px 0;font-size:.75rem;color:var(--muted);}
-.breadcrumb-bar a{color:var(--pr);text-decoration:none;}
+.gallery-wrap { max-width: 1380px; margin: 14px auto; padding: 0 24px; }
+.gallery-grid {
+  display: grid; grid-template-columns: 1.7fr 1fr;
+  grid-template-rows: 260px 180px; gap: 8px; border-radius: 18px; overflow: hidden;
+}
+.gal-main { grid-row: 1 / 3; position: relative; overflow: hidden; }
+.gal-side { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; }
+.gal-cell { position: relative; overflow: hidden; }
+.gal-img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s; display: block; }
+.gal-cell:hover .gal-img, .gal-main:hover .gal-img { transform: scale(1.04); }
+.gallery-overlay-btn {
+  position: absolute; bottom: 14px; right: 14px;
+  background: rgba(255,255,255,.95); border: none; border-radius: 10px;
+  padding: 8px 16px; font-size: .8rem; font-weight: 700; color: var(--sec);
+  cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  display: flex; align-items: center; gap: 6px; z-index: 3;
+}
+.gal-placeholder { background: #dde2ea; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
 
-/* DETAIL LAYOUT */
-.detail-layout{max-width:1300px;margin:0 auto;padding:16px 20px 40px;display:grid;grid-template-columns:1fr 340px;gap:24px;}
-.detail-section{background:white;border-radius:14px;border:1px solid var(--border);padding:22px;margin-bottom:16px;}
-.ds-title{font-size:.92rem;font-weight:800;color:var(--sec);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+/* ── MEDIA VIEWER ── */
+.media-wrap { max-width: 1380px; margin: 12px auto; padding: 0 24px; }
+.media-player-card { background: #0c1421; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+#mediaViewer { width: 100%; height: 460px; display: flex; align-items: center; justify-content: center; position: relative; }
+#activeDisplay { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+#activeDisplay video, #activeDisplay img { width: 100%; height: 100%; object-fit: contain; }
+.media-controls { position: absolute; bottom: 16px; right: 16px; display: flex; gap: 8px; z-index: 5; }
+.mc-btn {
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+  color: white; border-radius: 8px; padding: 7px 14px; font-size: .78rem;
+  font-weight: 700; cursor: pointer; backdrop-filter: blur(6px); transition: background .2s;
+}
+.mc-btn:hover { background: rgba(255,255,255,.25); }
+.mc-btn.img-mode { opacity: .4; cursor: default; }
+.media-thumb-strip {
+  display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto;
+  background: #0c1421; scrollbar-width: thin; scrollbar-color: #333 transparent;
+}
+.media-thumb {
+  flex-shrink: 0; width: 90px; height: 62px; border-radius: 8px; overflow: hidden;
+  border: 2px solid transparent; cursor: pointer; transition: border-color .2s;
+}
+.media-thumb:hover, .media-thumb.active { border-color: var(--pr); }
+.media-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.video-thumb-btn {
+  flex-shrink: 0; width: 90px; height: 62px; border-radius: 8px;
+  border: 2px solid #f97316; cursor: pointer; background: #1a1a2e;
+  display: flex; align-items: center; justify-content: center;
+  color: #f97316; font-size: .65rem; font-weight: 700; flex-direction: column; gap: 3px;
+}
+.video-thumb-btn:hover { border-color: #fb923c; }
+.no-media-placeholder {
+  color: rgba(255,255,255,.25); font-size: 4rem; display: flex;
+  flex-direction: column; align-items: center; gap: 12px;
+}
+.no-media-placeholder span { font-size: 1rem; }
 
-/* LEFT PANEL CONTENT */
-.detail-title{font-size:1.5rem;font-weight:900;color:var(--sec);margin-bottom:6px;}
-.detail-addr{font-size:.84rem;color:var(--muted);display:flex;align-items:center;gap:5px;margin-bottom:14px;}
-.detail-price{font-size:2rem;font-weight:900;color:var(--pr);}
-.spec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0;}
-.sg-item{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;}
-.sg-val{font-size:.9rem;font-weight:800;color:var(--sec);}
-.sg-lbl{font-size:.67rem;color:var(--muted);}
-.amenity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.amenity-item{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--bg);border-radius:9px;font-size:.8rem;font-weight:600;color:#475569;}
-.amenity-item i{color:var(--pr);width:14px;}
+/* ── LAYOUT ── */
+.detail-layout {
+  max-width: 1380px; margin: 0 auto; padding: 20px 24px 60px;
+  display: grid; grid-template-columns: 1fr 380px; gap: 26px; align-items: start;
+}
 
-/* RIGHT PANEL */
-.contact-card{background:white;border-radius:16px;border:1px solid var(--border);padding:22px;position:sticky;top:80px;}
-.cc-price{font-size:1.8rem;font-weight:900;color:var(--pr);margin-bottom:16px;}
-.cc-owner{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
-.co-av{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white;flex-shrink:0;}
-.contact-btn{width:100%;padding:13px;border-radius:11px;font-size:.9rem;font-weight:800;cursor:pointer;border:none;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;transition:.2s;}
-.contact-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15);}
-.ef-input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;font-size:.83rem;margin-bottom:10px;}
+/* HEADER CARD */
+.prop-header-card {
+  background: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
+  padding: 28px; margin-bottom: 16px; box-shadow: var(--shadow);
+}
+.prop-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.tag { font-size: .7rem; font-weight: 700; padding: 4px 12px; border-radius: 50px; letter-spacing: .3px; text-transform: uppercase; }
+.tag-sale { background: #fef3c7; color: #92400e; }
+.tag-rent { background: #dbeafe; color: #1e40af; }
+.tag-cat  { background: #f1f5f9; color: #475569; }
+.tag-purpose { background: #fef9c3; color: #78350f; }
+.prop-title { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 700; color: var(--sec); line-height: 1.3; margin-bottom: 8px; }
+.prop-address { font-size: .9rem; color: var(--muted); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.prop-address i { color: var(--pr); }
 
-/* SIMILAR PROPERTIES GRID */
-.similar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px;}
-.sim-card{background:white;border-radius:12px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:.2s;text-decoration:none;color:inherit;}
-.sim-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08);color:inherit;}
-.sim-img{height:130px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;background:#f1f5f9;}
-.sim-body{padding:12px;}
-.sim-price{font-size:.88rem;font-weight:900;color:var(--pr);}
-.sim-title{font-size:.8rem;font-weight:700;color:var(--sec);margin-top:3px;}
-.sim-loc{font-size:.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.price-strip {
+  background: linear-gradient(135deg, #fff8f6 0%, #fff1eb 100%);
+  border: 1.5px solid #fcd3c1; border-radius: 14px; padding: 22px 24px; margin-top: 20px;
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+}
+.price-main-label { font-size: .72rem; font-weight: 700; color: #c2410c; text-transform: uppercase; letter-spacing: .5px; }
+.price-main-val { font-size: 2.4rem; font-weight: 800; color: var(--pr); line-height: 1.1; }
+.price-main-val .per-unit { font-size: 1rem; font-weight: 500; color: var(--muted); }
+.price-meta { text-align: right; display: flex; flex-direction: column; gap: 5px; }
+.price-meta-item { font-size: .82rem; font-weight: 600; color: var(--sec); }
+.price-meta-item.neg  { color: var(--green); }
+.price-meta-item.dep  { color: var(--muted); }
+.price-meta-item.brok { color: #dc2626; }
 
-@media(max-width:1024px){.detail-layout{grid-template-columns:1fr;}.gallery{grid-template-columns:1fr;grid-template-rows:300px;}.gal-cell{display:none;}.spec-grid{grid-template-columns:repeat(2,1fr);}.similar-grid{grid-template-columns:1fr 1fr;}}
-@media(max-width:768px){.similar-grid{grid-template-columns:1fr;}}
+/* SECTION CARDS */
+.sec-card {
+  background: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
+  padding: 26px; margin-bottom: 16px; box-shadow: var(--shadow);
+}
+.sec-head {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 1rem; font-weight: 800; color: var(--sec);
+  margin-bottom: 22px; padding-bottom: 14px; border-bottom: 1.5px solid #f0f4f8;
+}
+.sec-head-icon {
+  width: 34px; height: 34px; border-radius: 9px; background: #fff1eb;
+  display: flex; align-items: center; justify-content: center; color: var(--pr); font-size: .9rem; flex-shrink: 0;
+}
 
+.spec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 12px; }
+.sg-item {
+  background: #f8fafc; border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 16px; transition: box-shadow .2s, border-color .2s;
+}
+.sg-item:hover { border-color: #fcd3c1; box-shadow: 0 2px 10px rgba(232,65,24,.07); }
+.sg-lbl { font-size: .68rem; color: var(--muted); font-weight: 700; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px; }
+.sg-val { font-size: 1rem; font-weight: 800; color: var(--sec); }
 
-/* FOOTER STYLES */
-footer { background:#1e293b; color:rgba(255,255,255,.7); padding:60px 20px 30px; margin-top:0; }
-.footer-inner { max-width:1280px; margin:0 auto; }
-.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; margin-bottom:40px; }
-@media(max-width:992px){ .footer-grid{ grid-template-columns:1fr 1fr; gap:30px; } }
-@media(max-width:640px){ .footer-grid{ grid-template-columns:1fr; gap:25px; } }
+.info-table { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; }
+.info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 14px; border-bottom: 1px solid #f0f4f8; gap: 10px;
+}
+.info-row:nth-child(odd) { background: #fafbfc; }
+.info-row:hover { background: #f0f9ff; }
+.info-label { font-size: .82rem; color: var(--muted); font-weight: 600; }
+.info-value { font-size: .85rem; font-weight: 700; color: var(--sec); text-align: right; }
 
-.fl-brand { font-size:1.5rem; font-weight:900; color:#fff; margin-bottom:14px; }
-.fl-desc { font-size:.9rem; line-height:1.7; margin-bottom:20px; }
-.footer-social { display:flex; gap:12px; }
-.footer-social a { width:40px; height:40px; border-radius:10px; background:rgba(255,255,255,.1);
-  display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.7);
-  text-decoration:none; transition:.3s; font-size:1.1rem; }
-.footer-social a:hover { background:var(--primary); color:#fff; transform:translateY(-3px); }
+.amenity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 10px; }
+.amenity-item {
+  display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+  background: #f8fafc; border-radius: 10px; font-size: .83rem; font-weight: 600;
+  border: 1px solid var(--border); color: var(--sec); transition: all .2s;
+}
+.amenity-item:hover { background: #fff1eb; border-color: #fcd3c1; }
+.amenity-item i { color: var(--green); font-size: .85rem; }
+.amenity-item.no { background: #fff5f5; }
+.amenity-item.no i { color: #dc2626; }
 
-.fl-title { font-size:.85rem; font-weight:700; color:#fff; margin-bottom:16px; text-transform:uppercase; letter-spacing:0.5px; }
-.fl-link { display:block; color:rgba(255,255,255,.7); text-decoration:none; font-size:.9rem;
-  margin-bottom:10px; transition:.3s; font-weight:500; }
-.fl-link:hover { color:var(--primary); padding-left:8px; }
+.pg-bed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.pg-bed-card {
+  background: linear-gradient(135deg, #fff8f6, #fff1eb);
+  border: 1.5px solid #fcd3c1; border-radius: 14px; padding: 16px; text-align: center;
+}
+.pg-bed-type  { font-size: .7rem; font-weight: 700; color: #c2410c; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.pg-bed-price { font-size: 1.4rem; font-weight: 800; color: var(--pr); }
+.pg-bed-suffix{ font-size: .78rem; color: var(--muted); font-weight: 500; }
 
-.footer-bottom { border-top:1px solid rgba(255,255,255,.1); padding-top:25px;
-  display:flex; justify-content:space-between; align-items:center; font-size:.85rem;
-  flex-wrap:wrap; gap:15px; }
-.footer-bottom a { color:rgba(255,255,255,.7); text-decoration:none; margin:0 8px; }
-.footer-bottom a:hover { color:var(--primary); }
+.legal-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+.legal-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 13px 16px; border-radius: 10px; border: 1px solid var(--border); background: #f8fafc;
+}
+.legal-label  { font-size: .82rem; font-weight: 600; color: var(--muted); }
+.legal-status { font-size: .82rem; font-weight: 700; }
+.ls-ok   { color: var(--green); }
+.ls-warn { color: #dc2626; }
+.ls-yellow { color: #d97706; }
 
-@media(max-width:640px){ .footer-bottom{ flex-direction:column; text-align:center; } }
+.desc-body { font-size: .93rem; color: #4b5563; line-height: 1.85; }
+.desc-body p { margin-bottom: 12px; }
 
+.emi-banner { background: linear-gradient(135deg, var(--sec) 0%, #1e3a5f 100%); border-radius: 14px; padding: 24px; color: white; }
+.emi-label  { font-size: .72rem; font-weight: 700; opacity: .7; text-transform: uppercase; margin-bottom: 4px; }
+.emi-amount { font-size: 2.2rem; font-weight: 800; color: #f97316; }
+.emi-note   { font-size: .75rem; opacity: .6; margin-top: 4px; }
+.emi-adjust-btn {
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  color: white; border-radius: 8px; padding: 9px 18px; font-size: .82rem;
+  font-weight: 700; cursor: pointer; margin-top: 14px; width: 100%; transition: background .2s;
+}
+.emi-adjust-btn:hover { background: rgba(255,255,255,.18); }
+.emi-controls { margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.12); display: none; }
+.emi-control-label { font-size: .75rem; font-weight: 600; opacity: .7; margin-bottom: 5px; }
+.emi-input {
+  width: 100%; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  border-radius: 8px; padding: 9px 12px; color: white; font-size: .85rem; font-weight: 600;
+}
+
+.map-placeholder {
+  background: linear-gradient(135deg, #e0f2fe, #e8f5e9);
+  border-radius: 12px; height: 280px; display: flex; align-items: center; justify-content: center;
+  border: 1px dashed #93c5fd; position: relative; overflow: hidden;
+}
+.map-placeholder::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(0,0,0,.02) 20px,rgba(0,0,0,.02) 22px); }
+.map-pin-badge {
+  background: white; border-radius: 50px; padding: 12px 24px;
+  font-weight: 700; color: var(--sec); box-shadow: 0 8px 30px rgba(0,0,0,.12);
+  display: flex; align-items: center; gap: 8px; z-index: 2; font-size: .9rem;
+}
+
+.similar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 12px; }
+.sim-card {
+  background: var(--card); border-radius: 14px; border: 1px solid var(--border);
+  overflow: hidden; transition: all .25s; display: flex; flex-direction: column;
+}
+.sim-card:hover { transform: translateY(-5px); box-shadow: 0 12px 32px rgba(0,0,0,.1); border-color: #fcd3c1; }
+.sim-img { height: 130px; overflow: hidden; position: relative; }
+.sim-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+.sim-card:hover .sim-img img { transform: scale(1.06); }
+.sim-tag { position: absolute; top: 8px; left: 8px; background: var(--pr); color: white; font-size: .65rem; font-weight: 800; padding: 3px 9px; border-radius: 5px; text-transform: uppercase; }
+.sim-body { padding: 14px; flex: 1; display: flex; flex-direction: column; }
+.sim-price { font-size: 1.05rem; font-weight: 800; color: var(--pr); }
+.sim-title { font-size: .83rem; font-weight: 700; color: var(--sec); margin: 4px 0; line-height: 1.4; }
+.sim-loc   { font-size: .75rem; color: var(--muted); }
+.sim-footer { border-top: 1px solid var(--border); padding-top: 10px; margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: .73rem; color: var(--muted); font-weight: 600; }
+
+/* SIDEBAR */
+.contact-card {
+  background: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
+  padding: 24px; position: sticky; top: 80px; box-shadow: 0 8px 30px rgba(0,0,0,.08);
+}
+.cc-price-label { font-size: .7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+.cc-price-val   { font-size: 1.9rem; font-weight: 800; color: var(--pr); margin-bottom: 6px; }
+.cc-price-subtext { font-size: .8rem; color: var(--muted); font-weight: 500; }
+
+.owner-block {
+  display: flex; align-items: center; gap: 13px;
+  padding: 14px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: 16px 0;
+}
+.owner-avatar {
+  width: 46px; height: 46px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--sec), #1e3a5f);
+  display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; flex-shrink: 0;
+}
+.owner-name { font-weight: 700; color: var(--sec); font-size: .92rem; }
+.owner-role { font-size: .75rem; color: var(--muted); font-weight: 500; margin-top: 1px; }
+
+.cta-btn {
+  width: 100%; padding: 13px; border-radius: 12px; font-size: .88rem;
+  font-weight: 800; cursor: pointer; border: none; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  transition: all .2s; letter-spacing: .2px;
+}
+.cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,.15); }
+.cta-primary  { background: linear-gradient(135deg, var(--pr), var(--pr2)); color: white; }
+.cta-whatsapp { background: #25d366; color: white; }
+.cta-disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+.cta-disabled:hover { transform: none; box-shadow: none; }
+
+.masked-phone-block {
+  background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 10px;
+  padding: 14px; text-align: center; margin-bottom: 12px;
+}
+.masked-num  { font-size: 1.15rem; font-weight: 800; color: var(--sec); letter-spacing: 2px; }
+.masked-hint { font-size: .72rem; color: var(--muted); margin-top: 4px; }
+
+.enq-divider { text-align: center; font-size: .78rem; font-weight: 700; color: var(--muted); margin: 16px 0; position: relative; }
+.enq-divider::before, .enq-divider::after { content: ''; position: absolute; top: 50%; width: 35%; height: 1px; background: var(--border); }
+.enq-divider::before { left: 0; }
+.enq-divider::after  { right: 0; }
+.enq-input {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 11px 14px; font-size: .83rem; margin-bottom: 10px;
+  font-family: 'DM Sans', sans-serif; transition: border-color .2s; outline: none;
+  background: #fafafa; color: var(--sec);
+}
+.enq-input:focus { border-color: var(--pr); background: white; }
+.enq-submit {
+  width: 100%; padding: 13px; border-radius: 12px; font-size: .88rem;
+  font-weight: 800; cursor: pointer; border: none; background: var(--sec); color: white;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all .2s; font-family: 'DM Sans', sans-serif;
+}
+.enq-submit:hover { background: #1e3a5f; transform: translateY(-1px); }
+
+.badge-ok   { background: #d1fae5; color: #065f46; padding: 3px 10px; border-radius: 6px; font-size: .75rem; font-weight: 700; }
+.badge-warn { background: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 6px; font-size: .75rem; font-weight: 700; }
+.util-badge { display: inline-flex; align-items: center; gap: 6px; background: #d1fae5; color: #065f46; padding: 5px 12px; border-radius: 8px; font-size: .78rem; font-weight: 700; margin: 4px; }
+.floor-plan-img { width: 100%; border-radius: 12px; border: 1px solid var(--border); object-fit: contain; max-height: 480px; background: #f8fafc; }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .detail-layout { grid-template-columns: 1fr; }
+  .gallery-grid  { grid-template-columns: 1fr; grid-template-rows: 300px; }
+  .gal-side { display: none; }
+  .info-table { grid-template-columns: 1fr; }
+  .similar-grid { grid-template-columns: 1fr 1fr; }
+  .legal-grid   { grid-template-columns: 1fr; }
+}
+@media (max-width: 680px) {
+  .similar-grid { grid-template-columns: 1fr; }
+  .spec-grid    { grid-template-columns: repeat(2, 1fr); }
+  .prop-title   { font-size: 1.35rem; }
+  #mediaViewer  { height: 260px; }
+}
 </style>
-
-
-
-
-
-
-<meta
-name="description"
-content="{% if seo %}{{ seo.meta_description }}{% endif %}">
-
-<meta
-name="keywords"
-content="{% if seo %}{{ seo.primary_keyword }}, {{ seo.secondary_keywords }}{% endif %}">
-
-{% if seo.canonical_url %}
-<link
-rel="canonical"
-href="{{ request.build_absolute_uri }}">
-{% endif %}
-
-<!-- OPEN GRAPH -->
-
-<meta property="og:title" content="{{ seo.meta_title }}">
-<meta property="og:description" content="{{ seo.meta_description }}">
-<meta property="og:type" content="website">
-<meta property="og:url" content="{{ request.build_absolute_uri }}">
-
-{% if property_images %}
-<meta property="og:image" content="{{ property_images.0.image.url }}">
-{% endif %}
-
-<!-- TWITTER -->
-
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ seo.meta_title }}">
-<meta name="twitter:description" content="{{ seo.meta_description }}">
-
-<!-- SCHEMA -->
-
-{% if seo.schema_json %}
-
-<script type="application/ld+json">
-
-{{ seo.schema_json|safe }}
-
-</script>
-
-{% endif %}
 </head>
 <body>
 
 {% include 'home_page/header.html' %}
 
+<!-- BREADCRUMB -->
 <div class="breadcrumb-bar">
-  <a href="/">Home</a>
-  <a href="/listings/?type={{ listing_type }}">{{ listing_type|title }}</a>
-  <a href="#">{{ p.location|default:"City" }}</a>
+  <a href="/"><i class="fas fa-home"></i> Home</a>
+  <i class="fas fa-chevron-right" style="font-size:.6rem;opacity:.4;"></i>
+  <a href="/listingpage/?type={{ listing_type }}">{{ listing_type|title }}</a>
+  <i class="fas fa-chevron-right" style="font-size:.6rem;opacity:.4;"></i>
+  <span>{{ p.city|default:"Location" }}</span>
 </div>
 
-<div class="gallery">
-
-  <!-- MAIN IMAGE -->
-  <div class="gal-main">
-    {% if property_images %}
-      <img src="{{ property_images.0.image.url }}" class="main-property-image" alt="{{ p.title }}">
-    {% elif p.image_url %}
-      <img src="{{ p.image_url }}" class="main-property-image" alt="{{ p.title }}">
-    {% else %}
-      <div class="gal-img">🏠</div>
-    {% endif %}
-  </div>
-
-  <!-- SIDE IMAGES -->
-  {% for img in property_images|slice:"1:5" %}
-    <div class="gal-cell">
-      <img src="{{ img.image.url }}" class="side-property-image" alt="Property Image">
+<!-- GALLERY -->
+<div class="gallery-wrap">
+  <div class="gallery-grid">
+    <div class="gal-main">
+      {% if property_images %}
+        <img src="{{ property_images.0.image.url }}" class="gal-img" alt="Property Main">
+      {% else %}
+        <div class="gal-img gal-placeholder">🏠</div>
+      {% endif %}
+      <button class="gallery-overlay-btn" onclick="document.getElementById('mediaViewerSection').scrollIntoView({behavior:'smooth'})">
+        <i class="fas fa-images"></i> View All Photos
+      </button>
     </div>
-  {% endfor %}
-
+    <div class="gal-side">
+      {% for img in property_images|slice:"1:3" %}
+        <div class="gal-cell"><img src="{{ img.image.url }}" class="gal-img" alt="Property"></div>
+      {% empty %}
+        <div class="gal-cell gal-placeholder" style="background:#d9dfe8;"></div>
+        <div class="gal-cell gal-placeholder" style="background:#c8d0db;"></div>
+      {% endfor %}
+    </div>
+  </div>
 </div>
 
-<div class="detail-layout">
-  <div>
-    <!-- TITLE & PRICE SECTION -->
-    <div class="detail-section">
-      <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-        <div style="flex:1;">
-          <div class="d-flex gap-2 mb-2">
-            {% if original.is_featured|default:False %}
-              <span class="badge b-feat">⭐ Featured</span>
-            {% endif %}
-            <span class="badge" style="background:#dbeafe;color:#1e40af;">FOR {{ listing_type|upper }}</span>
+<!-- MEDIA PLAYER (fixed video playback) -->
+<div class="media-wrap" id="mediaViewerSection">
+  <div class="media-player-card">
+    <div id="mediaViewer">
+      <div id="activeDisplay">
+        {% if p.video %}
+          {# Video is present — render it #}
+          <video id="mainVideo"
+                 src="{{ p.video.url }}"
+                 controls
+                 preload="metadata"
+                 style="width:100%;height:100%;object-fit:contain;"
+                 playsinline>
+            <source src="{{ p.video.url }}" type="video/mp4">
+            <source src="{{ p.video.url }}" type="video/webm">
+            Your browser does not support HTML5 video.
+          </video>
+        {% elif property_images %}
+          <img id="mainImage" src="{{ property_images.0.image.url }}" alt="Property"
+               style="width:100%;height:100%;object-fit:contain;">
+        {% else %}
+          <div class="no-media-placeholder">
+            <span>🏠</span>
+            <span>No media available</span>
           </div>
-          <div class="detail-title">{{ p.title }}</div>
-          <div class="detail-addr">
-            <i class="fas fa-map-marker-alt" style="color:var(--pr);"></i> 
-            {{ p.location }}
-          </div>
+        {% endif %}
+      </div>
+
+      <div class="media-controls" id="mediaControls">
+        {% if p.video %}
+          <button class="mc-btn" id="playPauseBtn" onclick="togglePlayPause()">
+            <i class="fas fa-play" id="playPauseIcon"></i> Play / Pause
+          </button>
+        {% endif %}
+        <button class="mc-btn" onclick="downloadMedia()"><i class="fas fa-download"></i> Download</button>
+      </div>
+    </div>
+
+    <!-- Thumbnail strip -->
+    <div class="media-thumb-strip">
+      {% if p.video %}
+        <div class="video-thumb-btn" id="videoThumb" onclick="activateVideo('{{ p.video.url }}')">
+          <i class="fas fa-play-circle" style="font-size:1.4rem;"></i>
+          <span>Video Tour</span>
         </div>
-        <div class="text-end">
-          <div class="detail-price">
-            {{ p.price_display }}
-            {% if listing_type == 'rent' %}
-              <span style="font-size:1rem;font-weight:400;color:var(--muted);">/mo</span>
-            {% endif %}
-          </div>
+      {% endif %}
+      {% for img in property_images %}
+        <div class="media-thumb" onclick="activateImage('{{ img.image.url }}', this)">
+          <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="detail-layout">
+<div>
+
+  <!-- ① TITLE + PRICE CARD -->
+  <div class="prop-header-card">
+    <div class="prop-tags">
+      <span class="tag {% if listing_type == 'rent' %}tag-rent{% else %}tag-sale{% endif %}">FOR {{ listing_type|upper }}</span>
+      <span class="tag tag-cat">{{ p.category_name|title }}</span>
+      {% if p.property_purpose %}<span class="tag tag-purpose">{{ p.property_purpose|title }}</span>{% endif %}
+      {% if p.construction_status %}<span class="tag" style="background:#ede9fe;color:#5b21b6;">{{ p.construction_status|title }}</span>{% endif %}
+    </div>
+    <h1 class="prop-title">{{ p.title }}</h1>
+    <div class="prop-address">
+      <i class="fas fa-map-marker-alt"></i>
+      {% if p.building_name %}{{ p.building_name }}, {% endif %}
+      {{ p.address|default:p.locality }}{% if p.pincode %} – {{ p.pincode }}{% endif %}
+    </div>
+
+    <!-- PRICE STRIP — handles all 8 property types -->
+    <div class="price-strip">
+      <div>
+        <div class="price-main-label">
           {% if listing_type == 'rent' %}
-            <div class="small text-muted">
-              Maintenance: ₹{{ original.maintenance|default:"0" }}/mo
-            </div>
+            {% if p.sharing_type or p.pg_for %}Starting Rent (Per Bed){% else %}Monthly Rent{% endif %}
+          {% else %}Expected Price{% endif %}
+        </div>
+        <div class="price-main-val">
+          {% if p.monthly_rent %}
+            ₹{{ p.monthly_rent|floatformat:0 }}<span class="per-unit">{% if listing_type == 'rent' %}/mo{% endif %}</span>
+          {% elif p.expected_price %}
+            ₹{{ p.expected_price|floatformat:0 }}
+          {% else %}
+            <span style="font-size:1.4rem;color:var(--muted);">Price on Request</span>
           {% endif %}
         </div>
       </div>
-    </div>
-
-    <!-- SPECIFICATIONS GRID -->
-    <div class="detail-section">
-      <div class="spec-grid">
-        <div class="sg-item">
-          <div class="sg-ico">🛏</div>
-          <div class="sg-val">{{ p.beds|default:"—" }}</div>
-          <div class="sg-lbl">Bedrooms</div>
-        </div>
-        <div class="sg-item">
-          <div class="sg-ico">🚿</div>
-          <div class="sg-val">{{ p.baths|default:"—" }}</div>
-          <div class="sg-lbl">Bathrooms</div>
-        </div>
-        <div class="sg-item">
-          <div class="sg-ico">📐</div>
-          <div class="sg-val">{{ p.area|default:"—" }}</div>
-          <div class="sg-lbl">Area</div>
-        </div>
-        <div class="sg-item">
-          <div class="sg-ico">🏢</div>
-          <div class="sg-val">{{ p.floor|default:"—" }}</div>
-          <div class="sg-lbl">Floor</div>
-        </div>
-        <div class="sg-item">
-          <div class="sg-ico">🛋</div>
-          <div class="sg-val">{{ p.furnished|default:"—" }}</div>
-          <div class="sg-lbl">Furnishing</div>
-        </div>
-        <div class="sg-item">
-          <div class="sg-ico">🚗</div>
-          <div class="sg-val">{{ original.parking|default:"—" }}</div>
-          <div class="sg-lbl">Parking</div>
-        </div>
-        <div class="sg-item">
-          <div class="sg-ico">🧭</div>
-          <div class="sg-val">{{ original.facing|default:"—" }}</div>
-          <div class="sg-lbl">Facing</div>
-        </div>
-        <div class="sg-item">
-          <div class="sg-ico">🏗</div>
-          <div class="sg-val">{{ original.property_age|default:"—" }}</div>
-          <div class="sg-lbl">Age</div>
-        </div>
-      </div>
-    </div>
-
-<!-- DESCRIPTION SECTION -->
-<div class="detail-section">
-
-    <div class="ds-title">
-        <i class="fas fa-align-left" style="color:var(--pr);"></i>
-        About This Property
-    </div>
-
-    <div
-    style="
-    font-size:.85rem;
-    color:#475569;
-    line-height:1.8;
-    ">
-
-        <!-- PROPERTY DESCRIPTION -->
-
-        {% if original.rent_residential_desc %}
-
-            {{ original.rent_residential_desc|linebreaks }}
-
-        {% elif original.description %}
-
-            {{ original.description|linebreaks }}
-
-        {% elif original.pg_description %}
-
-            {{ original.pg_description|linebreaks }}
-
-        {% elif seo.meta_description %}
-
-            <p>
-
-                {{ seo.meta_description }}
-
-            </p>
-
-        {% else %}
-
-            <p class="text-muted">
-
-                No detailed description provided for this property.
-
-            </p>
-
-        {% endif %}
-
-
-        <!-- SEO INTRO CONTENT -->
-
-        {% if seo.intro_html %}
-
-            <div
-            style="
-            margin-top:20px;
-            padding-top:15px;
-            border-top:1px solid #e2e8f0;
-            ">
-
-                {{ seo.intro_html|safe }}
-
-            </div>
-
-        {% endif %}
-
-    </div>
-
-</div>
-
-    <!-- AMENITIES SECTION -->
-    {% if amenities_list %}
-    <div class="detail-section">
-      <div class="ds-title">
-        <i class="fas fa-star" style="color:var(--pr);"></i> 
-        Amenities
-      </div>
-      <div class="amenity-grid">
-        {% for item in amenities_list %}
-          <div class="amenity-item">
-            <i class="fas fa-check-circle"></i>
-            {{ item }}
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
-    <!-- NEARBY FACILITIES SECTION -->
-    {% if facilities_list %}
-    <div class="detail-section">
-      <div class="ds-title">
-        <i class="fas fa-map-marked-alt" style="color:var(--pr);"></i> 
-        Nearby Facilities
-      </div>
-      <div class="amenity-grid">
-        {% for item in facilities_list %}
-          <div class="amenity-item">
-            <i class="fas fa-location-dot"></i>
-            {{ item }}
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
-    <!-- SIMILAR PROPERTIES SECTION -->
-    <div>
-      <div style="font-size:1rem;font-weight:800;color:var(--sec);margin-bottom:14px;">
-        Similar Properties You May Like
-      </div>
-      <div class="similar-grid">
-        {% for sp in similar %}
-        <a href="/listing/{{ sp.listing_type }}/{{ sp.category }}/{{ sp.id }}/" class="sim-card">
-          <div class="sim-img">
-            {% if sp.image_url %}
-              <img src="{{ sp.image_url }}" style="width:100%;height:100%;object-fit:cover;" alt="{{ sp.title }}">
-            {% else %}
-              {% if sp.category == 'commercial' %}🏗
-              {% elif sp.listing_type == 'sale' %}🏘
-              {% else %}🏠{% endif %}
-            {% endif %}
-          </div>
-          <div class="sim-body">
-            <div class="sim-price">{{ sp.price_display }}</div>
-            <div class="sim-title">{{ sp.title|truncatechars:25 }}</div>
-            <div class="sim-loc">
-              <i class="fas fa-map-marker-alt" style="color:var(--pr);font-size:.65rem;"></i> 
-              {{ sp.location }}
-            </div>
-          </div>
-        </a>
-        {% empty %}
-        <div style="grid-column:1/-1; background:white; border-radius:12px; padding:30px; text-align:center; border: 1px dashed var(--border);">
-            <div style="font-size:2rem; margin-bottom:10px;">🏠</div>
-            <div class="fw-bold small text-muted">No similar properties found in this area.</div>
-        </div>
-        {% endfor %}
+      <div class="price-meta">
+        {% if p.price_sqft %}<div class="price-meta-item">₹{{ p.price_sqft }} / sq.ft</div>{% endif %}
+        {% if p.maintenance %}<div class="price-meta-item dep">Maintenance: ₹{{ p.maintenance }}/mo</div>{% endif %}
+        {% if p.security_deposit %}<div class="price-meta-item dep">Deposit: ₹{{ p.security_deposit }}</div>{% endif %}
+        {% if p.brokerage %}<div class="price-meta-item brok">Brokerage: {{ p.brokerage }}</div>{% endif %}
+        {% if p.is_negotiable == 'yes' or p.negotiable %}<div class="price-meta-item neg"><i class="fas fa-check-circle"></i> Negotiable</div>{% endif %}
       </div>
     </div>
   </div>
 
-  <!-- RIGHT SIDEBAR -->
- <!-- RIGHT SIDEBAR -->
+  <!-- ② PG BED-WISE PRICING -->
+  {% if p.single_sharing or p.double_sharing or p.triple_sharing or p.four_sharing or p.five_sharing or p.six_sharing %}
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-bed"></i></div> Bed-wise Pricing</div>
+    <div class="pg-bed-grid">
+      {% if p.single_sharing %}<div class="pg-bed-card"><div class="pg-bed-type">Single Sharing</div><div class="pg-bed-price">₹{{ p.single_sharing|floatformat:0 }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
+      {% if p.double_sharing %}<div class="pg-bed-card"><div class="pg-bed-type">Double Sharing</div><div class="pg-bed-price">₹{{ p.double_sharing|floatformat:0 }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
+      {% if p.triple_sharing %}<div class="pg-bed-card"><div class="pg-bed-type">Triple Sharing</div><div class="pg-bed-price">₹{{ p.triple_sharing|floatformat:0 }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
+      {% if p.four_sharing  %}<div class="pg-bed-card"><div class="pg-bed-type">4-Person Sharing</div><div class="pg-bed-price">₹{{ p.four_sharing|floatformat:0 }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
+      {% if p.five_sharing  %}<div class="pg-bed-card"><div class="pg-bed-type">5-Person Sharing</div><div class="pg-bed-price">₹{{ p.five_sharing|floatformat:0 }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
+      {% if p.six_sharing   %}<div class="pg-bed-card"><div class="pg-bed-type">6-Person Sharing</div><div class="pg-bed-price">₹{{ p.six_sharing|floatformat:0 }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
+    </div>
+    {% if p.notice_period or p.minimum_stay %}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+      {% if p.minimum_stay %}<span class="util-badge"><i class="fas fa-calendar-check"></i> Min. Stay: {{ p.minimum_stay }} months</span>{% endif %}
+      {% if p.notice_period %}<span class="util-badge"><i class="fas fa-bell"></i> Notice: {{ p.notice_period }} days</span>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- ③ OVERVIEW -->
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-th-large"></i></div> Property Overview</div>
+    <div class="spec-grid">
+      {% if p.area %}<div class="sg-item"><div class="sg-lbl">Total Area</div><div class="sg-val">{{ p.area }} {% if category == 'agriculture' %}Acres{% else %}Sq.Ft{% endif %}</div></div>{% endif %}
+      {% if p.carpet_area %}<div class="sg-item"><div class="sg-lbl">Carpet Area</div><div class="sg-val">{{ p.carpet_area }} Sq.Ft</div></div>{% endif %}
+      {% if p.plot_area %}<div class="sg-item"><div class="sg-lbl">Plot Area</div><div class="sg-val">{{ p.plot_area }} Sq.Ft</div></div>{% endif %}
+      {% if p.beds %}<div class="sg-item"><div class="sg-lbl">Configuration</div><div class="sg-val">{{ p.beds }}</div></div>{% endif %}
+      {% if p.baths %}<div class="sg-item"><div class="sg-lbl">Bathrooms</div><div class="sg-val">{{ p.baths }}</div></div>{% endif %}
+      {% if p.balconies %}<div class="sg-item"><div class="sg-lbl">Balconies</div><div class="sg-val">{{ p.balconies }}</div></div>{% endif %}
+      {% if p.furnished %}<div class="sg-item"><div class="sg-lbl">Furnishing</div><div class="sg-val">{{ p.furnished|title }}</div></div>{% endif %}
+      {% if p.age %}<div class="sg-item"><div class="sg-lbl">Property Age</div><div class="sg-val">{{ p.age }}</div></div>{% endif %}
+      {% if p.property_condition %}<div class="sg-item"><div class="sg-lbl">Condition</div><div class="sg-val">{{ p.property_condition|title }}</div></div>{% endif %}
+      {% if p.facing %}<div class="sg-item"><div class="sg-lbl">Facing</div><div class="sg-val">{{ p.facing }}</div></div>{% endif %}
+      {% if p.floor %}<div class="sg-item"><div class="sg-lbl">Floor</div><div class="sg-val">{{ p.floor }}{% if p.total_floors %} / {{ p.total_floors }}{% endif %}</div></div>{% endif %}
+      {% if p.ownership %}<div class="sg-item"><div class="sg-lbl">Ownership</div><div class="sg-val">{{ p.ownership|title }}</div></div>{% endif %}
+      {% if p.num_owners %}<div class="sg-item"><div class="sg-lbl">No. of Owners</div><div class="sg-val">{{ p.num_owners }}</div></div>{% endif %}
+      {% if p.possession %}<div class="sg-item"><div class="sg-lbl">Availability</div><div class="sg-val">{{ p.possession }}</div></div>{% endif %}
+      {% if p.zone %}<div class="sg-item"><div class="sg-lbl">Zone</div><div class="sg-val">{{ p.zone }}{% if p.zone_type %} / {{ p.zone_type }}{% endif %}</div></div>{% endif %}
+      {% if p.location_hub %}<div class="sg-item"><div class="sg-lbl">Location Hub</div><div class="sg-val">{{ p.location_hub|title }}</div></div>{% endif %}
+      {% if p.society_type %}<div class="sg-item"><div class="sg-lbl">Society Type</div><div class="sg-val">{{ p.society_type|title }}</div></div>{% endif %}
+      {% if p.water_type %}<div class="sg-item"><div class="sg-lbl">Water Supply</div><div class="sg-val">{{ p.water_type|title }}</div></div>{% endif %}
+      {% if p.renting_option %}<div class="sg-item"><div class="sg-lbl">Renting Option</div><div class="sg-val">{{ p.renting_option|title }}</div></div>{% endif %}
+      {% if p.available_for %}<div class="sg-item"><div class="sg-lbl">Available For</div><div class="sg-val">{{ p.available_for|title }}</div></div>{% endif %}
+      {% if p.covered_parking %}<div class="sg-item"><div class="sg-lbl">Covered Parking</div><div class="sg-val">{{ p.covered_parking }} Spots</div></div>{% endif %}
+      {% if p.open_parking %}<div class="sg-item"><div class="sg-lbl">Open Parking</div><div class="sg-val">{{ p.open_parking }} Spots</div></div>{% endif %}
+      {% if p.private_parking %}<div class="sg-item"><div class="sg-lbl">Private Parking</div><div class="sg-val">{{ p.private_parking }} Spots</div></div>{% endif %}
+      {% if p.public_parking %}<div class="sg-item"><div class="sg-lbl">Public Parking</div><div class="sg-val">{{ p.public_parking }} Spots</div></div>{% endif %}
+    </div>
+  </div>
+
+  <!-- ④ COMMERCIAL SPECS -->
+  {% if p.min_seats or p.cabins or p.meeting_rooms or p.private_washroom or p.passenger_lifts or p.lockin_period or p.flooring_type or p.staircases %}
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-briefcase"></i></div> Commercial Specifications</div>
+    <div class="info-table">
+      {% if p.min_seats %}<div class="info-row"><span class="info-label">Seating Capacity</span><span class="info-value">{{ p.min_seats }}{% if p.max_seats %} – {{ p.max_seats }}{% endif %} Seats</span></div>{% endif %}
+      {% if p.cabins %}<div class="info-row"><span class="info-label">Cabins</span><span class="info-value">{{ p.cabins }}</span></div>{% endif %}
+      {% if p.meeting_rooms %}<div class="info-row"><span class="info-label">Meeting Rooms</span><span class="info-value">{{ p.meeting_rooms }}</span></div>{% endif %}
+      {% if p.private_washroom or p.public_washroom %}<div class="info-row"><span class="info-label">Washrooms</span><span class="info-value">{{ p.private_washroom|default:"0" }} Pvt · {{ p.public_washroom|default:"0" }} Public</span></div>{% endif %}
+      {% if p.passenger_lifts or p.service_lifts %}<div class="info-row"><span class="info-label">Lifts</span><span class="info-value">{{ p.passenger_lifts|default:"0" }} Passenger · {{ p.service_lifts|default:"0" }} Service</span></div>{% endif %}
+      {% if p.staircases %}<div class="info-row"><span class="info-label">Staircases</span><span class="info-value">{{ p.staircases }}</span></div>{% endif %}
+      {% if p.flooring_type %}<div class="info-row"><span class="info-label">Flooring</span><span class="info-value">{{ p.flooring_type|title }}</span></div>{% endif %}
+      {% if p.lockin_period %}<div class="info-row"><span class="info-label">Lock-in Period</span><span class="info-value">{{ p.lockin_period }} Months</span></div>{% endif %}
+      {% if p.rent_increase %}<div class="info-row"><span class="info-label">Rent Escalation</span><span class="info-value">{{ p.rent_increase }}%</span></div>{% endif %}
+      {% if p.lease_duration %}<div class="info-row"><span class="info-label">Lease Duration</span><span class="info-value">{{ p.lease_duration }}</span></div>{% endif %}
+      {% if p.maintenance_type %}<div class="info-row"><span class="info-label">Maintenance Type</span><span class="info-value">{{ p.maintenance_type|title }}</span></div>{% endif %}
+    </div>
+    {% if p.dg_ups_included or p.electricity_included or p.water_included %}
+    <div class="mt-3">
+      <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:8px;">Included Utilities</div>
+      <div>
+        {% if p.dg_ups_included %}<span class="util-badge"><i class="fas fa-bolt"></i> DG/UPS Backup</span>{% endif %}
+        {% if p.electricity_included %}<span class="util-badge"><i class="fas fa-plug"></i> Electricity</span>{% endif %}
+        {% if p.water_included %}<span class="util-badge"><i class="fas fa-tint"></i> Water</span>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- ⑤ PG / HOSTEL DETAILS -->
+  {% if p.total_beds or p.pg_for or p.sharing_type or p.meal_offerings %}
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-bed"></i></div> Hostel / PG Details</div>
+    <div class="info-table" style="margin-bottom:18px;">
+      {% if p.total_beds %}<div class="info-row"><span class="info-label">Total Capacity</span><span class="info-value">{{ p.total_beds }} Beds</span></div>{% endif %}
+      {% if p.pg_for %}<div class="info-row"><span class="info-label">Target Tenants</span><span class="info-value">{{ p.pg_for|title }}</span></div>{% endif %}
+      {% if p.sharing_type %}<div class="info-row"><span class="info-label">Sharing Options</span><span class="info-value">{{ p.sharing_type|title }}</span></div>{% endif %}
+      {% if p.property_managed_by %}<div class="info-row"><span class="info-label">Managed By</span><span class="info-value">{{ p.property_managed_by|title }}</span></div>{% endif %}
+      {% if p.manager_stays %}<div class="info-row"><span class="info-label">Manager On-Site</span><span class="info-value"><span class="badge-ok">Yes</span></span></div>{% endif %}
+    </div>
+    {% if p.meals_available %}
+    <div style="margin-bottom:16px;">
+      <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:8px;">Food & Meals</div>
+      {% if p.meal_offerings %}<span class="util-badge">{{ p.meal_offerings }}</span>{% endif %}
+      {% if p.meal_speciality %}<span class="util-badge">{{ p.meal_speciality }}</span>{% endif %}
+    </div>
+    {% endif %}
+    {% if p.non_veg_allowed or p.opposite_sex_allowed or p.visitors_allowed or p.any_time_allowed or p.guardian_allowed %}
+    <div>
+      <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:10px;">House Rules</div>
+      <div class="amenity-grid">
+        {% if p.non_veg_allowed %}<div class="amenity-item"><i class="fas fa-check-circle"></i> Non-Veg Allowed</div>{% endif %}
+        {% if p.opposite_sex_allowed %}<div class="amenity-item"><i class="fas fa-check-circle"></i> Opposite Gender Allowed</div>{% endif %}
+        {% if p.visitors_allowed %}<div class="amenity-item"><i class="fas fa-check-circle"></i> Visitors Allowed</div>{% endif %}
+        {% if p.any_time_allowed %}<div class="amenity-item"><i class="fas fa-check-circle"></i> 24/7 Access</div>{% endif %}
+        {% if p.guardian_allowed %}<div class="amenity-item"><i class="fas fa-check-circle"></i> Guardian Stays Allowed</div>{% endif %}
+        {% if not p.drinking_allowed %}<div class="amenity-item no"><i class="fas fa-ban"></i> No Drinking</div>{% endif %}
+        {% if not p.smoking_allowed %}<div class="amenity-item no"><i class="fas fa-ban"></i> No Smoking</div>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+    {% if p.common_area %}
+    <div class="mt-3 p-3" style="background:#f8fafc;border-radius:10px;border:1px solid var(--border);">
+      <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:6px;">Common Areas</div>
+      <p style="font-size:.88rem;color:var(--sec);margin:0;">{{ p.common_area }}</p>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- ⑥ LAND & INFRASTRUCTURE -->
+  {% if p.plot_corner or p.plot_fencing or p.sanctioning_authority or p.power_kva or p.crane_heavy_machinery or p.road_connectivity or p.worker_housing_nearby %}
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-map"></i></div> Land & Infrastructure</div>
+    <div class="info-table">
+      {% if p.plot_corner %}<div class="info-row"><span class="info-label">Corner Plot</span><span class="info-value"><span class="badge-ok">Yes</span></span></div>{% endif %}
+      {% if p.plot_fencing %}<div class="info-row"><span class="info-label">Boundary Fencing</span><span class="info-value"><span class="badge-ok">Yes</span></span></div>{% endif %}
+      {% if p.plot_road_facing %}<div class="info-row"><span class="info-label">Road Facing</span><span class="info-value">{{ p.plot_road_facing|title }}</span></div>{% endif %}
+      {% if p.sanctioning_authority %}<div class="info-row"><span class="info-label">Sanctioning Authority</span><span class="info-value">{{ p.sanctioning_authority }}</span></div>{% endif %}
+      {% if p.power_kva %}<div class="info-row"><span class="info-label">Power Supply</span><span class="info-value">{{ p.power_kva }} KVA</span></div>{% endif %}
+      {% if p.crane_heavy_machinery %}<div class="info-row"><span class="info-label">Crane / Machinery</span><span class="info-value"><span class="badge-ok">Supported</span></span></div>{% endif %}
+      {% if p.road_connectivity %}<div class="info-row"><span class="info-label">Road Connectivity</span><span class="info-value">{{ p.road_connectivity|title }}</span></div>{% endif %}
+      {% if p.worker_housing_nearby %}<div class="info-row"><span class="info-label">Worker Housing</span><span class="info-value"><span class="badge-ok">Available Nearby</span></span></div>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ⑦ AGRICULTURAL DETAILS -->
+  {% if p.soil_type or p.water_source or p.fertility_status or p.irrigation_facility or p.previous_crops %}
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-leaf"></i></div> Agricultural Details</div>
+    <div class="info-table">
+      {% if p.soil_type %}<div class="info-row"><span class="info-label">Soil Type</span><span class="info-value">{{ p.soil_type|title }}</span></div>{% endif %}
+      {% if p.water_source %}<div class="info-row"><span class="info-label">Water Source</span><span class="info-value">{{ p.water_source|title }}</span></div>{% endif %}
+      {% if p.irrigation_facility %}<div class="info-row"><span class="info-label">Irrigation</span><span class="info-value">{{ p.irrigation_facility|title }}</span></div>{% endif %}
+      {% if p.fertility_status %}<div class="info-row"><span class="info-label">Fertility Status</span><span class="info-value">{{ p.fertility_status|title }}</span></div>{% endif %}
+      {% if p.previous_crops %}<div class="info-row"><span class="info-label">Previous Crops</span><span class="info-value">{{ p.previous_crops }}</span></div>{% endif %}
+      {% if p.state %}<div class="info-row"><span class="info-label">State</span><span class="info-value">{{ p.state }}</span></div>{% endif %}
+      {% if p.district %}<div class="info-row"><span class="info-label">District</span><span class="info-value">{{ p.district }}</span></div>{% endif %}
+      {% if p.taluka %}<div class="info-row"><span class="info-label">Taluka</span><span class="info-value">{{ p.taluka }}</span></div>{% endif %}
+      {% if p.village %}<div class="info-row"><span class="info-label">Village</span><span class="info-value">{{ p.village }}</span></div>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ⑧ LEGAL & COMPLIANCE -->
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-gavel"></i></div> Legal & Compliance Status</div>
+    <div class="legal-grid">
+      <div class="legal-item">
+        <span class="legal-label">Active Loan</span>
+        {% if p.has_loan %}<span class="legal-status ls-warn"><i class="fas fa-exclamation-circle"></i> Yes{% if p.loan_amount %} (₹{{ p.loan_amount|floatformat:0 }}){% endif %}</span>
+        {% else %}<span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> No Loan</span>{% endif %}
+      </div>
+      <div class="legal-item">
+        <span class="legal-label">Legal Dispute</span>
+        {% if p.has_dispute %}<span class="legal-status ls-warn"><i class="fas fa-exclamation-triangle"></i> Disputed</span>
+        {% else %}<span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> Clear</span>{% endif %}
+      </div>
+      <div class="legal-item">
+        <span class="legal-label">Property Tax</span>
+        {% if p.has_tax_due %}<span class="legal-status ls-warn">Pending{% if p.tax_amount %} ₹{{ p.tax_amount|floatformat:0 }}{% endif %}</span>
+        {% else %}<span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> Cleared</span>{% endif %}
+      </div>
+      <div class="legal-item">
+        <span class="legal-label">Existing Tenants</span>
+        {% if p.has_tenants %}<span class="legal-status ls-yellow"><i class="fas fa-user"></i> Occupied</span>
+        {% else %}<span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> Vacant</span>{% endif %}
+      </div>
+      {% if p.fire_noc %}
+      <div class="legal-item"><span class="legal-label">Fire NOC</span><span class="legal-status ls-ok">{{ p.fire_noc|title }}</span></div>
+      {% endif %}
+      {% if p.tax_clearance_cert %}
+      <div class="legal-item"><span class="legal-label">Tax Clearance</span><span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> Available</span></div>
+      {% endif %}
+    </div>
+    {% if p.encumbrance_cert or p.compliance_docs %}
+    <div class="mt-3 d-flex gap-2 flex-wrap">
+      {% if p.encumbrance_cert %}<a href="{{ p.encumbrance_cert.url }}" target="_blank" class="util-badge"><i class="fas fa-file-alt"></i> Encumbrance Certificate</a>{% endif %}
+      {% if p.compliance_docs %}<a href="{{ p.compliance_docs.url }}" target="_blank" class="util-badge"><i class="fas fa-folder-open"></i> Compliance Docs</a>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ⑨ EMI CALCULATOR -->
+  {% if listing_type == 'sale' and base_emi > 0 %}
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-calculator"></i></div> EMI Calculator</div>
+    <div class="emi-banner">
+      <div class="emi-label">Estimated Monthly EMI</div>
+      <div class="emi-amount">₹<span id="emiResult">{{ base_emi }}</span><span style="font-size:1rem;font-weight:500;opacity:.7;">/mo</span></div>
+      <div class="emi-note">Based on 80% loan at 8.5% interest for 20 years.</div>
+      <button class="emi-adjust-btn" onclick="document.getElementById('emiControls').style.display='block';this.style.display='none'">
+        <i class="fas fa-sliders-h"></i> Adjust Loan Terms
+      </button>
+      <div class="emi-controls" id="emiControls">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="emi-control-label">Property Value (₹)</div>
+            <input type="number" id="emiPrincipal" class="emi-input" value="{{ raw_price|default:'0'|floatformat:'0' }}" oninput="calculateInteractiveEMI()">
+          </div>
+          <div class="col-md-4">
+            <div class="emi-control-label">Interest Rate (%)</div>
+            <input type="number" id="emiRate" class="emi-input" value="8.5" step="0.1" oninput="calculateInteractiveEMI()">
+          </div>
+          <div class="col-md-4">
+            <div class="emi-control-label">Tenure (Years)</div>
+            <input type="number" id="emiYears" class="emi-input" value="20" oninput="calculateInteractiveEMI()">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ⑩ AMENITIES -->
+  {% if amenities_list %}
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-star"></i></div> Amenities & Features</div>
+    <div class="amenity-grid">
+      {% for item in amenities_list %}<div class="amenity-item"><i class="fas fa-check-circle"></i> {{ item }}</div>{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ⑪ NEARBY FACILITIES -->
+  {% if facilities_list %}
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-map-signs"></i></div> Nearby Facilities</div>
+    <div class="amenity-grid">
+      {% for item in facilities_list %}<div class="amenity-item" style="background:white;"><i class="fas fa-location-arrow" style="color:var(--blue);"></i> {{ item }}</div>{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ⑫ DESCRIPTION -->
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-align-left"></i></div> About This Property</div>
+    <div class="desc-body">
+      {% if p.desc %}{{ p.desc|safe|linebreaks }}{% else %}<p style="color:var(--muted);">No description provided by the owner.</p>{% endif %}
+      {% if p.room_details %}
+      <div class="mt-4 p-4" style="background:#f8fafc;border-radius:12px;border:1px solid var(--border);">
+        <div style="font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:10px;"><i class="fas fa-bed"></i> Room Details</div>
+        <p style="margin:0;color:var(--sec);">{{ p.room_details|linebreaksbr }}</p>
+      </div>
+      {% endif %}
+      {% if seo and seo.intro_html %}
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">{{ seo.intro_html|safe }}</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ⑬ FLOOR PLAN -->
+  {% if p.floor_plan %}
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-drafting-compass"></i></div> Floor Plan</div>
+    <img src="{{ p.floor_plan.url }}" alt="Floor Plan" class="floor-plan-img">
+  </div>
+  {% endif %}
+
+  <!-- ⑭ MAP -->
+  {% if p.city %}
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-map-marked-alt"></i></div> Location & Map</div>
+    <div class="map-placeholder">
+      <div class="map-pin-badge">
+        <i class="fas fa-map-pin" style="color:var(--pr);font-size:1.1rem;"></i>
+        {{ p.address|default:p.locality }}, {{ p.city }}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ⑮ SIMILAR PROPERTIES -->
+  {% if similar %}
+  <div class="sec-card">
+    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-home"></i></div> Similar Properties Nearby</div>
+    <div class="similar-grid">
+      {% for sp in similar %}
+      <a href="/listing/{{ sp.listing_type }}/{{ sp.category|lower|slugify }}/{{ sp.id }}/" class="sim-card">
+        <div class="sim-img">
+          {% if sp.image_url %}<img src="{{ sp.image_url }}" alt="{{ sp.title }}">
+          {% else %}<div style="width:100%;height:100%;background:#dde4ef;display:flex;align-items:center;justify-content:center;font-size:2rem;">🏠</div>{% endif %}
+          <span class="sim-tag">{{ sp.listing_type|upper }}</span>
+        </div>
+        <div class="sim-body">
+          <div class="sim-price">{{ sp.price_display }}</div>
+          <div class="sim-title">{{ sp.title|truncatechars:32 }}</div>
+          <div class="sim-loc"><i class="fas fa-map-marker-alt"></i> {{ sp.location }}</div>
+          <div class="sim-footer">
+            <span>{{ sp.feature }}</span>
+            <span style="color:var(--pr);">View <i class="fas fa-arrow-right"></i></span>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div><!-- end left col -->
+
+<!-- ── RIGHT SIDEBAR ── -->
 <aside>
-
-    <div class="contact-card">
-
-        <!-- PRICE -->
-        <div class="cc-price">
-
-            {{ p.price_display }}
-
-        </div>
-
-        <!-- OWNER INFO -->
-        <div class="cc-owner">
-
-            <div
-            class="co-av"
-            style="background:var(--pr);">
-
-                {{ p.owner_initials|default:"OW" }}
-
-            </div>
-
-            <div style="flex:1;">
-
-                <div class="fw-bold small">
-
-                    {{ p.owner|default:"Property Owner" }}
-
-                </div>
-
-                <div
-                class="small text-muted"
-                style="font-size:.7rem;">
-
-                    {{ p.owner_role|default:"Owner" }}
-
-                </div>
-
-                <div
-                style="
-                font-size:.65rem;
-                background:#dcfce7;
-                color:#166534;
-                padding:2px 6px;
-                border-radius:4px;
-                display:inline-block;
-                margin-top:4px;
-                ">
-
-                    ✅ Verified Owner
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- SUBSCRIPTION STATUS -->
-        {% if logged_user %}
-
-        <div
-        style="
-        background:#f8fafc;
-        border:1px solid #e2e8f0;
-        padding:12px;
-        border-radius:10px;
-        margin-bottom:15px;
-        ">
-
-            {% if active_subscription %}
-
-                <div class="fw-bold text-success">
-
-                    Premium Subscription Active
-
-                </div>
-
-                <div
-                style="
-                font-size:.75rem;
-                color:#64748b;
-                margin-top:4px;
-                ">
-
-                    Remaining Contacts:
-                    <b>{{ remaining_contacts }}</b>
-
-                </div>
-
-            {% else %}
-
-                <div class="fw-bold text-danger">
-
-                    Free User Account
-
-                </div>
-
-                <div
-                style="
-                font-size:.75rem;
-                color:#64748b;
-                margin-top:4px;
-                ">
-
-                    Upgrade your subscription
-                    to unlock owner contacts.
-
-                </div>
-
-            {% endif %}
-
-        </div>
-
-        {% endif %}
-
-
-        <!-- PHONE SECTION -->
-
-        {% if p.phone %}
-
-            <!-- PREMIUM USER -->
-            {% if can_view_contact %}
-
-                <button
-                class="contact-btn btn-pr"
-                onclick="callOwner('{{ p.phone }}')">
-
-                    <i class="fas fa-phone"></i>
-
-                    {{ p.phone }}
-
-                </button>
-
-                <button
-                class="contact-btn"
-                style="background:#25d366;color:white;"
-                onclick="window.open('https://wa.me/91{{ p.phone }}')">
-
-                    <i class="fab fa-whatsapp"></i>
-
-                    WhatsApp Owner
-
-                </button>
-
-            {% else %}
-
-                <!-- MASKED NUMBER -->
-                <div
-                style="
-                background:#f8fafc;
-                border:1px dashed #cbd5e1;
-                padding:14px;
-                border-radius:10px;
-                text-align:center;
-                margin-bottom:12px;
-                ">
-
-                    <div
-                    style="
-                    font-size:1rem;
-                    font-weight:800;
-                    color:#0f172a;
-                    ">
-
-                         {{ masked_phone }}
-
-                    </div>
-
-                    <div
-                    style="
-                    font-size:.72rem;
-                    color:#64748b;
-                    margin-top:4px;
-                    ">
-
-                        Owner contact protected
-
-                    </div>
-
-                </div>
-
-            {% endif %}
-
-        {% else %}
-
-            <button
-            class="contact-btn btn-pr"
-            onclick="Swal.fire({
-                icon:'info',
-                title:'Contact not available'
-            })">
-
-                <i class="fas fa-phone"></i>
-
-                Contact Unavailable
-
-            </button>
-
-        {% endif %}
-
-
-        <!-- ENQUIRY FORM -->
-        <div class="mt-4">
-
-            <div class="fw-bold small mb-2">
-
-                Send Enquiry
-
-            </div>
-
-          <form
-method="POST"
-action="{% url 'save_property_enquiry' %}">
-
-    {% csrf_token %}
-
-    <!-- PROPERTY DETAILS -->
-    <input
-    type="hidden"
-    name="property_id"
-    value="{{ original.id }}">
-                <input
-                type="hidden"
-                name="property_id"
-                value="{{ original.id }}">
-
-    <input
-    type="hidden"
-    name="property_title"
-    value="{{ p.title }}">
-
-    <input
-    type="hidden"
-    name="property_type"
-    value="{{ listing_type }}">
-                <input
-                type="text"
-                name="enquiry_name"
-                id="enquiry_name"
-                class="ef-input"
-                placeholder="Your Name"
-                required value="{{user_obj.user_name}}">
-
-    <input
-    type="hidden"
-    name="property_location"
-    value="{{ p.location }}">
-
-                <input
-                type="tel"
-                name="enquiry_phone"
-                id="enquiry_phone"
-                class="ef-input"
-                placeholder="Phone Number"
-                required value="{{user_obj.user_phone}}">
-
-                <input
-                type="tel"
-                name="enquiry_email"
-                id="enquiry_email"
-                class="ef-input"
-                placeholder="Email Address"
-                required value="{{user_obj.user_email}}">
-
-    <!-- SOURCE TRACKING -->
-    <input
-    type="hidden"
-    name="lead_source"
-    value="property_detail_page">
-
-                <textarea
-                name="enquiry_message"
-                id="enquiry_message"
-                class="ef-input"
-                rows="3"
-                placeholder="I am interested in this property"></textarea>
-
-    <input
-    type="hidden"
-    name="seo_slug"
-    value="{{ seo.slug }}">
-
-                {% if user_obj %}
-                  <button type="button" name="send_enquiry" class="btn btn-dark w-100 btn-sm py-2" onclick="Send_Enquiry(this)">
-                      Send Enquiry
-                  </button>
-                {% else %}
-                  <button type="button" class="btn btn-dark w-100 btn-sm py-2" data-bs-toggle="modal" data-bs-target="#authEnModal">
-                      Send Enquiry
-                  </button>
-                {% endif %}
-
-    <input
-    type="email"
-    name="email"
-    class="ef-input"
-    placeholder="Email Address">
-
-    <textarea
-    name="message"
-    class="ef-input"
-    rows="3"
-    placeholder="I am interested in this property"></textarea>
-
-    <!-- SUBMIT BUTTON -->
-
-    <button
-    type="submit"
-    name="send_enquiry"
-    class="btn btn-dark w-100 btn-sm py-2">
-
-        <i class="fas fa-paper-plane"></i>
-
-        Send Enquiry
-
-    </button>
-
-</form>
-
-        </div>
-
+  <div class="contact-card">
+    <div class="cc-price-label">
+      {% if listing_type == 'rent' %}
+        {% if p.sharing_type or p.pg_for %}Starting Rent (Per Bed){% else %}Monthly Rent{% endif %}
+      {% else %}Property Value{% endif %}
+    </div>
+    <div class="cc-price-val">
+      {% if p.monthly_rent %}₹{{ p.monthly_rent|floatformat:0 }}
+      {% elif p.expected_price %}₹{{ p.expected_price|floatformat:0 }}
+      {% elif p.raw_price %}₹{{ p.raw_price|floatformat:0 }}
+      {% else %}Price on Request{% endif %}
+    </div>
+    {% if listing_type == 'rent' %}
+      <div class="cc-price-subtext">
+        {% if p.sharing_type or p.pg_for %}per bed · per month{% else %}per month{% endif %}
+        {% if p.security_deposit %} · Deposit: ₹{{ p.security_deposit }}{% endif %}
+      </div>
+    {% else %}
+      {% if p.price_sqft %}<div class="cc-price-subtext">₹{{ p.price_sqft }} / sq.ft</div>{% endif %}
+    {% endif %}
+
+    <!-- OWNER BLOCK -->
+    <div class="owner-block">
+      <div class="owner-avatar"><i class="fas fa-user"></i></div>
+      <div>
+        <div class="owner-name">{{ p.owner_name|default:"Property Owner" }}</div>
+        <div class="owner-role">{{ p.uploaded_by_role|default:"Owner"|title }}</div>
+      </div>
     </div>
 
-
-    <!-- MANAGER CARD -->
-    <div class="detail-section mt-3 p-3">
-
-        <div class="small text-muted fw-bold mb-2">
-
-            MANAGED BY PROPCRM
-
+    <!-- CONTACT BUTTONS -->
+    {% if p.owner_contact %}
+      {% if can_view_contact %}
+        <button class="cta-btn cta-primary" onclick="callOwner('{{ p.owner_contact }}')">
+          <i class="fas fa-phone-alt"></i> Call Owner
+        </button>
+        <a href="https://wa.me/91{{ p.owner_contact }}" target="_blank" class="cta-btn cta-whatsapp" style="text-decoration:none;">
+          <i class="fab fa-whatsapp"></i> WhatsApp Owner
+        </a>
+      {% else %}
+        <div class="masked-phone-block">
+          <div class="masked-num">{{ masked_phone }}</div>
+          <div class="masked-hint">Login / Subscribe to view full number</div>
         </div>
+      {% endif %}
+    {% else %}
+      <button class="cta-btn cta-disabled" disabled><i class="fas fa-phone-slash"></i> Contact Unavailable</button>
+    {% endif %}
 
-        <div class="d-flex align-items-center gap-2">
+    <!-- ENQUIRY FORM -->
+    <div class="enq-divider">or send an enquiry</div>
+    <input type="text"  name="enquiry_name"    id="enquiry_name"    class="enq-input" placeholder="Your Full Name *" value="{{ user_obj.user_name|default:'' }}">
+    <input type="tel"   name="enquiry_phone"   id="enquiry_phone"   class="enq-input" placeholder="Mobile Number *"  value="{{ user_obj.user_phone|default:'' }}">
+    <input type="email" name="enquiry_email"   id="enquiry_email"   class="enq-input" placeholder="Email Address *"  value="{{ user_obj.user_email|default:'' }}">
+    <textarea           name="enquiry_message" id="enquiry_message" class="enq-input" rows="3" placeholder="I am interested and would like more details."></textarea>
 
-            <div
-            style="
-            width:40px;
-            height:40px;
-            background:linear-gradient(135deg,#7c3aed,#f97316);
-            border-radius:8px;
-            ">
-            </div>
+    {% if user_obj %}
+      <button type="button" class="enq-submit" onclick="Send_Enquiry(this)">
+        <i class="fas fa-paper-plane"></i> Submit Enquiry
+      </button>
+    {% else %}
+      <button type="button" class="enq-submit" data-bs-toggle="modal" data-bs-target="#authEnModal">
+        <i class="fas fa-paper-plane"></i> Submit Enquiry
+      </button>
+    {% endif %}
 
-            <div>
-
-                <div class="fw-bold small">
-
-                    PropCRM Assistant
-
-                </div>
-
-                <div
-                class="text-muted"
-                style="font-size:.65rem;">
-
-                    Assigned Relationship Manager
-
-                </div>
-
-            </div>
-
-        </div>
-
+    <!-- TRUST BADGES -->
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:center;gap:18px;flex-wrap:wrap;">
+      <div style="text-align:center;"><i class="fas fa-shield-alt" style="color:var(--green);font-size:1.3rem;"></i><div style="font-size:.68rem;font-weight:700;color:var(--muted);margin-top:3px;">Verified</div></div>
+      <div style="text-align:center;"><i class="fas fa-user-check" style="color:var(--blue);font-size:1.3rem;"></i><div style="font-size:.68rem;font-weight:700;color:var(--muted);margin-top:3px;">Owner Connect</div></div>
+      <div style="text-align:center;"><i class="fas fa-lock" style="color:#d97706;font-size:1.3rem;"></i><div style="font-size:.68rem;font-weight:700;color:var(--muted);margin-top:3px;">Secure</div></div>
     </div>
-
+  </div>
 </aside>
-  </aside>
-</div>
 
+</div><!-- end detail-layout -->
 
+<!-- AUTH MODAL -->
 <div class="modal fade" id="authEnModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
-      
-      <div class="modal-header border-0 pb-0" style="position: relative;">
-        <h5 class="modal-title" style="font-weight: 800; color: #1e293b;">Unlock Enquiry Steps</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 20px;"></button>
+    <div class="modal-content" style="border-radius:18px;border:none;box-shadow:0 20px 50px rgba(0,0,0,.18);">
+      <div class="modal-header border-0 pb-0 px-4 pt-4" style="position:relative;">
+        <h5 class="modal-title" style="font-weight:800;color:var(--sec);font-size:1.15rem;">Login to Send Enquiry</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" style="position:absolute;right:20px;top:20px;"></button>
       </div>
-
-      <div class="modal-body pt-2 pb-4 px-4">
-        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Please login or register to continue enquiries for the property you liked.</p>
-        
-        <ul class="nav nav-pills mb-4" id="authTabs" role="tablist" style="background: #f1f5f9; padding: 4px; border-radius: 12px;">
-          <li class="nav-item" role="presentation" style="flex: 1; text-align: center;">
-            <button class="nav-link active w-100" data-bs-toggle="pill" data-bs-target="#modalenLogin" type="button" style="border-radius: 10px; font-weight: 600;">Login</button>
-          </li>
-          <li class="nav-item" role="presentation" style="flex: 1; text-align: center;">
-            <button class="nav-link w-100" data-bs-toggle="pill" data-bs-target="#modalenRegister" type="button" style="border-radius: 10px; font-weight: 600;">Register</button>
-          </li>
+      <div class="modal-body px-4 pb-4 pt-2">
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:18px;">Please login or register to continue with your enquiry.</p>
+        <ul class="nav nav-pills mb-4" style="background:#f1f5f9;padding:4px;border-radius:12px;">
+          <li class="nav-item" style="flex:1;text-align:center;"><button class="nav-link active w-100" data-bs-toggle="pill" data-bs-target="#modalenLogin" type="button" style="border-radius:10px;font-weight:700;">Login</button></li>
+          <li class="nav-item" style="flex:1;text-align:center;"><button class="nav-link w-100" data-bs-toggle="pill" data-bs-target="#modalenRegister" type="button" style="border-radius:10px;font-weight:700;">Register</button></li>
         </ul>
-
         <div class="tab-content">
           <div class="tab-pane fade show active" id="modalenLogin">
-            <div class="mb-3">
-              <label style="font-size: 0.8rem; font-weight: 700;">Email Address/Phone Number <span class="text-danger">*</span></label>
-              <input type="text" id="modal_login_email" class="form-control" placeholder="name@example.com/1234567890" style="border-radius: 10px;">
-            </div>
-            <div class="mb-3">
-              <label style="font-size: 0.8rem; font-weight: 700;">Password <span class="text-danger">*</span></label>
-              <input type="password" id="modal_login_password" class="form-control" placeholder="Enter password" style="border-radius: 10px;">
-            </div>
-
-            <div class="mb-3">
-                <label style="font-size: 0.8rem; font-weight: 700;">Account Role <span class="text-danger">*</span></label>
-                  <select name="user_role" class="form-select" id="modal_login_role" required>
-                    <option value="SelectRole" selected disabled>Choose a role...</option>
-                    <option value="Tenant">Tenant</option>
-                    <option value="Buyer">Buyer</option>
-                  </select>
-            </div>
-
-            <button type="button" class="btn w-100 mt-2" onclick="processModalLogin(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px; justify-content:center;">Sign In & Continue</button>
+            <div class="mb-3"><label style="font-size:.78rem;font-weight:700;">Email / Phone <span class="text-danger">*</span></label><input type="text" id="modal_login_email" class="form-control" placeholder="name@example.com or 1234567890" style="border-radius:10px;"></div>
+            <div class="mb-3"><label style="font-size:.78rem;font-weight:700;">Password <span class="text-danger">*</span></label><input type="password" id="modal_login_password" class="form-control" style="border-radius:10px;"></div>
+            <div class="mb-3"><label style="font-size:.78rem;font-weight:700;">Role <span class="text-danger">*</span></label><select class="form-select" id="modal_login_role"><option value="SelectRole" selected disabled>Choose role...</option><option value="Tenant">Tenant</option><option value="Buyer">Buyer</option></select></div>
+            <button type="button" class="btn w-100" onclick="processModalLogin(this)" style="background:var(--blue);color:white;font-weight:800;padding:12px;border-radius:11px;">Sign In & Continue</button>
           </div>
-
           <div class="tab-pane fade" id="modalenRegister">
-            <div class="mb-3">
-              <label style="font-size: 0.8rem; font-weight: 700;">Full Name <span class="text-danger">*</span></label>
-              <input type="text" id="modal_reg_name" class="form-control" placeholder="John Doe" style="border-radius: 10px;">
-            </div>
-            <div class="row">
-              <div class="col-6 mb-3">
-                <label style="font-size: 0.8rem; font-weight: 700;">Email <span class="text-danger">*</span></label>
-                <input type="email" id="modal_reg_email" class="form-control" placeholder="Email" style="border-radius: 10px;">
-              </div>
-              <div class="col-6 mb-3">
-                <label style="font-size: 0.8rem; font-weight: 700;">Mobile <span class="text-danger">*</span></label>
-                <input type="tel" id="modal_reg_mobile" class="form-control" placeholder="10 Digits" style="border-radius: 10px;" maxlength=10>
-              </div>
-            </div>
-            <div class="mb-3">
-              <label style="font-size: 0.8rem; font-weight: 700;">Create Password <span class="text-danger">*</span></label>
-              <input type="password" id="modal_reg_password" class="form-control" placeholder="6+ characters" style="border-radius: 10px;">
-            </div>
-
-            <div class="mb-3">
-                <label style="font-size: 0.8rem; font-weight: 700;">Account Role <span class="text-danger">*</span></label>
-                  <select name="user_role" class="form-select" id="modal_reg_role" required>
-                    <option value="SelectRole" selected disabled>Choose a role...</option>
-                    <option value="Tenant">Tenant</option>
-                    <option value="Buyer">Buyer</option>
-                  </select>
-            </div>
-
-            <button type="button" class="btn w-100 mt-2" onclick="processModalRegister(this)" style="background: #f97316; color: white; font-weight: 700; padding: 12px; border-radius: 10px; justify-content:center;">Register & Continue</button>
-
-            <button type="button" class="btn w-100 mt-2" data-bs-dismiss="modal" style="background: grey; color: white; font-weight: 700; padding: 12px; border-radius: 10px; justify-content:center;">Close</button>
+            <div class="mb-3"><label style="font-size:.78rem;font-weight:700;">Full Name <span class="text-danger">*</span></label><input type="text" id="modal_reg_name" class="form-control" style="border-radius:10px;"></div>
+            <div class="row"><div class="col-6 mb-3"><label style="font-size:.78rem;font-weight:700;">Email <span class="text-danger">*</span></label><input type="email" id="modal_reg_email" class="form-control" style="border-radius:10px;"></div><div class="col-6 mb-3"><label style="font-size:.78rem;font-weight:700;">Mobile <span class="text-danger">*</span></label><input type="tel" id="modal_reg_mobile" class="form-control" style="border-radius:10px;" maxlength="10"></div></div>
+            <div class="mb-3"><label style="font-size:.78rem;font-weight:700;">Password <span class="text-danger">*</span></label><input type="password" id="modal_reg_password" class="form-control" style="border-radius:10px;"></div>
+            <div class="mb-3"><label style="font-size:.78rem;font-weight:700;">Role <span class="text-danger">*</span></label><select class="form-select" id="modal_reg_role"><option value="SelectRole" selected disabled>Choose role...</option><option value="Tenant">Tenant</option><option value="Buyer">Buyer</option></select></div>
+            <button type="button" class="btn w-100" onclick="processModalRegister(this)" style="background:var(--pr);color:white;font-weight:800;padding:12px;border-radius:11px;">Register & Continue</button>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </div>
 
-
 <!-- FOOTER -->
-<footer>
-    <div class="footer-inner">
-        <div class="footer-grid">
-            <div>
-                <div class="fl-brand">🏠 PropCRM</div>
-                <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
-                <div class="footer-social">
-                    <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                    <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                    <a href="#" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
-                </div>
-            </div>
-            <div>
-                <div class="fl-title">For Tenants</div>
-                <a href="/listingpage/?type=rent" class="fl-link">Flats for Rent</a>
-                <a href="/listingpage/?category=pg" class="fl-link">PG / Hostels</a>
-                <a href="#" class="fl-link">Short-term Stays</a>
-                <a href="#" class="fl-link">Rent Agreement</a>
-            </div>
-            <div>
-                <div class="fl-title">For Buyers</div>
-                <a href="/listingpage/?type=sale" class="fl-link">Flats for Sale</a>
-                <a href="#" class="fl-link">New Projects</a>
-                <a href="#" class="fl-link">Plots & Land</a>
-                <a href="#" class="fl-link">Home Loans</a>
-            </div>
-            <div>
-                <div class="fl-title">For Owners</div>
-                <a href="{% url 'post_property' %}" class="fl-link">Post Property FREE</a>
-                <a href="#" class="fl-link">Agent Registration</a>
-                <a href="#" class="fl-link">PropCRM Plans</a>
-                <a href="#" class="fl-link">Contact Support</a>
-            </div>
+<footer style="background:#1e293b;color:rgba(255,255,255,.7);padding:60px 20px 30px;margin-top:0;">
+  <div style="max-width:1280px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;">
+      <div>
+        <div style="font-size:1.5rem;font-weight:900;color:#fff;margin-bottom:14px;">🏠 PropCRM</div>
+        <div style="font-size:.9rem;line-height:1.7;margin-bottom:20px;">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
+        <div style="display:flex;gap:12px;">
+          <a href="#" style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);font-size:1.1rem;"><i class="fab fa-facebook"></i></a>
+          <a href="#" style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);font-size:1.1rem;"><i class="fab fa-instagram"></i></a>
+          <a href="#" style="width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);font-size:1.1rem;"><i class="fab fa-whatsapp"></i></a>
         </div>
-        <div class="footer-bottom">
-            <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
-            <div>
-                <a href="/privacy">Privacy Policy</a> ·
-                <a href="/terms">Terms of Service</a> ·
-                <a href="/sitemap">Sitemap</a>
-            </div>
-        </div>
+      </div>
+      <div><div style="font-size:.85rem;font-weight:700;color:#fff;margin-bottom:16px;text-transform:uppercase;">For Tenants</div><a href="/listingpage/?type=rent" style="display:block;color:rgba(255,255,255,.7);font-size:.9rem;margin-bottom:10px;">Flats for Rent</a><a href="/listingpage/?category=pg" style="display:block;color:rgba(255,255,255,.7);font-size:.9rem;margin-bottom:10px;">PG / Hostels</a></div>
+      <div><div style="font-size:.85rem;font-weight:700;color:#fff;margin-bottom:16px;text-transform:uppercase;">For Buyers</div><a href="/listingpage/?type=sale" style="display:block;color:rgba(255,255,255,.7);font-size:.9rem;margin-bottom:10px;">Flats for Sale</a><a href="#" style="display:block;color:rgba(255,255,255,.7);font-size:.9rem;margin-bottom:10px;">Plots & Land</a></div>
+      <div><div style="font-size:.85rem;font-weight:700;color:#fff;margin-bottom:16px;text-transform:uppercase;">For Owners</div><a href="{% url 'post_property' %}" style="display:block;color:rgba(255,255,255,.7);font-size:.9rem;margin-bottom:10px;">Post Property FREE</a></div>
     </div>
+    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:24px;display:flex;justify-content:space-between;font-size:.85rem;flex-wrap:wrap;gap:15px;">
+      <span>© 2026 PropCRM · Nagpur, Maharashtra</span>
+      <div><a href="/privacy" style="color:rgba(255,255,255,.7);margin:0 8px;">Privacy Policy</a><a href="/terms" style="color:rgba(255,255,255,.7);margin:0 8px;">Terms</a></div>
+    </div>
+  </div>
 </footer>
 
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
-// --- AUTHENTICATION STATE & INTERCEPTION ---
-let isLoggedIn = {% if user_obj %}true{% else %}false{% endif %};
-let userMobile = "{{ user_obj.user_phone|default:''|escapejs }}";
-let pendingStep = null;
-
-
-
-// --- MODAL AJAX LOGIN ---
-function processModalLogin(btn) {
-    const user_identifier = document.getElementById('modal_login_email').value;
-    const password = document.getElementById('modal_login_password').value;
-    const role = document.getElementById('modal_login_role').value;
-
-    if (!user_identifier || !password || role === "SelectRole") {
-        Swal.fire({icon: "warning", title: "Missing Input", text: "Please enter email/phone number, password and select a role"});
-        return;
-    }
-
-    const originalText = btn.innerHTML;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Verifying...`;
-    btn.disabled = true;
-
-    $.ajax({
-        method: "POST",
-        url: "{% url 'login' %}", 
-        contentType: "application/json",
-        data: JSON.stringify({
-            "user_identifier": user_identifier,
-            "user_password": password,
-            "user_role": role
-        }),
-        success: function (response) {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-
-            if (response.status == '1' || response.status == 'success') {
-                isLoggedIn = true; 
-                bootstrap.Modal.getInstance(document.getElementById('authEnModal')).hide();
-                
-                
-                
-                location.reload();
-                
-                // Jump to top and clear pending action
-                if(pendingStep) {
-                    window.scrollTo(0, 0);
-                    pendingStep = null; // <-- FIXED: Clears the pending step
-                }
-            } else {
-                Swal.fire({icon: "error", title: "Login Failed", text: response.msg});
-            }
-        },
-        error: function() {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            Swal.fire({icon: "error", title: "Error", text: "Server connection failed."});
-        }
-    });
-}
-
-// --- MODAL AJAX REGISTER ---
-function processModalRegister(btn) {
-    const name = document.getElementById('modal_reg_name').value;
-    const email = document.getElementById('modal_reg_email').value;
-    const mobile = document.getElementById('modal_reg_mobile').value;
-    const password = document.getElementById('modal_reg_password').value;
-    const role = document.getElementById('modal_reg_role').value;
-
-    if (!name || !email || !mobile || !password || role === "SelectRole") {
-        Swal.fire({icon: "warning", title: "Missing Input", text: "Please fill all fields"});
-        return;
-    }
-
-    const originalText = btn.innerHTML;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Creating Account...`;
-    btn.disabled = true;
-
-    var fd = new FormData();
-    fd.append('role', role);
-    fd.append('full_name', name);
-    fd.append('email', email);
-    fd.append('mobile_number', mobile);
-    fd.append('password', password);
-    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-    $.ajax({
-        method: "POST",
-        url: "{% url 'signup' %}", 
-        data: fd,
-        processData: false,
-        contentType: false,
-        success: function (response) {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-
-            if (response.status == '1' || response.status == 'success') {
-                isLoggedIn = true; 
-                bootstrap.Modal.getInstance(document.getElementById('autEnModal')).hide();
-                
-                location.reload();
-                
-                // Jump to top and clear pending action
-                if(pendingStep) {
-                    window.scrollTo(0, 0);
-                    pendingStep = null; // <-- FIXED: Clears the pending step
-                }
-            } else {
-                Swal.fire({icon: "error", title: "Registration Failed", text: response.msg});
-            }
-        },
-        error: function() {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            Swal.fire({icon: "error", title: "Error", text: "Server connection failed."});
-        }
-    });
-}
-</script>
-
-
-<script>
-
-
-// ==========================================
-// CALL OWNER
-// ==========================================
-
-function callOwner(phone){
-
-    Swal.fire({
-
-        title:'Owner Contact',
-
-        html:`
-
-            <div style="padding:10px;">
-
-                <div
-                style="
-                font-size:28px;
-                font-weight:800;
-                color:#f97316;
-                margin-bottom:15px;
-                ">
-
-                    📞 ${phone}
-
-                </div>
-
-                <a
-                href="tel:${phone}"
-                class="btn btn-primary">
-
-                    Call Now
-
-                </a>
-
-            </div>
-
-        `,
-
-        confirmButtonColor:'#f97316'
-
-    });
-
-}
-
-
-
-// ==========================================
-// LOGIN REQUIRED POPUP
-// ==========================================
-
-function showLoginPopup(){
-
-    Swal.fire({
-
-        icon:'info',
-
-        title:'Login Required',
-
-        html:`
-
-            <div style="font-size:14px;color:#475569;">
-
-                Please login to continue.
-
-                <br><br>
-
-                <a
-                href="{% url "login" %}"
-                class="btn btn-warning">
-
-                    Login Now
-
-                </a>
-
-            </div>
-
-        `,
-
-        showConfirmButton:false
-
-    });
-
-}
-
-
-
-// ==========================================
-// PREMIUM REQUIRED POPUP
-// ==========================================
-
-function showPremiumPopup(){
-
-    Swal.fire({
-
-        icon:'info',
-
-        title:'Premium Membership Required',
-
-        html:`
-
-            <div style="font-size:14px;color:#475569;">
-
-                Upgrade your subscription
-                to unlock owner contact details.
-
-                <br><br>
-
-                <a
-                href="/subscription/plans/"
-                class="btn btn-warning">
-
-                    Upgrade Now
-
-                </a>
-
-            </div>
-
-        `,
-
-        showConfirmButton:false
-
-    });
-
-}
-
-
-
-// ==========================================
-// SEND ENQUIRY
-// ==========================================
-
-  function Send_Enquiry(_this) {
-  // Added .trim() to prevent users from just typing spaces to bypass validation
-  var enquiry_name = $("#enquiry_name").val().trim();
-  var enquiry_phone = $("#enquiry_phone").val().trim();
-  var enquiry_email = $("#enquiry_email").val().trim();
-  var enquiry_message = $("#enquiry_message").val().trim();
-
-  // FIX: Check if required fields are empty, rather than comparing name to phone
-  if (enquiry_name === "" || enquiry_phone === "") {
-    Swal.fire({
-      title: 'Error',
-      text: 'Please fill the required fields',
-      icon: 'error',
-      confirmButtonColor: '#3085d6' // Optional: customize button color
-    });
-    return;
+// ═══════════════════════════════════════════════
+// MEDIA VIEWER — FIXED VIDEO PLAYBACK
+// ═══════════════════════════════════════════════
+
+// Track active thumb
+let currentThumb = null;
+let isVideoMode = {% if p.video %}true{% else %}false{% endif %};
+
+// On page load: wire up the initial video element (if any)
+document.addEventListener('DOMContentLoaded', function () {
+  const v = document.getElementById('mainVideo');
+  if (v) {
+    wireVideoEvents(v);
+    // Show play icon (video is paused initially — autoplay blocked by browser)
+    setPlayIcon(true);
   }
+});
 
-  var fd = new FormData();
-  fd.append('enquiry_name', enquiry_name);
-  fd.append('enquiry_phone', enquiry_phone);
-  fd.append('enquiry_email', enquiry_email);
-  fd.append('enquiry_message', enquiry_message);
-  fd.append('listing_type', '{{p.listing_type}}');
-  fd.append('category', '{{p.category}}');
-  fd.append('property_id', '{{p.id}}');
-  fd.append('user_id', '{{user_obj.id}}');
-
-  $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Sending...`);
-
-  $.ajax({
-    method: "POST",
-    url: "{% url 'Send_Property_Enquiry' %}",
-    data: fd,
-    processData: false,
-    contentType: false,
-    success: function (response) {
-      $(_this).prop("disabled", false).html(`Send Enquiry`);
-      
-      if (response.status == '1') {
-        Swal.fire({
-          title: 'Success!',
-          text: response.msg,
-          icon: 'success',
-          confirmButtonColor: '#28a745'
-        }).then((result) => {
-          // SweetAlert2 passes a 'result' object. Check if they clicked OK.
-          if (result.isConfirmed) {
-            location.reload();
-          }
-        });
-      } else {
-        Swal.fire({
-          title: 'Error',
-          text: response.msg,
-          icon: 'error',
-          confirmButtonColor: '#d33'
-        });
-      }
-    },
-    error: function() {
-      // It's always good practice to catch server/network errors!
-      $(_this).prop("disabled", false).html(`Send Enquiry`);
-      Swal.fire({
-        title: 'Network Error',
-        text: 'Something went wrong while submitting your enquiry. Please try again.',
-        icon: 'error'
-      });
-    }
+function wireVideoEvents(videoEl) {
+  videoEl.addEventListener('play',  () => setPlayIcon(false));
+  videoEl.addEventListener('pause', () => setPlayIcon(true));
+  videoEl.addEventListener('ended', () => setPlayIcon(true));
+  videoEl.addEventListener('error', function () {
+    document.getElementById('activeDisplay').innerHTML =
+      '<div class="no-media-placeholder"><span style="font-size:2rem;">⚠️</span><span>Video could not be loaded</span></div>';
   });
 }
 
+function setPlayIcon(isPaused) {
+  const icon = document.getElementById('playPauseIcon');
+  if (icon) icon.className = isPaused ? 'fas fa-play' : 'fas fa-pause';
+}
 
+// Called by the video thumbnail button
+function activateVideo(url) {
+  isVideoMode = true;
+  deactivateAllThumbs();
+  const videoThumb = document.getElementById('videoThumb');
+  if (videoThumb) videoThumb.style.borderColor = '#f97316';
 
-// ==========================================
-// SAVE PROPERTY
-// ==========================================
+  const container = document.getElementById('activeDisplay');
+  container.innerHTML =
+    '<video id="mainVideo" src="' + url + '" controls preload="metadata" playsinline ' +
+    'style="width:100%;height:100%;object-fit:contain;">' +
+    '<source src="' + url + '" type="video/mp4">' +
+    '<source src="' + url + '" type="video/webm">' +
+    '</video>';
 
-function saveListing(){
+  const v = document.getElementById('mainVideo');
+  wireVideoEvents(v);
+  setPlayIcon(true);
 
-    const btn = document.getElementById('saveBtn');
+  // Attempt play (may be blocked; user can click play manually)
+  v.play().then(() => setPlayIcon(false)).catch(() => setPlayIcon(true));
 
-    if(btn){
+  // Show play/pause button
+  const ppBtn = document.getElementById('playPauseBtn');
+  if (ppBtn) ppBtn.style.display = '';
+}
 
-        btn.innerHTML = `
-            <i class="fas fa-heart text-danger"></i>
-            Saved
-        `;
+// Called by image thumbnails
+function activateImage(url, thumbEl) {
+  isVideoMode = false;
+  deactivateAllThumbs();
+  if (thumbEl) thumbEl.classList.add('active');
+  currentThumb = thumbEl;
 
+  document.getElementById('activeDisplay').innerHTML =
+    '<img id="mainImage" src="' + url + '" alt="Property" style="width:100%;height:100%;object-fit:contain;">';
+
+  // Hide play/pause button (not applicable for images)
+  const ppBtn = document.getElementById('playPauseBtn');
+  if (ppBtn) ppBtn.style.display = 'none';
+}
+
+function deactivateAllThumbs() {
+  document.querySelectorAll('.media-thumb').forEach(t => t.classList.remove('active'));
+}
+
+// Play/Pause toggle
+function togglePlayPause() {
+  const v = document.getElementById('mainVideo');
+  if (!v) return;
+  if (v.paused) { v.play(); }
+  else          { v.pause(); }
+}
+
+// Download current media
+function downloadMedia() {
+  const v = document.getElementById('mainVideo');
+  const img = document.getElementById('mainImage');
+  const url = v ? v.src : (img ? img.src : null);
+  if (!url) return;
+  const a = document.createElement('a');
+  a.href = url; a.download = 'Property_Media';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// ═══════════════════════════════════════════════
+// EMI CALCULATOR
+// ═══════════════════════════════════════════════
+function calculateInteractiveEMI() {
+  const principal = parseFloat(document.getElementById('emiPrincipal').value) * 0.80;
+  const r = parseFloat(document.getElementById('emiRate').value) / 12 / 100;
+  const n = parseFloat(document.getElementById('emiYears').value) * 12;
+  if (principal > 0 && r > 0 && n > 0) {
+    const emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    document.getElementById('emiResult').innerText = Math.round(emi).toLocaleString('en-IN');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════
+function processModalLogin(btn) {
+  const identifier = document.getElementById('modal_login_email').value;
+  const password   = document.getElementById('modal_login_password').value;
+  const role       = document.getElementById('modal_login_role').value;
+  if (!identifier || !password || role === 'SelectRole') { Swal.fire({icon:'warning',title:'Missing Input'}); return; }
+  const orig = btn.innerHTML; btn.innerHTML = 'Verifying...'; btn.disabled = true;
+  $.ajax({
+    method:'POST', url:'{% url "login" %}', contentType:'application/json',
+    data: JSON.stringify({user_identifier:identifier, user_password:password, user_role:role}),
+    success: function(res) {
+      if (res.status=='1'||res.status=='success') location.reload();
+      else Swal.fire({icon:'error',title:'Failed',text:res.msg});
+      btn.innerHTML=orig; btn.disabled=false;
+    },
+    error: function() { btn.innerHTML=orig; btn.disabled=false; Swal.fire({icon:'error',title:'Error'}); }
+  });
+}
+
+function processModalRegister(btn) {
+  const name=document.getElementById('modal_reg_name').value;
+  const email=document.getElementById('modal_reg_email').value;
+  const mobile=document.getElementById('modal_reg_mobile').value;
+  const password=document.getElementById('modal_reg_password').value;
+  const role=document.getElementById('modal_reg_role').value;
+  if (!name||!email||!mobile||!password||role==='SelectRole') { Swal.fire({icon:'warning',title:'Missing Input'}); return; }
+  const orig=btn.innerHTML; btn.innerHTML='Creating...'; btn.disabled=true;
+  const fd=new FormData();
+  fd.append('role',role); fd.append('full_name',name); fd.append('email',email);
+  fd.append('mobile_number',mobile); fd.append('password',password);
+  fd.append('csrfmiddlewaretoken','{{ csrf_token }}');
+  $.ajax({
+    method:'POST', url:'{% url "signup" %}', data:fd, processData:false, contentType:false,
+    success: function(res) {
+      if (res.status=='1'||res.status=='success') location.reload();
+      else Swal.fire({icon:'error',title:'Failed',text:res.msg});
+      btn.innerHTML=orig; btn.disabled=false;
+    },
+    error: function() { btn.innerHTML=orig; btn.disabled=false; Swal.fire({icon:'error',title:'Error'}); }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// CALL OWNER
+// ═══════════════════════════════════════════════
+function callOwner(phone) {
+  Swal.fire({
+    title:'Owner Contact',
+    html:`<div style="padding:10px;text-align:center;">
+      <div style="font-size:26px;font-weight:800;color:#e84118;margin-bottom:15px;">📞 ${phone}</div>
+      <a href="tel:${phone}" class="btn btn-danger" style="background:#e84118;border:none;padding:10px 28px;border-radius:10px;font-weight:800;">Call Now</a>
+    </div>`,
+    showConfirmButton:false, showCloseButton:true
+  });
+}
+
+// ═══════════════════════════════════════════════
+// SEND ENQUIRY
+// ═══════════════════════════════════════════════
+function Send_Enquiry(_this) {
+  const name  = $('#enquiry_name').val().trim();
+  const phone = $('#enquiry_phone').val().trim();
+  const email = $('#enquiry_email').val().trim();
+  const msg   = $('#enquiry_message').val().trim();
+  if (!name || !phone) { Swal.fire({title:'Error',text:'Please fill required fields',icon:'error'}); return; }
+  const fd = new FormData();
+  fd.append('enquiry_name', name);
+  fd.append('enquiry_phone', phone);
+  fd.append('enquiry_email', email);
+  fd.append('enquiry_message', msg);
+  fd.append('listing_type', '{{ listing_type }}');
+  fd.append('category', '{{ category }}');
+  fd.append('property_id', '{{ p.id }}');
+  fd.append('user_id', '{{ user_obj.id|default:"" }}');
+  fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+  $(_this).prop('disabled',true).html('<i class="fas fa-spinner fa-spin"></i> Sending...');
+  $.ajax({
+    method:'POST', url:'{% url "Send_Property_Enquiry" %}', data:fd, processData:false, contentType:false,
+    success: function(res) {
+      $(_this).prop('disabled',false).html('<i class="fas fa-paper-plane"></i> Submit Enquiry');
+      if (res.status=='1') Swal.fire({title:'Enquiry Sent!',text:res.msg,icon:'success'}).then(()=>location.reload());
+      else Swal.fire({title:'Error',text:res.msg,icon:'error'});
+    },
+    error: function() {
+      $(_this).prop('disabled',false).html('<i class="fas fa-paper-plane"></i> Submit Enquiry');
+      Swal.fire({title:'Network Error',text:'Something went wrong.',icon:'error'});
     }
-
-    Swal.fire({
-
-        icon:'success',
-
-        title:'Property Saved',
-
-        timer:1200,
-
-        showConfirmButton:false
-
-    });
-
+  });
 }
-
-
-
-// ==========================================
-// SHARE PROPERTY
-// ==========================================
-
-function shareListing(){
-
-    if(navigator.share){
-
-        navigator.share({
-
-            title:document.title,
-
-            url:window.location.href
-
-        }).catch(() => {
-
-            copyToClipboard();
-
-        });
-
-    }else{
-
-        copyToClipboard();
-
-    }
-
-}
-
-
-
-// ==========================================
-// COPY URL
-// ==========================================
-
-function copyToClipboard(){
-
-    navigator.clipboard.writeText(window.location.href);
-
-    Swal.fire({
-
-        icon:'success',
-
-        title:'Link Copied',
-
-        text:'Property link copied successfully',
-
-        confirmButtonColor:'#f97316'
-
-    });
-
-}
-
-
-
 </script>
-
 </body>
 </html>

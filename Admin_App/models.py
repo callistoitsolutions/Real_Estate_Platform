@@ -195,7 +195,6 @@ class Achievement(models.Model):
 
 
 
-from django.db import models
 
 
 class PropertyFAQ(models.Model):
@@ -214,8 +213,11 @@ class PropertyFAQ(models.Model):
     )
 
     property_type = models.CharField(
+
         max_length=50,
+
         choices=PROPERTY_TYPES
+
     )
 
     question = models.CharField(max_length=500)
@@ -227,9 +229,8 @@ class PropertyFAQ(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
+
         return f"{self.property_type} - {self.question}"
-    
-    
 
 
 class TimelineItem(models.Model):
@@ -577,6 +578,8 @@ class CommercialRentalProperty(models.Model):
     public_washroom = models.IntegerField(default=0)
 
     flooring_type = models.CharField(max_length=50, blank=True, null=True)
+    property_summary = models.TextField(blank=True, null=True)
+    property_description = models.TextField(blank=True, null=True)
 
     # ✅ LIST DATA
     amenities = models.JSONField(blank=True, null=True)
@@ -675,7 +678,7 @@ class PGColivingProperty(models.Model):
     guardian_allowed = models.BooleanField(default=False)
     drinking_allowed = models.BooleanField(default=False)
     smoking_allowed = models.BooleanField(default=False)
-
+    property_description = models.TextField(blank=True, null=True) # ✅ ADD THIS
     # MEDIA
     floor_plan = models.ImageField(upload_to='pg/floorplans/', blank=True, null=True)
     video = models.FileField(upload_to='pg/videos/', blank=True, null=True)

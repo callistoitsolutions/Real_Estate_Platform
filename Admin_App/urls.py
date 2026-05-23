@@ -403,7 +403,7 @@ urlpatterns = [
 
     path('rental-residential/delete/<int:pk>/', views.rental_residential_delete, name='rental_residential_delete'),
 
-  
+    path('system-audit-logs/', views.system_audit_logs, name='system_audit_logs'),
     path('rental-residential/bulk-delete/', views.rental_bulk_delete, name='rental_bulk_delete'),
     path('global_recycle_bin', views.global_recycle_bin, name='global_recycle_bin'),
     #path('rental-residential/recycle-bin/', views.rental_recycle_bin, name='rental_recycle_bin'),
@@ -489,7 +489,9 @@ urlpatterns = [
      
      path('commercial-resale/bulk-delete/', views.commercial_resale_bulk_delete, name='commercial_resale_bulk_delete'),
     
-    
+    path('commercial-resale/restore/<int:id>/', views.commercial_resale_restore, name='commercial_resale_restore'),
+    path('commercial-resale/hard-delete/<int:id>/', views.commercial_resale_hard_delete, name='commercial_resale_hard_delete'),
+
     path('commercial-resale/view/<int:id>/', views.commercial_resale_view, name='commercial_resale_view'),
     path('commercial-resale/edit/<int:id>/', views.commercial_resale_edit, name='commercial_resale_edit'),
 
