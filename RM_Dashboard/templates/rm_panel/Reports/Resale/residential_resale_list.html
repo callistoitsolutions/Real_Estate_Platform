@@ -1,0 +1,854 @@
+{% include "rm_panel/rm_header.html" %}
+{% load static %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+
+        <div class="main-content">
+
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Sell Residential Property Listings</h1>
+                    <div class="page-actions">
+                        <a href="{% url 'residential_resale_rm' %}">
+                            <button class="btn-primary-custom">
+                                <i class="fas fa-plus-circle"></i> Add Resale (Residential) Property
+                            </button>
+                        </a>
+                        <button class="btn-primary-custom"
+                                style="background: transparent; border: 2px solid white; color: white;"
+                                data-toggle="modal" data-target="#exampleModalCenter">
+                            <i class="fas fa-download"></i> Import Excel
+                        </button>
+                        <button class="btn-primary-custom" data-toggle="modal" data-target="#bulkDeleteModal" style="background: #ef4444; border-color: #ef4444; color: white;">
+                            <i class="fas fa-trash-alt"></i> Bulk Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card primary">
+                    <div class="stat-icon primary"><i class="fas fa-home"></i></div>
+                    <div class="stat-value">{{ properties.count }}</div>
+                    <div class="stat-label">Total Properties</div>
+                    <span class="stat-change positive"><i class="fas fa-arrow-up"></i> Live</span>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon success"><i class="fas fa-building"></i></div>
+                    <div class="stat-value">{{ total_negotiable }}</div>
+                    <div class="stat-label">Negotiable</div>
+                    <span class="stat-change positive"><i class="fas fa-handshake"></i> Open</span>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon warning"><i class="fas fa-couch"></i></div>
+                    <div class="stat-value">{{ total_furnished }}</div>
+                    <div class="stat-label">Fully Furnished</div>
+                    <span class="stat-change positive"><i class="fas fa-arrow-up"></i> Ready</span>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-icon info"><i class="fas fa-file-contract"></i></div>
+                    <div class="stat-value">{{ total_freehold }}</div>
+                    <div class="stat-label">Freehold</div>
+                    <span class="stat-change positive"><i class="fas fa-check"></i> Clear</span>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-icon danger" style="background: var(--success-gradient);">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <div class="stat-value">{{ total_with_images }}</div>
+                    <div class="stat-label">With Photos</div>
+                    <span class="stat-change positive"><i class="fas fa-chart-line"></i> Listed</span>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon success" style="background: var(--dark-gradient);">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="stat-value">{{ properties.count }}</div>
+                    <div class="stat-label">Total Listings</div>
+                    <span class="stat-change positive"><i class="fas fa-arrow-up"></i> +20%</span>
+                </div>
+            </div>
+
+            <div class="analytics-section">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Property Type Distribution</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="propertyPieChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-chart-bar"></i> BHK Distribution</h3>
+                        <div class="chart-filters">
+                            <button class="filter-btn active">All</button>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="rentalIncomeChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Furnishing Status</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="occupancyDoughnutChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Zone Distribution</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="rentRangeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="properties-section">
+                <div class="section-header">
+                    <h3 class="section-title"><i class="fas fa-list"></i> Resale Residential Property Listings</h3>
+                </div>
+
+                <div class="table-responsive">
+                   
+
+                    <table class="properties-table table table-hover" id="resaleTable" style="width:100%">
+<thead>
+<tr>
+<th>Sr.No</th>
+<th>Images</th>
+<th>Title</th>
+<th>Property Type</th>
+<th>Zone</th>
+<th>Society Type</th>
+<th>Water Type</th>
+<th>Furnishing</th>
+<th>Age</th>
+<th>Facing</th>
+<th>Available From</th>
+<th>BHK</th>
+<th>Bathrooms</th>
+<th>Balconies</th>
+<th>Covered Parking</th>
+<th>Open Parking</th>
+<th>Built-up</th>
+<th>Carpet</th>
+<th>Plot</th>
+<th>Floor No</th>
+<th>Total Floors</th>
+<th>Ownership</th>
+<th>No Owners</th>
+<th>Loan</th>
+<th>Loan Amount</th>
+<th>Tenants</th>
+<th>Tenant Details</th>
+<th>Dispute</th>
+<th>Dispute Details</th>
+<th>Tax</th>
+<th>Tax Amount</th>
+<th>Price</th>
+<th>Price/sqft</th>
+<th>Negotiable</th>
+<th>Brokerage</th>
+<th>Brokerage %</th>
+<th>Facilities</th>
+<th>Amenities</th>
+<th>City</th>
+<th>Locality</th>
+<th>Building</th>
+<th>Address</th>
+<th>Owner</th>
+<th>Contact</th>
+<th>Email</th>
+<th>Status</th>
+<th>Listed By</th>
+<th>Role</th>
+<th>Lister Email</th>
+<th>Lister Contact</th>
+<th>Floor Plan</th>
+<th>Video</th>
+<th>Created</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody>
+{% for prop in properties %}
+<tr id="row-{{ prop.pk }}">
+
+<td>{{ forloop.counter }}</td>
+
+<td>
+{% if prop.thumbnail %}
+<div style="position:relative;">
+    <img src="{{ prop.thumbnail.image.url }}"
+         style="width:70px;height:55px;border-radius:6px;cursor:pointer;"
+         onclick="openGallery(this)"
+         data-images='{{ prop.image_urls|join:"|" }}'>
+
+    <span style="position:absolute;top:-5px;right:-5px;
+    background:#6366f1;color:white;font-size:10px;padding:2px 6px;border-radius:10px;">
+        {{ prop.image_count }}
+    </span>
+</div>
+{% else %}—{% endif %}
+</td>
+
+<td>{{ prop.title }}</td>
+<td>{{ prop.get_property_type_display }}</td>
+<td>{{ prop.get_zone_display }}</td>
+<td>{{ prop.get_society_type_display }}</td>
+<td>{{ prop.get_water_type_display }}</td>
+<td>{{ prop.get_furnishing_type_display }}</td>
+<td>{{ prop.get_age_of_property_display }}</td>
+<td>{{ prop.facing }}</td>
+<td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
+<td>{{ prop.bhk }}</td>
+<td>{{ prop.bathrooms }}</td>
+<td>{{ prop.balconies }}</td>
+<td>{{ prop.covered_parking }}</td>
+<td>{{ prop.open_parking }}</td>
+<td>{{ prop.builtup_area }}</td>
+<td>{{ prop.carpet_area }}</td>
+<td>{{ prop.plot_area|default:"—" }}</td>
+<td>{{ prop.floor_no }}</td>
+<td>{{ prop.total_floors }}</td>
+<td>{{ prop.get_ownership_type_display }}</td>
+<td>{{ prop.num_owners }}</td>
+
+<td>{% if prop.has_loan == 'yes' %}Yes{% else %}No{% endif %}</td>
+<td>{{ prop.loan_amount|default:"—" }}</td>
+
+<td>{% if prop.has_tenants == 'yes' %}Yes{% else %}No{% endif %}</td>
+<td>{{ prop.tenant_details|default:"—" }}</td>
+
+<td>{% if prop.has_legal_dispute == 'yes' %}Yes{% else %}No{% endif %}</td>
+<td>{{ prop.dispute_details|default:"—" }}</td>
+
+<td>{% if prop.has_tax_due == 'yes' %}Pending{% else %}Paid{% endif %}</td>
+<td>{{ prop.pending_tax_amount|default:"—" }}</td>
+
+<td>₹{{ prop.expected_price|floatformat:0 }}</td>
+<td>{{ prop.price_per_sqft|default:"—" }}</td>
+<td>{{ prop.is_negotiable }}</td>
+<td>{{ prop.brokerage|default:"—" }}</td>
+<td>
+{% if prop.manual_brokerage %}
+{{ prop.manual_brokerage }}
+{% elif prop.brokerage_percentage %}
+{{ prop.brokerage_percentage }}
+{% else %}—{% endif %}
+</td>
+
+<td>
+    {% if prop.nearby_facilities_list %}
+        {% for f in prop.nearby_facilities_list %}
+            <span class="badge bg-primary">{{ f }}</span>
+        {% endfor %}
+    {% else %}
+        —
+    {% endif %}
+</td>
+
+<td>
+    {% if prop.amenities_list %}
+        {% for a in prop.amenities_list %}
+            <span class="badge bg-success">{{ a }}</span>
+        {% endfor %}
+    {% else %}
+        —
+    {% endif %}
+</td>
+
+<td>{{ prop.city }}</td>
+<td>{{ prop.locality }}</td>
+<td>{{ prop.building_name|default:"—" }}</td>
+<td>{{ prop.complete_address }}</td>
+<td>{{ prop.owner_name }}</td>
+<td>{{ prop.owner_contact }}</td>
+<td>{{ prop.owner_email }}</td>
+<td>{{ prop.get_residential_status_display }}</td>
+
+<td>{{ prop.uploaded_by_name|default:"—" }}</td>
+<td>{{ prop.uploaded_by_role|default:"—" }}</td>
+<td>{{ prop.uploaded_by_email|default:"—" }}</td>
+<td>{{ prop.uploaded_by_contact|default:"—" }}</td>
+
+<td>
+{% if prop.floor_plan %}
+<a href="{{ prop.floor_plan.url }}" target="_blank">View</a>
+{% else %}—{% endif %}
+</td>
+
+<td>
+{% if prop.property_video %}
+<a href="{{ prop.property_video.url }}" target="_blank">View</a>
+{% else %}—{% endif %}
+</td>
+
+<td>{{ prop.created_at|date:"d M Y" }}</td>
+
+<td class="text-center">
+    <div class="d-flex justify-content-center gap-2">
+        <a href="{% url 'resale_residential_view' prop.pk %}" class="btn-action btn-view" title="View">
+            <i class="fas fa-eye"></i>
+        </a>
+
+        <a href="{% url 'resale_residential_edit' prop.pk %}" class="btn-action btn-edit" title="Edit">
+            <i class="fas fa-edit"></i>
+        </a>
+
+        <button class="btn-action btn-delete" title="Delete" onclick="Delete_Property({{ prop.pk }})">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</td>
+
+</tr>
+
+{% empty %}
+<tr>
+<td colspan="54" class="text-center">No Data Found</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="imagePreviewModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalTitle">Property Image</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="previewImg" src="" alt="" style="max-width:100%; border-radius:8px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Import Excel</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px;">
+                                <i class="fas fa-info-circle" style="color:#10b981;"></i>
+                                Download the sample file to use the correct format.&nbsp;
+                                <a href="{% url 'resale_residential_sample_excel' %}"
+                                   style="color:#10b981;font-weight:600;text-decoration:underline;">
+                                    <i class="fas fa-download"></i> Download Sample Excel
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    Upload Resale (Residential) Data Excel File
+                                    <span class="required" style="color:red;">*</span>
+                                </label>
+                                <input type="file" class="form-control"
+                                       id="resale_file" name="resale_file"
+                                       required onchange="checkSelectedFileSize(this)" accept=".xlsx">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary"
+                            style="background-color:#667eea;"
+                            onclick="Import_Resale_Data(this)">Upload</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 10000;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="border-radius:12px; overflow:hidden; border:none; box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+                <div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none; padding:20px 24px;">
+                    <h5 class="modal-title" style="color:white; font-weight:700; font-size:16px;">
+                        <i class="fas fa-trash-alt" style="margin-right:8px;"></i> Advanced Bulk Delete (Resale)
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:1;">&times;</button>
+                </div>
+                <div class="modal-body" style="padding:24px;">
+                    <form id="bulkDeleteForm">
+                        <div class="form-group mb-3">
+                            <label style="font-size:13px; font-weight:600;">Delete Criteria <span style="color:red;">*</span></label>
+                            <select class="form-control mt-1" id="deleteType" name="delete_type" onchange="toggleDeleteInputs()" style="font-size:13px;">
+                                <option value="">-- Select Option --</option>
+                                <option value="current_page">Delete Current Page Data</option>
+                                <option value="date_range">Delete by Date Range</option>
+                                <option value="latest_month">Delete Latest Month Data</option>
+                                <option value="old_data">Delete Data Older Than 6 Months</option>
+                                <option value="by_uploader">Delete by Uploaded User Source</option>
+                                <option value="by_file">Delete by Specific Excel File</option>
+                                <option value="delete_all" style="color: red; font-weight: bold;">Delete ALL Data</option>
+                            </select>
+                        </div>
+
+                        <div id="dateRangeInputs" style="display:none; gap: 10px; margin-top: 10px;">
+                            <div style="flex: 1;">
+                                <label style="font-size:12px;">From Date</label>
+                                <input type="date" id="fromDate" name="from_date" class="form-control mt-1">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size:12px;">To Date</label>
+                                <input type="date" id="toDate" name="to_date" class="form-control mt-1">
+                            </div>
+                        </div>
+
+                        <div id="uploaderInput" style="display:none; margin-top: 10px;">
+                            <label style="font-size:12px;">Uploaded By (Name/Email/Role)</label>
+                            <input type="text" id="uploaderText" name="uploader_text" class="form-control mt-1" placeholder="e.g. Admin or admin@example.com">
+                        </div>
+
+                        <div id="fileInput" style="display:none; margin-top: 10px;">
+                            <label style="font-size:12px;">Select Uploaded Excel File</label>
+                            <select id="selectedFile" name="selected_file" class="form-control mt-1" style="font-size:13px;">
+                                <option value="">-- Select File --</option>
+                                {% for file in uploaded_files %}
+                                    <option value="{{ file }}">{{ file }}</option>
+                                {% empty %}
+                                    <option value="" disabled>No files found in database (Ensure your import script saves the filename)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #F3F4F6; padding:16px 24px; gap:10px;">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="executeBulkDelete()" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none;">
+                        <i class="fas fa-exclamation-triangle"></i> Confirm Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="imageModal" style="display:none; position:fixed; top:0; left:0;
+width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999;
+justify-content:center; align-items:center; flex-direction:column;">
+
+    <span onclick="closeGallery()" 
+          style="position:absolute; top:20px; right:30px; color:white;
+          font-size:30px; cursor:pointer;">&times;</span>
+
+    <img id="modalImage" style="max-width:80%; max-height:80%; border-radius:10px;">
+
+    <div style="margin-top:10px;">
+        <button onclick="prevImage()">⬅ Prev</button>
+        <button onclick="nextImage()">Next ➡</button>
+    </div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+    <script>
+
+        $("#Resale").addClass("active");
+
+        $(document).ready(function () {
+            $('#resaleTable').DataTable({
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 50, 100],
+                responsive: false,
+                scrollX: true,
+                order: [[52, 'desc']],        // 52 = "Added On" column
+                dom: '<"row mb-3"<"col-md-6"B><"col-md-6"f>>rt<"row mt-3"<"col-md-5"i><"col-md-7"p>>',
+                buttons: [
+                    {
+                        extend: 'excelHtml5',
+                        text: '<i class="fas fa-file-excel"></i> Export Excel',
+                        className: 'btn btn-success btn-sm',
+                        exportOptions: { columns: ':not(:last-child)' }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: '<i class="fas fa-file-pdf"></i> Export PDF',
+                        className: 'btn btn-danger btn-sm',
+                        exportOptions: { columns: ':not(:last-child)' }
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print"></i> Print',
+                        className: 'btn btn-secondary btn-sm',
+                        exportOptions: { columns: ':not(:last-child)' }
+                    }
+                ],
+                language: {
+                    emptyTable: "No resale residential properties found.",
+                    search: "Search Properties:"
+                },
+                columnDefs: [
+                    { orderable: false, targets: [1, 53] }  // 1=Image, 53=Actions
+                ]
+            });
+        });
+
+        function openImageModal(url, title) {
+            document.getElementById('previewImg').src = url;
+            document.getElementById('imageModalTitle').innerText = title;
+            $('#imagePreviewModal').modal('show');
+        }
+
+        function Delete_Property(prop_id) {
+            swal({
+                title: "DELETE",
+                text: "Are you sure you want to delete this property?",
+                icon: "warning",
+                buttons: ["No", "Yes"],
+                closeOnClickOutside: false,
+                dangerMode: true,
+            })
+            .then((willDelete) => {
+                if (willDelete) {
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'resale_residential_delete' 0 %}".replace('/0/', '/' + prop_id + '/'),
+                        data: { 'prop_id': prop_id },
+                        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                        success: function (response) {
+                            if (response.status === 'success') {
+                                swal("" + response.message + "", {
+                                    icon: "success",
+                                    button: "Ok",
+                                    closeOnClickOutside: false,
+                                }).then(() => { 
+                                    const row = document.getElementById(`row-${prop_id}`);
+                                    if(row) {
+                                        $('#resaleTable').DataTable().row($(row)).remove().draw();
+                                    } else {
+                                        location.reload(); 
+                                    }
+                                });
+                            } else {
+                                swal("" + response.message + "", {
+                                    icon: "info",
+                                    button: "Ok",
+                                    closeOnClickOutside: false,
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        function checkSelectedFileSize(_this) {
+            var ext_arr = ['xlsx'];
+            var f = _this.files[0];
+            var filename = f.name;
+            var ext = (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename) : undefined;
+            if (!ext_arr.includes(ext[0])) {
+                alert("Please Upload only .xlsx file");
+                _this.value = '';
+                return false;
+            }
+        }
+
+        function Import_Resale_Data(_this) {
+            var resale_file = $("#resale_file")[0].files;
+            if (resale_file.length == 0) {
+                alert("Please Upload Excel File");
+            } else {
+                var fd = new FormData();
+                fd.append('excel_file', resale_file[0]);
+                $(_this).prop("disabled", true);
+                _this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`;
+                $.ajax({
+                    method: "POST",
+                    url: "{% url 'resale_residential_import_excel' %}",
+                    processData: false,
+                    contentType: false,
+                    cache: false,
+                    data: fd,
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    success: function (response) {
+                        $(_this).prop("disabled", false);
+                        _this.innerHTML = `Upload`;
+                        if (response.status === 'success') {
+                            swal({
+                                title: "Import Successful! " + response.imported + " records imported.",
+                                icon: 'success',
+                                allowOutsideClick: false,
+                                confirmButtonText: 'Thank You!',
+                            }).then((result) => {
+                                if (result) { window.location.href = "{% url 'residential_resale_list' %}"; }
+                            });
+                        } else {
+                            swal({
+                                title: response.message,
+                                icon: 'error',
+                                showCancelButton: true,
+                                cancelButtonColor: '#d33',
+                                showConfirmButton: false,
+                                allowOutsideClick: false
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        // ==========================================
+        // BULK DELETE LOGIC
+        // ==========================================
+        function toggleDeleteInputs() {
+            const type = document.getElementById('deleteType').value;
+            document.getElementById('dateRangeInputs').style.display = (type === 'date_range') ? 'flex' : 'none';
+            document.getElementById('uploaderInput').style.display = (type === 'by_uploader') ? 'block' : 'none';
+            document.getElementById('fileInput').style.display = (type === 'by_file') ? 'block' : 'none';
+        }
+
+        function executeBulkDelete() {
+            const type = document.getElementById('deleteType').value;
+            if (!type) {
+                swal('Warning', 'Please select a delete criteria.', 'warning');
+                return;
+            }
+
+            let payload = { delete_type: type };
+
+            if (type === 'date_range') {
+                payload.from_date = document.getElementById('fromDate').value;
+                payload.to_date = document.getElementById('toDate').value;
+                if (!payload.from_date || !payload.to_date) {
+                    swal('Warning', 'Please select both From and To dates.', 'warning');
+                    return;
+                }
+            } else if (type === 'by_uploader') {
+                payload.uploader_text = document.getElementById('uploaderText').value;
+                if (!payload.uploader_text) {
+                    swal('Warning', 'Please enter the uploader detail.', 'warning');
+                    return;
+                }
+            } else if (type === 'by_file') {
+                payload.file_name = document.getElementById('selectedFile').value;
+                if (!payload.file_name) {
+                    swal('Warning', 'Please select an Excel file from the list.', 'warning');
+                    return;
+                }
+            } else if (type === 'current_page') {
+                // Since this uses DataTables, we get the IDs of the currently visible rows
+                const table = $('#resaleTable').DataTable();
+                const currentRows = table.rows({ page: 'current' }).nodes();
+                const ids = Array.from(currentRows).map(row => row.id.split('-')[1]);
+                
+                if (ids.length === 0) {
+                    swal('Warning', 'No data on the current page to delete.', 'warning');
+                    return;
+                }
+                payload.page_ids = ids;
+            }
+
+            swal({
+                title: "Are you absolutely sure?",
+                text: "This action will permanently delete the selected Resale records and their media!",
+                icon: "warning",
+                buttons: ["Cancel", "Yes, delete them!"],
+                dangerMode: true,
+            }).then((willDelete) => {
+                if (willDelete) {
+                    
+                    fetch("{% url 'resale_residential_bulk_delete' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            swal("Deleted!", data.message, "success").then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            swal("Error", data.message, "error");
+                        }
+                    })
+                    .catch(err => swal("Error", "Server error occurred.", "error"));
+                }
+            });
+        }
+
+
+        // Charts
+        const propertyTypeData = {
+            labels: [{% for k,v in property_type_counts.items %}'{{ k }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            data:   [{% for k,v in property_type_counts.items %}{{ v }}{% if not forloop.last %},{% endif %}{% endfor %}]
+        };
+        const bhkData = {
+            labels: [{% for k,v in bhk_counts.items %}'{{ k|upper }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            data:   [{% for k,v in bhk_counts.items %}{{ v }}{% if not forloop.last %},{% endif %}{% endfor %}]
+        };
+        const zoneData = {
+            labels: [{% for k,v in zone_counts.items %}'{{ k|title }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+            data:   [{% for k,v in zone_counts.items %}{{ v }}{% if not forloop.last %},{% endif %}{% endfor %}]
+        };
+
+        new Chart(document.getElementById('propertyPieChart').getContext('2d'), {
+            type: 'pie',
+            data: { labels: propertyTypeData.labels, datasets: [{ data: propertyTypeData.data,
+                backgroundColor: ['rgba(102,126,234,0.8)','rgba(245,87,108,0.8)','rgba(79,172,254,0.8)','rgba(67,233,123,0.8)'],
+                borderWidth: 2 }] },
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { font: { family: 'Poppins', size: 11 } } } } }
+        });
+
+        new Chart(document.getElementById('rentalIncomeChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: bhkData.labels, datasets: [{ label: 'Properties', data: bhkData.data,
+                backgroundColor: 'rgba(102,126,234,0.7)', borderColor: 'rgba(102,126,234,1)',
+                borderWidth: 2, borderRadius: 8 }] },
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } } }
+        });
+
+        new Chart(document.getElementById('occupancyDoughnutChart').getContext('2d'), {
+            type: 'doughnut',
+            data: { labels: ['Fully Furnished', 'Semi Furnished', 'Unfurnished'],
+                datasets: [{ data: [{{ fully_furnished }}, {{ semi_furnished }}, {{ unfurnished }}],
+                backgroundColor: ['rgba(16,185,129,0.8)','rgba(251,191,36,0.8)','rgba(239,68,68,0.8)'],
+                borderWidth: 2 }] },
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { font: { family: 'Poppins', size: 11 } } } } }
+        });
+
+        new Chart(document.getElementById('rentRangeChart').getContext('2d'), {
+            type: 'bar',
+            data: { labels: zoneData.labels, datasets: [{ label: 'Properties', data: zoneData.data,
+                backgroundColor: ['rgba(102,126,234,0.7)','rgba(79,172,254,0.7)','rgba(67,233,123,0.7)',
+                                  'rgba(250,112,154,0.7)','rgba(251,191,36,0.7)'],
+                borderWidth: 2, borderRadius: 8 }] },
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } } }
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+            } else { sidebar.classList.toggle('collapsed'); }
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        function toggleSubmenu(event, element) {
+            event.preventDefault(); event.stopPropagation();
+            const submenu = element.nextElementSibling;
+            document.querySelectorAll('.submenu').forEach(s => { if (s !== submenu) s.classList.remove('active'); });
+            document.querySelectorAll('.menu-link').forEach(l => { if (l !== element) l.classList.remove('dropdown-open'); });
+            submenu.classList.toggle('active');
+            element.classList.toggle('dropdown-open');
+            return false;
+        }
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 768) {
+                document.getElementById('sidebar').classList.remove('active');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.submenu-link').forEach(link => {
+                link.addEventListener('click', function () {
+                    if (window.innerWidth <= 768) setTimeout(closeSidebar, 200);
+                });
+            });
+            document.querySelectorAll('.menu-link').forEach(link => {
+                if (!link.hasAttribute('onclick')) {
+                    link.addEventListener('click', function () {
+                        if (window.innerWidth <= 768) setTimeout(closeSidebar, 200);
+                    });
+                }
+            });
+        });
+        document.getElementById('sidebar').addEventListener('transitionend', function () {
+            if (this.classList.contains('active')) document.body.style.overflow = 'hidden';
+        });
+
+    </script>
+
+    <script>
+let galleryImages = [];
+let currentIndex = 0;
+
+function openGallery(element){
+    let images = element.getAttribute("data-images");
+
+    if(!images){
+        alert("No images found");
+        return;
+    }
+
+    galleryImages = images.split("|");
+    currentIndex = 0;
+
+    document.getElementById("modalImage").src = galleryImages[currentIndex];
+    document.getElementById("imageModal").style.display = "flex";
+}
+
+function closeGallery(){
+    document.getElementById("imageModal").style.display = "none";
+}
+
+function nextImage(){
+    if(currentIndex < galleryImages.length - 1){
+        currentIndex++;
+        document.getElementById("modalImage").src = galleryImages[currentIndex];
+    }
+}
+
+function prevImage(){
+    if(currentIndex > 0){
+        currentIndex--;
+        document.getElementById("modalImage").src = galleryImages[currentIndex];
+    }
+}
+</script>
+
+</body>
+</html>

@@ -385,8 +385,8 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
   <div>
     <!-- Breadcrumb -->
     <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px;font-weight:500;">
-      <a href="/" style="color:var(--primary);text-decoration:none;">Home</a> &rsaquo;
-      {{ listing_type|title }} &rsaquo; <span style="color:var(--sec);">{{ category|title }}</span>
+      <a href="/" style="color:var(--primary);text-decoration:none;">Home</a>
+      {{ listing_type|title }} <span style="color:var(--sec);">{{ category|title }}</span>
     </div>
 
     <!-- Applied Filters Tags (99acres style) -->
@@ -474,7 +474,7 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
     <!-- Property Listings Grid -->
     <div class="listings-grid" id="listingsGrid">
       {% for p in properties %}
-        <a href="/listing/{{ p.listing_type }}/{{ p.category|lower|slugify }}/{{ p.id }}/" class="pcard">
+        <a href="/listing/{{listing_type }}/{{ category|lower|slugify }}/{{ p.id }}/" class="pcard">
             
             <div class="pc-img">
                 {% if p.image_url %}
@@ -507,7 +507,7 @@ body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--b
             </div>
 
             <div class="pc-body">
-                <div class="pc-title">{{ p.title }}</div>
+                <div class="pc-title">{{ p.title }} </div>
                 
                 <div class="pc-addr">
                     <i class="fas fa-map-marker-alt" style="color:var(--primary);"></i>

@@ -174,6 +174,18 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 @media(max-width:1024px){.page-wrap{grid-template-columns:1fr;}.sidebar{display:none;}}
 @media(max-width:768px){.fg-2,.fg-3,.fg-4{grid-template-columns:1fr;}}
 @media(max-width:480px){.stepper{gap:4px;}.step-label{display:none;}}
+
+.auth-step { display: none; animation: fadeInSlideUp 0.4s ease forwards; }
+.auth-step.active-step { display: block; }
+@keyframes fadeInSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+}
+.otp-container { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+.otp-input { width: 50px; height: 55px; text-align: center; font-size: 1.5rem; font-weight: 700; border-radius: 8px; border: 2px solid #e2e8f0; background: white;}
+.otp-input:focus { border-color: #006ce4; outline: none; box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1); }
+
+
 </style>
 </head>
 <body>
@@ -634,89 +646,85 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 
 </div>
 
-<div class="modal fade" id="authModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="authEnModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
       
       <div class="modal-header border-0 pb-0" style="position: relative;">
-        <h5 class="modal-title" style="font-weight: 800; color: #1e293b;">Unlock Next Steps</h5>
+        <h5 class="modal-title" style="font-weight: 800; color: #1e293b;">Continue to PropCRM</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 20px;"></button>
       </div>
 
-      <div class="modal-body pt-2 pb-4 px-4">
-        <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Please login or register to continue posting your property and access specifications.</p>
+      <div class="modal-body pt-3 pb-4 px-4">
         
-        <ul class="nav nav-pills mb-4" id="authTabs" role="tablist" style="background: #f1f5f9; padding: 4px; border-radius: 12px;">
-          <li class="nav-item" role="presentation" style="flex: 1; text-align: center;">
-            <button class="nav-link active w-100" data-bs-toggle="pill" data-bs-target="#modalLogin" type="button" style="border-radius: 10px; font-weight: 600;">Login</button>
-          </li>
-          <li class="nav-item" role="presentation" style="flex: 1; text-align: center;">
-            <button class="nav-link w-100" data-bs-toggle="pill" data-bs-target="#modalRegister" type="button" style="border-radius: 10px; font-weight: 600;">Register</button>
-          </li>
-        </ul>
+        <div id="step-1-email" class="auth-step active-step">
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Enter your email address to login or create a new account.</p>
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Email Address <span class="text-danger">*</span></label>
+            <input type="email" id="flow_email" class="form-control" placeholder="name@example.com" style="border-radius: 10px; padding: 12px; background: #f8fafc;">
+          </div>
+          <button type="button" class="btn w-100 mt-2" onclick="checkEmailExists(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Continue <i class="fas fa-arrow-right ms-1"></i>
+          </button>
+        </div>
 
-        <div class="tab-content">
-          <div class="tab-pane fade show active" id="modalLogin">
-            <div class="mb-3">
-              <label style="font-size: 0.8rem; font-weight: 700;">Email Address/Phone Number <span class="text-danger">*</span></label>
-              <input type="text" id="modal_login_email" class="form-control" placeholder="name@example.com/1234567890" style="border-radius: 10px;">
-            </div>
-            <div class="mb-3">
-              <label style="font-size: 0.8rem; font-weight: 700;">Password <span class="text-danger">*</span></label>
-              <input type="password" id="modal_login_password" class="form-control" placeholder="Enter password" style="border-radius: 10px;">
-            </div>
+        <div id="step-2-login" class="auth-step">
+          <button onclick="goToStepAuth('step-1-email')" style="background:none; border:none; color:#64748b; font-size:0.9rem; font-weight:600; margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Welcome back! Please enter your password to continue.</p>
+          
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Password <span class="text-danger">*</span></label>
+            <input type="password" id="flow_password" class="form-control" placeholder="Enter your password" style="border-radius: 10px; padding: 12px; background: #f8fafc;">
+          </div>
+          
+          <button type="button" class="btn w-100 mt-2" onclick="processProgLogin(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Secure Login
+          </button>
+        </div>
 
-            <div class="mb-3">
-                <label style="font-size: 0.8rem; font-weight: 700;">Account Role <span class="text-danger">*</span></label>
-                  <select name="user_role" class="form-select" id="modal_login_role" required>
-                    <option value="SelectRole" selected disabled>Choose a role...</option>
-                    <option value="Relationship Manager">Relationship Manager (RM)</option>
-                    <option value="Landlord">Landlord</option>
-                    <option value="Agent">Agent</option>
-                    <option value="Agency/Builder">Agencies / Builder</option>
-                    <option value="Vendor">Vendor</option>
-                  </select>
-            </div>
+        <div id="step-2-otp" class="auth-step">
+          <button onclick="goToStepAuth('step-1-email')" style="background:none; border:none; color:#64748b; font-size:0.9rem; font-weight:600; margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">We've sent a 4-digit code to <strong id="display_otp_email" class="text-dark"></strong>.</p>
+          
+          <div class="otp-container">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+          </div>
+          
+          <button type="button" class="btn w-100 mt-2" onclick="verifyOTP(this)" style="background: #f97316; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Verify OTP
+          </button>
+        </div>
 
-            <button type="button" class="btn w-100 mt-2" onclick="processModalLogin(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px; justify-content:center;">Sign In & Continue</button>
+        <div id="step-3-details" class="auth-step">
+          <p style="font-size: 0.9rem; color: #10b981; font-weight: 600; margin-bottom: 20px;"><i class="fas fa-check-circle"></i> Email Verified! Just a few details.</p>
+          
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Full Name <span class="text-danger">*</span></label>
+            <input type="text" id="flow_reg_name" class="form-control" placeholder="John Doe" style="border-radius: 10px; padding: 10px; background: #f8fafc;">
+          </div>
+          
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Mobile Number <span class="text-danger">*</span></label>
+            <input type="tel" id="flow_reg_mobile" class="form-control" placeholder="10 Digits" style="border-radius: 10px; padding: 10px; background: #f8fafc;" maxlength="10">
+          </div>
+          
+          <div class="mb-3">
+             <label style="font-size: 0.8rem; font-weight: 700;">I am a <span class="text-danger">*</span></label>
+             <select id="flow_reg_role" class="form-select" style="border-radius: 10px; padding: 10px; background: #f8fafc;" required>
+               <option value="SelectRole" selected disabled>Choose a role...</option>
+               <option value="Landlord">Landlord</option>
+               <option value="Agent">Agent</option>
+               <option value="Agency/Builder">Agencies / Builder</option>
+               <option value="Vendor">Vendor</option>
+             </select>
           </div>
 
-          <div class="tab-pane fade" id="modalRegister">
-            <div class="mb-3">
-              <label style="font-size: 0.8rem; font-weight: 700;">Full Name <span class="text-danger">*</span></label>
-              <input type="text" id="modal_reg_name" class="form-control" placeholder="John Doe" style="border-radius: 10px;">
-            </div>
-            <div class="row">
-              <div class="col-6 mb-3">
-                <label style="font-size: 0.8rem; font-weight: 700;">Email <span class="text-danger">*</span></label>
-                <input type="email" id="modal_reg_email" class="form-control" placeholder="Email" style="border-radius: 10px;">
-              </div>
-              <div class="col-6 mb-3">
-                <label style="font-size: 0.8rem; font-weight: 700;">Mobile <span class="text-danger">*</span></label>
-                <input type="tel" id="modal_reg_mobile" class="form-control" placeholder="10 Digits" style="border-radius: 10px;" maxlength="10">
-              </div>
-            </div>
-            <div class="mb-3">
-              <label style="font-size: 0.8rem; font-weight: 700;">Create Password <span class="text-danger">*</span></label>
-              <input type="password" id="modal_reg_password" class="form-control" placeholder="6+ characters" style="border-radius: 10px;">
-            </div>
-
-            <div class="mb-3">
-                <label style="font-size: 0.8rem; font-weight: 700;">Account Role <span class="text-danger">*</span></label>
-                  <select name="user_role" class="form-select" id="modal_reg_role" required>
-                    <option value="SelectRole" selected disabled>Choose a role...</option>
-                    <option value="Relationship Manager">Relationship Manager (RM)</option>
-                    <option value="Landlord">Landlord</option>
-                    <option value="Agent">Agent</option>
-                    <option value="Agency/Builder">Agencies / Builder</option>
-                    <option value="Vendor">Vendor</option>
-                  </select>
-            </div>
-
-            <button type="button" class="btn w-100 mt-2" onclick="processModalRegister(this)" style="background: #f97316; color: white; font-weight: 700; padding: 12px; border-radius: 10px; justify-content:center;">Register & Continue</button>
-
-            <button type="button" class="btn w-100 mt-2" data-bs-dismiss="modal" style="background: grey; color: white; font-weight: 700; padding: 12px; border-radius: 10px; justify-content:center;">Close</button>
-          </div>
+          <button type="button" class="btn w-100 mt-3" onclick="processProgRegistration(this)" style="background: #10b981; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Create Account & Continue
+          </button>
         </div>
 
       </div>
@@ -726,14 +734,14 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:#1e293b;}
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-// --- AUTHENTICATION STATE & INTERCEPTION ---
+// --- GLOBAL STATE ---
 let isLoggedIn = {% if user_obj %}true{% else %}false{% endif %};
-let userMobile = "{{ user_obj.user_phone|default:''|escapejs }}";
-let pendingStep = null;
+let pendingAction = null; 
 let currentStep = 1;
 
-/* ── UPDATE HEADER NAV DYNAMICALLY ── */
+// --- DYNAMIC HEADER UPDATE ---
 function updateHeaderNav(uName, uRole, uEmail, uMobile) {
     const navRight = document.querySelector('.nav-right');
     const loginBtn = navRight ? navRight.querySelector('a[href*="login"]') : null;
@@ -746,65 +754,82 @@ function updateHeaderNav(uName, uRole, uEmail, uMobile) {
         "Agency/Builder": "{% url 'Agency_Dashboard' %}",
         "Vendor": "{% url 'Vendors:vendors_Dashboard' %}"
     };
-
     const targetUrl = dashboardUrls[uRole] || "#";
     
     if (loginBtn) {
         const dropdownHTML = `
-            <div class="dropdown d-inline-block">
-                <a href="#" class="btn-nav-pr dropdown-toggle text-decoration-none" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person"></i> Hello ${uName}-${uRole}
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="loginDropdown" style="border-radius: 12px; min-width: 200px;">
-                    <li>
-                        <a class="dropdown-item py-2 fw-medium text-secondary" href="${targetUrl}" target="_blank">
-                            <i class="bi bi-send me-2 text-primary"></i> Access Dashboard
-                        </a>
-                    </li>
-                    <li>    
-                        <a class="dropdown-item py-2 fw-medium text-secondary" href="#" target="_blank">
-                         <i class="bi bi-heart me-2 text-primary"></i> Wishlist Properties
-                        </a>
-                    </li>
-                    <li>    
-                        <a class="dropdown-item py-2 fw-medium text-secondary" href="#" target="_blank">
-                         <i class="bi bi-search me-2 text-primary"></i> Searched Properties
-                        </a>
-                    </li>
-                    <li>
-                        <button class="dropdown-item py-2 fw-medium text-secondary" onclick="User_Logout()">
-                            <i class="bi bi-door-closed me-2 text-primary"></i> Logout
-                        </button>
-                    </li>
-                </ul>
-            </div>
+          <div class="dropdown d-inline-block">
+              <a href="#" class="btn-nav-pr dropdown-toggle text-decoration-none" id="loginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-person"></i> Hello ${uName}-${uRole}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="loginDropdown" style="border-radius: 12px; min-width: 200px;">
+                  <li>
+                      <a class="dropdown-item py-2 fw-medium text-secondary" href="${targetUrl}">
+                          <i class="bi bi-send me-2 text-primary"></i> Access Dashboard
+                      </a>
+                  </li>
+                  
+                  <li>
+                      <a class="dropdown-item py-2 fw-medium text-secondary" href="#">
+                          <i class="bi bi-heart me-2 text-danger"></i> Wishlist Properties
+                      </a>
+                  </li>
+
+                  <li>
+                      <a class="dropdown-item py-2 fw-medium text-secondary" href="#">
+                          <i class="bi bi-search me-2 text-info"></i> Searched Properties
+                      </a>
+                  </li>
+
+                  <li><hr class="dropdown-divider" style="border-color: #f1f5f9;"></li>
+
+                  <li>
+                      <button class="dropdown-item py-2 fw-medium text-secondary" onclick="User_Logout()">
+                          <i class="bi bi-door-closed me-2 text-warning"></i> Logout
+                      </button>
+                  </li>
+              </ul>
+          </div>
         `;
         loginBtn.outerHTML = dropdownHTML;
-        
         const newDropdown = document.getElementById('loginDropdown');
-        if(newDropdown && typeof bootstrap !== 'undefined') {
-            new bootstrap.Dropdown(newDropdown);
-        }
+        if(newDropdown && typeof bootstrap !== 'undefined') new bootstrap.Dropdown(newDropdown);
     }
 
     const nameField = document.getElementById('display_up_name');
     const emailField = document.getElementById('display_up_email');
     const mobileField = document.getElementById('display_up_mobile');
     const roleField = document.getElementById('display_up_role');
-    
     if(nameField) nameField.value = uName;
     if(emailField) emailField.value = uEmail;
     if(roleField) roleField.value = uRole;
     if(mobileField) mobileField.value = uMobile || "";
 }
 
-/* ── STEPPER ── */
+// --- MODAL TAB SWITCHERS ---
+function goToStepAuth(stepId) {
+    $('.auth-step').removeClass('active-step').hide(); 
+    $('#' + stepId).addClass('active-step').fadeIn(250);
+}
+function moveToNext(current, event) {
+    if (current.value.length >= current.maxLength) {
+        let next = $(current).next('.otp-input');
+        if (next.length) next.focus();
+    }
+    if (event.key === "Backspace" && current.value.length === 0) {
+        let prev = $(current).prev('.otp-input');
+        if (prev.length) prev.focus();
+    }
+}
+
+/* ── FORM STEPPER (WITH LOGIN INTERCEPTION) ── */
 function goToStep(n) {
-  // INTERCEPT: If trying to go to Step 2 and NOT logged in
-  if (n === 2 && !isLoggedIn) {
-      pendingStep = n; 
-      const authModal = new bootstrap.Modal(document.getElementById('authModal'));
-      authModal.show();
+  let userStatus = (typeof isLoggedIn !== 'undefined') ? isLoggedIn : false;
+  
+  if (n === 2 && userStatus === false) {
+      pendingAction = function() { goToStep(2); }; 
+      goToStepAuth('step-1-email');
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).show();
       return; 
   }
 
@@ -814,268 +839,199 @@ function goToStep(n) {
     const sc = document.getElementById('sc' + i);
     const sl = document.getElementById('sl' + i);
     const line = document.getElementById('line' + i);
-    sc.className = 'step-circle'; sl.className = 'step-label';
+    if (sc) sc.className = 'step-circle'; 
+    if (sl) sl.className = 'step-label';
     if (line) line.className = 'step-line';
     if (i < n) {
-      sc.classList.add('done'); sl.classList.add('done');
-      sc.innerHTML = '<i class="fas fa-check" style="font-size:.6rem;"></i>';
-      if (line) line.classList.add('done');
+      if(sc){ sc.classList.add('done'); sc.innerHTML = '<i class="fas fa-check" style="font-size:.6rem;"></i>'; }
+      if(sl) sl.classList.add('done');
+      if(line) line.classList.add('done');
     } else if (i === n) {
-      sc.classList.add('active'); sl.classList.add('active'); sc.textContent = i;
+      if(sc){ sc.classList.add('active'); sc.textContent = i; }
+      if(sl) sl.classList.add('active');
     } else {
-      sc.textContent = i;
+      if(sc) sc.textContent = i;
     }
   }
   currentStep = n;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (typeof updateReview === 'function') updateReview();
 }
 
-// --- MODAL AJAX LOGIN ---
-function processModalLogin(btn) {
-    const user_identifier = document.getElementById('modal_login_email').value;
-    const password = document.getElementById('modal_login_password').value;
-    const role = document.getElementById('modal_login_role').value;
-
-    if (!user_identifier || !password || role === "SelectRole") {
-        Swal.fire({icon: "warning", title: "Missing Input", text: "Please enter email/phone number, password and select a role"});
-        return;
-    }
-
-    const originalText = btn.innerHTML;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Verifying...`;
-    btn.disabled = true;
+// --- PROGRESSIVE AUTHENTICATION API CALLS ---
+function checkEmailExists(_this) {
+    let email = $('#flow_email').val().trim();
+    if (!email) return Swal.fire("Wait", "Please enter a valid email address.", "info");
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Checking...`);
 
     $.ajax({
-        method: "POST",
-        url: "{% url 'login' %}", // Adjust to your actual login endpoint
-        contentType: "application/json",
-        data: JSON.stringify({
-            "user_identifier": user_identifier,
-            "user_password": password,
-            "user_role": role
-        }),
-        success: function (response) {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+        type: "POST", url: "{% url 'Check_Email_Api' %}", 
+        data: { 'email': email},
+        success: function(response) {
+            $(_this).prop("disabled", false).html(btnText);
+            if(response.exists) goToStepAuth('step-2-login');
+            else sendOTP(email);
+        },
+        error: function() { $(_this).prop("disabled", false).html(btnText); Swal.fire("Error", "Server error.", "error"); }
+    });
+}
 
-            if (response.status == '1' || response.status == 'success') {
+function sendOTP(email) {
+    $('#display_otp_email').text(email);
+    goToStepAuth('step-2-otp'); 
+    $.ajax({ 
+        type: "POST", 
+        url: "{% url 'Send_Otp_Api' %}", 
+        data: { 'email': email } 
+    });
+}
+
+function processProgLogin(_this) {
+    let email = $('#flow_email').val();
+    let password = $('#flow_password').val();
+    if (!password) return Swal.fire("Wait", "Please enter your password.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Logging in...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Prop_Login_Api' %}", 
+        data: { 'email': email, 'password': password },
+        success: function(response) {
+            if(response.status == '1') {
                 isLoggedIn = true; 
-                bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
                 
-                // Dynamically update Header and Form Fields
-                updateHeaderNav(
-                  response.user_name || "User", 
-                  response.user_role || role, 
-                  response.user_email || email,  // <--- FIXED! Ask Django for the real email.
-                  response.user_mobile || ""
-                );
+                // NO-RELOAD: Update Header UI instantly
+                updateHeaderNav(response.user_name || "User", response.user_role || "User", response.user_email || email, response.user_mobile || "");
                 
-                Swal.fire({icon: 'success', title: 'Welcome Back!', text: 'Continuing to Rent Details...', timer: 1500, showConfirmButton: false});
-                if(pendingStep) {
-                    goToStep(pendingStep);
-                    pendingStep = null; 
+                // RESUME PAUSED ACTION
+                if (typeof pendingAction === 'function') {
+                    let action = pendingAction; pendingAction = null; action(); 
+                } else {
+                    Swal.fire("Success", "Logged in successfully!", "success");
                 }
             } else {
-                Swal.fire({icon: "error", title: "Login Failed", text: response.msg});
+                $(_this).prop("disabled", false).html(btnText);
+                Swal.fire("Error", response.msg || "Incorrect password", "error");
             }
-        },
-        error: function() {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            Swal.fire({icon: "error", title: "Error", text: "Server connection failed."});
         }
     });
 }
 
-// --- MODAL AJAX REGISTER ---
-function processModalRegister(btn) {
-    const name = document.getElementById('modal_reg_name').value;
-    const email = document.getElementById('modal_reg_email').value;
-    const mobile = document.getElementById('modal_reg_mobile').value;
-    const password = document.getElementById('modal_reg_password').value;
-    const role = document.getElementById('modal_reg_role').value;
+function verifyOTP(_this) {
+    let otp = "";
+    $('.otp-input').each(function() { otp += $(this).val(); });
+    if(otp.length < 4) return Swal.fire("Wait", "Please enter the 4-digit OTP.", "info");
 
-    if (!name || !email || !mobile || !password || role === "SelectRole") {
-        Swal.fire({icon: "warning", title: "Missing Input", text: "Please fill all fields"});
-        return;
-    }
-
-    const originalText = btn.innerHTML;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Creating Account...`;
-    btn.disabled = true;
-
-    var fd = new FormData();
-    fd.append('role', role);
-    fd.append('full_name', name);
-    fd.append('email', email);
-    fd.append('mobile_number', mobile);
-    fd.append('password', password);
-    fd.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Verifying...`);
 
     $.ajax({
-        method: "POST",
-        url: "{% url 'signup' %}", 
-        data: fd,
-        processData: false,
-        contentType: false,
-        success: function (response) {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
+        type: "POST", url: "{% url 'Verify_Otp_Api' %}", 
+        data: { 'email': $('#flow_email').val(), 'otp': otp },
+        success: function(response) {
+            $(_this).prop("disabled", false).html(btnText);
+            if(response.valid) goToStepAuth('step-3-details');
+            else Swal.fire("Error", "Invalid OTP. Try again.", "error");
+        }
+    });
+}
 
-            if (response.status == '1' || response.status == 'success') {
+function processProgRegistration(_this) {
+    let email = $('#flow_email').val();
+    let name = $('#flow_reg_name').val();
+    let mobile = $('#flow_reg_mobile').val();
+    let role = $('#flow_reg_role').val();
+
+    if(!name || !mobile || role === "SelectRole") return Swal.fire("Wait", "Please fill in all details.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Creating Account...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Prop_Register_Api' %}", 
+        data: { 'email': email, 'name': name, 'mobile': mobile, 'role': role},
+        success: function(response) {
+            if(response.status == '1') {
                 isLoggedIn = true; 
-                bootstrap.Modal.getInstance(document.getElementById('authModal')).hide();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
                 
+                // NO-RELOAD: Update Header UI instantly
                 updateHeaderNav(name, role, email, mobile);
                 
-                Swal.fire({icon: 'success', title: 'Account Created!', text: 'Continuing to Next Step...', timer: 1500, showConfirmButton: false});
-                if(pendingStep) {
-                    goToStep(pendingStep);
-                    pendingStep = null; 
+                // RESUME PAUSED ACTION
+                if (typeof pendingAction === 'function') {
+                    let action = pendingAction; pendingAction = null; action(); 
+                } else {
+                    Swal.fire("Success", "Account created!", "success");
                 }
             } else {
-                Swal.fire({icon: "error", title: "Registration Failed", text: response.msg});
+                $(_this).prop("disabled", false).html(btnText);
+                Swal.fire("Error", response.msg || "Registration failed.", "error");
             }
-        },
-        error: function() {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            Swal.fire({icon: "error", title: "Error", text: "Server connection failed."});
         }
     });
 }
 
-/* ── TOGGLE SCRIPTS (Brokerage & Legal) ── */
+/* ── PROPERTY FORM UTILITIES ── */
 document.addEventListener('DOMContentLoaded', function () {
-  
-  // Brokerage Toggles
   const brokerageSelect = document.getElementById('brokerageSelect');
   const brokerageSection = document.getElementById('brokerageSection');
   const brokeragePercentage = document.getElementById('brokeragePercentage');
   const manualBrokerage = document.getElementById('manualBrokerage');
-
-  if(brokerageSelect){
+  if(brokerageSelect) {
       brokerageSelect.addEventListener('change', function () {
-        if (this.value === 'Yes') {
-          brokerageSection.style.display = 'flex';
-          brokerageSection.style.flexDirection = 'column';
-        } else {
-          brokerageSection.style.display = 'none';
-          manualBrokerage.style.display = 'none';
-        }
+        if (this.value === 'Yes') brokerageSection.style.display = 'grid';
+        else { brokerageSection.style.display = 'none'; manualBrokerage.style.display = 'none'; }
       });
   }
-
   if(brokeragePercentage) {
       brokeragePercentage.addEventListener('change', function () {
-        manualBrokerage.style.display = (this.value === 'Manual') ? 'flex' : 'none';
-        if (this.value === 'Manual') manualBrokerage.style.flexDirection = 'column';
+        if (this.value === 'Manual') manualBrokerage.style.display = 'flex';
+        else manualBrokerage.style.display = 'none';
       });
   }
-
-  // Legal & Status Conditional Toggles (Industrial Names)
-  const toggles = [
-      { name: 'loan_on_property', target: 'ind_loan_amount_section' },
-      { name: 'existing_tenants', target: 'ind_tenant_details_section' },
-      { name: 'legal_dispute', target: 'ind_dispute_details_section' },
-      { name: 'tax_due', target: 'ind_tax_amount_section' }
-  ];
-
-  toggles.forEach(toggle => {
-      document.querySelectorAll(`input[name="${toggle.name}"]`).forEach(radio => {
-          radio.addEventListener('change', function () {
-              const targetSection = document.getElementById(toggle.target);
-              if (targetSection) {
-                  targetSection.style.display = (this.value === 'yes') ? 'flex' : 'none';
-                  if(this.value === 'yes') targetSection.style.flexDirection = 'column';
-              }
-          });
-      });
-  });
-
-  // AJAX Submit handling
-  document.getElementById('industrialPropertyForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      
-      const form = this;
-      const formData = new FormData(form);
-
-      Swal.fire({
-          title: 'Submitting...',
-          text: 'Please wait while we save the industrial property.',
-          allowOutsideClick: false,
-          didOpen: () => { Swal.showLoading(); }
-      });
-
-      fetch(form.action, {
-          method: 'POST',
-          body: formData,
-          headers: {
-              'X-Requested-With': 'XMLHttpRequest',
-          }
-      })
-      .then(response => response.json())
-      .then(data => {
-          if (data.status === 'success') {
-              Swal.fire({
-                  icon: 'success',
-                  title: 'Property Saved!',
-                  text: data.message || 'Industrial property added successfully.',
-                  confirmButtonColor: '#28a745',
-              }).then(() => { form.reset(); });
-          } else {
-              Swal.fire({
-                  icon: 'error',
-                  title: 'Submission Failed',
-                  text: data.message || 'Something went wrong. Please try again.',
-                  confirmButtonColor: '#dc3545',
-              });
-          }
-      })
-      .catch(error => {
-          Swal.fire({
-              icon: 'error',
-              title: 'Server Error',
-              text: 'Could not connect to server. Please try again.',
-              confirmButtonColor: '#dc3545',
-          });
-      });
-  });
 });
 
-/* ── LIVE PREVIEW UPDATE ── */
-function updatePreview() {
-  const title = document.getElementById('propTitle')?.value || 'Property Title';
-  const loc   = document.getElementById('ind_locality')?.value  || 'Area';
-  const price = document.getElementById('expectedPrice')?.value;
-  const area  = document.getElementById('ind_area')?.value;
-
-  document.getElementById('previewTitle').textContent = title;
-  document.getElementById('previewLoc').innerHTML =
-    '<i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> ' + (loc || 'Area') + ', City';
-  document.getElementById('previewPrice').textContent =
-    price ? '₹' + parseInt(price).toLocaleString('en-IN') : '₹ —';
-  document.getElementById('prevArea').textContent = area ? area + ' sqft/acres' : '— sqft';
-
-  // Checklist updates
-  setCheck('cl-title',    title && title !== 'Property Title');
-  setCheck('cl-location', !!loc);
-  setCheck('cl-price',    !!price);
+function checkToggle(cb) {
+  const item = cb.closest('.check-item');
+  if (cb.checked) item.classList.add('selected'); else item.classList.remove('selected');
 }
-
+function updatePreview() {
+  const title = document.getElementById('propTitle')?.value || 'Your Property Title';
+  const loc   = document.getElementById('locality')?.value  || 'Area';
+  const rent  = document.getElementById('monthlyRent')?.value;
+  const area  = document.getElementById('carpetArea')?.value;
+  document.getElementById('previewTitle').textContent = title;
+  document.getElementById('previewLoc').innerHTML = '<i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> ' + (loc || 'Area') + ', Nagpur';
+  document.getElementById('previewPrice').textContent = rent ? '₹' + parseInt(rent).toLocaleString('en-IN') + '/mo' : '₹ — /mo';
+  document.getElementById('prevArea').textContent = area ? area + ' sqft' : '— sqft';
+  setCheck('cl-title', title && title !== 'Your Property Title');
+  setCheck('cl-location', !!loc);
+  setCheck('cl-price', !!rent);
+}
 function updateChecklist() {
-  const desc = document.querySelector('textarea[name="resale_industrial_desc"]')?.value || '';
+  const desc = document.getElementById('rent_residential_desc')?.value || '';
   setCheck('cl-desc', desc.length >= 80);
 }
-
 function setCheck(id, done) {
   const el = document.getElementById(id);
   if (!el) return;
   el.className = 'cl-item' + (done ? ' done' : '');
   el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
 }
-
-/* ── PHOTO UPLOAD ── */
+function updateReview() {
+  const title = document.getElementById('propTitle')?.value || '—';
+  const loc   = document.getElementById('locality')?.value || '—';
+  const rent  = document.getElementById('monthlyRent')?.value;
+  const area  = document.getElementById('carpetArea')?.value;
+  document.getElementById('rv-title').textContent = title;
+  document.getElementById('rv-location').textContent = (loc || '—') + ', Nagpur';
+  document.getElementById('rv-rent').textContent = rent ? '₹' + parseInt(rent).toLocaleString('en-IN') + '/month' : '—';
+  document.getElementById('rv-area').textContent = area ? area + ' sqft' : '—';
+}
 function handlePhotos(e) {
   const files = Array.from(e.target.files).slice(0, 10);
   const prev  = document.getElementById('imagePreview');
@@ -1093,6 +1049,41 @@ function handlePhotos(e) {
   });
   setCheck('cl-photos', files.length > 0);
 }
+
+/* ── PUBLISH / SUBMIT ── */
+function publishListing() {
+  let userStatus = (typeof isLoggedIn !== 'undefined') ? isLoggedIn : false;
+  if (userStatus === false) {
+      pendingAction = publishListing; 
+      goToStepAuth('step-1-email');
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).show();
+      return; 
+  }
+  if (!document.getElementById('agreeTerms').checked) {
+    Swal.fire({ icon: 'warning', title: 'Agreement Required',
+      text: 'Please agree to PropCRM Terms of Service before publishing.',
+      background: '#fff', color: '#1e293b', confirmButtonColor: '#f97316' });
+    return;
+  }
+  const title = document.getElementById('propTitle')?.value;
+  const rent  = document.getElementById('monthlyRent')?.value;
+  if (!title || !rent) {
+    Swal.fire({ icon: 'error', title: 'Required Fields Missing',
+      text: 'Please fill in the Property Title and Monthly Rent before publishing.',
+      background: '#fff', color: '#1e293b', confirmButtonColor: '#f97316' });
+    return;
+  }
+  Swal.fire({
+    icon: 'success', title: '🎉 Listing Submitted!',
+    html: `<div style="text-align:center;">
+      <div style="font-size:.9rem;font-weight:700;margin-bottom:8px;">"${title}" is now LIVE on PropCRM!</div>
+      <div style="font-size:.78rem;color:#64748b;">Visible to 50,000+ tenants · RM assigned · WhatsApp alerts enabled</div>
+    </div>`,
+    background: '#fff', color: '#1e293b', confirmButtonColor: '#f97316', confirmButtonText: 'View Portal →'
+  }).then(() => { window.location.href = '/listingpage/?type=rent'; });
+}
 </script>
+
+
 </body>
 </html>

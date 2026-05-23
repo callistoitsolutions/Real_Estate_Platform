@@ -297,8 +297,239 @@ def pg_rm(request):
 ############# Views start for resale property list ####################
 
 def residential_resale_rm_list(request):
-    return HttpResponse("Residential Resale List")
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
 
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Relationship Manager":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "rm_panel/Reports/Resale/residential_resale_list.html", context)
+
+
+########### Views start for resale property form residential ################
+
+def residential_resale_rm(request):
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Relationship Manager":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "rm_panel/Forms/Resale/residential_resale.html", context)
+
+########## Views end for resale property form residential ########################
+
+
+############ Views start for resale commercial property list ##################
+
+def commercial_resale_rm_list(request):
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Relationship Manager":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "rm_panel/Reports/Resale/commercial_list.html", context)
+
+########### Views end for resale commercial property list ####################
+
+
+########## Views start for resale property for commercial ####################
+
+def commercial_resale_rm(request):
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Relationship Manager":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "rm_panel/Forms/Resale/commercial_resale.html", context)
+
+######### Views end for resale property for commercial ########################
+
+
+########## Views start  for plot resale property list ######################
+
+def plot_resale_rm_list(request):
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Relationship Manager":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "rm_panel/Reports/Resale/plot_list.html", context)
+
+######### Views end for plot resale property list ###################
+
+
+############# Views start for resale property from plot ##################
+
+def plot_resale_rm(request):
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Relationship Manager":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "rm_panel/Forms/Resale/plot_resale.html", context)
+
+######### Views end for resale property from plot ########################
+
+
+########### Views start for industrial property list #########################
+
+def industry_resale_rm_list(request):
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Relationship Manager":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "rm_panel/Reports/Resale/industrial_list.html", context)
+
+############ Views end for industrial property list ############################
+
+
+########### Views start for industrial resale property form #####################
+
+def industry_resale_rm(request):
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Relationship Manager":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "rm_panel/Forms/Resale/industrial_resale.html", context)
+
+############### Views end for industrial resale property form ######################
+
+
+############ Views start for agricultural resale property list #####################
+
+def agriculture_resale_rm_list(request):
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Relationship Manager":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "rm_panel/Reports/Resale/agricultural_list.html", context)
+
+########## Views end for agricultural resale property list ##############################
+
+
+############ Views start for agricultural resale property form ######################
+
+def agriculture_resale_rm(request):
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    user_role = request.session.get('user_type')
+
+    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
+    if not user_id or user_role != "Relationship Manager":
+        return redirect('login') 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_role
+    }
+    
+    return render(request, "rm_panel/Forms/Resale/agricultural_resale.html", context)
+
+############# Views end for agricultural resale property form ########################
 
 
 @login_required

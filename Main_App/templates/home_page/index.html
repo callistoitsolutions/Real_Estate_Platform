@@ -935,38 +935,23 @@ footer { background: #0f172a; padding: 60px 20px 30px; color: rgba(255,255,255,.
         <div class="section-subtitle">Quick answers to common queries</div>
     </div>
     <div class="accordion" id="faqAcc" style="max-width:800px;margin:0 auto;">
-        {% if faqs %}
-            {% for faq in faqs %}
+        {% for faq in faqs_obj %}
             <div class="accordion-item">
                 <h2 class="accordion-header">
-                    <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ forloop.counter }}">
-                        {{ faq.question }}
-                        {% if faq.residential %}<span class="badge bg-primary faq-badge">Residential</span>{% elif faq.commercial %}<span class="badge bg-success faq-badge">Commercial</span>{% elif faq.pg %}<span class="badge bg-warning text-dark faq-badge">PG</span>{% endif %}
+                    <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#faq{{ forloop.counter }}">
+                        {{ faq.faq_question }}
                     </button>
                 </h2>
-                <div id="faq{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAcc">
-                    <div class="accordion-body">{{ faq.answer }}</div>
+                <div id="faq{{ forloop.counter }}"
+                     class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                     data-bs-parent="#faqAcc">
+                    <div class="accordion-body">{{ faq.faq_answer|safe }}</div>
                 </div>
             </div>
-            {% endfor %}
-        {% else %}
-            <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#faq1">Do I need to pay brokerage?</button></h2>
-                <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAcc"><div class="accordion-body">No, all properties are listed directly by owners. No hidden brokerage fees.</div></div>
-            </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq2">Are listings verified?</button></h2>
-                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body">Yes, our team of 87 RMs verifies every listing manually with physical site visits.</div></div>
-            </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq3">How do subscription plans work?</button></h2>
-                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body">Owners get visibility boost, homepage featured slots and priority RM support with paid plans.</div></div>
-            </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#faq4">How long does it take to close a deal?</button></h2>
-                <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAcc"><div class="accordion-body">On average, verified listings close within 18 days. Our RMs actively assist with site visits and negotiations.</div></div>
-            </div>
-        {% endif %}
+        {% endfor %}
     </div>
 </div>
 

@@ -101,6 +101,26 @@ urlpatterns = [
 
     path('Update_Services/<int:id>',views.Update_Services,name='Update_Services'),
 
+    ########### urls for normal faqs list ################################
+
+    path('Faqs_List',views.Faqs_List,name="Faqs_List"),
+
+    ############# urls for add normal faqs ############################
+
+    path('Add_FAQ',views.Add_FAQ,name="Add_FAQ"),
+
+    ############## urls for ajax for normal faqs ####################
+
+    path('Faq_Ajax',views.Faq_Ajax,name="Faq_Ajax"),
+
+    ############## urls for delete faqs ############################
+
+    path('Delete_Faqs',views.Delete_Faqs,name="Delete_Faqs"),
+
+    ############ urls for update faqs #######################
+
+    path('Update_Faqs/<int:id>',views.Update_Faqs,name="Update_Faqs"),
+
      ############# urls for subscriptions list ###########################
 
     path('Subscriptions_List',views.Subscriptions_List,name="Subscriptions_List"),

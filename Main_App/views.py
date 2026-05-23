@@ -46,6 +46,7 @@ from django.db.models import Q
 import re
 from rapidfuzz import process, fuzz
 from .apps import MainAppConfig
+from django.core.mail import send_mail
 
 
 ########### Crime Officer Views#######
@@ -61,6 +62,11 @@ from django.forms.models import model_to_dict
 import json
 from .apps import MainAppConfig
 from datetime import datetime
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.utils.crypto import get_random_string
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.contenttypes.models import ContentType
 
 
 
@@ -600,69 +606,95 @@ from django.contrib.contenttypes.models import ContentType
 
 @csrf_exempt
 def Send_Property_Enquiry(request):
-    if request.method != "POST":
-        return JsonResponse({"status": "0", "msg": "Invalid request method."})
+    if request.method == "POST":
+        data = request.POST.dict()   
+        
+        # 1. SECURITY: Retrieve user authentication from the secure session container
+        user_id = request.session.get('User_id') or data.get('user_id')
+        if not user_id:
+            return JsonResponse({"status": "0", "msg": "User session expired. Please log in."})
 
-    data = request.POST.dict()   
-    property_id = data.get('property_id')
-    listing_type = data.get('listing_type', '').lower()
-    category = data.get('category', '').lower()
-    
-    real_property = None
+        try:
+            user_data = User_Details.objects.get(id=user_id)
+        except (User_Details.DoesNotExist, ValueError):
+            return JsonResponse({"status": "0", "msg": "Invalid user account verification."})
 
-    # 1. Fetch Property
-    try:
-        if listing_type == "rent":
-            if "residential" in category:
+        # 2. Extract Data Context Parameters Safely
+        property_id = data.get('property_id')
+        listing_type = data.get('listing_type', '')
+        category = data.get('category', '')
+        
+        print("---------------------",listing_type)
+        print("---------------------",category)
+        # New country parameters and consent evaluation
+        country_code = data.get('country_code', '+91')
+        whatsapp_consent_raw = data.get('whatsapp_consent', 'no')
+        whatsapp_consent = True if whatsapp_consent_raw == 'yes' else False
+
+        real_property = None
+
+        # 3. CRASH PREVENTION: Safely lookup target records using model-specific tables
+        try:
+            if listing_type == "rent" and category == "residential":
                 real_property = RentalResidentialProperty.objects.get(id=property_id)
-            elif "pg" in category:
+
+            elif listing_type == "rent" and category == "pg":
                 real_property = PGColivingProperty.objects.get(id=property_id)
-            elif "commercial" in category:
-                real_property = CommercialRentalProperty.objects.get(id=property_id)
-        
-        elif listing_type == "sale":
-            if "residential" in category:
+
+            elif listing_type == "rent" and category == "commercial":
+                real_property = CommercialProperty.objects.get(id=property_id)
+                
+            elif listing_type == "sale" and category == "resale-residential":
                 real_property = ResaleResidentialProperty.objects.get(id=property_id)
-            elif "commercial" in category:
-                real_property = CommercialResaleProperty.objects.get(id=property_id)
-            elif "plot" in category:
+
+            elif listing_type == "sale" and category == "resale-commercial":
+                real_property = ResaleResidentialProperty.objects.get(id=property_id)
+
+            elif listing_type == "sale" and category == "plot-resale":
                 real_property = PlotSaleProperty.objects.get(id=property_id)
-            elif "industrial" in category:
+
+            elif listing_type == "sale" and category == "industrial-resale":
                 real_property = IndustrialResaleProperty.objects.get(id=property_id)
-            elif "agriculture" in category:
+
+            elif listing_type == "sale" and category == "agricultural-data":
                 real_property = AgriculturalResaleProperty.objects.get(id=property_id)
-    except Exception as e:
-        return JsonResponse({"status": "0", "msg": f"Property not found: {str(e)}"})
+                
+        except ObjectDoesNotExist:
+            return JsonResponse({"status": "0", "msg": "The requested property could not be found."})
 
-    if not real_property:
-        return JsonResponse({"status": "0", "msg": "Invalid property type or category."})
-
-    # 2. Get User
-    user_id = data.get('user_id')
-    user_data = User_Details.objects.filter(id=user_id).first() if (user_id and user_id.strip()) else None
-
-    # 3. Create Enquiry using ContentType
-    try:
-        # Get ContentType for the real_property model
-        c_type = ContentType.objects.get_for_model(real_property)
+        if not real_property:
+            return JsonResponse({"status": "0", "msg": "Invalid property type or category arrangement."})
         
-        enquiry = PropertyEnquiry.objects.create(
-            user=user_data,
-            enquiry_name=data.get('enquiry_name'),
-            enquiry_phone=data.get('enquiry_phone'),
-            enquiry_email=data.get('enquiry_email'),
-            enquiry_message=data.get('enquiry_message'),
-            enquiry_date=date.today(),
-            enquiry_time=datetime.now().time(),
-            # Explicitly set the fields that were missing
-            content_type=c_type,
-            object_id=real_property.id
-        )
-        
-        return JsonResponse({"status": "1", "msg": "Enquiry submitted successfully!"})
-    
-    except Exception as e:
-        return JsonResponse({"status": "0", "msg": f"Error saving enquiry: {str(e)}"})
+        # 4. GENERIC FOREIGN KEY STABILITY: Resolve explicit content type model definitions
+        property_content_type = ContentType.objects.get_for_model(real_property)
+
+        # 5. Persist the Enquiry Form Submission
+        try:
+            PropertyEnquiry.objects.create(
+                content_type=property_content_type,   # Stores table map target
+                object_id=real_property.id,           # Stores row primary key ID 
+                user=user_data,
+                enquiry_name=data.get('enquiry_name', '').strip(),
+                country_code=country_code,
+                enquiry_phone=data.get('enquiry_phone', '').strip(),
+                whatsapp_consent=whatsapp_consent,
+                enquiry_date=datetime.today(),
+                enquiry_time=datetime.now()
+            )
+            
+            return JsonResponse({
+                "status": "1", 
+                "msg": "Enquiry submitted successfully! We will get back to you soon."
+            })
+            
+        except Exception as e:
+            print(f"Enquiry DB Save Failure: {str(e)}")
+            return JsonResponse({
+                "status": "0", 
+                "msg": "Could not save your request. Please try again later."
+            })
+
+    return JsonResponse({"status": "0", "msg": "Invalid HTTP communication architecture."})
     
 
 ########### Views end for ajax for send property enquiry ######################
@@ -863,61 +895,7 @@ def _mask_phone(phone):
 # CLIENT IP
 # =========================================================
 
-def _get_client_ip(request):
 
-    x_forwarded = request.META.get(
-        'HTTP_X_FORWARDED_FOR'
-    )
-
-    if x_forwarded:
-
-        return x_forwarded.split(',')[0].strip()
-
-    return request.META.get(
-        'REMOTE_ADDR',
-        ''
-    )
-
-
-
-
-
-
-
-
-
-
-
-
-
-# ═══════════════════════════════════════════════════════════════════════
-# 1. AI HELPER FUNCTIONS (Must be defined BEFORE listings_view)
-# ═══════════════════════════════════════════════════════════════════════
-def correct_query_text(query):
-    query = query.lower().strip()
-    query = re.sub(r'[^\w\s]', '', query) # Remove punctuation
-    return query
-
-def apply_fuzzy_correction(query):
-    words = query.split()
-    corrected_words = []
-    
-    valid_keywords = []
-    # Check if cities loaded successfully in apps.py
-    if hasattr(MainAppConfig, 'cities') and MainAppConfig.cities:
-        valid_keywords = MainAppConfig.cities
-        
-    for word in words:
-        if valid_keywords:
-            match = process.extractOne(word, valid_keywords, scorer=fuzz.ratio)
-            if match and match[1] > 80: # 80% similarity threshold
-                corrected_words.append(match[0])
-            else:
-                corrected_words.append(word)
-        else:
-            corrected_words.append(word)
-            
-    return " ".join(corrected_words)
 
 def extract_entities(query):
     # Sends the fuzzy-corrected text straight to the Sentence Transformer
@@ -991,7 +969,6 @@ def _normalize_any_property(obj, source):
         'is_ai_match': True,
         
         # Owner / Contact
-        'owner': owner_name,
         'owner_initials': owner_name[0].upper() if owner_name else "O",
         'phone': getattr(obj, 'contact_number', getattr(obj, 'owner_contact', getattr(obj, 'plot_owner_contact', 'N/A'))),
         
@@ -1148,6 +1125,521 @@ def _parse_pg_room_prices(obj):
     return result
 
 
+
+
+
+
+
+def property_detail_view(request, listing_type, category, pk):
+    """
+    COMPREHENSIVE PROPERTY DETAIL VIEW
+    Supports 8 property types across rent / sale.
+    """
+    obj = None
+    p   = {}
+    amenities_list  = []
+    facilities_list = []
+    property_images = []
+    seo_page_type   = ""
+    base_emi        = 0
+    property_model  = None
+ 
+    # ── 1. Identify correct model ────────────────────────────
+    if listing_type == 'rent':
+        if category in ['residential', 'residential-data']:
+            property_model = RentalResidentialProperty
+            seo_page_type  = "rental_residential"
+        elif category in ['commercial', 'commercial-data']:
+            property_model = CommercialRentalProperty
+            seo_page_type  = "commercial_rental"
+        elif category in ['pg', 'pg-data']:
+            property_model = PGColivingProperty
+            seo_page_type  = "pg_coliving"
+ 
+    elif listing_type == 'sale':
+        if category in ['residential', 'resale-residential']:
+            property_model = ResaleResidentialProperty
+            seo_page_type  = "resale_residential"
+        elif category in ['commercial', 'commercial-resale']:
+            property_model = CommercialResaleProperty
+            seo_page_type  = "commercial_resale"
+        elif category in ['plot', 'plot-resale']:
+            property_model = PlotSaleProperty
+            seo_page_type  = "plot_sale"
+        elif category in ['industrial', 'industrial-resale']:
+            property_model = IndustrialResaleProperty
+            seo_page_type  = "industrial_sale"
+        elif category in ['agriculture', 'agricultural-data']:
+            property_model = AgriculturalResaleProperty
+            seo_page_type  = "agriculture_sale"
+ 
+    if not property_model:
+        return render(request, 'home_page/property_not_found.html')
+ 
+    obj = get_object_or_404(property_model, pk=pk)
+ 
+    # ── 2. Extract all data ──────────────────────────────────
+ 
+    # BASIC
+    p['id'] = obj.id
+    p['title'] = (
+        getattr(obj, 'title',          None) or
+        getattr(obj, 'property_title', None) or
+        getattr(obj, 'plot_title',     None) or
+        getattr(obj, 'pg_name',        None) or
+        getattr(obj, 'building_name',  None) or
+        'Property Details'
+    )
+ 
+    p['property_purpose']   = getattr(obj, 'property_purpose', None)
+    p['renting_option']     = getattr(obj, 'renting_option',   None)
+    p['available_for']      = getattr(obj, 'available_for',    None)
+ 
+    # Category name
+    cat_raw = (
+        getattr(obj, 'property_type',             None) or
+        getattr(obj, 'agriculture_property_type', None) or
+        getattr(obj, 'resale_plot_type',          None) or
+        category
+    )
+    p['category_name'] = str(cat_raw).replace('_', ' ').title()
+ 
+    # CONFIGURATION
+    p['bhk']      = getattr(obj, 'bhk',      None)
+    p['bhk_type'] = getattr(obj, 'bhk_type', None)
+    p['beds']     = p['bhk'] or p['bhk_type']
+ 
+    p['bathrooms'] = getattr(obj, 'bathrooms', None)
+    p['baths']     = getattr(obj, 'baths', p['bathrooms'])
+ 
+    p['balconies']       = getattr(obj, 'balconies',       None)
+    p['covered_parking'] = getattr(obj, 'covered_parking', None)
+    p['open_parking']    = getattr(obj, 'open_parking',    None)
+    p['private_parking'] = getattr(obj, 'private_parking', None)
+    p['public_parking']  = getattr(obj, 'public_parking',  None)
+ 
+    # AREA
+    p['area'] = (
+        getattr(obj, 'builtup_area',  None) or
+        getattr(obj, 'built_up_area', None) or
+        getattr(obj, 'land_area',     None) or
+        getattr(obj, 'plot_area',     None) or
+        getattr(obj, 'total_area',    None)
+    )
+    p['carpet_area']  = getattr(obj, 'carpet_area',  None)
+    p['plot_area']    = getattr(obj, 'plot_area',    None)
+    p['builtup_area'] = getattr(obj, 'builtup_area', getattr(obj, 'built_up_area', None))
+ 
+    # FURNISHING & AGE
+    p['furnished'] = (
+        getattr(obj, 'furnishing_status', None) or
+        getattr(obj, 'furnishing_type',   None) or
+        getattr(obj, 'furnished',         None)
+    )
+    p['age']                = getattr(obj, 'age_of_property',   getattr(obj, 'property_age', None))
+    p['property_condition'] = getattr(obj, 'property_condition', None)
+    p['construction_status']= getattr(obj, 'construction_status', None)
+ 
+    # FACING & FLOOR
+    p['facing'] = getattr(obj, 'facing', getattr(obj, 'plot_road_facing', None))
+    p['floor']  = (
+        getattr(obj, 'floor_number', None) or
+        getattr(obj, 'floor_no',     None) or
+        getattr(obj, 'your_floor',   None)
+    )
+    p['total_floors'] = getattr(obj, 'total_floors', None)
+ 
+    # ZONE / LOCATION
+    p['zone']          = getattr(obj, 'zone',          None)
+    p['zone_type']     = getattr(obj, 'zone_type',     None)
+    p['location_hub']  = getattr(obj, 'location_hub',  None)
+    p['society_type']  = getattr(obj, 'society_type',  None)
+    p['water_type']    = getattr(obj, 'water_type',    None)
+ 
+    # POSSESSION
+    p['possession']    = getattr(obj, 'possession_status', getattr(obj, 'available_from', None))
+    p['available_from']= getattr(obj, 'available_from',    None)
+    p['lease_duration']= getattr(obj, 'lease_duration',    None)
+ 
+    # OWNERSHIP
+    p['ownership']   = getattr(obj, 'ownership_type', getattr(obj, 'plot_ownership', None))
+    p['num_owners']  = getattr(obj, 'num_owners',     None)
+ 
+    # ── PRICING ────────────────────────────────────────────
+    # Rental prices
+    p['monthly_rent']     = getattr(obj, 'monthly_rent',     getattr(obj, 'expected_rent', None))
+    p['security_deposit'] = getattr(obj, 'security_deposit', None)
+    p['maintenance']      = getattr(obj, 'maintenance_amount', getattr(obj, 'maintenance_charges', None))
+    p['maintenance_type'] = getattr(obj, 'maintenance_type', None)
+    p['negotiable']       = getattr(obj, 'negotiable',       None)
+    p['is_negotiable']    = getattr(obj, 'is_negotiable',    None)
+ 
+    # Sale prices
+    raw_price = (
+        getattr(obj, 'expected_price', None) or
+        getattr(obj, 'plot_price',     None) or
+        getattr(obj, 'monthly_rent',   None) or
+        getattr(obj, 'expected_rent',  None)
+    )
+ 
+    # PG: no direct price field — parse room_details
+    if seo_page_type == "pg_coliving":
+        pg_prices = _parse_pg_room_prices(obj)
+        p.update(pg_prices)  # single_sharing, double_sharing, etc.
+ 
+        # Set monthly_rent to minimum bed price for sidebar display
+        bed_prices = [v for v in pg_prices.values() if v]
+        if bed_prices:
+            p['monthly_rent'] = min(bed_prices)
+            raw_price = p['monthly_rent']
+        else:
+            pg_min = _get_pg_min_price(obj)
+            if pg_min:
+                p['monthly_rent'] = pg_min
+                raw_price = pg_min
+ 
+    p['raw_price']      = raw_price or 0
+    p['expected_price'] = raw_price or 0
+ 
+    try:
+        price_f = float(raw_price) if raw_price else 0
+        p['price_display'] = f"₹{price_f:,.0f}" if price_f > 0 else "Price on Request"
+    except Exception:
+        p['price_display'] = str(raw_price) if raw_price else "Price on Request"
+ 
+    p['price_sqft'] = getattr(obj, 'price_per_sqft', None)
+ 
+    # Brokerage
+    b_flag = str(getattr(obj, 'brokerage', '')).lower()
+    p['brokerage'] = None
+    if b_flag in ['yes', 'true', '1']:
+        p['brokerage'] = (
+            getattr(obj, 'brokerage_percentage', None) or
+            getattr(obj, 'manual_brokerage',     None) or
+            'Applicable'
+        )
+ 
+    # COMMERCIAL SPECS
+    p['min_seats']       = getattr(obj, 'min_seats',       None)
+    p['max_seats']       = getattr(obj, 'max_seats',       None)
+    p['cabins']          = getattr(obj, 'cabins',   getattr(obj, 'num_cabins',    None))
+    p['meeting_rooms']   = getattr(obj, 'meeting_rooms',   None)
+    p['passenger_lifts'] = getattr(obj, 'passenger_lifts', None)
+    p['service_lifts']   = getattr(obj, 'service_lifts',   None)
+    p['private_washroom']= getattr(obj, 'private_washroom', None)
+    p['public_washroom'] = getattr(obj, 'public_washroom',  None)
+    p['staircases']      = getattr(obj, 'staircases', getattr(obj, 'num_staircases', None))
+    p['flooring_type']   = getattr(obj, 'flooring_type',   None)
+ 
+    # UTILITIES (commercial)
+    p['dg_ups_included']    = getattr(obj, 'dg_ups_included',    False)
+    p['electricity_included']= getattr(obj, 'electricity_included', False)
+    p['water_included']     = getattr(obj, 'water_included',     False)
+ 
+    # RENTAL TERMS
+    p['lockin_period']  = getattr(obj, 'lockin_period',  None)
+    p['rent_increase']  = getattr(obj, 'rent_increase',  None)
+    p['minimum_stay']   = getattr(obj, 'minimum_stay',   None)
+    p['notice_period']  = getattr(obj, 'notice_period',  None)
+ 
+    # PG SPECIFIC
+    p['total_beds']          = getattr(obj, 'total_beds',         None)
+    p['sharing_type']        = getattr(obj, 'sharing_type',       None)
+    p['pg_for']              = getattr(obj, 'pg_for',  getattr(obj, 'best_suited_for', None))
+    p['meal_offerings']      = getattr(obj, 'meal_offerings',     None)
+    p['meals_available']     = getattr(obj, 'meals_available',    False)
+    p['meal_speciality']     = getattr(obj, 'meal_speciality',    None)
+    p['room_details']        = getattr(obj, 'room_details',       None)
+    p['common_area']         = getattr(obj, 'common_area',        None)
+    p['property_managed_by'] = getattr(obj, 'property_managed_by', None)
+    p['manager_stays']       = getattr(obj, 'manager_stays',      False)
+ 
+    # PG RULES
+    p['non_veg_allowed']     = getattr(obj, 'non_veg_allowed',      False)
+    p['opposite_sex_allowed']= getattr(obj, 'opposite_sex_allowed', False)
+    p['any_time_allowed']    = getattr(obj, 'any_time_allowed',     False)
+    p['visitors_allowed']    = getattr(obj, 'visitors_allowed',     False)
+    p['guardian_allowed']    = getattr(obj, 'guardian_allowed',     False)
+    p['drinking_allowed']    = getattr(obj, 'drinking_allowed',     False)
+    p['smoking_allowed']     = getattr(obj, 'smoking_allowed',      False)
+ 
+    # PLOT
+    p['plot_corner']         = getattr(obj, 'plot_corner',         False)
+    p['plot_fencing']        = getattr(obj, 'plot_fencing',        False)
+    p['plot_road_facing']    = getattr(obj, 'plot_road_facing',    None)
+    p['sanctioning_authority']= getattr(obj, 'sanctioning_authority', getattr(obj, 'plot_authority', None))
+ 
+    # INDUSTRIAL
+    p['power_kva']            = getattr(obj, 'kva_capacity',          getattr(obj, 'power_supply', None))
+    p['power_supply']         = getattr(obj, 'power_supply',          None)
+    p['water_supply']         = getattr(obj, 'water_supply',          None)
+    p['crane_heavy_machinery']= getattr(obj, 'crane_heavy_machinery', False)
+    p['road_connectivity']    = getattr(obj, 'road_connectivity',     None)
+    p['worker_housing_nearby']= getattr(obj, 'worker_housing_nearby', False)
+ 
+    # AGRICULTURE
+    p['soil_type']          = getattr(obj, 'soil_type',          None)
+    p['water_source']       = getattr(obj, 'water_source', getattr(obj, 'water_type', None))
+    p['irrigation_facility']= getattr(obj, 'irrigation_facility', None)
+    p['fertility_status']   = getattr(obj, 'fertility_status',   None)
+    p['previous_crops']     = getattr(obj, 'previous_crops',     None)
+    p['state']              = getattr(obj, 'state',              None)
+    p['district']           = getattr(obj, 'district',           None)
+    p['taluka']             = getattr(obj, 'taluka',             None)
+    p['village']            = getattr(obj, 'village',            None)
+ 
+    # LEGAL
+    def _bool_field(*attrs):
+        for a in attrs:
+            v = getattr(obj, a, None)
+            if v is not None:
+                return str(v).lower() in ['yes', 'true', '1']
+        return False
+ 
+    p['has_loan']        = _bool_field('has_loan', 'plot_loan', 'agri_loan', 'loan_on_property')
+    p['loan_amount']     = getattr(obj, 'loan_amount', getattr(obj, 'plot_loan_amount', None))
+    p['has_dispute']     = _bool_field('has_legal_dispute', 'legal_dispute', 'agri_dispute')
+    p['dispute_details'] = getattr(obj, 'dispute_details', None)
+    p['has_tax_due']     = _bool_field('has_tax_due', 'tax_due', 'agri_tax_due')
+    p['tax_amount']      = getattr(obj, 'pending_tax_amount', getattr(obj, 'tax_amount', None))
+    p['has_tenants']     = _bool_field('has_tenants', 'existing_tenants', 'agri_tenants')
+    p['tenant_details']  = getattr(obj, 'tenant_details', None)
+    p['fire_noc']        = getattr(obj, 'fire_noc',            None)
+    p['tax_clearance_cert']= getattr(obj, 'tax_clearance_cert', False)
+    p['encumbrance_cert']  = getattr(obj, 'encumbrance_cert',   None)
+    p['compliance_docs']   = getattr(obj, 'compliance_docs',    None)
+ 
+    # LOCATION
+    p['city']     = getattr(obj, 'city',     getattr(obj, 'plot_city', getattr(obj, 'state', '')))
+    p['locality'] = (
+        getattr(obj, 'locality',      None) or
+        getattr(obj, 'plot_locality', None) or
+        getattr(obj, 'area_locality', None) or
+        getattr(obj, 'village',       None) or
+        ''
+    )
+    p['address'] = (
+        getattr(obj, 'complete_address',  None) or
+        getattr(obj, 'property_address',  None) or
+        getattr(obj, 'address',           None) or
+        getattr(obj, 'plot_address',      None) or
+        ''
+    )
+    p['building_name'] = getattr(obj, 'building_name', None)
+    p['pincode']       = getattr(obj, 'pincode', '')
+ 
+    # DESCRIPTION
+    p['desc'] = (
+        getattr(obj, 'description',            None) or
+        getattr(obj, 'property_description',   None) or
+        getattr(obj, 'rent_residential_desc',  None) or
+        getattr(obj, 'resale_agricultural_desc', None) or
+        getattr(obj, 'pg_description',         None) or
+        ''
+    )
+ 
+    # MEDIA
+    p['video'] = (
+        getattr(obj, 'property_video', None) or
+        getattr(obj, 'video',          None) or
+        getattr(obj, 'social_video',   None)
+    )
+    p['floor_plan'] = getattr(obj, 'floor_plan', None)
+ 
+    # OWNER
+    p['owner_name']    = (
+        getattr(obj, 'owner_name',       None) or
+        getattr(obj, 'plot_owner_name',  None) or
+        'Property Owner'
+    )
+    p['owner_contact'] = (
+        getattr(obj, 'contact_number',      None) or
+        getattr(obj, 'owner_contact',       None) or
+        getattr(obj, 'plot_owner_contact',  None) or
+        ''
+    )
+    p['owner_email'] = (
+        getattr(obj, 'email',             None) or
+        getattr(obj, 'owner_email',       None) or
+        getattr(obj, 'plot_owner_email',  None) or
+        ''
+    )
+    p['alternate_contact']  = getattr(obj, 'alternate_contact', None)
+    p['residential_status'] = getattr(obj, 'residential_status', getattr(obj, 'comm_residency', None))
+ 
+    # UPLOADED BY
+    p['uploaded_by_role']    = getattr(obj, 'uploaded_by_role',    'Owner')
+    p['uploaded_by_name']    = getattr(obj, 'uploaded_by_name',    None)
+    p['uploaded_by_email']   = getattr(obj, 'uploaded_by_email',   None)
+    p['uploaded_by_contact'] = getattr(obj, 'uploaded_by_contact', None)
+ 
+    # ── 3. Images & Amenities ────────────────────────────────
+    if hasattr(obj, 'images'):
+        property_images = obj.images.all()
+ 
+    def parse_list(val):
+        if not val:
+            return []
+        if isinstance(val, list):
+            return [str(x).strip() for x in val if x]
+        if isinstance(val, str):
+            try:
+                parsed = json.loads(val)
+                if isinstance(parsed, list):
+                    return [str(x).strip() for x in parsed if x]
+            except Exception:
+                pass
+            return [x.strip() for x in val.split(',') if x.strip()]
+        return []
+ 
+    amenities_list  = parse_list(getattr(obj, 'amenities',          ''))
+    facilities_list = parse_list(getattr(obj, 'nearby_facilities',  getattr(obj, 'facilities', '')))
+ 
+    if p.get('dg_ups_included'):    amenities_list.append("DG/UPS Backup")
+    if p.get('electricity_included'): amenities_list.append("Electricity Included")
+    if p.get('water_included'):     amenities_list.append("Water Included")
+ 
+    # ── 4. EMI Calculator ────────────────────────────────────
+    if listing_type == 'sale' and p['raw_price']:
+        try:
+            principal = float(p['raw_price']) * 0.80
+            r = 8.5 / 12 / 100
+            n = 20 * 12
+            base_emi = int((principal * r * math.pow(1 + r, n)) / (math.pow(1 + r, n) - 1))
+        except Exception:
+            base_emi = 0
+ 
+    # ── 5. Similar Properties ────────────────────────────────
+    similar = []
+    if p.get('city'):
+        try:
+            similar_qs = property_model.objects.filter(is_deleted=False).exclude(id=obj.id)
+ 
+            city_val = p['city']
+            if hasattr(property_model, 'city'):
+                similar_qs = similar_qs.filter(city__icontains=city_val)
+            elif hasattr(property_model, 'plot_city'):
+                similar_qs = similar_qs.filter(plot_city__icontains=city_val)
+ 
+            for s_obj in similar_qs[:3]:
+                s_raw = (
+                    getattr(s_obj, 'expected_price', None) or
+                    getattr(s_obj, 'plot_price',     None) or
+                    getattr(s_obj, 'monthly_rent',   None) or
+                    getattr(s_obj, 'expected_rent',  None)
+                )
+                # PG similar price
+                if seo_page_type == "pg_coliving" and not s_raw:
+                    s_raw = _get_pg_min_price(s_obj)
+ 
+                try:
+                    s_price_str = f"₹{float(s_raw):,.0f}" if s_raw else "Ask Price"
+                except Exception:
+                    s_price_str = "Ask Price"
+ 
+                s_bhk  = getattr(s_obj, 'bhk', getattr(s_obj, 'bhk_type', ''))
+                s_area = (
+                    getattr(s_obj, 'builtup_area', None) or
+                    getattr(s_obj, 'land_area',    None) or
+                    getattr(s_obj, 'plot_area',    None) or
+                    getattr(s_obj, 'carpet_area',  None)
+                )
+                feature = s_bhk if s_bhk else (f"{s_area} Sq.Ft" if s_area else "Details")
+ 
+                s_img_url = None
+                if hasattr(s_obj, 'images'):
+                    try:
+                        fi = s_obj.images.first()
+                        if fi and fi.image:
+                            s_img_url = fi.image.url
+                    except Exception:
+                        pass
+ 
+                similar.append({
+                    'id':            s_obj.id,
+                    'title':         (
+                        getattr(s_obj, 'title',          None) or
+                        getattr(s_obj, 'plot_title',     None) or
+                        getattr(s_obj, 'pg_name',        None) or
+                        getattr(s_obj, 'property_title', 'Property')
+                    ),
+                    'price_display': s_price_str,
+                    'location':      (
+                        getattr(s_obj, 'locality',      None) or
+                        getattr(s_obj, 'plot_locality', None) or
+                        getattr(s_obj, 'area_locality', None) or
+                        ''
+                    ),
+                    'feature':       feature,
+                    'listing_type':  listing_type,
+                    'category':      category,
+                    'image_url':     s_img_url,
+                })
+        except Exception:
+            pass
+ 
+    # ── 6. SEO & Auth ────────────────────────────────────────
+    seo = None
+    try:
+        from .models import LocationSEO
+        from django.contrib.contenttypes.models import ContentType
+        seo = LocationSEO.objects.filter(
+            content_type=ContentType.objects.get_for_model(obj),
+            object_id=obj.id,
+            pagetype=seo_page_type,
+            is_active=True,
+        ).first()
+    except Exception:
+        pass
+ 
+    user_id = request.session.get('user_id') or request.session.get('User_id')
+    logged_user = user_obj = user_subscription = None
+    can_view_contact = False
+ 
+    if user_id:
+        try:
+            from .models import User_Details
+            logged_user = User_Details.objects.filter(id=user_id).first()
+            user_obj    = logged_user
+            try:
+                from .utils import get_active_subscription
+                user_subscription = get_active_subscription(logged_user)
+                if user_subscription:
+                    can_view_contact = True
+            except Exception:
+                pass
+        except Exception:
+            pass
+ 
+    # Mask phone
+    masked_phone = "XXXXXXXXXX"
+    if p['owner_contact'] and len(str(p['owner_contact'])) >= 10:
+        ph = str(p['owner_contact'])
+        masked_phone = f"{ph[:2]}XXXXXX{ph[-2:]}"
+ 
+    # ── 7. Context & Render ──────────────────────────────────
+    context = {
+        "p":                p,
+        "original":         obj,
+        "listing_type":     listing_type,
+        "category":         category,
+        "property_images":  property_images,
+        "amenities_list":   amenities_list,
+        "facilities_list":  facilities_list,
+        "similar":          similar,
+        "base_emi":         base_emi,
+        "raw_price":        p['raw_price'],
+        "seo":              seo,
+        "logged_user":      logged_user,
+        "user_obj":         user_obj,
+        "user_subscription":user_subscription,
+        "can_view_contact": can_view_contact,
+        "masked_phone":     masked_phone,
+        "today":            date.today(),
+        "now":              now(),
+    }
+    return render(request, 'home_page/property_detail.html', context)
+ 
 # ─────────────────────────────────────────────────────────────
 # HELPER: normalise ANY property object to a flat dict for
 # the listing page cards. Covers all 8 property types.
@@ -1293,130 +1785,9 @@ def _normalize_any_property(obj, sheet_name):
         'location':       location,
         'city':           city,
         'price_display':  price_display,
-        'raw_price':      raw_price,
         'area':           area,
-        'land_area':      land_area,
-        'plot_area':      plot_area,
-        'beds':           beds,
-        'total_beds':     total_beds,
-        'min_seats':      min_seats,
-        'kva_capacity':   kva_capacity,
-        'baths':          baths,
-        'furnished':      furnished,
-        'property_type':  property_type,
-        'plot_road_facing': getattr(obj, 'plot_road_facing', None),
-        'pg_for':         getattr(obj, 'pg_for', getattr(obj, 'best_suited_for', None)),
-        'owner':          owner_name,
-        'owner_initials': owner_initials,
-        'phone':          phone,
-        'image_url':      image_url,
-        'emoji':          EMOJI.get(sheet_name, "🏠"),
-        'listing_type':   lt,
-        'category':       cat,
-        'is_new':         False,
-        'is_ai_match':    False,
-    }
-
-
-# ═════════════════════════════════════════════════════════════
-# PROPERTY DETAIL VIEW
-# ═════════════════════════════════════════════════════════════
-def property_detail_view(request, listing_type, category, pk):
-    """
-    COMPREHENSIVE PROPERTY DETAIL VIEW
-    Supports 8 property types across rent / sale.
-    """
-    obj = None
-    p   = {}
-    amenities_list  = []
-    facilities_list = []
-    property_images = []
-    seo_page_type   = ""
-    base_emi        = 0
-    property_model  = None
-
-    # ── 1. Identify correct model ────────────────────────────
-    if listing_type == 'rent':
-        if category in ['residential', 'residential-data']:
-            property_model = RentalResidentialProperty
-            seo_page_type  = "rental_residential"
-        elif category in ['commercial', 'commercial-data']:
-            property_model = CommercialRentalProperty
-            seo_page_type  = "commercial_rental"
-        elif category in ['pg', 'pg-data']:
-            property_model = PGColivingProperty
-            seo_page_type  = "pg_coliving"
-
-    elif listing_type == 'sale':
-        if category in ['residential', 'resale-residential']:
-            property_model = ResaleResidentialProperty
-            seo_page_type  = "resale_residential"
-        elif category in ['commercial', 'commercial-resale']:
-            property_model = CommercialResaleProperty
-            seo_page_type  = "commercial_resale"
-        elif category in ['plot', 'plot-resale']:
-            property_model = PlotSaleProperty
-            seo_page_type  = "plot_sale"
-        elif category in ['industrial', 'industrial-resale']:
-            property_model = IndustrialResaleProperty
-            seo_page_type  = "industrial_sale"
-        elif category in ['agriculture', 'agricultural-data']:
-            property_model = AgriculturalResaleProperty
-            seo_page_type  = "agriculture_sale"
-
-    if not property_model:
-        return render(request, 'home_page/property_not_found.html')
-
-    obj = get_object_or_404(property_model, pk=pk)
-
-    # ── 2. Extract all data ──────────────────────────────────
-
-    # BASIC
-    p['id'] = obj.id
-    p['title'] = (
-        getattr(obj, 'title',          None) or
-        getattr(obj, 'property_title', None) or
-        getattr(obj, 'plot_title',     None) or
-        getattr(obj, 'pg_name',        None) or
-        getattr(obj, 'building_name',  None) or
-        'Property Details'
-    )
-
-    p['property_purpose']   = getattr(obj, 'property_purpose', None)
-    p['renting_option']     = getattr(obj, 'renting_option',   None)
-    p['available_for']      = getattr(obj, 'available_for',    None)
-
-    # Category name
-    cat_raw = (
-        getattr(obj, 'property_type',             None) or
-        getattr(obj, 'agriculture_property_type', None) or
-        getattr(obj, 'resale_plot_type',          None) or
-        category
-    )
-    p['category_name'] = str(cat_raw).replace('_', ' ').title()
-
-    # CONFIGURATION
-    p['bhk']      = getattr(obj, 'bhk',      None)
-    p['bhk_type'] = getattr(obj, 'bhk_type', None)
-    p['beds']     = p['bhk'] or p['bhk_type']
-
-    p['bathrooms'] = getattr(obj, 'bathrooms', None)
-    p['baths']     = getattr(obj, 'baths', p['bathrooms'])
-
-    p['balconies']       = getattr(obj, 'balconies',       None)
-    p['covered_parking'] = getattr(obj, 'covered_parking', None)
-    p['open_parking']    = getattr(obj, 'open_parking',    None)
-    p['private_parking'] = getattr(obj, 'private_parking', None)
-    p['public_parking']  = getattr(obj, 'public_parking',  None)
-
-    # AREA
-    p['area'] = (
-        getattr(obj, 'builtup_area',  None) or
-        getattr(obj, 'built_up_area', None) or
-        getattr(obj, 'land_area',     None) or
-        getattr(obj, 'plot_area',     None) or
-        getattr(obj, 'total_area',    None)
-    )
+        'land_area':      land_area,}
+    
     p['carpet_area']  = getattr(obj, 'carpet_area',  None)
     p['plot_area']    = getattr(obj, 'plot_area',    None)
     p['builtup_area'] = getattr(obj, 'builtup_area', getattr(obj, 'built_up_area', None))
@@ -1835,8 +2206,11 @@ def property_detail_view(request, listing_type, category, pk):
 # ═════════════════════════════════════════════════════════════
 # LISTINGS VIEW
 # ═════════════════════════════════════════════════════════════
-def listings_view(request):
 
+
+
+def listings_view(request):
+ 
     # GET FILTERS
     raw_types        = request.GET.get('types', '')
     selected_types   = [t.strip() for t in raw_types.split(',') if t.strip()] if raw_types else []
@@ -1854,9 +2228,9 @@ def listings_view(request):
     owner_filter     = request.GET.get('owner')
     pet_filter       = request.GET.get('pet')
     sort_filter      = request.GET.get('sort', 'relevant')
-
+ 
     normalized_properties = []
-
+ 
     # MODEL MAP
     model_map = {
         "Residential Data": RentalResidentialProperty,
@@ -1868,7 +2242,7 @@ def listings_view(request):
         "Agricultural Data":  AgriculturalResaleProperty,
         "Industrial Resale":  IndustrialResaleProperty,
     }
-
+ 
     # AI SEARCH
     if ai_query:
         df           = MainAppConfig.get_ai_df()
@@ -1877,10 +2251,10 @@ def listings_view(request):
         query_vector = model_ai.encode([ai_query]).astype('float32')
         _, indices   = faiss_index.search(query_vector, k=100)
         results_df   = df.iloc[indices[0]].copy()
-
+ 
         if category:
             results_df = results_df[results_df['source_sheet'] == category]
-
+ 
         for _, row in results_df.iterrows():
             if len(normalized_properties) >= 20:
                 break
@@ -1898,7 +2272,7 @@ def listings_view(request):
             real_obj = obj_q.first()
             if real_obj:
                 normalized_properties.append(_normalize_any_property(real_obj, row.get('source_sheet')))
-
+ 
     # NORMAL SEARCH
     else:
         # Determine which models to query
@@ -1936,24 +2310,24 @@ def listings_view(request):
                 ]
         else:
             models_to_search = list(model_map.items())
-
+ 
         for sheet_name, db_model in models_to_search:
             if len(normalized_properties) >= 20:
                 break
-
+ 
             obj_q = db_model.objects.all()
-
+ 
             # Filter deleted
             if hasattr(db_model, 'is_deleted'):
                 obj_q = obj_q.filter(is_deleted=False)
-
+ 
             # City filter
             if city_filter:
                 if hasattr(db_model, 'city'):
                     obj_q = obj_q.filter(city__icontains=city_filter)
                 elif hasattr(db_model, 'plot_city'):
                     obj_q = obj_q.filter(plot_city__icontains=city_filter)
-
+ 
             # Area filter (locality / area_locality / address / village)
             if area_filter:
                 from django.db.models import Q
@@ -1963,7 +2337,7 @@ def listings_view(request):
                         area_q |= Q(**{f'{f}__icontains': area_filter})
                 if area_q:
                     obj_q = obj_q.filter(area_q)
-
+ 
             # BHK filter
             if bhk_filter:
                 from django.db.models import Q
@@ -1973,7 +2347,7 @@ def listings_view(request):
                         bhk_q |= Q(**{f'{f}__icontains': bhk_filter})
                 if bhk_q:
                     obj_q = obj_q.filter(bhk_q)
-
+ 
             # Budget min
             if budget_min:
                 try:
@@ -1988,7 +2362,7 @@ def listings_view(request):
                         obj_q = obj_q.filter(plot_price__gte=bmin)
                 except ValueError:
                     pass
-
+ 
             # Budget max
             if budget_max:
                 try:
@@ -2003,14 +2377,14 @@ def listings_view(request):
                         obj_q = obj_q.filter(plot_price__lte=bmax)
                 except ValueError:
                     pass
-
+ 
             # Furnishing
             if furnishing_filter:
                 for f in ('furnishing_status', 'furnishing_type', 'furnished'):
                     if hasattr(db_model, f):
                         obj_q = obj_q.filter(**{f'{f}__icontains': furnishing_filter})
                         break
-
+ 
             # Verified / Featured / Owner / Pet
             if verified_filter and hasattr(db_model, 'is_verified'):
                 obj_q = obj_q.filter(is_verified=True)
@@ -2020,7 +2394,7 @@ def listings_view(request):
                 obj_q = obj_q.filter(listed_by__icontains='owner')
             if pet_filter and hasattr(db_model, 'pet_friendly'):
                 obj_q = obj_q.filter(pet_friendly=True)
-
+ 
             # Sorting
             if sort_filter == "price-asc":
                 for f in ('monthly_rent', 'expected_rent', 'expected_price', 'plot_price'):
@@ -2051,7 +2425,7 @@ def listings_view(request):
                         if hasattr(db_model, f):
                             conditions.append(When(**{f'{f}__icontains': bhk_filter}, then=15))
                             break
-
+ 
                 obj_q = obj_q.annotate(
                     relevance_score=Case(
                         *conditions,
@@ -2059,11 +2433,11 @@ def listings_view(request):
                         output_field=IntegerField(),
                     )
                 ).order_by('-relevance_score', '-id')
-
+ 
             remaining = 20 - len(normalized_properties)
             for real_obj in obj_q[:remaining]:
                 normalized_properties.append(_normalize_any_property(real_obj, sheet_name))
-
+ 
     # Active filter count
     active_filter_count = sum(1 for v in [
         area_filter, bhk_filter, budget_min, budget_max,
@@ -2071,6 +2445,7 @@ def listings_view(request):
         owner_filter, pet_filter,
     ] if v)
 
+ 
     context = {
         'properties':          normalized_properties,
         'total':               len(normalized_properties),
@@ -2090,7 +2465,6 @@ def listings_view(request):
         'active_filter_count': active_filter_count,
     }
     return render(request, 'home_page/listingpage.html', context)
-
 
 
 
@@ -2260,50 +2634,6 @@ from django.db.models import Q
 
 @csrf_exempt
 def login_view(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body.decode('utf-8'))
-            user_identifier = data.get('user_identifier', '').strip()
-            user_password = data.get('user_password', '')
-            user_role = data.get('user_role') 
-
-            user_qs = User_Details.objects.filter(
-                Q(user_email=user_identifier) | Q(user_phone=user_identifier),
-                user_password=user_password, 
-                user_role=user_role
-            )
-            
-            if user_qs.exists():
-                user_obj = user_qs.first()
-                
-                # --- SESSION LOGIC ---
-                request.session['User_id'] = str(user_obj.id)
-                request.session['user_type'] = user_role
-                
-
-                # --- DYNAMIC REDIRECT LOGIC ---
-
-                if user_role == 'Relationship Manager':
-                    # Make sure 'rm_dashboard' matches the exact name in your urls.py!
-                    url = reverse('rm_dashboard') 
-                else:
-                    url = reverse('index')
-                
-                return JsonResponse({
-                    'status': '1', 
-                    'msg': 'Success!',
-                    'user_name': user_obj.user_name, 
-                    'user_role': user_obj.user_role,
-                    'user_mobile': user_obj.user_phone, 
-                    'user_email': user_obj.user_email,
-                    'redirect_url': url 
-                })
-
-            return JsonResponse({'status': 0, 'msg': 'Invalid Credentials or Role Selection'})
-
-        except Exception:
-            print(traceback.format_exc())
-            return JsonResponse({'status': 0, 'msg': 'Something went wrong'})
     
     return render(request, 'home_page/login.html')
 
@@ -2347,6 +2677,303 @@ def lead_capture_view(request):
 
 
 # ---------------- POST PROPERTY ----------------
+
+
+############### Views start for check email already exists or not ####################
+
+@csrf_exempt
+def Check_Email_Api(request):
+    if request.method == "POST":
+        email = request.POST.get('email', '').strip()
+        # Check database for email
+        user_exists = User_Details.objects.filter(user_email=email).exists()
+        return JsonResponse({'exists': user_exists})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+########### Views end for check email already exists or not ##########################
+
+
+########### Views start for if email exits directly login #########################
+
+@csrf_exempt
+def Prop_Login_Api(request):
+    if request.method == "POST":
+        try:
+            user_identifier = request.POST.get('email', '').strip()
+            password = request.POST.get('password', '')
+            
+            # Find the user by Email OR Phone
+            user_qs = User_Details.objects.filter(
+                Q(user_email=user_identifier) | Q(user_phone=user_identifier),
+                user_password=password
+            )
+            
+            if user_qs.exists():
+                user_obj = user_qs.first()
+                
+                # 🟢 EXACT MATCH TO YOUR ORIGINAL SESSION LOGIC
+                request.session['User_id'] = str(user_obj.id)
+                request.session['user_type'] = user_obj.user_role
+                
+                # 🟢 DYNAMIC REDIRECT LOGIC
+                if user_obj.user_role == 'Relationship Manager':
+                    url = reverse('rm_dashboard') 
+                else:
+                    url = reverse('index')
+                
+                return JsonResponse({
+                    'status': '1', 
+                    'msg': 'Success!',
+                    'redirect_url': url,
+                    'user_name': user_obj.user_name,   
+                    'user_role': user_obj.user_role,
+                    'user_email': user_obj.user_email
+                })
+
+            return JsonResponse({'status': '0', 'msg': 'Incorrect password or user not found.'})
+
+        except Exception as e:
+            print(traceback.format_exc())
+            return JsonResponse({'status': '0', 'msg': 'Something went wrong'})
+            
+    return JsonResponse({'status': '0', 'msg': 'Invalid request.'})
+
+############ Views end for if email exists directly login ############################
+
+
+############ Views start for send otp to email #############################
+
+@csrf_exempt
+def Send_Otp_Api(request):
+    if request.method == "POST":
+        user_identifier = request.POST.get('email', '').strip()
+        otp = str(random.randint(1000, 9999))
+        
+        request.session['auth_otp'] = otp
+        request.session['auth_identifier'] = user_identifier
+        
+        # 🟢 CRITICAL FIX: Force Django to save the session immediately
+        request.session.modified = True 
+        
+        if '@' in user_identifier:
+            try:
+                send_mail(
+                    subject='Your PropCRM Verification Code',
+                    message=f'Hello!\n\nYour 4-digit verification code is: {otp}\n\nDo not share this code with anyone.',
+                    from_email=None, 
+                    recipient_list=[user_identifier],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                print(f"Mail Error: {e}")
+                
+        print(f" OTP FOR {user_identifier}: {otp}")
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+########## Views end for send otp to email ###########################
+
+
+########## Views start for verify otp for email ########################
+
+@csrf_exempt
+def Verify_Otp_Api(request):
+    if request.method == "POST":
+        user_identifier = request.POST.get('email', '').strip()
+        submitted_otp = request.POST.get('otp', '').strip()
+        
+        actual_otp = request.session.get('auth_otp')
+        session_identifier = request.session.get('auth_identifier')
+        
+        if submitted_otp == actual_otp and user_identifier == session_identifier:
+            #  CRITICAL FIX: Set a dedicated success flag and save immediately
+            request.session['otp_verified_for'] = user_identifier
+            request.session.modified = True
+            return JsonResponse({'valid': True})
+        else:
+            return JsonResponse({'valid': False})
+            
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+########### Views end for verify otp for email #############################
+
+
+############# Views start for user registration #########################
+
+@csrf_exempt
+def Prop_Register_Api(request):
+    if request.method == "POST":
+        user_identifier = request.POST.get('email', '').strip()
+        name = request.POST.get('name', '').strip()
+        mobile = request.POST.get('mobile', '').strip()
+        role = request.POST.get('role', '').strip()
+        
+        #  CRITICAL FIX: Check the new success flag instead of the raw email
+        verified_user = request.session.get('otp_verified_for')
+        if verified_user != user_identifier:
+             return JsonResponse({'status': '0', 'msg': 'Security timeout. Please request a new OTP.'})
+             
+        try:
+            email_val = user_identifier if '@' in user_identifier else ''
+
+            generated_password = get_random_string(
+                length=12, 
+                allowed_chars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^*'
+            )
+            
+            # 1. Save user object details
+            new_user = User_Details(
+                user_email=email_val,
+                user_name=name,
+                user_phone=mobile,
+                user_role=role,
+                user_password=generated_password,
+                user_register_date=datetime.today(),
+                user_register_time=datetime.now()
+            )
+            new_user.save()
+            
+            # 2.  RENDER AND SEND EXTERNAL HTML EMAIL TEMPLATE
+            if email_val:
+                subject = "Welcome to PropCRM! "
+                login_link = request.build_absolute_uri('/') 
+                
+                # Context variables to map directly into the template
+                context = {
+                    'name': name,
+                    'email': email_val,
+                    'role': role,
+                    'login_link': login_link
+                }
+                
+                # Compiles the standalone HTML file with our context data
+                html_message = render_to_string('emails/welcome_mail.html', context)
+                
+                # Plain text version fallback for strict email clients
+                plain_message = strip_tags(html_message)
+
+                send_mail(
+                    subject=subject,
+                    message=plain_message,
+                    from_email=None, 
+                    recipient_list=[email_val],
+                    html_message=html_message,
+                    fail_silently=False,
+                )
+            
+            # 3. Handle active user sessions setups
+            request.session['User_id'] = str(new_user.id)
+            request.session['user_type'] = new_user.user_role
+            
+            request.session.pop('auth_otp', None)
+            request.session.pop('auth_identifier', None)
+            request.session.pop('otp_verified_for', None)
+            request.session.modified = True
+            
+            return JsonResponse({'status': '1', 'msg': 'Account Created Successfully!'})
+            
+        except Exception as e:
+            print(traceback.format_exc())
+            return JsonResponse({'status': '0', 'msg': f"Server Error: {str(e)}"})
+            
+    return JsonResponse({'status': '0', 'msg': 'Invalid request.'})
+
+############ Views end for user registration ##############################
+
+
+############# Views start for wishlist properties ######################
+
+def Wishlist_Property(request):
+    context = {}
+    # ═══════════════════════════════════════════════════════
+    # HANDLE LOGGED-IN USER
+    # ═══════════════════════════════════════════════════════
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:     
+            wishlist_property = WishlistProperty.objects.filter(user=user_obj).order_by('-id')
+            context = {'user_obj':user_obj,
+            'wishlist_property':wishlist_property}
+
+    return render(request,'home_page/Wishlist/wishlist.html',context)
+
+############## Views end for wishlist properties #######################
+
+
+############# Views start for ajax for add property to wishlist ##################
+
+@csrf_exempt
+def Wishlist_Ajax(request):
+    if request.method == "POST":
+        data = request.POST.dict()   
+        
+        # 1.  SECURITY FIX: Get the user ID from the secure session, NOT the frontend data
+        user_id = request.session.get('User_id')
+        if not user_id:
+            return JsonResponse({"status": "0", "msg": "User not authenticated. Please log in."})
+
+        try:
+            user_data = User_Details.objects.get(id=user_id)
+        except User_Details.DoesNotExist:
+            return JsonResponse({"status": "0", "msg": "Invalid user session."})
+
+        real_property = None
+        property_id = data.get('property_id')
+        
+        # 2.  CRASH PREVENTION: Safely try to get the property
+        try:
+            if data['listing_type'] == "rent" and data['category'] == "Residential Data":
+                real_property = RentalResidentialProperty.objects.get(id=property_id)
+
+            elif data['listing_type'] == "rent" and data['category'] == "PG Data":
+                real_property = PGColivingProperty.objects.get(id=property_id)
+
+            elif data['listing_type'] == "rent" and data['category'] == "Commercial Data":
+                real_property = CommercialProperty.objects.get(id=property_id)
+
+        except ObjectDoesNotExist:
+            return JsonResponse({"status": "0", "msg": "Property not found in the database."})
+
+        if not real_property:
+            return JsonResponse({"status": "0", "msg": "Invalid property type or category."})
+        
+        property_content_type = ContentType.objects.get_for_model(real_property)
+
+        # 3. TOGGLE LOGIC: Check if it's already in the wishlist
+        # If it exists, delete it (Remove from wishlist)
+        wishlist_item = WishlistProperty.objects.filter(
+            content_type=property_content_type, 
+            object_id=real_property.id, 
+            user=user_data
+        ).first()
+        
+        if wishlist_item:
+            wishlist_item.delete()
+            return JsonResponse({
+                "status": "1", 
+                "action": "removed", 
+                "msg": "Property removed from wishlist."
+            })
+            
+        # If it doesn't exist, create it (Add to wishlist)
+        else:
+            WishlistProperty.objects.create(
+                content_type=property_content_type, # Passes the model type (e.g. CommercialProperty)
+                object_id=real_property.id,         # Passes the ID (e.g. 5)
+                user=user_data,
+                wishlist_date=datetime.today(),
+                wishlist_time=datetime.now()
+            )
+            return JsonResponse({
+                "status": "1", 
+                "action": "added", 
+                "msg": "Property added to wishlist successfully!"
+            })
+
+    return JsonResponse({"status": "0", "msg": "Invalid request method."})
+
+############ Views end for ajax for add property to wishlist #########################
 
 
 
@@ -2458,13 +3085,16 @@ def index(request):
         reverse=True
     )
 
+    ########### Normal FAQ Table call ###########################
+
+    faqs_obj = NormalFAQ.objects.all().order_by('-id')
+
     context = {
         "featured_props": featured_props,
        
        
         "hero": hero,
         "seo_pages":seo_pages,
-       # "faqs": faqs,
         "today": today,
         "fifteen_days_ago": fifteen_days_ago,
         'user_obj': None,
@@ -2627,7 +3257,18 @@ def properties(request):
 
 def services(request):
     services = LocationSEO.objects.filter(pagetype="service", is_active=True)
-    return render(request, "home_page/services.html", {"services": services})
+
+    context = {
+        'services':services
+    }
+
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
+    return render(request, "home_page/services.html",context)
 
 
 
@@ -2674,6 +3315,13 @@ def blog(request):
     context = {
         "blogs": seo_pages,
     }
+
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
     return render(request, "home_page/blog.html", context)
 
 
@@ -3468,6 +4116,14 @@ def dynamic_property_faq(request):
             ]
         })
 
-    return render(request, "home_page/property_faq.html", {
-        "faq_sections": faq_sections
-    })
+    context = {
+        'faq_sections':faq_sections
+    }
+
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
+    return render(request, "home_page/property_faq.html",context)

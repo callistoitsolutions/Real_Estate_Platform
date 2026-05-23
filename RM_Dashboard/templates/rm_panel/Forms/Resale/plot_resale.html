@@ -1,0 +1,575 @@
+{% include "rm_panel/rm_header.html" %}
+{% load static %}
+
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); /* Pink to Violet */
+        --success-gradient: linear-gradient(135deg, #10b981 0%, #065f46 100%); /* Jade Green */
+        --danger-gradient: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); /* Neon Orange-Red */
+        --warning-gradient: linear-gradient(135deg, #facc15 0%, #ca8a04 100%); /* Vivid Yellow */
+        --info-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); /* Electric Blue */
+        --dark-gradient: linear-gradient(180deg, #0b1528 0%, #1e293b 100%); /* Dark Deep Ocean Blue */
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 80px;
+        --topbar-height: 70px;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    .main-content { padding: 30px; margin-top: var(--topbar-height); }
+
+    .page-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 30px;
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+
+    /* Page Header */
+    .page-header {
+        background: var(--primary-gradient);
+        border-radius: 20px;
+        padding: 30px;
+        color: white;
+        grid-column: 1 / -1;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Stepper UI */
+    .stepper-container {
+        grid-column: 1 / -1;
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .stepper { display: flex; align-items: center; justify-content: space-between; position: relative; }
+    .step-item { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; z-index: 2; }
+    .step-circle {
+        width: 50px; height: 50px; border-radius: 50%; background: #e9ecef;
+        display: flex; align-items: center; justify-content: center; font-weight: 700;
+        transition: all 0.3s ease; border: 3px solid #fff;
+    }
+    .step-circle.active { background: var(--primary-gradient); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
+    .step-circle.done { background: var(--success-gradient); color: white; }
+    .step-line { position: absolute; top: 25px; left: 50%; right: -50%; height: 3px; background: #e9ecef; z-index: 1; }
+    .step-line.done { background: var(--success-gradient); }
+
+    /* Form Design */
+    .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
+    .step-content { display: none; }
+    .step-content.active { display: block; animation: fadeIn 0.4s ease; }
+
+    .section-header {
+        background: var(--primary-gradient); color: white;
+        padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .section-body {
+        background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px;
+        border: 2px solid #e9ecef; border-top: none; margin-bottom: 30px;
+    }
+
+    .form-label { font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 0.85rem; display: block; }
+    .required { color: #e74c3c; }
+
+    .radio-group { display: flex; gap: 20px; padding: 10px 0; }
+    .radio-option { cursor: pointer; display: flex; align-items: center; gap: 8px; background: #fff; padding: 10px 15px; border: 1px solid #ddd; border-radius: 10px; transition: 0.3s; }
+
+    /* Preview Sidebar */
+    .preview-sidebar { position: sticky; top: 100px; display: flex; flex-direction: column; gap: 20px; }
+    .preview-card { background: #2c3e50; border-radius: 16px; padding: 20px; color: white; }
+    .preview-mock { background: white; border-radius: 12px; overflow: hidden; color: #333; margin-top: 15px; }
+    .preview-image { height: 140px; background: #f0fdf4; display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
+    .preview-price { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.85); color: white; padding: 5px 12px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; }
+
+    .checklist-card, .tips-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+    .checklist-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 10px; color: #718096; }
+    .checklist-item.done { color: #11998e; font-weight: 600; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } }
+</style>
+
+<div class="main-content">
+    <div class="page-wrapper">
+        <div class="page-header">
+            <h1 class="page-title">🗺️ Plot & Land Resale</h1>
+            <p class="page-subtitle">List your residential or commercial plot in 4 simple steps</p>
+        </div>
+
+        <div class="stepper-container">
+            <div class="stepper">
+                <div class="step-item">
+                    <div class="step-circle active" id="sc1">1</div>
+                    <span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Plot Specs</span>
+                    <div class="step-line" id="line1"></div>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle" id="sc2">2</div>
+                    <span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Pricing & Legal</span>
+                    <div class="step-line" id="line2"></div>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle" id="sc3">3</div>
+                    <span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Media</span>
+                    <div class="step-line" id="line3"></div>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle" id="sc4">4</div>
+                    <span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Location</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-container">
+    <form action="{% url 'plot_sale_add' %}" method="POST" enctype="multipart/form-data" id="plotForm">
+        {% csrf_token %}
+
+        <div class="step-content active" id="step1">
+            <div class="section-header"><i class="fas fa-info-circle"></i> Plot/Land Details</div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-12 mt-2">
+                        <label class="form-label">Project Name <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="plot_title" id="plot_title" placeholder="e.g., Prime Residential Plot" required>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Plot Area (sq.ft) <span class="required">*</span></label>
+                        <input type="number" class="form-control" name="plot_area" id="plot_area" placeholder="e.g., 2000" required>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Plot Type <span class="required">*</span></label>
+                        <select class="form-select form-control" name="resale_plot_type" id="resale_plot_type" required>
+                            <option value="">Select</option>
+                            <option value="open_plot">Open Plot</option>
+                            <option value="residential_plot">Residential Plot</option>
+                            <option value="commercial_plot">Commercial Plot</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Road Facing <span class="required">*</span></label>
+                        <select class="form-select form-control" name="plot_road_facing" id="plot_road_facing" required>
+                            <option value="">Select</option>
+                            <option value="main">Main Road</option>
+                            <option value="internal">Internal Road</option>
+                            <option value="corner">Corner Plot</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Corner Plot?</label>
+                        <select class="form-select form-control" name="plot_corner" id="plot_corner">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Available From</label>
+                        <input type="date" class="form-control" name="available_from">
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Sanctioning Authority</label>
+                        <input type="text" class="form-control" name="plot_authority" placeholder="e.g., MHADA, CIDCO">
+                    </div>
+                </div>
+                <div class="form-group mt-3">
+                    <label class="form-label">Fencing Done?</label>
+                    <div class="radio-group">
+                        <label class="radio-option"><input type="radio" name="plot_fencing" value="no" checked> No</label>
+                        <label class="radio-option"><input type="radio" name="plot_fencing" value="yes"> Yes</label>
+                    </div>
+                </div>
+            </div>
+            <div class="text-end">
+                <button type="button" class="btn btn-primary px-5 py-2" onclick="goToStep(2)">Next: Pricing & Legal <i class="fas fa-arrow-right ml-2"></i></button>
+            </div>
+        </div>
+
+        <div class="step-content" id="step2">
+            <div class="section-header"><i class="fas fa-hand-holding-usd"></i> Pricing & Legal</div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-6 mt-2">
+                        <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
+                        <input type="number" class="form-control" name="plot_price" id="plot_price" placeholder="e.g., 3000000" required>
+                    </div>
+                    <div class="col-md-6 mt-2">
+                        <label class="form-label">Price per Sq.ft (₹)</label>
+                        <input type="number" class="form-control" id="plot_price_per_sqft" placeholder="Auto-calculated" readonly>
+                    </div>
+                    <div class="col-md-6 mt-3">
+                        <label class="form-label">Brokerage</label>
+                        <select class="form-select form-control" name="brokerage" id="brokerageSelect">
+                            <option value="No">No</option>
+                            <option value="Yes">Yes</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mt-3" id="brokerageSection" style="display:none;">
+                        <label class="form-label">Brokerage Percentage</label>
+                        <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
+                            <option value="1%">1%</option>
+                            <option value="2%">2%</option>
+                            <option value="Manual">Enter Manually</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Ownership Type <span class="required">*</span></label>
+                        <select class="form-select form-control" name="plot_ownership" id="plot_ownership" required>
+                            <option value="freehold">Freehold</option>
+                            <option value="leasehold">Leasehold</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Loan on Property? <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <label class="radio-option"><input type="radio" name="plot_loan" value="no" checked required> No</label>
+                            <label class="radio-option"><input type="radio" name="plot_loan" value="yes"> Yes</label>
+                        </div>
+                        <div id="plot_loan_amount_section" style="display:none;" class="mt-2">
+                            <input type="number" class="form-control" name="plot_loan_amount" placeholder="Loan Amount (₹)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary px-4" onclick="goToStep(1)">Back</button>
+                <button type="button" class="btn btn-primary px-5" onclick="goToStep(3)">Next: Photos <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="step-content" id="step3">
+            <div class="section-header"><i class="fas fa-images"></i> Media & Certificates</div>
+            <div class="section-body">
+                <div class="image-upload-area p-5 text-center" style="border: 2px dashed #cbd5e0; cursor: pointer;" id="uploadArea">
+                    <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
+                    <i class="fas fa-cloud-upload-alt fa-3x mb-2" style="color: #667eea;"></i>
+                    <p class="mb-0">Click or Drag Images</p>
+                    <p class="text-danger mt-2 mb-0" style="font-size: 0.85rem; font-weight: 600;">Note: Please upload a minimum of 1 and a maximum of 10 images.</p>
+                </div>
+                <div class="image-preview" id="imagePreview"></div>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <label class="form-label">Encumberance Certificate <span class="required">*</span></label>
+                        <input type="file" class="form-control" name="encumbrance_cert" >
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Social Media Video <span class="required">*</span></label>
+                        <input type="file" class="form-control" name="social_video">
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary px-4" onclick="goToStep(2)">Back</button>
+                <button type="button" class="btn btn-primary px-5" onclick="goToStep(4)">Next: Location <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="step-content" id="step4">
+            <div class="section-header"><i class="fas fa-map-marker-alt"></i> Location & Contact</div>
+            <div class="section-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">City <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="plot_city" id="plot_city" placeholder="e.g., Nagpur" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Locality <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="plot_locality" id="plot_locality" placeholder="e.g., Panvel" required>
+                    </div>
+                    <div class="col-md-12 mt-3">
+                        <label class="form-label">Complete Address <span class="required">*</span></label>
+                        <textarea class="form-control" name="plot_address" required></textarea>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Owner Name <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="plot_owner_name" required>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Owner Contact <span class="required">*</span></label>
+                        <input type="tel" class="form-control" name="plot_owner_contact" pattern="[0-9]{10}" required>
+                    </div>
+                    <div class="col-md-4 mt-3">
+                        <label class="form-label">Email <span class="required">*</span></label>
+                        <input type="email" class="form-control" name="plot_owner_email" required>
+                    </div>
+                </div>
+                <div class="row mt-4 pt-3 border-top">
+                    <div class="col-md-3"><label class="form-label">Uploaded By</label><input type="text" class="form-control" value="{{ admin_obj.name }}" disabled></div>
+                    <div class="col-md-3"><label class="form-label">Role</label><input type="text" class="form-control" value="{{ admin_obj.role }}" disabled></div>
+                    <div class="col-md-3"><label class="form-label">Email</label><input type="text" class="form-control" value="{{ admin_obj.email }}" disabled></div>
+                    <div class="col-md-3"><label class="form-label">Phone</label><input type="text" class="form-control" value="{{ admin_obj.phone }}" disabled></div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary px-4" onclick="goToStep(3)">Back</button>
+                <button type="submit" class="btn btn-success px-5" id="submitBtn">Submit Plot Listing <i class="fas fa-save ml-2"></i></button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+
+    $("#Resale").addClass("active");
+    
+    // FORM SUBMISSION AJAX WITH SWEETALERT
+    document.getElementById('plotForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent page reload
+
+        // Validate final step before submitting
+        const requiredFields = document.getElementById('step4').querySelectorAll('[required]');
+        let missing = false;
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) missing = true;
+        });
+
+        if (missing) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Missing Fields',
+                text: 'Please fill all required fields in the Location step before submitting.',
+            });
+            return;
+        }
+
+        // Validate max images
+        const imageFiles = document.getElementById('imageInput').files;
+        if (imageFiles.length > 10) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Too Many Images',
+                text: 'You can only upload a maximum of 10 images.',
+            });
+            return;
+        }
+
+        // UI Feedback during submission
+        const submitBtn = document.getElementById('submitBtn');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        submitBtn.disabled = true;
+
+        // Fetch API request
+        let formData = new FormData(this);
+        let actionUrl = this.getAttribute('action'); // Gets URL from form action
+
+        fetch(actionUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Trigger Success SweetAlert
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message || 'Property listed successfully!',
+                    confirmButtonColor: '#38ef7d'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Optionally reload or redirect after success
+                        window.location.reload(); 
+                    }
+                });
+            } else {
+                // Trigger Error SweetAlert
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: data.message || 'Something went wrong while saving.',
+                    confirmButtonColor: '#e74c3c'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Server Error',
+                text: 'A server error occurred. Please try again.',
+                confirmButtonColor: '#e74c3c'
+            });
+        })
+        .finally(() => {
+            // Restore button
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        });
+    });
+</script>
+
+        <div class="preview-sidebar">
+            <div class="preview-card">
+                <div class="preview-header" style="font-size: 0.8rem; opacity: 0.7; font-weight: 700; text-transform: uppercase;">Portal Card Preview</div>
+                <div class="preview-mock">
+                    <div class="preview-image">🗺️
+                        <div class="preview-price" id="p_price">₹ 0</div>
+                    </div>
+                    <div class="p-3">
+                        <div style="font-weight: 800; font-size: 0.95rem; color: #2d3748;" id="p_title">Your Project Name</div>
+                        <div style="font-size: 0.75rem; color: #718096; margin-top: 5px;">
+                            <i class="fas fa-map-marker-alt" style="color: #667eea;"></i> <span id="p_loc">City, Locality</span>
+                        </div>
+                        <div class="mt-2" style="font-weight: 700; font-size: 0.8rem; color: #4a5568;">
+                            <span id="p_area">0</span> sq.ft • <span id="p_type">Plot Type</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checklist-card">
+                <h6 style="font-weight: 800; font-size: 0.9rem; margin-bottom: 15px;">📋 Listing Checklist</h6>
+                <div class="checklist-item" id="cl-title"><i class="fas fa-circle"></i> Project Name added</div>
+                <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i> Area details filled</div>
+                <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Pricing set</div>
+                <div class="checklist-item" id="cl-loc"><i class="fas fa-circle"></i> Location verified</div>
+            </div>
+
+            <div class="tips-card">
+                <h6 style="font-weight: 800; font-size: 0.9rem; margin-bottom: 12px; color: #667eea;">💡 Pro Tips</h6>
+                <div style="font-size: 0.75rem; color: #4a5568; line-height: 1.5;">
+                    • Corner plots usually sell 15% faster.<br>
+                    • High-quality boundary photos increase trust.<br>
+                    • Mentioning nearby landmarks improves search rank.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    let currentStep = 1;
+
+    /* STEPPER NAVIGATION */
+    function goToStep(n) {
+        if (n > currentStep && !validateStep(currentStep)) return;
+
+        document.getElementById('step' + currentStep).classList.remove('active');
+        document.getElementById('step' + n).classList.add('active');
+
+        for (let i = 1; i <= 4; i++) {
+            const sc = document.getElementById('sc' + i);
+            const line = document.getElementById('line' + i);
+            if (i < n) {
+                sc.className = 'step-circle done'; sc.innerHTML = '✓';
+                if(line) line.classList.add('done');
+            } else if (i === n) {
+                sc.className = 'step-circle active'; sc.innerHTML = i;
+                if(line) line.classList.remove('done');
+            } else {
+                sc.className = 'step-circle'; sc.innerHTML = i;
+            }
+        }
+        currentStep = n;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* VALIDATION */
+    function validateStep(step) {
+        const stepEl = document.getElementById('step' + step);
+        const required = stepEl.querySelectorAll('[required]');
+        let missing = [];
+
+        required.forEach(field => {
+            if (!field.value.trim()) {
+                const label = field.previousElementSibling?.innerText || "Required Field";
+                missing.push(label.replace('*', '').trim());
+            }
+        });
+
+        if (missing.length > 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Required Fields',
+                html: 'Please fill: <br><b>' + missing.join(', ') + '</b>',
+                confirmButtonColor: '#667eea'
+            });
+            return false;
+        }
+        return true;
+    }
+
+    /* LIVE PREVIEW LOGIC */
+    function updatePreview() {
+        const title = document.getElementById('plot_title').value;
+        const price = document.getElementById('plot_price').value;
+        const area = document.getElementById('plot_area').value;
+        const city = document.getElementById('plot_city').value;
+        const loc = document.getElementById('plot_locality').value;
+        const type = document.getElementById('resale_plot_type');
+
+        // Update Text
+        document.getElementById('p_title').innerText = title || "Your Project Name";
+        document.getElementById('p_price').innerText = price ? '₹ ' + parseInt(price).toLocaleString('en-IN') : '₹ 0';
+        document.getElementById('p_area').innerText = area || "0";
+        document.getElementById('p_type').innerText = type.options[type.selectedIndex].text || "Plot Type";
+        document.getElementById('p_loc').innerText = (city || loc) ? `${city}, ${loc}` : "City, Locality";
+
+        // Auto-calculate Sqft Price
+        if (price && area) {
+            document.getElementById('plot_price_per_sqft').value = Math.round(price / area);
+        }
+
+        // Checklist Updates
+        updateCheckItem('cl-title', !!title);
+        updateCheckItem('cl-area', !!area);
+        updateCheckItem('cl-price', !!price);
+        updateCheckItem('cl-loc', !!city && !!loc);
+    }
+
+    function updateCheckItem(id, done) {
+        const el = document.getElementById(id);
+        el.className = 'checklist-item' + (done ? ' done' : '');
+        el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+    }
+
+    /* EVENT LISTENERS */
+    document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', updatePreview));
+
+    // Conditional Fields
+    document.querySelectorAll('input[name="plot_loan"]').forEach(r => r.onchange = (e) => 
+        document.getElementById('plot_loan_amount_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
+
+    document.getElementById("brokerageSelect").onchange = function() {
+        document.getElementById('brokerageSection').style.display = this.value === "Yes" ? "block" : "none";
+    };
+
+    // Multi-Image Handler
+    const uploadArea = document.getElementById('uploadArea');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+
+    uploadArea.onclick = () => imageInput.click();
+    imageInput.onchange = () => {
+        imagePreview.innerHTML = '';
+        Array.from(imageInput.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.style = "width:80px; height:80px; margin-top:10px; display:inline-block; border-radius:8px; overflow:hidden; border:1px solid #ddd; margin-right:5px;";
+                div.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
+                imagePreview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+</script>

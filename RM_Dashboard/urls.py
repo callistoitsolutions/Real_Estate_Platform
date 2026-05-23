@@ -46,6 +46,42 @@ urlpatterns = [
     ############## urls for resale property list #########################
 
     path('residential_resale_rm_list',views.residential_resale_rm_list,name="residential_resale_rm_list"),
+
+    ########### urls for resale property form residential ################
+
+    path('residential_resale_rm',views.residential_resale_rm,name="residential_resale_rm"),
+
+    ######### urls for resale commercial property list #########################
+
+    path('commercial_resale_rm_list',views.commercial_resale_rm_list,name="commercial_resale_rm_list"),
+
+    ######## urls for resale property from commercial ######################
+
+    path('commercial_resale_rm',views.commercial_resale_rm,name="commercial_resale_rm"),
+
+    ######### urls for resale plot property list #######################
+
+    path('plot_resale_rm_list',views.plot_resale_rm_list,name="plot_resale_rm_list"),
+
+    ########## urls for resale property from plot #########################
+
+    path('plot_resale_rm',views.plot_resale_rm,name="plot_resale_rm"),
+
+    ############ urls for resale industrial property list ##########################
+
+    path('industry_resale_rm_list',views.industry_resale_rm_list,name="industry_resale_rm_list"),
+
+    ######## urls for industrial resale property form ######################
+
+    path('industry_resale_rm',views.industry_resale_rm,name="industry_resale_rm"),
+
+    ########## urls for resale agricultural property list ###################
+
+    path('agriculture_resale_rm_list',views.agriculture_resale_rm_list,name="agriculture_resale_rm_list"),
+
+    ######### urls for agricutural resale property form ######################
+
+    path('agriculture_resale_rm',views.agriculture_resale_rm,name="agriculture_resale_rm"),
       
     path('affilate_page',views.affilate_page,name="affilate_page"),
     

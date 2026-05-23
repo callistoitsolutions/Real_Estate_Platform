@@ -3,6 +3,10 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.text import slugify
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+from Admin_App.models import *
+
 
 # Create your models here.
 class Agent(models.Model):
@@ -580,4 +584,43 @@ class Page(models.Model):
         return self.property_title
 
 
+############### Wishlist Property Modal Starts Here ###########################
+
+class WishlistProperty(models.Model):
+
+    # 1. The type of property (PG, Commercial, etc.)
+    content_type = models.ForeignKey(
+        ContentType, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True
+    )
+    
+    # 2. The ID of that specific property
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+
+    # 3. The Generic Foreign Key (Combines the two above)
+    property_object = GenericForeignKey('content_type', 'object_id')
+
+    # --- Your existing fields stay the same ---
+    user = models.ForeignKey(User_Details,on_delete=models.CASCADE,blank=True,null=True
+    )
+
+    wishlist_date = models.DateField(blank=True,null=True)
+    wishlist_time = models.TimeField(blank=True,null=True)
+    
+################## Wishlist Property Modal Ends Here ############################
+
+
+############## Normal FAQ Modal Starts Here ################################
+
+class NormalFAQ(models.Model):
+
+    faq_question = models.CharField(max_length=200,blank=True,null=True)
+    faq_answer = models.TextField(blank=True,null=True)
+
+    faq_date = models.DateField(blank=True,null=True)
+    faq_time = models.TimeField(blank=True,null=True)
+
+############## Normal FAQ Modal Ends Here ############################
 

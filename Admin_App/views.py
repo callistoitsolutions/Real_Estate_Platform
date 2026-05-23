@@ -218,7 +218,7 @@ def index2(request):
 
 @csrf_exempt
 def Impersonate(request):
-    if request.method == "POST" and request.session.get('user_type') == 'Admin':
+    if request.method == "POST":
         target_id = request.POST.get('target_user_id')
 
         
@@ -228,9 +228,8 @@ def Impersonate(request):
             request.session['impersonate_id'] = target_id
             
             target_user = User_Details.objects.get(id=target_id)
-
             
-            
+                
             # 2. Determine the correct URL based on their role
             if target_user.user_role == 'Relationship Manager':
                 url = reverse('rm_dashboard')
@@ -953,6 +952,112 @@ def Update_Services(request,id):
         return render(request,'home_page/Adminlogin.html')
 
 ############ Views end for update service details ######################
+
+
+############## Views start for normal faqs list ######################
+
+def Faqs_List(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        faqs_obj = NormalFAQ.objects.all().order_by('-id')
+        faqs_obj_count = NormalFAQ.objects.all().count()
+
+        rendered = render_to_string("admin_user/render_to_string/R_FAQ/r_t_s_faq.html",{'faqs_obj':faqs_obj,'faqs_obj_count':faqs_obj_count})
+
+        context = {'admin_obj':admin_obj,'faqs_list':rendered}
+
+        return render(request,"admin_user/FAQ/display_faq.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+######### Views end for normal faqs list ###############################
+
+
+########### Views start for add normal faq #############################
+
+def Add_FAQ(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        context = {'admin_obj':admin_obj}
+
+        return render(request,"admin_user/FAQ/add_faq.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############## Views end for add normal faq #########################
+
+
+############## Views start for ajax for normal faq ####################
+
+@csrf_exempt
+def Faq_Ajax(request):
+    data = request.POST.dict()
+
+    if data.get('id') == "":
+        data.pop("id", None)        
+        data['faq_date'] = datetime.today()
+        data['faq_time'] = datetime.now()
+        NormalFAQ.objects.create(**data)
+        return JsonResponse({"status":"1", "msg" : f"FAQ Details added successfully"})
+
+    # UPDATE MODE
+    else:
+        try:
+            faqs = NormalFAQ.objects.get(id=data['id'])
+        except NormalFAQ.DoesNotExist:
+            return JsonResponse({'status': '0', 'msg': 'FAQ Details not found'})
+
+
+        # Update withdraw fields (unchanged)
+        for key, value in data.items():
+            setattr(faqs, key, value)
+
+        faqs.save()
+        return JsonResponse({"status":"1", "msg" : f"FAQ Details updated successfully"})
+
+############ Views end for ajax for normal faq ##########################
+
+
+############## Views start for delete faqs #########################
+
+@csrf_exempt
+def Delete_Faqs(request):
+    try:
+        try:
+            faq_id = request.POST.get('faq_id')
+            NormalFAQ.objects.filter(id=faq_id).delete()
+            return JsonResponse({'status':'1', 'msg':'FAQ details deleted successfully...'})
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+
+############# Views end for delete faqs ###############################
+
+
+############## Views start for update faqs #######################
+
+def Update_Faqs(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        faq = NormalFAQ.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'faq':faq}
+
+        return render(request,"admin_user/FAQ/update_faq.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############## Views end for update faqs ############################
+
 
 ############## Views start for subscriptions list ##########################
 
@@ -2050,8 +2155,10 @@ def User_Ajax(request):
         data['user_profile'] = request.FILES.get('user_profile')        
         data['user_register_date'] = datetime.today()
         data['user_register_time'] = datetime.now()
-        if User_Details.objects.filter(user_role=data['user_role'],user_phone=data['user_phone']).exists():
+        if User_Details.objects.filter(user_phone=data['user_phone']).exists():
             return JsonResponse({"status":"0", "msg" : f"User with this phone number already exists"})
+        elif User_Details.objects.filter(user_email=data['user_email']).exists():
+            return JsonResponse({"status":"0", "msg" : f"User with this email address already exists"})
         else:
             User_Details.objects.create(**data)
             return JsonResponse({"status":"1", "msg" : f"User Details added successfully"})
@@ -2763,6 +2870,7 @@ def Agency_List(request):
         end_date= request.POST.get('end_date')
         agency_obj = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Agency/Builder").order_by("-id")
         if User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Agency/Builder").exists():
+            
             agency_obj_count = User_Details.objects.filter(user_register_date__gte=start_date,user_register_date__lte=end_date,user_role="Agency/Builder").count()
 
             rendered = render_to_string("admin_user/render_to_string/R_Agency/r_t_s_agency.html",{'agency_obj':agency_obj,'agency_obj_count':agency_obj_count,'Role':'Agency'})
