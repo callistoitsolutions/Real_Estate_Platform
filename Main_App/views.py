@@ -37,7 +37,7 @@ from django.urls import reverse
 import random
 
 from django.shortcuts import render
-from django.db.models import Q
+from django.db.models import Q,F
 from itertools import chain
 from datetime import datetime, timedelta
 import random
@@ -67,6 +67,9 @@ from django.utils.html import strip_tags
 from django.utils.crypto import get_random_string
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.contenttypes.models import ContentType
+from urllib.parse import urlparse
+import json
+import uuid
 
 
 
@@ -600,10 +603,6 @@ import math
 ########### Views start for ajax for send property enquiry ########################
 
 
-
-from django.contrib.contenttypes.models import ContentType
-
-
 @csrf_exempt
 def Send_Property_Enquiry(request):
     if request.method == "POST":
@@ -624,8 +623,8 @@ def Send_Property_Enquiry(request):
         listing_type = data.get('listing_type', '')
         category = data.get('category', '')
         
-        print("---------------------",listing_type)
-        print("---------------------",category)
+        # print("---------------------",listing_type)
+        # print("---------------------",category)
         # New country parameters and consent evaluation
         country_code = data.get('country_code', '+91')
         whatsapp_consent_raw = data.get('whatsapp_consent', 'no')
@@ -635,20 +634,20 @@ def Send_Property_Enquiry(request):
 
         # 3. CRASH PREVENTION: Safely lookup target records using model-specific tables
         try:
-            if listing_type == "rent" and category == "residential":
+            if listing_type == "rent" and category == "residential-data":
                 real_property = RentalResidentialProperty.objects.get(id=property_id)
 
-            elif listing_type == "rent" and category == "pg":
+            elif listing_type == "rent" and category == "pg-data":
                 real_property = PGColivingProperty.objects.get(id=property_id)
 
-            elif listing_type == "rent" and category == "commercial":
-                real_property = CommercialProperty.objects.get(id=property_id)
+            if listing_type == "rent" and category == "commercial-data":
+                real_property = CommercialRentalProperty.objects.get(id=property_id)
                 
             elif listing_type == "sale" and category == "resale-residential":
                 real_property = ResaleResidentialProperty.objects.get(id=property_id)
 
-            elif listing_type == "sale" and category == "resale-commercial":
-                real_property = ResaleResidentialProperty.objects.get(id=property_id)
+            elif listing_type == "sale" and category == "commercial-resale":
+                real_property = CommercialResaleProperty.objects.get(id=property_id)
 
             elif listing_type == "sale" and category == "plot-resale":
                 real_property = PlotSaleProperty.objects.get(id=property_id)
@@ -1639,6 +1638,122 @@ def property_detail_view(request, listing_type, category, pk):
         "now":              now(),
     }
     return render(request, 'home_page/property_detail.html', context)
+
+
+############ Views start for track utm link #########################
+
+@csrf_exempt
+def Track_utm_link(request):
+    """Track UTM link clicks - creates new or updates existing"""
+    
+    try:
+        # Parse request body
+        data = json.loads(request.body)
+        
+        print("=" * 50)
+        print("TRACK_UTM_LINK CALLED")
+        print("Received data:", data)
+        print("=" * 50)
+        
+        # Get data from request
+        utm_source = data.get('utm_source')
+        utm_medium = data.get('utm_medium')
+        utm_campaign = data.get('utm_campaign', '')
+        utm_term = data.get('utm_term', '')
+        utm_content = data.get('utm_content', '')
+        property_id = data.get('property_id')
+        property_title = data.get('property_title', 'Unknown')
+        listing_type = data.get('listing_type', 'rent')
+        category = data.get('category', 'unknown')
+        page_url = data.get('page_url', '')
+
+
+        # ✅ GET PATH AND PARAMS FROM REQUEST
+        utm_path = data.get('utm_path', '/')
+        utm_params = data.get('utm_params', '')
+        
+        print(f"UTM Path: {utm_path}")
+        print(f"UTM Params: {utm_params}")
+        
+        # Validate required fields
+        if not utm_source:
+            return JsonResponse({'success': False, 'error': 'utm_source is required'})
+        
+        if not utm_medium:
+            return JsonResponse({'success': False, 'error': 'utm_medium is required'})
+        
+        if not property_id:
+            return JsonResponse({'success': False, 'error': 'property_id is required'})
+        
+        
+        
+        # Try to find existing UTM link
+        utm_link = UTMLink.objects.filter(
+            utm_source=utm_source,
+            utm_medium=utm_medium,
+            utm_campaign=utm_campaign,
+            property_id=property_id,
+            listing_type=listing_type,
+            category=category,
+        ).first()
+
+        
+        print(f"Existing UTM link found: {utm_link is not None}")
+        
+        if utm_link:
+            # ✅ UPDATE EXISTING - INCREASE CLICK COUNT
+            utm_link.total_clicks = models.F('total_clicks') + 1
+            utm_link.save()
+            utm_link.refresh_from_db()
+            
+            print(f"Updated click count: {utm_link.total_clicks}")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Click tracked successfully',
+                'total_clicks': utm_link.total_clicks,
+                'created': False
+            })
+        else:
+            # ✅ CREATE NEW UTM LINK
+            link_id = str(uuid.uuid4())[:8]
+            
+            utm_link = UTMLink.objects.create(
+                link_id=link_id,
+                property_id=property_id,
+                property_title=property_title,
+                listing_type=listing_type,
+                category=category,
+                utm_path=utm_path,  
+                utm_url = page_url,      
+                utm_source=utm_source,
+                utm_medium=utm_medium,
+                utm_campaign=utm_campaign,
+                utm_term=utm_term,
+                utm_content=utm_content,
+                total_clicks=1  # First click
+            )
+            
+            print(f"Created new UTM link with ID: {link_id}")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'New UTM link created and click tracked',
+                'total_clicks': 1,
+                'link_id': link_id,
+                'created': True
+            })
+            
+    except Exception as e:
+        print(f"Error in Track_utm_link: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+############# Views end for track utm link #############################
  
 # ─────────────────────────────────────────────────────────────
 # HELPER: normalise ANY property object to a flat dict for
@@ -2843,8 +2958,8 @@ def Prop_Register_Api(request):
                     'name': name,
                     'email': email_val,
                     'role': role,
-                    'login_link': login_link
-                }
+                    'login_link': login_link,
+                    'password':generated_password                }
                 
                 # Compiles the standalone HTML file with our context data
                 html_message = render_to_string('emails/welcome_mail.html', context)

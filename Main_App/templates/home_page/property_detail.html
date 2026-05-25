@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <style>
 :root {
   --pr: #e84118; --pr2: #c0392b; --sec: #12263a; --muted: #6b7280;
@@ -71,7 +71,7 @@ a { text-decoration: none; color: inherit; }
 .media-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .video-thumb-btn {
   flex-shrink: 0; width: 90px; height: 62px; border-radius: 8px;
-  border: 2px solid #f97316; cursor: pointer; background: #1a1a2e;
+  border: 2px solid #f97316; cursor: background: #1a1a2e;
   display: flex; align-items: center; justify-content: center;
   color: #f97316; font-size: .65rem; font-weight: 700; flex-direction: column; gap: 3px;
 }
@@ -309,6 +309,16 @@ a { text-decoration: none; color: inherit; }
   .prop-title   { font-size: 1.35rem; }
   #mediaViewer  { height: 260px; }
 }
+
+.auth-step { display: none; animation: fadeInSlideUp 0.4s ease forwards; }
+.auth-step.active-step { display: block; }
+@keyframes fadeInSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+}
+.otp-container { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+.otp-input { width: 50px; height: 55px; text-align: center; font-size: 1.5rem; font-weight: 700; border-radius: 8px; border: 2px solid #e2e8f0; background: white;}
+.otp-input:focus { border-color: #006ce4; outline: none; box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1); }
 </style>
 </head>
 <body>
@@ -827,7 +837,13 @@ a { text-decoration: none; color: inherit; }
             <input type="hidden" name="lead_source" value="property_detail_page">
             <input type="hidden" name="seo_slug" value="{{ seo.slug }}">
 
-            <input type="text" name="enquiry_name" id="enquiry_name" class="ef-input mb-2" placeholder="Your Name" required value="{{ user_obj.user_name }}">
+            <input type="hidden" name="utm_source" id="utm_source" value="">
+            <input type="hidden" name="utm_medium" id="utm_medium" value="">
+            <input type="hidden" name="utm_campaign" id="utm_campaign" value="">
+            <input type="hidden" name="utm_term" id="utm_term" value="">
+            <input type="hidden" name="utm_content" id="utm_content" value="">
+
+            <input type="text" name="enquiry_name" id="enquiry_name" class="form-select mb-2" placeholder="Your Name" required value="{{ user_obj.user_name }}">
 
             <div class="input-group mb-3">
                 <select name="country_code" id="country_code" class="form-select" style="max-width: 110px; border-radius: 12px 0 0 12px; height: 46px; font-size: 0.9rem; border: 1.5px solid #e2e8f0; background-color: #fff;">
@@ -871,7 +887,8 @@ a { text-decoration: none; color: inherit; }
             {% if user_obj %}
               <button type="button" name="send_enquiry" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" onclick="Send_Enquiry(this)">Get Contact Details</button>
             {% else %}
-              <button type="button" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#authModal">Get Contact Details</button>
+              <!-- 🟢 FIXED: Changed data-bs-target to #authEnModal -->
+              <button type="button" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#authEnModal">Get Contact Details</button>
             {% endif %}
         </form>
     </div>
@@ -893,32 +910,85 @@ a { text-decoration: none; color: inherit; }
 <!-- AUTH MODAL -->
 <div class="modal fade" id="authEnModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius:18px;border:none;box-shadow:0 20px 50px rgba(0,0,0,.18);">
-      <div class="modal-header border-0 pb-0 px-4 pt-4" style="position:relative;">
-        <h5 class="modal-title" style="font-weight:800;color:var(--sec);font-size:1.15rem;">Login to Send Enquiry</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" style="position:absolute;right:20px;top:20px;"></button>
+    <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+      
+      <div class="modal-header border-0 pb-0" style="position: relative;">
+        <h5 class="modal-title" style="font-weight: 800; color: #1e293b;">Continue to PropCRM</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 20px;"></button>
       </div>
-      <div class="modal-body px-4 pb-4 pt-2">
-        <p style="font-size:.88rem;color:var(--muted);margin-bottom:18px;">Please login or register to continue with your enquiry.</p>
-        <ul class="nav nav-pills mb-4" style="background:#f1f5f9;padding:4px;border-radius:12px;">
-          <li class="nav-item" style="flex:1;text-align:center;"><button class="nav-link active w-100" data-bs-toggle="pill" data-bs-target="#modalenLogin" type="button" style="border-radius:10px;font-weight:700;">Login</button></li>
-          <li class="nav-item" style="flex:1;text-align:center;"><button class="nav-link w-100" data-bs-toggle="pill" data-bs-target="#modalenRegister" type="button" style="border-radius:10px;font-weight:700;">Register</button></li>
-        </ul>
-        <div class="tab-content">
-          <div class="tab-pane fade show active" id="modalenLogin">
-            <div class="mb-3"><label style="font-size:.78rem;font-weight:700;">Email / Phone <span class="text-danger">*</span></label><input type="text" id="modal_login_email" class="form-control" placeholder="name@example.com or 1234567890" style="border-radius:10px;"></div>
-            <div class="mb-3"><label style="font-size:.78rem;font-weight:700;">Password <span class="text-danger">*</span></label><input type="password" id="modal_login_password" class="form-control" style="border-radius:10px;"></div>
-            <div class="mb-3"><label style="font-size:.78rem;font-weight:700;">Role <span class="text-danger">*</span></label><select class="form-select" id="modal_login_role"><option value="SelectRole" selected disabled>Choose role...</option><option value="Tenant">Tenant</option><option value="Buyer">Buyer</option></select></div>
-            <button type="button" class="btn w-100" onclick="processModalLogin(this)" style="background:var(--blue);color:white;font-weight:800;padding:12px;border-radius:11px;">Sign In & Continue</button>
+
+      <div class="modal-body pt-3 pb-4 px-4">
+        
+        <div id="step-1-email" class="auth-step active-step">
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Enter your email address to login or create a new account.</p>
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Email Address <span class="text-danger">*</span></label>
+            <input type="email" id="flow_email" class="form-control" placeholder="name@example.com" style="border-radius: 10px; padding: 12px; background: #f8fafc;">
           </div>
-          <div class="tab-pane fade" id="modalenRegister">
-            <div class="mb-3"><label style="font-size:.78rem;font-weight:700;">Full Name <span class="text-danger">*</span></label><input type="text" id="modal_reg_name" class="form-control" style="border-radius:10px;"></div>
-            <div class="row"><div class="col-6 mb-3"><label style="font-size:.78rem;font-weight:700;">Email <span class="text-danger">*</span></label><input type="email" id="modal_reg_email" class="form-control" style="border-radius:10px;"></div><div class="col-6 mb-3"><label style="font-size:.78rem;font-weight:700;">Mobile <span class="text-danger">*</span></label><input type="tel" id="modal_reg_mobile" class="form-control" style="border-radius:10px;" maxlength="10"></div></div>
-            <div class="mb-3"><label style="font-size:.78rem;font-weight:700;">Password <span class="text-danger">*</span></label><input type="password" id="modal_reg_password" class="form-control" style="border-radius:10px;"></div>
-            <div class="mb-3"><label style="font-size:.78rem;font-weight:700;">Role <span class="text-danger">*</span></label><select class="form-select" id="modal_reg_role"><option value="SelectRole" selected disabled>Choose role...</option><option value="Tenant">Tenant</option><option value="Buyer">Buyer</option></select></div>
-            <button type="button" class="btn w-100" onclick="processModalRegister(this)" style="background:var(--pr);color:white;font-weight:800;padding:12px;border-radius:11px;">Register & Continue</button>
-          </div>
+          <button type="button" class="btn w-100 mt-2" onclick="checkEmailExists(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Continue <i class="fas fa-arrow-right ms-1"></i>
+          </button>
         </div>
+
+        <div id="step-2-login" class="auth-step">
+          <button onclick="goToStepAuth('step-1-email')" style="background:none; border:none; color:#64748b; font-size:0.9rem; font-weight:600; margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Welcome back! Please enter your password to continue.</p>
+          
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Password <span class="text-danger">*</span></label>
+            <input type="password" id="flow_password" class="form-control" placeholder="Enter your password" style="border-radius: 10px; padding: 12px; background: #f8fafc;">
+          </div>
+          
+          <button type="button" class="btn w-100 mt-2" onclick="processProgLogin(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Secure Login
+          </button>
+        </div>
+
+        <div id="step-2-otp" class="auth-step">
+          <button onclick="goToStepAuth('step-1-email')" style="background:none; border:none; color:#64748b; font-size:0.9rem; font-weight:600; margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">We've sent a 4-digit code to <strong id="display_otp_email" class="text-dark"></strong>.</p>
+          
+          <div class="otp-container">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+          </div>
+          
+          <button type="button" class="btn w-100 mt-2" onclick="verifyOTP(this)" style="background: #f97316; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Verify OTP
+          </button>
+        </div>
+
+        <div id="step-3-details" class="auth-step">
+          <p style="font-size: 0.9rem; color: #10b981; font-weight: 600; margin-bottom: 20px;"><i class="fas fa-check-circle"></i> Email Verified! Just a few details.</p>
+          
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Full Name <span class="text-danger">*</span></label>
+            <input type="text" id="flow_reg_name" class="form-control" placeholder="John Doe" style="border-radius: 10px; padding: 10px; background: #f8fafc;">
+          </div>
+          
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Mobile Number <span class="text-danger">*</span></label>
+            <input type="tel" id="flow_reg_mobile" class="form-control" placeholder="10 Digits" style="border-radius: 10px; padding: 10px; background: #f8fafc;" maxlength="10">
+          </div>
+          
+          <div class="mb-3">
+             <label style="font-size: 0.8rem; font-weight: 700;">I am a <span class="text-danger">*</span></label>
+             <select id="flow_reg_role" class="form-select" style="border-radius: 10px; padding: 10px; background: #f8fafc;" required>
+               <option value="SelectRole" selected disabled>Choose a role...</option>
+               <option value="Landlord">Landlord</option>
+               <option value="Agent">Agent</option>
+               <option value="Agency/Builder">Agencies / Builder</option>
+               <option value="Vendor">Vendor</option>
+             </select>
+          </div>
+
+          <button type="button" class="btn w-100 mt-3" onclick="processProgRegistration(this)" style="background: #10b981; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Create Account & Continue
+          </button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -948,9 +1018,10 @@ a { text-decoration: none; color: inherit; }
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+
 // ═══════════════════════════════════════════════
 // MEDIA VIEWER — FIXED VIDEO PLAYBACK
 // ═══════════════════════════════════════════════
@@ -958,6 +1029,53 @@ a { text-decoration: none; color: inherit; }
 // Track active thumb
 let currentThumb = null;
 let isVideoMode = {% if p.video %}true{% else %}false{% endif %};
+let currentStep = 1;
+
+// --- MODAL TAB SWITCHERS ---
+function goToStepAuth(stepId) {
+    $('.auth-step').removeClass('active-step').hide(); 
+    $('#' + stepId).addClass('active-step').fadeIn(250);
+}
+function moveToNext(current, event) {
+    if (current.value.length >= current.maxLength) {
+        let next = $(current).next('.otp-input');
+        if (next.length) next.focus();
+    }
+    if (event.key === "Backspace" && current.value.length === 0) {
+        let prev = $(current).prev('.otp-input');
+        if (prev.length) prev.focus();
+    }
+}
+
+/* ── FORM STEPPER (WITH LOGIN INTERCEPTION) ── */
+// ═══════════════════════════════════════════════
+// SAFE STEPPER FUNCTION - No UI element manipulation
+// ═══════════════════════════════════════════════
+function goToStep(n) {
+  let userStatus = (typeof isLoggedIn !== 'undefined') ? isLoggedIn : false;
+  
+  if (n === 2 && userStatus === false) {
+      pendingAction = function() { goToStep(2); }; 
+      goToStepAuth('step-1-email');
+      const modal = document.getElementById('authEnModal');
+      if (modal && typeof bootstrap !== 'undefined') {
+        bootstrap.Modal.getOrCreateInstance(modal).show();
+      }
+      return; 
+  }
+  
+  // Simple step tracking - only update currentStep variable
+  // No DOM manipulation that could cause errors
+  currentStep = n;
+  
+  // Only attempt smooth scroll if window exists
+  if (typeof window !== 'undefined') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  
+  // Only call updateReview if it exists
+  if (typeof updateReview === 'function') updateReview();
+}
 
 // On page load: wire up the initial video element (if any)
 document.addEventListener('DOMContentLoaded', function () {
@@ -1062,48 +1180,122 @@ function calculateInteractiveEMI() {
   }
 }
 
-// ═══════════════════════════════════════════════
-// AUTH
-// ═══════════════════════════════════════════════
-function processModalLogin(btn) {
-  const identifier = document.getElementById('modal_login_email').value;
-  const password   = document.getElementById('modal_login_password').value;
-  const role       = document.getElementById('modal_login_role').value;
-  if (!identifier || !password || role === 'SelectRole') { Swal.fire({icon:'warning',title:'Missing Input'}); return; }
-  const orig = btn.innerHTML; btn.innerHTML = 'Verifying...'; btn.disabled = true;
-  $.ajax({
-    method:'POST', url:'{% url "login" %}', contentType:'application/json',
-    data: JSON.stringify({user_identifier:identifier, user_password:password, user_role:role}),
-    success: function(res) {
-      if (res.status=='1'||res.status=='success') location.reload();
-      else Swal.fire({icon:'error',title:'Failed',text:res.msg});
-      btn.innerHTML=orig; btn.disabled=false;
-    },
-    error: function() { btn.innerHTML=orig; btn.disabled=false; Swal.fire({icon:'error',title:'Error'}); }
-  });
+
+// --- PROGRESSIVE AUTHENTICATION API CALLS ---
+function checkEmailExists(_this) {
+    let email = $('#flow_email').val().trim();
+    if (!email) return Swal.fire("Wait", "Please enter a valid email address.", "info");
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Checking...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Check_Email_Api' %}", 
+        data: { 'email': email},
+        success: function(response) {
+            $(_this).prop("disabled", false).html(btnText);
+            if(response.exists) goToStepAuth('step-2-login');
+            else sendOTP(email);
+        },
+        error: function() { $(_this).prop("disabled", false).html(btnText); Swal.fire("Error", "Server error.", "error"); }
+    });
 }
 
-function processModalRegister(btn) {
-  const name=document.getElementById('modal_reg_name').value;
-  const email=document.getElementById('modal_reg_email').value;
-  const mobile=document.getElementById('modal_reg_mobile').value;
-  const password=document.getElementById('modal_reg_password').value;
-  const role=document.getElementById('modal_reg_role').value;
-  if (!name||!email||!mobile||!password||role==='SelectRole') { Swal.fire({icon:'warning',title:'Missing Input'}); return; }
-  const orig=btn.innerHTML; btn.innerHTML='Creating...'; btn.disabled=true;
-  const fd=new FormData();
-  fd.append('role',role); fd.append('full_name',name); fd.append('email',email);
-  fd.append('mobile_number',mobile); fd.append('password',password);
-  fd.append('csrfmiddlewaretoken','{{ csrf_token }}');
-  $.ajax({
-    method:'POST', url:'{% url "signup" %}', data:fd, processData:false, contentType:false,
-    success: function(res) {
-      if (res.status=='1'||res.status=='success') location.reload();
-      else Swal.fire({icon:'error',title:'Failed',text:res.msg});
-      btn.innerHTML=orig; btn.disabled=false;
-    },
-    error: function() { btn.innerHTML=orig; btn.disabled=false; Swal.fire({icon:'error',title:'Error'}); }
-  });
+function sendOTP(email) {
+    $('#display_otp_email').text(email);
+    goToStepAuth('step-2-otp'); 
+    $.ajax({ 
+        type: "POST", 
+        url: "{% url 'Send_Otp_Api' %}", 
+        data: { 'email': email } 
+    });
+}
+
+function processProgLogin(_this) {
+    let email = $('#flow_email').val();
+    let password = $('#flow_password').val();
+    if (!password) return Swal.fire("Wait", "Please enter your password.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Logging in...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Prop_Login_Api' %}", 
+        data: { 'email': email, 'password': password },
+        success: function(response) {
+            if(response.status == '1') {
+                isLoggedIn = true; 
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
+                
+                // NO-RELOAD: Update Header UI instantly
+                location.reload();
+                
+                // RESUME PAUSED ACTION
+                if (typeof pendingAction === 'function') {
+                    let action = pendingAction; pendingAction = null; action(); 
+                } else {
+                    Swal.fire("Success", "Logged in successfully!", "success");
+                }
+            } else {
+                $(_this).prop("disabled", false).html(btnText);
+                Swal.fire("Error", response.msg || "Incorrect password", "error");
+            }
+        }
+    });
+}
+
+function verifyOTP(_this) {
+    let otp = "";
+    $('.otp-input').each(function() { otp += $(this).val(); });
+    if(otp.length < 4) return Swal.fire("Wait", "Please enter the 4-digit OTP.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Verifying...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Verify_Otp_Api' %}", 
+        data: { 'email': $('#flow_email').val(), 'otp': otp },
+        success: function(response) {
+            $(_this).prop("disabled", false).html(btnText);
+            if(response.valid) goToStepAuth('step-3-details');
+            else Swal.fire("Error", "Invalid OTP. Try again.", "error");
+        }
+    });
+}
+
+function processProgRegistration(_this) {
+    let email = $('#flow_email').val();
+    let name = $('#flow_reg_name').val();
+    let mobile = $('#flow_reg_mobile').val();
+    let role = $('#flow_reg_role').val();
+
+    if(!name || !mobile || role === "SelectRole") return Swal.fire("Wait", "Please fill in all details.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Creating Account...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Prop_Register_Api' %}", 
+        data: { 'email': email, 'name': name, 'mobile': mobile, 'role': role},
+        success: function(response) {
+            if(response.status == '1') {
+                isLoggedIn = true; 
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
+                
+                // NO-RELOAD: Update Header UI instantly
+                location.reload();
+                
+                // RESUME PAUSED ACTION
+                if (typeof pendingAction === 'function') {
+                    let action = pendingAction; pendingAction = null; action(); 
+                } else {
+                    Swal.fire("Success", "Account created!", "success");
+                }
+            } else {
+                $(_this).prop("disabled", false).html(btnText);
+                Swal.fire("Error", response.msg || "Registration failed.", "error");
+            }
+        }
+    });
 }
 
 // ═══════════════════════════════════════════════
@@ -1146,7 +1338,7 @@ function Send_Enquiry(_this) {
   if (!whatsapp_consent) {
     Swal.fire({
       title: 'Agreement Required', 
-      text: 'You must agree to the Terms of Service and Privacy Policy to proceed.', 
+      text: 'You must agree to the Whatsapp consent to proceed.', 
       icon: 'warning',
       confirmButtonColor: '#1e293b'
     });
@@ -1198,5 +1390,160 @@ function Send_Enquiry(_this) {
 }
 
 </script>
+
+<script>
+console.log("===== PAGE VIEW TRACKING WITH CATEGORY =====");
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("===== DOM LOADED =====");
+    
+    // Get UTM parameters from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    let utm_source = urlParams.get('utm_source') || '';
+    let utm_medium = urlParams.get('utm_medium') || '';
+    let utm_campaign = urlParams.get('utm_campaign') || '';
+    let utm_term = urlParams.get('utm_term') || '';
+    let utm_content = urlParams.get('utm_content') || '';
+    
+    // Get property and category information from template
+    const propertyId = '{{ p.id }}';
+    const propertyTitle = '{{ p.title|escapejs }}';
+    const listingType = '{{ listing_type|default:"rent" }}';
+    
+    // ✅ IMPORTANT: Get category from URL or template
+    // Method 1: From URL path (e.g., /rent/commercial/ or /rent/residential/)
+    let category = '';
+    const pathMatch = window.location.pathname.match(/\/rent\/([^\/]+)\//);
+    if (pathMatch && pathMatch[1]) {
+        category = pathMatch[1];  // 'commercial' or 'residential'
+    }
+    
+    // Method 2: From template if available
+    const templateCategory = '{{ category|default:"" }}';
+    if (templateCategory) {
+        category = templateCategory;
+    }
+    
+    // Method 3: From data attribute
+    if (!category) {
+        const categoryAttr = document.body.getAttribute('data-category');
+        if (categoryAttr) category = categoryAttr;
+    }
+    
+    console.log("Property ID:", propertyId);
+    console.log("Property Title:", propertyTitle);
+    console.log("Listing Type:", listingType);
+    console.log("Category:", category);
+    console.log("UTM Source:", utm_source || 'none (will track as direct)');
+    
+    // Get referrer for source detection
+    const referrer = document.referrer;
+    
+    // Auto-detect source if no UTM parameters
+    if (!utm_source) {
+        if (referrer.includes('google.com')) {
+            utm_source = 'google';
+            utm_medium = 'organic';
+            utm_campaign = 'organic_search';
+            console.log("Source detected: Google Search");
+        } 
+        else if (referrer.includes('facebook.com')) {
+            utm_source = 'facebook';
+            utm_medium = 'social';
+            utm_campaign = 'facebook_referral';
+            console.log("Source detected: Facebook");
+        }
+        else if (referrer.includes('whatsapp.com')) {
+            utm_source = 'whatsapp';
+            utm_medium = 'messaging';
+            utm_campaign = 'whatsapp_share';
+            console.log("Source detected: WhatsApp");
+        }
+        else if (referrer === '') {
+            utm_source = 'direct';
+            utm_medium = 'none';
+            utm_campaign = 'direct_visit';
+            console.log("Source detected: Direct Visit");
+        }
+        else {
+            utm_source = 'referral';
+            utm_medium = 'other';
+            utm_campaign = 'external_referral';
+            console.log("Source detected: Referral from", referrer);
+        }
+    } else {
+        console.log("UTM Source from URL:", utm_source);
+    }
+    
+    // Set hidden form fields for enquiry form
+    if (document.getElementById('utm_source')) {
+        document.getElementById('utm_source').value = utm_source;
+        document.getElementById('utm_medium').value = utm_medium;
+        document.getElementById('utm_campaign').value = utm_campaign;
+        document.getElementById('utm_term').value = utm_term;
+        document.getElementById('utm_content').value = utm_content;
+        console.log("Form UTM fields populated");
+    }
+    
+    // Only track if we have property ID
+    if (propertyId && propertyId !== '') {
+        
+        console.log("Sending tracking data to server...");
+        
+        fetch("{% url 'Track_utm_link' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              // UTM parameters
+              utm_source: utm_source,
+              utm_medium: utm_medium,
+              utm_campaign: utm_campaign,
+              utm_term: utm_term,
+              utm_content: utm_content,
+              
+              // Property information
+              property_id: propertyId,
+              property_title: propertyTitle,
+              listing_type: listingType,
+              category: category,
+              
+              //  ADD THESE TWO LINES
+              utm_path: window.location.pathname,
+              utm_params: window.location.search.substring(1), 
+
+              page_url: window.location.href,
+              
+              // Additional tracking (optional)
+              page_url: window.location.href,
+              referrer: referrer,
+              user_agent: navigator.userAgent
+            })
+        })
+        .then(response => {
+            console.log("Response status:", response.status);
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                console.log(" Page view tracked successfully!");
+                console.log("Category:", category);
+                console.log("Source:", utm_source);
+                console.log("Total views for this source:", data.total_views);
+            } else {
+                console.log(" Tracking failed:", data.error);
+            }
+        })
+        .catch(error => {
+            console.log(" Fetch error:", error);
+        });
+        
+    } else {
+        console.warn("No property ID found - cannot track");
+    }
+});
+</script>
+
 </body>
 </html>

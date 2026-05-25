@@ -34,6 +34,14 @@ class PropertyEnquiry(models.Model):
 
     whatsapp_consent = models.BooleanField(default=False)
 
+    ############### UTM fields ################################
+
+    utm_source = models.CharField(max_length=255, blank=True, null=True)
+    utm_medium = models.CharField(max_length=255, blank=True, null=True)
+    utm_campaign = models.CharField(max_length=255, blank=True, null=True)
+    utm_term = models.CharField(max_length=255, blank=True, null=True)
+    utm_content = models.CharField(max_length=255, blank=True, null=True)
+
     enquiry_date = models.DateField(blank=True,null=True)
     enquiry_time = models.TimeField(blank=True,null=True)
 
@@ -41,3 +49,45 @@ class PropertyEnquiry(models.Model):
         return str(self.enquiry_name)+"-"+self.enquiry_phone
     
 ############### Property Enquiry Modal Ends Here ############################
+
+
+############### UTM Link Modal Starts Here #######################
+
+class UTMLink(models.Model):
+    
+    # Basic info
+    link_id = models.CharField(max_length=50, unique=True)
+    property_id = models.IntegerField()
+    property_title = models.CharField(max_length=500)
+    listing_type = models.CharField(max_length=50, default='rent')
+    category = models.CharField(max_length=100, blank=True, null=True, db_index=True)
+    
+    # The actual UTM URL
+    utm_path = models.CharField(max_length=500, default='/')
+    utm_url = models.TextField()
+    
+    # UTM Parameters
+    utm_source = models.CharField(max_length=255)
+    utm_medium = models.CharField(max_length=255)
+    utm_campaign = models.CharField(max_length=255, blank=True, null=True)
+    utm_term = models.CharField(max_length=255, blank=True, null=True)
+    utm_content = models.CharField(max_length=255, blank=True, null=True)
+    
+    # Statistics
+    total_clicks = models.IntegerField(default=0)
+    total_enquiries = models.IntegerField(default=0)
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['category', 'utm_source']),
+            models.Index(fields=['listing_type', 'category']),
+        ]
+    
+    def __str__(self):
+        return f"{self.utm_source} - {self.property_title}"
+    
+
+############### UTM Link Modal Ends Here ########################
