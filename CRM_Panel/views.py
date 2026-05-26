@@ -14,6 +14,10 @@ from django.contrib import messages
 from django.shortcuts import render,redirect
 from CRM_Panel .models import *
 from Admin_App.models import *
+from django.template.loader import render_to_string
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import traceback
 
 # Create your views here.
 
@@ -39,7 +43,15 @@ def utm_links_crm(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
-        context = {'admin_obj':admin_obj}
+
+        utm_obj = UTMLink.objects.all().order_by('-id')
+        utm_obj_count = UTMLink.objects.all().count()
+
+        rendered = render_to_string("crm/render_to_string/R_Utm/r_t_s_utm.html",{'utm_obj':utm_obj,'utm_obj_count':utm_obj_count})
+
+
+        context = {'admin_obj':admin_obj,'utm_lists':rendered}
+        
         return render(request,"crm/UTM/utm_links.html",context) 
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -71,6 +83,25 @@ def create_utm_crm(request):
         return render(request,'home_page/Adminlogin.html')
 
 ############ Views end for create utm link ###########################
+
+
+############# Views start for delete utm link ########################
+
+@csrf_exempt
+def delete_utm_crm(request):
+    try:
+        try:
+            utm_id = request.POST.get('utm_id')
+            UTMLink.objects.filter(id=utm_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Utm link details deleted successfully...'})
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+
+############# Views end for delete utm link ##########################
 
 ############## Views start for property enquiries section #####################
 

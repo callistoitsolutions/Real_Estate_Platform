@@ -1628,101 +1628,103 @@ from Admin_App.models import PGColivingProperty, Admin_Login  # ← update app n
 # ─────────────────────────────────────────────────────────────
 # LIST VIEW
 # ─────────────────────────────────────────────────────────────
-def pg_list(request):
-    session_id = request.session.get('Admin_id')
-    if not session_id:
-        return render(request, 'home_page/Adminlogin.html')
+# def pg_list(request):
+#     session_id = request.session.get('Admin_id')
+#     if not session_id:
+#         return render(request, 'home_page/Adminlogin.html')
 
-    try:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-    except Admin_Login.DoesNotExist:
-        return render(request, 'home_page/Adminlogin.html')
+#     try:
+#         admin_obj = Admin_Login.objects.get(id=session_id)
+#     except Admin_Login.DoesNotExist:
+#         return render(request, 'home_page/Adminlogin.html')
 
-    search_query = request.GET.get('search', '').strip()
-    pg_for_filter = request.GET.get('pg_for', '').strip()       # boys / girls / co-living
-    city_filter   = request.GET.get('city', '').strip()
+#     search_query = request.GET.get('search', '').strip()
+#     pg_for_filter = request.GET.get('pg_for', '').strip()       # boys / girls / co-living
+#     city_filter   = request.GET.get('city', '').strip()
 
-    # Base queryset — newest first
-    properties = PGColivingProperty.objects.all().order_by('-id')
+#     # Base queryset — newest first
+#     properties = PGColivingProperty.objects.all().order_by('-id')
 
-    # ── Search ────────────────────────────────────────────────
-    if search_query:
-        properties = properties.filter(
-            Q(pg_name__icontains=search_query)       |
-            Q(city__icontains=search_query)          |
-            Q(locality__icontains=search_query)      |
-            Q(building_name__icontains=search_query) |
-            Q(owner_name__icontains=search_query)    |
-            Q(contact_number__icontains=search_query)
-        )
+#     # ── Search ────────────────────────────────────────────────
+#     if search_query:
+#         properties = properties.filter(
+#             Q(pg_name__icontains=search_query)       |
+#             Q(city__icontains=search_query)          |
+#             Q(locality__icontains=search_query)      |
+#             Q(building_name__icontains=search_query) |
+#             Q(owner_name__icontains=search_query)    |
+#             Q(contact_number__icontains=search_query)
+#         )
 
-    # ── Filters ───────────────────────────────────────────────
-    if pg_for_filter:
-        properties = properties.filter(pg_for=pg_for_filter)
+#     # ── Filters ───────────────────────────────────────────────
+#     if pg_for_filter:
+#         properties = properties.filter(pg_for=pg_for_filter)
 
-    if city_filter:
-        properties = properties.filter(city__icontains=city_filter)
+#     if city_filter:
+#         properties = properties.filter(city__icontains=city_filter)
 
-    total_count = properties.count()
+#     total_count = properties.count()
 
-    # ── CSV Download ──────────────────────────────────────────
-    if request.GET.get('download') == 'csv':
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="pg_coliving_properties.csv"'
-        writer = csv.writer(response)
+#     # ── CSV Download ──────────────────────────────────────────
+#     if request.GET.get('download') == 'csv':
+#         response = HttpResponse(content_type='text/csv')
+#         response['Content-Disposition'] = 'attachment; filename="pg_coliving_properties.csv"'
+#         writer = csv.writer(response)
 
-        writer.writerow([
-            'ID', 'PG Name', 'City', 'Locality', 'Building Name',
-            'PG For', 'Furnishing', 'Room Type', 'Total Beds',
-            'Rent', 'Security Deposit', 'Min Stay',
-            'Meals Available', 'Owner Name', 'Contact', 'Email',
-            'Added On',
-        ])
+#         writer.writerow([
+#             'ID', 'PG Name', 'City', 'Locality', 'Building Name',
+#             'PG For', 'Furnishing', 'Room Type', 'Total Beds',
+#             'Rent', 'Security Deposit', 'Min Stay',
+#             'Meals Available', 'Owner Name', 'Contact', 'Email',
+#             'Added On',
+#         ])
 
-        for p in properties:
-            writer.writerow([
-                p.id,
-                p.pg_name,
-                p.city,
-                p.locality,
-                p.building_name or '',
-                p.get_pg_for_display(),
-                p.get_furnishing_type_display(),
-                p.get_room_type_display(),
-                p.total_beds,
-                p.rent,
-                p.security_deposit,
-                p.minimum_stay,
-                'Yes' if p.meals_available else 'No',
-                p.owner_name,
-                p.contact_number,
-                p.email,
-                p.created_at.strftime('%d-%m-%Y') if p.created_at else '',
-            ])
+#         for p in properties:
+#             writer.writerow([
+#                 p.id,
+#                 p.pg_name,
+#                 p.city,
+#                 p.locality,
+#                 p.building_name or '',
+#                 p.get_pg_for_display(),
+#                 p.get_furnishing_type_display(),
+#                 p.get_room_type_display(),
+#                 p.total_beds,
+#                 p.rent,
+#                 p.security_deposit,
+#                 p.minimum_stay,
+#                 'Yes' if p.meals_available else 'No',
+#                 p.owner_name,
+#                 p.contact_number,
+#                 p.email,
+#                 p.created_at.strftime('%d-%m-%Y') if p.created_at else '',
+#             ])
 
-        return response
+#         return response
 
-    # ── Pagination ────────────────────────────────────────────
-    paginator   = Paginator(properties, 10)
-    page_number = request.GET.get('page', 1)
-    page_obj    = paginator.get_page(page_number)
+#     # ── Pagination ────────────────────────────────────────────
+#     paginator   = Paginator(properties, 10)
+#     page_number = request.GET.get('page', 1)
+#     page_obj    = paginator.get_page(page_number)
 
-    # Distinct cities for filter dropdown
-    cities = (PGColivingProperty.objects
-              .values_list('city', flat=True)
-              .distinct()
-              .order_by('city'))
+#     # Distinct cities for filter dropdown
+#     cities = (PGColivingProperty.objects
+#               .values_list('city', flat=True)
+#               .distinct()
+#               .order_by('city'))
 
-    context = {
-        'admin_obj':     admin_obj,
-        'page_obj':      page_obj,
-        'search_query':  search_query,
-        'pg_for_filter': pg_for_filter,
-        'city_filter':   city_filter,
-        'total_count':   total_count,
-        'cities':        cities,
-    }
-    return render(request, 'admin_user/Reports/Rental/pg_list.html', context)
+#     print("----------------------------",admin_obj)
+
+#     context = {
+#         'admin_obj':     admin_obj,
+#         'page_obj':      page_obj,
+#         'search_query':  search_query,
+#         'pg_for_filter': pg_for_filter,
+#         'city_filter':   city_filter,
+#         'total_count':   total_count,
+#         'cities':        cities,
+#     }
+#     return render(request, 'admin_user/Reports/Rental/pg_list.html', context)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -4162,6 +4164,8 @@ def system_audit_logs(request):
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
 
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
     deletion_logs = []
     restore_logs = []
 
@@ -4217,6 +4221,7 @@ def system_audit_logs(request):
     restore_logs.sort(key=lambda x: x['date'] if x['date'] else timezone.now(), reverse=True)
 
     context = {
+        'admin_obj':admin_obj,
         'deletion_logs': deletion_logs,
         'restore_logs': restore_logs,
         'deletion_count': len(deletion_logs),
@@ -4235,6 +4240,8 @@ def global_recycle_bin(request):
     session_id = request.session.get('Admin_id')
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
 
     # Helper function to calculate auto-delete countdown (30 days)
     def calculate_retention(queryset):
@@ -4259,6 +4266,7 @@ def global_recycle_bin(request):
     agricultural_resale_deleted = calculate_retention(AgriculturalResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
 
     context = {
+        'admin_obj':admin_obj,
         'rental_deleted': rental_deleted, 'rental_count': len(rental_deleted),
         'commercial_deleted': commercial_deleted, 'commercial_count': len(commercial_deleted),
         'pg_deleted': pg_deleted, 'pg_count': len(pg_deleted),
@@ -5629,6 +5637,8 @@ def pg_list(request):
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
 
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
     search = request.GET.get('search', '')
     qs = PGColivingProperty.objects.all().order_by('-id')
 
@@ -5692,6 +5702,7 @@ def pg_list(request):
     return render(request, 'admin_user/Reports/Rental/pg_list.html', {
         "page_obj": page,
         "search": search,
+        'admin_obj':admin_obj,
         
         # Pass Stats to template
         "total_properties": total_properties,
@@ -9346,16 +9357,26 @@ def seo_list(request):
             
         return JsonResponse({'status': 'success', 'message': f'Items updated to {action}'})
 
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+    
     # --- Regular List Logic ---
     # Retrieve all pages ordered by type for consistent grouping
+
     seo_pages = LocationSEO.objects.all().order_by('pagetype', '-id')
 
     # Get distinct page types and their counts for the menu/cards
     type_counts = LocationSEO.objects.values('pagetype').annotate(total=Count('id')).order_by('pagetype')
 
+    
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
     context = {
         "seo_pages": seo_pages,
         "type_counts": type_counts,
+        'admin_obj':admin_obj
     }
     return render(request, "admin_user/Seo_Module/seo_list.html", context)
 
@@ -9379,7 +9400,15 @@ def add_blog(request):
         )
         return redirect("blog_list")
 
-    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_add.html")
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    context = {'admin_obj':admin_obj}
+
+    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_add.html",context)
 
 
 
@@ -9387,8 +9416,15 @@ def add_blog(request):
 
 
 def blog_list(request):
+
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+    
+    admin_obj = Admin_Login.objects.get(id=session_id)
+    
     blogs = Blog.objects.all().order_by("-date_posted")
-    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_list.html", {"blogs": blogs})
+    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_list.html", {"blogs": blogs,'admin_obj':admin_obj})
 
 
 def blog_delete(request, id):
@@ -9411,7 +9447,13 @@ def blog_edit(request, id):
         blog.save()
         return redirect("blog_list")
 
-    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_edit.html", {"blog": blog})
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_edit.html", {"blog": blog,'admin_obj':admin_obj})
 
 
 
@@ -9480,7 +9522,15 @@ def add_service(request):
         service.save()
        # return redirect("services_list")  # after save go to list page
 
-    return render(request, "admin_user/Seo_Module/Services_Pages/add_service.html")
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    context = {'admin_obj':admin_obj}
+
+    return render(request, "admin_user/Seo_Module/Services_Pages/add_service.html",context)
 
 
 def delete_service(request, service_id):
@@ -9520,16 +9570,30 @@ def edit_service(request, id):
         # Redirect back to the services list
         return redirect("services_list")
 
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
     # For a GET request, pass the service object to the template
     context = {
-        'service': service
+        'service': service,
+        'admin_obj':admin_obj
     }
     return render(request, "admin_user/Seo_Module/Services_Pages/edit_service.html", context)
 
 
 def services_list(request):
     services = Service.objects.all().order_by('-id')
-    return render(request, 'admin_user/Seo_Module/Services_Pages/services_list.html', {'services': services})
+
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    return render(request, 'admin_user/Seo_Module/Services_Pages/services_list.html', {'services': services,'admin_obj':admin_obj})
 
 
 

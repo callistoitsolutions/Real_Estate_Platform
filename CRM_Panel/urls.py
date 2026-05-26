@@ -18,6 +18,10 @@ urlpatterns = [
 
      path('create_utm_crm',views.create_utm_crm,name="create_utm_crm"),
 
+     ############ urls for delete utm link #######################
+
+     path('delete_utm_crm',views.delete_utm_crm,name="delete_utm_crm"),
+
 
     ############# urls for property enquiry sections ####################
 
