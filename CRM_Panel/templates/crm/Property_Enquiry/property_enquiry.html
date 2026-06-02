@@ -6,11 +6,11 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="page-header-content">
-            <h1 class="page-title"><i class="fas fa-drafting-compass"></i> Property Enquiries Listings</h1>
+            <h1 class="page-title"><i class="fas fa-sticky-note"></i> Property Enquiries Listings</h1>
             <div class="page-actions">
-                <button class="btn-primary-custom" data-toggle="modal" data-target="#AmenetiesModalCenter">
+                {% comment %} <button class="btn-primary-custom" data-toggle="modal" data-target="#AmenetiesModalCenter">
                     <i class="fas fa-plus-circle"></i> Add Ameneties
-                </button>
+                </button> {% endcomment %}
                 <button class="btn-primary-custom"
                     style="background: transparent; border: 2px solid white; color: white;" data-toggle="modal"
                     data-target="#exampleModalCenter">
@@ -19,6 +19,8 @@
             </div>
         </div>
     </div>
+
+    
 
 
 
@@ -31,7 +33,7 @@
 
         <!-- TABLE SCROLL AREA -->
         <div class="table-responsive">
-            {{ameneties_list}}
+            {{property_enquiry_list}}
         </div>
 
     </div>
@@ -39,64 +41,6 @@
 </div>
 </div>
 
-
-<!-- Modal -->
-<div class="modal fade" id="AmenetiesModalCenter" tabindex="-1" role="dialog"
-    aria-labelledby="AmenetiesModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">Ameneties</h5>
-
-            </div>
-            <div class="modal-body">
-                <div class="row">
-
-
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label class="form-label">
-                                Amenities Icon <span style="color:red;">*</span>
-                            </label>
-
-                            <div class="input-group">
-                                <input type="text" class="form-control amenity_icon" placeholder="e.g: fas fa-users"
-                                    id="amenties_icon" name="amenties_icon">
-
-                                <span class="input-group-text" style="width:50px; justify-content:center;">
-                                    <i class="iconPreview"></i>
-                                </span>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div class="col-md-12 mt-2">
-                        <div class="form-group">
-                            <label class="form-label">
-                                Amenities Name <span style="color:red;">*</span>
-                            </label>
-
-                            <div class="input-group">
-                                <input type="text" class="form-control amenity_icon" placeholder="Enter Ameneties Name"
-                                    id="amenties_name" name="amenties_name">
-
-                            </div>
-
-
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" style="background-color:#667eea;"
-                    onclick="Add_Ameneties(this)"><i class="fas fa-add"></i> Add Ameneties</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -638,16 +582,16 @@
 </script>
 
 
-{% comment %} Ajax Jquery and Javascript for delete ameneties {% endcomment %}
+{% comment %} Ajax Jquery and Javascript for delete property enquiries {% endcomment %}
 
 <script>
 
 
-    function Delete_Ameneties(ameneties_id)
+    function Delete_Enquiry(enquiry_id)
     {
         swal({
             title: "DELETE",
-            text: "Are you sure, you want to delete the ameneties detail ?",
+            text: "Are you sure, you want to delete the property enquiry detail ?",
             icon: "warning",
             buttons: ["No", "Yes"],	
             closeOnClickOutside: false,
@@ -658,8 +602,8 @@
             {	
                 $.ajax({
                     type:"POST",
-                    url: "{% url 'Delete_Ameneties' %}",
-                    data: {'ameneties_id' : ameneties_id},
+                    url: "{% url 'delete_property_enquiry' %}",
+                    data: {'enquiry_id' : enquiry_id},
                     success: function (response) 
                     {
                         if (response.status == '1'){

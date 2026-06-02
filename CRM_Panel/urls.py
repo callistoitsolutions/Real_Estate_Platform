@@ -26,6 +26,18 @@ urlpatterns = [
     ############# urls for property enquiry sections ####################
 
     path('property_enquiry_crm',views.property_enquiry_crm,name="property_enquiry_crm"),
+
+    ############## urls for delete property enquiry ########################
+
+    path('delete_property_enquiry',views.delete_property_enquiry,name="delete_property_enquiry"),
+
+    ############# urls for update property enquiry #####################
+
+    path('update_property_enquiry/<int:id>',views.update_property_enquiry,name="update_property_enquiry"),
+
+    ############ urls for ajax for update property enquiry ####################
+
+    path('property_enquiry_ajax',views.property_enquiry_ajax,name="property_enquiry_ajax"),
     
      
     

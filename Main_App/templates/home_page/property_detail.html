@@ -837,11 +837,19 @@ a { text-decoration: none; color: inherit; }
             <input type="hidden" name="lead_source" value="property_detail_page">
             <input type="hidden" name="seo_slug" value="{{ seo.slug }}">
 
-            <input type="hidden" name="utm_source" id="utm_source" value="">
-            <input type="hidden" name="utm_medium" id="utm_medium" value="">
-            <input type="hidden" name="utm_campaign" id="utm_campaign" value="">
-            <input type="hidden" name="utm_term" id="utm_term" value="">
-            <input type="hidden" name="utm_content" id="utm_content" value="">
+            <!--  ADD THESE HIDDEN UTM FIELDS -->
+
+            <!-- Add these hidden fields inside your enquiry form -->
+            <input type="hidden" name="utm_source" id="enquiry_utm_source" value="">
+            <input type="hidden" name="utm_medium" id="enquiry_utm_medium" value="">
+            <input type="hidden" name="utm_campaign" id="enquiry_utm_campaign" value="">
+            <input type="hidden" name="utm_term" id="enquiry_utm_term" value="">
+            <input type="hidden" name="utm_content" id="enquiry_utm_content" value="">
+            <input type="hidden" name="utm_path" id="enquiry_utm_path" value="">
+            <input type="hidden" name="utm_params" id="enquiry_utm_params" value="">
+            <input type="hidden" name="page_url" id="enquiry_page_url" value="">
+            <input type="hidden" name="property_id" id="enquiry_property_id" value="{{ p.id }}">
+            <input type="hidden" name="property_type" id="enquiry_property_type" value="{{ property_type }}">
 
             <input type="text" name="enquiry_name" id="enquiry_name" class="form-select mb-2" placeholder="Your Name" required value="{{ user_obj.user_name }}">
 
@@ -1315,6 +1323,7 @@ function callOwner(phone) {
 // ═══════════════════════════════════════════════
 // SEND ENQUIRY
 // ═══════════════════════════════════════════════
+
 function Send_Enquiry(_this) {
   var enquiry_name = $("#enquiry_name").val().trim();
   var enquiry_phone = $("#enquiry_phone").val().trim();
@@ -1337,15 +1346,31 @@ function Send_Enquiry(_this) {
   // 3. Validate mandatory Terms & Conditions checkbox
   if (!whatsapp_consent) {
     Swal.fire({
-      title: 'Agreement Required', 
-      text: 'You must agree to the Whatsapp consent to proceed.', 
+      title: 'Consenment Required', 
+      text: 'You must agree to the Consenment to proceed.', 
       icon: 'warning',
       confirmButtonColor: '#1e293b'
     });
     return;
   }
 
-  // 4. Build the Form Data Object
+  // 4. Get UTM values from hidden fields
+  var utm_source = $("#enquiry_utm_source").val() || "";
+  var utm_medium = $("#enquiry_utm_medium").val() || "";
+  var utm_campaign = $("#enquiry_utm_campaign").val() || "";
+  var utm_term = $("#enquiry_utm_term").val() || "";
+  var utm_content = $("#enquiry_utm_content").val() || "";
+  var utm_path = $("#enquiry_utm_path").val() || "";
+  var utm_params = $("#enquiry_utm_params").val() || "";
+  var page_url = $("#enquiry_page_url").val() || window.location.href;
+
+  console.log("📊 Sending Enquiry with UTM:", {
+    utm_source: utm_source,
+    utm_medium: utm_medium,
+    utm_campaign: utm_campaign
+  });
+
+  // 5. Build the Form Data Object
   var fd = new FormData();
   fd.append('enquiry_name', enquiry_name);
   fd.append('country_code', country_code); 
@@ -1353,6 +1378,16 @@ function Send_Enquiry(_this) {
   fd.append('enquiry_email', enquiry_email);
   fd.append('enquiry_message', enquiry_message);
   fd.append('whatsapp_consent', whatsapp_consent ? 'yes' : 'no'); 
+  
+  //  Append UTM fields to FormData
+  fd.append('utm_source', utm_source);
+  fd.append('utm_medium', utm_medium);
+  fd.append('utm_campaign', utm_campaign);
+  fd.append('utm_term', utm_term);
+  fd.append('utm_content', utm_content);
+  fd.append('utm_path', utm_path);
+  fd.append('utm_params', utm_params);
+  fd.append('page_url', page_url);
   
   // Django Context variables
   fd.append('listing_type', '{{ listing_type }}');
@@ -1363,7 +1398,7 @@ function Send_Enquiry(_this) {
   // Change button state to loading spinner
   $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Processing...`);
 
-  // 5. Execute AJAX Request
+  // 6. Execute AJAX Request
   $.ajax({
     method: "POST",
     url: "{% url 'Send_Property_Enquiry' %}",
@@ -1392,157 +1427,176 @@ function Send_Enquiry(_this) {
 </script>
 
 <script>
-console.log("===== PAGE VIEW TRACKING WITH CATEGORY =====");
+  
+  console.log("===== PAGE VIEW TRACKING WITH CATEGORY =====");
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("===== DOM LOADED =====");
-    
-    // Get UTM parameters from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    let utm_source = urlParams.get('utm_source') || '';
-    let utm_medium = urlParams.get('utm_medium') || '';
-    let utm_campaign = urlParams.get('utm_campaign') || '';
-    let utm_term = urlParams.get('utm_term') || '';
-    let utm_content = urlParams.get('utm_content') || '';
-    
-    // Get property and category information from template
-    const propertyId = '{{ p.id }}';
-    const propertyTitle = '{{ p.title|escapejs }}';
-    const listingType = '{{ listing_type|default:"rent" }}';
-    
-    // ✅ IMPORTANT: Get category from URL or template
-    // Method 1: From URL path (e.g., /rent/commercial/ or /rent/residential/)
-    let category = '';
-    const pathMatch = window.location.pathname.match(/\/rent\/([^\/]+)\//);
-    if (pathMatch && pathMatch[1]) {
-        category = pathMatch[1];  // 'commercial' or 'residential'
-    }
-    
-    // Method 2: From template if available
-    const templateCategory = '{{ category|default:"" }}';
-    if (templateCategory) {
-        category = templateCategory;
-    }
-    
-    // Method 3: From data attribute
-    if (!category) {
-        const categoryAttr = document.body.getAttribute('data-category');
-        if (categoryAttr) category = categoryAttr;
-    }
-    
-    console.log("Property ID:", propertyId);
-    console.log("Property Title:", propertyTitle);
-    console.log("Listing Type:", listingType);
-    console.log("Category:", category);
-    console.log("UTM Source:", utm_source || 'none (will track as direct)');
-    
-    // Get referrer for source detection
-    const referrer = document.referrer;
-    
-    // Auto-detect source if no UTM parameters
-    if (!utm_source) {
-        if (referrer.includes('google.com')) {
-            utm_source = 'google';
-            utm_medium = 'organic';
-            utm_campaign = 'organic_search';
-            console.log("Source detected: Google Search");
-        } 
-        else if (referrer.includes('facebook.com')) {
-            utm_source = 'facebook';
-            utm_medium = 'social';
-            utm_campaign = 'facebook_referral';
-            console.log("Source detected: Facebook");
-        }
-        else if (referrer.includes('whatsapp.com')) {
-            utm_source = 'whatsapp';
-            utm_medium = 'messaging';
-            utm_campaign = 'whatsapp_share';
-            console.log("Source detected: WhatsApp");
-        }
-        else if (referrer === '') {
-            utm_source = 'direct';
-            utm_medium = 'none';
-            utm_campaign = 'direct_visit';
-            console.log("Source detected: Direct Visit");
-        }
-        else {
-            utm_source = 'referral';
-            utm_medium = 'other';
-            utm_campaign = 'external_referral';
-            console.log("Source detected: Referral from", referrer);
-        }
-    } else {
-        console.log("UTM Source from URL:", utm_source);
-    }
-    
-    // Set hidden form fields for enquiry form
-    if (document.getElementById('utm_source')) {
-        document.getElementById('utm_source').value = utm_source;
-        document.getElementById('utm_medium').value = utm_medium;
-        document.getElementById('utm_campaign').value = utm_campaign;
-        document.getElementById('utm_term').value = utm_term;
-        document.getElementById('utm_content').value = utm_content;
-        console.log("Form UTM fields populated");
-    }
-    
-    // Only track if we have property ID
-    if (propertyId && propertyId !== '') {
-        
-        console.log("Sending tracking data to server...");
-        
-        fetch("{% url 'Track_utm_link' %}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              // UTM parameters
-              utm_source: utm_source,
-              utm_medium: utm_medium,
-              utm_campaign: utm_campaign,
-              utm_term: utm_term,
-              utm_content: utm_content,
-              
-              // Property information
-              property_id: propertyId,
-              property_title: propertyTitle,
-              listing_type: listingType,
-              category: category,
-              
-              //  ADD THESE TWO LINES
-              utm_path: window.location.pathname,
-              utm_params: window.location.search.substring(1), 
+  document.addEventListener('DOMContentLoaded', function() {
+      console.log("===== DOM LOADED =====");
+      
+      // Get UTM parameters from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      let utm_source = urlParams.get('utm_source') || '';
+      let utm_medium = urlParams.get('utm_medium') || '';
+      let utm_campaign = urlParams.get('utm_campaign') || '';
+      let utm_term = urlParams.get('utm_term') || '';
+      let utm_content = urlParams.get('utm_content') || '';
+      
+      // Get property and category information from template
+      const propertyId = '{{ p.id }}';
+      const propertyTitle = '{{ p.title|escapejs }}';
+      const listingType = '{{ listing_type|default:"rent" }}';
+      
+      // Get category from URL path (e.g., /rent/commercial/ or /rent/residential/)
+      let category = '';
+      const pathMatch = window.location.pathname.match(/\/rent\/([^\/]+)\//);
+      if (pathMatch && pathMatch[1]) {
+          category = pathMatch[1];
+      }
+      
+      // Fallback to template category
+      const templateCategory = '{{ category|default:"" }}';
+      if (templateCategory) {
+          category = templateCategory;
+      }
+      
+      // Fallback to data attribute
+      if (!category) {
+          const categoryAttr = document.body.getAttribute('data-category');
+          if (categoryAttr) category = categoryAttr;
+      }
+      
+      console.log("Property ID:", propertyId);
+      console.log("Property Title:", propertyTitle);
+      console.log("Listing Type:", listingType);
+      console.log("Category:", category);
+      console.log("UTM Source:", utm_source || 'none (will track as direct)');
+      
+      // Get referrer for source detection
+      const referrer = document.referrer;
+      
+      // Auto-detect source if no UTM parameters
+      if (!utm_source) {
+          if (referrer.includes('google.com')) {
+              utm_source = 'google';
+              utm_medium = 'organic';
+              utm_campaign = 'organic_search';
+              console.log("Source detected: Google Search");
+          } 
+          else if (referrer.includes('facebook.com')) {
+              utm_source = 'facebook';
+              utm_medium = 'social';
+              utm_campaign = 'facebook_referral';
+              console.log("Source detected: Facebook");
+          }
+          else if (referrer.includes('whatsapp.com')) {
+              utm_source = 'whatsapp';
+              utm_medium = 'messaging';
+              utm_campaign = 'whatsapp_share';
+              console.log("Source detected: WhatsApp");
+          }
+          else if (referrer === '') {
+              utm_source = 'direct';
+              utm_medium = 'none';
+              utm_campaign = 'direct_visit';
+              console.log("Source detected: Direct Visit");
+          }
+          else {
+              utm_source = 'referral';
+              utm_medium = 'other';
+              utm_campaign = 'external_referral';
+              console.log("Source detected: Referral from", referrer);
+          }
+      } else {
+          console.log("UTM Source from URL:", utm_source);
+      }
+      
+      //  STORE UTM DATA IN SESSION STORAGE (for enquiry form)
+      const utmDataForSession = {
+          utm_source: utm_source,
+          utm_medium: utm_medium,
+          utm_campaign: utm_campaign,
+          utm_term: utm_term,
+          utm_content: utm_content,
+          utm_path: window.location.pathname,
+          utm_params: window.location.search.substring(1),
+          page_url: window.location.href,
+          timestamp: new Date().toISOString()
+      };
+      sessionStorage.setItem('utm_tracking_data', JSON.stringify(utmDataForSession));
+      console.log("UTM data stored in session storage");
+      
+      // Set hidden form fields for enquiry form (if they exist on page)
+      if (document.getElementById('enquiry_utm_source')) {
+          document.getElementById('enquiry_utm_source').value = utm_source;
+          document.getElementById('enquiry_utm_medium').value = utm_medium;
+          document.getElementById('enquiry_utm_campaign').value = utm_campaign;
+          document.getElementById('enquiry_utm_term').value = utm_term;
+          document.getElementById('enquiry_utm_content').value = utm_content;
+          document.getElementById('enquiry_utm_path').value = window.location.pathname;
+          document.getElementById('enquiry_utm_params').value = window.location.search.substring(1);
+          document.getElementById('enquiry_page_url').value = window.location.href;
+          console.log("Enquiry form UTM fields populated");
+      }
+      
+      // Only track if we have property ID
+      if (propertyId && propertyId !== '') {
+          
+          console.log("Sending tracking data to server...");
+          
+          
+          
+          fetch("{% url 'Track_utm_link' %}", {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  // UTM parameters
+                  utm_source: utm_source,
+                  utm_medium: utm_medium,
+                  utm_campaign: utm_campaign,
+                  utm_term: utm_term,
+                  utm_content: utm_content,
+                  
+                  // Property information
+                  property_id: propertyId,
+                  property_title: propertyTitle,
+                  listing_type: listingType,
+                  category: category,
+                  
+                  // URL components
+                  utm_path: window.location.pathname,
+                  utm_params: window.location.search.substring(1),
+                  page_url: window.location.href,
+                  
+                  // Additional tracking
+                  referrer: referrer,
+                  user_agent: navigator.userAgent
+              })
+          })
+          .then(response => {
+              console.log("Response status:", response.status);
+              return response.json();
+          })
+          .then(data => {
+              if (data.success) {
+                  console.log("Page view tracked successfully!");
+                  console.log("Category:", category);
+                  console.log("Source:", utm_source);
+                  console.log("Total views:", data.total_views || data.total_clicks);
+              } else {
+                  console.log("Tracking failed:", data.error);
+              }
+          })
+          .catch(error => {
+              console.log("Fetch error:", error);
+          });
+          
+      } else {
+          console.warn("No property ID found - cannot track");
+      }
+  });
 
-              page_url: window.location.href,
-              
-              // Additional tracking (optional)
-              page_url: window.location.href,
-              referrer: referrer,
-              user_agent: navigator.userAgent
-            })
-        })
-        .then(response => {
-            console.log("Response status:", response.status);
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                console.log(" Page view tracked successfully!");
-                console.log("Category:", category);
-                console.log("Source:", utm_source);
-                console.log("Total views for this source:", data.total_views);
-            } else {
-                console.log(" Tracking failed:", data.error);
-            }
-        })
-        .catch(error => {
-            console.log(" Fetch error:", error);
-        });
-        
-    } else {
-        console.warn("No property ID found - cannot track");
-    }
-});
 </script>
 
 </body>

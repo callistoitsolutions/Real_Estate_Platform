@@ -606,10 +606,23 @@ import math
 @csrf_exempt
 def Send_Property_Enquiry(request):
     if request.method == "POST":
-        data = request.POST.dict()   
+        data = request.POST.dict()
         
-        # 1. SECURITY: Retrieve user authentication from the secure session container
+        print("=" * 50)
+        print("Send_Property_Enquiry called")
+        print("Received data:", data)
+        print("=" * 50)
+        
+        # 1. Get user from session
         user_id = request.session.get('User_id') or data.get('user_id')
+        
+        if not user_id and request.user.is_authenticated:
+            try:
+                user_data = User_Details.objects.get(user_ptr=request.user)
+                user_id = user_data.id
+            except User_Details.DoesNotExist:
+                pass
+        
         if not user_id:
             return JsonResponse({"status": "0", "msg": "User session expired. Please log in."})
 
@@ -618,21 +631,43 @@ def Send_Property_Enquiry(request):
         except (User_Details.DoesNotExist, ValueError):
             return JsonResponse({"status": "0", "msg": "Invalid user account verification."})
 
-        # 2. Extract Data Context Parameters Safely
+        # 2. Extract Data
         property_id = data.get('property_id')
         listing_type = data.get('listing_type', '')
         category = data.get('category', '')
         
-        # print("---------------------",listing_type)
-        # print("---------------------",category)
-        # New country parameters and consent evaluation
         country_code = data.get('country_code', '+91')
         whatsapp_consent_raw = data.get('whatsapp_consent', 'no')
         whatsapp_consent = True if whatsapp_consent_raw == 'yes' else False
 
-        real_property = None
+        #  Get UTM parameters to find the UTMLink record
+        utm_source = data.get('utm_source', '').strip()
+        utm_medium = data.get('utm_medium', '').strip()
+        utm_campaign = data.get('utm_campaign', '').strip()
+        
+        # print(f"UTM Data - Source: {utm_source}, Medium: {utm_medium}, Campaign: {utm_campaign}")
 
-        # 3. CRASH PREVENTION: Safely lookup target records using model-specific tables
+        # Find existing UTMLink record
+        utm_link = None
+        if utm_source and utm_medium and property_id:
+            utm_filter = {
+                'utm_source': utm_source,
+                'utm_medium': utm_medium,
+                'property_id': property_id
+            }
+            if utm_campaign:
+                utm_filter['utm_campaign'] = utm_campaign
+            
+            utm_link = UTMLink.objects.filter(**utm_filter).first()
+            
+            # if utm_link:
+            #     print(f"Found UTMLink: {utm_link.link_id} - Clicks: {utm_link.total_clicks}")
+            # else:
+            #     print(f"No UTMLink found for {utm_source}/{utm_medium}")
+
+        # 3. Find the property
+        real_property = None
+        
         try:
             if listing_type == "rent" and category == "residential-data":
                 real_property = RentalResidentialProperty.objects.get(id=property_id)
@@ -640,7 +675,7 @@ def Send_Property_Enquiry(request):
             elif listing_type == "rent" and category == "pg-data":
                 real_property = PGColivingProperty.objects.get(id=property_id)
 
-            if listing_type == "rent" and category == "commercial-data":
+            elif listing_type == "rent" and category == "commercial-data":
                 real_property = CommercialRentalProperty.objects.get(id=property_id)
                 
             elif listing_type == "sale" and category == "resale-residential":
@@ -658,36 +693,55 @@ def Send_Property_Enquiry(request):
             elif listing_type == "sale" and category == "agricultural-data":
                 real_property = AgriculturalResaleProperty.objects.get(id=property_id)
                 
-        except ObjectDoesNotExist:
+        except ObjectDoesNotExist as e:
+            # print(f"Property not found: {e}")
             return JsonResponse({"status": "0", "msg": "The requested property could not be found."})
 
         if not real_property:
             return JsonResponse({"status": "0", "msg": "Invalid property type or category arrangement."})
         
-        # 4. GENERIC FOREIGN KEY STABILITY: Resolve explicit content type model definitions
+        # 4. Save Enquiry with ForeignKey to UTMLink
         property_content_type = ContentType.objects.get_for_model(real_property)
-
-        # 5. Persist the Enquiry Form Submission
+        
         try:
-            PropertyEnquiry.objects.create(
-                content_type=property_content_type,   # Stores table map target
-                object_id=real_property.id,           # Stores row primary key ID 
-                user=user_data,
+            enquiry = PropertyEnquiry.objects.create(
+                content_type=property_content_type,
+                object_id=real_property.id,
                 enquiry_name=data.get('enquiry_name', '').strip(),
                 country_code=country_code,
                 enquiry_phone=data.get('enquiry_phone', '').strip(),
                 whatsapp_consent=whatsapp_consent,
-                enquiry_date=datetime.today(),
-                enquiry_time=datetime.now()
+                
+                #  Foreign Key to UTMLink (instead of duplicate fields)
+                utm_link=utm_link,
+                
+                enquiry_date=date.today(),
+                enquiry_time=datetime.now().time()
             )
             
+            # print(f"Enquiry saved successfully - ID: {enquiry.id}")
+            # print(f"   UTM Source: {utm_source}, Medium: {utm_medium}")
+            if utm_link:
+                print(f"Linked to UTMLink: {utm_link.link_id}")
+
+            # ✅ Update UTMLink statistics (increment enquiry count)
+            if utm_link:
+                utm_link.total_enquiries = models.F('total_enquiries') + 1
+                utm_link.save()
+                utm_link.refresh_from_db()
+                print(f" Updated UTMLink enquiries: {utm_link.total_enquiries}")
+            else:
+                print(f" No UTMLink to update for source: {utm_source}, medium: {utm_medium}")
+        
             return JsonResponse({
                 "status": "1", 
                 "msg": "Enquiry submitted successfully! We will get back to you soon."
             })
             
         except Exception as e:
-            print(f"Enquiry DB Save Failure: {str(e)}")
+            # print(f" Enquiry DB Save Failure: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return JsonResponse({
                 "status": "0", 
                 "msg": "Could not save your request. Please try again later."

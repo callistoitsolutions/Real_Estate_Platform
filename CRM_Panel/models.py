@@ -5,56 +5,10 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from Admin_App.models import *
 
 
-################### Property Enquiry Modal Starts Here ######################
-
-
-class PropertyEnquiry(models.Model):
-
-    # 1. The type of property (PG, Commercial, etc.)
-    content_type = models.ForeignKey(
-        ContentType, 
-        on_delete=models.CASCADE, 
-        null=True, 
-        blank=True
-    )
-    
-    # 2. The ID of that specific property
-    object_id = models.PositiveIntegerField(null=True, blank=True)
-
-    # 3. The Generic Foreign Key (Combines the two above)
-    property_object = GenericForeignKey('content_type', 'object_id')
-
-    # --- Your existing fields stay the same ---
-    user = models.ForeignKey(User_Details,on_delete=models.CASCADE,blank=True,null=True
-    )
-
-    enquiry_name = models.CharField(max_length=200, blank=True, null=True)
-    country_code = models.CharField(max_length=10, default="+91", blank=True, null=True)
-    enquiry_phone = models.CharField(max_length=20, blank=True, null=True)
-
-    whatsapp_consent = models.BooleanField(default=False)
-
-    ############### UTM fields ################################
-
-    utm_source = models.CharField(max_length=255, blank=True, null=True)
-    utm_medium = models.CharField(max_length=255, blank=True, null=True)
-    utm_campaign = models.CharField(max_length=255, blank=True, null=True)
-    utm_term = models.CharField(max_length=255, blank=True, null=True)
-    utm_content = models.CharField(max_length=255, blank=True, null=True)
-
-    enquiry_date = models.DateField(blank=True,null=True)
-    enquiry_time = models.TimeField(blank=True,null=True)
-
-    def __str__(self):
-        return str(self.enquiry_name)+"-"+self.enquiry_phone
-    
-############### Property Enquiry Modal Ends Here ############################
-
-
 ############### UTM Link Modal Starts Here #######################
 
 class UTMLink(models.Model):
-    
+      
     # Basic info
     link_id = models.CharField(max_length=50, unique=True)
     property_id = models.IntegerField()
@@ -91,3 +45,60 @@ class UTMLink(models.Model):
     
 
 ############### UTM Link Modal Ends Here ########################
+
+
+############# Property Enquiry Modal Starts Here ######################
+
+class PropertyEnquiry(models.Model):
+
+    # 1. The type of property (PG, Commercial, etc.)
+    content_type = models.ForeignKey(
+        ContentType, 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True
+    )
+    
+    # 2. The ID of that specific property
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+
+    # 3.The Generic Foreign Key (Combines the two above)
+    property_object = GenericForeignKey('content_type', 'object_id')
+
+    enquiry_name = models.CharField(max_length=200, blank=True, null=True)
+    country_code = models.CharField(max_length=10, default="+91", blank=True, null=True)
+    enquiry_phone = models.CharField(max_length=20, blank=True, null=True)
+
+    whatsapp_consent = models.BooleanField(default=False)
+
+    # IMPROVED: Foreign Key to UTMLink instead of duplicating fields
+    utm_link = models.ForeignKey(
+        'UTMLink', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='enquiries',
+        db_index=True
+    )
+
+    # Lead Status
+
+    assigned_to = models.ForeignKey(User_Details, on_delete=models.CASCADE, blank=True, null=True)
+    lead_status = models.CharField(max_length=20, blank=True, null=True,default="Pending")
+    followup_notes = models.TextField(blank=True,null=True)
+    closed_date = models.DateField(null=True, blank=True)
+
+    # Date Fields
+    enquiry_date = models.DateField(blank=True, null=True)
+    enquiry_time = models.TimeField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.enquiry_name} - {self.enquiry_phone}"
+    
+    @property
+    def get_utm_source(self):
+        if self.utm_link:
+            return self.utm_link.utm_source
+        return self.utm_source
+    
+############## Property Enquiry Modal Ends Here ################################## 
