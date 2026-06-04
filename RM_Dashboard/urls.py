@@ -18,6 +18,10 @@ urlpatterns = [
 
     path('Update_Profile_Rm',views.Update_Profile_Rm,name='Update_Profile_Rm'),
 
+    ############## urls for assign enquiries to rm #########################
+
+    path('Assign_Enquiry_Rm',views.Assign_Enquiry_Rm,name='Assign_Enquiry_Rm'),
+
     ########### urls for rental forms list for RM #######################
 
     path('residential_rm_list',views.residential_rm_list,name="residential_rm_list"),

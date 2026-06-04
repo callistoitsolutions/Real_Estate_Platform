@@ -115,7 +115,26 @@ def property_enquiry_crm(request):
         enquiry_obj = PropertyEnquiry.objects.all().order_by('-id')
         enquiry_obj_count = PropertyEnquiry.objects.all().count()
 
-        rendered = render_to_string("crm/render_to_string/R_Enquiry/r_t_s_enquiry.html",{'enquiry_obj':enquiry_obj,'enquiry_obj_count':enquiry_obj_count})
+        ############## Enquiries Stats By Source ##############################
+
+        fb_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="facebook").count()
+        insta_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="instagram").count()
+        whatsapp_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="whatsapp").count()
+        google_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="google").count()
+        linkedin_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="linkedin").count()
+        twitter_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="twitter").count()
+        youtube_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="youtube").count()
+        referral_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="referral").count()
+
+        ########### Enquiry Stats by lead source ################################
+
+        pending_obj_count = PropertyEnquiry.objects.filter(lead_status="Pending").count()
+        progress_obj_count = PropertyEnquiry.objects.filter(lead_status="In Progress").count()
+        hold_obj_count = PropertyEnquiry.objects.filter(lead_status="Hold").count()
+        closed_obj_count = PropertyEnquiry.objects.filter(lead_status="Closed").count()
+        cancelled_obj_count = PropertyEnquiry.objects.filter(lead_status="Cancelled").count()
+
+        rendered = render_to_string("crm/render_to_string/R_Enquiry/r_t_s_enquiry.html",{'enquiry_obj':enquiry_obj,'enquiry_obj_count':enquiry_obj_count,'fb_obj_count':fb_obj_count,'insta_obj_count':insta_obj_count,'whatsapp_obj_count':whatsapp_obj_count,'google_obj_count':google_obj_count,'linkedin_obj_count':linkedin_obj_count,'twitter_obj_count':twitter_obj_count,'youtube_obj_count':youtube_obj_count,'referral_obj_count':referral_obj_count,'pending_obj_count':pending_obj_count,'progress_obj_count':progress_obj_count,'hold_obj_count':hold_obj_count,'closed_obj_count':closed_obj_count,'cancelled_obj_count':cancelled_obj_count})
 
 
         context = {'admin_obj':admin_obj,'property_enquiry_list':rendered}
@@ -222,6 +241,184 @@ def property_enquiry_ajax(request):
     return JsonResponse({"status":"1", "msg" : f"Property Enquiry Details updated successfully"})
 
 ############# Views end for ajax for update property enquiry ####################
+
+
+############ Views start for ajax for filter by source ########################
+
+@csrf_exempt
+def filter_source(request):
+    par = request.POST.get('par')
+
+    enquiry_obj = PropertyEnquiry.objects.filter(utm_link__utm_source=par).order_by('-id')
+    enquiry_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source=par).count()
+
+    ############## Enquiries Stats By Source ##############################
+
+    fb_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="facebook").count()
+    insta_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="instagram").count()
+    whatsapp_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="whatsapp").count()
+    google_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="google").count()
+    linkedin_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="linkedin").count()
+    twitter_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="twitter").count()
+    youtube_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="youtube").count()
+    referral_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="referral").count()
+
+    ########### Enquiry Stats by lead source ################################
+
+    pending_obj_count = PropertyEnquiry.objects.filter(lead_status="Pending").count()
+    progress_obj_count = PropertyEnquiry.objects.filter(lead_status="In Progress").count()
+    hold_obj_count = PropertyEnquiry.objects.filter(lead_status="Hold").count()
+    closed_obj_count = PropertyEnquiry.objects.filter(lead_status="Closed").count()
+    cancelled_obj_count = PropertyEnquiry.objects.filter(lead_status="Cancelled").count()
+
+    rendered = render_to_string("crm/render_to_string/R_Enquiry/r_t_s_enquiry.html",{'enquiry_obj':enquiry_obj,'enquiry_obj_count':enquiry_obj_count,'fb_obj_count':fb_obj_count,'insta_obj_count':insta_obj_count,'whatsapp_obj_count':whatsapp_obj_count,'google_obj_count':google_obj_count,'linkedin_obj_count':linkedin_obj_count,'twitter_obj_count':twitter_obj_count,'youtube_obj_count':youtube_obj_count,'referral_obj_count':referral_obj_count,'pending_obj_count':pending_obj_count,'progress_obj_count':progress_obj_count,'hold_obj_count':hold_obj_count,'closed_obj_count':closed_obj_count,'cancelled_obj_count':cancelled_obj_count})
+
+    return HttpResponse(rendered)
+
+############ Views end for ajax for filter by source ###############################
+
+
+############# Views start for ajax for filter by lead status #######################
+
+@csrf_exempt
+def filter_status(request):
+    par = request.POST.get('par')
+
+    if par == "all":
+        enquiry_obj = PropertyEnquiry.objects.all().order_by('-id')
+        enquiry_obj_count = PropertyEnquiry.objects.all().count()
+    else:
+        enquiry_obj = PropertyEnquiry.objects.filter(lead_status=par).order_by('-id')
+        enquiry_obj_count = PropertyEnquiry.objects.filter(lead_status=par).count()
+
+    ############## Enquiries Stats By Source ##############################
+
+    fb_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="facebook").count()
+    insta_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="instagram").count()
+    whatsapp_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="whatsapp").count()
+    google_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="google").count()
+    linkedin_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="linkedin").count()
+    twitter_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="twitter").count()
+    youtube_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="youtube").count()
+    referral_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="referral").count()
+
+    ########### Enquiry Stats by lead source ################################
+
+    pending_obj_count = PropertyEnquiry.objects.filter(lead_status="Pending").count()
+    progress_obj_count = PropertyEnquiry.objects.filter(lead_status="In Progress").count()
+    hold_obj_count = PropertyEnquiry.objects.filter(lead_status="Hold").count()
+    closed_obj_count = PropertyEnquiry.objects.filter(lead_status="Closed").count()
+    cancelled_obj_count = PropertyEnquiry.objects.filter(lead_status="Cancelled").count()
+
+    rendered = render_to_string("crm/render_to_string/R_Enquiry/r_t_s_enquiry.html",{'enquiry_obj':enquiry_obj,'enquiry_obj_count':enquiry_obj_count,'fb_obj_count':fb_obj_count,'insta_obj_count':insta_obj_count,'whatsapp_obj_count':whatsapp_obj_count,'google_obj_count':google_obj_count,'linkedin_obj_count':linkedin_obj_count,'twitter_obj_count':twitter_obj_count,'youtube_obj_count':youtube_obj_count,'referral_obj_count':referral_obj_count,'pending_obj_count':pending_obj_count,'progress_obj_count':progress_obj_count,'hold_obj_count':hold_obj_count,'closed_obj_count':closed_obj_count,'cancelled_obj_count':cancelled_obj_count})
+
+    return HttpResponse(rendered)
+
+############# Views end for ajax for filter by lead status ##########################
+
+
+############# Views start for ajax for datewise filter #############################
+
+@csrf_exempt
+def date_property_filter(request):
+    if request.method=="POST":
+        start_date= request.POST.get('start_date')
+        end_date= request.POST.get('end_date')
+        lead_source = request.POST.get('lead_source')
+        lead_status = request.POST.get('lead_status')
+
+        if lead_source != "All" and lead_status != "All":
+            # Case 1: Both filters applied
+            enquiry_obj = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                utm_link__utm_source=lead_source,
+                lead_status=lead_status
+            ).order_by('-id')
+            enquiry_obj_count= PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                utm_link__utm_source=lead_source,
+                lead_status=lead_status
+            ).count()
+        
+        elif lead_source != "All" and lead_status == "All":
+            # Case 2: Only source filter, all statuses
+            enquiry_obj = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                utm_link__utm_source=lead_source
+            ).order_by('-id')
+            enquiry_obj_count = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                utm_link__utm_source=lead_source
+            ).count()
+        
+        elif lead_source == "All" and lead_status != "All":
+            # Case 3: Only status filter, all sources
+            enquiry_obj = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                lead_status=lead_status
+            ).order_by('-id')
+            enquiry_obj_count = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                lead_status=lead_status
+            ).count()
+        
+        else:
+            # Case 4: No filters (All sources, All statuses)
+            enquiry_obj = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date
+            ).order_by('-id')
+            enquiry_obj_count = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date
+            ).count()
+
+
+    ############## Enquiries Stats By Source ##############################
+
+    fb_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="facebook").count()
+    insta_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="instagram").count()
+    whatsapp_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="whatsapp").count()
+    google_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="google").count()
+    linkedin_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="linkedin").count()
+    twitter_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="twitter").count()
+    youtube_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="youtube").count()
+    referral_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="referral").count()
+
+    ########### Enquiry Stats by lead source ################################
+
+    pending_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,lead_status="Pending").count()
+    progress_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,lead_status="In Progress").count()
+    hold_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,lead_status="Hold").count()
+    closed_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,lead_status="Closed").count()
+    cancelled_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,lead_status="Cancelled").count()
+
+    rendered = render_to_string("crm/render_to_string/R_Enquiry/r_t_s_enquiry.html",{'enquiry_obj':enquiry_obj,'enquiry_obj_count':enquiry_obj_count,'fb_obj_count':fb_obj_count,'insta_obj_count':insta_obj_count,'whatsapp_obj_count':whatsapp_obj_count,'google_obj_count':google_obj_count,'linkedin_obj_count':linkedin_obj_count,'twitter_obj_count':twitter_obj_count,'youtube_obj_count':youtube_obj_count,'referral_obj_count':referral_obj_count,'pending_obj_count':pending_obj_count,'progress_obj_count':progress_obj_count,'hold_obj_count':hold_obj_count,'closed_obj_count':closed_obj_count,'cancelled_obj_count':cancelled_obj_count})
+
+    return HttpResponse(rendered)   
+    
+
+
+############# Views end ffor ajax for datewise filter ###########################
 
 def lead_report(request):
     session_id = request.session.get('Admin_id')

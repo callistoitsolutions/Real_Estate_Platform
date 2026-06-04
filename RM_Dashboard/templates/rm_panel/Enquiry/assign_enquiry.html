@@ -1,4 +1,4 @@
-{% include "crm/crm_header.html" %}
+{% include "rm_panel/rm_header.html" %}
 {% load static %}
 
 <!-- Main Content -->
@@ -6,16 +6,12 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="page-header-content">
-            <h1 class="page-title"><i class="fas fa-sticky-note"></i> Property Enquiries Listings</h1>
+            <h1 class="page-title"><i class="fas fa-sticky-note"></i>Assigned Property Enquiries Listings</h1>
             <div class="page-actions">
                 {% comment %} <button class="btn-primary-custom" data-toggle="modal" data-target="#AmenetiesModalCenter">
                     <i class="fas fa-plus-circle"></i> Add Ameneties
                 </button> {% endcomment %}
-                <button class="btn-primary-custom"
-                    style="background: transparent; border: 2px solid white; color: white;" data-toggle="modal"
-                    data-target="#exampleModalCenter">
-                    <i class="fas fa-download"></i> Import Excel
-                </button>
+                
             </div>
         </div>
     </div>
@@ -148,7 +144,7 @@
 
 <script>
 
-    $("#Property_Enquiry").addClass("active");
+    $("#Assign_Enquiry").addClass("active");
 
     // Function to check upload file type
 
