@@ -10,6 +10,8 @@ from django.db import models
 from Admin_App.models import *
 from django.views.decorators.csrf import csrf_exempt
 import traceback
+from django.template.loader import render_to_string
+from CRM_Panel.models import *
 
 
 def referral_redirect(request, code):
@@ -174,15 +176,194 @@ def Assign_Enquiry_Rm(request):
 
     # 4. Data Fetching
     user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+
+    enquiry_obj = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).order_by('-id')
+    enquiry_obj_count = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+
+    ############## Enquiries Stats By Source ##############################
+
+    fb_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="facebook",assigned_to__id=user_obj.id).count()
+    insta_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="instagram",assigned_to__id=user_obj.id).count()
+    whatsapp_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="whatsapp",assigned_to__id=user_obj.id).count()
+    google_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="google",assigned_to__id=user_obj.id).count()
+    linkedin_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="linkedin",assigned_to__id=user_obj.id).count()
+    twitter_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="twitter",assigned_to__id=user_obj.id).count()
+    youtube_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="youtube",assigned_to__id=user_obj.id).count()
+    referral_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="referral",assigned_to__id=user_obj.id).count()
+
+    ########### Enquiry Stats by lead source ################################
+
+    pending_obj_count = PropertyEnquiry.objects.filter(lead_status="Pending",assigned_to__id=user_obj.id).count()
+    progress_obj_count = PropertyEnquiry.objects.filter(lead_status="In Progress",assigned_to__id=user_obj.id).count()
+    hold_obj_count = PropertyEnquiry.objects.filter(lead_status="Hold",assigned_to__id=user_obj.id).count()
+    closed_obj_count = PropertyEnquiry.objects.filter(lead_status="Closed",assigned_to__id=user_obj.id).count()
+    cancelled_obj_count = PropertyEnquiry.objects.filter(lead_status="Cancelled",assigned_to__id=user_obj.id).count()
+
+    rendered = render_to_string("rm_panel/render_to_string/R_Enquiry/r_t_s_enquiry.html",{'enquiry_obj':enquiry_obj,'enquiry_obj_count':enquiry_obj_count,'fb_obj_count':fb_obj_count,'insta_obj_count':insta_obj_count,'whatsapp_obj_count':whatsapp_obj_count,'google_obj_count':google_obj_count,'linkedin_obj_count':linkedin_obj_count,'twitter_obj_count':twitter_obj_count,'youtube_obj_count':youtube_obj_count,'referral_obj_count':referral_obj_count,'pending_obj_count':pending_obj_count,'progress_obj_count':progress_obj_count,'hold_obj_count':hold_obj_count,'closed_obj_count':closed_obj_count,'cancelled_obj_count':cancelled_obj_count})
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_obj.user_role
+        'user_role': user_obj.user_role,
+        'property_enquiry_list':rendered
     }
     
     return render(request, "rm_panel/Enquiry/assign_enquiry.html", context)
 
 ########### Views end for assig enquiries to RM ###########################
+
+
+########### Views start for ajax for datewise filter for user #################
+
+@csrf_exempt
+def date_property_filter_user(request):
+    if request.method=="POST":
+        start_date= request.POST.get('start_date')
+        end_date= request.POST.get('end_date')
+        lead_source = request.POST.get('lead_source')
+        lead_status = request.POST.get('lead_status')
+        role = request.POST.get('role')
+        user_id = request.POST.get('user_id')
+
+        if lead_source != "All" and lead_status != "All":
+            # Case 1: Both filters applied
+            enquiry_obj = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                utm_link__utm_source=lead_source,
+                lead_status=lead_status,
+                assigned_to__id=user_id
+            ).order_by('-id')
+            enquiry_obj_count= PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                utm_link__utm_source=lead_source,
+                lead_status=lead_status,
+                assigned_to__id=user_id
+            ).count()
+        
+        elif lead_source != "All" and lead_status == "All":
+            # Case 2: Only source filter, all statuses
+            enquiry_obj = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                utm_link__utm_source=lead_source,
+                assigned_to__id=user_id
+            ).order_by('-id')
+            enquiry_obj_count = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                utm_link__utm_source=lead_source,
+                assigned_to__id=user_id
+            ).count()
+        
+        elif lead_source == "All" and lead_status != "All":
+            # Case 3: Only status filter, all sources
+            enquiry_obj = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                lead_status=lead_status,
+                assigned_to__id=user_id
+            ).order_by('-id')
+            enquiry_obj_count = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                lead_status=lead_status,
+                assigned_to__id=user_id
+            ).count()
+        
+        else:
+            # Case 4: No filters (All sources, All statuses)
+            enquiry_obj = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                assigned_to__id=user_id
+            ).order_by('-id')
+            enquiry_obj_count = PropertyEnquiry.objects.filter(
+                enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,
+                assigned_to__id=user_id
+            ).count()
+
+
+    ############## Enquiries Stats By Source ##############################
+
+    fb_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="facebook",assigned_to__id=user_id).count()
+    insta_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="instagram",assigned_to__id=user_id).count()
+    whatsapp_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="whatsapp",assigned_to__id=user_id).count()
+    google_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="google",assigned_to__id=user_id).count()
+    linkedin_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="linkedin",assigned_to__id=user_id).count()
+    twitter_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="twitter",assigned_to__id=user_id).count()
+    youtube_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="youtube",assigned_to__id=user_id).count()
+    referral_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,utm_link__utm_source="referral",assigned_to__id=user_id).count()
+
+    ########### Enquiry Stats by lead source ################################
+
+    pending_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,lead_status="Pending",assigned_to__id=user_id).count()
+    progress_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,lead_status="In Progress",assigned_to__id=user_id).count()
+    hold_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,lead_status="Hold",assigned_to__id=user_id).count()
+    closed_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,lead_status="Closed",assigned_to__id=user_id).count()
+    cancelled_obj_count = PropertyEnquiry.objects.filter(enquiry_date__gte=start_date,
+                enquiry_date__lte=end_date,lead_status="Cancelled",assigned_to__id=user_id).count()
+
+    if role == "Relationship Manager":
+        rendered = render_to_string("rm_panel/render_to_string/R_Enquiry/r_t_s_enquiry.html",{'enquiry_obj':enquiry_obj,'enquiry_obj_count':enquiry_obj_count,'fb_obj_count':fb_obj_count,'insta_obj_count':insta_obj_count,'whatsapp_obj_count':whatsapp_obj_count,'google_obj_count':google_obj_count,'linkedin_obj_count':linkedin_obj_count,'twitter_obj_count':twitter_obj_count,'youtube_obj_count':youtube_obj_count,'referral_obj_count':referral_obj_count,'pending_obj_count':pending_obj_count,'progress_obj_count':progress_obj_count,'hold_obj_count':hold_obj_count,'closed_obj_count':closed_obj_count,'cancelled_obj_count':cancelled_obj_count})
+    else:
+        rendered = render_to_string("crm/render_to_string/R_Enquiry/r_t_s_enquiry.html",{'enquiry_obj':enquiry_obj,'enquiry_obj_count':enquiry_obj_count,'fb_obj_count':fb_obj_count,'insta_obj_count':insta_obj_count,'whatsapp_obj_count':whatsapp_obj_count,'google_obj_count':google_obj_count,'linkedin_obj_count':linkedin_obj_count,'twitter_obj_count':twitter_obj_count,'youtube_obj_count':youtube_obj_count,'referral_obj_count':referral_obj_count,'pending_obj_count':pending_obj_count,'progress_obj_count':progress_obj_count,'hold_obj_count':hold_obj_count,'closed_obj_count':closed_obj_count,'cancelled_obj_count':cancelled_obj_count})
+
+    return HttpResponse(rendered)
+
+############ Views end for ajax for datewise filter for user #######################
+
+
+############### Views start for update property enquiry ############################
+
+def update_enquiry_rm(request,id):
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    # If they are an Admin, we only care that they have an impersonate_id.
+    # We don't care if their standard 'User_id' is missing.
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
+    # 4. Data Fetching
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    enquiry = PropertyEnquiry.objects.get(id=id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'enquiry':enquiry
+    }
+    
+    return render(request, "rm_panel/Enquiry/update_enquiry.html", context)
+
+############ Views end for update property enquiry #################################
 
 
 ############ Views start for rental forms for RM ######################

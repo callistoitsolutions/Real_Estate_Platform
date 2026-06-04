@@ -1722,7 +1722,8 @@ def Track_utm_link(request):
         page_url = data.get('page_url', '')
 
 
-        # ✅ GET PATH AND PARAMS FROM REQUEST
+        # GET PATH AND PARAMS FROM REQUEST
+
         utm_path = data.get('utm_path', '/')
         utm_params = data.get('utm_params', '')
         
@@ -1755,7 +1756,7 @@ def Track_utm_link(request):
         print(f"Existing UTM link found: {utm_link is not None}")
         
         if utm_link:
-            # ✅ UPDATE EXISTING - INCREASE CLICK COUNT
+            # UPDATE EXISTING - INCREASE CLICK COUNT
             utm_link.total_clicks = models.F('total_clicks') + 1
             utm_link.save()
             utm_link.refresh_from_db()
@@ -1769,7 +1770,7 @@ def Track_utm_link(request):
                 'created': False
             })
         else:
-            # ✅ CREATE NEW UTM LINK
+            # CREATE NEW UTM LINK
             link_id = str(uuid.uuid4())[:8]
             
             utm_link = UTMLink.objects.create(
@@ -1785,7 +1786,7 @@ def Track_utm_link(request):
                 utm_campaign=utm_campaign,
                 utm_term=utm_term,
                 utm_content=utm_content,
-                total_clicks=1  # First click
+                total_clicks=1 
             )
             
             print(f"Created new UTM link with ID: {link_id}")

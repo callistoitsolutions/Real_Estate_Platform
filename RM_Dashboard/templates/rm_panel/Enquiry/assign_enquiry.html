@@ -268,68 +268,6 @@
     });
 </script>
 
-<script>
-
-    {% comment %} Ajax and Jquery to upload amenities data {% endcomment %}
-
-    function Import_Ameneties_Data(_this) {
-
-        var ameneties_file = $("#ameneties_file")[0].files;
-
-        if (ameneties_file.length == 0) {
-            alert("Please Upload Excel File");
-
-        }
-
-
-        else {
-            var fd = new FormData();
-            fd.append('ameneties_file', ameneties_file[0]);
-
-            $(_this).prop("disabled", true);
-            _this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`;
-            $.ajax({
-                method: "POST",
-                url: "{% url 'Ameneties_Data' %}",
-                enctype: "mutipart/form_data",
-                processData: false,
-                contentType: false,
-                cache: false,
-                data: fd,
-                mode: 'same-origin',
-                success: function (response) {
-                    $(_this).prop("disabled", false);
-                    _this.innerHTML = `Upload`;
-                    if (response.status == '1') {
-                        swal({
-                            title: response.msg,
-                            icon: 'success',
-                            allowOutsideClick: false,
-                            showCancelButton: false,
-                            confirmButtonColor: '#3085d6',
-                            confirmButtonText: 'Thank You!',
-                        }).then((result) => {
-                            if (result) {
-                                window.location.href = "{% url 'Ameneties_List' %}"
-                            }
-                        })
-                    }
-                    else {
-                        swal({
-                            title: response.msg,
-                            icon: 'error',
-                            showCancelButton: true,
-                            cancelButtonColor: '#d33',
-                            showConfirmButton: false,
-                            allowOutsideClick: false
-                        })
-                    }
-                }
-            });
-        }
-    }    
-</script>
-
 
 {% comment %} Ajax Jquery and Javascript for delete property enquiries {% endcomment %}
 
@@ -381,49 +319,6 @@
 
 <script>
 
-    // Ajax and Jquery to generate enquiry based on source
-
-    function filterBySource(par){
-        $.ajax({
-            method : "POST",
-            url : "{% url 'filter_source' %}",
-            data: {'par' : par},
-            success: function (response) 
-            {
-                $('#property_enquiry_div').html("")
-                $('#property_enquiry_div').html(response)
-
-            }
-            
-        })
-    }
-
-</script>
-
-
-<script>
-
-    // Ajax and Jquery to generate enquiry based on lead status
-
-    function filterByStatus(par){
-        $.ajax({
-            method : "POST",
-            url : "{% url 'filter_status' %}",
-            data: {'par' : par},
-            success: function (response) 
-            {
-                $('#property_enquiry_div').html("")
-                $('#property_enquiry_div').html(response)
-
-            }
-            
-        })
-    }
-
-</script>
-
-<script>
-
     // Ajax and Jquery to generate property enquiry reports
 
     function generate_property_enquiry_reports(){
@@ -441,12 +336,14 @@
         else{
             $.ajax({
                 method: "POST",
-                url: "{% url 'date_property_filter' %}",
+                url: "{% url 'date_property_filter_user' %}",
                 data: {
                     'start_date':start_date,
                     'end_date':end_date,
                     'lead_source':lead_source,
                     'lead_status':lead_status,
+                    'role':'{{user_obj.user_role}}',
+                    'user_id':'{{user_obj.id}}'
                 },
                  success : function(response){
                   $("#loading").hide();
