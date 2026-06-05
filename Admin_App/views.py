@@ -439,7 +439,7 @@ def get_todays_notifications(request):
         master_feed.append({
             'category': 'contact', 
             'title': "New Contact Enquiry",
-            'desc': f"{con.contact_name} and number {con.contact_phone}",
+            'desc': f"{con.contact_name} and contact {con.contact_phone}",
             'timestamp': con.contact_enquiry_date,
             'time': con.contact_enquiry_time,
             'url': contact_url 
@@ -548,6 +548,27 @@ def Contact_Enquiries_List(request):
         return render(request,'home_page/Adminlogin.html')
 
 ############ Views end for contact enquiries list ###########################
+
+
+############ Views start for delete contact enquiry ######################
+
+@csrf_exempt
+def Delete_Contact_Enquiry(request):
+    try:
+        try:
+            enquiry_id = request.POST.get('enquiry_id')
+            Contact_Enquiry.objects.filter(id=enquiry_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Contact enquiry details deleted successfully...'})
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+
+
+
+############## Views end for delete contact enquiry ######################
 
 
 ############ Views start for view contact enquiries ####################
@@ -676,6 +697,7 @@ def Delete_Ameneties(request):
     except:
         traceback.print_exc()
         return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    
 
 ############ Views end for delete ameneties data ############################
 

@@ -228,7 +228,7 @@ footer { background: #0f172a; padding: 60px 20px 30px; border-top: 1px solid var
     <div class="row">
         <div class="col-lg-7">
             <div class="contact-form-box">
-                <h3>Send Us a Message</h3>
+                <h3>Tell us what you’re looking for</h3>
                 <form id="contactForm">
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -239,27 +239,82 @@ footer { background: #0f172a; padding: 60px 20px 30px; border-top: 1px solid var
                             <label class="form-label">Phone Number <span class="text-danger">*</span></label>
                             <input type="tel" class="form-control" id="contact_phone" name="contact_phone" required placeholder="+91 XXXXX XXXXX">
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <label class="form-label">Email Address </label>
                             <input type="email" class="form-control" id="contact_email" name="contact_email" required placeholder="john@example.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">City/Preferred Location </label>
+                            <input type="email" class="form-control" id="contact_city" name="contact_city" required placeholder="Nagpur">
                         </div>
                         <div class="col-md-12">
                             <label class="form-label">I am looking to... <span class="text-danger">*</span></label>
                             <select class="form-select" id="contact_en_title" name="contact_en_title" required>
                                 <option value="" selected disabled>Select an option</option>
-                                <option value="Rent a property">Rent a property</option>
-                                <option value="Buy a property">Buy a property</option>
-                                <option value="List my property">List my property for Rent/Sale</option>
-                                <option value="General Inquiry">General Enquiry / Support</option>
+                                <option value="I want to Rent a property">I want to Rent a property</option>
+                                <option value="I want to Buy a property">I want to Buy a property</option>
+                                <option value="I want to Sell/Resale property">I want to Sell/Resale property</option>
+                                <option value="I want to list my property on estateflow">I want to list my property on estateflow</option>
+                                <option value="I need property management/maintanence">I need property management/maintanence</option>
+                                <option value="I need home loan/finance assistance">I need home loan/finance assistance</option>
+                                <option value="I want marketing/lead generation for my project">I want marketing/lead generation for my project</option>
                             </select>
                         </div>
+
+                        <div class="col-md-6">
+                             <label class="form-label">Property Type </label> 
+                            <select class="form-select" id="contact_en_type" name="contact_en_type" required>
+                                <option value="" selected disabled>Select an option</option>
+                                <option value="Residential">Residential</option>
+                                <option value="Commercial">Commercial</option>
+                                <option value="Pg/Coliving">Pg/Coliving</option>
+                                <option value="Plot/Land">Plot/Land</option>
+                                <option value="Industrial">Industrial</option>
+                                <option value="Agricultural">Agricultural</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Budget Range </label>
+                            <input type="number" class="form-control" id="contact_start_budget" name="contact_start_budget" required placeholder="From">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label" style="visibility:hidden;">Budget Range <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="contact_end_budget" name="contact_end_budget" required placeholder="To">
+                        </div>
+
+
                         <div class="col-md-12">
                             <label class="form-label">Message</label>
                             <textarea class="form-control" id="contact_message" name="contact_message" rows="4" placeholder="How can we help you today?"></textarea>
                         </div>
+
+                        <div class="col-md-6">
+                             <label class="form-label">Preferred Contact Mode </label>   
+                            <select class="form-select" id="contact_mode" name="contact_mode" required>
+                                <option value="" selected disabled>Select an option</option>
+                                <option value="Call">Call</option>
+                                <option value="Whatsapp">Whatsapp</option>
+                                <option value="Email">Email</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                             <label class="form-label">Preferred Time to Contact </label>  
+                            <select class="form-select" id="contact_time" name="contact_time" required>
+                                <option value="" selected disabled>Select an option</option>
+                                <option value="Anytime">Anytime</option>
+                                <option value="Morning(10am-1pm)">Morning (10am-1pm)</option>
+                                <option value="Afternoon(1pm-5pm)">Afternoon (1pm-5pm)</option>
+                                <option value="Evening(5pm-8pm)">Evening (5pm-8pm)</option>
+                            </select>
+                        </div>
+
+
                         <div class="col-md-12 mt-4">
                             <button type="button" class="btn-primary-custom" id="submitBtn" onclick="Send_Contact_Enquiry(this)">
-                                <i class="bi bi-send me-2"></i> Send Message
+                                <i class="bi bi-send me-2"></i> Submit Enquiry
                             </button>
                         </div>
                     </div>
@@ -282,7 +337,7 @@ footer { background: #0f172a; padding: 60px 20px 30px; border-top: 1px solid var
                 <div class="fl-brand">🏠 PropCRM</div>
                 <div class="fl-desc">Nagpur's most trusted property platform connecting landlords, tenants, buyers and agents since 2022.</div>
                 <div class="footer-social mt-4 d-flex gap-3">
-                    <a href="#"><i class="bi bi-facebook"></i></a>
+                    <a href="#"><i class="bi bi-faceIbook"></i></a>
                     <a href="#"><i class="bi bi-instagram"></i></a>
                     <a href="#"><i class="bi bi-whatsapp"></i></a>
                     <a href="#"><i class="bi bi-twitter-x"></i></a>
@@ -324,26 +379,45 @@ footer { background: #0f172a; padding: 60px 20px 30px; border-top: 1px solid var
 <script>
     // Contact Enquiry Form Ajax
     function Send_Contact_Enquiry(_this) {
-        // 1. Grab the values from the form
+        //  Grab the values from the form
+
         var contact_name = $("#contact_name").val();
         var contact_email = $("#contact_email").val();
         var contact_phone = $("#contact_phone").val();
-        var contact_en_title = $("#contact_en_title").val(); 
+        var contact_city = $("#contact_city").val();
+
+        var contact_en_title = $("#contact_en_title").val();
+        var contact_en_type = $("#contact_en_type").val();
+        var contact_start_budget = $("#contact_start_budget").val();
+        var contact_end_budget = $("#contact_end_budget").val();
         var contact_message = $("#contact_message").val();
 
-        // 2. Validate
-        if (!contact_name || !contact_phone) {
+        var contact_mode = $("#contact_mode").val();
+        var contact_time = $("#contact_time").val();
+
+        //  Validate
+
+        if (!contact_name || !contact_phone || !contact_en_title ) {
             Swal.fire("Error", "Please fill out all required fields.", "error");
             return;
         }
 
-        // 3. Package the data
+        // Package the data
+        
         var fd = new FormData();
         fd.append('contact_name', contact_name);
         fd.append('contact_email', contact_email);
         fd.append('contact_phone', contact_phone);
+        fd.append('contact_city', contact_city);
+
         fd.append('contact_en_title', contact_en_title);
+        fd.append('contact_en_type', contact_en_type);
+        fd.append('contact_start_budget', contact_start_budget);
+        fd.append('contact_end_budget', contact_end_budget);
         fd.append('contact_message', contact_message);
+
+        fd.append('contact_mode', contact_mode);
+        fd.append('contact_time', contact_time);
 
         // 4. Change button to loading state
         var originalText = _this.innerHTML; 
@@ -363,7 +437,7 @@ footer { background: #0f172a; padding: 60px 20px 30px; border-top: 1px solid var
                 _this.innerHTML = originalText;
                 
                 if (response.status == '1' || response.status == 'success') {
-                    // 🟢 FIX: Changed to Swal.fire()
+                    //  FIX: Changed to Swal.fire()
                     Swal.fire("Success!", "Your message has been sent. We will contact you shortly.", "success").then(() => {
                        location.reload();
                     });

@@ -537,16 +537,16 @@
 </script>
 
 
-{% comment %} Ajax Jquery and Javascript for delete ameneties {% endcomment %}
+{% comment %} Ajax Jquery and Javascript for delete contact Enquiries {% endcomment %}
 
 <script>
 
 
-    function Delete_Ameneties(ameneties_id)
+    function Delete_Contact(enquiry_id)
     {
         swal({
             title: "DELETE",
-            text: "Are you sure, you want to delete the ameneties detail ?",
+            text: "Are you sure, you want to delete the contact enquiry detail ?",
             icon: "warning",
             buttons: ["No", "Yes"],	
             closeOnClickOutside: false,
@@ -557,8 +557,8 @@
             {	
                 $.ajax({
                     type:"POST",
-                    url: "{% url 'Delete_Ameneties' %}",
-                    data: {'ameneties_id' : ameneties_id},
+                    url: "{% url 'Delete_Contact_Enquiry' %}",
+                    data: {'enquiry_id' : enquiry_id},
                     success: function (response) 
                     {
                         if (response.status == '1'){

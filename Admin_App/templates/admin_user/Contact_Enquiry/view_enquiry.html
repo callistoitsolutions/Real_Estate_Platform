@@ -847,7 +847,7 @@
             </div>
             <button class="btn-back" onclick="history.back();">
                 <i class="fas fa-arrow-left"></i>
-                Back to Contact Enquiries List
+                Back 
             </button>
         </div>
 
@@ -892,12 +892,51 @@
                                     placeholder="Enter Email Address" required value="{{contact.contact_email}}" disabled>
                             </div>
                         </div>
-
                         <div class="col-md-4 mt-2">
                             <div class="form-group">
-                                <label class="form-label">I am looking for <span style="color:red;">*</span></label>
-                                <input type="text" class="form-control" id="contact_en_title" name="contact_en_title"
+                                <label class="form-label">City </label>
+                                <input type="text" class="form-control" id="contact_city" name="contact_city"
+                                    placeholder="Enter City" required value="{{contact.contact_city}}" disabled>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mt-2">
+                               <label class="form-label">I am looking for <span style="color:red;">*</span></label>
+                               <div class="form-group">
+                              <input type="text" class="form-control" id="contact_en_title" name="contact_en_title"
                                     placeholder="Enter Enquiry For" required value="{{contact.contact_en_title}}" disabled>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mt-2">
+                               <label class="form-label">Property Type <span style="color:red;">*</span></label>
+                               <div class="form-group">
+                              <input type="text" class="form-control" id="contact_en_type" name="contact_en_type"
+                                    placeholder="Enter Property Type" required {% if contact.contact_en_type == "null" %}value=""{% else %}value="{{contact.contact_en_type}}"{% endif %} disabled>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mt-2">
+                               <label class="form-label">Budget Range <span style="color:red;">*</span></label>
+                               <div class="form-group">
+                              <input type="text" class="form-control" id="contact_en_type" name="contact_en_type"
+                                    placeholder="Enter Budget Range" required value="{{contact.contact_start_budget}} - {{contact.contact_end_budget}}" disabled>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mt-2">
+                               <label class="form-label">Preferred Contact Mode <span style="color:red;">*</span></label>
+                               <div class="form-group">
+                              <input type="text" class="form-control" id="contact_mode" name="contact_mode"
+                                    placeholder="Enter Preferred Contact Mode" required {% if contact.contact_mode == "null" %}value=""{% else %}value="{{contact.contact_mode}}"{% endif %} disabled>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mt-2">
+                               <label class="form-label">Preferred Contact Time <span style="color:red;">*</span></label>
+                               <div class="form-group">
+                              <input type="text" class="form-control" id="contact_time" name="contact_time"
+                                    placeholder="Enter Preferred Contact Time" required {% if contact.contact_time == "null" %}value=""{% else %}value="{{contact.contact_time}}"{% endif %} disabled>
                             </div>
                         </div>
 
