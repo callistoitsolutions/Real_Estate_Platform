@@ -42,6 +42,12 @@ admin.site.register(CommercialRentalProperty)
 
 ########### Register  CommercialRentalImageProperty Table/Modal ###############
 
+
+admin.site.register(PGColivingProperty)
+
+########### Register  CommercialRentalImageProperty Table/Modal ###############
+
+
 admin.site.register(CommercialRentalPropertyImage)
 
 ########### Register ResaleResidentialProperty Table/Modal ###############

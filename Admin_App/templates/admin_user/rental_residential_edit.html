@@ -44,6 +44,7 @@
     .required-star { color: #e74c3c; font-size: 1rem; }
     .form-control, .form-select { border: 2px solid #e9ecef; border-radius: 12px; padding: 12px 15px; font-size: 0.95rem; width: 100%; transition: all 0.3s ease; }
     .form-control:focus { border-color: #667eea; outline: none; }
+    .form-control.is-invalid { border-color: #e74c3c !important; box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1) !important; }
     textarea.form-control { min-height: 100px; resize: vertical; }
 
     /* Buttons */
@@ -63,11 +64,14 @@
     /* Image Upload */
     .image-upload-area { border: 3px dashed #cbd5e0; border-radius: 15px; padding: 40px; text-align: center; background: white; cursor: pointer; transition: all 0.3s ease; }
     .image-upload-area:hover { border-color: #667eea; background: #f0f4ff; }
+    .image-upload-area.dragover { border-color: #667eea; background: #e6f0ff; }
     .image-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
-    .preview-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; border: 2px solid #e9ecef; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
-    .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; border: 2px solid #e9ecef; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); cursor: grab; transition: transform 0.2s; }
+    .preview-item:active { cursor: grabbing; }
+    .preview-item.drag-over { border: 2px dashed #667eea; opacity: 0.6; transform: scale(0.95); }
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; pointer-events: none;}
     .existing-image-badge { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: white; font-size: 0.75rem; text-align: center; padding: 4px 0; font-weight: 600;}
-    .remove-image { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; background: #e74c3c; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; }
+    .remove-image { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; background: #e74c3c; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; z-index: 10;}
     .remove-image:hover { background: #c0392b; transform: scale(1.1); }
 </style>
 
@@ -90,12 +94,12 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0;">
                 <h2 style="font-size: 1.5rem; font-weight: 700; color: #2d3748; display: flex; align-items: center; gap: 12px;">
                     <i class="fas fa-edit" style="width: 45px; height: 45px; background: var(--primary-gradient); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center;"></i>
-                    Edit Property #{{ property.id }}
+                    Edit Property #{{ property.rental_residential_id }}
                 </h2>
                 <a href="#" onclick="history.back()" class="btn-back"><i class="fas fa-arrow-left"></i> Back to List</a>
             </div>
 
-            <form method="POST" enctype="multipart/form-data" id="rentalEditForm" action="{% url 'rental_residential_edit' property.id %}" novalidate>
+            <form method="POST" enctype="multipart/form-data" id="rentalEditForm" action="{% url 'rental_residential_edit' property.rental_residential_id %}" novalidate>
                 {% csrf_token %}
 
                 <div class="step-content active" id="step1">
@@ -104,24 +108,12 @@
                         <div class="section-header"><i class="fas fa-info-circle"></i> Basic Information</div>
                         <div class="section-body">
                             <div class="row">
-                                <div class="col-md-6" hidden>
-                                    <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-heading"></i> Property Title</label>
-                                        <input type="text" class="form-control" name="property_title" value="{{ property.property_title|default:'' }}">
-                                    </div>
-                                </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label class="form-label"><i class="fas fa-tag"></i> Property Purpose <span class="required-star">*</span></label>
-                                        <select class="form-select form-control" name="property_purpose" required>
-                                            <option value="">Select Purpose</option>
-                                            <option value="rent" {% if property.property_purpose == 'rent' %}selected{% endif %}>Rent</option>
-                                        </select>
+                                        <label class="form-label"><i class="fas fa-heading"></i> Property Title (Auto-Generated by System)</label>
+                                        <input type="text" class="form-control" name="property_title" value="{{ property.property_title|default:'' }}" readonly style="background-color: #f8f9fa; color: #6c757d; cursor: not-allowed;">
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row mt-2">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-home"></i> Property Type <span class="required-star">*</span></label>
@@ -136,6 +128,9 @@
                                         </select>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="row mt-2">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-bed"></i> BHK Type <span class="required-star">*</span></label>
@@ -150,9 +145,6 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row mt-2">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-key"></i> Renting Option <span class="required-star">*</span></label>
@@ -164,21 +156,24 @@
                                         </select>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="row mt-2">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-expand"></i> Built-up Area (sq.ft) <span class="required-star">*</span></label>
                                         <input type="number" class="form-control" name="built_up_area" value="{{ property.built_up_area|default:'' }}" required>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row mt-2">
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-bath"></i> Bathrooms <span class="required-star">*</span></label>
                                         <input type="number" class="form-control" name="bathrooms" value="{{ property.bathrooms|default:'' }}" required>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="row mt-2">
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-couch"></i> Balconies</label>
@@ -191,15 +186,15 @@
                                         <input type="text" class="form-control" name="floor_number" value="{{ property.floor_number|default:'' }}" required>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row mt-2">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-building"></i> Total Floors in Building</label>
                                         <input type="number" class="form-control" name="total_floors" value="{{ property.total_floors|default:'' }}">
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="row mt-2">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-compass"></i> Facing Direction</label>
@@ -216,9 +211,6 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="row mt-2">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-warehouse"></i> Furnishing Status <span class="required-star">*</span></label>
@@ -230,6 +222,9 @@
                                         </select>
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="row mt-2">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-user-tie"></i> Available For <span class="required-star">*</span></label>
@@ -635,7 +630,8 @@
                                 <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display: none;">
                                 <i class="fas fa-cloud-upload-alt" style="font-size:3rem; color:#667eea; margin-bottom: 10px;"></i>
                                 <div style="font-weight: 600; color: #4a5568; font-size: 1.1rem;">Click or Drag Images Here</div>
-                                <div style="font-size: 0.9rem; color: #718096;">Upload high-quality images (JPG, PNG). Max 10 images total.</div>
+                                <div style="font-size: 0.9rem; color: #718096;">Upload high-quality images (JPG, PNG). Max 10 images total. <br><strong id="imageCountText" style="color:#667eea; font-size:1.05rem;">0/10 Uploaded</strong></div>
+                                <div style="font-size: 0.8rem; color: #64748b; margin-top: 10px;"><i class="fas fa-arrows-alt"></i> Drag and drop new images to rearrange their sequence</div>
                             </div>
                             
                             <div class="image-preview" id="imagePreview"></div>
@@ -655,7 +651,8 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-phone"></i> Contact Number <span class="required-star">*</span></label>
-                                        <input type="tel" class="form-control" name="contact_number" value="{{ property.contact_number|default:'' }}" required>
+                                        <input type="tel" class="form-control" name="contact_number" id="contactNumber" value="{{ property.contact_number|default:'' }}" placeholder="e.g., +91 9876543210" required>
+                                        <small class="text-muted" style="font-size: 0.75rem;">Must be a valid 10-digit number</small>
                                     </div>
                                 </div>
                             </div>
@@ -669,7 +666,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-phone-alt"></i> Alternate Contact</label>
-                                        <input type="tel" class="form-control" name="alternate_contact" value="{{ property.alternate_contact|default:'' }}">
+                                        <input type="tel" class="form-control" name="alternate_contact" id="altContactNumber" value="{{ property.alternate_contact|default:'' }}" placeholder="e.g., +91 9876543210">
                                     </div>
                                 </div>
                             </div>
@@ -766,11 +763,62 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
 <script>
-    // --- STEPPER LOGIC ---
+    // Global variable tracking database fields that started empty
+    let emptyFieldsOnLoad = {};
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Intercept form elements on page initialization to take a baseline map snapshot
+        document.querySelectorAll('#rentalEditForm input, #rentalEditForm select, #rentalEditForm textarea').forEach(el => {
+            if (el.name) {
+                let initialValue = el.value ? el.value.trim() : '';
+                // If it evaluates to empty or equivalent baseline string, mark it as tracking target
+                if (initialValue === '' || initialValue === 'None') {
+                    emptyFieldsOnLoad[el.name] = true;
+                }
+            }
+        });
+    });
+
+    // --- STEPPER LOGIC WITH VALIDATION ---
     let currentStep = 1;
     const totalSteps = 4;
 
+    function validateStep(stepIndex) {
+        let isValid = true;
+        let currentStepEl = document.getElementById('step' + stepIndex);
+        if (!currentStepEl) return true;
+
+        let requiredFields = currentStepEl.querySelectorAll('input[required], select[required], textarea[required]');
+
+        requiredFields.forEach(function(field) {
+            field.classList.remove('is-invalid');
+            if (!field.value || field.value.trim() === '') {
+                isValid = false;
+                field.classList.add('is-invalid');
+            }
+        });
+        
+        return isValid;
+    }
+
     function goToStep(n) {
+        if (n > currentStep) {
+            for (let i = currentStep; i < n; i++) {
+                if (!validateStep(i)) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Incomplete Details',
+                        text: 'Please fill out all highlighted required fields before proceeding.',
+                        confirmButtonColor: '#667eea'
+                    });
+                    document.querySelectorAll('.step-content').forEach(step => step.classList.remove('active'));
+                    document.getElementById('step' + i).classList.add('active');
+                    currentStep = i; 
+                    return; 
+                }
+            }
+        }
+
         document.querySelectorAll('.step-content').forEach(step => step.classList.remove('active'));
         document.getElementById('step' + n).classList.add('active');
         
@@ -795,7 +843,6 @@
         }
         currentStep = n;
 
-        // Auto-generate if navigating to step 3
         if (n === 3) {
             generateAIDetails(false);
             updatePreview();
@@ -910,7 +957,7 @@
         el.addEventListener('input', updatePreview);
         el.addEventListener('change', () => {
             updatePreview();
-            generateAIDetails(false); // Only generates if the fields are empty!
+            generateAIDetails(false);
         });
     });
 
@@ -952,7 +999,6 @@
         toggleManual();
     }
 
-    // --- INITIALIZE ALL ON LOAD ---
     $(document).ready(function() {
         updatePreview();
         updateAmenityCount();
@@ -967,44 +1013,34 @@
         }
     });
 
-    // --- IMAGE UPLOAD LOGIC ---
+    // --- DRAG & DROP IMAGE UPLOAD WITH REORDERING LOGIC ---
     const uploadArea = document.getElementById('uploadArea');
     const imageInput = document.getElementById('imageInput');
     const imagePreview = document.getElementById('imagePreview');
+    const imageCountText = document.getElementById('imageCountText');
     let selectedFiles = [];
 
     uploadArea.addEventListener('click', () => imageInput.click());
-    
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.style.borderColor = '#667eea';
-        uploadArea.style.background = '#e6f0ff';
-    });
-
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.style.borderColor = '#cbd5e0';
-        uploadArea.style.background = 'white';
-    });
-
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.style.borderColor = '#cbd5e0';
-        uploadArea.style.background = 'white';
-        handleFiles(e.dataTransfer.files);
-    });
-
+    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+    uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
+    uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
     imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
     function handleFiles(files) {
+        const fileArray = Array.from(files);
+        if (selectedFiles.length + fileArray.length > 10) {
+            Swal.fire('Limit Exceeded', 'Maximum 10 images allowed.', 'warning');
+            return;
+        }
+        fileArray.forEach(file => { if (file.type.startsWith('image/')) selectedFiles.push(file); });
+        syncFileInputAndRender();
+    }
+
+    function syncFileInputAndRender() {
         const dt = new DataTransfer();
-        Array.from(files).forEach(file => {
-            if (file.type.startsWith('image/') && selectedFiles.length < 10) {
-                selectedFiles.push(file);
-            }
-        });
         selectedFiles.forEach(file => dt.items.add(file));
         imageInput.files = dt.files;
-        
+        imageCountText.innerText = `${selectedFiles.length}/10 Uploaded`;
         imagePreview.innerHTML = "";
         selectedFiles.forEach(file => displayImage(file));
     }
@@ -1014,32 +1050,71 @@
         reader.onload = (e) => {
             const div = document.createElement('div');
             div.className = 'preview-item';
-            div.innerHTML = `<img src="${e.target.result}"><button type="button" class="remove-image" onclick="removeImage('${file.name}', this)">✖</button>`;
+            div.draggable = true;
+            div.dataset.fileName = file.name;
+            div.innerHTML = `<img src="${e.target.result}"><button type="button" class="remove-image" onclick="removeImage('${file.name}', this, event)">✖</button>`;
+            
+            div.addEventListener('dragstart', handleDragStart);
+            div.addEventListener('dragover', handleDragOver);
+            div.addEventListener('dragenter', handleDragEnter);
+            div.addEventListener('dragleave', handleDragLeave);
+            div.addEventListener('drop', handleDrop);
             imagePreview.appendChild(div);
         };
         reader.readAsDataURL(file);
     }
 
-    function removeImage(fileName, btn) {
+    function removeImage(fileName, btn, event) {
+        event.stopPropagation();
         selectedFiles = selectedFiles.filter(file => file.name !== fileName);
-        const dt = new DataTransfer();
-        selectedFiles.forEach(file => dt.items.add(file));
-        imageInput.files = dt.files;
-        btn.parentElement.remove();
+        syncFileInputAndRender();
     }
 
-    // --- SWEETALERT FORM SUBMISSION ---
+    let draggedItemName = null;
+    function handleDragStart(e) { draggedItemName = this.dataset.fileName; e.dataTransfer.effectAllowed = 'move'; this.style.opacity = '0.5'; }
+    function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; return false; }
+    function handleDragEnter(e) { this.classList.add('drag-over'); }
+    function handleDragLeave(e) { this.classList.remove('drag-over'); }
+    function handleDrop(e) {
+        e.stopPropagation();
+        this.classList.remove('drag-over');
+        const targetItemName = this.dataset.fileName;
+        if (draggedItemName !== targetItemName) {
+            const draggedIndex = selectedFiles.findIndex(f => f.name === draggedItemName);
+            const targetIndex = selectedFiles.findIndex(f => f.name === targetItemName);
+            const [movedItem] = selectedFiles.splice(draggedIndex, 1);
+            selectedFiles.splice(targetIndex, 0, movedItem);
+            syncFileInputAndRender();
+        }
+        return false;
+    }
+
+    // --- SWEETALERT FORM SUBMISSION WITH LIVE MODIFIED FIELD AUDITING ---
     const form = document.getElementById('rentalEditForm');
     if (form) {
       form.addEventListener('submit', function (e) {
         e.preventDefault(); 
         
-        if (!form.checkValidity()) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Incomplete Form',
-                text: 'Please review all steps and fill out required fields marked with *'
-            });
+        for (let i = 1; i <= totalSteps; i++) {
+            if (!validateStep(i)) {
+                goToStep(i);
+                Swal.fire({ icon: 'warning', title: 'Incomplete Details', text: 'Please review all steps and fill out highlighted required fields.' });
+                return;
+            }
+        }
+
+        let phoneRegex = /^(?:\+91|91)?\s?[6-9]\d{9}$/; 
+        let contactNumber = $('#contactNumber').val().trim();
+        let altContactNumber = $('#altContactNumber').val().trim();
+
+        if (contactNumber && !phoneRegex.test(contactNumber)) {
+            $('#contactNumber').addClass('is-invalid');
+            Swal.fire({ icon: 'error', title: 'Invalid Contact Number', text: 'Please enter a valid 10-digit phone number.' });
+            return;
+        }
+        if (altContactNumber && !phoneRegex.test(altContactNumber)) {
+            $('#altContactNumber').addClass('is-invalid');
+            Swal.fire({ icon: 'error', title: 'Invalid Alternate Number', text: 'Please enter a valid 10-digit alternate phone number.' });
             return;
         }
 
@@ -1047,14 +1122,55 @@
           for (instance in CKEDITOR.instances) { CKEDITOR.instances[instance].updateElement(); }
         }
 
+        // --- TRACK DYNAMIC CHANGES IN PREVIOUSLY NULL FIELDS ---
+        let newlyPopulatedFields = [];
+        document.querySelectorAll('#rentalEditForm input, #rentalEditForm select, #rentalEditForm textarea').forEach(el => {
+            if (el.name && emptyFieldsOnLoad[el.name]) {
+                let currentVal = el.value ? el.value.trim() : '';
+                // Check if field was empty on load, but now contains data
+                if (currentVal !== '' && currentVal !== 'None') {
+                    let group = el.closest('.form-group');
+                    let labelText = '';
+                    if (group) {
+                        let label = group.querySelector('.form-label');
+                        if (label) {
+                            labelText = label.textContent.trim();
+                        }
+                    }
+                    if (!labelText) {
+                        labelText = el.placeholder || el.name.replace(/_/g, ' ');
+                    }
+                    // Clean up icon tags or validation astor-symbols
+                    labelText = labelText.replace(/[\n\r]+/g, '').replace(/\*/g, '').trim();
+                    if (labelText) {
+                        newlyPopulatedFields.push(labelText);
+                    }
+                }
+            }
+        });
+
+        // Construct HTML markup string summarizing newly appended fields if they exist
+        let changeSummaryHtml = '';
+        if (newlyPopulatedFields.length > 0) {
+            changeSummaryHtml = `
+                <div style="text-align: left; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 10px; margin-top: 12px; margin-bottom: 12px; max-height: 140px; overflow-y: auto;">
+                    <p style="margin: 0 0 6px 0; font-weight: 700; color: #16a34a; font-size: 13px;"><i class="fas fa-plus-circle"></i> Newly Added Fields Data:</p>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #1e293b; line-height: 1.5;">
+                        ${newlyPopulatedFields.map(f => `<li><b>${f}</b></li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
         Swal.fire({
           title: 'Update Property?',
-          text: "Are you sure you want to save these changes?",
+          html: `<p style="font-size: 14px; color: #4a5568;">Are you sure you want to save these changes to the listing database?</p>` + changeSummaryHtml,
           icon: 'question',
           showCancelButton: true,
           confirmButtonColor: '#667eea',
           cancelButtonColor: '#e74c3c',
-          confirmButtonText: 'Yes, update it!'
+          confirmButtonText: 'Yes, update it!',
+          width: '500px'
         }).then((result) => {
           if (result.isConfirmed) {
             Swal.fire({ title: 'Updating...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });

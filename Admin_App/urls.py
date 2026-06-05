@@ -418,18 +418,42 @@ urlpatterns = [
     path('residential_list/', views.rental_list, name='residential_list'),
 
     path('rental_residential_add', views.rental_residential_add, name='rental_residential_add'),
-    path('rental/residential/view/<int:pk>/', views.rental_residential_view, name='rental_residential_view'),
-    path('rental/residential/edit/<int:pk>/', views.rental_residential_edit, name='rental_residential_edit'),
 
-    path('rental-residential/delete/<int:pk>/', views.rental_residential_delete, name='rental_residential_delete'),
+    path('rental/residential/edit/<str:pk>/', views.rental_residential_edit, name='rental_residential_edit'),
+
+    
 
     path('system-audit-logs/', views.system_audit_logs, name='system_audit_logs'),
     path('rental-residential/bulk-delete/', views.rental_bulk_delete, name='rental_bulk_delete'),
     path('global_recycle_bin', views.global_recycle_bin, name='global_recycle_bin'),
     #path('rental-residential/recycle-bin/', views.rental_recycle_bin, name='rental_recycle_bin'),
-    path('rental-residential/restore/<int:id>/', views.rental_restore, name='rental_restore'),
-    path('rental-residential/hard-delete/<int:id>/', views.rental_hard_delete, name='rental_hard_delete'),
+    path(
+    'rental-residential/restore/<str:pk>/',
+    views.rental_restore,
+    name='rental_restore'
+    ),
+
+    path(
+    'rental-residential/hard-delete/<str:pk>/',
+    views.rental_hard_delete,
+    name='rental_hard_delete'
+    ),
+
+    path(
+    'rental-residential/delete/<str:pk>/',
+    views.rental_residential_delete,
+    name='rental_residential_delete'
+    ),
+
+    path(
+    'rental/residential/view/<str:pk>/',
+    views.rental_residential_view,
+    name='rental_residential_view'
+    ),
+
+    path('rental-residential/activity-logs/', views.rental_residential_logs_view, name='rental_residential_logs'),
   
+    path('bulk-hard-delete/<str:property_type>/', views.bulk_hard_delete_properties, name='bulk_hard_delete_properties'),
     path('residential_import_excel/', views.import_residential_excel, name='import_residential_excel'),
 
     path('residential_download_template/', views.download_residential_template, name='download_residential_template'),
@@ -439,8 +463,8 @@ urlpatterns = [
 
 #########################START URL SECTION OF COMMERICIAL RENTAL LISTING##############################
    
-    path('Admin_App/commercial/import-excel/', views.import_commercial_excel, name='import_commercial_excel'),
-    path('Admin_App/commercial/download-template/', views.download_commercial_rental__template, name='download_commercial_rental__template'),
+    path('Admin_App/commercial/import-excel/', views.import_commercial_rental_excel, name='import_commercial_rental_excel'),
+    path('Admin_App/commercial/download-template/', views.download_commercial_rental12__template, name='download_commercial_rental12__template'),
     
     path('commercial/list/',           views.commercial_list,   name='commercial_list'),
   
@@ -470,7 +494,13 @@ urlpatterns = [
 
     path('pg-coliving/delete/<int:pk>/', views.pg_coliving_delete, name='pg_coliving_delete'),
 
-    path('Admin_App/pg/edit/<int:pk>/', views.pg_edit, name='pg_edit'),
+  
+    # 1. Route to render the HTML Edit Form Page interface (GET request)
+    path('Admin_App/pg/edit/page/<str:property_id>/', views.pg_edit_page, name='pg_edit_page'),
+
+    # 2. Route to process the Form save transaction data (POST request)
+    path('Admin_App/pg/edit/save/<str:property_id>/', views.pg_edit, name='pg_edit'),
+
     
      ##############################END URL SECTION RENTAL PG_COLIVING LISTING#####################
 

@@ -91,6 +91,11 @@
         <div class="tab-content" id="recycleBinTabsContent">
 
             <div class="tab-pane fade show active" id="rental" role="tabpanel">
+                {% if rental_deleted %}
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                    <button class="btn-hard-delete" onclick="processBulkDelete('rental-residential', 'Rental Residential')"><i class="fas fa-dumpster-fire"></i> Empty Rental Bin</button>
+                </div>
+                {% endif %}
                 <div style="overflow-x: auto;">
                     <table class="properties-table">
                         <thead>
@@ -107,9 +112,9 @@
                         </thead>
                         <tbody>
                             {% for prop in rental_deleted %}
-                            <tr id="rental-row-{{ prop.id }}">
+                            <tr id="rental-row-{{ prop.rental_residential_id }}">
                                 <td><strong>{{ forloop.counter }}</strong></td>
-                                <td><strong>#{{ prop.id }}</strong></td>
+                                <td><strong>#{{ prop.rental_residential_id }}</strong></td>
                                 <td>{{ prop.property_title }}</td>
                                 <td>{{ prop.owner_name }}</td>
                                 <td><span class="deleted-by-text">{{ prop.deleted_by|default:"System Admin" }}</span></td>
@@ -123,8 +128,8 @@
                                 </td>
                                 <td>
                                     <div style="display: flex; gap: 8px;">
-                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/rental-residential/restore/{{ prop.id }}/', 'rental-row-{{ prop.id }}')"><i class="fas fa-undo"></i> Restore</button>
-                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/rental-residential/hard-delete/{{ prop.id }}/', 'rental-row-{{ prop.id }}')"><i class="fas fa-times"></i> Delete</button>
+                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/rental-residential/restore/{{ prop.rental_residential_id }}/', 'rental-row-{{ prop.rental_residential_id }}')"><i class="fas fa-undo"></i> Restore</button>
+                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/rental-residential/hard-delete/{{prop.rental_residential_id }}/', 'rental-row-{{ prop.rental_residential_id }}')"><i class="fas fa-times"></i> Delete</button>
                                     </div>
                                 </td>
                             </tr>
@@ -137,6 +142,11 @@
             </div>
 
             <div class="tab-pane fade" id="commercial" role="tabpanel">
+                {% if commercial_deleted %}
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                    <button class="btn-hard-delete" onclick="processBulkDelete('commercial', 'Commercial Rental')"><i class="fas fa-dumpster-fire"></i> Empty Commercial Rental Bin</button>
+                </div>
+                {% endif %}
                 <div style="overflow-x: auto;">
                     <table class="properties-table">
                         <thead>
@@ -183,6 +193,11 @@
             </div>
 
             <div class="tab-pane fade" id="pg" role="tabpanel">
+                {% if pg_deleted %}
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                    <button class="btn-hard-delete" onclick="processBulkDelete('pg-coliving', 'PG/Co-Living')"><i class="fas fa-dumpster-fire"></i> Empty PG Bin</button>
+                </div>
+                {% endif %}
                 <div style="overflow-x: auto;">
                     <table class="properties-table">
                         <thead>
@@ -229,6 +244,11 @@
             </div>
 
             <div class="tab-pane fade" id="resale" role="tabpanel">
+                {% if resale_deleted %}
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                    <button class="btn-hard-delete" onclick="processBulkDelete('resale-residential', 'Resale Residential')"><i class="fas fa-dumpster-fire"></i> Empty Resale Bin</button>
+                </div>
+                {% endif %}
                 <div style="overflow-x: auto;">
                     <table class="properties-table">
                         <thead>
@@ -275,6 +295,11 @@
             </div>
 
             <div class="tab-pane fade" id="comm-resale" role="tabpanel">
+                {% if commercial_resale_deleted %}
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                    <button class="btn-hard-delete" onclick="processBulkDelete('commercial-resale', 'Commercial Resale')"><i class="fas fa-dumpster-fire"></i> Empty Commercial Resale Bin</button>
+                </div>
+                {% endif %}
                 <div style="overflow-x: auto;">
                     <table class="properties-table">
                         <thead>
@@ -321,6 +346,11 @@
             </div>
 
             <div class="tab-pane fade" id="plot" role="tabpanel">
+                {% if plot_sale_deleted %}
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                    <button class="btn-hard-delete" onclick="processBulkDelete('plot-sale', 'Plot Sale')"><i class="fas fa-dumpster-fire"></i> Empty Plot Bin</button>
+                </div>
+                {% endif %}
                 <div style="overflow-x: auto;">
                     <table class="properties-table">
                         <thead>
@@ -367,6 +397,11 @@
             </div>
 
             <div class="tab-pane fade" id="industrial" role="tabpanel">
+                {% if industrial_resale_deleted %}
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                    <button class="btn-hard-delete" onclick="processBulkDelete('industrial-resale', 'Industrial Resale')"><i class="fas fa-dumpster-fire"></i> Empty Industrial Bin</button>
+                </div>
+                {% endif %}
                 <div style="overflow-x: auto;">
                     <table class="properties-table">
                         <thead>
@@ -413,6 +448,11 @@
             </div>
 
             <div class="tab-pane fade" id="agricultural" role="tabpanel">
+                {% if agricultural_resale_deleted %}
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                    <button class="btn-hard-delete" onclick="processBulkDelete('agricultural-resale', 'Agricultural Resale')"><i class="fas fa-dumpster-fire"></i> Empty Agricultural Bin</button>
+                </div>
+                {% endif %}
                 <div style="overflow-x: auto;">
                     <table class="properties-table">
                         <thead>
@@ -468,8 +508,42 @@
     const csrfToken = '{{ csrf_token }}';
 
     /**
-     * A unified JavaScript function to handle BOTH Restoring and Hard Deleting 
-     * across ALL 8 property types by simply passing the correct URL string.
+     * Handles bulk deletion for an entire property category
+     */
+    function processBulkDelete(propertyType, label) {
+        Swal.fire({
+            title: `Empty ${label} Bin?`,
+            text: `This will PERMANENTLY delete ALL soft-deleted ${label} records! This action is irreversible.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, Delete All Forever!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+
+                fetch(`/Admin_App/bulk-hard-delete/${propertyType}/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire('Emptied!', data.message, 'success').then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                })
+                .catch(err => Swal.fire('Error', 'Server error occurred.', 'error'));
+            }
+        });
+    }
+
+    /**
+     * Single property restore and permanent delete actions
      */
     function processAction(actionType, targetUrl, rowId) {
         let swalTitle, swalText, swalIcon, swalConfirmColor, swalConfirmText;
@@ -509,7 +583,6 @@
                     if (data.status === 'success') {
                         Swal.fire(actionType === 'restore' ? 'Restored!' : 'Deleted!', data.message, 'success');
                         
-                        // Remove the row dynamically
                         const row = document.getElementById(rowId);
                         if(row) {
                             row.style.opacity = '0';
