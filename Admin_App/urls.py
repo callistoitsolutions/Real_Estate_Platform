@@ -37,6 +37,10 @@ urlpatterns = [
 
      path('Contact_Enquiries_List',views.Contact_Enquiries_List,name="Contact_Enquiries_List"),
 
+     ########### urls for delete contact enquiry ##########################
+
+     path('Delete_Contact_Enquiry',views.Delete_Contact_Enquiry,name='Delete_Contact_Enquiry'),
+
      ############ urls for view contact enquiries ########################
 
      path('View_Contact_Enquiry/<int:id>',views.View_Contact_Enquiry,name="View_Contact_Enquiry"),

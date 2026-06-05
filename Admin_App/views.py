@@ -455,7 +455,7 @@ def get_todays_notifications(request):
         master_feed.append({
             'category': 'contact', 
             'title': "New Contact Enquiry",
-            'desc': f"{con.contact_name} and number {con.contact_phone}",
+            'desc': f"{con.contact_name} and contact {con.contact_phone}",
             'timestamp': con.contact_enquiry_date,
             'time': con.contact_enquiry_time,
             'url': contact_url 
@@ -564,6 +564,27 @@ def Contact_Enquiries_List(request):
         return render(request,'home_page/Adminlogin.html')
 
 ############ Views end for contact enquiries list ###########################
+
+
+############ Views start for delete contact enquiry ######################
+
+@csrf_exempt
+def Delete_Contact_Enquiry(request):
+    try:
+        try:
+            enquiry_id = request.POST.get('enquiry_id')
+            Contact_Enquiry.objects.filter(id=enquiry_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Contact enquiry details deleted successfully...'})
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+
+
+
+############## Views end for delete contact enquiry ######################
 
 
 ############ Views start for view contact enquiries ####################
@@ -692,6 +713,7 @@ def Delete_Ameneties(request):
     except:
         traceback.print_exc()
         return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    
 
 ############ Views end for delete ameneties data ############################
 
@@ -1947,9 +1969,109 @@ def download_commercial_template(request):
 # ─────────────────────────────────────────────────────────────
 # LIST VIEW
 # ─────────────────────────────────────────────────────────────
+<<<<<<< HEAD
 
 
 
+=======
+# def pg_list(request):
+#     session_id = request.session.get('Admin_id')
+#     if not session_id:
+#         return render(request, 'home_page/Adminlogin.html')
+
+#     try:
+#         admin_obj = Admin_Login.objects.get(id=session_id)
+#     except Admin_Login.DoesNotExist:
+#         return render(request, 'home_page/Adminlogin.html')
+
+#     search_query = request.GET.get('search', '').strip()
+#     pg_for_filter = request.GET.get('pg_for', '').strip()       # boys / girls / co-living
+#     city_filter   = request.GET.get('city', '').strip()
+
+#     # Base queryset — newest first
+#     properties = PGColivingProperty.objects.all().order_by('-id')
+
+#     # ── Search ────────────────────────────────────────────────
+#     if search_query:
+#         properties = properties.filter(
+#             Q(pg_name__icontains=search_query)       |
+#             Q(city__icontains=search_query)          |
+#             Q(locality__icontains=search_query)      |
+#             Q(building_name__icontains=search_query) |
+#             Q(owner_name__icontains=search_query)    |
+#             Q(contact_number__icontains=search_query)
+#         )
+
+#     # ── Filters ───────────────────────────────────────────────
+#     if pg_for_filter:
+#         properties = properties.filter(pg_for=pg_for_filter)
+
+#     if city_filter:
+#         properties = properties.filter(city__icontains=city_filter)
+
+#     total_count = properties.count()
+
+#     # ── CSV Download ──────────────────────────────────────────
+#     if request.GET.get('download') == 'csv':
+#         response = HttpResponse(content_type='text/csv')
+#         response['Content-Disposition'] = 'attachment; filename="pg_coliving_properties.csv"'
+#         writer = csv.writer(response)
+
+#         writer.writerow([
+#             'ID', 'PG Name', 'City', 'Locality', 'Building Name',
+#             'PG For', 'Furnishing', 'Room Type', 'Total Beds',
+#             'Rent', 'Security Deposit', 'Min Stay',
+#             'Meals Available', 'Owner Name', 'Contact', 'Email',
+#             'Added On',
+#         ])
+
+#         for p in properties:
+#             writer.writerow([
+#                 p.id,
+#                 p.pg_name,
+#                 p.city,
+#                 p.locality,
+#                 p.building_name or '',
+#                 p.get_pg_for_display(),
+#                 p.get_furnishing_type_display(),
+#                 p.get_room_type_display(),
+#                 p.total_beds,
+#                 p.rent,
+#                 p.security_deposit,
+#                 p.minimum_stay,
+#                 'Yes' if p.meals_available else 'No',
+#                 p.owner_name,
+#                 p.contact_number,
+#                 p.email,
+#                 p.created_at.strftime('%d-%m-%Y') if p.created_at else '',
+#             ])
+
+#         return response
+
+#     # ── Pagination ────────────────────────────────────────────
+#     paginator   = Paginator(properties, 10)
+#     page_number = request.GET.get('page', 1)
+#     page_obj    = paginator.get_page(page_number)
+
+#     # Distinct cities for filter dropdown
+#     cities = (PGColivingProperty.objects
+#               .values_list('city', flat=True)
+#               .distinct()
+#               .order_by('city'))
+
+#     print("----------------------------",admin_obj)
+
+#     context = {
+#         'admin_obj':     admin_obj,
+#         'page_obj':      page_obj,
+#         'search_query':  search_query,
+#         'pg_for_filter': pg_for_filter,
+#         'city_filter':   city_filter,
+#         'total_count':   total_count,
+#         'cities':        cities,
+#     }
+#     return render(request, 'admin_user/Reports/Rental/pg_list.html', context)
+>>>>>>> d0f149b2c74d1fc5cd4a07f46e5105a392471ff5
 
 
 # ─────────────────────────────────────────────────────────────
@@ -4929,6 +5051,8 @@ def system_audit_logs(request):
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
 
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
     deletion_logs = []
     restore_logs = []
 
@@ -4984,6 +5108,7 @@ def system_audit_logs(request):
     restore_logs.sort(key=lambda x: x['date'] if x['date'] else timezone.now(), reverse=True)
 
     context = {
+        'admin_obj':admin_obj,
         'deletion_logs': deletion_logs,
         'restore_logs': restore_logs,
         'deletion_count': len(deletion_logs),
@@ -5004,6 +5129,12 @@ def global_recycle_bin(request):
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
 
+<<<<<<< HEAD
+=======
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    # Helper function to calculate auto-delete countdown (30 days)
+>>>>>>> d0f149b2c74d1fc5cd4a07f46e5105a392471ff5
     def calculate_retention(queryset):
         now = timezone.now()
 
@@ -5067,6 +5198,7 @@ def global_recycle_bin(request):
     )
 
     context = {
+<<<<<<< HEAD
         'rental_deleted': rental_deleted,
         'rental_count': len(rental_deleted),
 
@@ -5091,6 +5223,18 @@ def global_recycle_bin(request):
         'agricultural_resale_deleted': agricultural_resale_deleted,
         'agricultural_resale_count': len(agricultural_resale_deleted),
 
+=======
+        'admin_obj':admin_obj,
+        'rental_deleted': rental_deleted, 'rental_count': len(rental_deleted),
+        'commercial_deleted': commercial_deleted, 'commercial_count': len(commercial_deleted),
+        'pg_deleted': pg_deleted, 'pg_count': len(pg_deleted),
+        'resale_deleted': resale_deleted, 'resale_count': len(resale_deleted),
+        'commercial_resale_deleted': commercial_resale_deleted, 'commercial_resale_count': len(commercial_resale_deleted),
+        'plot_sale_deleted': plot_sale_deleted, 'plot_sale_count': len(plot_sale_deleted),
+        'industrial_resale_deleted': industrial_resale_deleted, 'industrial_resale_count': len(industrial_resale_deleted),
+        'agricultural_resale_deleted': agricultural_resale_deleted, 'agricultural_resale_count': len(agricultural_resale_deleted),
+        
+>>>>>>> d0f149b2c74d1fc5cd4a07f46e5105a392471ff5
         'total_deleted_all': (
             len(rental_deleted)
             + len(commercial_deleted)
@@ -7276,8 +7420,82 @@ def add_pg(request):
 
 
 
+<<<<<<< HEAD
+=======
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    search = request.GET.get('search', '')
+    qs = PGColivingProperty.objects.all().order_by('-id')
+>>>>>>> d0f149b2c74d1fc5cd4a07f46e5105a392471ff5
 
 
+<<<<<<< HEAD
+=======
+    if request.GET.get('download') == 'csv':
+        res = HttpResponse(content_type='text/csv')
+        res['Content-Disposition'] = 'attachment; filename="pg.csv"'
+        w = csv.writer(res)
+        w.writerow(["PG", "City", "Total Beds", "Owner", "Contact"])
+        for p in qs:
+            w.writerow([p.pg_name, p.city, p.total_beds, p.owner_name, p.contact_number])
+        return res
+
+    # ── Fetch unique uploaded file names for the Bulk Delete modal ──
+    try:
+        # Note: Replace 'upload_file_name' with your actual model field name if different
+        uploaded_files = PGColivingProperty.objects.exclude(
+            upload_file_name__isnull=True
+        ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
+    except Exception:
+        uploaded_files = []
+
+    paginator = Paginator(qs, 10)
+    page = paginator.get_page(request.GET.get('page'))
+
+    # ==========================================
+    # DASHBOARD AGGREGATION LOGIC
+    # ==========================================
+    
+    # 1. Get counts for property types
+    pg_count = PGColivingProperty.objects.count()
+    
+    try:
+        # Assuming you have these models imported
+        commercial_count = CommercialRentalProperty.objects.count()
+        # residential_count = ResidentialRentalProperty.objects.count() # Update with your actual model name
+        residential_count = 32 # Placeholder: replace with actual query
+    except NameError:
+        commercial_count = 0
+        residential_count = 0
+
+    total_properties = pg_count + commercial_count + residential_count
+
+    # 2. Get PG Specific Stats
+    total_pg_beds = PGColivingProperty.objects.aggregate(total=Sum('total_beds'))['total'] or 0
+    
+    # Pack data for charts (Converting to JSON for safe Javascript usage)
+    chart_data = {
+        "property_distribution": [residential_count, commercial_count, pg_count],
+        "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        "rental_income": [120000, 150000, 180000, 210000, 250000, 300000], # Mock data: replace with real monthly aggregation
+    }
+
+    return render(request, 'admin_user/Reports/Rental/pg_list.html', {
+        "page_obj": page,
+        "search": search,
+        'admin_obj':admin_obj,
+        
+        # Pass Stats to template
+        "total_properties": total_properties,
+        "residential_count": residential_count,
+        "commercial_count": commercial_count,
+        "pg_count": pg_count,
+        "total_pg_beds": total_pg_beds,
+        "active_listings": total_properties, # Assuming all are active for now
+        "chart_data_json": json.dumps(chart_data), # Send secure JSON to JS
+        "uploaded_files": uploaded_files, # Passed files to template here
+    })
+>>>>>>> d0f149b2c74d1fc5cd4a07f46e5105a392471ff5
 
 
 def pg_bulk_delete(request):
@@ -11587,16 +11805,26 @@ def seo_list(request):
             
         return JsonResponse({'status': 'success', 'message': f'Items updated to {action}'})
 
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+    
     # --- Regular List Logic ---
     # Retrieve all pages ordered by type for consistent grouping
+
     seo_pages = LocationSEO.objects.all().order_by('pagetype', '-id')
 
     # Get distinct page types and their counts for the menu/cards
     type_counts = LocationSEO.objects.values('pagetype').annotate(total=Count('id')).order_by('pagetype')
 
+    
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
     context = {
         "seo_pages": seo_pages,
         "type_counts": type_counts,
+        'admin_obj':admin_obj
     }
     return render(request, "admin_user/Seo_Module/seo_list.html", context)
 
@@ -11620,7 +11848,15 @@ def add_blog(request):
         )
         return redirect("blog_list")
 
-    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_add.html")
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    context = {'admin_obj':admin_obj}
+
+    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_add.html",context)
 
 
 
@@ -11628,8 +11864,15 @@ def add_blog(request):
 
 
 def blog_list(request):
+
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+    
+    admin_obj = Admin_Login.objects.get(id=session_id)
+    
     blogs = Blog.objects.all().order_by("-date_posted")
-    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_list.html", {"blogs": blogs})
+    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_list.html", {"blogs": blogs,'admin_obj':admin_obj})
 
 
 def blog_delete(request, id):
@@ -11652,7 +11895,13 @@ def blog_edit(request, id):
         blog.save()
         return redirect("blog_list")
 
-    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_edit.html", {"blog": blog})
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    return render(request, "admin_user/Seo_Module/Blog_Pages/blog_edit.html", {"blog": blog,'admin_obj':admin_obj})
 
 
 
@@ -11721,7 +11970,15 @@ def add_service(request):
         service.save()
        # return redirect("services_list")  # after save go to list page
 
-    return render(request, "admin_user/Seo_Module/Services_Pages/add_service.html")
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    context = {'admin_obj':admin_obj}
+
+    return render(request, "admin_user/Seo_Module/Services_Pages/add_service.html",context)
 
 
 def delete_service(request, service_id):
@@ -11761,16 +12018,30 @@ def edit_service(request, id):
         # Redirect back to the services list
         return redirect("services_list")
 
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
     # For a GET request, pass the service object to the template
     context = {
-        'service': service
+        'service': service,
+        'admin_obj':admin_obj
     }
     return render(request, "admin_user/Seo_Module/Services_Pages/edit_service.html", context)
 
 
 def services_list(request):
     services = Service.objects.all().order_by('-id')
-    return render(request, 'admin_user/Seo_Module/Services_Pages/services_list.html', {'services': services})
+
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    return render(request, 'admin_user/Seo_Module/Services_Pages/services_list.html', {'services': services,'admin_obj':admin_obj})
 
 
 

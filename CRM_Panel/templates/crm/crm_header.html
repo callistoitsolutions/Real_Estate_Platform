@@ -32,6 +32,12 @@
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Select2 JS (Must be loaded after jQuery) -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     
     <style>
         :root {
@@ -1390,6 +1396,24 @@
                 <a href="{% url "crm_dashboard" %}" class="menu-link" id="CRM_Dashboard">
                     <i class="fas fa-tachometer-alt menu-icon"></i>
                     <span class="menu-text" style="color:white;">Dashboard</span>
+                </a>
+            </li>
+
+            <li class="menu-section-title" style="color:white;">UTM SECTION</li>
+
+            <li class="menu-item">
+                <a href="{% url "utm_links_crm" %}" class="menu-link" id="Utm_Link">
+                    <i class="fas fa-link menu-icon"></i>
+                    <span class="menu-text" style="color:white;">UTM Link Generate</span>
+                </a>
+            </li>
+
+            <li class="menu-section-title" style="color:white;">ENQUIRIES SECTION</li>
+
+            <li class="menu-item">
+                <a href="{% url "property_enquiry_crm" %}" class="menu-link" id="Property_Enquiry">
+                    <i class="fas fa-sticky-note menu-icon"></i>
+                    <span class="menu-text" style="color:white;">Enquiries</span>
                 </a>
             </li>
 

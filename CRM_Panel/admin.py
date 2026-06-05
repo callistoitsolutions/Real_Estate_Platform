@@ -6,3 +6,7 @@ from CRM_Panel.models import *
 ########### Register Property Enquiry Modal #########################
 
 admin.site.register(PropertyEnquiry)
+
+########### Register UTM Link Modal ##########################
+
+admin.site.register(UTMLink)

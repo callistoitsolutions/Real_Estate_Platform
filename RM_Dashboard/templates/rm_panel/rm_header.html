@@ -1517,6 +1517,15 @@
                 </a>
             </li>
 
+            <li class="menu-section-title" style="color:white;">PROPERTY ENQUIRY DETAILS</li>
+
+            <li class="menu-item">
+                <a href="{% url "Assign_Enquiry_Rm" %}" class="menu-link" id="Assign_Enquiry">
+                    <i class="fas fa-sticky-note menu-icon"></i>
+                    <span class="menu-text" style="color:white;">Assigned Enquiries</span>
+                </a>
+            </li>
+
             <li class="menu-section-title" style="color:white;">PROPERTY DETAILS</li>
 
             <li class="menu-item">
@@ -1610,7 +1619,7 @@
                     <div class="user-avatar">RS</div>
                     <div class="user-info">
                         <div class="user-name">{{user_obj.user_email}}</div>
-                        <div class="user-role">Owner</div>
+                        <div class="user-role">{{user_obj.user_role}}</div>
                     </div>
                     <i class="fas fa-chevron-down" style="color: #adb5bd; font-size: 0.8rem;"></i>
 

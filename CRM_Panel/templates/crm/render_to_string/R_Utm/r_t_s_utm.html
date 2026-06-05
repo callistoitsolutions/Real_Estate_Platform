@@ -1,0 +1,461 @@
+<style>
+.quick-stats {
+    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.quick-stats-title {
+    color: white;
+    font-size: 22px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quick-stats-title i {
+    font-size: 26px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.stat-item {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,0.25);
+}
+
+.stat-item-icon i {
+    font-size: 38px;
+    margin-bottom: 10px;
+}
+
+.stat-item-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: white;
+    margin: 10px 0;
+}
+
+.stat-item-label {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Single container for both scrollbars */
+.table-responsive {
+    border-radius: 15px;
+    overflow: auto;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    width: 100%;
+    max-height: 550px;
+    position: relative;
+}
+
+#utmTable {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1300px;
+}
+
+#utmTable thead th {
+    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+    color: white;
+    padding: 12px;
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#utmTable tbody tr {
+    transition: all 0.3s ease;
+}
+
+#utmTable tbody tr:hover {
+    background: #f0fdfa;
+}
+
+#utmTable tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.btn-action {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-edit {
+    background: #10b981;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #059669;
+    transform: translateY(-2px);
+}
+
+.btn-delete {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+}
+
+/* DataTables Controls Styling */
+.dataTables_wrapper {
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 10px 0;
+}
+
+.dt-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.dt-buttons button {
+    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.dt-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13,148,136,0.4);
+}
+
+.dataTables_length {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dataTables_length label {
+    margin: 0;
+    color: #333;
+}
+
+.dataTables_length select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 6px;
+    font-size: 14px;
+}
+
+/* Search container with counter */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0 15px;
+    transition: all 0.3s ease;
+}
+
+.search-container:focus-within {
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13,148,136,0.1);
+}
+
+.search-container i {
+    color: #0d9488;
+    font-size: 14px;
+}
+
+.dataTables_filter {
+    margin: 0;
+}
+
+.dataTables_filter label {
+    margin: 0;
+}
+
+.dataTables_filter input {
+    border: none;
+    padding: 10px 0;
+    width: 250px;
+    font-size: 14px;
+    color: #333;
+    background: transparent;
+    outline: none;
+}
+
+.records-counter {
+    background: #0d9488;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Footer styling */
+.table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 15px 0;
+    border-top: 1px solid #e9ecef;
+}
+
+.dataTables_info {
+    color: #475569;
+    font-size: 14px;
+}
+
+.dataTables_paginate {
+    display: flex;
+    gap: 5px;
+}
+
+.paginate_button {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    background: white;
+    color: #0d9488;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.paginate_button:hover {
+    background: #f0fdfa;
+    transform: translateY(-1px);
+}
+
+.paginate_button.current {
+    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+    color: white;
+    border-color: #0d9488;
+}
+
+/* Custom scrollbars - clean and simple */
+.table-responsive::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #0d9488;
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #0f766e;
+}
+
+/* For Firefox */
+.table-responsive {
+    scrollbar-width: thin;
+    scrollbar-color: #0d9488 #e2e8f0;
+}
+</style>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<div class="quick-stats">
+    <h3 class="quick-stats-title">
+        <i class="fas fa-chart-line"></i> UTM Links Summary and Listings
+    </h3>
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-item-icon" style="color:#ffd700;">
+                <i class="fas fa-link"></i>
+            </div>
+            <div class="stat-item-value">
+                {{ utm_obj_count }}
+            </div>
+            <div class="stat-item-label" style="color:white;font-weight:bold;">
+                Total UTM Links Exists
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="properties-table" id="utmTable">
+        <thead>
+            <tr>
+                <th>Actions</th>
+                <th>Sr. No.</th>
+                <th>Total Clicks</th>
+                <th>Total Enquiries</th>
+                <th>UTM Source</th>
+                <th>Property Info</th>
+                <th>Listing Type</th>
+                <th>Category</th>
+                <th>UTM Path</th>
+                <th>UTM URL</th>
+                <th>UTM Campaign</th>
+                <th>UTM Medium</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for utm in utm_obj %}
+            <tr>
+                <td>
+                    <div class="action-buttons">
+                        <a href="#" class="btn-action btn-edit" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn-action btn-delete" title="Delete" onclick="Delete_Ameneties({{ameneties.id}})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ utm.total_clicks }}</td>
+                <td>{{ utm.total_enquiries }}</td>
+                <td>{{ utm.utm_source }}</td>
+                <td>{{ utm.property_id }}-{{utm.property_title}}</td>
+                <td>{{ utm.listing_type }}</td>
+                <td>{{ utm.category }}</td>
+                <td>{{ utm.utm_path }}</td>
+                <td>{{ utm.utm_url }}</td>
+                <td>{{ utm.utm_campaign }}</td>
+                <td>{{ utm.utm_medium }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+$(document).ready(function () {
+    var table = $('#utmTable').DataTable({
+        dom: '<"table-header"Bf>lrt<"table-footer"ip>',
+        buttons: ['excel', 'csv'],
+        paging: true,
+        ordering: true,
+        info: true,
+        lengthChange: true,
+        pageLength: 5,
+        lengthMenu: [5, 10, 25, 50],
+        language: {
+            search: "",
+            searchPlaceholder: "Search UTM links...",
+            info: "Showing _START_ to _END_ of _TOTAL_ entries",
+            infoEmpty: "Showing 0 to 0 of 0 entries",
+            infoFiltered: "(filtered from _MAX_ total entries)",
+            paginate: {
+                previous: "<i class='fas fa-chevron-left'></i>",
+                next: "<i class='fas fa-chevron-right'></i>"
+            }
+        },
+        autoWidth: false
+    });
+    
+    // Create search container and move the search input
+    var searchHtml = '<div class="search-container">' +
+                        '<i class="fas fa-search"></i>' +
+                        '<div class="dataTables_filter"></div>' +
+                        '<span class="records-counter">0 records</span>' +
+                     '</div>';
+    
+    // Append search container to table-header
+    $('.table-header').append(searchHtml);
+    
+    // Move the existing search to our container
+    $('.dataTables_filter').appendTo('.search-container');
+    $('.dataTables_filter input').attr("placeholder", "Search UTM links...");
+    
+    // Function to update record counter
+    function updateRecordCounter() {
+        var totalRecords = table.rows().count();
+        var filteredRecords = table.rows({search: 'applied'}).count();
+        
+        if (filteredRecords === totalRecords) {
+            $('.records-counter').text(totalRecords + ' total');
+        } else {
+            $('.records-counter').text(filteredRecords + ' found');
+        }
+    }
+    
+    // Update counter on search
+    $('.dataTables_filter input').on('keyup search', function() {
+        setTimeout(updateRecordCounter, 50);
+    });
+    
+    // Update counter on page change
+    table.on('draw', function() {
+        updateRecordCounter();
+    });
+    
+    // Initial counter update
+    setTimeout(updateRecordCounter, 200);
+});
+</script>

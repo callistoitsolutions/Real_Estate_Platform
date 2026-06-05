@@ -18,6 +18,18 @@ urlpatterns = [
 
     path('Update_Profile_Rm',views.Update_Profile_Rm,name='Update_Profile_Rm'),
 
+    ############## urls for assign enquiries to rm #########################
+
+    path('Assign_Enquiry_Rm',views.Assign_Enquiry_Rm,name='Assign_Enquiry_Rm'),
+
+    ############ urls for ajax for datewise filter for user ###################
+
+    path('date_property_filter_user',views.date_property_filter_user,name="date_property_filter_user"),
+
+    ############ urls for update property enquiry ############################
+
+    path('update_enquiry_rm/<int:id>',views.update_enquiry_rm,name="update_enquiry_rm"),
+
     ########### urls for rental forms list for RM #######################
 
     path('residential_rm_list',views.residential_rm_list,name="residential_rm_list"),

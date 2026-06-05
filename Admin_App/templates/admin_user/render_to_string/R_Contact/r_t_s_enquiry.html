@@ -9,7 +9,7 @@
 <div class="quick-stats">
 
     <h3 class="quick-stats-title">
-        <i class="fas fa-chart-line"></i> Enquiries Summary and Listings
+        <i class="fas fa-chart-line"></i> Enquiries Received From Contact Page Summary and Listings
     </h3>
 
     <div class="stats-row">
@@ -24,7 +24,7 @@
             </div>
 
             <div class="stat-item-label" style="color:black;font-weight:bold;">
-                Total Contact Enquiries
+                Total Contacted Enquiries
             </div>
         </div>
 
@@ -44,8 +44,13 @@
             <th>Name</th>
             <th>Email</th>
             <th>Phone Number</th>
+            <th>City</th>
             <th>Enquiry For</th>
+            <th>Property Type</th>
+            <th>Budget Range</th>
             <th>Message</th>
+            <th>Contact Mode</th>
+            <th>Contact Time</th>
             <th>Enquiry Date</th>
         </tr>
     </thead>
@@ -71,7 +76,7 @@
                         <i class="fas fa-power-off"></i>
                     </button> {% endcomment %}
 
-                    <button class="btn-action btn-delete" title="Delete" onclick="Delete_Landlord({{landlord.id}})">
+                    <button class="btn-action btn-delete" title="Delete" onclick="Delete_Contact({{contact.id}})">
                         <i class="fas fa-trash"></i>
                     </button>
 
@@ -87,8 +92,14 @@
             <td>{% if contact.contact_email %}{{ contact.contact_email }} {% else %} ---{% endif %}</td>
 
             <td>{{ contact.contact_phone }}</td>
+            <td>{% if contact.contact_city == "" %} --- {% else %}{{ contact.contact_city }}{% endif %}</td>
             <td>{{ contact.contact_en_title }}</td>
+            <td>{% if contact.contact_en_type == "null" %} --- {% else %}{{contact.contact_en_type}}{% endif %}</td>
+            <td>{{ contact.contact_start_budget }}-{{contact.contact_end_budget}}</td>
             <td>{% if contact.contact_message %}{{ contact.contact_message }} {% else %} ---{% endif %}</td>
+            
+            <td>{% if contact.contact_mode == "null" %} --- {% else %}{{contact.contact_mode}}{% endif %}</td>
+            <td>{% if contact.contact_time == "null" %} --- {% else %}{{contact.contact_time}}{% endif %}</td>
             <td>{{ contact.contact_enquiry_date }}</td>
 
         </tr>
