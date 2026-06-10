@@ -1,184 +1,1327 @@
 {% include "admin_user/admin_header.html" %}
 {% load static %}
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
 <style>
     :root {
-        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --topbar-height: 70px;
-        --sidebar-width: 250px; /* Adjust this to match your actual sidebar width */
-    }
-    
-    body { 
-        font-family: 'Poppins', sans-serif; 
-        background: #f5f7fa; 
-        min-height: 100vh; 
-        overflow-x: hidden;
-    }
-    
-    /* Layout Fix: Ensure content respects the sidebar and topbar */
-    .main-content { 
-        padding: 30px; 
-        margin-top: var(--topbar-height); 
-        margin-left: var(--sidebar-width); 
-        transition: all 0.3s ease; /* Smooth transition if sidebar collapses */
+        --primary: #d97706;
+        --primary-light: #fef3c7;
+        --primary-dark: #b45309;
+        --accent: #1a56db;
+        --dark: #111827;
+        --mid: #374151;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --surface: #f9fafb;
+        --white: #ffffff;
+        --success: #10b981;
+        --danger: #ef4444;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+        --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
     }
 
-    /* Container for the cards to prevent them from stretching too wide on massive screens */
-    .content-container {
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-    
-    .view-card { background: white; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 30px; }
-    .view-header { background: var(--primary-gradient); color: white; padding: 25px 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
-    .view-header h2 { margin: 0; font-size: 1.5rem; font-weight: 700; text-transform: capitalize; }
-    
-    .details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 30px; }
-    .detail-item { padding: 15px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
-    .detail-label { font-size: 0.75rem; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 5px; }
-    .detail-value { font-size: 1rem; color: #2d3748; font-weight: 600; word-break: break-word; }
-    
-    .section-title { font-size: 1.1rem; font-weight: 700; color: #2d3748; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin: 0 30px 15px 30px; }
-    
-    .description-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin: 0 30px 30px 30px; color: #4a5568; line-height: 1.6; }
-    
-    /* Image Gallery */
-    .gallery-container { padding: 0 30px 30px 30px; display: flex; flex-wrap: wrap; gap: 15px; }
-    .gallery-img { width: 150px; height: 150px; object-fit: cover; border-radius: 12px; border: 2px solid #e2e8f0; transition: transform 0.3s; cursor: pointer; }
-    .gallery-img:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-    
-    .document-links { padding: 0 30px 30px 30px; display: flex; gap: 15px; flex-wrap: wrap; }
-    .doc-btn { display: inline-flex; align-items: center; gap: 8px; background: #edf2f7; color: #4a5568; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: 0.3s; border: 1px solid #e2e8f0; }
-    .doc-btn:hover { background: #e2e8f0; color: #2d3748; }
+    * { box-sizing: border-box; }
 
-    /* Responsive adjustments for mobile/tablets where sidebar might be hidden */
-    @media (max-width: 992px) {
-        .main-content {
-            margin-left: 0;
-        }
+    body, .main-content {
+        font-family: 'DM Sans', sans-serif;
+        background: #f3f4f8;
+        color: var(--dark);
     }
+
+    /* ============ TOP BREADCRUMB BAR ============ */
+    .prop-topbar {
+        background: var(--white);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 0;
+        font-size: 0.8rem;
+        color: var(--muted);
+    }
+    .prop-topbar a { color: var(--primary); text-decoration: none; }
+    .prop-id-badge {
+        background: #fef3c7;
+        color: var(--primary-dark);
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        border: 1px solid #fde68a;
+        font-family: monospace;
+    }
+    .prop-verified-badge {
+        background: #ecfdf5;
+        color: var(--success);
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        border: 1px solid #a7f3d0;
+    }
+    .prop-tax-badge-ok {
+        background: #ecfdf5; color: #065f46;
+        font-weight: 600; padding: 3px 10px;
+        border-radius: 20px; font-size: 0.75rem;
+        border: 1px solid #a7f3d0;
+    }
+    .prop-tax-badge-warn {
+        background: #fef2f2; color: #991b1b;
+        font-weight: 600; padding: 3px 10px;
+        border-radius: 20px; font-size: 0.75rem;
+        border: 1px solid #fca5a5;
+    }
+
+    /* ============ HERO TITLE SECTION ============ */
+    .prop-hero-header {
+        background: var(--white);
+        padding: 20px 0 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .prop-hero-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 6px;
+        line-height: 1.3;
+    }
+    .prop-hero-location {
+        color: var(--muted);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .prop-hero-location i { color: var(--primary); }
+    .prop-hero-price-tag {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+        line-height: 1;
+    }
+    .prop-hero-price-tag span { font-size: 0.9rem; color: var(--muted); font-weight: 400; }
+
+    /* Quick stat chips */
+    .prop-quick-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 14px 0 14px;
+    }
+    .quick-stat-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 5px 11px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--mid);
+    }
+    .quick-stat-chip i { color: var(--primary); font-size: 0.72rem; }
+
+    /* ============ MEDIA GALLERY ============ */
+    .prop-gallery-grid {
+        display: grid;
+        grid-template-columns: 1.65fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 6px;
+        height: 420px;
+        overflow: hidden;
+        background: var(--dark);
+    }
+    .prop-gallery-main {
+        grid-row: 1 / 3;
+        position: relative;
+        overflow: hidden;
+        background: #0d1117;
+        cursor: pointer;
+    }
+    .prop-gallery-thumb {
+        position: relative;
+        overflow: hidden;
+        background: #1e2733;
+        cursor: pointer;
+    }
+    .prop-gallery-thumb img,
+    .prop-gallery-main .walkthrough-slide img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.4s ease;
+    }
+    .prop-gallery-thumb:hover img { transform: scale(1.05); }
+
+    /* Walkthrough slide engine */
+    .walkthrough-slide {
+        position: absolute; inset: 0;
+        opacity: 0; transition: opacity 0.7s ease;
+        display: none;
+    }
+    .walkthrough-slide.active { display: block; opacity: 1; }
+
+    .gallery-hud {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        padding: 20px 16px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        z-index: 10;
+    }
+    .gallery-hud-left { display: flex; align-items: center; gap: 10px; }
+    .btn-play-pause {
+        width: 34px; height: 34px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        color: white;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 0.75rem;
+        backdrop-filter: blur(4px);
+        transition: background 0.2s;
+    }
+    .btn-play-pause:hover { background: rgba(255,255,255,0.25); }
+    .gallery-timer { color: rgba(255,255,255,0.7); font-size: 0.72rem; font-family: monospace; }
+    .gallery-badge-walkthrough {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        padding: 4px 9px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        backdrop-filter: blur(4px);
+    }
+
+    /* No-image placeholder */
+    .gallery-no-image-bg {
+        position: absolute; inset: 0;
+        background: linear-gradient(135deg, #78350f, #d97706, #92400e);
+        filter: blur(12px);
+        transform: scale(1.2);
+    }
+    .gallery-no-image-overlay {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.38);
+    }
+    .gallery-no-image-icon {
+        width: 140px; height: 140px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.12);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.15);
+        display: flex; align-items: center; justify-content: center;
+        margin: auto;
+    }
+
+    /* More images overlay */
+    .thumb-more-overlay {
+        position: absolute; inset: 0;
+        background: rgba(17,24,39,0.7);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .thumb-more-overlay:hover { background: rgba(17,24,39,0.85); }
+    .thumb-more-overlay span { color: white; font-size: 1.2rem; font-weight: 700; }
+    .thumb-more-overlay small { display: block; color: rgba(255,255,255,0.6); font-size: 0.7rem; margin-top: 2px; }
+
+    /* Thumb strip */
+    .prop-image-strip {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #374151 transparent;
+        padding-bottom: 2px;
+    }
+    .strip-thumb {
+        flex-shrink: 0;
+        width: 64px; height: 46px;
+        border-radius: 4px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        opacity: 0.65;
+        transition: all 0.2s;
+    }
+    .strip-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .strip-thumb.active-thumb { border-color: var(--primary); opacity: 1; }
+    .strip-thumb:hover { opacity: 0.9; }
+
+    /* ============ STICKY NAV ============ */
+    .prop-sticky-nav {
+        position: sticky;
+        top: 68px;
+        background: var(--white);
+        border-bottom: 2px solid var(--border);
+        z-index: 990;
+    }
+    .prop-sticky-nav-inner {
+        display: flex;
+        gap: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .prop-sticky-nav-inner::-webkit-scrollbar { display: none; }
+    .prop-nav-link {
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        padding: 14px 18px;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .prop-nav-link i { font-size: 0.75rem; }
+    .prop-nav-link:hover { color: var(--primary); background: var(--primary-light); }
+    .prop-nav-link.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
+
+    /* ============ LAYOUT ============ */
+    .prop-page-body { padding: 28px 0 60px; }
+    .prop-layout-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+        align-items: start;
+    }
+    @media (max-width: 1100px) {
+        .prop-layout-grid { grid-template-columns: 1fr; }
+        .prop-gallery-grid { grid-template-columns: 1fr; height: 260px; }
+        .prop-gallery-thumb { display: none; }
+        .prop-gallery-main { grid-row: 1; }
+    }
+
+    /* ============ SECTION CARDS ============ */
+    .prop-section {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-bottom: 20px;
+        scroll-margin-top: 130px;
+        box-shadow: var(--shadow-sm);
+    }
+    .prop-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .prop-section-title .section-icon {
+        width: 32px; height: 32px;
+        background: var(--primary-light);
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--primary);
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    /* Sub-section headings within a card */
+    .sub-section-heading {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--muted);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 7px 12px;
+        margin: 20px 0 12px;
+        display: flex; align-items: center; gap: 7px;
+    }
+    .sub-section-heading:first-child { margin-top: 0; }
+    .sub-section-heading i { color: var(--primary); }
+
+    /* Spec rows */
+    .spec-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+    }
+    .spec-item {
+        padding: 11px 12px;
+        border-bottom: 1px solid #f3f4f6;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .spec-item:nth-child(odd) { border-right: 1px solid #f3f4f6; }
+    .spec-item:last-child, .spec-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+    .spec-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+    .spec-value {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--dark);
+    }
+    .spec-full { grid-column: 1 / -1; border-right: none !important; }
+
+    /* Highlight price row */
+    .spec-item.highlight-price {
+        background: linear-gradient(135deg, #fffbeb, #fef3c7);
+        border-radius: 8px;
+        border: 1px solid #fde68a !important;
+        padding: 14px;
+    }
+    .spec-item.highlight-price .spec-label { color: var(--primary-dark); }
+    .spec-item.highlight-price .spec-value { font-size: 1.1rem; color: var(--primary-dark); }
+
+    /* Status badges inline */
+    .status-ok { color: var(--success); font-weight: 600; }
+    .status-no { color: var(--danger); font-weight: 600; }
+    .badge-dispute { background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:12px; font-size:0.72rem; font-weight:700; }
+    .badge-clear   { background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:12px; font-size:0.72rem; font-weight:700; }
+
+    /* Feature pills */
+    .feature-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: #15803d;
+    }
+    .feature-pill-warn {
+        background: #fef2f2;
+        border: 1px solid #fca5a5;
+        color: #991b1b;
+    }
+    .feature-pill i { font-size: 0.68rem; }
+
+    /* Address box */
+    .address-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+        font-size: 0.85rem;
+        color: var(--mid);
+        line-height: 1.6;
+        border-left: 3px solid var(--primary);
+    }
+
+    /* Desc */
+    .desc-body { font-size: 0.88rem; line-height: 1.8; color: #4b5563; }
+
+    /* Doc/Video links */
+    .doc-link {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 8px 14px;
+        background: #fee2e2; color: #991b1b;
+        border-radius: 8px; text-decoration: none;
+        font-weight: 600; font-size: 0.85rem;
+        transition: background 0.2s;
+    }
+    .doc-link:hover { background: #fca5a5; color: #7f1d1d; }
+    .vid-link {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 8px 14px;
+        background: #eff6ff; color: #1d4ed8;
+        border-radius: 8px; text-decoration: none;
+        font-weight: 600; font-size: 0.85rem;
+        transition: background 0.2s;
+    }
+    .vid-link:hover { background: #dbeafe; color: #1e40af; }
+
+    /* FAQ */
+    .prop-faq .accordion-item {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm) !important;
+        margin-bottom: 10px;
+        overflow: hidden;
+    }
+    .prop-faq .accordion-button {
+        font-weight: 600;
+        font-size: 0.88rem;
+        color: var(--dark);
+        background: var(--white);
+        padding: 14px 16px;
+        box-shadow: none;
+    }
+    .prop-faq .accordion-button:not(.collapsed) {
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        border-bottom: 1px solid #fde68a;
+    }
+    .prop-faq .accordion-button::after { filter: none; }
+    .prop-faq .accordion-body {
+        font-size: 0.85rem;
+        line-height: 1.75;
+        color: var(--mid);
+        background: var(--white);
+        padding: 14px 16px;
+    }
+
+    /* Audit section */
+    .audit-section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px 24px;
+        margin-bottom: 20px;
+        scroll-margin-top: 130px;
+    }
+
+    /* ============ SIDEBAR ============ */
+    .prop-sidebar { position: sticky; top: 130px; display: flex; flex-direction: column; gap: 16px; }
+
+    .sidebar-price-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+    .sidebar-price-header {
+        background: linear-gradient(135deg, #b45309, #d97706);
+        padding: 20px 20px 16px;
+        color: white;
+    }
+    .sidebar-price-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.8; font-weight: 600; }
+    .sidebar-price-amount { font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin: 4px 0 0; }
+    .sidebar-price-amount span { font-size: 0.85rem; opacity: 0.7; font-weight: 400; }
+    .sidebar-price-body { padding: 16px 20px; }
+    .sidebar-mini-stat { text-align: center; padding: 10px 0; }
+    .sidebar-mini-stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; }
+    .sidebar-mini-stat-val { font-size: 0.95rem; font-weight: 700; color: var(--dark); margin-top: 3px; }
+
+    /* Owner card */
+    .sidebar-owner-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        box-shadow: var(--shadow-sm);
+    }
+    .owner-card-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--muted);
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+    }
+    .owner-avatar {
+        width: 46px; height: 46px;
+        background: linear-gradient(135deg, var(--primary), #f59e0b);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+    .owner-name { font-size: 0.95rem; font-weight: 700; color: var(--dark); }
+    .owner-email { font-size: 0.75rem; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .owner-info-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.82rem;
+        color: var(--mid);
+        padding: 10px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .owner-info-row:last-of-type { border-bottom: none; }
+    .owner-info-row > i { color: var(--primary); font-size: 0.75rem; margin-top: 3px; flex-shrink: 0; }
+    .owner-phone-masked { font-weight: 600; color: var(--dark); font-family: monospace; letter-spacing: 1px; }
+    .btn-reveal-phone {
+        background: var(--primary-light); color: var(--primary-dark);
+        border: 1px solid #fde68a; border-radius: 4px;
+        font-size: 0.7rem; font-weight: 700; padding: 2px 8px;
+        cursor: pointer;
+    }
+    .btn-call-primary {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        background: linear-gradient(135deg, #b45309, #d97706);
+        color: white; border: none;
+        padding: 11px 16px; border-radius: var(--radius-sm);
+        font-weight: 700; font-size: 0.85rem; width: 100%;
+        margin-top: 14px; text-decoration: none;
+        transition: opacity 0.2s;
+    }
+    .btn-call-primary:hover { opacity: 0.9; color: white; }
+
+    /* Quick status sidebar widget */
+    .sidebar-status-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 18px 20px;
+        box-shadow: var(--shadow-sm);
+    }
+    .status-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 8px 0; border-bottom: 1px solid #f3f4f6;
+        font-size: 0.82rem;
+    }
+    .status-row:last-child { border-bottom: none; }
+    .status-row-label { color: var(--muted); font-weight: 500; }
+    .status-pill-ok  { background:#d1fae5; color:#065f46; padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; }
+    .status-pill-bad { background:#fee2e2; color:#991b1b; padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; }
+    .status-pill-neu { background:#f3f4f6; color:#374151; padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; }
 </style>
 
-<div class="main-content">
-    <div class="content-container">
-        
-        <div class="mb-4">
-            <a href="{% url 'industrial_resale_list' %}" class="btn btn-secondary" style="border-radius: 8px; padding: 8px 20px; font-weight: 500;">
-                <i class="fas fa-arrow-left me-2"></i> Back to Industrial Listings
+<!-- ============ TOP BREADCRUMB BAR ============ -->
+<div class="prop-topbar">
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <a href="{% url 'industrial_resale_list' %}"><i class="fas fa-home me-1"></i>Dashboard</a>
+                <i class="fas fa-chevron-right" style="font-size:0.65rem;"></i>
+                <a href="{% url 'industrial_resale_list' %}">Industrial Properties</a>
+                <i class="fas fa-chevron-right" style="font-size:0.65rem;"></i>
+                <span>{{ prop.property_title|truncatechars:40 }}</span>
+                <span class="prop-id-badge">{{ prop.industrial_id }}</span>
+                {% if prop.tax_clearance_cert %}
+                    <span class="prop-tax-badge-ok"><i class="fas fa-circle-check"></i> Tax Cleared</span>
+                {% else %}
+                    <span class="prop-tax-badge-warn"><i class="fas fa-triangle-exclamation"></i> Tax Unverified</span>
+                {% endif %}
+            </div>
+            <a href="{% url 'industrial_resale_list' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600;">
+                <i class="fas fa-arrow-left"></i> Back to Listing
             </a>
         </div>
+    </div>
+</div>
 
-        <div class="view-card">
-            <div class="view-header">
-                <div>
-                    <h2><i class="fas fa-industry me-2"></i> {{ prop.property_type}}</h2>
-                    <div class="mt-2" style="font-size: 0.95rem; opacity: 0.9;">
-                        <i class="fas fa-map-marker-alt text-warning me-1"></i> {{ prop.locality|default:"Locality Not Set" }}, {{ prop.city|default:"City Not Set" }}
-                    </div>
+<!-- ============ HERO TITLE SECTION ============ -->
+<div class="prop-hero-header">
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
+            <div style="flex:1; min-width:260px;">
+                <h1>{{ prop.property_title|default:"Industrial Property" }}</h1>
+                <div class="prop-hero-location">
+                    <i class="fas fa-location-dot"></i>
+                    {{ prop.locality }}, {{ prop.city }}
                 </div>
-                <div class="text-md-end text-start mt-3 mt-md-0">
-                    <div style="font-size: 0.85rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Expected Price</div>
-                    <div style="font-size: 2rem; font-weight: 800; line-height: 1;">₹ {{ prop.expected_price }}</div>
+            </div>
+            <div class="text-end">
+                <div class="prop-hero-price-tag">₹{{ prop.expected_price|floatformat:"0"|default:"—" }} <span>Expected Price</span></div>
+                <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">
+                    {{ prop.land_area|default:"—" }} Sqft &bull; {{ prop.property_type|default:"Industrial"|title }}
                 </div>
-            </div>
-
-            <div class="section-title mt-4 pt-2"><i class="fas fa-cogs text-primary me-2"></i> Industrial Specifications</div>
-            <div class="details-grid">
-                <div class="detail-item"><div class="detail-label">Land Area</div><div class="detail-value">{{ prop.land_area }} sq.ft/acres</div></div>
-                <div class="detail-item"><div class="detail-label">Available From</div><div class="detail-value">{{ prop.available_from|date:"d M Y"|default:"Immediate" }}</div></div>
-                <div class="detail-item"><div class="detail-label">Power Supply</div><div class="detail-value">{% if prop.power_supply %}Yes ({{ prop.kva_capacity|default:"N/A" }} KVA){% else %}No{% endif %}</div></div>
-                <div class="detail-item"><div class="detail-label">Water Supply</div><div class="detail-value text-capitalize">{{ prop.water_supply|default:"N/A" }}</div></div>
-                <div class="detail-item"><div class="detail-label">Heavy Machinery/Crane</div><div class="detail-value">{% if prop.crane_heavy_machinery %}Available{% else %}Not Available{% endif %}</div></div>
-                <div class="detail-item"><div class="detail-label">Road Connectivity</div><div class="detail-value text-capitalize">{{ prop.road_connectivity|default:"N/A" }}</div></div>
-                <div class="detail-item"><div class="detail-label">Worker Housing</div><div class="detail-value">{% if prop.worker_housing_nearby %}Available Nearby{% else %}Not Available{% endif %}</div></div>
-            </div>
-
-            <div class="section-title"><i class="fas fa-gavel text-primary me-2"></i> Legal & Commercials</div>
-            <div class="details-grid">
-                <div class="detail-item"><div class="detail-label">Ownership Type</div><div class="detail-value text-capitalize">{{ prop.ownership_type|default:"N/A" }}</div></div>
-                <div class="detail-item"><div class="detail-label">Sanctioning Authority</div><div class="detail-value">{{ prop.sanctioning_authority|default:"N/A" }}</div></div>
-                <div class="detail-item"><div class="detail-label">Brokerage</div><div class="detail-value">{{ prop.brokerage|default:"N/A" }} {% if prop.brokerage == 'Yes' %}({{ prop.brokerage_percentage }}{% if prop.manual_brokerage %} - {{ prop.manual_brokerage }}{% endif %}){% endif %}</div></div>
-                
-                <div class="detail-item"><div class="detail-label">Property Loan</div><div class="detail-value">{% if prop.has_loan %}Yes (₹{{ prop.loan_amount }}){% else %}No{% endif %}</div></div>
-                <div class="detail-item"><div class="detail-label">Tax Dues</div><div class="detail-value">{% if prop.tax_due %}Pending (₹{{ prop.tax_amount }}){% else %}Clear{% endif %}</div></div>
-                <div class="detail-item"><div class="detail-label">Tax Clearance Cert.</div><div class="detail-value">{% if prop.tax_clearance_cert %}Available{% else %}Not Available{% endif %}</div></div>
-                
-                <div class="detail-item"><div class="detail-label">Existing Tenants</div><div class="detail-value">{% if prop.existing_tenants %}Yes{% else %}No{% endif %}</div></div>
-                <div class="detail-item"><div class="detail-label">Legal Disputes</div><div class="detail-value">{% if prop.legal_dispute %}Yes{% else %}No{% endif %}</div></div>
-            </div>
-
-            {% if prop.existing_tenants or prop.legal_dispute %}
-            <div class="details-grid pt-0">
-                {% if prop.existing_tenants %}
-                <div class="detail-item" style="border-left: 4px solid #f59e0b;"><div class="detail-label text-warning">Tenant Details</div><div class="detail-value">{{ prop.tenant_details|default:"No details provided." }}</div></div>
-                {% endif %}
-                {% if prop.legal_dispute %}
-                <div class="detail-item" style="border-left: 4px solid #ef4444;"><div class="detail-label text-danger">Dispute Details</div><div class="detail-value">{{ prop.dispute_details|default:"No details provided." }}</div></div>
-                {% endif %}
-            </div>
-            {% endif %}
-
-            <div class="section-title"><i class="fas fa-align-left text-primary me-2"></i> Property Description</div>
-            <div class="description-box">
-                {{ prop.property_description|safe|default:"No detailed description provided." }}
-            </div>
-
-            <div class="section-title"><i class="fas fa-address-book text-primary me-2"></i> Contact & Location Info</div>
-            <div class="details-grid">
-                <div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-label">Complete Address</div><div class="detail-value">{{ prop.complete_address|default:"N/A" }}</div></div>
-                <div class="detail-item"><div class="detail-label">Owner Name</div><div class="detail-value">{{ prop.owner_name|default:"N/A" }}</div></div>
-                <div class="detail-item"><div class="detail-label">Contact Number</div><div class="detail-value">{{ prop.owner_contact|default:"N/A" }}</div></div>
-                <div class="detail-item"><div class="detail-label">Email Address</div><div class="detail-value">{{ prop.owner_email|default:"N/A" }}</div></div>
-                <div class="detail-item"><div class="detail-label">Residency Status</div><div class="detail-value text-capitalize">{{ prop.residency_status|default:"N/A" }}</div></div>
-            </div>
-            
-            <div class="section-title"><i class="fas fa-server text-primary me-2"></i> System Record Details</div>
-            <div class="details-grid" style="background: #f8fafc; margin: 0 30px 30px 30px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                <div class="detail-item border-0 bg-transparent"><div class="detail-label">Uploaded By</div><div class="detail-value">{{ prop.uploaded_by_name|default:"N/A" }}</div></div>
-                <div class="detail-item border-0 bg-transparent"><div class="detail-label">Role</div><div class="detail-value">{{ prop.uploaded_by_role|default:"N/A" }}</div></div>
-                <div class="detail-item border-0 bg-transparent"><div class="detail-label">Upload Date</div><div class="detail-value">{{ prop.created_at|date:"d M Y, h:i A" }}</div></div>
-                <div class="detail-item border-0 bg-transparent"><div class="detail-label">Last Updated</div><div class="detail-value">{{ prop.updated_at|date:"d M Y, h:i A" }}</div></div>
             </div>
         </div>
+        <!-- Quick stat chips -->
+        <div class="prop-quick-stats">
+            <div class="quick-stat-chip"><i class="fas fa-industry"></i> {{ prop.property_type|default:"Industrial"|title }}</div>
+            <div class="quick-stat-chip"><i class="fas fa-ruler-combined"></i> {{ prop.land_area|default:"—" }} Sqft</div>
+            <div class="quick-stat-chip"><i class="fas fa-calendar-check"></i> {{ prop.available_from|date:"d M Y"|default:"Immediate" }}</div>
+            {% if prop.power_supply %}<div class="quick-stat-chip"><i class="fas fa-bolt"></i> {{ prop.kva_capacity|default:"—" }} KVA Power</div>{% endif %}
+            {% if prop.crane_heavy_machinery %}<div class="quick-stat-chip"><i class="fas fa-truck-moving"></i> Crane Support</div>{% endif %}
+            <div class="quick-stat-chip"><i class="fas fa-road"></i> {{ prop.road_connectivity|default:"—" }}</div>
+            {% if prop.worker_housing_nearby %}<div class="quick-stat-chip"><i class="fas fa-house-user"></i> Worker Housing Nearby</div>{% endif %}
+            <div class="quick-stat-chip"><i class="fas fa-file-shield"></i> {{ prop.ownership_type|default:"—"|title }}</div>
+        </div>
+    </div>
+</div>
 
-        <div class="view-card">
-            <div class="view-header" style="background: #2d3748;">
-                <h2><i class="fas fa-images text-warning me-2"></i> Media & Compliance Documents</h2>
-            </div>
-            
-            <div class="mt-4 pt-2">
-                <div class="section-title border-0">Property Images ({{ prop.images.count }})</div>
-                <div class="gallery-container">
+<!-- ============ GALLERY ============ -->
+<div style="background:#111827;">
+    <div class="container-fluid px-0">
+        <div class="prop-gallery-grid">
+
+            <!-- Main Gallery Walkthrough -->
+            <div class="prop-gallery-main" id="galMain">
+                {% if prop.images.all %}
                     {% for img in prop.images.all %}
-                        <a href="{{ img.image.url }}" target="_blank">
-                            <img src="{{ img.image.url }}" class="gallery-img" alt="Industrial Image">
-                        </a>
-                    {% empty %}
-                        <div class="alert alert-light border w-100"><i class="fas fa-info-circle me-2"></i> No images uploaded for this property.</div>
+                    <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
+                        <img src="{{ img.image.url }}" alt="Industrial facility view {{ forloop.counter }}">
+                    </div>
+                    {% endfor %}
+                    <div class="gallery-hud">
+                        <div class="gallery-hud-left">
+                            <button class="btn-play-pause" id="playPauseBtn"><i class="fas fa-pause"></i></button>
+                            <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
+                        </div>
+                        <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> Industrial Walkthrough</span>
+                    </div>
+                {% else %}
+                    <div class="w-100 h-100 position-relative overflow-hidden">
+                        <div class="gallery-no-image-bg"></div>
+                        <div class="gallery-no-image-overlay"></div>
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center position-relative">
+                            <div class="text-center text-white">
+                                <div class="gallery-no-image-icon">
+                                    <i class="fas fa-industry" style="font-size:60px;"></i>
+                                </div>
+                                <h2 style="margin-top:20px; font-weight:700; letter-spacing:1px;">Industrial Asset</h2>
+                                <p style="color:rgba(255,255,255,0.8); margin-bottom:0;">Property Images Not Available</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Thumbnail 1 -->
+            <div class="prop-gallery-thumb" style="background:#0d1117;" onclick="setSlide(1)">
+                {% if prop.images.count > 1 %}
+                    <img src="{{ prop.images.all.1.image.url }}" alt="Facility thumbnail 2">
+                {% else %}
+                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:linear-gradient(135deg,#78350f,#d97706);color:white;">
+                        <i class="fas fa-industry mb-1"></i>
+                        <span style="font-size:10px;font-weight:600;">Industrial</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Thumbnail 2 -->
+            <div class="prop-gallery-thumb" style="background:#0d1117;" onclick="setSlide(2)">
+                {% if prop.images.count > 2 %}
+                    <img src="{{ prop.images.all.2.image.url }}" alt="Facility thumbnail 3">
+                    {% if prop.images.count > 3 %}
+                    <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoLightboxStrip">
+                        <div class="text-center">
+                            <span>+{{ prop.images.count|add:"-3" }}</span>
+                            <small>More Photos</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:linear-gradient(135deg,#78350f,#d97706);color:white;">
+                        <i class="fas fa-industry mb-1"></i>
+                        <span style="font-size:10px;font-weight:600;">Industrial</span>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+    {% if prop.images.all %}
+    <div style="background:#0d1117;padding:8px 16px 12px;">
+        <div class="prop-image-strip" id="imageStrip">
+            {% for img in prop.images.all %}
+            <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}"
+                 data-slide="{{ forloop.counter0 }}"
+                 onclick="setSlide({{ forloop.counter0 }})">
+                <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ============ STICKY NAV ============ -->
+<div class="prop-sticky-nav">
+    <div class="container-fluid px-4">
+        <div class="prop-sticky-nav-inner" id="propNavTabs">
+            <a class="prop-nav-link active" data-target="overview" href="#overview"><i class="fas fa-info-circle"></i> Overview</a>
+            <a class="prop-nav-link" data-target="specifications" href="#specifications"><i class="fas fa-tools"></i> Specifications</a>
+            <a class="prop-nav-link" data-target="financials" href="#financials"><i class="fas fa-file-invoice-dollar"></i> Financials</a>
+            <a class="prop-nav-link" data-target="legal" href="#legal"><i class="fas fa-gavel"></i> Legal & Tax</a>
+            <a class="prop-nav-link" data-target="media" href="#media"><i class="fas fa-paperclip"></i> Documents</a>
+            <a class="prop-nav-link" data-target="location" href="#location"><i class="fas fa-map-marker-alt"></i> Location</a>
+            <a class="prop-nav-link" data-target="faqs" href="#faqs"><i class="fas fa-circle-question"></i> FAQs</a>
+            <a class="prop-nav-link" data-target="audit" href="#audit"><i class="fas fa-database"></i> Audit</a>
+        </div>
+    </div>
+</div>
+
+<!-- ============ MAIN PAGE BODY ============ -->
+<div class="prop-page-body">
+    <div class="container-fluid px-4">
+        <div class="prop-layout-grid">
+
+            <!-- LEFT COLUMN -->
+            <div>
+
+                <!-- SECTION: OVERVIEW / DESCRIPTION -->
+                <div class="prop-section" id="overview">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-info-circle"></i></span>
+                        Description & Overview
+                    </div>
+                    <p class="desc-body" style="white-space:pre-wrap;">{{ prop.property_description|default:"No description has been provided for this industrial property." }}</p>
+                </div>
+
+                <!-- SECTION: STEP 1 — PROPERTY SPECIFICATIONS -->
+                <div class="prop-section" id="specifications">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-tools"></i></span>
+                        Physical Specifications & Infrastructure
+                    </div>
+
+                    <div class="sub-section-heading"><i class="fas fa-warehouse"></i> Core Property Details</div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Property Type</span>
+                            <span class="spec-value">{{ prop.property_type|default:"—"|title }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Land Area</span>
+                            <span class="spec-value">{{ prop.land_area|default:"—" }} Sqft</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Available From</span>
+                            <span class="spec-value">{{ prop.available_from|date:"d M Y"|default:"Immediate" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Water Supply</span>
+                            <span class="spec-value">{{ prop.water_supply|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Road Connectivity</span>
+                            <span class="spec-value">{{ prop.road_connectivity|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Worker Housing Nearby</span>
+                            <span class="spec-value">
+                                {% if prop.worker_housing_nearby %}<span class="status-ok"><i class="fas fa-check-circle me-1"></i>Yes</span>{% else %}<span class="status-no"><i class="fas fa-times-circle me-1"></i>No</span>{% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="sub-section-heading"><i class="fas fa-bolt"></i> Power & Machinery</div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Power Supply Available</span>
+                            <span class="spec-value">
+                                {% if prop.power_supply %}<span class="status-ok"><i class="fas fa-check-circle me-1"></i>Yes</span>{% else %}<span class="status-no"><i class="fas fa-times-circle me-1"></i>No</span>{% endif %}
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">KVA Capacity</span>
+                            <span class="spec-value">{% if prop.kva_capacity %}{{ prop.kva_capacity }} KVA{% else %}—{% endif %}</span>
+                        </div>
+                        <div class="spec-item spec-full">
+                            <span class="spec-label">Crane / Heavy Machinery Support</span>
+                            <span class="spec-value">
+                                {% if prop.crane_heavy_machinery %}<span class="status-ok"><i class="fas fa-check-circle me-1"></i>Available</span>{% else %}<span class="status-no"><i class="fas fa-times-circle me-1"></i>Not Available</span>{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: STEP 2a — PRICING & BROKERAGE -->
+                <div class="prop-section" id="financials">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                        Pricing & Brokerage
+                    </div>
+                    <div class="spec-grid">
+                        <div class="spec-item highlight-price spec-full">
+                            <span class="spec-label">Expected Sale Price</span>
+                            <span class="spec-value">₹{{ prop.expected_price|floatformat:"0"|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Brokerage Required</span>
+                            <span class="spec-value">{{ prop.brokerage|default:"No" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Brokerage %</span>
+                            <span class="spec-value">{{ prop.brokerage_percentage|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item spec-full">
+                            <span class="spec-label">Manual Brokerage Amount</span>
+                            <span class="spec-value">{{ prop.manual_brokerage|default:"—" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="sub-section-heading mt-4"><i class="fas fa-landmark"></i> Ownership & Loan</div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Ownership Type</span>
+                            <span class="spec-value">{{ prop.ownership_type|default:"—"|title }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Sanctioning Authority</span>
+                            <span class="spec-value">{{ prop.sanctioning_authority|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Active Loan on Property</span>
+                            <span class="spec-value">
+                                {% if prop.has_loan %}<span class="status-no fw-bold">Yes</span>{% else %}No{% endif %}
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Loan Amount</span>
+                            <span class="spec-value">{% if prop.has_loan %}₹{{ prop.loan_amount|floatformat:"0" }}{% else %}—{% endif %}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Existing Tenants</span>
+                            <span class="spec-value">{% if prop.existing_tenants %}Yes{% else %}No{% endif %}</span>
+                        </div>
+                        <div class="spec-item spec-full">
+                            <span class="spec-label">Tenant Details</span>
+                            <span class="spec-value">{{ prop.tenant_details|default:"—" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: STEP 2b — LEGAL & TAX -->
+                <div class="prop-section" id="legal">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-gavel"></i></span>
+                        Legal & Tax Status
+                    </div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Legal Dispute</span>
+                            <span class="spec-value">
+                                {% if prop.legal_dispute %}<span class="badge-dispute">Under Dispute</span>{% else %}<span class="badge-clear">Clear</span>{% endif %}
+                            </span>
+                        </div>
+                        <div class="spec-item spec-full">
+                            <span class="spec-label">Dispute Details</span>
+                            <span class="spec-value">{{ prop.dispute_details|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Tax Dues Pending</span>
+                            <span class="spec-value">{% if prop.tax_due %}<span class="status-no fw-bold">Yes</span>{% else %}No{% endif %}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Tax Due Amount</span>
+                            <span class="spec-value">{% if prop.tax_due %}₹{{ prop.tax_amount|floatformat:"0" }}{% else %}—{% endif %}</span>
+                        </div>
+                        <div class="spec-item spec-full">
+                            <span class="spec-label">Tax Clearance Certificate</span>
+                            <span class="spec-value">
+                                {% if prop.tax_clearance_cert %}
+                                    <span class="status-ok"><i class="fas fa-check-circle me-1"></i>Certificate Available</span>
+                                {% else %}
+                                    <span class="status-no"><i class="fas fa-times-circle me-1"></i>Certificate Missing</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: STEP 3 — DOCUMENTS & MEDIA -->
+                <div class="prop-section" id="media">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-paperclip"></i></span>
+                        Documents & Media
+                    </div>
+                    <div class="d-flex gap-3 flex-wrap">
+                        {% if prop.compliance_docs %}
+                            <a href="{{ prop.compliance_docs.url }}" target="_blank" class="doc-link">
+                                <i class="fas fa-file-pdf"></i> View Compliance Docs
+                            </a>
+                        {% else %}
+                            <span class="text-muted fst-italic" style="font-size:0.85rem;"><i class="fas fa-info-circle me-1"></i>No compliance documents uploaded.</span>
+                        {% endif %}
+                        {% if prop.social_video %}
+                            <a href="{{ prop.social_video.url }}" target="_blank" class="vid-link">
+                                <i class="fas fa-video"></i> Watch Property Video
+                            </a>
+                        {% else %}
+                            <span class="text-muted fst-italic" style="font-size:0.85rem;"><i class="fas fa-info-circle me-1"></i>No video reel uploaded.</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- SECTION: STEP 4 — LOCATION -->
+                <div class="prop-section" id="location">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-map-marker-alt"></i></span>
+                        Location Details
+                    </div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">City</span>
+                            <span class="spec-value">{{ prop.city|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Locality / MIDC Area</span>
+                            <span class="spec-value">{{ prop.locality|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item spec-full">
+                            <span class="spec-label">Complete Address</span>
+                            <span class="spec-value">
+                                <div class="address-box mt-1">{{ prop.complete_address|default:"Address not provided." }}</div>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: FAQs -->
+                <div class="prop-section prop-faq" id="faqs">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-circle-question"></i></span>
+                        Auto-Generated FAQs
+                    </div>
+                    <p style="font-size:0.82rem; color:var(--muted); margin-bottom:16px; margin-top:-8px;">
+                        Dynamically generated based on this property's specific attributes and conditions.
+                    </p>
+                    <div class="accordion" id="faqAccordion">
+                        {% for faq in faqs %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faqH{{ forloop.counter }}">
+                                <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#faqC{{ forloop.counter }}"
+                                    aria-expanded="false">
+                                    {{ faq.question }}
+                                </button>
+                            </h2>
+                            <div id="faqC{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">{{ faq.answer }}</div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="alert alert-light border text-muted" style="font-size:0.85rem;">
+                            <i class="fas fa-info-circle me-2"></i>Not enough property data to generate dynamic FAQs.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- SECTION: AUDIT -->
+                <div class="audit-section" id="audit">
+                    <div class="prop-section-title" style="border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:16px;">
+                        <span class="section-icon" style="background:#f3f4f6;"><i class="fas fa-database" style="color:var(--muted);"></i></span>
+                        <span style="color:var(--muted);">System Audit Record</span>
+                    </div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Uploaded By</span>
+                            <span class="spec-value">{{ prop.uploaded_by_name|default:"System" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Uploader Role</span>
+                            <span class="spec-value">{{ prop.uploaded_by_role|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Uploader Email</span>
+                            <span class="spec-value">{{ prop.uploaded_by_email|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Uploader Contact</span>
+                            <span class="spec-value">{{ prop.uploaded_by_contact|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Source File</span>
+                            <span class="spec-value">{{ prop.upload_file_name|default:"Web UI" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Created At</span>
+                            <span class="spec-value">{{ prop.created_at|date:"d M Y, H:i" }}</span>
+                        </div>
+                        <div class="spec-item spec-full">
+                            <span class="spec-label">Last Updated</span>
+                            <span class="spec-value">{{ prop.updated_at|date:"d M Y, H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT SIDEBAR -->
+            <div class="prop-sidebar">
+
+                <!-- Price Card -->
+                <div class="sidebar-price-card">
+                    <div class="sidebar-price-header">
+                        <div class="sidebar-price-label">Expected Sale Price</div>
+                        <div class="sidebar-price-amount">₹{{ prop.expected_price|floatformat:"0"|default:"—" }} <span></span></div>
+                    </div>
+                    <div class="sidebar-price-body">
+                        <div class="row g-0" style="border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
+                            <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border);">
+                                <div class="sidebar-mini-stat-label">Land Area</div>
+                                <div class="sidebar-mini-stat-val">{{ prop.land_area|default:"—" }} Sqft</div>
+                            </div>
+                            <div class="col-6 sidebar-mini-stat">
+                                <div class="sidebar-mini-stat-label">Type</div>
+                                <div class="sidebar-mini-stat-val">{{ prop.property_type|default:"—"|title }}</div>
+                            </div>
+                        </div>
+                        <div class="mt-3 row g-0" style="border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
+                            <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border);">
+                                <div class="sidebar-mini-stat-label">Brokerage</div>
+                                <div class="sidebar-mini-stat-val">{{ prop.brokerage|default:"No" }}</div>
+                            </div>
+                            <div class="col-6 sidebar-mini-stat">
+                                <div class="sidebar-mini-stat-label">Available</div>
+                                <div class="sidebar-mini-stat-val">{{ prop.available_from|date:"M Y"|default:"Now" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Status Card -->
+                <div class="sidebar-status-card">
+                    <div class="owner-card-title"><i class="fas fa-shield-halved me-1"></i> Property Status Overview</div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-bolt me-1" style="color:var(--primary);"></i> Power Supply</span>
+                        {% if prop.power_supply %}<span class="status-pill-ok">Available</span>{% else %}<span class="status-pill-bad">Not Available</span>{% endif %}
+                    </div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-truck-moving me-1" style="color:var(--primary);"></i> Crane / Heavy Mach.</span>
+                        {% if prop.crane_heavy_machinery %}<span class="status-pill-ok">Yes</span>{% else %}<span class="status-pill-neu">No</span>{% endif %}
+                    </div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-gavel me-1" style="color:var(--primary);"></i> Legal Dispute</span>
+                        {% if prop.legal_dispute %}<span class="status-pill-bad">Under Dispute</span>{% else %}<span class="status-pill-ok">Clear</span>{% endif %}
+                    </div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-receipt me-1" style="color:var(--primary);"></i> Tax Dues</span>
+                        {% if prop.tax_due %}<span class="status-pill-bad">Pending</span>{% else %}<span class="status-pill-ok">Clear</span>{% endif %}
+                    </div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-file-shield me-1" style="color:var(--primary);"></i> Tax Clearance Cert</span>
+                        {% if prop.tax_clearance_cert %}<span class="status-pill-ok">Available</span>{% else %}<span class="status-pill-bad">Missing</span>{% endif %}
+                    </div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-bank me-1" style="color:var(--primary);"></i> Active Loan</span>
+                        {% if prop.has_loan %}<span class="status-pill-bad">Yes</span>{% else %}<span class="status-pill-ok">No</span>{% endif %}
+                    </div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-users me-1" style="color:var(--primary);"></i> Existing Tenants</span>
+                        {% if prop.existing_tenants %}<span class="status-pill-neu">Yes</span>{% else %}<span class="status-pill-ok">None</span>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Owner Card -->
+                <div class="sidebar-owner-card">
+                    <div class="owner-card-title"><i class="fas fa-user-tie me-1"></i> Owner / Contact</div>
+
+                    <div class="d-flex align-items-center gap-3 mb-14" style="margin-bottom:14px;">
+                        <div class="owner-avatar">{{ prop.owner_name|slice:":1"|upper|default:"O" }}</div>
+                        <div style="min-width:0;">
+                            <div class="owner-name">{{ prop.owner_name|default:"Undisclosed Identity" }}</div>
+                            <div class="owner-email"><i class="fas fa-envelope me-1"></i>{{ prop.owner_email|default:"No email logged" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="owner-info-row">
+                        <i class="fas fa-id-badge"></i>
+                        <div>
+                            <div style="font-size:0.7rem; color:var(--muted); font-weight:600; text-transform:uppercase;">Residency Status</div>
+                            <div style="font-weight:600;">{{ prop.residency_status|default:"—"|title }}</div>
+                        </div>
+                    </div>
+
+                    <div class="owner-info-row">
+                        <i class="fas fa-phone"></i>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="owner-phone-masked" id="sidebarPhone" data-phone="{{ prop.owner_contact|default:'' }}">
+                                {% if prop.owner_contact %}
+                                    {{ prop.owner_contact|slice:":2" }}XXXXXX{{ prop.owner_contact|slice:"-2:" }}
+                                {% else %}Not available{% endif %}
+                            </span>
+                            {% if prop.owner_contact %}
+                                <button class="btn-reveal-phone" onclick="revealPhone('sidebarPhone','{{ prop.owner_contact }}')">View Number</button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <a href="tel:{{ prop.owner_contact }}" class="btn-call-primary">
+                        <i class="fas fa-phone-volume"></i> Call Owner
+                    </a>
+                </div>
+
+            </div>
+            <!-- END SIDEBAR -->
+
+        </div>
+    </div>
+</div>
+
+<!-- LIGHTBOX MODAL -->
+<div class="modal fade" id="photoLightboxStrip" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content" style="background:#0d1117; color:white; border:1px solid #1e2733;">
+            <div class="modal-header border-0" style="border-bottom:1px solid #1e2733 !important;">
+                <h5 class="modal-title fw-bold" style="font-size:0.95rem;">
+                    <i class="fas fa-images me-2 text-warning"></i>
+                    Industrial Property Photo Gallery — {{ prop.images.count }} Views
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    {% for img in prop.images.all %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div style="height:140px; border-radius:8px; overflow:hidden; background:#1e2733; border:1px solid #374151; cursor:pointer;">
+                            <img src="{{ img.image.url }}" alt="Gallery view {{ forloop.counter }}"
+                                 style="width:100%; height:100%; object-fit:cover; transition:transform 0.3s;"
+                                 onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        </div>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
-
-            <div class="mt-2">
-                <div class="section-title border-0">Compliance & Video Links</div>
-                <div class="document-links">
-                    {% if prop.compliance_docs %}
-                        <a href="{{ prop.compliance_docs.url }}" target="_blank" class="doc-btn">
-                            <i class="fas fa-file-pdf text-danger" style="font-size: 1.2rem;"></i> View Compliance Docs
-                        </a>
-                    {% endif %}
-                    
-                    {% if prop.social_video %}
-                        <a href="{{ prop.social_video.url }}" target="_blank" class="doc-btn">
-                            <i class="fas fa-video text-primary" style="font-size: 1.2rem;"></i> View Property Video
-                        </a>
-                    {% endif %}
-
-                    {% if not prop.compliance_docs and not prop.social_video %}
-                        <div class="alert alert-light border w-100"><i class="fas fa-info-circle me-2"></i> No external documents or videos uploaded.</div>
-                    {% endif %}
-                </div>
-            </div>
         </div>
+    </div>
+</div>
 
-    </div> </div> 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ============================
+    // 1. WALKTHROUGH ENGINE
+    // ============================
+    const slides = document.querySelectorAll('.walkthrough-slide');
+    const stripThumbs = document.querySelectorAll('.strip-thumb');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const galTimer = document.getElementById('galTimer');
+    const INTERVAL = 4000;
+
+    let currentSlide = 0;
+    let isPlaying = true;
+    let ticker = null;
+    let startTime = Date.now();
+    const totalDuration = slides.length * INTERVAL;
+
+    function fmt(ms) {
+        const s = Math.floor(ms / 1000);
+        const m = Math.floor(s / 60);
+        return `${String(m).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+    }
+
+    window.setSlide = function(idx) {
+        slides.forEach(s => s.classList.remove('active'));
+        stripThumbs.forEach(t => t.classList.remove('active-thumb'));
+        currentSlide = (idx + slides.length) % slides.length;
+        if (slides[currentSlide]) slides[currentSlide].classList.add('active');
+        const activeThumb = document.querySelector(`.strip-thumb[data-slide="${currentSlide}"]`);
+        if (activeThumb) {
+            activeThumb.classList.add('active-thumb');
+            activeThumb.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+        }
+        startTime = Date.now();
+    };
+
+    function tickTimer() {
+        if (!isPlaying || !galTimer) return;
+        const elapsed = (currentSlide * INTERVAL) + ((Date.now() - startTime) % INTERVAL);
+        const capped = Math.min(elapsed, totalDuration);
+        galTimer.textContent = `${fmt(capped)} / ${fmt(totalDuration)}`;
+        requestAnimationFrame(tickTimer);
+    }
+
+    function autoAdvance() {
+        ticker = setInterval(() => { setSlide(currentSlide + 1); }, INTERVAL);
+    }
+
+    if (slides.length > 0) {
+        stripThumbs.forEach(t => {
+            t.addEventListener('click', function() { setSlide(parseInt(this.dataset.slide)); });
+        });
+
+        if (playPauseBtn) {
+            playPauseBtn.addEventListener('click', function () {
+                if (isPlaying) {
+                    clearInterval(ticker);
+                    isPlaying = false;
+                    this.innerHTML = '<i class="fas fa-play"></i>';
+                } else {
+                    autoAdvance();
+                    isPlaying = true;
+                    this.innerHTML = '<i class="fas fa-pause"></i>';
+                    requestAnimationFrame(tickTimer);
+                }
+            });
+        }
+
+        setSlide(0);
+        autoAdvance();
+        requestAnimationFrame(tickTimer);
+    }
+
+    // ============================
+    // 2. STICKY NAV + SCROLL SPY
+    // ============================
+    const navLinks = document.querySelectorAll('.prop-nav-link');
+    const sections = document.querySelectorAll('.prop-section[id], .audit-section[id]');
+
+    function updateActiveNav() {
+        let activeId = null;
+        const scrollY = window.scrollY;
+        sections.forEach(sec => {
+            const top = sec.getBoundingClientRect().top + window.scrollY - 160;
+            if (scrollY >= top) activeId = sec.id;
+        });
+        if (activeId) {
+            navLinks.forEach(l => {
+                l.classList.toggle('active', l.getAttribute('data-target') === activeId);
+            });
+        }
+    }
+
+    window.addEventListener('scroll', updateActiveNav, { passive: true });
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.getElementById(this.getAttribute('data-target'));
+            if (target) {
+                const top = target.getBoundingClientRect().top + window.scrollY - 130;
+                window.scrollTo({ top, behavior: 'smooth' });
+            }
+        });
+    });
+
+    updateActiveNav();
+});
+
+// ============================
+// 3. PHONE REVEAL
+// ============================
+function revealPhone(elementId, phone) {
+    const el = document.getElementById(elementId);
+    if (el && phone) {
+        el.textContent = phone;
+        el.style.color = 'var(--primary-dark)';
+        el.style.fontWeight = '700';
+        const btn = el.nextElementSibling;
+        if (btn) btn.remove();
+    }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for faq in faqs %}
+    {
+      "@type": "Question",
+      "name": "{{ faq.question|escapejs }}",
+      "acceptedAnswer": { "@type": "Answer", "text": "{{ faq.answer|escapejs }}" }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>

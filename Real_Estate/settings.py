@@ -73,7 +73,7 @@ FINANCE = {
   'CURRENCY': 'INR'
 }
 
-AUTH_USER_MODEL = 'Main_App.CustomUser' 
+
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',

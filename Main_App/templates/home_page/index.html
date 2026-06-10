@@ -264,6 +264,54 @@ body { font-family: "Poppins", sans-serif; background: var(--bg); color: var(--t
     .plan-card.popular { transform: scale(1); margin-top: 15px; }
 }
 
+
+
+
+
+
+/* ── AUTOCOMPLETE DROPDOWN ── */
+.suggestions-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0; right: 0;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.18);
+    border: 1px solid #e2e8f0;
+    z-index: 99999;
+    overflow: hidden;
+}
+.suggestions-dropdown.open { display: block; }
+.suggestion-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 18px; cursor: pointer;
+    transition: background 0.15s;
+    font-family: "Poppins", sans-serif;
+}
+.suggestion-item:hover,
+.suggestion-item.highlighted { background: #f0f4ff; }
+.suggestion-item + .suggestion-item { border-top: 1px solid #f1f5f9; }
+.si-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: #eff6ff; color: #2563eb;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 0.88rem;
+}
+.si-icon.city { background: #fef3c7; color: #d97706; }
+.si-text { font-size: 0.92rem; font-weight: 600; color: #1e293b; flex: 1; }
+.si-badge {
+    font-size: 0.68rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 20px; text-transform: uppercase;
+}
+.si-badge.locality { background: #eff6ff; color: #2563eb; }
+.si-badge.city     { background: #fef3c7; color: #d97706; }
+.suggestions-no-result {
+    padding: 14px 18px; font-size: 0.88rem;
+    color: #94a3b8; text-align: center;
+    font-family: "Poppins", sans-serif;
+}
+
 /* ============================================================
    FAQ
 ============================================================ */
@@ -308,17 +356,34 @@ footer { background: #0f172a; padding: 60px 20px 30px; color: rgba(255,255,255,.
             <button class="tab-99a" onclick="switchTab('resale',this)">Buy / Resale</button>
         </div>
         <form class="search-box-99a" id="searchForm" onsubmit="doSearch(event)">
+
+            <!-- CITY INPUT -->
             <div class="sb-field-99a sb-locality" style="flex:0 0 25%;border-right:1px solid #e2e8f0;">
                 <i class="bi bi-geo-alt" style="color:#888;margin-right:8px;font-size:1.1rem;"></i>
-                <input type="text" id="sb-city-input" placeholder="Enter City (Nagpur, Pune...)" value="" style="border:none;outline:none;background:transparent;font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:600;width:100%;">
+                <input type="text" id="sb-city-input"
+                       placeholder="Enter City (Nagpur, Pune...)"
+                       style="border:none;outline:none;background:transparent;font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:600;width:100%;">
             </div>
-            <div class="sb-field-99a sb-locality" style="flex:1;">
+
+            <!-- LOCALITY INPUT + AUTOCOMPLETE DROPDOWN -->
+            <div class="sb-field-99a sb-locality" style="flex:1; position:relative;">
                 <div class="loc-scroll-wrapper">
                     <div id="locality-tags" class="loc-tags-container"></div>
-                    <input type="text" id="sb-location-input" placeholder="Locality, Area or '3 BHK'...">
+                    <input type="text" id="sb-location-input"
+                           placeholder="Locality, Area or Landmark..."
+                           autocomplete="off"
+                           oninput="fetchSuggestions(this.value)"
+                           onkeydown="handleSuggestionKey(event)">
                 </div>
-                <button type="button" onclick="startVoiceSearch()" class="voice-btn-inline"><i class="bi bi-mic"></i></button>
+                <button type="button" onclick="startVoiceSearch()" class="voice-btn-inline">
+                    <i class="bi bi-mic"></i>
+                </button>
+
+                <!-- DROPDOWN — renders here -->
+                <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
             </div>
+
+            <!-- PROPERTY TYPE DROPDOWN -->
             <div class="sb-field-99a sb-custom-dropdown" id="type-trigger">
                 <div class="sb-field-text" id="type-display">Property Type</div>
                 <i class="bi bi-chevron-down" style="color:#888;margin-left:8px;font-size:.8rem;"></i>
@@ -327,7 +392,10 @@ footer { background: #0f172a; padding: 60px 20px 30px; color: rgba(255,255,255,.
                     <div id="type-checkboxes"></div>
                 </div>
             </div>
-            <button type="submit" class="sb-btn-99a"><i class="bi bi-search"></i> Search</button>
+
+            <button type="submit" class="sb-btn-99a">
+                <i class="bi bi-search"></i> Search
+            </button>
         </form>
     </div>
 
@@ -412,200 +480,6 @@ footer { background: #0f172a; padding: 60px 20px 30px; color: rgba(255,255,255,.
      EXPLORE TOP LISTINGS
      Shows 1 card per category (Residential, Commercial, PG)
 ═══════════════════════════════════════════ -->
-<section class="section-wrap" style="padding-top:10px;">
-    <div class="sec-header">
-        <div>
-            <div class="section-title">Explore Top Listings</div>
-            <div class="section-subtitle">One best pick from each category</div>
-        </div>
-        <a href="/listingpage/" class="sec-link">View All →</a>
-    </div>
-
-    <ul class="nav nav-pills mb-4" id="propTabs">
-        <li class="nav-item"><button class="nav-link active" data-bs-target="#rentSec" data-bs-toggle="pill">For Rent</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-target="#saleSec" data-bs-toggle="pill">For Resale</button></li>
-    </ul>
-
-    <div class="tab-content">
-
-        <!-- RENT -->
-        <div class="tab-pane fade show active" id="rentSec">
-            <div class="prop-grid-3">
-                {% for cat, props in rental_map.items %}
-                    {% with p=props|first %}
-                    {% if p %}
-                    <a href="/listing/rent/{{ cat|lower }}/{{ p.id }}/" class="pcard">
-                        <div class="pc-img">
-                            {% if p.images.first %}
-                                <img src="{{ p.images.first.image.url }}" alt="{{ p.property_title }}">
-                            {% else %}
-                                <!-- BRANDED PLACEHOLDER -->
-                                <div class="prop-placeholder" data-cat="{{ cat }}">
-                                    <div class="pp-inner">
-                                        <div class="pp-icon-wrap">
-                                            {% if cat == "Residential" or cat == "Residential Data" %}
-                                                <i class="bi bi-house-door-fill"></i>
-                                            {% elif cat == "Commercial" or cat == "Commercial Data" %}
-                                                <i class="bi bi-building-fill"></i>
-                                            {% elif cat == "PG" or cat == "PG Data" %}
-                                                <i class="bi bi-people-fill"></i>
-                                            {% elif cat == "Plot" or cat == "Plot Resale" %}
-                                                <i class="bi bi-map-fill"></i>
-                                            {% elif cat == "Industrial" or cat == "Industrial Resale" %}
-                                                <i class="bi bi-gear-fill"></i>
-                                            {% elif cat == "Agricultural" or cat == "Agricultural Data" %}
-                                                <i class="bi bi-tree-fill"></i>
-                                            {% else %}
-                                                <i class="bi bi-house-fill"></i>
-                                            {% endif %}
-                                        </div>
-                                        <div class="pp-cat-name">{{ cat }}</div>
-                                        <div class="pp-brand">EstateFlow</div>
-                                    </div>
-                                </div>
-                            {% endif %}
-
-                            <div class="pc-badges">
-                                <span class="badge-tag b-rent">FOR RENT</span>
-                                <span class="badge-tag" style="background:#7c3aed;color:white;">{{ cat }}</span>
-                                {% if p.is_verified %}<span class="badge-tag b-verif">✅ Verified</span>{% endif %}
-                            </div>
-
-                            <!-- LATEST BADGE -->
-                            {% if p.created_at.date == today %}
-                                <span class="pp-latest-badge" style="background:#10b981;">🆕 Just Added</span>
-                            {% elif p.created_at.date >= fifteen_days_ago %}
-                                <span class="pp-latest-badge" style="background:#f59e0b;">🔥 Latest</span>
-                            {% endif %}
-
-                            <button class="pc-save" onclick="event.preventDefault();toggleSave({{ p.id }},'rent',this)"><i class="bi bi-heart"></i></button>
-                            <div class="pc-price-tag">₹{{ p.monthly_rent|default:"N/A"|floatformat:0 }}/mo</div>
-                        </div>
-
-                        <div class="pc-body">
-                            <div class="pc-title">{{ p.property_title|truncatechars:50 }}</div>
-                            <div class="pc-addr"><i class="bi bi-geo-alt-fill"></i> {{ p.city }}{% if p.locality %}, {{ p.locality }}{% endif %}</div>
-                            <div class="pc-specs">
-                                {% if p.bhk_type %}<div class="spec"><i class="bi bi-door-open"></i> {{ p.bhk_type }}</div>{% endif %}
-                                {% if p.bathrooms %}<div class="spec"><i class="bi bi-droplet"></i> {{ p.bathrooms }} Bath</div>{% endif %}
-                                {% if p.built_up_area %}<div class="spec"><i class="bi bi-aspect-ratio"></i> {{ p.built_up_area|floatformat:0 }} sqft</div>{% endif %}
-                            </div>
-                            <div class="pc-meta">{{ p.created_at|timesince }} ago</div>
-                            <div class="pc-footer">
-                                <div class="pc-agent">
-                                    <div class="pa-av" style="background:#f97316;">{{ p.owner_name|default:"OW"|slice:":2"|upper }}</div>
-                                    <div>
-                                        <div class="pa-name">{{ p.owner_name|default:"Owner"|truncatechars:16 }}</div>
-                                        <div class="pa-role">Verified Owner</div>
-                                    </div>
-                                </div>
-                                <div class="pc-actions">
-                                    <button class="pca" onclick="event.preventDefault();callListing('{{ p.contact_number }}')" title="Call"><i class="bi bi-telephone"></i></button>
-                                    <button class="pca wa" onclick="event.preventDefault();waListing('{{ p.contact_number }}')" title="WhatsApp"><i class="bi bi-whatsapp"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                    {% endif %}
-                    {% endwith %}
-                {% empty %}
-                <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">No rental listings available.</div>
-                {% endfor %}
-            </div>
-            <div class="text-center mt-4">
-                <a href="/listingpage/?type=rent" class="btn-primary-custom">View All Rentals →</a>
-            </div>
-        </div>
-
-        <!-- RESALE -->
-        <div class="tab-pane fade" id="saleSec">
-            <div class="prop-grid-3">
-                {% for cat, props in resale_map.items %}
-                    {% with p=props|first %}
-                    {% if p %}
-                    <a href="/listing/sale/{{ cat|lower }}/{{ p.id }}/" class="pcard">
-                        <div class="pc-img">
-                            {% if p.images.first %}
-                                <img src="{{ p.images.first.image.url }}" alt="{{ p.property_title }}">
-                            {% else %}
-                                <!-- BRANDED PLACEHOLDER -->
-                                <div class="prop-placeholder" data-cat="{{ cat }}">
-                                    <div class="pp-inner">
-                                        <div class="pp-icon-wrap">
-                                            {% if cat == "Resale Residential" or cat == "Residential" %}
-                                                <i class="bi bi-house-door-fill"></i>
-                                            {% elif cat == "Commercial Resale" or cat == "Commercial" %}
-                                                <i class="bi bi-building-fill"></i>
-                                            {% elif cat == "Plot Resale" or cat == "Plot" %}
-                                                <i class="bi bi-map-fill"></i>
-                                            {% elif cat == "Industrial Resale" or cat == "Industrial" %}
-                                                <i class="bi bi-gear-fill"></i>
-                                            {% elif cat == "Agricultural Data" or cat == "Agricultural" %}
-                                                <i class="bi bi-tree-fill"></i>
-                                            {% else %}
-                                                <i class="bi bi-buildings-fill"></i>
-                                            {% endif %}
-                                        </div>
-                                        <div class="pp-cat-name">{{ cat }}</div>
-                                        <div class="pp-brand">EstateFlow</div>
-                                    </div>
-                                </div>
-                            {% endif %}
-
-                            <div class="pc-badges">
-                                <span class="badge-tag b-sale">FOR SALE</span>
-                                <span class="badge-tag" style="background:#7c3aed;color:white;">{{ cat }}</span>
-                                {% if p.is_verified %}<span class="badge-tag b-verif">✅ Verified</span>{% endif %}
-                            </div>
-
-                            <!-- LATEST BADGE -->
-                            {% if p.created_at.date == today %}
-                                <span class="pp-latest-badge" style="background:#10b981;">🆕 Just Added</span>
-                            {% elif p.created_at.date >= fifteen_days_ago %}
-                                <span class="pp-latest-badge" style="background:#f59e0b;">🔥 Latest</span>
-                            {% endif %}
-
-                            <button class="pc-save" onclick="event.preventDefault();toggleSave({{ p.id }},'sale',this)"><i class="bi bi-heart"></i></button>
-                            <div class="pc-price-tag">₹{{ p.expected_price|default:"N/A"|floatformat:0 }}</div>
-                        </div>
-
-                        <div class="pc-body">
-                            <div class="pc-title">{{ p.property_title|truncatechars:50 }}</div>
-                            <div class="pc-addr"><i class="bi bi-geo-alt-fill"></i> {{ p.city }}{% if p.locality %}, {{ p.locality }}{% endif %}</div>
-                            <div class="pc-specs">
-                                {% if p.bhk_type %}<div class="spec"><i class="bi bi-door-open"></i> {{ p.bhk_type }}</div>{% endif %}
-                                {% if p.bathrooms %}<div class="spec"><i class="bi bi-droplet"></i> {{ p.bathrooms }} Bath</div>{% endif %}
-                                {% if p.built_up_area %}<div class="spec"><i class="bi bi-aspect-ratio"></i> {{ p.built_up_area|floatformat:0 }} sqft</div>{% endif %}
-                            </div>
-                            <div class="pc-meta">{{ p.created_at|timesince }} ago</div>
-                            <div class="pc-footer">
-                                <div class="pc-agent">
-                                    <div class="pa-av" style="background:#006ce4;">{{ p.owner_name|default:"OW"|slice:":2"|upper }}</div>
-                                    <div>
-                                        <div class="pa-name">{{ p.owner_name|default:"Owner"|truncatechars:16 }}</div>
-                                        <div class="pa-role">Verified Owner</div>
-                                    </div>
-                                </div>
-                                <div class="pc-actions">
-                                    <button class="pca" onclick="event.preventDefault();callListing('{{ p.contact_number }}')" title="Call"><i class="bi bi-telephone"></i></button>
-                                    <button class="pca wa" onclick="event.preventDefault();waListing('{{ p.contact_number }}')" title="WhatsApp"><i class="bi bi-whatsapp"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                    {% endif %}
-                    {% endwith %}
-                {% empty %}
-                <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">No resale listings available.</div>
-                {% endfor %}
-            </div>
-            <div class="text-center mt-4">
-                <a href="/listingpage/?type=sale" class="btn-primary-custom">View All Resale →</a>
-            </div>
-        </div>
-
-    </div>
-</section>
 
 <!-- ── PLACEHOLDER STYLES ── -->
 <style>
@@ -1009,7 +883,11 @@ footer { background: #0f172a; padding: 60px 20px 30px; color: rgba(255,255,255,.
 
 <script>
 /* ── SEARCH ── */
+/* ── SEARCH STATE ── */
 let selectedLocalities = [];
+let suggestionIndex    = -1;
+let suggestionData     = [];
+
 const TYPE_OPTIONS = {
     rent: `
         <label class="check-item"><input type="checkbox" class="ptype-cb" value="Residential Data"> <span>Residential</span></label>
@@ -1024,6 +902,7 @@ const TYPE_OPTIONS = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Popover toggle for Property Type dropdown
     document.querySelectorAll('.sb-custom-dropdown').forEach(d => {
         d.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -1032,89 +911,232 @@ document.addEventListener('DOMContentLoaded', () => {
             if(p) p.classList.toggle('show-popover');
         });
     });
-    document.addEventListener('click', () => document.querySelectorAll('.custom-popover').forEach(p => p.classList.remove('show-popover')));
+    document.addEventListener('click', (e) => {
+        // close popover
+        document.querySelectorAll('.custom-popover').forEach(p => p.classList.remove('show-popover'));
+        // close suggestion dropdown if click outside
+        if (!e.target.closest('.sb-locality')) closeSuggestions();
+    });
 
+    // Enter key inside location input adds chip
     const locInput = document.getElementById('sb-location-input');
-    if(locInput) {
+    if (locInput) {
         locInput.addEventListener('keydown', function(e) {
-            if(e.key==='Enter') {
+            if (e.key === 'Enter') {
                 e.preventDefault();
                 const v = this.value.trim();
-                if(v && !selectedLocalities.includes(v)) { selectedLocalities.push(v); renderTags(); this.value=''; }
+                if (v) { addLocalityChip(v); this.value = ''; closeSuggestions(); }
             }
         });
     }
+
+    // Init type checkboxes
     const tc = document.getElementById('type-checkboxes');
-    if(tc) tc.innerHTML = TYPE_OPTIONS['rent'];
+    if (tc) tc.innerHTML = TYPE_OPTIONS['rent'];
 });
 
+/* ── TAB SWITCH ── */
 function switchTab(mode, el) {
     document.querySelectorAll('.tab-99a').forEach(t => t.classList.remove('active-tab'));
-    if(el) el.classList.add('active-tab');
+    if (el) el.classList.add('active-tab');
     document.getElementById('type-checkboxes').innerHTML = TYPE_OPTIONS[mode];
     document.getElementById('type-display').innerText = 'Property Type';
 }
 
+/* ── PROPERTY TYPE CHECKBOX LABEL ── */
 document.addEventListener('change', function(e) {
-    if(e.target && e.target.classList.contains('ptype-cb')) {
+    if (e.target && e.target.classList.contains('ptype-cb')) {
         const checked = document.querySelectorAll('.ptype-cb:checked');
-        document.getElementById('type-display').innerText = checked.length===0 ? 'Property Type' : (checked.length===1 ? checked[0].value : checked.length+' Selected');
+        document.getElementById('type-display').innerText =
+            checked.length === 0 ? 'Property Type' :
+            checked.length === 1 ? checked[0].parentElement.querySelector('span').innerText :
+            checked.length + ' Selected';
     }
 });
 
-function renderTags() {
-    const c = document.getElementById('locality-tags');
-    if(!c) return;
-    c.innerHTML = selectedLocalities.map((l,i) => `<span class="loc-tag">${l} <i class="bi bi-x-circle-fill" onclick="selectedLocalities.splice(${i},1);renderTags();"></i></span>`).join('');
+/* ── AUTOCOMPLETE SUGGESTIONS ── */
+let suggestTimer = null;
+
+function fetchSuggestions(query) {
+    clearTimeout(suggestTimer);
+    query = query.trim();
+    if (query.length < 2) { closeSuggestions(); return; }
+
+    const activeTab   = document.querySelector('.tab-99a.active-tab');
+    const listingType = activeTab && activeTab.innerText.trim().toLowerCase() === 'rent' ? 'rent' : 'sale';
+
+    suggestTimer = setTimeout(() => {
+        fetch(`/api/search-suggestions/?q=${encodeURIComponent(query)}&type=${listingType}`)
+            .then(r => r.json())
+            .then(data => renderSuggestions(data.suggestions || []))
+            .catch(() => closeSuggestions());
+    }, 220);   // 220ms debounce — feels instant, saves requests
 }
 
+function renderSuggestions(items) {
+    const dropdown = document.getElementById('suggestionsDropdown');
+    if (!dropdown) return;
+    suggestionData  = items;
+    suggestionIndex = -1;
+
+    if (!items.length) {
+        dropdown.innerHTML = `<div class="suggestions-no-result">No results found</div>`;
+        dropdown.classList.add('open');
+        return;
+    }
+
+    dropdown.innerHTML = items.map((item, i) => {
+        const isCity  = item.type === 'City';
+        const iconCls = isCity ? 'city' : '';
+        const icon    = isCity ? 'bi bi-geo-alt-fill' : 'bi bi-geo-alt';
+        const badge   = isCity ? 'city' : 'locality';
+        return `
+        <div class="suggestion-item" data-index="${i}"
+             onmousedown="selectSuggestion('${item.text.replace(/'/g,"\\'")}')">
+            <div class="si-icon ${iconCls}"><i class="${icon}"></i></div>
+            <span class="si-text">${item.text}</span>
+            <span class="si-badge ${badge}">${item.type}</span>
+        </div>`;
+    }).join('');
+
+    dropdown.classList.add('open');
+}
+
+function selectSuggestion(text) {
+    addLocalityChip(text);
+    const inp = document.getElementById('sb-location-input');
+    if (inp) inp.value = '';
+    closeSuggestions();
+}
+
+function closeSuggestions() {
+    const dropdown = document.getElementById('suggestionsDropdown');
+    if (dropdown) { dropdown.classList.remove('open'); dropdown.innerHTML = ''; }
+    suggestionIndex = -1;
+}
+
+/* ── KEYBOARD NAVIGATION in dropdown (↑ ↓ Enter Esc) ── */
+function handleSuggestionKey(e) {
+    const dropdown = document.getElementById('suggestionsDropdown');
+    const items    = dropdown ? dropdown.querySelectorAll('.suggestion-item') : [];
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        suggestionIndex = Math.min(suggestionIndex + 1, items.length - 1);
+        highlightSuggestion(items);
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        suggestionIndex = Math.max(suggestionIndex - 1, -1);
+        highlightSuggestion(items);
+    } else if (e.key === 'Enter') {
+        if (suggestionIndex >= 0 && suggestionData[suggestionIndex]) {
+            e.preventDefault();
+            selectSuggestion(suggestionData[suggestionIndex].text);
+        }
+    } else if (e.key === 'Escape') {
+        closeSuggestions();
+    }
+}
+
+function highlightSuggestion(items) {
+    items.forEach((el, i) => {
+        el.style.background = i === suggestionIndex ? '#f0f4ff' : '';
+    });
+    if (suggestionIndex >= 0 && items[suggestionIndex]) {
+        items[suggestionIndex].scrollIntoView({ block: 'nearest' });
+    }
+}
+
+/* ── LOCALITY CHIPS ── */
+function addLocalityChip(text) {
+    if (!text || selectedLocalities.includes(text)) return;
+    selectedLocalities.push(text);
+    renderTags();
+}
+
+function renderTags() {
+    const c = document.getElementById('locality-tags');
+    if (!c) return;
+    c.innerHTML = selectedLocalities.map((l, i) =>
+        `<span class="loc-tag">${l}
+            <i class="bi bi-x-circle-fill"
+               onclick="selectedLocalities.splice(${i},1);renderTags();">
+            </i>
+         </span>`
+    ).join('');
+}
+
+/* ── VOICE SEARCH ── */
 function startVoiceSearch() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SR) return alert('Browser not supported.');
-    const r = new SR(); r.lang='en-IN';
-    r.onresult = e => { document.getElementById('sb-location-input').value = e.results[0][0].transcript; };
+    if (!SR) return alert('Browser does not support voice search.');
+    const r    = new SR();
+    r.lang     = 'en-IN';
+    r.onresult = e => {
+        const text = e.results[0][0].transcript.trim();
+        document.getElementById('sb-location-input').value = text;
+        fetchSuggestions(text);
+    };
     r.start();
 }
 
+/* ── MAIN SEARCH — no AI query, uses area param ── */
 function doSearch(e) {
-    if(e) e.preventDefault();
-    const intent = document.querySelector('.tab-99a.active-tab').innerText.trim();
-    const city = document.getElementById('sb-city-input').value.trim();
-    const loc = document.getElementById('sb-location-input').value.trim();
-    const checked = Array.from(document.querySelectorAll('.ptype-cb:checked')).map(c=>c.value).join(',');
-    let cats = checked;
-    if(!cats) cats = intent==='Rent' ? 'Residential Data,Commercial Data,PG Data' : 'Resale Residential,Commercial Resale,Plot Resale,Agricultural Data,Industrial Resale';
-    let q = `I am looking for ${intent} property in ${city}`;
-    if(loc) q += ` specifically in ${loc}`;
-    const p = new URLSearchParams();
-    p.set('ai_query', q); p.set('types', cats); p.set('city_filter', city);
-    window.location.href = '/listingpage/?' + p.toString();
+    if (e) e.preventDefault();
+
+    const activeTab   = document.querySelector('.tab-99a.active-tab');
+    const intent      = activeTab ? activeTab.innerText.trim() : 'Rent';
+    const listingType = intent.toLowerCase() === 'rent' ? 'rent' : 'sale';
+
+    const city      = (document.getElementById('sb-city-input')?.value || '').trim();
+    const locInp    = (document.getElementById('sb-location-input')?.value || '').trim();
+    const checked   = Array.from(document.querySelectorAll('.ptype-cb:checked')).map(c => c.value);
+
+    // Combine chip tags + current typed input
+    const allLocs = [...selectedLocalities];
+    if (locInp) allLocs.push(locInp);
+
+    const params = new URLSearchParams();
+    params.set('type', listingType);
+
+    if (city)           params.set('city_filter', city);
+    if (allLocs[0])     params.set('area', allLocs[0]);   // first locality
+    if (checked[0])     params.set('category', checked[0]);
+
+    window.location.href = '/listingpage/?' + params.toString();
 }
 
-/* ── PLANS FILTER ── */
-$(document).ready(function() {
+/* ── PLAN FILTER (jQuery — keep as-is) ── */
+$(document).ready(function () {
     function filterPlans() {
         const aud = $('.plan-badge.active').attr('data-target');
         const dur = $('#durationSelect').val();
         let count = 0;
-        $('.plan-item').each(function() {
-            if($(this).attr('data-for')===aud && $(this).attr('data-duration')===dur) { $(this).fadeIn(200); count++; }
-            else { $(this).hide(); }
+        $('.plan-item').each(function () {
+            if ($(this).attr('data-for') === aud && $(this).attr('data-duration') === dur) {
+                $(this).fadeIn(200); count++;
+            } else {
+                $(this).hide();
+            }
         });
-        count===0 ? $('#noPlansMsg').fadeIn(200) : $('#noPlansMsg').hide();
+        count === 0 ? $('#noPlansMsg').fadeIn(200) : $('#noPlansMsg').hide();
     }
-    $('.plan-badge').on('click', function() { $('.plan-badge').removeClass('active'); $(this).addClass('active'); filterPlans(); });
+    $('.plan-badge').on('click', function () {
+        $('.plan-badge').removeClass('active');
+        $(this).addClass('active');
+        filterPlans();
+    });
     $('#durationSelect').on('change', filterPlans);
     filterPlans();
 });
 
 /* ── UTILITIES ── */
 function callListing(phone) {
-    if(!phone || phone==='None') return;
+    if (!phone || phone === 'None') return;
     window.location.href = 'tel:' + phone;
 }
 function waListing(phone) {
-    if(!phone || phone==='None') return;
+    if (!phone || phone === 'None') return;
     window.open('https://wa.me/91' + phone, '_blank');
 }
 function toggleSave(id, type, btn) {

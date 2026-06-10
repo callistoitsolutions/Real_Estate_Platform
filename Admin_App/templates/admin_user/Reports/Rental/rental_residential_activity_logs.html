@@ -1,0 +1,1092 @@
+{% include "admin_user/admin_header.html" %}
+{% load static %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+    :root {
+        --primary: #667eea;
+        --primary-dark: #5a67d8;
+        --secondary: #764ba2;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --dark: #1e293b;
+        --card-bg: #ffffff;
+        --border: #e2e8f0;
+        --text-muted: #94a3b8;
+        --text-body: #334155;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+        --shadow-md: 0 4px 12px -1px rgba(0,0,0,0.08);
+        --radius: 12px;
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    /* ── Base Layout ─────────────────────────────────────── */
+    .main-content {
+        padding: 24px 28px;
+        background-color: #f1f5f9;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        min-height: 100vh;
+        box-sizing: border-box;
+    }
+
+    /* ── Page Header ─────────────────────────────────────── */
+    .page-header {
+        background: var(--primary-gradient);
+        border-radius: var(--radius);
+        padding: 22px 28px;
+        margin-bottom: 24px;
+        color: white;
+        box-shadow: 0 4px 20px rgba(102,126,234,0.35);
+    }
+    .page-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .page-title {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        white-space: nowrap;
+    }
+    .page-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-primary-custom {
+        padding: 9px 18px;
+        background: rgba(255,255,255,0.18);
+        border: 1px solid rgba(255,255,255,0.4);
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: all 0.2s;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+    .btn-primary-custom:hover {
+        background: rgba(255,255,255,0.30);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    /* ── Section Divider ─────────────────────────────────── */
+    .row-divider {
+        display: flex;
+        align-items: center;
+        margin: 24px 0 16px;
+        color: #64748b;
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+    .row-divider::before,
+    .row-divider::after { content: ''; flex: 1; border-bottom: 2px solid #e2e8f0; }
+    .row-divider:not(:empty)::before { margin-right: 16px; }
+    .row-divider:not(:empty)::after  { margin-left:  16px; }
+
+    /* ── KPI Cards ───────────────────────────────────────── */
+    .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 8px;
+    }
+    @media (max-width: 1100px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px)  { .kpi-row { grid-template-columns: 1fr; } }
+
+    .kpi-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        border-bottom: 4px solid #cbd5e1;
+        box-shadow: var(--shadow-sm);
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .kpi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .kpi-card.b-purple { border-bottom-color: #8b5cf6; }
+    .kpi-card.b-blue   { border-bottom-color: #3b82f6; }
+    .kpi-card.b-red    { border-bottom-color: #ef4444; }
+    .kpi-card.b-green  { border-bottom-color: #10b981; }
+
+    .kpi-icon {
+        width: 44px; height: 44px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 17px;
+        margin-bottom: 12px;
+    }
+    .ic-purple { background: #f5f3ff; color: #8b5cf6; }
+    .ic-orange { background: #fff7ed; color: #f97316; }
+    .ic-red    { background: #fee2e2; color: #ef4444; }
+    .ic-green  { background: #f0fdf4; color: #10b981; }
+
+    .kpi-val   { font-size: 30px; font-weight: 800; color: #0f172a; line-height: 1; }
+    .kpi-label { font-size: 12.5px; font-weight: 600; color: #64748b; margin-top: 5px; }
+
+    /* ── Search Bar ──────────────────────────────────────── */
+    .advanced-search-bar {
+        background: #fff;
+        padding: 22px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: flex-end;
+        margin-bottom: 20px;
+    }
+    .search-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        flex: 1;
+        min-width: 160px;
+    }
+    .search-group.wide { flex: 2; min-width: 240px; }
+    .search-group label {
+        font-size: 10.5px;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .filter-input {
+        width: 100%;
+        padding: 9px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #1e293b;
+        background: #f8fafc;
+        height: 40px;
+        outline: none;
+        transition: border-color 0.15s, background 0.15s;
+        box-sizing: border-box;
+    }
+    .filter-input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(102,126,234,0.12); }
+
+    .btn-run-search {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0 20px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 40px;
+        white-space: nowrap;
+        transition: background 0.15s;
+    }
+    .btn-run-search:hover { background: #2563eb; }
+
+    .btn-reset {
+        background: #fff;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        padding: 0 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 40px;
+        white-space: nowrap;
+        transition: background 0.15s;
+    }
+    .btn-reset:hover { background: #f1f5f9; color: #1e293b; text-decoration: none; }
+
+    /* ── Results Badge & Active Tags ─────────────────────── */
+    .results-badge {
+        background: #eff6ff;
+        color: #2563eb;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 9px 16px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid #bfdbfe;
+        box-shadow: var(--shadow-sm);
+    }
+    .active-tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .active-tag {
+        background: #f1f5f9;
+        color: #1e293b;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid #cbd5e1;
+    }
+    .active-tag i { cursor: pointer; color: #64748b; font-size: 10px; }
+    .active-tag i:hover { color: #ef4444; }
+
+    /* ── Logs Section / Tabs ─────────────────────────────── */
+    .logs-section {
+        background: #fff;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 30px;
+        overflow: hidden;
+    }
+    .logs-tabs-header {
+        padding: 0 24px;
+        background: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    .nav-tabs {
+        border-bottom: none !important;
+        gap: 0;
+        display: flex !important;
+        margin-bottom: 0 !important;
+    }
+    .nav-tabs .nav-link {
+        font-weight: 700;
+        font-size: 13.5px;
+        color: #64748b;
+        border: none !important;
+        padding: 14px 20px;
+        border-radius: 0;
+        background: transparent;
+        transition: color 0.2s;
+        border-bottom: 3px solid transparent !important;
+        white-space: nowrap;
+    }
+    .nav-tabs .nav-link:hover { color: #334155; }
+    .nav-tabs .nav-link.active {
+        color: #4f46e5 !important;
+        border-bottom: 3px solid #4f46e5 !important;
+        background: transparent;
+    }
+    .tab-content { padding: 20px 24px 24px; }
+
+    /* ── Table Wrapper ───────────────────────────────────── */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 10px;
+        border: 1px solid #e8edf3;
+        background: #fff;
+    }
+    .properties-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        text-align: left;
+        min-width: 900px; /* prevents squishing on Table 1 */
+    }
+    .properties-table.wide-table { min-width: 2400px; } /* Table 2 wide */
+
+    .properties-table th {
+        padding: 12px 15px;
+        font-size: 10.5px;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        background: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+    }
+    .properties-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        color: #334155;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+    .properties-table tbody tr:last-child td { border-bottom: none; }
+    .properties-table tbody tr:hover { background-color: #f8fafc; }
+
+    .truncate-cell {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    /* ── Action Badges ───────────────────────────────────── */
+    .badge-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .badge-search   { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .badge-update   { background: #fef9c3; color: #92400e; border: 1px solid #fde68a; }
+    .badge-delete   { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .badge-import   { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .badge-schedule { background: #f3e8ff; color: #7c3aed; border: 1px solid #d8b4fe; }
+
+    /* ── Inline Code ─────────────────────────────────────── */
+    code {
+        font-family: monospace;
+        font-size: 11.5px;
+        color: #b91c1c;
+        background-color: #fef2f2;
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    /* ── Action Buttons ──────────────────────────────────── */
+    .action-container { display: flex; gap: 6px; align-items: center; }
+    .btn-action {
+        width: 32px; height: 32px;
+        border-radius: 7px;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: white;
+        font-size: 13px;
+        transition: transform 0.15s, box-shadow 0.15s;
+        text-decoration: none;
+        flex-shrink: 0;
+    }
+    .btn-action:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); color: white; text-decoration: none; }
+    .btn-view { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .btn-edit { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+
+    /* ── Sticky column for Table 2 ───────────────────────── */
+    .sticky-col-right {
+        position: sticky;
+        right: 0;
+        background: #fff;
+        z-index: 3;
+        box-shadow: -3px 0 8px rgba(0,0,0,0.06);
+    }
+    .sticky-col-right-header {
+        position: sticky;
+        right: 0;
+        background: #f8fafc;
+        z-index: 6;
+        box-shadow: -3px 0 8px rgba(0,0,0,0.06);
+    }
+
+    /* ── Pagination ──────────────────────────────────────── */
+    .pagination-wrap {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 16px;
+    }
+    .pagination-wrap small { color: #94a3b8; font-size: 12.5px; }
+    .page-btns { display: flex; gap: 5px; }
+    .page-btn {
+        padding: 7px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        background: #fff;
+        transition: all 0.15s;
+    }
+    .page-btn:hover { background: #f1f5f9; border-color: #94a3b8; color: #0f172a; text-decoration: none; }
+    .page-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* ── Modals ──────────────────────────────────────────── */
+    .app-modal-overlay {
+        display: none;
+        position: fixed;
+        z-index: 99999;
+        left: 0; top: 0;
+        width: 100vw; height: 100vh;
+        background: rgba(15,23,42,0.7);
+        backdrop-filter: blur(4px);
+        align-items: center;
+        justify-content: center;
+    }
+    .app-modal-overlay.open {
+        display: flex;
+    }
+    .app-modal-box {
+        background: #fff;
+        border-radius: 14px;
+        padding: 28px;
+        width: 90%;
+        max-width: 860px;
+        max-height: 88vh;
+        overflow-y: auto;
+        position: relative;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        animation: modalIn 0.22s ease;
+    }
+    @keyframes modalIn {
+        from { opacity: 0; transform: translateY(16px) scale(0.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-close-btn {
+        position: absolute;
+        top: 16px; right: 20px;
+        background: #f1f5f9;
+        border: none;
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        font-size: 18px;
+        color: #64748b;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        line-height: 1;
+        transition: background 0.15s;
+    }
+    .modal-close-btn:hover { background: #e2e8f0; color: #0f172a; }
+    .modal-title {
+        margin: 0 0 16px;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-right: 40px;
+    }
+    .modal-divider { border: 0; border-top: 1px solid var(--border); margin: 0 0 16px; }
+    .json-output {
+        background: #0f172a;
+        color: #38bdf8;
+        padding: 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: 'Cascadia Code', 'Fira Code', monospace;
+        font-size: 12px;
+        max-height: 380px;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* Image modal gallery */
+    .img-gallery {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 16px;
+    }
+    .img-gallery img {
+        width: 200px; height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* ── Empty State ─────────────────────────────────────── */
+    .empty-state {
+        text-align: center;
+        padding: 48px 24px;
+        color: var(--text-muted);
+    }
+    .empty-state i { font-size: 2.4rem; display: block; margin-bottom: 12px; opacity: 0.4; }
+    .empty-state p { margin: 0; font-size: 14px; }
+</style>
+
+<div class="main-content">
+
+    <!-- ░░ PAGE HEADER ░░ -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">
+                <i class="fas fa-history"></i>
+                Unified Property Activity Logs &amp; Multi-Listing Analytics
+            </h1>
+            <div class="page-actions">
+                <button type="button" onclick="triggerExtraction('csv')" class="btn-primary-custom" style="background:rgba(2,132,199,0.45); border-color:rgba(255,255,255,0.5);">
+                    <i class="fas fa-file-csv"></i> Download CSV Log
+                </button>
+                <button type="button" onclick="triggerExtraction('excel')" class="btn-primary-custom" style="background:rgba(22,163,74,0.45); border-color:rgba(255,255,255,0.5);">
+                    <i class="fas fa-file-excel"></i> Download Excel Matrix
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ░░ KPI CARDS ░░ -->
+    <div class="row-divider"><span>Audit Interaction Overview</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-purple">
+            <div class="kpi-icon ic-purple"><i class="fas fa-fingerprint"></i></div>
+            <div class="kpi-val">{{ total_logs_count|default:"0" }}</div>
+            <div class="kpi-label">Active Filter Logs Found</div>
+        </div>
+        <div class="kpi-card b-orange" style="border-bottom-color:#f97316;">
+            <div class="kpi-icon ic-orange"><i class="fas fa-edit"></i></div>
+            <div class="kpi-val">{{ update_logs_count|default:"0" }}</div>
+            <div class="kpi-label">Properties Modified / Edited</div>
+        </div>
+        <div class="kpi-card b-red">
+            <div class="kpi-icon ic-red"><i class="fas fa-trash-alt"></i></div>
+            <div class="kpi-val">{{ delete_logs_count|default:"0" }}</div>
+            <div class="kpi-label">Total Logs Deleted</div>
+        </div>
+        <div class="kpi-card b-green">
+            <div class="kpi-icon ic-green"><i class="fas fa-file-excel"></i></div>
+            <div class="kpi-val">{{ import_logs_count|default:"0" }}</div>
+            <div class="kpi-label">Total Excel Sheet Uploads</div>
+        </div>
+    </div>
+
+    <!-- ░░ SEARCH BAR ░░ -->
+    <div class="row-divider"><span>Multi-Dimensional Search &amp; Filter Criteria</span></div>
+    <form method="GET" action="{% url 'rental_residential_logs' %}" id="logSearchForm" class="advanced-search-bar">
+        <input type="hidden" name="download" id="downloadInputFormFlag" value="">
+
+        <div class="search-group wide">
+            <label>Operator / User Search</label>
+            <input type="text" name="user_query" value="{{ request.GET.user_query|default:'' }}" class="filter-input" placeholder="Search operational operator user parameters...">
+        </div>
+        <div class="search-group wide">
+            <label>Excel File Source Name</label>
+            <input type="text" name="file_query" value="{{ request.GET.file_query|default:'' }}" class="filter-input" placeholder="Search by workbook file source name...">
+        </div>
+        <div class="search-group wide">
+            <label><i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> Location (City / Locality / Address)</label>
+            <input type="text" name="location_query" value="{{ request.GET.location_query|default:'' }}" class="filter-input" placeholder="Search by city, locality, or address...">
+        </div>
+        <div class="search-group">
+            <label>Property Type</label>
+            <input type="text" name="property_type" value="{{ request.GET.property_type|default:'' }}" class="filter-input" placeholder="e.g. Flat, House, Villa">
+        </div>
+        <div class="search-group">
+            <label>BHK Config Type</label>
+            <input type="text" name="bhk_type" value="{{ request.GET.bhk_type|default:'' }}" class="filter-input" placeholder="e.g. 1 BHK, 2 BHK">
+        </div>
+        <div class="search-group">
+            <label>Min Rent (₹)</label>
+            <input type="number" name="min_budget" value="{{ request.GET.min_budget|default:'' }}" class="filter-input" placeholder="Min amount">
+        </div>
+        <div class="search-group">
+            <label>Max Rent (₹)</label>
+            <input type="number" name="max_budget" value="{{ request.GET.max_budget|default:'' }}" class="filter-input" placeholder="Max amount">
+        </div>
+        <div class="search-group">
+            <label>Changed Target Field</label>
+            <select name="field_target" class="filter-input">
+                <option value="">-- All Fields --</option>
+                <option value="monthly_rent"   {% if request.GET.field_target == 'monthly_rent'   %}selected{% endif %}>Rent / Budget</option>
+                <option value="city_locality"  {% if request.GET.field_target == 'city_locality'  %}selected{% endif %}>City &amp; Locality</option>
+                <option value="bhk_type"       {% if request.GET.field_target == 'bhk_type'       %}selected{% endif %}>BHK Layout</option>
+                <option value="owner_contact"  {% if request.GET.field_target == 'owner_contact'  %}selected{% endif %}>Owner Contact</option>
+            </select>
+        </div>
+        <div class="search-group">
+            <label>Action / Source</label>
+            <select name="action_type" class="filter-input">
+                <option value="">-- All Sources --</option>
+                <option value="SEARCH"        {% if request.GET.action_type == 'SEARCH'        %}selected{% endif %}>Search Query</option>
+                <option value="UPDATE"        {% if request.GET.action_type == 'UPDATE'        %}selected{% endif %}>Property Edited</option>
+                <option value="DELETE"        {% if request.GET.action_type == 'DELETE'        %}selected{% endif %}>Deleted</option>
+                <option value="EXCEL_IMPORT"  {% if request.GET.action_type == 'EXCEL_IMPORT'  %}selected{% endif %}>Excel Upload</option>
+                <option value="SCHEDULED_RUN" {% if request.GET.action_type == 'SCHEDULED_RUN' %}selected{% endif %}>Scheduled Task</option>
+            </select>
+        </div>
+        <div class="search-group">
+            <label><i class="fas fa-calendar-alt" style="color:var(--primary);"></i> Calendar Month</label>
+            <select name="month_filter" class="filter-input">
+                <option value="">-- All Months --</option>
+                <option value="1"  {% if request.GET.month_filter == '1'  %}selected{% endif %}>January</option>
+                <option value="2"  {% if request.GET.month_filter == '2'  %}selected{% endif %}>February</option>
+                <option value="3"  {% if request.GET.month_filter == '3'  %}selected{% endif %}>March</option>
+                <option value="4"  {% if request.GET.month_filter == '4'  %}selected{% endif %}>April</option>
+                <option value="5"  {% if request.GET.month_filter == '5'  %}selected{% endif %}>May</option>
+                <option value="6"  {% if request.GET.month_filter == '6'  %}selected{% endif %}>June</option>
+                <option value="7"  {% if request.GET.month_filter == '7'  %}selected{% endif %}>July</option>
+                <option value="8"  {% if request.GET.month_filter == '8'  %}selected{% endif %}>August</option>
+                <option value="9"  {% if request.GET.month_filter == '9'  %}selected{% endif %}>September</option>
+                <option value="10" {% if request.GET.month_filter == '10' %}selected{% endif %}>October</option>
+                <option value="11" {% if request.GET.month_filter == '11' %}selected{% endif %}>November</option>
+                <option value="12" {% if request.GET.month_filter == '12' %}selected{% endif %}>December</option>
+            </select>
+        </div>
+        <div class="search-group">
+            <label>From Date</label>
+            <input type="date" name="start_date" value="{{ request.GET.start_date|default:'' }}" class="filter-input">
+        </div>
+        <div class="search-group">
+            <label>From Time</label>
+            <input type="time" name="start_time" value="{{ request.GET.start_time|default:'' }}" class="filter-input">
+        </div>
+        <div class="search-group">
+            <label>To Date</label>
+            <input type="date" name="end_date" value="{{ request.GET.end_date|default:'' }}" class="filter-input">
+        </div>
+        <div class="search-group">
+            <label>To Time</label>
+            <input type="time" name="end_time" value="{{ request.GET.end_time|default:'' }}" class="filter-input">
+        </div>
+        <div style="display:flex; gap:8px; align-self:flex-end;">
+            <button type="button" onclick="executeLogsSearchLookupFilter()" class="btn-run-search">
+                <i class="fas fa-search"></i> Run Search
+            </button>
+            <a href="?" class="btn-reset"><i class="fas fa-undo"></i> Reset</a>
+        </div>
+    </form>
+
+    <!-- ░░ RESULTS BADGE + ACTIVE FILTER TAGS ░░ -->
+    <div style="margin-bottom:20px;">
+        <div class="results-badge">
+            <i class="fas fa-filter"></i>
+            Showing <strong style="color:#1d4ed8; font-size:15px; margin:0 3px;">{{ properties_filtered_count|default:"0" }}</strong>
+            of {{ properties_total_count|default:"0" }} properties in current query context
+        </div>
+        <div class="active-tags-row">
+            {% if request.GET.location_query %}
+                <span class="active-tag">Location: {{ request.GET.location_query }} <i class="fas fa-times" onclick="clearFilterField('location_query')"></i></span>
+            {% endif %}
+            {% if request.GET.bhk_type %}
+                <span class="active-tag">BHK: {{ request.GET.bhk_type }} <i class="fas fa-times" onclick="clearFilterField('bhk_type')"></i></span>
+            {% endif %}
+            {% if request.GET.property_type %}
+                <span class="active-tag">Type: {{ request.GET.property_type }} <i class="fas fa-times" onclick="clearFilterField('property_type')"></i></span>
+            {% endif %}
+            {% if request.GET.action_type %}
+                <span class="active-tag">Action: {{ request.GET.action_type }} <i class="fas fa-times" onclick="clearFilterField('action_type')"></i></span>
+            {% endif %}
+            {% if request.GET.month_filter %}
+                <span class="active-tag">Month: {{ request.GET.month_filter }} <i class="fas fa-times" onclick="clearFilterField('month_filter')"></i></span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ░░ DUAL TAB TABLES ░░ -->
+    <div class="logs-section">
+        <div class="logs-tabs-header">
+            <ul class="nav nav-tabs" id="dualTableTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="logs-tab" data-toggle="tab" href="#logsTimelinePanel" role="tab">
+                        <i class="fas fa-history mr-1"></i> Table 1: Activity Logs Timeline (11 Columns)
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="props-tab" data-toggle="tab" href="#propertiesDetailsPanel" role="tab">
+                        <i class="fas fa-home mr-1"></i> Table 2: Impacted Property Details Matrix (53 Columns)
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="tab-content" id="dualTableTabsContent">
+
+            <!-- TABLE 1: ACTIVITY LOGS -->
+            <div class="tab-pane fade show active" id="logsTimelinePanel" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="properties-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date &amp; Time</th>
+                                <th>Property ID</th>
+                                <th>User / Operator</th>
+                                <th>Role</th>
+                                <th>Action</th>
+                                <th>Changed Fields</th>
+                                <th>Excel Source</th>
+                                <th>IP Address</th>
+                                <th>Status</th>
+                                <th style="text-align:center;">View</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in log_records_list %}
+                            <tr>
+                                <td style="color:#94a3b8; font-weight:600;">{{ log_records_list.start_index|add:forloop.counter0 }}</td>
+                                <td>
+                                    <strong style="color:#0f172a;">{{ log.timestamp|date:"d M Y" }}</strong>
+                                    <br><small style="color:#94a3b8;">{{ log.timestamp|date:"H:i:s" }}</small>
+                                </td>
+                                <td>
+                                    {% if log.property_id and log.property_id != "Multiple / Sheet Records" %}
+                                        <span style="background:#e0e7ff; color:#4338ca; padding:3px 8px; border-radius:5px; font-weight:700; font-family:monospace; font-size:12px;">#{{ log.property_id }}</span>
+                                    {% else %}
+                                        <span style="color:#94a3b8; font-style:italic; font-size:12px;"><i class="fas fa-copy"></i> Bulk Sheet</span>
+                                    {% endif %}
+                                </td>
+                                <td style="font-weight:600;">{{ log.user_identity|default:"System Engine" }}</td>
+                                <td><span style="font-weight:600; color:#475569;">{{ log.user_role|default:"CRON Machine" }}</span></td>
+                                <td>
+                                    {% if log.action_type|upper == 'SEARCH' %}
+                                        <span class="badge-action badge-search"><i class="fas fa-search"></i> Search</span>
+                                    {% elif log.action_type|upper == 'UPDATE' %}
+                                        <span class="badge-action badge-update"><i class="fas fa-edit"></i> Edited</span>
+                                    {% elif log.action_type|upper == 'DELETE' %}
+                                        <span class="badge-action badge-delete"><i class="fas fa-trash"></i> Deleted</span>
+                                    {% elif log.action_type|upper == 'EXCEL_IMPORT' %}
+                                        <span class="badge-action badge-import"><i class="fas fa-file-excel"></i> Excel Upload</span>
+                                    {% else %}
+                                        <span class="badge-action badge-schedule"><i class="fas fa-clock"></i> Scheduled</span>
+                                    {% endif %}
+                                </td>
+                                <td><code>{{ log.targeted_fields|default:"General" }}</code></td>
+                                <td>
+                                    {% if log.associated_file and log.associated_file != "Web UI Form" %}
+                                        <span style="color:#059669; font-weight:600; font-size:12.5px;"><i class="far fa-file-excel"></i> {{ log.associated_file }}</span>
+                                    {% else %}
+                                        <span style="color:#94a3b8; font-size:12px;"><i class="fas fa-globe"></i> Form Interface</span>
+                                    {% endif %}
+                                </td>
+                                <td><small style="font-family:monospace; color:#64748b; font-size:12px;">{{ log.ip_address|default:"127.0.0.1" }}</small></td>
+                                <td>
+                                    {% if log.status|upper == 'SUCCESS' %}
+                                        <span style="color:#10b981; font-weight:700; font-size:13px;"><i class="fas fa-check-circle"></i> Success</span>
+                                    {% else %}
+                                        <span style="color:#ef4444; font-weight:700; font-size:13px;"><i class="fas fa-times-circle"></i> Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align:center;">
+                                    <button type="button" class="btn-action btn-edit"
+                                        title="Inspect Change Values JSON Payload"
+                                        onclick="displayLogInspectedDetails('{{ log.id }}', '{{ log.action_payload|escapejs }}')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="11">
+                                    <div class="empty-state">
+                                        <i class="fas fa-history"></i>
+                                        <p>No tracking history log rows match selection criteria.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if log_records_list.paginator.num_pages > 1 %}
+                <div class="pagination-wrap">
+                    <small>Showing log page {{ log_records_list.number }} of {{ log_records_list.paginator.num_pages }}</small>
+                    <div class="page-btns">
+                        {% if log_records_list.has_previous %}
+                            <a href="?log_page={{ log_records_list.previous_page_number }}&user_query={{ request.GET.user_query|default:'' }}&file_query={{ request.GET.file_query|default:'' }}&location_query={{ request.GET.location_query|default:'' }}&property_type={{ request.GET.property_type|default:'' }}&bhk_type={{ request.GET.bhk_type|default:'' }}&min_budget={{ request.GET.min_budget|default:'' }}&max_budget={{ request.GET.max_budget|default:'' }}&field_target={{ request.GET.field_target|default:'' }}&action_type={{ request.GET.action_type|default:'' }}&month_filter={{ request.GET.month_filter|default:'' }}&start_date={{ request.GET.start_date|default:'' }}&end_date={{ request.GET.end_date|default:'' }}&start_time={{ request.GET.start_time|default:'' }}&end_time={{ request.GET.end_time|default:'' }}" class="page-btn">&laquo; Prev</a>
+                        {% endif %}
+                        <span class="page-btn active">{{ log_records_list.number }}</span>
+                        {% if log_records_list.has_next %}
+                            <a href="?log_page={{ log_records_list.next_page_number }}&user_query={{ request.GET.user_query|default:'' }}&file_query={{ request.GET.file_query|default:'' }}&location_query={{ request.GET.location_query|default:'' }}&property_type={{ request.GET.property_type|default:'' }}&bhk_type={{ request.GET.bhk_type|default:'' }}&min_budget={{ request.GET.min_budget|default:'' }}&max_budget={{ request.GET.max_budget|default:'' }}&field_target={{ request.GET.field_target|default:'' }}&action_type={{ request.GET.action_type|default:'' }}&month_filter={{ request.GET.month_filter|default:'' }}&start_date={{ request.GET.start_date|default:'' }}&end_date={{ request.GET.end_date|default:'' }}&start_time={{ request.GET.start_time|default:'' }}&end_time={{ request.GET.end_time|default:'' }}" class="page-btn">Next &raquo;</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- TABLE 2: PROPERTY DETAILS -->
+            <div class="tab-pane fade" id="propertiesDetailsPanel" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="properties-table wide-table" id="rentalTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Property ID</th>
+                                <th>Images</th>
+                                <th>Property Title</th>
+                                <th>Property Type</th>
+                                <th>BHK Type</th>
+                                <th>Renting Option</th>
+                                <th>Built-Up Area</th>
+                                <th>Bathrooms</th>
+                                <th>Balconies</th>
+                                <th>Floor No.</th>
+                                <th>Total Floors</th>
+                                <th>Facing</th>
+                                <th>Furnishing</th>
+                                <th>Available For</th>
+                                <th>Zone</th>
+                                <th>Ownership</th>
+                                <th>Construction</th>
+                                <th>Prop. Age</th>
+                                <th>Carpet Area</th>
+                                <th>Plot Area</th>
+                                <th>Building Name</th>
+                                <th>Possession</th>
+                                <th>Available From</th>
+                                <th>Lease Duration</th>
+                                <th>Brokerage</th>
+                                <th>Brokerage %</th>
+                                <th>Manual Brokerage</th>
+                                <th>Monthly Rent</th>
+                                <th>Security Deposit</th>
+                                <th>Maintenance Type</th>
+                                <th>Maintenance Amt</th>
+                                <th>Address</th>
+                                <th>City</th>
+                                <th>Locality</th>
+                                <th>State</th>
+                                <th>Pincode</th>
+                                <th>Road Connectivity</th>
+                                <th>Amenities</th>
+                                <th>Facilities</th>
+                                <th>Description</th>
+                                <th>Rent Desc</th>
+                                <th>Owner Name</th>
+                                <th>Contact</th>
+                                <th>Email</th>
+                                <th>Alt. Contact</th>
+                                <th>Uploaded By</th>
+                                <th>UB Email</th>
+                                <th>UB Contact</th>
+                                <th>UB Role</th>
+                                <th>Upload File</th>
+                                <th>Created At</th>
+                                <th class="sticky-col-right-header">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prop in page_obj %}
+                            <tr id="row-{{ prop.rental_residential_id }}">
+                                <td style="color:#94a3b8; font-weight:600;">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                                <td>{{ prop.rental_residential_id|default:"—" }}</td>
+                                <td>
+                                    <div style="cursor:pointer;" onclick="openImageModal('img-modal-{{ prop.id }}')">
+                                        {% if prop.images.all %}
+                                            <div style="position:relative; width:48px; height:48px;">
+                                                {% with first_img=prop.images.all|first %}
+                                                    <img src="{{ first_img.image.url }}" style="width:100%; height:100%; object-fit:cover; border-radius:7px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                                                {% endwith %}
+                                                {% if prop.images.count > 1 %}
+                                                    <div style="position:absolute; bottom:-4px; right:-4px; background:rgba(0,0,0,0.75); color:#fff; font-size:10px; padding:1px 5px; border-radius:8px; border:1px solid white; font-weight:bold;">+{{ prop.images.count|add:"-1" }}</div>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <div style="width:48px; height:48px; border-radius:7px; background:linear-gradient(135deg,#2563eb,#1e40af); display:flex; flex-direction:column; align-items:center; justify-content:center; color:white;">
+                                                <i class="fas fa-home" style="font-size:14px;"></i>
+                                                <span style="font-size:6px; font-weight:700; margin-top:2px;">EF</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td><span class="truncate-cell" title="{{ prop.property_title }}">{{ prop.property_title|default:"—" }}</span></td>
+                                <td>{{ prop.property_type|default:"—" }}</td>
+                                <td>{{ prop.bhk_type|default:"—" }}</td>
+                                <td>{{ prop.renting_option|default:"—" }}</td>
+                                <td>{{ prop.built_up_area|default:"—" }}</td>
+                                <td>{{ prop.bathrooms|default:"—" }}</td>
+                                <td>{{ prop.balconies|default:"—" }}</td>
+                                <td>{{ prop.floor_number|default:"—" }}</td>
+                                <td>{{ prop.total_floors|default:"—" }}</td>
+                                <td>{{ prop.facing|default:"—" }}</td>
+                                <td>{{ prop.furnishing_status|default:"—" }}</td>
+                                <td>{{ prop.available_for|default:"—" }}</td>
+                                <td>{{ prop.zone|default:"—" }}</td>
+                                <td>{{ prop.ownership_type|default:"—" }}</td>
+                                <td>{{ prop.construction_status|default:"—" }}</td>
+                                <td>{{ prop.property_age|default:"—" }}</td>
+                                <td>{{ prop.carpet_area|default:"—" }}</td>
+                                <td>{{ prop.plot_area|default:"—" }}</td>
+                                <td>{{ prop.building_name|default:"—" }}</td>
+                                <td>{{ prop.possession_status|default:"—" }}</td>
+                                <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
+                                <td>{{ prop.lease_duration|default:"—" }}</td>
+                                <td>{{ prop.brokerage|default:"—" }}</td>
+                                <td>{{ prop.brokerage_percentage|default:"—" }}</td>
+                                <td>{{ prop.manual_brokerage|default:"—" }}</td>
+                                <td><strong>₹{{ prop.monthly_rent|default:"—" }}</strong></td>
+                                <td>₹{{ prop.security_deposit|default:"—" }}</td>
+                                <td>{{ prop.maintenance_type|default:"—" }}</td>
+                                <td>{{ prop.maintenance_amount|default:"—" }}</td>
+                                <td><span class="truncate-cell" title="{{ prop.address }}">{{ prop.address|default:"—" }}</span></td>
+                                <td>{{ prop.city|default:"—" }}</td>
+                                <td>{{ prop.locality|default:"—" }}</td>
+                                <td>{{ prop.state|default:"—" }}</td>
+                                <td>{{ prop.pincode|default:"—" }}</td>
+                                <td>{{ prop.road_connectivity|default:"—" }}</td>
+                                <td><span class="truncate-cell" title="{{ prop.amenities }}">{{ prop.amenities|default:"—" }}</span></td>
+                                <td><span class="truncate-cell" title="{{ prop.facilities }}">{{ prop.facilities|default:"—" }}</span></td>
+                                <td>{{ prop.description|striptags|truncatechars:30|default:"—" }}</td>
+                                <td>{{ prop.rent_residential_desc|striptags|truncatechars:30|default:"—" }}</td>
+                                <td>{{ prop.owner_name|default:"—" }}</td>
+                                <td>{{ prop.contact_number|default:"—" }}</td>
+                                <td>{{ prop.email|default:"—" }}</td>
+                                <td>{{ prop.alternate_contact|default:"—" }}</td>
+                                <td>{{ prop.uploaded_by_name|default:"—" }}</td>
+                                <td>{{ prop.uploaded_by_email|default:"—" }}</td>
+                                <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
+                                <td>{{ prop.uploaded_by_role|default:"—" }}</td>
+                                <td><small style="color:#94a3b8;">{{ prop.upload_file_name|default:"Web UI Form" }}</small></td>
+                                <td style="white-space:nowrap;">{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
+                                <td class="sticky-col-right">
+                                    <div class="action-container">
+                                        <a href="{% url 'rental_residential_view' prop.rental_residential_id %}" class="btn-action btn-view" title="View Property">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'rental_residential_edit' prop.rental_residential_id %}" class="btn-action btn-edit" title="Edit Property">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="53">
+                                    <div class="empty-state">
+                                        <i class="fas fa-home"></i>
+                                        <p>No property profiles found matching current filters.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if page_obj.paginator.num_pages > 1 %}
+                <div class="pagination-wrap">
+                    <small>Showing property page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</small>
+                    <div class="page-btns">
+                        {% if page_obj.has_previous %}
+                            <a href="?prop_page={{ page_obj.previous_page_number }}&user_query={{ request.GET.user_query|default:'' }}&file_query={{ request.GET.file_query|default:'' }}&location_query={{ request.GET.location_query|default:'' }}&property_type={{ request.GET.property_type|default:'' }}&bhk_type={{ request.GET.bhk_type|default:'' }}&min_budget={{ request.GET.min_budget|default:'' }}&max_budget={{ request.GET.max_budget|default:'' }}&field_target={{ request.GET.field_target|default:'' }}&action_type={{ request.GET.action_type|default:'' }}&month_filter={{ request.GET.month_filter|default:'' }}&start_date={{ request.GET.start_date|default:'' }}&end_date={{ request.GET.end_date|default:'' }}&start_time={{ request.GET.start_time|default:'' }}&end_time={{ request.GET.end_time|default:'' }}" class="page-btn">&laquo; Prev</a>
+                        {% endif %}
+                        <span class="page-btn active">{{ page_obj.number }}</span>
+                        {% if page_obj.has_next %}
+                            <a href="?prop_page={{ page_obj.next_page_number }}&user_query={{ request.GET.user_query|default:'' }}&file_query={{ request.GET.file_query|default:'' }}&location_query={{ request.GET.location_query|default:'' }}&property_type={{ request.GET.property_type|default:'' }}&bhk_type={{ request.GET.bhk_type|default:'' }}&min_budget={{ request.GET.min_budget|default:'' }}&max_budget={{ request.GET.max_budget|default:'' }}&field_target={{ request.GET.field_target|default:'' }}&action_type={{ request.GET.action_type|default:'' }}&month_filter={{ request.GET.month_filter|default:'' }}&start_date={{ request.GET.start_date|default:'' }}&end_date={{ request.GET.end_date|default:'' }}&start_time={{ request.GET.start_time|default:'' }}&end_time={{ request.GET.end_time|default:'' }}" class="page-btn">Next &raquo;</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+        </div><!-- /tab-content -->
+    </div><!-- /logs-section -->
+
+</div><!-- /main-content -->
+
+
+<!-- ░░ LOG DETAIL MODAL ░░ -->
+<div id="logInspectedDetailsModal" class="app-modal-overlay" role="dialog">
+    <div class="app-modal-box" style="max-width:700px;">
+        <button class="modal-close-btn" onclick="dismissLogDetailsInspectionModal()" aria-label="Close">&times;</button>
+        <h3 class="modal-title"><i class="fas fa-terminal" style="color:var(--primary);"></i> Log Raw Change Matrix Values</h3>
+        <hr class="modal-divider">
+        <pre id="payloadDisplayOutputTrace" class="json-output">Loading…</pre>
+    </div>
+</div>
+
+<!-- ░░ IMAGE MODALS ░░ -->
+{% for prop in page_obj %}
+<div id="img-modal-{{ prop.id }}" class="app-modal-overlay" role="dialog">
+    <div class="app-modal-box" style="max-width:860px;">
+        <button class="modal-close-btn" onclick="closeImageModal('img-modal-{{ prop.id }}')" aria-label="Close">&times;</button>
+        <h3 class="modal-title"><i class="fas fa-images" style="color:var(--primary);"></i> Property Media Gallery</h3>
+        <hr class="modal-divider">
+        <div class="img-gallery">
+            {% if prop.images.all %}
+                {% for img in prop.images.all %}
+                    <img src="{{ img.image.url }}" alt="Property image">
+                {% endfor %}
+            {% else %}
+                <p style="text-align:center; width:100%; color:#94a3b8;">No images uploaded for this property.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const form = document.getElementById('logSearchForm');
+
+    function clearFilterField(fieldName) {
+        const el = form.querySelector(`[name="${fieldName}"]`);
+        if (el) { el.value = ''; form.submit(); }
+    }
+
+    function executeLogsSearchLookupFilter() {
+        document.getElementById('downloadInputFormFlag').value = '';
+        form.submit();
+    }
+
+    function triggerExtraction(formatType) {
+        document.getElementById('downloadInputFormFlag').value = formatType;
+        form.submit();
+    }
+
+    function displayLogInspectedDetails(logId, stringifiedPayload) {
+        const outputBox = document.getElementById('payloadDisplayOutputTrace');
+        try {
+            const parsed = JSON.parse(stringifiedPayload);
+            outputBox.textContent = JSON.stringify(parsed, null, 4);
+        } catch (e) {
+            outputBox.textContent = stringifiedPayload || "No structural trace data exists.";
+        }
+        document.getElementById('logInspectedDetailsModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function dismissLogDetailsInspectionModal() {
+        document.getElementById('logInspectedDetailsModal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    function openImageModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) { modal.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    }
+
+    function closeImageModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) { modal.classList.remove('open'); document.body.style.overflow = ''; }
+    }
+
+    // Click-outside-to-close for all modals
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('app-modal-overlay')) {
+            e.target.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    });
+
+    // Keyboard ESC to close
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.app-modal-overlay.open').forEach(function(m) {
+                m.classList.remove('open');
+            });
+            document.body.style.overflow = '';
+        }
+    });
+</script>

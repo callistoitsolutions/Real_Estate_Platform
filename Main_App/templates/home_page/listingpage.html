@@ -3,898 +3,1165 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>{% if listing_type == 'sale' %}Flats & Houses for Sale{% elif listing_type == 'commercial' %}Commercial Properties{% else %}Flats & Houses for Rent{% endif %} in Nagpur — PropCRM</title>
+<title>{% if listing_type == 'sale' %}Flats & Houses for Sale{% else %}Flats & Houses for Rent{% endif %} in {{ current_city|default:"Nagpur" }} — PropCRM</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-/* ============================================
-   GLOBAL VARIABLES & RESET (PROFESSIONAL LIGHT)
-============================================ */
 :root {
-    --primary: #006ce4; 
-    --primary-dark: #0050a8;
-    --accent: #f97316; 
-    --accent-dark: #ea580c;
-    --sec: #1e293b;
-    --body-text: #475569;
-    --muted: #64748b;
-    --border: #e2e8f0;
-    --bg: #f8fafc;
-    --card-bg: #ffffff;
-    --shadow-sm: 0 4px 12px rgba(0,0,0,0.04);
-    --shadow-md: 0 12px 30px rgba(0,0,0,0.08);
+  --primary: #6C3CF4;
+  --primary-dark: #5429d6;
+  --primary-light: #ede8fe;
+  --sec: #11142d;
+  --body-text: #5e6670;
+  --muted: #9098a9;
+  --border: #e4e7ed;
+  --bg: #f5f6fa;
+  --white: #ffffff;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.10);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.15);
+  --green: #0dbd8b;
+  --green-bg: #e8faf5;
+  --orange: #f97316;
+  --blue: #3b82f6;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--body-text); }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--body-text);}
+a{text-decoration:none;color:inherit;}
 
-/* ============================================
-   GLOBAL BUTTONS
-============================================ */
-.btn { padding: 8px 18px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; border: none; transition: .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
-.btn-pr { background: var(--accent); color: white; }
-.btn-pr:hover { background: var(--accent-dark); color: white; transform: translateY(-1px); }
-.btn-outline { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); }
-.btn-outline:hover { background: var(--primary); color: white; }
+/* ── TOP SEARCH BAR ── */
+.top-bar{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:300;box-shadow:var(--shadow-sm);}
+.top-bar-inner{max-width:1340px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 
-/* ============================================
-   SEARCH BAR (99acres style)
-============================================ */
-.search-bar { background: white; border-bottom: 1px solid var(--border); padding: 16px 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); position: sticky; top: 0; z-index: 100; }
-.sb-inner { max-width: 1300px; margin: 0 auto; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-.sb-field { display: flex; flex-direction: column; gap: 4px; position: relative; }
-.sb-label { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-.sb-sel, .sb-inp { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; font-weight: 500; color: var(--sec); cursor: pointer; transition: 0.2s; font-family: 'Poppins', sans-serif; }
-.sb-sel { min-width: 140px; }
-.sb-inp { min-width: 220px; }
-.sb-sel:focus, .sb-inp:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1); }
+.type-toggle{display:flex;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0;}
+.type-toggle button{padding:8px 20px;font-size:0.82rem;font-weight:700;border:none;background:white;cursor:pointer;color:var(--muted);font-family:'Poppins',sans-serif;transition:.15s;}
+.type-toggle button.active{background:var(--primary);color:white;}
 
-/* Location Chip Style (like 99acres) */
-.location-chip { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; margin: 2px; }
-.location-chip .remove-chip { cursor: pointer; font-weight: 900; font-size: 0.9rem; }
-.location-chip .remove-chip:hover { color: #dc2626; }
+.loc-wrap{position:relative;flex:1;min-width:260px;}
+.loc-bar{display:flex;align-items:center;gap:6px;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;background:white;cursor:text;flex-wrap:wrap;min-height:42px;}
+.loc-bar:focus-within{border-color:var(--primary);}
+.loc-chip{background:var(--primary-light);color:var(--primary-dark);border-radius:20px;padding:3px 10px;font-size:0.8rem;font-weight:600;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.loc-chip .x{cursor:pointer;font-size:1rem;line-height:1;opacity:.7;}
+.loc-chip .x:hover{opacity:1;}
+.loc-bar input{border:none;outline:none;font-family:'Poppins',sans-serif;font-size:0.88rem;font-weight:500;color:var(--sec);flex:1;min-width:120px;background:transparent;}
+.loc-bar input::placeholder{color:var(--muted);font-weight:400;}
 
-/* Add More Button */
-.add-more-btn { background: transparent; border: 1px dashed var(--border); color: var(--muted); padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
-.add-more-btn:hover { border-color: var(--primary); color: var(--primary); }
+.autocomplete-drop{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);z-index:9999;overflow:hidden;}
+.autocomplete-drop.open{display:block;}
+.ac-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:0.88rem;color:var(--sec);font-weight:500;transition:background .1s;}
+.ac-item:hover,.ac-item.hl{background:#f5f0fe;}
+.ac-item+.ac-item{border-top:1px solid #f4f5f8;}
+.ac-icon{width:30px;height:30px;border-radius:8px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;}
+.ac-icon.city-ic{background:#fef3c7;color:#d97706;}
+.ac-badge{margin-left:auto;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--primary-light);color:var(--primary);text-transform:uppercase;}
+.ac-badge.city{background:#fef3c7;color:#d97706;}
+.ac-empty{padding:12px 14px;font-size:0.85rem;color:var(--muted);text-align:center;}
 
-.sb-search-btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 10px 24px; font-weight: 700; font-size: 0.9rem; cursor: pointer; white-space: nowrap; transition: 0.2s; }
-.sb-search-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+/* ── FILTER STRIP ── */
+.filter-strip{background:white;border-bottom:1px solid var(--border);position:sticky;top:57px;z-index:290;}
+.filter-strip-inner{max-width:1340px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none;height:52px;}
+.filter-strip-inner::-webkit-scrollbar{display:none;}
 
-/* ============================================
-   LAYOUT & SIDEBAR
-============================================ */
-.page-layout { max-width: 1300px; margin: 0 auto; padding: 24px 20px; display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
+.fpill{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.8rem;font-weight:600;border:1.5px solid var(--border);background:white;color:var(--sec);cursor:pointer;white-space:nowrap;transition:.15s;font-family:'Poppins',sans-serif;flex-shrink:0;position:relative;}
+.fpill:hover{border-color:var(--primary);color:var(--primary);}
+.fpill.active{background:var(--primary-light);border-color:var(--primary);color:var(--primary);}
+.fpill .chevron{font-size:0.7rem;}
+.fpill .dot{width:7px;height:7px;background:var(--primary);border-radius:50%;flex-shrink:0;}
+.fs-divider{width:1px;height:20px;background:var(--border);flex-shrink:0;margin:0 4px;}
 
-.filter-sidebar { background: white; border-radius: 12px; border: 1px solid var(--border); padding: 24px; height: fit-content; position: sticky; top: 110px; box-shadow: var(--shadow-sm); max-height: calc(100vh - 130px); overflow-y: auto; }
-.fs-title { font-size: 1rem; font-weight: 800; color: var(--sec); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-.fs-clear { font-size: 0.75rem; font-weight: 600; color: var(--primary); cursor: pointer; text-decoration: none; }
-.fs-clear:hover { text-decoration: underline; }
+/* ── PILL DROPDOWN PANEL ── */
+.pill-panel{display:none;position:fixed;top:0;left:0;background:white;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.14);padding:16px;z-index:99999;min-width:240px;font-size:0.88rem;color:var(--sec);}
+.pill-panel.right{left:auto;right:0;}
+.pill-panel.open{display:block;}
+.pp-title{font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.pp-options{display:flex;flex-wrap:wrap;gap:8px;}
+.pp-btn{padding:5px 14px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;color:var(--sec);}
+.pp-btn:hover{border-color:var(--primary);color:var(--primary);}
+.pp-btn.sel{background:var(--primary-light);border-color:var(--primary);color:var(--primary);font-weight:600;}
 
-.filter-group { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
-.filter-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-.fg-title { font-size: 0.8rem; font-weight: 700; color: var(--sec); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-.fg-toggle { cursor: pointer; color: var(--muted); font-size: 0.9rem; margin-left: auto; }
+/* Budget slider panel */
+.budget-panel{min-width:300px;}
+.budget-hist{display:flex;align-items:flex-end;gap:2px;height:50px;margin-bottom:8px;padding:0 4px;}
+.hist-bar{flex:1;background:var(--primary-light);border-radius:2px 2px 0 0;transition:.2s;}
+.hist-bar.in-range{background:var(--primary);}
+.range-track{position:relative;height:4px;background:#e4e7ed;border-radius:4px;margin:0 4px;}
+.range-fill{position:absolute;height:100%;background:var(--primary);border-radius:4px;}
+.range-inputs{position:relative;margin-top:-10px;}
+.range-inputs input[type=range]{position:absolute;width:100%;-webkit-appearance:none;appearance:none;height:4px;background:transparent;pointer-events:none;outline:none;}
+.range-inputs input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:white;border:2.5px solid var(--primary);cursor:pointer;pointer-events:all;box-shadow:0 2px 6px rgba(108,60,244,.3);}
+.range-inputs input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:white;border:2.5px solid var(--primary);cursor:pointer;pointer-events:all;}
+.budget-vals{display:flex;gap:8px;margin-top:18px;align-items:center;}
+.bval-box{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:0.8rem;font-weight:600;color:var(--sec);text-align:center;}
+.bval-sep{font-size:0.8rem;color:var(--muted);}
+.pp-apply{margin-top:14px;width:100%;padding:9px;background:var(--primary);color:white;border:none;border-radius:8px;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'Poppins',sans-serif;}
+.pp-apply:hover{background:var(--primary-dark);}
 
-.filter-btn { padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: white; color: var(--body-text); transition: .2s; margin: 4px 2px; font-family: 'Poppins', sans-serif; }
-.filter-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(0, 108, 228, 0.04); }
-.filter-btn.active { background: rgba(0, 108, 228, 0.1); color: var(--primary); border-color: var(--primary); font-weight: 700; }
+/* ── MORE FILTERS DRAWER ── */
+.mf-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;backdrop-filter:blur(2px);}
+.mf-overlay.open{display:block;}
+.mf-drawer{position:fixed;top:0;right:-500px;width:460px;max-width:96vw;height:100vh;background:white;z-index:1001;display:flex;flex-direction:column;transition:right .3s cubic-bezier(.4,0,.2,1);box-shadow:var(--shadow-lg);}
+.mf-drawer.open{right:0;}
+.mf-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.mf-head h3{font-size:1rem;font-weight:700;color:var(--sec);}
+.mf-close{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;color:var(--muted);}
+.mf-close:hover{border-color:#ef4444;color:#ef4444;}
 
-/* Budget Dropdowns (99acres style) */
-.budget-row { display: flex; gap: 12px; align-items: center; }
-.budget-dropdown { flex: 1; }
-.budget-dropdown select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 500; color: var(--sec); cursor: pointer; font-family: 'Poppins', sans-serif; }
-.budget-dropdown select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1); }
+.mf-layout{display:flex;flex:1;overflow:hidden;}
+.mf-sidebar{width:170px;border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;background:#fafbfc;}
+.mf-sidebar-item{padding:12px 16px;font-size:0.82rem;font-weight:600;color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:.15s;}
+.mf-sidebar-item:hover{background:#f0ecfe;color:var(--primary);}
+.mf-sidebar-item.active{background:var(--primary-light);color:var(--primary);border-left-color:var(--primary);}
+.mf-content{flex:1;overflow-y:auto;padding:20px;}
+.mf-section{display:none;}
+.mf-section.active{display:block;}
+.mf-section-title{font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
+.mf-options{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+.mf-btn{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:white;font-size:0.82rem;font-weight:500;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;color:var(--sec);}
+.mf-btn:hover{border-color:var(--primary);color:var(--primary);}
+.mf-btn.sel{background:var(--primary-light);border-color:var(--primary);color:var(--primary);font-weight:600;}
+.mf-divider{height:1px;background:var(--border);margin:16px 0;}
 
-.range-input { width: 100%; accent-color: var(--primary); cursor: pointer; }
-.range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 8px; font-weight: 500; }
+.mf-foot{display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0;}
+.mf-clear-btn{flex:1;padding:10px;border-radius:8px;border:1.5px solid var(--border);background:white;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'Poppins',sans-serif;color:var(--sec);}
+.mf-apply-btn{flex:2;padding:10px;border-radius:8px;border:none;background:var(--primary);color:white;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'Poppins',sans-serif;}
+.mf-apply-btn:hover{background:var(--primary-dark);}
 
-.checkbox-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; font-size: 0.85rem; color: var(--body-text); font-weight: 500; }
-.checkbox-item input { accent-color: var(--primary); width: 16px; height: 16px; cursor: pointer; }
+/* ── PAGE BODY ── */
+.page-wrap{max-width:1340px;margin:0 auto;padding:20px 20px 50px;}
 
-/* ============================================
-   RESULTS AREA
-============================================ */
-.results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-.rh-count { font-size: 1rem; font-weight: 700; color: var(--sec); }
-.rh-count span { color: var(--primary); }
+.applied-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.af-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:white;border:1px solid var(--border);font-size:0.78rem;font-weight:600;color:var(--sec);cursor:pointer;}
+.af-chip i{font-size:0.7rem;color:var(--muted);}
+.af-chip:hover{border-color:#ef4444;color:#ef4444;}
+.af-clear{font-size:0.78rem;font-weight:700;color:var(--primary);cursor:pointer;padding:5px 0;}
 
-.rh-sort { display: flex; align-items: center; gap: 12px; }
-.sort-select { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 0.85rem; font-weight: 600; color: var(--sec); cursor: pointer; font-family: 'Poppins', sans-serif; }
-.sort-select:focus { outline: none; border-color: var(--primary); }
+.results-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.rh-count{font-size:0.82rem;color:var(--muted);font-weight:500;margin-bottom:3px;}
+.rh-title{font-size:1.28rem;font-weight:700;color:var(--sec);line-height:1.25;}
+.rh-sub{font-size:0.78rem;color:var(--muted);margin-top:3px;font-weight:400;}
+.sort-sel{background:white;border:1.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:0.82rem;font-weight:600;color:var(--sec);cursor:pointer;font-family:'Poppins',sans-serif;}
 
-.view-toggle { display: flex; gap: 6px; }
-.vt-btn { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: white; color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; transition: .2s; }
-.vt-btn:hover { border-color: var(--primary); color: var(--primary); }
-.vt-btn.active { background: rgba(0, 108, 228, 0.1); color: var(--primary); border-color: var(--primary); }
+/* ── PROPERTY CARDS ── */
+.listings-col{display:flex;flex-direction:column;gap:16px;}
+.pcard{background:white;border-radius:14px;border:1px solid var(--border);display:flex;overflow:hidden;transition:box-shadow .2s,border-color .2s,transform .15s;cursor:pointer;color:inherit;text-decoration:none;}
+.pcard:hover{box-shadow:var(--shadow-md);border-color:#c4b3f9;transform:translateY(-1px);}
 
-/* APPLIED FILTERS (99acres style) */
-.applied-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; background: white; padding: 16px; border-radius: 12px; border: 1px solid var(--border); }
-.af-label { font-size: 0.8rem; color: var(--sec); font-weight: 700; margin-right: 4px; }
-.af-tag { font-size: 0.75rem; font-weight: 600; padding: 6px 12px; border-radius: 20px; background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s; }
-.af-tag:hover { background: #bae6fd; }
-.af-tag i { font-size: 0.7rem; font-weight: 900; }
+/* image side */
+.pc-img-wrap{width:290px;min-width:290px;position:relative;overflow:hidden;background:#f1f5f9;}
+.pc-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+.pcard:hover .pc-img-wrap img{transform:scale(1.03);}
+.pc-placeholder{width:100%;height:100%;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#ede8fe 0%,#ddd6fe 100%);}
+.pc-placeholder i{font-size:2.8rem;color:var(--primary);opacity:.6;}
+.pc-placeholder span{font-size:0.75rem;font-weight:600;color:var(--primary);opacity:.7;text-transform:uppercase;letter-spacing:1px;}
 
-/* ============================================
-   PROPERTY CARDS
-============================================ */
-.listings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.listings-grid.list-view { grid-template-columns: 1fr; }
+/* image counter badge */
+.img-counter{position:absolute;bottom:52px;right:10px;background:rgba(17,20,45,.6);color:white;font-size:0.7rem;font-weight:600;padding:3px 8px;border-radius:12px;backdrop-filter:blur(4px);}
 
-.pcard { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; transition: .3s; cursor: pointer; text-decoration: none; color: inherit; display: block; box-shadow: var(--shadow-sm); }
-.pcard:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: rgba(0, 108, 228, 0.3); }
+.img-badges{position:absolute;top:10px;left:10px;display:flex;gap:5px;flex-wrap:wrap;}
+.ibadge{font-size:0.65rem;font-weight:800;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px;}
+.ib-new{background:#3b82f6;color:white;}
+.ib-feat{background:#f59e0b;color:white;}
+.ib-verif{background:#0dbd8b;color:white;}
 
-.pc-img { height: 200px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #e2e8f0; }
-.pc-img img { width: 100%; height: 100%; object-fit: cover; }
-.pc-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; background: #f1f5f9 !important; }
+.owner-av{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;background:white;box-shadow:0 2px 6px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:var(--primary);border:2px solid white;}
 
-.pc-badges { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
-.badge { font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
-.b-feat { background: #f59e0b; color: white; }
-.b-new { background: #3b82f6; color: white; }
+.img-price{position:absolute;bottom:0;left:0;right:0;background:rgba(17,20,45,.75);backdrop-filter:blur(4px);padding:8px 12px;color:white;display:flex;justify-content:space-between;align-items:center;}
+.img-price .amt{font-size:1.05rem;font-weight:800;}
+.img-price .per{font-size:0.7rem;opacity:.7;font-weight:400;}
+.btn-save{width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;color:white;font-size:0.95rem;backdrop-filter:blur(4px);}
+.btn-save:hover{background:rgba(239,68,68,.8);}
+.btn-save.saved{background:rgba(239,68,68,.9);}
 
-.pc-save { position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; background: rgba(255,255,255,.95); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: .2s; font-size: 1rem; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.pc-save:hover { background: #fff; transform: scale(1.1); }
-.pc-save.saved i { color: #ef4444; font-weight: 900; }
+/* body side */
+.pc-body{flex:1;padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0;}
+.pc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.pc-owner-row{font-size:0.75rem;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:5px;}
+.pc-owner-row strong{color:var(--sec);}
+.pc-new-badge{font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:4px;background:#dbeafe;color:#1e40af;}
 
-.pc-price-tag { position: absolute; bottom: 12px; left: 12px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); color: white; padding: 6px 14px; border-radius: 8px; font-size: 1rem; font-weight: 800; border: 1px solid rgba(255,255,255,0.15); }
+.pc-title{font-size:0.98rem;font-weight:700;color:var(--sec);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pc-addr{font-size:0.82rem;color:var(--muted);display:flex;align-items:center;gap:5px;}
 
-.pc-body { padding: 18px; }
-.pc-title { font-size: 1rem; font-weight: 700; color: var(--sec); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pc-addr { font-size: 0.8rem; color: var(--body-text); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; font-weight: 500; }
-.pc-specs { display: flex; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
-.spec { font-size: 0.8rem; color: var(--sec); display: flex; align-items: center; gap: 5px; font-weight: 600; background: #f1f5f9; padding: 4px 10px; border-radius: 6px; }
-.spec i { color: var(--muted); font-size: 0.8rem; }
-.pc-tags { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
-.pt { font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 6px; background: white; border: 1px solid var(--border); color: var(--muted); }
+/* specs row */
+.pc-specs{display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.spec-col{flex:1;padding:8px 12px;display:flex;flex-direction:column;gap:1px;}
+.spec-col+.spec-col{border-left:1px solid var(--border);}
+.spec-val{font-size:0.88rem;font-weight:700;color:var(--sec);}
+.spec-lbl{font-size:0.68rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;}
 
-.pc-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--border); }
-.pc-agent { display: flex; align-items: center; gap: 10px; }
-.pa-av { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-.pa-name { font-size: 0.8rem; font-weight: 700; color: var(--sec); }
-.pa-role { font-size: 0.65rem; color: var(--muted); font-weight: 500; }
+/* short description */
+.pc-desc{font-size:0.8rem;color:var(--body-text);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 
-.pc-contact-btns { display: flex; gap: 8px; }
-.cb { padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: 1px solid var(--primary); background: white; color: var(--primary); transition: .2s; display: flex; align-items: center; gap: 6px; }
-.cb:hover { background: var(--primary); color: white; }
+/* amenities/highlights */
+.pc-highlights{display:flex;gap:6px;flex-wrap:wrap;}
+.hl-tag{font-size:0.72rem;font-weight:500;padding:3px 9px;border-radius:4px;background:#f8f9fb;border:1px solid var(--border);color:var(--body-text);display:flex;align-items:center;gap:4px;}
+.hl-tag.verified{background:var(--green-bg);border-color:#a7f3d0;color:#065f46;}
+.hl-tag.ptype{background:#eff6ff;border-color:#bfdbfe;color:#1e40af;}
 
-/* LIST VIEW OVERRIDES */
-.listings-grid.list-view .pcard { display: grid; grid-template-columns: 280px 1fr; }
-.listings-grid.list-view .pc-img { height: 100%; min-height: 200px; }
+/* footer row */
+.pc-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--border);margin-top:auto;gap:10px;flex-wrap:wrap;}
+.pc-updated{font-size:0.75rem;color:var(--muted);}
+.pc-updated strong{color:var(--body-text);font-weight:600;}
+.pc-btns{display:flex;gap:8px;align-items:center;}
+.btn-contact{padding:9px 20px;border-radius:8px;border:none;background:var(--primary);color:white;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.btn-contact:hover{background:var(--primary-dark);}
+.btn-whatsapp{padding:9px 14px;border-radius:8px;border:1.5px solid #25D366;color:#25D366;background:white;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:.15s;display:flex;align-items:center;gap:6px;}
+.btn-whatsapp:hover{background:#f0fdf4;}
 
-/* PAGINATION */
-.pagination { display: flex; justify-content: center; gap: 8px; margin-top: 40px; flex-wrap: wrap; }
-.pg-btn { width: 40px; height: 40px; border-radius: 8px; border: 1px solid var(--border); background: white; color: var(--sec); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.9rem; font-weight: 700; transition: .2s; }
-.pg-btn:hover { border-color: var(--primary); color: var(--primary); background: #f8fafc; }
-.pg-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:80px 20px;background:white;border-radius:12px;border:1px solid var(--border);}
+.empty-state i{font-size:3rem;color:var(--muted);display:block;margin-bottom:14px;}
+.empty-state h3{font-size:1.1rem;font-weight:700;color:var(--sec);margin-bottom:6px;}
+.empty-state p{font-size:0.88rem;color:var(--muted);}
+.btn-reset{margin-top:18px;padding:10px 24px;border-radius:8px;border:none;background:var(--primary);color:white;font-weight:700;font-size:0.88rem;cursor:pointer;font-family:'Poppins',sans-serif;}
 
-@media(max-width:1024px) { .page-layout { grid-template-columns: 1fr; } .filter-sidebar { display: none; } }
-@media(max-width:768px) { .listings-grid { grid-template-columns: 1fr; } .listings-grid.list-view { grid-template-columns: 1fr; } .listings-grid.list-view .pcard { grid-template-columns: 1fr; } }
+/* ── PAGINATION ── */
+.pagination-row{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:28px;flex-wrap:wrap;}
+.pg-btn{min-width:38px;height:38px;padding:0 10px;border-radius:8px;border:1.5px solid var(--border);background:white;font-size:0.85rem;font-weight:600;color:var(--sec);cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:.15s;font-family:'Poppins',sans-serif;}
+.pg-btn:hover{border-color:var(--primary);color:var(--primary);}
+.pg-btn.current{background:var(--primary);border-color:var(--primary);color:white;}
+.pg-btn.disabled{opacity:.4;pointer-events:none;}
+.pg-info{font-size:0.78rem;color:var(--muted);text-align:center;margin-top:8px;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .pc-img-wrap{width:240px;min-width:240px;}
+}
+@media(max-width:768px){
+  .pc-img-wrap{width:100%;min-width:100%;height:200px;}
+  .pcard{flex-direction:column;}
+  .mf-drawer{width:100%;}
+  .mf-sidebar{width:140px;}
+}
+@media(max-width:480px){
+  .pc-specs{flex-wrap:wrap;}
+  .spec-col{min-width:45%;}
+}
 </style>
 </head>
 <body>
 
 {% include 'home_page/header.html' %}
 
-<!-- ==================== STICKY SEARCH BAR (99acres style) ==================== -->
-<div class="search-bar">
-  <div class="sb-inner">
-    
-    <!-- Listing Type Dropdown -->
-    <div class="sb-field">
-      <div class="sb-label">Listing Type</div>
-      <select class="sb-sel" id="header-type-sel">
-        <option value="rent" {% if listing_type == 'rent' %}selected{% endif %}>For Rent</option>
-        <option value="sale" {% if listing_type == 'sale' %}selected{% endif %}>For Sale</option>
-      </select>
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <div class="type-toggle">
+      <button id="toggleRent" onclick="switchType('rent')" class="{% if listing_type == 'rent' %}active{% endif %}">Rent</button>
+      <button id="toggleSale" onclick="switchType('sale')" class="{% if listing_type == 'sale' %}active{% endif %}">Resale</button>
     </div>
 
-    <!-- Location Chips Display -->
-    <div class="sb-field" style="flex: 1; min-width: 300px;">
-      <div class="sb-label">Location</div>
-      <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 42px; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; background: white;">
-        <div id="location-chips-container">
-          {% if current_area %}
-            <span class="location-chip">
-              {{ current_area|title }}
-              <span class="remove-chip" onclick="removeFilter('area')">&times;</span>
-            </span>
-          {% else %}
-            <input type="text" id="header-loc-inp" placeholder="Add locality..." style="border: none; outline: none; flex: 1; min-width: 150px; font-size: 0.85rem; font-weight: 500; font-family: 'Poppins', sans-serif;">
-          {% endif %}
-        </div>
-        <button class="add-more-btn" onclick="showLocationModal()">+ Add more</button>
+    <div class="loc-wrap">
+      <div class="loc-bar" id="locBar" onclick="document.getElementById('locInput').focus()">
+        {% for area in areas_list %}
+          <span class="loc-chip">
+            {{ area|title }}
+            <span class="x" onclick="event.stopPropagation();removeAreaChip('{{ area }}')">×</span>
+          </span>
+        {% endfor %}
+        <input type="text" id="locInput"
+               placeholder="{% if not areas_list %}Search locality, area, landmark…{% endif %}"
+               autocomplete="off"
+               oninput="fetchAC(this.value)"
+               onkeydown="handleACKey(event)">
       </div>
+      <div class="autocomplete-drop" id="acDrop"></div>
     </div>
 
-    <!-- Search Button -->
-    <button class="sb-search-btn" onclick="applyHeaderFilters()">
-      <i class="fas fa-search"></i> Search
-    </button>
-
-    <!-- Reset Button -->
-    <button class="btn btn-outline" onclick="resetAllFilters()">
-      <i class="fas fa-redo"></i> Reset
+    <button onclick="applyLocSearch()"
+            style="padding:9px 20px;border-radius:8px;border:none;background:var(--primary);color:white;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:'Poppins',sans-serif;white-space:nowrap;display:flex;align-items:center;gap:6px;">
+      <i class="bi bi-search"></i> Search
     </button>
   </div>
 </div>
 
-<div class="page-layout">
-  
-  <!-- ==================== LEFT SIDEBAR FILTERS ==================== -->
-  <div class="filter-sidebar">
-    <div class="fs-title">
-      Filters 
-      <span class="fs-clear" onclick="resetAllFilters()">Clear All</span>
-    </div>
+<div class="filter-strip">
+  <div class="filter-strip-inner">
 
-    <!-- Applied Filters Summary (inside sidebar) -->
-    <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border);">
-      <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 8px; font-weight: 600;">ACTIVE FILTERS</div>
-      <div id="sidebar-active-count" style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">
-        {{ active_filter_count|default:"0" }}
-      </div>
-    </div>
-
-    <!-- Budget Filter (99acres style with min/max) -->
-    <div class="filter-group">
-      <div class="fg-title">
-        <i class="fas fa-rupee-sign" style="color: var(--primary);"></i>
-        Budget Range
-      </div>
-      <div class="budget-row">
-        <div class="budget-dropdown">
-          <select id="sidebar-budget-min" onchange="syncFilters()">
-            <option value="">No min</option>
-            <option value="5000" {% if budget_min == '5000' %}selected{% endif %}>₹5,000</option>
-            <option value="10000" {% if budget_min == '10000' %}selected{% endif %}>₹10,000</option>
-            <option value="15000" {% if budget_min == '15000' %}selected{% endif %}>₹15,000</option>
-            <option value="20000" {% if budget_min == '20000' %}selected{% endif %}>₹20,000</option>
-            <option value="30000" {% if budget_min == '30000' %}selected{% endif %}>₹30,000</option>
-            <option value="40000" {% if budget_min == '40000' %}selected{% endif %}>₹40,000</option>
-            <option value="50000" {% if budget_min == '50000' %}selected{% endif %}>₹50,000</option>
-          </select>
-        </div>
-        <span style="color: var(--muted); font-weight: 600;">to</span>
-        <div class="budget-dropdown">
-          <select id="sidebar-budget-max" onchange="syncFilters()">
-            <option value="">No max</option>
-            <option value="15000" {% if budget_max == '15000' %}selected{% endif %}>₹15,000</option>
-            <option value="20000" {% if budget_max == '20000' %}selected{% endif %}>₹20,000</option>
-            <option value="30000" {% if budget_max == '30000' %}selected{% endif %}>₹30,000</option>
-            <option value="40000" {% if budget_max == '40000' %}selected{% endif %}>₹40,000</option>
-            <option value="50000" {% if budget_max == '50000' %}selected{% endif %}>₹50,000</option>
-            <option value="75000" {% if budget_max == '75000' %}selected{% endif %}>₹75,000</option>
-            <option value="100000" {% if budget_max == '100000' %}selected{% endif %}>₹1,00,000</option>
-          </select>
+    <div class="fpill {% if current_bhk %}active{% endif %}" id="pill-bhk" onclick="togglePanel('panel-bhk',this)">
+      {% if current_bhk %}<span class="dot"></span> {{ current_bhk }}{% else %}BHK Type{% endif %}
+      <i class="bi bi-chevron-down chevron"></i>
+      <div class="pill-panel" id="panel-bhk" onclick="event.stopPropagation()">
+        <div class="pp-title">BHK Configuration</div>
+        <div class="pp-options">
+          <button class="pp-btn {% if current_bhk == '1RK' %}sel{% endif %}" onclick="selectBHK(this,'1RK')">1RK</button>
+          <button class="pp-btn {% if current_bhk == '1BHK' %}sel{% endif %}" onclick="selectBHK(this,'1BHK')">1BHK</button>
+          <button class="pp-btn {% if current_bhk == '2BHK' %}sel{% endif %}" onclick="selectBHK(this,'2BHK')">2BHK</button>
+          <button class="pp-btn {% if current_bhk == '3BHK' %}sel{% endif %}" onclick="selectBHK(this,'3BHK')">3BHK</button>
+          <button class="pp-btn {% if current_bhk == '4BHK' %}sel{% endif %}" onclick="selectBHK(this,'4BHK')">4BHK</button>
+          <button class="pp-btn {% if current_bhk == '5BHK' %}sel{% endif %}" onclick="selectBHK(this,'5BHK')">5BHK</button>
+          <button class="pp-btn {% if current_bhk == '5+BHK' %}sel{% endif %}" onclick="selectBHK(this,'5+BHK')">5+BHK</button>
+          <button class="pp-btn" onclick="selectBHK(this,'')">Any</button>
         </div>
       </div>
     </div>
 
-    <!-- BHK Type Filter -->
-    <div class="filter-group">
-      <div class="fg-title">
-        <i class="fas fa-bed" style="color: var(--primary);"></i>
-        No. of Bedrooms
-      </div>
-      <div>
-        <button class="filter-btn {% if current_bhk == '1BHK' %}active{% endif %}" onclick="toggleBHKFilter(this, '1BHK')">
-          + 1 RK/1 BHK
-        </button>
-        <button class="filter-btn {% if current_bhk == '2BHK' %}active{% endif %}" onclick="toggleBHKFilter(this, '2BHK')">
-          + 2 BHK
-        </button>
-        <button class="filter-btn {% if current_bhk == '3BHK' %}active{% endif %}" onclick="toggleBHKFilter(this, '3BHK')">
-          + 3 BHK
-        </button>
-        <button class="filter-btn {% if current_bhk == '4BHK' %}active{% endif %}" onclick="toggleBHKFilter(this, '4BHK')">
-          + 4 BHK
-        </button>
-        <button class="filter-btn {% if current_bhk == '5BHK' %}active{% endif %}" onclick="toggleBHKFilter(this, '5BHK')">
-          + 5 BHK
-        </button>
-      </div>
-    </div>
-
-    <!-- Area / Locality Filter -->
-    <div class="filter-group">
-      <div class="fg-title">
-        <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
-        Area / Locality
-      </div>
-      
-      <!-- Manual Input -->
-      <input type="text" class="sb-inp" id="sidebar-area-inp" 
-             placeholder="Type locality..." 
-             value="{{ current_area|default:'' }}" 
-             style="width:100%; margin-bottom:12px;"
-             oninput="handleManualAreaInput()">
-      
-      <!-- Quick Select Buttons -->
-      <div id="area-quick-select">
-        <button class="filter-btn {% if current_area == 'dharampeth' %}active{% endif %}" onclick="toggleAreaFilter(this, 'dharampeth')">Dharampeth</button>
-        <button class="filter-btn {% if current_area == 'civil-lines' %}active{% endif %}" onclick="toggleAreaFilter(this, 'civil-lines')">Civil Lines</button>
-        <button class="filter-btn {% if current_area == 'wardha' %}active{% endif %}" onclick="toggleAreaFilter(this, 'wardha')">Wardha Rd</button>
-        <button class="filter-btn {% if current_area == 'sitabuldi' %}active{% endif %}" onclick="toggleAreaFilter(this, 'sitabuldi')">Sitabuldi</button>
-        <button class="filter-btn {% if current_area == 'manewada' %}active{% endif %}" onclick="toggleAreaFilter(this, 'manewada')">Manewada</button>
-        <button class="filter-btn {% if current_area == 'sadar' %}active{% endif %}" onclick="toggleAreaFilter(this, 'sadar')">Sadar</button>
+    <div class="fpill {% if budget_min or budget_max %}active{% endif %}" id="pill-budget" onclick="togglePanel('panel-budget',this)">
+      {% if budget_min or budget_max %}
+        <span class="dot"></span>
+        ₹{% if budget_min %}{{ budget_min|floatformat:0 }}{% else %}0{% endif %} – {% if budget_max %}{{ budget_max|floatformat:0 }}{% else %}Any{% endif %}
+      {% else %}
+        ₹ Budget
+      {% endif %}
+      <i class="bi bi-chevron-down chevron"></i>
+      <div class="pill-panel budget-panel" id="panel-budget" onclick="event.stopPropagation()">
+        <div class="pp-title">Budget Range</div>
+        <div class="budget-hist" id="budgetHist">
+          <div class="hist-bar in-range" style="height:25%"></div>
+          <div class="hist-bar in-range" style="height:40%"></div>
+          <div class="hist-bar in-range" style="height:60%"></div>
+          <div class="hist-bar in-range" style="height:100%"></div>
+          <div class="hist-bar in-range" style="height:80%"></div>
+          <div class="hist-bar in-range" style="height:65%"></div>
+          <div class="hist-bar in-range" style="height:50%"></div>
+          <div class="hist-bar in-range" style="height:35%"></div>
+          <div class="hist-bar in-range" style="height:20%"></div>
+          <div class="hist-bar in-range" style="height:15%"></div>
+        </div>
+        <div class="range-track" id="rangeTrack">
+          <div class="range-fill" id="rangeFill"></div>
+          <div class="range-inputs">
+            <input type="range" id="rangeMin" min="0" max="200000" step="5000" value="{{ budget_min|default:0 }}" oninput="updateRange()">
+            <input type="range" id="rangeMax" min="0" max="200000" step="5000" value="{{ budget_max|default:200000 }}" oninput="updateRange()">
+          </div>
+        </div>
+        <div class="budget-vals">
+          <div class="bval-box" id="bValMin">₹{{ budget_min|default:"0" }}</div>
+          <span class="bval-sep">—</span>
+          <div class="bval-box" id="bValMax">₹{{ budget_max|default:"Any" }}</div>
+        </div>
+        <button class="pp-apply" onclick="applyBudget()">Apply</button>
       </div>
     </div>
 
-    <!-- Furnishing Status Filter -->
-    <div class="filter-group">
-      <div class="fg-title">
-        <i class="fas fa-couch" style="color: var(--primary);"></i>
-        Furnishing Status
-      </div>
-      <div>
-        <button class="filter-btn {% if current_furnishing == 'semi' %}active{% endif %}" onclick="toggleFurnishingFilter(this, 'semi')">Semi Furnished</button>
-        <button class="filter-btn {% if current_furnishing == 'fully' %}active{% endif %}" onclick="toggleFurnishingFilter(this, 'fully')">Fully Furnished</button>
-        <button class="filter-btn {% if current_furnishing == 'unfurnished' %}active{% endif %}" onclick="toggleFurnishingFilter(this, 'unfurnished')">Unfurnished</button>
+    <div class="fpill {% if filter_owner or filter_agent or filter_builder %}active{% endif %}" id="pill-listed" onclick="togglePanel('panel-listed',this)">
+      {% if filter_owner %}
+          <span class="dot"></span> Owner
+      {% elif filter_agent %}
+          <span class="dot"></span> Agent
+      {% elif filter_builder %}
+          <span class="dot"></span> Builder
+      {% else %}
+          Listed By
+      {% endif %}
+      <i class="bi bi-chevron-down chevron"></i>
+      <div class="pill-panel" id="panel-listed" onclick="event.stopPropagation()">
+        <div class="pp-title">Listed By</div>
+        <div class="pp-options">
+          <button class="pp-btn {% if filter_owner %}sel{% endif %}" onclick="selectListedBy('owner')">Owner</button>
+          <button class="pp-btn {% if filter_agent %}sel{% endif %}" onclick="selectListedBy('agent')">Agent</button>
+          <button class="pp-btn {% if filter_builder %}sel{% endif %}" onclick="selectListedBy('builder')">Builder</button>
+          <button class="pp-btn {% if not filter_owner and not filter_agent and not filter_builder %}sel{% endif %}" onclick="selectListedBy('')">Any</button>
+        </div>
       </div>
     </div>
 
-    <!-- Property Status Filter -->
-    <div class="filter-group">
-      <div class="fg-title">
-        <i class="fas fa-check-circle" style="color: var(--primary);"></i>
-        Property Status
+    <div class="fpill {% if current_furnishing %}active{% endif %}" id="pill-furn" onclick="togglePanel('panel-furn',this)">
+      {% if current_furnishing %}<span class="dot"></span> {{ current_furnishing|title }}{% else %}Furnishing{% endif %}
+      <i class="bi bi-chevron-down chevron"></i>
+      <div class="pill-panel" id="panel-furn" onclick="event.stopPropagation()">
+        <div class="pp-title">Furnishing Status</div>
+        <div class="pp-options">
+          <button class="pp-btn {% if current_furnishing == 'fully' %}sel{% endif %}" onclick="selectFurn(this,'fully')">Fully Furnished</button>
+          <button class="pp-btn {% if current_furnishing == 'semi' %}sel{% endif %}" onclick="selectFurn(this,'semi')">Semi Furnished</button>
+          <button class="pp-btn {% if current_furnishing == 'unfurnished' %}sel{% endif %}" onclick="selectFurn(this,'unfurnished')">Unfurnished</button>
+          <button class="pp-btn" onclick="selectFurn(this,'')">Any</button>
+        </div>
       </div>
-      <label class="checkbox-item">
-        <input type="checkbox" id="f-verified" {% if filter_verified %}checked{% endif %} onchange="syncFilters()"> 
-        ✅ Verified Only
-      </label>
-      <label class="checkbox-item">
-        <input type="checkbox" id="f-featured" {% if filter_featured %}checked{% endif %} onchange="syncFilters()"> 
-        ⭐ Featured Only
-      </label>
-      <label class="checkbox-item">
-        <input type="checkbox" id="f-owner" {% if filter_owner %}checked{% endif %} onchange="syncFilters()"> 
-        Owner Properties Only
-      </label>
-      <label class="checkbox-item">
-        <input type="checkbox" id="f-pet" {% if filter_pet %}checked{% endif %} onchange="syncFilters()"> 
-        🐕 Pet Friendly
-      </label>
     </div>
 
-    <!-- Amenities Filter -->
-    <div class="filter-group">
-      <div class="fg-title">
-        <i class="fas fa-star" style="color: var(--primary);"></i>
-        Amenities
+    <div class="fpill {% if current_prop_type %}active{% endif %}" id="pill-ptype" onclick="togglePanel('panel-ptype',this)">
+      {% if current_prop_type %}<span class="dot"></span> {{ current_prop_type }}{% else %}Property Type{% endif %}
+      <i class="bi bi-chevron-down chevron"></i>
+      <div class="pill-panel" id="panel-ptype" onclick="event.stopPropagation()">
+        <div class="pp-title">Property Type</div>
+        <div class="pp-options">
+          <button class="pp-btn {% if current_prop_type == 'Apartment' %}sel{% endif %}" onclick="selectPropType(this,'Apartment')">Apartment</button>
+          <button class="pp-btn {% if current_prop_type == 'Independent House' %}sel{% endif %}" onclick="selectPropType(this,'Independent House')">Independent House</button>
+          <button class="pp-btn {% if current_prop_type == 'Independent Floor' %}sel{% endif %}" onclick="selectPropType(this,'Independent Floor')">Independent Floor</button>
+          <button class="pp-btn {% if current_prop_type == 'Studio' %}sel{% endif %}" onclick="selectPropType(this,'Studio')">Studio</button>
+          <button class="pp-btn {% if current_prop_type == 'Duplex' %}sel{% endif %}" onclick="selectPropType(this,'Duplex')">Duplex</button>
+          <button class="pp-btn {% if current_prop_type == 'Penthouse' %}sel{% endif %}" onclick="selectPropType(this,'Penthouse')">Penthouse</button>
+          <button class="pp-btn {% if current_prop_type == 'Villa' %}sel{% endif %}" onclick="selectPropType(this,'Villa')">Villa</button>
+          <button class="pp-btn" onclick="selectPropType(this,'')">Any</button>
+        </div>
       </div>
-      <label class="checkbox-item"><input type="checkbox" onchange="syncFilters()"> Lift</label>
-      <label class="checkbox-item"><input type="checkbox" onchange="syncFilters()"> Gym</label>
-      <label class="checkbox-item"><input type="checkbox" onchange="syncFilters()"> Swimming Pool</label>
-      <label class="checkbox-item"><input type="checkbox" onchange="syncFilters()"> Power Backup</label>
-      <label class="checkbox-item"><input type="checkbox" onchange="syncFilters()"> Parking</label>
     </div>
 
-    <!-- Apply Button -->
-    <button class="btn btn-pr" style="width:100%;justify-content:center;margin-top:8px;padding:12px;" onclick="applySidebarFilters()">
-      <i class="fas fa-filter"></i> Apply Filters
-    </button>
+    <div class="fs-divider"></div>
+
+    <div class="fpill {% if filter_verified %}active{% endif %}" onclick="toggleFilter('verified',this)">
+      {% if filter_verified %}<span class="dot"></span>{% endif %}
+      <i class="bi bi-patch-check-fill" style="font-size:0.8rem;color:{% if filter_verified %}var(--primary){% else %}var(--muted){% endif %};"></i>
+      Verified
+    </div>
+
+    <div class="fpill {% if filter_pet %}active{% endif %}" onclick="toggleFilter('pet',this)">
+      {% if filter_pet %}<span class="dot"></span>{% endif %}
+      🐾 Pet Friendly
+    </div>
+
+    <div class="fpill" onclick="openMoreFilters()" style="{% if active_more_count > 0 %}background:var(--primary-light);border-color:var(--primary);color:var(--primary);{% endif %}">
+      {% if active_more_count > 0 %}<span class="dot"></span>{% endif %}
+      <i class="bi bi-sliders" style="font-size:0.85rem;"></i>
+      More Filters{% if active_more_count > 0 %} ({{ active_more_count }}){% endif %}
+    </div>
+
+    {% if active_filter_count > 0 %}
+    <div class="fpill" onclick="resetAllFilters()" style="color:#ef4444;border-color:#fecaca;">
+      <i class="bi bi-x-circle" style="font-size:0.85rem;"></i> Reset
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<div class="mf-overlay" id="mfOverlay" onclick="closeMoreFilters()"></div>
+<div class="mf-drawer" id="mfDrawer">
+  <div class="mf-head">
+    <h3><i class="bi bi-sliders" style="margin-right:8px;"></i>More Filters</h3>
+    <button class="mf-close" onclick="closeMoreFilters()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="mf-layout">
+    <div class="mf-sidebar">
+      <div class="mf-sidebar-item active" onclick="switchMFSection('sec-verified',this)">Verified</div>
+      <div class="mf-sidebar-item" onclick="switchMFSection('sec-lease',this)">Lease Type</div>
+      <div class="mf-sidebar-item" onclick="switchMFSection('sec-bathrooms',this)">Bathrooms</div>
+      <div class="mf-sidebar-item" onclick="switchMFSection('sec-area',this)">Built-up Area</div>
+      <div class="mf-sidebar-item" onclick="switchMFSection('sec-age',this)">Age of Property</div>
+      <div class="mf-sidebar-item" onclick="switchMFSection('sec-amenities',this)">Amenities</div>
+      <div class="mf-sidebar-item" onclick="switchMFSection('sec-parking',this)">Parking</div>
+      <div class="mf-sidebar-item" onclick="switchMFSection('sec-added',this)">Added</div>
+    </div>
+    <div class="mf-content">
+      <div class="mf-section active" id="sec-verified">
+        <div class="mf-section-title">Verified</div>
+        <div class="mf-options">
+          <button class="mf-btn {% if filter_verified %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_verified')">Show only verified properties</button>
+        </div>
+      </div>
+      <div class="mf-section" id="sec-lease">
+        <div class="mf-section-title">Lease Type</div>
+        <div class="mf-options">
+          <button class="mf-btn {% if filter_lease == 'Family' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_lease','Family')">Family</button>
+          <button class="mf-btn {% if filter_lease == 'Company' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_lease','Company')">Company</button>
+          <button class="mf-btn {% if filter_lease == 'Bachelor' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_lease','Bachelor')">Bachelor</button>
+        </div>
+      </div>
+      <div class="mf-section" id="sec-bathrooms">
+        <div class="mf-section-title">Bathrooms</div>
+        <div class="mf-options">
+          <button class="mf-btn {% if filter_bathrooms == '1' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_bathrooms','1')">1+</button>
+          <button class="mf-btn {% if filter_bathrooms == '2' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_bathrooms','2')">2+</button>
+          <button class="mf-btn {% if filter_bathrooms == '3' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_bathrooms','3')">3+</button>
+          <button class="mf-btn {% if filter_bathrooms == '4' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_bathrooms','4')">4+</button>
+        </div>
+      </div>
+      <div class="mf-section" id="sec-area">
+        <div class="mf-section-title">Built-up Area (sq.ft)</div>
+        <div class="mf-options">
+          <button class="mf-btn {% if filter_area_range == '0-500' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_area_range','0-500')">Under 500</button>
+          <button class="mf-btn {% if filter_area_range == '500-1000' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_area_range','500-1000')">500 – 1000</button>
+          <button class="mf-btn {% if filter_area_range == '1000-1500' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_area_range','1000-1500')">1000 – 1500</button>
+          <button class="mf-btn {% if filter_area_range == '1500-2000' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_area_range','1500-2000')">1500 – 2000</button>
+          <button class="mf-btn {% if filter_area_range == '2000+' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_area_range','2000+')">2000+</button>
+        </div>
+      </div>
+      <div class="mf-section" id="sec-age">
+        <div class="mf-section-title">Age of Property</div>
+        <div class="mf-options">
+          <button class="mf-btn {% if filter_age == '0-1' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_age','0-1')">Under 1 Year</button>
+          <button class="mf-btn {% if filter_age == '1-5' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_age','1-5')">1 – 5 Years</button>
+          <button class="mf-btn {% if filter_age == '5-10' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_age','5-10')">5 – 10 Years</button>
+          <button class="mf-btn {% if filter_age == '10-20' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_age','10-20')">10 – 20 Years</button>
+          <button class="mf-btn {% if filter_age == '20+' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_age','20+')">20+ Years</button>
+        </div>
+      </div>
+      <div class="mf-section" id="sec-amenities">
+        <div class="mf-section-title">Amenities</div>
+        <div class="mf-options" id="amenitiesBtns">
+          <button class="mf-btn" data-amenity="Lift" onclick="toggleAmenity(this,'Lift')">Lift</button>
+          <button class="mf-btn" data-amenity="Power Backup" onclick="toggleAmenity(this,'Power Backup')">Power Backup</button>
+          <button class="mf-btn" data-amenity="Security" onclick="toggleAmenity(this,'Security')">Security</button>
+          <button class="mf-btn" data-amenity="CCTV" onclick="toggleAmenity(this,'CCTV')">CCTV</button>
+          <button class="mf-btn" data-amenity="Gym" onclick="toggleAmenity(this,'Gym')">Gym</button>
+          <button class="mf-btn" data-amenity="Swimming Pool" onclick="toggleAmenity(this,'Swimming Pool')">Swimming Pool</button>
+          <button class="mf-btn" data-amenity="Club House" onclick="toggleAmenity(this,'Club House')">Club House</button>
+          <button class="mf-btn" data-amenity="Park" onclick="toggleAmenity(this,'Park')">Park</button>
+          <button class="mf-btn" data-amenity="Intercom" onclick="toggleAmenity(this,'Intercom')">Intercom</button>
+          <button class="mf-btn" data-amenity="Gated Society" onclick="toggleAmenity(this,'Gated Society')">Gated Society</button>
+          <button class="mf-btn" data-amenity="Vastu Compliant" onclick="toggleAmenity(this,'Vastu Compliant')">Vastu Compliant</button>
+          <button class="mf-btn" data-amenity="Water Supply 24x7" onclick="toggleAmenity(this,'Water Supply 24x7')">Water Supply 24x7</button>
+        </div>
+      </div>
+      <div class="mf-section" id="sec-parking">
+        <div class="mf-section-title">Parking</div>
+        <div class="mf-options">
+          <button class="mf-btn {% if filter_parking == 'Covered' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_parking','Covered')">Covered</button>
+          <button class="mf-btn {% if filter_parking == 'Open' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_parking','Open')">Open</button>
+          <button class="mf-btn {% if filter_parking == 'Both' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_parking','Both')">Both</button>
+        </div>
+      </div>
+      <div class="mf-section" id="sec-added">
+        <div class="mf-section-title">Added On</div>
+        <div class="mf-options">
+          <button class="mf-btn {% if filter_added == '1' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_added','1')">Last 1 Day</button>
+          <button class="mf-btn {% if filter_added == '7' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_added','7')">Last 7 Days</button>
+          <button class="mf-btn {% if filter_added == '30' %}sel{% endif %}" onclick="toggleMFBtn(this,'mf_added','30')">Last 30 Days</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mf-foot">
+    <button class="mf-clear-btn" onclick="clearMoreFilters()">Clear All</button>
+    <button class="mf-apply-btn" onclick="applyMoreFilters()">Apply Filters</button>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;">
+    <a href="/" style="color:var(--body-text);">Home</a>
+    <span style="margin:0 5px;">›</span>
+    {{ listing_type|title }}
+    <span style="margin:0 5px;">›{{ category }}</span>
+    <span style="color:var(--sec);font-weight:600;">{{ city|default:""|title }}</span>
+    {% for area in areas_list %}
+      <span style="margin:0 5px;">›</span>
+      <span style="color:var(--sec);font-weight:600;">{{ area|title }}</span>
+    {% endfor %}
   </div>
 
-  <!-- ==================== MAIN RESULTS AREA ==================== -->
-  <div>
-    <!-- Breadcrumb -->
-    <div style="font-size:0.85rem;color:var(--muted);margin-bottom:16px;font-weight:500;">
-      <a href="/" style="color:var(--primary);text-decoration:none;">Home</a>
-      {{ listing_type|title }} <span style="color:var(--sec);">{{ category|title }}</span>
+  {% if active_filter_count > 0 %}
+  <div class="applied-row">
+    {% for area in areas_list %}
+    <span class="af-chip" onclick="removeAreaChip('{{ area }}')">
+      {{ area|title }} <i class="fas fa-times"></i>
+    </span>
+    {% endfor %}
+    {% if current_bhk %}
+    <span class="af-chip" onclick="removeFilterParam('bhk')">
+      {{ current_bhk }} <i class="fas fa-times"></i>
+    </span>
+    {% endif %}
+    {% if budget_min %}
+    <span class="af-chip" onclick="removeFilterParam('budget_min')">
+      Min ₹{{ budget_min }} <i class="fas fa-times"></i>
+    </span>
+    {% endif %}
+    {% if budget_max %}
+    <span class="af-chip" onclick="removeFilterParam('budget_max')">
+      Max ₹{{ budget_max }} <i class="fas fa-times"></i>
+    </span>
+    {% endif %}
+    {% if current_furnishing %}
+    <span class="af-chip" onclick="removeFilterParam('furnishing')">
+      {{ current_furnishing|title }} <i class="fas fa-times"></i>
+    </span>
+    {% endif %}
+    {% if current_prop_type %}
+    <span class="af-chip" onclick="removeFilterParam('prop_type')">
+      {{ current_prop_type }} <i class="fas fa-times"></i>
+    </span>
+    {% endif %}
+    {% if filter_verified %}
+    <span class="af-chip" onclick="removeFilterParam('verified')">
+      Verified <i class="fas fa-times"></i>
+    </span>
+    {% endif %}
+    {% if filter_pet %}
+    <span class="af-chip" onclick="removeFilterParam('pet')">
+      Pet Friendly <i class="fas fa-times"></i>
+    </span>
+    {% endif %}
+    {% if filter_lease %}
+    <span class="af-chip" onclick="removeFilterParam('lease')">
+      {{ filter_lease }} <i class="fas fa-times"></i>
+    </span>
+    {% endif %}
+    <span class="af-clear" onclick="resetAllFilters()">Clear All</span>
+  </div>
+  {% endif %}
+
+  <div class="results-hdr">
+    <div>
+      <div class="rh-count">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of <strong>{{ total|default:"0" }}</strong> properties</div>
+      <div class="rh-title">
+        {% if listing_type == 'rent' %}Properties for Rent{% else %}Properties for Sale{% endif %}
+        {% for area in areas_list %}{% if forloop.first %} in {% else %}, {% endif %}{{ area|title }}{% endfor %}{% if not areas_list %} in {{ city|title }}{% endif %}
+      </div>
+      <div class="rh-sub">Last Updated: Today &nbsp;·&nbsp; Verified &amp; Owner listings</div>
     </div>
+    <select class="sort-sel" onchange="applySorting(this.value)">
+      <option value="relevant"   {% if current_sort == 'relevant'   %}selected{% endif %}>Sort by: Relevance</option>
+      <option value="newest"     {% if current_sort == 'newest'     %}selected{% endif %}>Sort by: Newest</option>
+      <option value="price-asc"  {% if current_sort == 'price-asc'  %}selected{% endif %}>Price: Low → High</option>
+      <option value="price-desc" {% if current_sort == 'price-desc' %}selected{% endif %}>Price: High → Low</option>
+    </select>
+  </div>
 
-    <!-- Applied Filters Tags (99acres style) -->
-    <div class="applied-filters" id="appliedFiltersMain">
-      <span class="af-label">Applied Filters:</span>
-      
-      <!-- Listing Type Tag -->
-      <div class="af-tag" style="background: #dcfce7; color: #16a34a; border-color: #bbf7d0;">
-        {{ listing_type|title }}
-      </div>
+  <div class="listings-col" id="listingsCol">
+    {% for p in properties %}
+    <a href="/listing/{{ listing_type }}/{{ category|lower|slugify }}/{{ p.id }}/" class="pcard">
 
-      <!-- Category Tag -->
-      {% if category %}
-      <div class="af-tag" style="background: #fef3c7; color: #d97706; border-color: #fde68a;">
-        {{ category|title }}
-      </div>
-      {% endif %}
-      
-      <!-- Location Tag -->
-      {% if current_area %}
-      <div class="af-tag" onclick="removeFilter('area')">
-        <i class="fas fa-map-marker-alt"></i> {{ current_area|title }}
-        <i class="fas fa-times"></i>
-      </div>
-      {% endif %}
+      <div class="pc-img-wrap">
+        {% if p.image_url %}
+          <img src="{{ p.image_url }}" alt="{{ p.title }}" loading="lazy">
+          <div class="img-counter"><i class="bi bi-images"></i> {{ p.image_count|default:"1" }}</div>
+        {% else %}
+          <div class="pc-placeholder">
+            <i class="bi {% if p.property_type == 'commercial' %}bi-building{% elif p.property_type == 'pg' %}bi-people-fill{% else %}bi-house-door-fill{% endif %}"></i>
+            <span>{{ p.property_type|default:"Residential" }}</span>
+          </div>
+        {% endif %}
 
-      <!-- BHK Tag -->
-      {% if current_bhk %}
-      <div class="af-tag" onclick="removeFilter('bhk')">
-        <i class="fas fa-bed"></i> {{ current_bhk }}
-        <i class="fas fa-times"></i>
-      </div>
-      {% endif %}
+        <div class="img-badges">
+          {% if p.is_new %}<span class="ibadge ib-new">New</span>{% endif %}
+          {% if p.is_verified %}<span class="ibadge ib-verif">✓ Verified</span>{% endif %}
+          {% if p.is_featured %}<span class="ibadge ib-feat">Featured</span>{% endif %}
+        </div>
 
-      <!-- Budget Tags -->
-      {% if budget_min %}
-      <div class="af-tag" onclick="removeFilter('budget_min')">
-        Min: ₹{{ budget_min|floatformat:0 }}
-        <i class="fas fa-times"></i>
-      </div>
-      {% endif %}
-      {% if budget_max %}
-      <div class="af-tag" onclick="removeFilter('budget_max')">
-        Max: ₹{{ budget_max|floatformat:0 }}
-        <i class="fas fa-times"></i>
-      </div>
-      {% endif %}
+        <div class="owner-av">{{ p.owner_initials|default:"O" }}</div>
 
-      <!-- Furnishing Tag -->
-      {% if current_furnishing %}
-      <div class="af-tag" onclick="removeFilter('furnishing')">
-        <i class="fas fa-couch"></i> {{ current_furnishing|title }}
-        <i class="fas fa-times"></i>
-      </div>
-      {% endif %}
-    </div>
-
-    <!-- Results Header -->
-    <div class="results-header">
-      <div class="rh-count">
-        Showing <span>{{ total|default:"0" }}</span> 
-        <strong>{{ category|title }}</strong> properties in 
-        <strong>{{ current_city|default:"Nagpur"|title }}</strong>
-      </div>
-      
-      <div class="rh-sort">
-        <select class="sort-select" onchange="applySorting(this.value)">
-          <option value="relevant" {% if current_sort == 'relevant' %}selected{% endif %}>Most Relevant</option>
-          <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
-          <option value="price-asc" {% if current_sort == 'price-asc' %}selected{% endif %}>Price: Low to High</option>
-          <option value="price-desc" {% if current_sort == 'price-desc' %}selected{% endif %}>Price: High to Low</option>
-        </select>
-        
-        <div class="view-toggle">
-          <button class="vt-btn active" onclick="setView('grid', this)">
-            <i class="fas fa-th"></i>
-          </button>
-          <button class="vt-btn" onclick="setView('list', this)">
-            <i class="fas fa-list"></i>
+        <div class="img-price">
+          <div>
+            <div class="amt">{{ p.price_display|default:"Price on Request" }}</div>
+            {% if listing_type == 'rent' %}<div class="per">per month</div>{% endif %}
+          </div>
+          <button class="btn-save" onclick="event.preventDefault();toggleSave('{{ p.id }}',this)" title="Save">
+            <i class="bi bi-heart"></i>
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- Property Listings Grid -->
-    <div class="listings-grid" id="listingsGrid">
-      {% for p in properties %}
-        <a href="/listing/{{listing_type }}/{{ category|lower|slugify }}/{{ p.id }}/" class="pcard">
-            
-            <div class="pc-img">
-                {% if p.image_url %}
-                <img src="{{ p.image_url }}" alt="Property">
-                {% else %}
-                <div class="pc-img-placeholder">
-                    {{ p.emoji|default:"🏠" }}
-                </div>
-                {% endif %}
-                
-                <div class="pc-badges">
-                    {% if p.is_ai_match %}
-                    <span class="badge" style="background: linear-gradient(45deg, #6366f1, #a855f7); color: white;">
-                        <i class="bi bi-robot"></i> AI Match
-                    </span>
-                    {% endif %}
+      <div class="pc-body">
+        <div class="pc-top">
+          <div class="pc-owner-row">
+            <i class="bi bi-person-circle" style="font-size:0.9rem;"></i>
+            <strong>{{ p.uploaded_by_name|default:"Unknown User" }}</strong>
+            <span>·</span>
+            <span>{{ p.uploaded_by_role|default:"Owner" }}</span>
+          </div>
+          {% if p.is_new %}
+          <span class="pc-new-badge">New</span>
+          {% endif %}
+        </div>
 
-                    {% if p.is_new %}
-                    <span class="badge b-new">🆕 New</span>
-                    {% endif %}
-                    
-                    <span class="badge b-feat">{{ p.category|default:category }}</span>
-                </div>
+        <div>
+          <div class="pc-title">{{ p.title }}</div>
+          <div class="pc-addr">
+            <i class="bi bi-geo-alt-fill" style="color:var(--primary);font-size:0.8rem;"></i>
+            {{ p.location }}
+          </div>
+        </div>
 
-                <button class="pc-save" onclick="event.preventDefault();toggleSave({{ p.id }}, '{{ p.category }}', this)">
-                    <i class="bi bi-heart"></i>
-                </button>
-                
-                <div class="pc-price-tag">{{ p.price_display|default:"Price on Request" }}</div>
-            </div>
+        <div class="pc-specs">
+          {% if p.area %}
+          <div class="spec-col">
+            <div class="spec-val">{{ p.area }}</div>
+            <div class="spec-lbl">Built-up Area</div>
+          </div>
+          {% endif %}
+          {% if p.beds %}
+          <div class="spec-col">
+            <div class="spec-val">{{ p.beds }}</div>
+            <div class="spec-lbl">Configuration</div>
+          </div>
+          {% elif p.total_beds %}
+          <div class="spec-col">
+            <div class="spec-val">{{ p.total_beds }} Beds</div>
+            <div class="spec-lbl">Beds</div>
+          </div>
+          {% endif %}
+          {% if p.furnishing %}
+          <div class="spec-col">
+            <div class="spec-val">{{ p.furnishing|title }}</div>
+            <div class="spec-lbl">Furnishing</div>
+          </div>
+          {% endif %}
+          {% if p.floor %}
+          <div class="spec-col">
+            <div class="spec-val">{{ p.floor }}</div>
+            <div class="spec-lbl">Floor</div>
+          </div>
+          {% endif %}
+        </div>
 
-            <div class="pc-body">
-                <div class="pc-title">{{ p.title }} </div>
-                
-                <div class="pc-addr">
-                    <i class="fas fa-map-marker-alt" style="color:var(--primary);"></i>
-                    {{ p.location }}
-                </div>
+        {% if p.description %}
+        <div class="pc-desc">{{ p.description }}</div>
+        {% endif %}
 
-                <div class="pc-specs">
-                    {% if p.beds %}
-                    <div class="spec"><i class="fas fa-bed"></i> {{ p.beds }}</div>
-                    {% elif p.total_beds %}
-                    <div class="spec"><i class="fas fa-bed"></i> {{ p.total_beds }} Beds</div>
-                    {% elif p.min_seats %}
-                    <div class="spec"><i class="fas fa-chair"></i> {{ p.min_seats }} Seats</div>
-                    {% endif %}
-                    
-                    {% if p.area %}
-                    <div class="spec"><i class="fas fa-vector-square"></i> {{ p.area }} Sq.Ft</div>
-                    {% elif p.land_area %}
-                    <div class="spec"><i class="fas fa-vector-square"></i> {{ p.land_area }} Acres</div>
-                    {% elif p.plot_area %}
-                    <div class="spec"><i class="fas fa-vector-square"></i> {{ p.plot_area }} Sq.Ft</div>
-                    {% endif %}
-                    
-                    {% if p.baths %}
-                    <div class="spec"><i class="fas fa-bath"></i> {{ p.baths }} Baths</div>
-                    {% elif p.kva_capacity %}
-                    <div class="spec"><i class="fas fa-bolt"></i> {{ p.kva_capacity }} KVA</div>
-                    {% endif %}
-                </div>
-                
-                <div class="pc-tags">
-                    {% if p.furnished %}
-                    <span class="pt">{{ p.furnished|title }}</span>
-                    {% endif %}
-                    
-                    {% if p.property_type %}
-                    <span class="pt">{{ p.property_type|title }}</span>
-                    {% endif %}
+        <div class="pc-highlights">
+          {% if p.property_type %}
+          <span class="hl-tag ptype">
+            <i class="bi bi-building" style="font-size:0.75rem;"></i>
+            {{ p.property_type|title }}
+          </span>
+          {% endif %}
+          {% if p.is_verified %}
+          <span class="hl-tag verified">
+            <i class="bi bi-patch-check-fill" style="font-size:0.75rem;"></i> Verified
+          </span>
+          {% endif %}
+          {% if p.pet_friendly %}
+          <span class="hl-tag">🐾 Pet Friendly</span>
+          {% endif %}
+          {% if p.pg_for %}
+          <span class="hl-tag">👤 For {{ p.pg_for|title }}</span>
+          {% endif %}
+          {% for amenity in p.amenities|slice:":4" %}
+          <span class="hl-tag">
+            <i class="bi bi-check-circle" style="font-size:0.7rem;color:var(--green);"></i>
+            {{ amenity }}
+          </span>
+          {% endfor %}
+          {% if p.amenities|length > 4 %}
+          <span class="hl-tag" style="background:#f0ecfe;border-color:#c4b3f9;color:var(--primary);">
+            +{{ p.amenities|length|add:"-4" }} more
+          </span>
+          {% endif %}
+        </div>
 
-                    {% if p.pg_for %}
-                    <span class="pt">For {{ p.pg_for|title }}</span>
-                    {% endif %}
-                    
-                    {% if p.plot_road_facing %}
-                    <span class="pt">{{ p.plot_road_facing|title }} Facing</span>
-                    {% endif %}
-                </div>
-
-                <div class="pc-footer">
-                    <div class="pc-agent">
-                        <div class="pa-av" style="background:var(--accent);">{{ p.owner_initials|default:"O" }}</div>
-                        <div>
-                            <div class="pa-name">{{ p.owner|default:"Owner" }}</div>
-                            <div class="pa-role">{{ p.category|default:category }}</div>
-                        </div>
-                    </div>
-                    <div class="pc-contact-btns">
-                        <button class="cb" onclick="event.preventDefault();callListing('{{ p.phone }}')">
-                            <i class="fas fa-phone"></i> Call
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </a>
-      {% empty %}
-        <div style="grid-column:1/-1;text-align:center;padding:80px 20px;background:white;border-radius:12px;border:1px solid var(--border);">
-            <i class="fas fa-search" style="font-size:3rem;margin-bottom:16px;display:block;color:var(--muted);"></i>
-            <div style="font-size:1.1rem;font-weight:700;color:var(--sec);">No properties found</div>
-            <div style="font-size:0.9rem;margin-top:8px;color:var(--muted);">Try adjusting your filters or search in a different area</div>
-            <button class="btn btn-pr" style="margin-top:20px;" onclick="resetAllFilters()">
-              <i class="fas fa-redo"></i> Reset All Filters
+        <div class="pc-footer">
+          <div class="pc-updated">
+            <strong>Updated</strong> recently
+            {% if p.facing %} · Facing {{ p.facing }}{% endif %}
+          </div>
+          <div class="pc-btns">
+            <button class="btn-whatsapp" onclick="event.preventDefault();whatsappListing('{{ p.phone|escapejs }}','{{ p.title|escapejs }}')">
+              <i class="fab fa-whatsapp"></i>
             </button>
+            <button class="btn-contact" onclick="event.preventDefault();callListing('{{ p.phone|escapejs }}','{{ p.uploaded_by_name|escapejs }}')">
+              <i class="bi bi-telephone-fill"></i> Contact
+            </button>
+          </div>
         </div>
-      {% endfor %}
+      </div>
+    </a>
+    {% empty %}
+    <div class="empty-state">
+      <i class="bi bi-search"></i>
+      <h3>No properties found</h3>
+      <p>Try adjusting your filters or searching in a different area</p>
+      <button class="btn-reset" onclick="resetAllFilters()">Clear Filters</button>
     </div>
+    {% endfor %}
   </div>
+
+  {% if page_obj.paginator.num_pages > 1 %}
+  <div class="pagination-row">
+    {% if page_obj.has_previous %}
+    <a class="pg-btn" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+      <i class="bi bi-chevron-left"></i>
+    </a>
+    {% else %}
+    <span class="pg-btn disabled"><i class="bi bi-chevron-left"></i></span>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <span class="pg-btn current">{{ num }}</span>
+      {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+        <a class="pg-btn" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <a class="pg-btn" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+      <i class="bi bi-chevron-right"></i>
+    </a>
+    {% else %}
+    <span class="pg-btn disabled"><i class="bi bi-chevron-right"></i></span>
+    {% endif %}
+  </div>
+  <div class="pg-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} · {{ total }} total results</div>
+  {% endif %}
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-<script>
-// ============================================
-// GLOBAL FILTER STATE MANAGEMENT
-// ============================================
 
-const filterState = {
-    type: '{{ listing_type|escapejs }}',
-    category: '{{ category|escapejs }}',
-    area: '{{ current_area|escapejs }}',
-    bhk: '{{ current_bhk|escapejs }}',
-    budget_min: '{{ budget_min|escapejs }}',
-    budget_max: '{{ budget_max|escapejs }}',
-    furnishing: '{{ current_furnishing|escapejs }}',
-    sort: '{{ current_sort|escapejs }}',
+<script>
+// ════════════════════════════════════════
+// SECURE FILTER STATE (DEFAULTS APPLIED)
+// ════════════════════════════════════════
+const FS = {
+  type: '{{ listing_type|default:"rent"|escapejs }}',
+  category: '{{ category|default:""|escapejs }}',
+  areas: {{ areas_json|default:"[]"|safe }},
+  bhk: '{{ current_bhk|default:""|escapejs }}',
+  budget_min: '{{ budget_min|default:""|escapejs }}',
+  budget_max: '{{ budget_max|default:""|escapejs }}',
+  furnishing: '{{ current_furnishing|default:""|escapejs }}',
+  prop_type: '{{ current_prop_type|default:""|escapejs }}',
+  sort: '{{ current_sort|default:"relevant"|escapejs }}',
+  verified: '{{ filter_verified|default:""|escapejs }}',
+  owner: '{{ filter_owner|default:""|escapejs }}',
+  agent: '{{ filter_agent|default:""|escapejs }}',
+  builder: '{{ filter_builder|default:""|escapejs }}',
+  pet: '{{ filter_pet|default:""|escapejs }}',
+  lease: '{{ filter_lease|default:""|escapejs }}',
+  bathrooms: '{{ filter_bathrooms|default:""|escapejs }}',
+  area_range: '{{ filter_area_range|default:""|escapejs }}',
+  age: '{{ filter_age|default:""|escapejs }}',
+  amenities: {{ amenities_json|default:"[]"|safe }},
+  parking: '{{ filter_parking|default:""|escapejs }}',
+  added: '{{ filter_added|default:""|escapejs }}',
 };
 
-// ============================================
-// INIT: Sync UI with current state
-// ============================================
-document.addEventListener('DOMContentLoaded', function() {
-    updateActiveFilterCount();
-    syncUIWithState();
+let MF = {
+  verified: FS.verified,
+  lease: FS.lease,
+  bathrooms: FS.bathrooms,
+  area_range: FS.area_range,
+  age: FS.age,
+  amenities: [...FS.amenities],
+  parking: FS.parking,
+  added: FS.added,
+};
+
+// ════════════════════════════════════════
+// URL BUILDER ENGINE
+// ════════════════════════════════════════
+function buildURL(page) {
+  const p = new URLSearchParams();
+  p.set('type', FS.type);
+  if (FS.category) p.set('category', FS.category);
+  if (FS.areas.length) p.set('areas', FS.areas.join(','));
+  if (FS.bhk) p.set('bhk', FS.bhk);
+  if (FS.budget_min) p.set('budget_min', FS.budget_min);
+  if (FS.budget_max && FS.budget_max !== '200000') p.set('budget_max', FS.budget_max);
+  if (FS.furnishing) p.set('furnishing', FS.furnishing);
+  if (FS.prop_type) p.set('prop_type', FS.prop_type);
+  if (FS.sort) p.set('sort', FS.sort);
+  if (FS.verified) p.set('verified', '1');
+  if (FS.owner) p.set('owner', '1');
+  if (FS.agent) p.set('agent', '1');
+  if (FS.builder) p.set('builder', '1');
+  if (FS.pet) p.set('pet', '1');
+  if (FS.lease) p.set('lease', FS.lease);
+  if (FS.bathrooms) p.set('bathrooms', FS.bathrooms);
+  if (FS.area_range) p.set('area_range', FS.area_range);
+  if (FS.age) p.set('age', FS.age);
+  if (FS.amenities.length) p.set('amenities', FS.amenities.join(','));
+  if (FS.parking) p.set('parking', FS.parking);
+  if (FS.added) p.set('added', FS.added);
+  if (page && page > 1) p.set('page', page);
+
+  return window.location.pathname + '?' + p.toString();
+}
+
+function go(page) {
+  window.location.href = buildURL(page);
+}
+
+function switchType(t) {
+  FS.type = t;
+  document.getElementById('toggleRent').classList.toggle('active', t === 'rent');
+  document.getElementById('toggleSale').classList.toggle('active', t === 'sale');
+  go();
+}
+
+function removeAreaChip(area) {
+  FS.areas = FS.areas.filter(a => a.toLowerCase() !== area.toLowerCase());
+  go();
+}
+
+function applyLocSearch() {
+  const inp = document.getElementById('locInput').value.trim();
+  if (inp && !FS.areas.map(a => a.toLowerCase()).includes(inp.toLowerCase())) {
+    FS.areas.push(inp);
+  }
+  document.getElementById('locInput').value = '';
+  go();
+}
+
+// ════════════════════════════════════════
+// AUTOCOMPLETE ENGINE
+// ════════════════════════════════════════
+let acTimer = null, acIndex = -1, acData = [];
+
+function fetchAC(q) {
+  clearTimeout(acTimer);
+  q = q.trim();
+  if (q.length < 2) {
+    closeAC();
+    return;
+  }
+  acTimer = setTimeout(() => {
+    fetch(`/api/search-suggestions/?q=${encodeURIComponent(q)}&type=${FS.type}`)
+      .then(r => r.json())
+      .then(d => renderAC(d.suggestions || []))
+      .catch(() => closeAC());
+  }, 220);
+}
+
+function renderAC(items) {
+  const drop = document.getElementById('acDrop');
+  acData = items;
+  acIndex = -1;
+  if (!items.length) {
+    drop.innerHTML = `<div class="ac-empty">No suggestions found</div>`;
+    drop.classList.add('open');
+    return;
+  }
+  drop.innerHTML = items.map((it, i) => {
+    const city = it.type === 'City';
+    const alreadyAdded = FS.areas.map(a => a.toLowerCase()).includes(it.text.toLowerCase());
+    return `
+      <div class="ac-item ${alreadyAdded ? 'hl' : ''}" data-i="${i}" onmousedown="pickAC('${it.text.replace(/'/g,"\\'")}')">
+        <div class="ac-icon ${city ? 'city-ic' : ''}">
+          <i class="bi ${city ? 'bi-geo-alt-fill' : 'bi-geo-alt'}"></i>
+        </div>
+        <span>${it.text}</span>
+        ${alreadyAdded ? `<span style="font-size:0.7rem;color:green;margin-left:auto;">Added</span>` : `<span class="ac-badge ${city ? 'city' : ''}">${it.type}</span>`}
+      </div>`;
+  }).join('');
+  drop.classList.add('open');
+}
+
+function pickAC(text) {
+  if (!FS.areas.map(a => a.toLowerCase()).includes(text.toLowerCase())) {
+    FS.areas.push(text);
+  }
+  document.getElementById('locInput').value = '';
+  closeAC();
+  go();
+}
+
+function closeAC() {
+  const d = document.getElementById('acDrop');
+  if (d) {
+    d.classList.remove('open');
+    d.innerHTML = '';
+  }
+  acIndex = -1;
+}
+
+function handleACKey(e) {
+  const items = document.querySelectorAll('#acDrop .ac-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    acIndex = Math.min(acIndex + 1, items.length - 1);
+    items.forEach((el, i) => { el.classList.toggle('hl', i === acIndex); });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acIndex = Math.max(acIndex - 1, -1);
+    items.forEach((el, i) => { el.classList.toggle('hl', i === acIndex); });
+  } else if (e.key === 'Enter') {
+    if (acIndex >= 0 && acData[acIndex]) {
+      e.preventDefault();
+      pickAC(acData[acIndex].text);
+    } else {
+      applyLocSearch();
+    }
+  } else if (e.key === 'Escape') {
+    closeAC();
+  }
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.loc-wrap')) closeAC();
+  if (!e.target.closest('.fpill')) closeAllPanels();
 });
 
-function syncUIWithState() {
-    // Update header dropdown
-    const headerTypeSel = document.getElementById('header-type-sel');
-    if (headerTypeSel) headerTypeSel.value = filterState.type;
-    
-    // Update sidebar inputs
-    const sidebarAreaInp = document.getElementById('sidebar-area-inp');
-    if (sidebarAreaInp && filterState.area) {
-        sidebarAreaInp.value = filterState.area;
+function togglePanel(id, pillEl) {
+  const panel = document.getElementById(id);
+  const isOpen = panel.classList.contains('open');
+  closeAllPanels();
+  if (!isOpen) {
+    const rect = pillEl.getBoundingClientRect();
+    panel.style.top = (rect.bottom + 6) + 'px';
+    const panelW = 260;
+    let left = rect.left;
+    if (left + panelW > window.innerWidth - 12) {
+      left = window.innerWidth - panelW - 12;
     }
+    panel.style.left = left + 'px';
+    panel.style.right = 'auto';
+    panel.classList.add('open');
+  }
 }
 
-// ============================================
-// BHK FILTER TOGGLE (99acres style)
-// ============================================
-function toggleBHKFilter(btn, value) {
-    const allBtns = btn.parentElement.querySelectorAll('.filter-btn');
-    
-    if (btn.classList.contains('active')) {
-        // Deselect
-        btn.classList.remove('active');
-        filterState.bhk = '';
-    } else {
-        // Deselect all others and select this one
-        allBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        filterState.bhk = value;
-    }
-    
-    updateActiveFilterCount();
+function closeAllPanels() {
+  document.querySelectorAll('.pill-panel').forEach(p => p.classList.remove('open'));
 }
 
-// ============================================
-// AREA FILTER TOGGLE
-// ============================================
-function toggleAreaFilter(btn, value) {
-    const allBtns = btn.parentElement.querySelectorAll('.filter-btn');
-    const areaInput = document.getElementById('sidebar-area-inp');
-    
-    if (btn.classList.contains('active')) {
-        btn.classList.remove('active');
-        filterState.area = '';
-        if (areaInput) areaInput.value = '';
-    } else {
-        allBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        filterState.area = value;
-        if (areaInput) areaInput.value = value;
-    }
-    
-    updateActiveFilterCount();
+window.addEventListener('scroll', closeAllPanels, { passive: true });
+window.addEventListener('resize', closeAllPanels, { passive: true });
+
+function selectBHK(btn, val) { FS.bhk = val; go(); }
+function selectFurn(btn, val) { FS.furnishing = val; go(); }
+function selectPropType(btn, val) { FS.prop_type = val; go(); }
+function toggleFilter(key, pill) { FS[key] = FS[key] ? '' : '1'; go(); }
+
+function selectListedBy(type) {
+  FS.owner = ''; FS.agent = ''; FS.builder = '';
+  if (type === 'owner') FS.owner = '1';
+  else if (type === 'agent') FS.agent = '1';
+  else if (type === 'builder') FS.builder = '1';
+  go();
 }
 
-function handleManualAreaInput() {
-    const areaInput = document.getElementById('sidebar-area-inp');
-    const quickBtns = document.querySelectorAll('#area-quick-select .filter-btn');
-    
-    if (areaInput.value.trim()) {
-        // Deselect all quick buttons when typing manually
-        quickBtns.forEach(b => b.classList.remove('active'));
-        filterState.area = areaInput.value.trim();
-    } else {
-        filterState.area = '';
-    }
-    
-    updateActiveFilterCount();
+function fmtMoney(v) {
+  v = parseInt(v);
+  if (v >= 100000) return '₹' + (v/100000).toFixed(v%100000===0?0:1) + 'L';
+  if (v >= 1000) return '₹' + (v/1000).toFixed(0) + 'K';
+  return '₹' + v;
 }
 
-// ============================================
-// FURNISHING FILTER TOGGLE
-// ============================================
-function toggleFurnishingFilter(btn, value) {
-    const allBtns = btn.parentElement.querySelectorAll('.filter-btn');
-    
-    if (btn.classList.contains('active')) {
-        btn.classList.remove('active');
-        filterState.furnishing = '';
-    } else {
-        allBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        filterState.furnishing = value;
-    }
-    
-    updateActiveFilterCount();
+function updateRange() {
+  const rMin = document.getElementById('rangeMin');
+  const rMax = document.getElementById('rangeMax');
+  if (!rMin || !rMax) return;
+
+  let lo = parseInt(rMin.value);
+  let hi = parseInt(rMax.value);
+  if (lo > hi) { rMin.value = hi; lo = hi; }
+
+  const pct_lo = (lo / 200000) * 100;
+  const pct_hi = (hi / 200000) * 100;
+
+  const fill = document.getElementById('rangeFill');
+  if (fill) {
+    fill.style.left = pct_lo + '%';
+    fill.style.width = (pct_hi - pct_lo) + '%';
+  }
+
+  document.getElementById('bValMin').textContent = fmtMoney(lo);
+  document.getElementById('bValMax').textContent = hi >= 200000 ? '₹Any' : fmtMoney(hi);
+
+  const bars = document.querySelectorAll('.hist-bar');
+  bars.forEach((bar, i) => {
+    const barPct = (i + 0.5) / bars.length * 100;
+    bar.classList.toggle('in-range', barPct >= pct_lo && barPct <= pct_hi);
+  });
 }
 
-// ============================================
-// SYNC FILTERS (called on any filter change)
-// ============================================
-function syncFilters() {
-    // Update budget from sidebar
-    const budgetMin = document.getElementById('sidebar-budget-min');
-    const budgetMax = document.getElementById('sidebar-budget-max');
-    
-    if (budgetMin) filterState.budget_min = budgetMin.value;
-    if (budgetMax) filterState.budget_max = budgetMax.value;
-    
-    updateActiveFilterCount();
+function applyBudget() {
+  const lo = document.getElementById('rangeMin').value;
+  const hi = document.getElementById('rangeMax').value;
+  FS.budget_min = parseInt(lo) > 0 ? String(lo) : '';
+  FS.budget_max = parseInt(hi) < 200000 ? String(hi) : '';
+  go();
 }
 
-// ============================================
-// UPDATE ACTIVE FILTER COUNT
-// ============================================
-function updateActiveFilterCount() {
-    let count = 0;
-    
-    if (filterState.area) count++;
-    if (filterState.bhk) count++;
-    if (filterState.budget_min) count++;
-    if (filterState.budget_max) count++;
-    if (filterState.furnishing) count++;
-    
-    // Update checkboxes
-    if (document.getElementById('f-verified')?.checked) count++;
-    if (document.getElementById('f-featured')?.checked) count++;
-    if (document.getElementById('f-owner')?.checked) count++;
-    if (document.getElementById('f-pet')?.checked) count++;
-    
-    const countEl = document.getElementById('sidebar-active-count');
-    if (countEl) countEl.textContent = count;
+document.addEventListener('DOMContentLoaded', () => { updateRange(); });
+
+// ════════════════════════════════════════
+// MORE FILTERS DRAWER MANAGEMENT
+// ════════════════════════════════════════
+function openMoreFilters() {
+  document.getElementById('mfOverlay').classList.add('open');
+  document.getElementById('mfDrawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.querySelectorAll('#amenitiesBtns .mf-btn').forEach(btn => {
+    btn.classList.toggle('sel', MF.amenities.includes(btn.dataset.amenity));
+  });
 }
 
-// ============================================
-// APPLY FILTERS (Sidebar)
-// ============================================
-function applySidebarFilters() {
-    const params = new URLSearchParams();
-    
-    // Core params
-    params.set('type', filterState.type);
-    if (filterState.category) params.set('category', filterState.category);
-    
-    // Filter params
-    if (filterState.area) params.set('area', filterState.area);
-    if (filterState.bhk) params.set('bhk', filterState.bhk);
-    if (filterState.budget_min) params.set('budget_min', filterState.budget_min);
-    if (filterState.budget_max) params.set('budget_max', filterState.budget_max);
-    if (filterState.furnishing) params.set('furnishing', filterState.furnishing);
-    if (filterState.sort) params.set('sort', filterState.sort);
-    
-    // Checkboxes
-    if (document.getElementById('f-verified')?.checked) params.set('verified', '1');
-    if (document.getElementById('f-featured')?.checked) params.set('featured', '1');
-    if (document.getElementById('f-owner')?.checked) params.set('owner', '1');
-    if (document.getElementById('f-pet')?.checked) params.set('pet', '1');
-    
-    window.location.href = window.location.pathname + '?' + params.toString();
+function closeMoreFilters() {
+  document.getElementById('mfOverlay').classList.remove('open');
+  document.getElementById('mfDrawer').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
-// ============================================
-// APPLY FILTERS (Header)
-// ============================================
-function applyHeaderFilters() {
-    const headerType = document.getElementById('header-type-sel')?.value;
-    const headerLoc = document.getElementById('header-loc-inp')?.value.trim();
-    
-    if (headerType) filterState.type = headerType;
-    if (headerLoc) filterState.area = headerLoc;
-    
-    applySidebarFilters();
+function switchMFSection(sectionId, item) {
+  document.querySelectorAll('.mf-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.mf-sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById(sectionId).classList.add('active');
+  item.classList.add('active');
 }
 
-// ============================================
-// REMOVE SINGLE FILTER
-// ============================================
-function removeFilter(key) {
-    const params = new URLSearchParams(window.location.search);
-    params.delete(key);
-    window.location.href = window.location.pathname + '?' + params.toString();
+function toggleMFBtn(btn, key, val) {
+  const isActive = btn.classList.contains('sel');
+  const siblings = btn.closest('.mf-options').querySelectorAll('.mf-btn');
+  siblings.forEach(b => b.classList.remove('sel'));
+  if (!isActive) {
+    btn.classList.add('sel');
+    MF[key.replace('mf_', '')] = val || '1';
+  } else {
+    MF[key.replace('mf_', '')] = '';
+  }
 }
 
-// ============================================
-// RESET ALL FILTERS
-// ============================================
+function toggleAmenity(btn, name) {
+  btn.classList.toggle('sel');
+  if (btn.classList.contains('sel')) {
+    if (!MF.amenities.includes(name)) MF.amenities.push(name);
+  } else {
+    MF.amenities = MF.amenities.filter(a => a !== name);
+  }
+}
+
+function clearMoreFilters() {
+  MF = { verified: '', lease: '', bathrooms: '', area_range: '', age: '', amenities: [], parking: '', added: '' };
+  document.querySelectorAll('#mfDrawer .mf-btn').forEach(b => b.classList.remove('sel'));
+}
+
+function applyMoreFilters() {
+  FS.verified = MF.verified;
+  FS.lease = MF.lease;
+  FS.bathrooms = MF.bathrooms;
+  FS.area_range = MF.area_range;
+  FS.age = MF.age;
+  FS.amenities = [...MF.amenities];
+  FS.parking = MF.parking;
+  FS.added = MF.added;
+  closeMoreFilters();
+  go();
+}
+
+function removeFilterParam(key) {
+  const p = new URLSearchParams(window.location.search);
+  const map = { bhk: 'bhk', budget_min: 'budget_min', budget_max: 'budget_max', furnishing: 'furnishing', prop_type: 'prop_type', verified: 'verified', owner: 'owner', agent: 'agent', builder: 'builder', pet: 'pet', lease: 'lease', area: 'areas' };
+  p.delete(map[key] || key);
+  window.location.href = window.location.pathname + '?' + p.toString();
+}
+
 function resetAllFilters() {
-    const params = new URLSearchParams();
-    params.set('type', filterState.type);
-    if (filterState.category) params.set('category', filterState.category);
-    window.location.href = window.location.pathname + '?' + params.toString();
+  FS.areas = []; FS.bhk = ''; FS.budget_min = ''; FS.budget_max = ''; FS.furnishing = ''; FS.prop_type = ''; FS.verified = ''; FS.owner = ''; FS.agent = ''; FS.builder = ''; FS.pet = ''; FS.lease = ''; FS.bathrooms = ''; FS.area_range = ''; FS.age = ''; FS.amenities = []; FS.parking = ''; FS.added = '';
+  go();
 }
 
-// ============================================
-// SORTING
-// ============================================
-function applySorting(value) {
-    const params = new URLSearchParams(window.location.search);
-    params.set('sort', value);
-    window.location.href = window.location.pathname + '?' + params.toString();
+function applySorting(val) {
+  const p = new URLSearchParams(window.location.search);
+  p.set('sort', val);
+  window.location.href = window.location.pathname + '?' + p.toString();
 }
 
-// ============================================
-// VIEW TOGGLE
-// ============================================
-function setView(view, btn) {
-    document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    
-    const grid = document.getElementById('listingsGrid');
-    if (view === 'list') {
-        grid.classList.add('list-view');
-    } else {
-        grid.classList.remove('list-view');
-    }
+function toggleSave(id, btn) {
+  btn.classList.toggle('saved');
+  btn.querySelector('i').className = btn.classList.contains('saved') ? 'bi bi-heart-fill' : 'bi bi-heart';
 }
 
-// ============================================
-// SAVE PROPERTY
-// ============================================
-function toggleSave(id, category, btn) {
-    btn.classList.toggle('saved');
-    const icon = btn.querySelector('i');
-    
-    if (btn.classList.contains('saved')) {
-        icon.className = 'bi bi-heart-fill';
-        icon.style.color = '#ef4444';
-    } else {
-        icon.className = 'bi bi-heart';
-        icon.style.color = '#ef4444';
-    }
+function callListing(phone, ownerName) {
+  Swal.fire({
+    title: 'Contact ' + (ownerName || 'Owner'),
+    html: `
+      <div style="text-align:center;padding:10px 0;">
+        <div style="width:60px;height:60px;background:#ede8fe;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.5rem;">📞</div>
+        <div style="font-size:1.6rem;font-weight:800;color:#6C3CF4;margin-bottom:4px;">${phone || 'N/A'}</div>
+        <p style="font-size:0.82rem;color:#9098a9;">Please mention you found this on PropCRM</p>
+      </div>`,
+    confirmButtonColor: '#6C3CF4',
+    confirmButtonText: '<i class="bi bi-telephone-fill" style="margin-right:6px;"></i>Call Now',
+    showCancelButton: true,
+    cancelButtonText: 'Close'
+  }).then(r => {
+    if (r.isConfirmed && phone) { window.location.href = 'tel:' + phone; }
+  });
 }
 
-// ============================================
-// CALL OWNER
-// ============================================
-function callListing(phone) {
-    Swal.fire({
-        title: 'Contact Owner',
-        html: `<div style="text-align:center;padding:12px;">
-            <div style="font-size:1.6rem;font-weight:900;color:#006ce4;margin:16px 0;">
-                <i class="fas fa-phone" style="font-size:1.2rem;"></i> ${phone || 'N/A'}
-            </div>
-            <div style="font-size:0.85rem;color:#64748b;font-weight:500;">
-                PropCRM Verified · Available 9 AM – 7 PM
-            </div>
-        </div>`,
-        background: '#ffffff',
-        color: '#1e293b',
-        confirmButtonColor: '#006ce4',
-        confirmButtonText: '<i class="fas fa-phone"></i> Call Now',
-        showCancelButton: true,
-        cancelButtonText: 'Close'
-    }).then((result) => {
-        if (result.isConfirmed && phone) {
-            window.location.href = `tel:${phone}`;
-        }
-    });
-}
-
-// ============================================
-// LOCATION MODAL (for Add More functionality)
-// ============================================
-function showLocationModal() {
-    Swal.fire({
-        title: 'Add More Locations',
-        html: `
-            <input type="text" id="modal-location-input" class="swal2-input" placeholder="Enter locality name">
-            <div style="margin-top:12px;font-size:0.85rem;color:#64748b;">Popular areas:</div>
-            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;justify-content:center;">
-                <button onclick="selectModalLocation('dharampeth')" class="filter-btn">Dharampeth</button>
-                <button onclick="selectModalLocation('civil-lines')" class="filter-btn">Civil Lines</button>
-                <button onclick="selectModalLocation('wardha')" class="filter-btn">Wardha Rd</button>
-                <button onclick="selectModalLocation('sitabuldi')" class="filter-btn">Sitabuldi</button>
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Add Location',
-        preConfirm: () => {
-            const input = document.getElementById('modal-location-input');
-            return input.value.trim();
-        }
-    }).then((result) => {
-        if (result.isConfirmed && result.value) {
-            filterState.area = result.value;
-            applySidebarFilters();
-        }
-    });
-}
-
-function selectModalLocation(location) {
-    filterState.area = location;
-    Swal.close();
-    applySidebarFilters();
+function whatsappListing(phone, title) {
+  if (!phone) return;
+  const msg = encodeURIComponent(`Hi, I found your property "${title}" on PropCRM. Is it still available?`);
+  window.open(`https://wa.me/91${phone.replace(/\D/g,'')}?text=${msg}`, '_blank');
 }
 </script>
-
 </body>
 </html>

@@ -1,381 +1,724 @@
 {% include "admin_user/admin_header.html" %}
 {% load static %}
 
-        <div class="main-content">
-            <div class="page-header">
-                <div class="page-header-content">
-                    <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Commercial Property Listings</h1>
-                    <div class="page-actions">
-                        <a href="{% url 'commercial' %}"><button class="btn-primary-custom">
-                            <i class="fas fa-plus-circle"></i> Add Commercial (Rent) Property
-                        </button></a>
-                         <button class="btn-primary-custom" style="background: transparent; border: 2px solid white; color: white;" data-toggle="modal" data-target="#exampleModalCenter">
-                            <i class="fas fa-download"></i> Import Excel
-                        </button>
-                        <button class="btn-primary-custom" data-toggle="modal" data-target="#bulkDeleteModal" style="background: #ef4444; border-color: #ef4444; color: white;">
-                            <i class="fas fa-trash-alt"></i> Bulk Delete
-                        </button>
-                    </div>
-                </div>
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+/* ── Advanced Search Bar ── */
+.advanced-search-bar{background:#fff;padding:20px;border-radius:12px;border:1px solid var(--border,#e5e7eb);box-shadow:0 4px 6px -1px rgba(0,0,0,.05);display:flex;flex-wrap:wrap;gap:15px;align-items:flex-end;margin-bottom:24px;margin-top:30px}
+.search-group{display:flex;flex-direction:column;gap:8px;flex:1;min-width:150px}
+.search-group.wide{flex:2;min-width:250px}
+.search-group label{font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px}
+.filter-input{width:100%;padding:10px 14px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;color:#374151;background:#f9fafb;outline:none;transition:border-color .2s;height:38px}
+.filter-input:focus{border-color:#4F46E5;background:#fff;box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+.search-actions{display:flex;gap:10px;margin-bottom:2px;flex-wrap:wrap}
+.btn-reset{background:#fff;color:#374151;border:1px solid #d1d5db;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;height:38px;gap:6px}
+.results-badge{background:#eff6ff;color:#2563eb;font-size:13px;font-weight:700;padding:8px 16px;border-radius:8px;display:inline-flex;align-items:center;gap:8px;width:fit-content;border:1px solid #bfdbfe}
+.active-tag{background:#eff6ff;color:#2563eb;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;display:inline-flex;align-items:center;gap:6px;border:1px solid #bfdbfe}
+.active-tag i{cursor:pointer;color:#3b82f6;transition:.2s}
+.active-tag i:hover{color:#1e3a8a}
+
+/* ── Row Dividers ── */
+.row-divider{display:flex;align-items:center;text-align:center;margin:30px 0 15px;color:#6b7280;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.row-divider::before,.row-divider::after{content:'';flex:1;border-bottom:2px solid #e5e7eb}
+.row-divider:not(:empty)::before{margin-right:15px}
+.row-divider:not(:empty)::after{margin-left:15px}
+
+/* ── KPI Cards ── */
+.kpi-row{display:flex;flex-wrap:wrap;gap:15px;margin-bottom:10px}
+.kpi-card{flex:1;min-width:170px;background:#fff;border-radius:12px;padding:18px;position:relative;border:1px solid #f3f4f6;box-shadow:0 4px 6px -1px rgba(0,0,0,.05)}
+.kpi-card.b-red{border-bottom:4px solid #ef4444}
+.kpi-card.b-blue{border-bottom:4px solid #3b82f6}
+.kpi-card.b-orange{border-bottom:4px solid #f97316}
+.kpi-card.b-green{border-bottom:4px solid #10b981}
+.kpi-card.b-pink{border-bottom:4px solid #ec4899}
+.kpi-card.b-purple{border-bottom:4px solid #8b5cf6}
+.kpi-card.b-cyan{border-bottom:4px solid #06b6d4}
+.badge-tag{position:absolute;top:12px;right:12px;font-size:10px;font-weight:800;padding:3px 8px;border-radius:12px;text-transform:uppercase}
+.tag-existing{background:#f3f4f6;color:#6b7280}
+.tag-new{background:#10b981;color:#fff}
+.kpi-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:15px}
+.ic-red{background:#fee2e2;color:#ef4444}
+.ic-blue{background:#eff6ff;color:#3b82f6}
+.ic-orange{background:#ffedd5;color:#f97316}
+.ic-green{background:#d1fae5;color:#10b981}
+.ic-pink{background:#fce7f3;color:#ec4899}
+.ic-purple{background:#ede9fe;color:#8b5cf6}
+.ic-cyan{background:#cffafe;color:#06b6d4}
+.kpi-val{font-size:28px;font-weight:800;color:#111827;line-height:1;margin-bottom:6px}
+.kpi-label{font-size:13px;font-weight:700;color:#6b7280;margin-bottom:6px}
+.kpi-desc{font-size:11px;color:#9ca3af;font-weight:500;display:flex;align-items:center;gap:4px}
+.c-up{color:#10b981;font-weight:600}
+.c-down{color:#ef4444;font-weight:600}
+
+/* ── Select2 override ── */
+.select2-container--default .select2-selection--single{border:1px solid #d1d5db;border-radius:8px;height:38px;padding:4px 8px;background:#f9fafb;font-size:13px;color:#374151}
+.select2-container--default.select2-container--open .select2-selection--single{border-color:#4F46E5;background:#fff;box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+.select2-container--default .select2-selection--single .select2-selection__arrow{height:36px}
+.select2-dropdown{border-color:#4F46E5;border-radius:8px;font-size:13px;box-shadow:0 4px 15px rgba(0,0,0,.1)}
+.select2-container{width:100%!important}
+.select2-results__option{padding:8px 12px}
+.select2-results__option--highlighted{background:#4F46E5!important}
+
+/* Date filter row */
+.date-filter-row{display:flex;gap:10px;flex-wrap:wrap;width:100%}
+.date-filter-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:140px}
+.date-filter-group label{font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px}
+.date-input{width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;color:#374151;background:#f9fafb;height:38px;outline:none;transition:border-color .2s}
+.date-input:focus{border-color:#4F46E5;background:#fff;box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+</style>
+
+<div class="main-content">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Commercial Property Listings</h1>
+            <div class="page-actions">
+                <a href="{% url 'commercial' %}">
+                    <button class="btn-primary-custom"><i class="fas fa-plus-circle"></i> Add Commercial (Rent)</button>
+                </a>
+                <button class="btn-primary-custom" style="background:transparent;border:2px solid white;color:white" data-toggle="modal" data-target="#exampleModalCenter">
+                    <i class="fas fa-download"></i> Import Excel
+                </button>
+                <button class="btn-primary-custom" data-toggle="modal" data-target="#bulkDeleteModal" style="background:#ef4444;border-color:#ef4444;color:white">
+                    <i class="fas fa-trash-alt"></i> Bulk Delete
+                </button>
             </div>
-
-            <div class="stats-grid">
-                <div class="stat-card primary">
-                    <div class="stat-icon primary">
-                        <i class="fas fa-home"></i>
-                    </div>
-                    <div class="stat-value">{{ total_properties }}</div>
-                    <div class="stat-label">Total Properties</div>
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +12%
-                    </span>
-                </div>
-
-                <div class="stat-card danger">
-                    <div class="stat-icon danger" style="background: var(--success-gradient);">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="stat-value">{{ active_listings }}</div>
-                    <div class="stat-label">Active Listings</div>
-                    <span class="stat-change positive">
-                        <i class="fas fa-chart-line"></i> Good
-                    </span>
-                </div>
-
-                <div class="stat-card success">
-                    <div class="stat-icon success" style="background: var(--dark-gradient);">
-                        <i class="fas fa-rupee-sign"></i>
-                    </div>
-                    <div class="stat-value">₹{{ monthly_revenue }}</div>
-                    <div class="stat-label">Monthly Revenue</div>
-                    <span class="stat-change positive">
-                        <i class="fas fa-arrow-up"></i> +20%
-                    </span>
-                </div>
-            </div>
-
-            <div class="analytics-section">
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Property Distribution</h3>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="propertyPieChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Monthly Rental Income</h3>
-                        <div class="chart-filters">
-                            <button class="filter-btn active">2026</button>
-                            <button class="filter-btn">2025</button>
-                        </div>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="rentalIncomeChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Occupancy Status</h3>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="occupancyDoughnutChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Rent Range Distribution</h3>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="rentRangeChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="quick-stats">
-                <h3 class="quick-stats-title"><i class="fas fa-chart-line"></i> Performance Insights</h3>
-                <div class="stats-row">
-                    <div class="stat-item">
-                        <div class="stat-item-icon" style="color: #10b981;">
-                            <i class="fas fa-user-check"></i>
-                        </div>
-                       <div class="stat-item-value">{{ total_tenants }}</div>
-                        <div class="stat-item-label">Total Tenants</div>
-                    </div>
-
-                    <div class="stat-item">
-                        <div class="stat-item-icon" style="color: #3b82f6;">
-                            <i class="fas fa-calendar-check"></i>
-                        </div>
-                        <div class="stat-item-value">{{ collection_rate }}%</div>
-                        <div class="stat-item-label">Collection Rate</div>
-                    </div>
-
-                    <div class="stat-item">
-                        <div class="stat-item-icon" style="color: #f59e0b;">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                       <div class="stat-item-value">{{ pending_payments }}</div>
-                        <div class="stat-item-label">Pending Payments</div>
-                    </div>
-
-                    <div class="stat-item">
-                        <div class="stat-item-icon" style="color: #8b5cf6;">
-                            <i class="fas fa-tools"></i>
-                        </div>
-                       <div class="stat-item-value">{{ maintenance_req }}</div>
-                        <div class="stat-item-label">Maintenance Req</div>
-                    </div>
-                </div>
-            </div>
-
-<div class="properties-section">
-
-    <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center; justify-content:space-between;">
-        <form method="GET" action="" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-            <input type="text" name="search" value="{{ search_query }}"
-                   placeholder="Search title, city, type, owner..."
-                   style="padding:8px 14px; border:1px solid #ddd; border-radius:6px; min-width:260px; font-size:13px;">
-            <button type="submit"
-                    style="padding:8px 16px; background:#667eea; color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px;">
-                <i class="fas fa-search"></i> Search
-            </button>
-            {% if search_query %}
-            <a href="{% url 'commercial_list' %}"
-               style="padding:8px 14px; background:#6c757d; color:white; border-radius:6px; text-decoration:none; font-size:13px;">
-                <i class="fas fa-times"></i> Clear
-            </a>
-            {% endif %}
-        </form>
-        <div style="display:flex; gap:8px; align-items:center;">
-            <small style="color:#888; font-size:13px;">
-                <i class="fas fa-database"></i> Total: <strong>{{ total_count }}</strong> records
-            </small>
-            <a href="?search={{ search_query }}&download=csv"
-               style="padding:8px 16px; background:#28a745; color:white; border-radius:6px; text-decoration:none; font-size:13px;">
-                <i class="fas fa-file-csv"></i> Download CSV
-            </a>
         </div>
     </div>
 
-   <div class="table-responsive">
+    <!-- ═══════ ROW 1 — OCCUPANCY ═══════ -->
+    <div class="row-divider"><span>ROW 1 — OCCUPANCY OVERVIEW</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-red">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-red"><i class="fas fa-building"></i></div>
+            <div class="kpi-val">{{ total_count|default:"0" }}</div>
+            <div class="kpi-label">Total Commercial</div>
+            <div class="kpi-desc"><i class="fas fa-database"></i> All listed records</div>
+        </div>
+        <div class="kpi-card b-blue">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-blue"><i class="fas fa-wifi"></i></div>
+            <div class="kpi-val">{{ active_count|default:"0" }}</div>
+            <div class="kpi-label">Active Listings</div>
+            <div class="kpi-desc"><i class="fas fa-circle" style="color:#10b981;font-size:8px"></i> Live on portal</div>
+        </div>
+        <div class="kpi-card b-orange">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-orange"><i class="fas fa-lock"></i></div>
+            <div class="kpi-val">{{ occupied_count|default:"0" }}</div>
+            <div class="kpi-label">Occupied Properties</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> {{ occupancy_rate }}% occupancy</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-door-open"></i></div>
+            <div class="kpi-val">{{ vacant_count|default:"0" }}</div>
+            <div class="kpi-label">Vacant Properties</div>
+            <div class="kpi-desc c-down"><i class="fas fa-arrow-down"></i> {{ vacancy_rate }}% vacant</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-chart-pie"></i></div>
+            <div class="kpi-val">{{ occupancy_rate|default:"0" }}%</div>
+            <div class="kpi-label">Occupancy Rate</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> Good performance</div>
+        </div>
+        <div class="kpi-card b-pink">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-pink"><i class="fas fa-percent"></i></div>
+            <div class="kpi-val">{{ vacancy_rate|default:"0" }}%</div>
+            <div class="kpi-label">Vacancy Rate</div>
+            <div class="kpi-desc"><i class="fas fa-circle" style="color:#ef4444;font-size:8px"></i> {{ vacant_count|default:"0" }} empty</div>
+        </div>
+    </div>
+
+    <!-- ═══════ ROW 2 — REVENUE ═══════ -->
+    <div class="row-divider"><span>ROW 2 — REVENUE SUMMARY</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-orange">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-orange" style="font-size:14px;font-weight:800">Rs</div>
+            <div class="kpi-val">₹{{ avg_rent|floatformat:"0"|default:"0" }}</div>
+            <div class="kpi-label">Avg Expected Rent</div>
+            <div class="kpi-desc"><i class="fas fa-calculator"></i> Average across all</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-coins"></i></div>
+            <div class="kpi-val">₹{{ total_revenue|floatformat:"0"|default:"0" }}</div>
+            <div class="kpi-label">Expected Revenue</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> Total expected income</div>
+        </div>
+        <div class="kpi-card b-purple">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-purple"><i class="fas fa-piggy-bank"></i></div>
+            <div class="kpi-val">₹{{ total_security_deposit|floatformat:"0"|default:"0" }}</div>
+            <div class="kpi-label">Security Deposit Total</div>
+            <div class="kpi-desc"><i class="fas fa-lock"></i> Locked asset</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-arrow-up"></i></div>
+            <div class="kpi-val">₹{{ max_rent|floatformat:"0"|default:"0" }}</div>
+            <div class="kpi-label">Highest Rent</div>
+            <div class="kpi-desc"><i class="fas fa-crown" style="color:#f59e0b"></i> Premium property</div>
+        </div>
+        <div class="kpi-card b-purple">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-purple"><i class="fas fa-arrow-down"></i></div>
+            <div class="kpi-val">₹{{ min_rent|floatformat:"0"|default:"0" }}</div>
+            <div class="kpi-label">Lowest Rent</div>
+            <div class="kpi-desc"><i class="fas fa-tag"></i> Budget listing</div>
+        </div>
+    </div>
+
+    <!-- ═══════ ROW 3 — BUSINESS SUMMARY ═══════ -->
+    <div class="row-divider"><span>ROW 3 — PROPERTY BUSINESS SUMMARY</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-cyan">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-cyan"><i class="fas fa-city"></i></div>
+            <div class="kpi-val">{{ city_count|default:"0" }}</div>
+            <div class="kpi-label">Cities Covered</div>
+            <div class="kpi-desc"><i class="fas fa-map-marker-alt"></i> Geographic spread</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-key"></i></div>
+            <div class="kpi-val">{{ ready_to_move_count|default:"0" }}</div>
+            <div class="kpi-label">Available Now</div>
+            <div class="kpi-desc"><i class="fas fa-circle" style="color:#10b981;font-size:8px"></i> Ready to rent</div>
+        </div>
+        <div class="kpi-card b-purple">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-purple"><i class="fas fa-star"></i></div>
+            <div class="kpi-val">{{ premium_properties_count|default:"0" }}</div>
+            <div class="kpi-label">Premium Commercial</div>
+            <div class="kpi-desc">Above ₹1L/mo</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-tags"></i></div>
+            <div class="kpi-val">{{ affordable_properties_count|default:"0" }}</div>
+            <div class="kpi-label">Affordable Commercial</div>
+            <div class="kpi-desc">Under ₹25k/mo</div>
+        </div>
+        <div class="kpi-card b-orange">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-orange"><i class="fas fa-running"></i></div>
+            <div class="kpi-val">{{ ready_to_move_count|default:"0" }}</div>
+            <div class="kpi-label">Ready To Move</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> Fast conversion</div>
+        </div>
+    </div>
+
+    <!-- ═══════ ROW 4 — LEASE & QUALITY ═══════ -->
+    <div class="row-divider"><span>ROW 4 — LEASE DURATION &amp; LISTING QUALITY</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-blue">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-blue"><i class="fas fa-hourglass-half"></i></div>
+            <div class="kpi-val">{{ short_lease_count|default:"0" }}</div>
+            <div class="kpi-label">Short Lock-in</div>
+            <div class="kpi-desc"><i class="fas fa-calendar"></i> 6 months</div>
+        </div>
+        <div class="kpi-card b-purple">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-purple"><i class="fas fa-calendar-alt"></i></div>
+            <div class="kpi-val">{{ long_lease_count|default:"0" }}</div>
+            <div class="kpi-label">Long Lock-in</div>
+            <div class="kpi-desc"><i class="fas fa-calendar"></i> 12+ months</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-images"></i></div>
+            <div class="kpi-val">{{ with_images_count|default:"0" }}</div>
+            <div class="kpi-label">With Images</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> {{ image_pct }}% visual listings</div>
+        </div>
+        <div class="kpi-card b-pink">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-pink"><i class="fas fa-user-check"></i></div>
+            <div class="kpi-val">{{ with_owner_count|default:"0" }}</div>
+            <div class="kpi-label">Owner Details</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> {{ verified_pct }}% data complete</div>
+        </div>
+    </div>
+
+    <!-- ═══════ ROW 5 — PERFORMANCE ═══════ -->
+    <div class="row-divider"><span>ROW 5 — PERFORMANCE INSIGHTS</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-green">
+            <div class="kpi-icon ic-green"><i class="fas fa-arrow-up"></i></div>
+            <div class="kpi-val">{% if max_rent %}₹{{ max_rent|floatformat:"0" }}{% else %}—{% endif %}</div>
+            <div class="kpi-label">Highest Rent Property</div>
+            <div class="kpi-desc"><i class="fas fa-crown" style="color:#f59e0b"></i> Premium tier</div>
+        </div>
+        <div class="kpi-card b-purple">
+            <div class="kpi-icon ic-purple"><i class="fas fa-arrow-down"></i></div>
+            <div class="kpi-val">{% if min_rent %}₹{{ min_rent|floatformat:"0" }}{% else %}—{% endif %}</div>
+            <div class="kpi-label">Lowest Rent Property</div>
+            <div class="kpi-desc"><i class="fas fa-tag"></i> Budget tier</div>
+        </div>
+        <div class="kpi-card b-orange">
+            <div class="kpi-icon ic-orange"><i class="fas fa-shield-alt"></i></div>
+            <div class="kpi-val">{% if avg_deposit %}₹{{ avg_deposit|floatformat:"0" }}{% else %}—{% endif %}</div>
+            <div class="kpi-label">Avg Security Deposit</div>
+            <div class="kpi-desc"><i class="fas fa-lock"></i> Protected capital</div>
+        </div>
+        <div class="kpi-card b-cyan">
+            <div class="kpi-icon ic-cyan"><i class="fas fa-ruler-combined"></i></div>
+            <div class="kpi-val">{% if avg_area %}{{ avg_area|floatformat:"0" }} sqft{% else %}—{% endif %}</div>
+            <div class="kpi-label">Avg Built-up Area</div>
+            <div class="kpi-desc"><i class="fas fa-chart-area"></i> Spatial average</div>
+        </div>
+    </div>
+
+    <!-- ═══════ CHARTS ═══════ -->
+    <div class="analytics-section">
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Property Type Distribution</h3>
+            </div>
+            <div class="chart-wrapper"><canvas id="propertyPieChart"></canvas></div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Monthly Listings &amp; Revenue</h3>
+            </div>
+            <div class="chart-wrapper"><canvas id="rentalIncomeChart"></canvas></div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Occupancy Status</h3>
+            </div>
+            <div class="chart-wrapper"><canvas id="occupancyDoughnutChart"></canvas></div>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Rent Range Distribution</h3>
+            </div>
+            <div class="chart-wrapper"><canvas id="rentRangeChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- ═══════ QUICK STATS ═══════ -->
+    <div class="quick-stats">
+        <h3 class="quick-stats-title"><i class="fas fa-chart-line"></i> Performance Insights</h3>
+        <div class="stats-row">
+            <div class="stat-item">
+                <div class="stat-item-icon" style="color:#10b981"><i class="fas fa-user-check"></i></div>
+                <div class="stat-item-value">{{ total_tenants }}</div>
+                <div class="stat-item-label">Total Tenants</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-item-icon" style="color:#3b82f6"><i class="fas fa-calendar-check"></i></div>
+                <div class="stat-item-value">{{ collection_rate }}%</div>
+                <div class="stat-item-label">Collection Rate</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-item-icon" style="color:#f59e0b"><i class="fas fa-clock"></i></div>
+                <div class="stat-item-value">{{ pending_payments }}</div>
+                <div class="stat-item-label">Pending Payments</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-item-icon" style="color:#8b5cf6"><i class="fas fa-tools"></i></div>
+                <div class="stat-item-value">{{ maintenance_req }}</div>
+                <div class="stat-item-label">Maintenance Req</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════ PROPERTIES SECTION ═══════ -->
+    <div class="properties-section">
+
+        <!-- ═══ SEARCH FORM ═══ -->
+        <form method="GET" action="" class="advanced-search-bar" id="liveSearchForm">
+
+            <!-- Text search -->
+            <div class="search-group wide">
+                <label><i class="fas fa-search"></i> Search Properties</label>
+                <input type="text" name="search" id="searchInput" value="{{ search_query }}"
+                       class="filter-input" placeholder="Title, city, locality, owner name…">
+            </div>
+
+            <!-- Property Type -->
+            <div class="search-group">
+                <label>Property Type</label>
+                <select name="property_type" class="filter-input s2-dropdown" data-default="All Types" data-placeholder="All Types">
+                    <option value="All Types">All Types</option>
+                    {% for pt in unique_property_types %}
+                        <option value="{{ pt }}" {% if prop_type_query == pt %}selected{% endif %}>{{ pt }}</option>
+                    {% endfor %}
+                    {% if prop_type_query and prop_type_query != 'All Types' and prop_type_query not in unique_property_types %}
+                        <option value="{{ prop_type_query }}" selected>{{ prop_type_query }}</option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- City -->
+            <div class="search-group">
+                <label>City</label>
+                <select name="city" class="filter-input s2-dropdown" data-default="All Cities" data-placeholder="All Cities">
+                    <option value="All Cities">All Cities</option>
+                    {% for city in unique_cities %}
+                        <option value="{{ city }}" {% if city_query == city %}selected{% endif %}>{{ city }}</option>
+                    {% endfor %}
+                    {% if city_query and city_query != 'All Cities' and city_query not in unique_cities %}
+                        <option value="{{ city_query }}" selected>{{ city_query }}</option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Zone Type -->
+            <div class="search-group">
+                <label>Zone Type</label>
+                <select name="zone_type" class="filter-input s2-dropdown" data-default="All Zones" data-placeholder="All Zones">
+                    <option value="All Zones">All Zones</option>
+                    {% for zone in unique_zones %}
+                        <option value="{{ zone }}" {% if zone_query == zone %}selected{% endif %}>{{ zone }}</option>
+                    {% endfor %}
+                    {% if zone_query and zone_query != 'All Zones' and zone_query not in unique_zones %}
+                        <option value="{{ zone_query }}" selected>{{ zone_query }}</option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Possession -->
+            <div class="search-group">
+                <label>Possession</label>
+                <select name="possession" class="filter-input s2-dropdown" data-default="All Status" data-placeholder="All Status">
+                    <option value="All Status">All Status</option>
+                    {% for p in unique_possession %}
+                        <option value="{{ p }}" {% if possession_query == p %}selected{% endif %}>{{ p }}</option>
+                    {% endfor %}
+                    {% if possession_query and possession_query != 'All Status' and possession_query not in unique_possession %}
+                        <option value="{{ possession_query }}" selected>{{ possession_query }}</option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Listed By -->
+            <div class="search-group">
+                <label>Listed By</label>
+                <select name="listed_by" class="filter-input s2-dropdown" data-default="All Roles" data-placeholder="All Roles">
+                    <option value="All Roles">All Roles</option>
+                    {% for role in unique_roles %}
+                        <option value="{{ role }}" {% if listed_by_query == role %}selected{% endif %}>{{ role }}</option>
+                    {% endfor %}
+                    {% if listed_by_query and listed_by_query != 'All Roles' and listed_by_query not in unique_roles %}
+                        <option value="{{ listed_by_query }}" selected>{{ listed_by_query }}</option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Budget -->
+            <div class="search-group">
+                <label>Budget</label>
+                <select name="budget" class="filter-input s2-dropdown" data-default="All Budgets" data-placeholder="All Budgets">
+                    <option value="All Budgets">All Budgets</option>
+                    <option value="under_25k"  {% if budget_query == 'under_25k'  %}selected{% endif %}>Under ₹25,000</option>
+                    <option value="25k_1L"     {% if budget_query == '25k_1L'     %}selected{% endif %}>₹25,000 – ₹1 Lakh</option>
+                    <option value="1L_5L"      {% if budget_query == '1L_5L'      %}selected{% endif %}>₹1 Lakh – ₹5 Lakhs</option>
+                    <option value="above_5L"   {% if budget_query == 'above_5L'   %}selected{% endif %}>Above ₹5 Lakhs</option>
+                </select>
+            </div>
+
+            <!-- ── DATE RANGE FILTER ── -->
+            <div style="width:100%; border-top:1px dashed #e5e7eb; padding-top:14px; margin-top:4px;">
+                <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">
+                    <i class="fas fa-calendar-alt"></i> Date Range Filter (Created At)
+                </div>
+                <div class="date-filter-row">
+                    <div class="date-filter-group">
+                        <label>From Date</label>
+                        <input type="date" name="from_date" value="{{ from_date }}" class="date-input" id="fromDateFilter">
+                    </div>
+                    <div class="date-filter-group">
+                        <label>To Date</label>
+                        <input type="date" name="to_date" value="{{ to_date }}" class="date-input" id="toDateFilter">
+                    </div>
+                    <div class="date-filter-group" style="flex:0;min-width:auto;justify-content:flex-end;">
+                        <label>&nbsp;</label>
+                        {% if from_date or to_date %}
+                        <button type="button" onclick="clearDates()" class="btn-reset" style="white-space:nowrap">
+                            <i class="fas fa-times"></i> Clear Dates
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions row -->
+            <div style="width:100%; display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:10px;">
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <div class="results-badge">
+                            <i class="fas fa-filter"></i> Showing
+                            <strong style="margin:0 4px;font-size:15px;color:#1d4ed8;">{{ filtered_count }}</strong>
+                            of {{ total_count }} properties
+                        </div>
+                        <a href="{% url 'commercial_list' %}" class="btn-reset"><i class="fas fa-times"></i> Reset All</a>
+                    </div>
+                    
+                    
+
+                </div>
+
+            
+
+
+
+
+ 
+        </form>
+
+        <!-- ═══ TABLE ═══ -->
+       <div class="table-responsive">
+
+        <div style="display:flex; gap:10px;">
+    <button type="submit" 
+            formaction="{% url 'export_commercial_rent' %}" 
+            name="format" value="csv" 
+            class="btn btn-primary btn-sm" style="height:38px;">
+        <i class="fas fa-file-csv"></i> Download CSV
+    </button>
+    
+    <button type="submit" 
+            formaction="{% url 'export_commercial_rent' %}" 
+            name="format" value="excel" 
+            class="btn btn-success btn-sm" style="height:38px;">
+        <i class="fas fa-file-excel"></i> Download Excel
+    </button>
+</div>
     <table class="properties-table" id="commercialTable">
         <thead>
             <tr>
                 <th>Sr.No</th>
-                
+                <th>Property ID</th>
+                <th>Property Title</th>
                 <th>Images</th>
-                <th>Floor Plan</th>
+             
                 <th>Video</th>
-
                 <th>Property Type</th>
+                <th>Property Condition</th>
                 <th>City</th>
                 <th>Area / Locality</th>
-                <th>Address</th>
-                <th>Building Name</th>
-
+                <th>Property Address</th>
+                <th>Building / Project Name</th>
                 <th>Possession Status</th>
                 <th>Available From</th>
-                <th>Age</th>
+                <th>Age of Property</th>
                 <th>Zone Type</th>
                 <th>Location Hub</th>
-                <th>Condition</th>
-                <th>Ownership</th>
-                <th>Construction</th>
-
-                <th>Builtup Area</th>
-                <th>Carpet Area</th>
-
+                <th>Ownership Type</th>
+                <th>Construction Status</th>
+                <th>Built-up Area (sqft)</th>
+                <th>Carpet Area (sqft)</th>
                 <th>Expected Rent</th>
-                <th>Deposit</th>
-                <th>Maintenance</th>
-
+                <th>Security Deposit</th>
+                <th>Maintenance Charges</th>
                 <th>Negotiable</th>
-                <th>Brokerage (Type / % / Manual)</th>
-
+                <th>Brokerage</th>
+                <th>Brokerage %</th>
+                <th>Manual Brokerage</th>
                 <th>DG/UPS</th>
                 <th>Electricity</th>
                 <th>Water</th>
                 <th>Lock-in (Months)</th>
                 <th>Rent Increase %</th>
-
                 <th>Total Floors</th>
                 <th>Your Floor</th>
                 <th>Staircases</th>
-                <th>Lifts (Pass / Serv)</th>
+                <th>Passenger Lifts</th>
+                <th>Service Lifts</th>
                 <th>Private Parking</th>
-
-                <th>Seats (Min - Max)</th>
+                <th>Min Seats</th>
+                <th>Max Seats</th>
                 <th>Cabins</th>
                 <th>Meeting Rooms</th>
-                <th>Washroom (Pvt / Public)</th>
-                <th>Flooring</th>
-
+                <th>Private Washroom</th>
+                <th>Public Washroom</th>
+                <th>Flooring Type</th>
                 <th>Amenities</th>
                 <th>Nearby Facilities</th>
-
+                <th>Property Summary</th>
+                <th>Property Description</th>
                 <th>Owner Name</th>
-                <th>Contact</th>
-                <th>Email</th>
+                <th>Contact Number</th>
+                <th>Email Address</th>
                 <th>Alt. Contact</th>
-
                 <th>UB Name</th>
                 <th>UB Email</th>
                 <th>UB Contact</th>
                 <th>UB Role</th>
-
+                <th>Data Uploaded Via</th>
                 <th>Created At</th>
-                <th>Actions</th>
+                <th style="position:sticky;right:0;background:#f8fafc;z-index:2;">Actions</th>
             </tr>
         </thead>
-
         <tbody>
         {% for prop in page_obj %}
             <tr id="row-{{ prop.id }}">
                 <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
+                <td><strong>{{ prop.commercial_rental_id|default:"—" }}</strong></td>
+                <td>{{ prop.property_title|truncatechars:35|default:"—" }}</td>
+                
+        <td>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;min-width:100px">
 
-                <td>
-    <div style="display:flex; gap:4px; flex-wrap:wrap; min-width: 100px;">
     {% if prop.images.all %}
-        
-        <div style="display: flex; cursor: pointer; position: relative;" 
-             onclick="previewGallery([{% for img in prop.images.all %}'{{ img.image.url }}'{% if not forloop.last %}, {% endif %}{% endfor %}], '{{ prop.building_name|escapejs|default:'Property' }}')">
-             
+
+        <div style="display:flex;cursor:pointer;position:relative"
+             onclick="previewGallery([{% for img in prop.images.all %}'{{ img.image.url }}'{% if not forloop.last %},{% endif %}{% endfor %}],'{{ prop.building_name|escapejs|default:"Property" }}')">
+
             {% for img in prop.images.all|slice:":3" %}
-                <img src="{{ img.image.url }}" 
-                     class="property-image" 
-                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); {% if not forloop.first %}margin-left: -15px;{% endif %} position: relative; z-index: {{ forloop.revcounter }};"
+                <img src="{{ img.image.url }}"
+                     class="property-image"
+                     style="width:40px;height:40px;object-fit:cover;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,.1);{% if not forloop.first %}margin-left:-15px;{% endif %}position:relative;z-index:{{ forloop.revcounter }}"
                      title="Click to view all images">
             {% endfor %}
-            
+
             {% if prop.images.count > 3 %}
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 2px solid white; margin-left: -15px; position: relative; z-index: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="
+                    width:40px;
+                    height:40px;
+                    border-radius:50%;
+                    background:#f1f5f9;
+                    color:#475569;
+                    font-size:.75rem;
+                    font-weight:bold;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    border:2px solid white;
+                    margin-left:-15px;
+                    position:relative;
+                    z-index:0;
+                    box-shadow:0 2px 4px rgba(0,0,0,.1)">
                     +{{ prop.images.count|add:"-3" }}
                 </div>
             {% endif %}
-            
+
         </div>
-        
+
     {% else %}
-        <span style="color: #999; font-size: 0.8rem;">No Images</span>
+
+        <div style="
+            width:50px;
+            height:50px;
+            border-radius:50%;
+            background:linear-gradient(135deg,#1e3a8a,#2563eb);
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            color:white;
+            box-shadow:0 2px 6px rgba(0,0,0,.15);">
+
+            <i class="fas fa-building" style="font-size:16px;"></i>
+
+            <span style="
+                font-size:6px;
+                font-weight:700;
+                line-height:1;
+                margin-top:2px;">
+                EstateFlow
+            </span>
+
+        </div>
+
     {% endif %}
+
     </div>
 </td>
-
-
-                <td>
-                    {% if prop.floor_plan %}
-                        <button class="btn btn-sm btn-outline-info" onclick="previewMedia('image', '{{ prop.floor_plan.url }}', 'Floor Plan - {{ prop.building_name }}')">
-                            <i class="fas fa-map"></i> View Plan
-                        </button>
-                    {% else %}
-                        <span style="color: #999; font-size: 0.8rem;">—</span>
-                    {% endif %}
-                </td>
+               
                 <td>
                     {% if prop.video %}
-                        <button class="btn btn-sm btn-outline-danger" onclick="previewMedia('video', '{{ prop.video.url }}', 'Property Video')">
+                        <button class="btn btn-sm btn-outline-danger" onclick="previewMedia('video','{{ prop.video.url }}','Property Video')">
                             <i class="fas fa-play-circle"></i> Play
                         </button>
-                    {% else %}
-                        <span style="color: #999; font-size: 0.8rem;">—</span>
-                    {% endif %}
+                    {% else %}<span style="color:#999;font-size:.8rem">—</span>{% endif %}
                 </td>
 
-                <td>{{ prop.property_type }}</td>
+                <td><span class="badge bg-secondary text-capitalize">{{ prop.property_type }}</span></td>
+                <td><span class="badge bg-light text-dark text-capitalize">{{ prop.property_condition }}</span></td>
                 <td>{{ prop.city }}</td>
                 <td>{{ prop.area_locality }}</td>
-                <td>{{ prop.property_address }}</td>
+                <td>{{ prop.property_address|truncatechars:40 }}</td>
                 <td>{{ prop.building_name }}</td>
-
                 <td>{{ prop.possession_status }}</td>
                 <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
-                <td>{{ prop.age_of_property }}</td>
+                <td>{{ prop.age_of_property }} Years</td>
                 <td>{{ prop.zone_type|default:"—" }}</td>
                 <td>{{ prop.location_hub|default:"—" }}</td>
-                <td>{{ prop.property_condition }}</td>
                 <td>{{ prop.ownership_type }}</td>
                 <td>{{ prop.construction_status|default:"—" }}</td>
 
-                <td>{{ prop.builtup_area }}</td>
-                <td>{{ prop.carpet_area|default:"—" }}</td>
-
-                <td>₹{{ prop.expected_rent }}</td>
-                <td>₹{{ prop.security_deposit|default:"—" }}</td>
-                <td>₹{{ prop.maintenance_charges|default:"—" }}</td>
-
-                <td>{% if prop.negotiable %}Yes{% else %}No{% endif %}</td>
-                <td>
-                    {{ prop.brokerage|default:"—" }} 
-                    {% if prop.brokerage_percentage %} / {{ prop.brokerage_percentage }}{% endif %}
-                    {% if prop.manual_brokerage %} / {{ prop.manual_brokerage }}{% endif %}
-                </td>
-
-                <td>{% if prop.dg_ups_included %}✔{% else %}✘{% endif %}</td>
-                <td>{% if prop.electricity_included %}✔{% else %}✘{% endif %}</td>
-                <td>{% if prop.water_included %}✔{% else %}✘{% endif %}</td>
+                <td>{{ prop.builtup_area }} sq.ft</td>
+                <td>{{ prop.carpet_area|default:"—" }}{% if prop.carpet_area %} sq.ft{% endif %}</td>
+                <td><strong>₹{{ prop.expected_rent }}</strong></td>
+                <td>{% if prop.security_deposit %}₹{{ prop.security_deposit }}{% else %}—{% endif %}</td>
+                <td>{% if prop.maintenance_charges %}₹{{ prop.maintenance_charges }}{% else %}—{% endif %}</td>
+                <td>{{ prop.negotiable|default:"No" }}</td>
+                <td>{{ prop.brokerage|default:"—" }}</td>
+                <td>{{ prop.brokerage_percentage|default:"—" }}</td>
+                <td>{{ prop.manual_brokerage|default:"—" }}</td>
+                <td>{% if prop.dg_ups_included %}✔ Yes{% else %}✘ No{% endif %}</td>
+                <td>{% if prop.electricity_included %}✔ Yes{% else %}✘ No{% endif %}</td>
+                <td>{% if prop.water_included %}✔ Yes{% else %}✘ No{% endif %}</td>
                 <td>{{ prop.lockin_period|default:"—" }}</td>
-                <td>{{ prop.rent_increase|default:"—" }}</td>
-
+                <td>{{ prop.rent_increase|default:"—" }}{% if prop.rent_increase %}%{% endif %}</td>
                 <td>{{ prop.total_floors|default:"—" }}</td>
                 <td>{{ prop.your_floor|default:"—" }}</td>
                 <td>{{ prop.staircases|default:"—" }}</td>
-                <td>{{ prop.passenger_lifts|default:"0" }} / {{ prop.service_lifts|default:"0" }}</td>
+                <td>{{ prop.passenger_lifts|default:"0" }}</td>
+                <td>{{ prop.service_lifts|default:"0" }}</td>
                 <td>{{ prop.private_parking|default:"0" }}</td>
-
-                <td>{{ prop.min_seats|default:"—" }} - {{ prop.max_seats|default:"—" }}</td>
+                <td>{{ prop.min_seats|default:"—" }}</td>
+                <td>{{ prop.max_seats|default:"—" }}</td>
                 <td>{{ prop.cabins|default:"—" }}</td>
                 <td>{{ prop.meeting_rooms|default:"—" }}</td>
-                <td>{{ prop.private_washroom|default:"0" }} / {{ prop.public_washroom|default:"0" }}</td>
+                <td>{{ prop.private_washroom|default:"0" }}</td>
+                <td>{{ prop.public_washroom|default:"0" }}</td>
                 <td>{{ prop.flooring_type|default:"—" }}</td>
 
-                <td>
-                    {% if prop.amenities %}
-                        {{ prop.amenities|join:", " }}
-                    {% else %}—{% endif %}
-                </td>
-                <td>
-                    {% if prop.nearby_facilities %}
-                        {{ prop.nearby_facilities|join:", " }}
-                    {% else %}—{% endif %}
-                </td>
+                <td>{% if prop.amenities %}{{ prop.amenities|join:", " }}{% else %}—{% endif %}</td>
+                <td>{% if prop.nearby_facilities %}{{ prop.nearby_facilities|join:", " }}{% else %}—{% endif %}</td>
+                <td>{{ prop.property_summary|striptags|truncatechars:40|default:"—" }}</td>
+                <td>{{ prop.property_description|striptags|truncatechars:40|default:"—" }}</td>
 
                 <td>{{ prop.owner_name }}</td>
                 <td>{{ prop.contact_number }}</td>
                 <td>{{ prop.email }}</td>
                 <td>{{ prop.alternate_contact|default:"—" }}</td>
-
                 <td>{{ prop.uploaded_by_name|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_email|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_role|default:"—" }}</td>
-
-                <td>{{ prop.created_at|date:"d M Y" }}</td>
-
-                <td>
-                    <div style="display: flex; gap: 5px;">
-                        <a class="btn-action btn-view" title="View" href="{% url 'commercial_view' prop.id %}">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a class="btn-action btn-edit" title="Edit" href="{% url 'commercial_edit' prop.id %}">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                       <button type="button" class="btn-action btn-delete" title="Delete Property" onclick="deleteCommercial({{ prop.id }})">
-    <i class="fas fa-trash-alt"></i>
-</button>
+                <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI Listing Form" }}</small></td>
+                <td>{{ prop.created_at|date:"d M Y H:i" }}</td>
+                
+                <td style="position:sticky;right:0;background:white;z-index:1;">
+                    <div style="display:flex;gap:5px">
+                        <a class="btn-action btn-view" title="View" href="{% url 'commercial_view' prop.id %}"><i class="fas fa-eye"></i></a>
+                        <a class="btn-action btn-edit" title="Edit" href="{% url 'commercial_edit' prop.id %}"><i class="fas fa-edit"></i></a>
+                        <button type="button" class="btn-action btn-delete" title="Delete" onclick="deleteCommercial({{ prop.id }})"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan="55" style="text-align:center; padding: 30px;">
-                    <div style="color: #64748b; font-size: 1.1rem;">
-                        <i class="fas fa-folder-open mb-2" style="font-size: 2rem;"></i><br>
-                        No commercial properties found
+                <td colspan="61" style="text-align:center;padding:40px">
+                    <div style="color:#64748b;font-size:1.1rem">
+                        <i class="fas fa-folder-open mb-2" style="font-size:2rem"></i><br>
+                        No matching commercial properties found.
                     </div>
                 </td>
             </tr>
@@ -384,601 +727,632 @@
     </table>
 </div>
 
-    {% if page_obj.paginator.num_pages > 1 %}
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; flex-wrap:wrap; gap:10px;">
-        <small style="color:#888;">
-            Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            ({{ total_count }} total records)
-        </small>
-        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            {% if page_obj.has_previous %}
-                <a href="?page=1&search={{ search_query }}"
-                   style="padding:6px 12px; border:1px solid #ddd; border-radius:4px; text-decoration:none; color:#667eea; font-size:13px;">
-                    &laquo; First
-                </a>
-                <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}"
-                   style="padding:6px 12px; border:1px solid #ddd; border-radius:4px; text-decoration:none; color:#667eea; font-size:13px;">
-                    &lsaquo; Prev
-                </a>
-            {% endif %}
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <a href="?page={{ num }}&search={{ search_query }}"
-                       style="padding:6px 12px; border:1px solid #667eea; border-radius:4px; text-decoration:none; background:#667eea; color:white; font-size:13px; font-weight:600;">
-                        {{ num }}
-                    </a>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <a href="?page={{ num }}&search={{ search_query }}"
-                       style="padding:6px 12px; border:1px solid #ddd; border-radius:4px; text-decoration:none; color:#667eea; font-size:13px;">
-                        {{ num }}
-                    </a>
+        <!-- ═══ PAGINATION ═══ -->
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;flex-wrap:wrap;gap:10px">
+            <small style="color:#888">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                ({{ total_count }} total records)
+            </small>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1&search={{ search_query }}&property_type={{ prop_type_query }}&city={{ city_query }}&zone_type={{ zone_query }}&possession={{ possession_query }}&listed_by={{ listed_by_query }}&budget={{ budget_query }}&from_date={{ from_date }}&to_date={{ to_date }}"
+                       style="padding:6px 12px;border:1px solid #ddd;border-radius:4px;text-decoration:none;color:#667eea;font-size:13px">&laquo; First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}&property_type={{ prop_type_query }}&city={{ city_query }}&zone_type={{ zone_query }}&possession={{ possession_query }}&listed_by={{ listed_by_query }}&budget={{ budget_query }}&from_date={{ from_date }}&to_date={{ to_date }}"
+                       style="padding:6px 12px;border:1px solid #ddd;border-radius:4px;text-decoration:none;color:#667eea;font-size:13px">&lsaquo; Prev</a>
                 {% endif %}
-            {% endfor %}
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}"
-                   style="padding:6px 12px; border:1px solid #ddd; border-radius:4px; text-decoration:none; color:#667eea; font-size:13px;">
-                    Next &rsaquo;
-                </a>
-                <a href="?page={{ page_obj.paginator.num_pages }}&search={{ search_query }}"
-                   style="padding:6px 12px; border:1px solid #ddd; border-radius:4px; text-decoration:none; color:#667eea; font-size:13px;">
-                    Last &raquo;
-                </a>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
-
-</div>
-
-
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content" style="border-radius:12px; overflow:hidden; border:none; box-shadow:0 20px 60px rgba(0,0,0,0.15);">
-
-            <div class="modal-header" style="background:linear-gradient(135deg,#DC2626,#991B1B); border:none; padding:20px 24px;">
-                <h5 class="modal-title" style="color:white; font-weight:700; font-size:16px;">
-                    <i class="fas fa-file-excel" style="margin-right:8px;"></i>
-                    Import Commercial Rental Data
-                </h5>
-                <button type="button" class="close" data-dismiss="modal"
-                        style="color:white; opacity:1; font-size:20px; background:none; border:none;">
-                    &times;
-                </button>
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <a href="?page={{ num }}&search={{ search_query }}&from_date={{ from_date }}&to_date={{ to_date }}"
+                           style="padding:6px 12px;border:1px solid #667eea;border-radius:4px;text-decoration:none;background:#667eea;color:white;font-size:13px;font-weight:600">{{ num }}</a>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}&search={{ search_query }}&from_date={{ from_date }}&to_date={{ to_date }}"
+                           style="padding:6px 12px;border:1px solid #ddd;border-radius:4px;text-decoration:none;color:#667eea;font-size:13px">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}&property_type={{ prop_type_query }}&city={{ city_query }}&zone_type={{ zone_query }}&possession={{ possession_query }}&listed_by={{ listed_by_query }}&budget={{ budget_query }}&from_date={{ from_date }}&to_date={{ to_date }}"
+                       style="padding:6px 12px;border:1px solid #ddd;border-radius:4px;text-decoration:none;color:#667eea;font-size:13px">Next &rsaquo;</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}&search={{ search_query }}&property_type={{ prop_type_query }}&city={{ city_query }}&zone_type={{ zone_query }}&possession={{ possession_query }}&listed_by={{ listed_by_query }}&budget={{ budget_query }}&from_date={{ from_date }}&to_date={{ to_date }}"
+                       style="padding:6px 12px;border:1px solid #ddd;border-radius:4px;text-decoration:none;color:#667eea;font-size:13px">Last &raquo;</a>
+                {% endif %}
             </div>
+        </div>
+        {% endif %}
 
-            <div class="modal-body" style="padding:24px;">
+    </div><!-- /properties-section -->
 
-                <div style="background:#FFF1F2; border:1px solid #FECACA; border-radius:8px;
-                            padding:12px 16px; margin-bottom:20px; display:flex;
-                            align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-                    <div>
-                        <p style="margin:0; font-size:13px; font-weight:600; color:#DC2626;">
-                            <i class="fas fa-info-circle"></i> First time? Download the template
-                        </p>
-                        <p style="margin:0; font-size:12px; color:#6B7280; margin-top:2px;">
-                            Fill in the template and re-upload. Do not change column headers.
-                        </p>
-                    </div>
-                    <a href="{% url 'download_commercial_rental__template' %}"
-                       style="padding:7px 16px; background:#DC2626; color:white; border-radius:6px;
-                              text-decoration:none; font-size:12px; font-weight:600; white-space:nowrap;">
-                        <i class="fas fa-download"></i> Download Template
-                    </a>
+
+    <!-- ═══════ IMPORT MODAL ═══════ -->
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="border-radius:12px;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(0,0,0,.15)">
+                <div class="modal-header" style="background:linear-gradient(135deg,#DC2626,#991B1B);border:none;padding:20px 24px">
+                    <h5 class="modal-title" style="color:white;font-weight:700;font-size:16px">
+                        <i class="fas fa-file-excel" style="margin-right:8px"></i>Import Commercial Rental Data
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" style="color:white;opacity:1;font-size:20px;background:none;border:none">&times;</button>
                 </div>
-
-                <div class="form-group">
-                    <label style="font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; display:block;">
-                        Upload Excel File <span style="color:red;">*</span>
-                    </label>
-                    <div id="commercial-dropzone"
-                         style="border:2px dashed #FECACA; border-radius:8px; padding:28px 20px;
-                                text-align:center; cursor:pointer; transition:all 0.2s; background:#FAFAFE;"
-                         onclick="document.getElementById('commercial_file').click()"
-                         ondragover="event.preventDefault(); this.style.borderColor='#DC2626'; this.style.background='#FFF1F2';"
-                         ondragleave="this.style.borderColor='#FECACA'; this.style.background='#FAFAFE';"
-                         ondrop="handleCommercialDrop(event)">
-                        <i class="fas fa-cloud-upload-alt" style="font-size:2rem; color:#DC2626; display:block; margin-bottom:8px;"></i>
-                        <p style="margin:0; font-size:13px; font-weight:600; color:#374151;">Click to browse or drag & drop</p>
-                        <p style="margin:4px 0 0; font-size:12px; color:#9CA3AF;">Accepted: <strong>.xlsx</strong> only</p>
-                    </div>
-
-                    <input type="file" id="commercial_file" name="commercial_file"
-                           accept=".xlsx" style="display:none;"
-                           onchange="handleCommercialFileSelect(this)">
-
-                    <div id="commercial-file-preview"
-                         style="display:none; margin-top:10px; padding:10px 14px;
-                                background:#F0FDF4; border:1px solid #86EFAC; border-radius:6px;
-                                align-items:center; gap:10px;">
-                        <i class="fas fa-file-excel" style="color:#16A34A; font-size:1.2rem;"></i>
+                <div class="modal-body" style="padding:24px">
+                    <div style="background:#FFF1F2;border:1px solid #FECACA;border-radius:8px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
                         <div>
-                            <p id="commercial-file-name" style="margin:0; font-size:13px; font-weight:600; color:#15803D;"></p>
-                            <p id="commercial-file-size" style="margin:0; font-size:11px; color:#6B7280;"></p>
+                            <p style="margin:0;font-size:13px;font-weight:600;color:#DC2626"><i class="fas fa-info-circle"></i> First time? Download the template</p>
+                            <p style="margin:0;font-size:12px;color:#6B7280;margin-top:2px">Fill and re-upload. Do not change column headers.</p>
                         </div>
-                        <button type="button" onclick="clearCommercialFile()"
-                                style="margin-left:auto; background:none; border:none; cursor:pointer; color:#6B7280; font-size:16px;">
-                            &times;
-                        </button>
+                        <a href="{% url 'download_commercial_rental12__template' %}"
+                           style="padding:7px 16px;background:#DC2626;color:white;border-radius:6px;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap">
+                            <i class="fas fa-download"></i> Download Template
+                        </a>
                     </div>
-                </div>
-
-                <div id="commercial-import-progress" style="display:none; margin-top:16px;">
-                    <div style="height:6px; background:#E5E7EB; border-radius:3px; overflow:hidden;">
-                        <div id="commercial-progress-bar"
-                             style="height:100%; width:0%; background:linear-gradient(90deg,#DC2626,#991B1B);
-                                    border-radius:3px; transition:width 0.3s ease;">
-                        </div>
-                    </div>
-                    <p style="margin:6px 0 0; font-size:12px; color:#6B7280; text-align:center;">Uploading and processing...</p>
-                </div>
-
-                <div id="commercial-import-result" style="display:none; margin-top:16px;"></div>
-            </div>
-
-            <div class="modal-footer" style="border-top:1px solid #F3F4F6; padding:16px 24px; gap:10px;">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                        style="padding:8px 20px; border-radius:6px; font-size:13px;">Close</button>
-                <button type="button" id="commercial-upload-btn" onclick="submitCommercialImport()"
-                        style="padding:8px 24px; background:linear-gradient(135deg,#DC2626,#991B1B);
-                               color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">
-                    <i class="fas fa-upload"></i> Import Data
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content" style="border-radius:12px; overflow:hidden; border:none; box-shadow:0 20px 60px rgba(0,0,0,0.15);">
-            <div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none; padding:20px 24px;">
-                <h5 class="modal-title" style="color:white; font-weight:700; font-size:16px;">
-                    <i class="fas fa-trash-alt" style="margin-right:8px;"></i> Advanced Bulk Delete (Commercial)
-                </h5>
-                <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:1;">&times;</button>
-            </div>
-            <div class="modal-body" style="padding:24px;">
-                <form id="bulkDeleteForm">
                     <div class="form-group">
-                        <label style="font-size:13px; font-weight:600;">Delete Criteria <span style="color:red;">*</span></label>
-                        <select class="form-control" id="deleteType" name="delete_type" onchange="toggleDeleteInputs()" style="font-size:13px;">
-                            <option value="">-- Select Option --</option>
-                            <option value="current_page">Delete Current Page Data</option>
-                            <option value="date_range">Delete by Date Range</option>
-                            <option value="latest_month">Delete Latest Month Data</option>
-                            <option value="old_data">Delete Data Older Than 6 Months</option>
-                            <option value="by_uploader">Delete by Uploaded User Source</option>
-                            <option value="by_file">Delete by Specific Excel File</option>
-                            <option value="delete_all" style="color: red; font-weight: bold;">Delete ALL Data</option>
-                        </select>
-                    </div>
-
-                    <div id="dateRangeInputs" style="display:none; gap: 10px; margin-top: 10px;">
-                        <div style="flex: 1;">
-                            <label style="font-size:12px;">From Date</label>
-                            <input type="date" id="fromDate" name="from_date" class="form-control">
+                        <label style="font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;display:block">Upload Excel File <span style="color:red">*</span></label>
+                        <div id="commercial-dropzone"
+                             style="border:2px dashed #FECACA;border-radius:8px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#FAFAFE"
+                             onclick="document.getElementById('commercial_file').click()"
+                             ondragover="event.preventDefault();this.style.borderColor='#DC2626';this.style.background='#FFF1F2'"
+                             ondragleave="this.style.borderColor='#FECACA';this.style.background='#FAFAFE'"
+                             ondrop="handleCommercialDrop(event)">
+                            <i class="fas fa-cloud-upload-alt" style="font-size:2rem;color:#DC2626;display:block;margin-bottom:8px"></i>
+                            <p style="margin:0;font-size:13px;font-weight:600;color:#374151">Click to browse or drag &amp; drop</p>
+                            <p style="margin:4px 0 0;font-size:12px;color:#9CA3AF">Accepted: <strong>.xlsx</strong> only</p>
                         </div>
-                        <div style="flex: 1;">
-                            <label style="font-size:12px;">To Date</label>
-                            <input type="date" id="toDate" name="to_date" class="form-control">
+                        <input type="file" id="commercial_file" name="commercial_file" accept=".xlsx" style="display:none" onchange="handleCommercialFileSelect(this)">
+                        <div id="commercial-file-preview" style="display:none;margin-top:10px;padding:10px 14px;background:#F0FDF4;border:1px solid #86EFAC;border-radius:6px;align-items:center;gap:10px">
+                            <i class="fas fa-file-excel" style="color:#16A34A;font-size:1.2rem"></i>
+                            <div>
+                                <p id="commercial-file-name" style="margin:0;font-size:13px;font-weight:600;color:#15803D"></p>
+                                <p id="commercial-file-size" style="margin:0;font-size:11px;color:#6B7280"></p>
+                            </div>
+                            <button type="button" onclick="clearCommercialFile()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#6B7280;font-size:16px">&times;</button>
                         </div>
                     </div>
-
-                    <div id="uploaderInput" style="display:none; margin-top: 10px;">
-                        <label style="font-size:12px;">Uploaded By (Name/Email/Role)</label>
-                        <input type="text" id="uploaderText" name="uploader_text" class="form-control" placeholder="e.g. Admin or admin@example.com">
+                    <div id="commercial-import-progress" style="display:none;margin-top:16px">
+                        <div style="height:6px;background:#E5E7EB;border-radius:3px;overflow:hidden">
+                            <div id="commercial-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#DC2626,#991B1B);border-radius:3px;transition:width .3s ease"></div>
+                        </div>
+                        <p style="margin:6px 0 0;font-size:12px;color:#6B7280;text-align:center">Uploading and processing…</p>
                     </div>
-
-                    <div id="fileInput" style="display:none; margin-top: 10px;">
-                        <label style="font-size:12px;">Select Uploaded Excel File</label>
-                        <select id="selectedFile" name="selected_file" class="form-control" style="font-size:13px;">
-                            <option value="">-- Select File --</option>
-                            {% for file in uploaded_files %}
-                                <option value="{{ file }}">{{ file }}</option>
-                            {% empty %}
-                                <option value="" disabled>No files found in database (Ensure your import script saves the filename)</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer" style="border-top:1px solid #F3F4F6; padding:16px 24px; gap:10px;">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" onclick="executeBulkDelete()" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none;">
-                    <i class="fas fa-exclamation-triangle"></i> Confirm Delete
-                </button>
+                    <div id="commercial-import-result" style="display:none;margin-top:16px"></div>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #F3F4F6;padding:16px 24px;gap:10px">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style="padding:8px 20px;border-radius:6px;font-size:13px">Close</button>
+                    <button type="button" id="commercial-upload-btn" onclick="submitCommercialImport()"
+                            style="padding:8px 24px;background:linear-gradient(135deg,#DC2626,#991B1B);color:white;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">
+                        <i class="fas fa-upload"></i> Import Data
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    // ... [Your existing Import Excel JS code remains untouched here] ...
+    <!-- ═══════ BULK DELETE MODAL ═══════ -->
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="border-radius:12px;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(0,0,0,.15)">
+                <div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#b91c1c);border:none;padding:20px 24px">
+                    <h5 class="modal-title" style="color:white;font-weight:700;font-size:16px">
+                        <i class="fas fa-trash-alt" style="margin-right:8px"></i> Advanced Bulk Delete (Commercial)
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" style="color:white;opacity:1">&times;</button>
+                </div>
+                <div class="modal-body" style="padding:24px">
+                    <form id="bulkDeleteForm">
+                        <div class="form-group">
+                            <label style="font-size:13px;font-weight:600">Delete Criteria <span style="color:red">*</span></label>
+                            <select class="form-control" id="deleteType" name="delete_type" onchange="toggleDeleteInputs()" style="font-size:13px">
+                                <option value="">-- Select Option --</option>
+                                <option value="current_page">Delete Current Page Data</option>
+                                <option value="date_range">Delete by Date Range</option>
+                                <option value="latest_month">Delete Latest Month Data</option>
+                                <option value="old_data">Delete Data Older Than 6 Months</option>
+                                <option value="by_uploader">Delete by Uploaded User Source</option>
+                                <option value="by_file">Delete by Specific Excel File</option>
+                                <option value="delete_all" style="color:red;font-weight:bold">Delete ALL Data</option>
+                            </select>
+                        </div>
+                        <div id="dateRangeInputs" style="display:none;gap:10px;margin-top:10px">
+                            <div style="flex:1"><label style="font-size:12px">From Date</label><input type="date" id="fromDate" name="from_date" class="form-control"></div>
+                            <div style="flex:1"><label style="font-size:12px">To Date</label><input type="date" id="toDate" name="to_date" class="form-control"></div>
+                        </div>
+                        <div id="uploaderInput" style="display:none;margin-top:10px">
+                            <label style="font-size:12px">Uploaded By (Name/Email/Role)</label>
+                            <input type="text" id="uploaderText" name="uploader_text" class="form-control" placeholder="e.g. Admin or admin@example.com">
+                        </div>
+                        <div id="fileInput" style="display:none;margin-top:10px">
+                            <label style="font-size:12px">Select Uploaded Excel File</label>
+                            <select id="selectedFile" name="selected_file" class="form-control" style="font-size:13px">
+                                <option value="">-- Select File --</option>
+                                {% for file in uploaded_files %}
+                                    <option value="{{ file }}">{{ file }}</option>
+                                {% empty %}
+                                    <option value="" disabled>No files found</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #F3F4F6;padding:16px 24px;gap:10px">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="executeBulkDelete()" style="background:linear-gradient(135deg,#ef4444,#b91c1c);border:none">
+                        <i class="fas fa-exclamation-triangle"></i> Confirm Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!--                  SCRIPTS                        -->
+    <!-- ═══════════════════════════════════════════════ -->
+
+    <!-- Select2 JS — must load AFTER jQuery from admin_header -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+    // ─────────────────────────────────────────────────
+    // 1. SELECT2 — self-executing retry, fires the moment
+    //    both jQuery AND select2 plugin are available.
+    //    No DOMContentLoaded race condition.
+    // ─────────────────────────────────────────────────
+    (function waitForSelect2() {
+        if (typeof window.jQuery === 'undefined' || typeof window.jQuery.fn.select2 === 'undefined') {
+            setTimeout(waitForSelect2, 30);   // retry every 30ms
+            return;
+        }
+        var $ = window.jQuery;
+        var form = document.getElementById('liveSearchForm');
+
+        $('.s2-dropdown').each(function () {
+            // destroy existing instance first (prevents double-init errors)
+            if ($(this).hasClass('select2-hidden-accessible')) {
+                $(this).select2('destroy');
+            }
+            $(this).select2({
+                tags:                    true,    // allows typing a value not in list
+                width:                   '100%',
+                placeholder:             $(this).data('placeholder') || 'Select or type…',
+                allowClear:              true,
+                minimumResultsForSearch: 0,      // search box always visible
+            });
+        });
+
+        // Submit form instantly on any selection / clear
+        $(document).on('select2:select select2:unselect select2:clear', '.s2-dropdown', function () {
+            form.submit();
+        });
+    })();
+
+    // ─────────────────────────────────────────────────
+    // 2. LIVE SEARCH — fires 250ms after user stops typing.
+    //    Works on every keystroke; no Enter key needed.
+    // ─────────────────────────────────────────────────
+    var typingTimer;
+    var searchInput = document.getElementById('searchInput');
+    var form        = document.getElementById('liveSearchForm');
+
+    if (searchInput) {
+        // 'input' fires on every character (paste, cut, voice, etc.)
+        searchInput.addEventListener('input', function () {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(function () { form.submit(); }, 250);
+        });
+        // Prevent Enter from double-submitting
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); clearTimeout(typingTimer); form.submit(); }
+            else { clearTimeout(typingTimer); }
+        });
+        // Keep cursor at end on page reload with prefilled value
+        var len = searchInput.value.length;
+        if (len) { searchInput.focus(); searchInput.setSelectionRange(len, len); }
+    }
+
+    // ─────────────────────────────────────────────────
+    // DATE INPUTS — submit instantly when a date is picked
+    // ─────────────────────────────────────────────────
+    ['fromDateFilter', 'toDateFilter'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('change', function () { form.submit(); });
+            // 'input' catches keyboard edits in some browsers
+            el.addEventListener('input',  function () { form.submit(); });
+        }
+    });
+    // ─────────────────────────────────────────────────
+    function clearFilterSelect(selectName, defaultVal) {
+        var sel = document.querySelector('select[name="' + selectName + '"]');
+        if (!sel) return;
+        if (typeof window.jQuery !== 'undefined' && window.jQuery(sel).hasClass('select2-hidden-accessible')) {
+            window.jQuery(sel).val(defaultVal).trigger('change');
+        } else {
+            sel.value = defaultVal;
+        }
+        form.submit();
+    }
+
+    function clearFilterText() {
+        if (searchInput) { searchInput.value = ''; form.submit(); }
+    }
+
+    function clearDate(fieldName) {
+        var inp = document.querySelector('input[name="' + fieldName + '"]');
+        if (inp) { inp.value = ''; form.submit(); }
+    }
+
+    function clearDates() {
+        var f = document.querySelector('input[name="from_date"]');
+        var t = document.querySelector('input[name="to_date"]');
+        if (f) f.value = '';
+        if (t) t.value = '';
+        form.submit();
+    }
+
+    // ─────────────────────────────────────────────────
+    // 4.  CHARTS  — real data from Django context (Fortified)
+    // ─────────────────────────────────────────────────
+    var COLORS = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#f97316'];
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // 4a. Property Type Pie
+        var ptLabels = {{ prop_type_labels_json|default:"[]"|safe }};
+        var ptCounts = {{ prop_type_counts_json|default:"[]"|safe }};
+        if (ptLabels.length === 0) { ptLabels = ['No Data']; ptCounts = [1]; }
+        new Chart(document.getElementById('propertyPieChart'), {
+            type: 'pie',
+            data: {
+                labels: ptLabels,
+                datasets: [{ data: ptCounts, backgroundColor: COLORS.slice(0, ptLabels.length), borderWidth: 2 }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+        });
+
+        // 4b. Monthly Revenue Bar
+        var mLabels  = {{ monthly_labels_json|default:"[]"|safe }};
+        var mRevenue = {{ monthly_revenue_json|default:"[]"|safe }};
+        if (mLabels.length === 0) { mLabels = ['No Data']; mRevenue = [0]; }
+        new Chart(document.getElementById('rentalIncomeChart'), {
+            type: 'bar',
+            data: {
+                labels: mLabels,
+                datasets: [{
+                    label: 'Expected Revenue (₹)',
+                    data: mRevenue,
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { ticks: { callback: function(v){ return '₹' + (v/1000).toFixed(0) + 'k'; } } }
+                }
+            }
+        });
+
+        // 4c. Occupancy Doughnut
+        var occData = {{ occupancy_json|default:"[0,0,0]"|safe }};
+        new Chart(document.getElementById('occupancyDoughnutChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Occupied', 'Vacant (Ready)', 'Other'],
+                datasets: [{ data: occData, backgroundColor: ['#10b981','#f59e0b','#e5e7eb'], borderWidth: 2 }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+        });
+
+        // 4d. Rent Range Bar
+        var rrLabels = {{ rent_range_labels_json|default:"[]"|safe }};
+        var rrCounts = {{ rent_range_counts_json|default:"[]"|safe }};
+        new Chart(document.getElementById('rentRangeChart'), {
+            type: 'bar',
+            data: {
+                labels: rrLabels,
+                datasets: [{
+                    label: 'No. of Properties',
+                    data: rrCounts,
+                    backgroundColor: ['#10b981','#3b82f6','#f59e0b','#ef4444'],
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+    });
+    // ─────────────────────────────────────────────────
+    // 5.  SINGLE DELETE
+    // ─────────────────────────────────────────────────
+    function deleteCommercial(propertyId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This will permanently delete the property and all its media.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#94a3b8',
+            confirmButtonText: '<i class="fas fa-trash-alt"></i> Yes, delete it!'
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Deleting…', allowOutsideClick: false, didOpen: function(){ Swal.showLoading(); } });
+                var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '{{ csrf_token }}';
+                fetch('/Admin_App/commercial/delete/' + propertyId + '/', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                .then(function(data){
+                    if (data.status === 'success') {
+                        Swal.fire({ icon:'success', title:'Deleted!', text:'Property deleted.', timer:1500, showConfirmButton:false });
+                        var row = document.getElementById('row-' + propertyId);
+                        if (row) {
+                            row.style.transition = 'all .4s ease';
+                            row.style.opacity = '0';
+                            row.style.transform = 'translateX(-20px)';
+                            setTimeout(function(){ row.remove(); }, 400);
+                        } else {
+                            setTimeout(function(){ window.location.reload(); }, 1500);
+                        }
+                    } else {
+                        Swal.fire('Error!', data.message || 'Could not delete.', 'error');
+                    }
+                })
+                .catch(function(e){ Swal.fire('Error!', e.message, 'error'); });
+            }
+        });
+    }
+
+    // ─────────────────────────────────────────────────
+    // 6.  BULK DELETE
+    // ─────────────────────────────────────────────────
+    function toggleDeleteInputs() {
+        var type = document.getElementById('deleteType').value;
+        document.getElementById('dateRangeInputs').style.display = (type === 'date_range') ? 'flex' : 'none';
+        document.getElementById('uploaderInput').style.display   = (type === 'by_uploader') ? 'block' : 'none';
+        document.getElementById('fileInput').style.display       = (type === 'by_file') ? 'block' : 'none';
+    }
+
+    function executeBulkDelete() {
+        var type = document.getElementById('deleteType').value;
+        if (!type) { Swal.fire('Warning','Please select a delete criteria.','warning'); return; }
+        var payload = { delete_type: type };
+        if (type === 'date_range') {
+            payload.from_date = document.getElementById('fromDate').value;
+            payload.to_date   = document.getElementById('toDate').value;
+            if (!payload.from_date || !payload.to_date) { Swal.fire('Warning','Select both dates.','warning'); return; }
+        } else if (type === 'by_uploader') {
+            payload.uploader_text = document.getElementById('uploaderText').value;
+            if (!payload.uploader_text) { Swal.fire('Warning','Enter uploader detail.','warning'); return; }
+        } else if (type === 'by_file') {
+            payload.file_name = document.getElementById('selectedFile').value;
+            if (!payload.file_name) { Swal.fire('Warning','Select a file.','warning'); return; }
+        } else if (type === 'current_page') {
+            var ids = Array.from(document.querySelectorAll('tr[id^="row-"]')).map(function(r){ return r.id.split('-')[1]; });
+            if (!ids.length) { Swal.fire('Warning','No data on current page.','warning'); return; }
+            payload.page_ids = ids;
+        }
+        Swal.fire({
+            title: 'Are you absolutely sure?',
+            text: 'This permanently deletes selected Commercial records and media!',
+            icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#ef4444', cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, delete them!'
+        }).then(function(result){
+            if (result.isConfirmed) {
+                Swal.fire({ title:'Processing…', allowOutsideClick:false, didOpen:function(){ Swal.showLoading(); } });
+                fetch("{% url 'commercial_bulk_delete' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type':'application/json', 'X-CSRFToken':'{{ csrf_token }}', 'X-Requested-With':'XMLHttpRequest' },
+                    body: JSON.stringify(payload)
+                })
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    if (data.status === 'success') {
+                        Swal.fire('Deleted!', data.message, 'success').then(function(){ window.location.reload(); });
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                })
+                .catch(function(){ Swal.fire('Error','Server error.','error'); });
+            }
+        });
+    }
+
+    // ─────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────
+    // 7.  IMPORT EXCEL (Updated with SweetAlert Validation)
+    // ─────────────────────────────────────────────────
     function handleCommercialFileSelect(input) {
         if (input.files && input.files[0]) showCommercialFilePreview(input.files[0]);
     }
-
+    
     function handleCommercialDrop(event) {
         event.preventDefault();
         document.getElementById('commercial-dropzone').style.borderColor = '#FECACA';
         document.getElementById('commercial-dropzone').style.background = '#FAFAFE';
-        const file = event.dataTransfer.files[0];
+        var file = event.dataTransfer.files[0];
         if (!file) return;
-        if (!file.name.endsWith('.xlsx')) {
-            Swal.fire('Invalid File', 'Please upload a .xlsx file only.', 'warning');
-            return;
-        }
-        const dt = new DataTransfer();
-        dt.items.add(file);
+        if (!file.name.endsWith('.xlsx')) { Swal.fire('Invalid File','Please upload a .xlsx file only.','warning'); return; }
+        var dt = new DataTransfer(); dt.items.add(file);
         document.getElementById('commercial_file').files = dt.files;
         showCommercialFilePreview(file);
     }
-
+    
     function showCommercialFilePreview(file) {
-        if (!file.name.endsWith('.xlsx')) {
-            Swal.fire('Invalid File', 'Please upload a .xlsx file only.', 'warning');
-            clearCommercialFile();
-            return;
-        }
+        if (!file.name.endsWith('.xlsx')) { Swal.fire('Invalid File','Please upload a .xlsx file only.','warning'); clearCommercialFile(); return; }
         document.getElementById('commercial-file-name').textContent = file.name;
         document.getElementById('commercial-file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
         document.getElementById('commercial-file-preview').style.display = 'flex';
-        document.getElementById('commercial-import-result').style.display = 'none';
+        
+        // Hide old result div if it was there
+        var resultDiv = document.getElementById('commercial-import-result');
+        if (resultDiv) resultDiv.style.display = 'none';
     }
-
+    
     function clearCommercialFile() {
         document.getElementById('commercial_file').value = '';
         document.getElementById('commercial-file-preview').style.display = 'none';
-        document.getElementById('commercial-import-result').style.display = 'none';
+        var resultDiv = document.getElementById('commercial-import-result');
+        if (resultDiv) resultDiv.style.display = 'none';
     }
-
-    function submitCommercialImport() {
-        const fileInput = document.getElementById('commercial_file');
-        if (!fileInput.files || !fileInput.files[0]) {
-            Swal.fire('No File', 'Please select an Excel file to upload.', 'warning');
-            return;
+    
+  function submitCommercialImport() {
+        var fileInput = document.getElementById('commercial_file');
+        if (!fileInput.files || !fileInput.files[0]) { 
+            Swal.fire('No File','Please select an Excel file.','warning'); 
+            return; 
         }
-
-        const formData = new FormData();
+        
+        var formData = new FormData();
         formData.append('commercial_file', fileInput.files[0]);
 
-        document.getElementById('commercial-import-progress').style.display = 'block';
-        document.getElementById('commercial-import-result').style.display = 'none';
-        document.getElementById('commercial-upload-btn').disabled = true;
-        document.getElementById('commercial-upload-btn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing...';
+        var modalEl = document.getElementById('exampleModalCenter');
+        
+        // 1. BULLETPROOF MODAL CLOSE: Safely hides the modal in Bootstrap 4 or 5 without crashing
+        try {
+            // Find the built-in closing "×" or "Close" button inside this specific modal and click it
+            var closeBtn = modalEl.querySelector('[data-dismiss="modal"], [data-bs-dismiss="modal"], .close');
+            if (closeBtn) {
+                closeBtn.click();
+            } else if (typeof $ !== 'undefined' && $.fn.modal) {
+                $(modalEl).modal('hide');
+            } else if (window.bootstrap && bootstrap.Modal && typeof bootstrap.Modal.getInstance === 'function') {
+                var modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modalInstance.hide();
+            }
+        } catch (modalError) {
+            console.log("Modal close bypassed safely:", modalError);
+        }
+        
+        // 2. Show loading spinner via SweetAlert
+        Swal.fire({
+            title: 'Uploading & Validating...',
+            text: 'Checking data for errors and duplicates. Please wait.',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading(); }
+        });
 
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress = Math.min(progress + 10, 85);
-            document.getElementById('commercial-progress-bar').style.width = progress + '%';
-        }, 200);
-
-        fetch("{% url 'import_commercial_excel' %}", {
+        // 3. Send to Django Backend
+        fetch("{% url 'import_commercial_rental_excel' %}", {
             method: 'POST',
             headers: { 'X-CSRFToken': '{{ csrf_token }}' },
             body: formData
         })
-        .then(res => res.json())
-        .then(data => {
-            clearInterval(interval);
-            document.getElementById('commercial-progress-bar').style.width = '100%';
-            setTimeout(() => {
-                document.getElementById('commercial-import-progress').style.display = 'none';
-                document.getElementById('commercial-upload-btn').disabled = false;
-                document.getElementById('commercial-upload-btn').innerHTML = '<i class="fas fa-upload"></i> Import Data';
-                showCommercialImportResult(data);
-            }, 400);
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: "success",
+                    title: "Upload Complete!",
+                    text: data.message
+                }).then(() => {
+                    window.location.reload(); 
+                });
+            } else {
+                // Catches Missing Columns, Missing Data, and Duplicate Files!
+                Swal.fire({
+                    icon: "error",
+                    title: "Upload Rejected",
+                    text: data.message,
+                    customClass: {
+                        popup: 'format-pre' 
+                    }
+                }).then(() => {
+                    clearCommercialFile(); // Reset input field
+                    
+                    // 4. BULLETPROOF MODAL RE-OPEN IF VALIDATION FAILS
+                    try {
+                        if (typeof $ !== 'undefined' && $.fn.modal) {
+                            $(modalEl).modal('show');
+                        } else if (window.bootstrap && bootstrap.Modal) {
+                            if (typeof bootstrap.Modal.getInstance === 'function') {
+                                var modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                                modalInstance.show();
+                            } else {
+                                var modalInstance = new bootstrap.Modal(modalEl);
+                                modalInstance.show();
+                            }
+                        } else {
+                            // Raw CSS/HTML layout fallback if Bootstrap scripts are completely locked
+                            modalEl.classList.add('show');
+                            modalEl.style.display = 'block';
+                            var backdrop = document.createElement('div');
+                            backdrop.className = 'modal-backdrop fade show';
+                            document.body.appendChild(backdrop);
+                        }
+                    } catch (openError) {
+                        console.log("Modal re-open bypassed safely:", openError);
+                    }
+                });
+            }
         })
-        .catch(() => {
-            clearInterval(interval);
-            document.getElementById('commercial-import-progress').style.display = 'none';
-            document.getElementById('commercial-upload-btn').disabled = false;
-            document.getElementById('commercial-upload-btn').innerHTML = '<i class="fas fa-upload"></i> Import Data';
-            Swal.fire('Error', 'An unexpected error occurred. Please try again.', 'error');
+        .catch(function(error) {
+            Swal.fire('Error', 'A server error occurred during upload. Check console.', 'error');
+            clearCommercialFile();
         });
     }
 
-    function showCommercialImportResult(data) {
-        const resultDiv = document.getElementById('commercial-import-result');
-        resultDiv.style.display = 'block';
-
-        if (data.status === 'error') {
-            resultDiv.innerHTML = `
-                <div style="background:#FEF2F2; border:1px solid #FCA5A5; border-radius:8px; padding:14px 16px;">
-                    <p style="margin:0; font-size:13px; font-weight:700; color:#DC2626;">
-                        <i class="fas fa-times-circle"></i> Import Failed
-                    </p>
-                    <p style="margin:4px 0 0; font-size:12px; color:#7F1D1D;">${data.message}</p>
-                </div>`;
-            return;
-        }
-
-        let errHtml = '';
-        if (data.error_count > 0) {
-            const errItems = data.errors.slice(0, 5).map(e => `<li style="font-size:11px; color:#7F1D1D;">${e}</li>`).join('');
-            const more = data.error_count > 5 ? `<li style="font-size:11px; color:#9CA3AF;">...and ${data.error_count - 5} more</li>` : '';
-            errHtml = `
-                <div style="margin-top:10px; background:#FEF2F2; border:1px solid #FCA5A5; border-radius:6px; padding:10px 14px;">
-                    <p style="margin:0 0 6px; font-size:12px; font-weight:700; color:#DC2626;">
-                        <i class="fas fa-exclamation-triangle"></i> ${data.error_count} row(s) had errors:
-                    </p>
-                    <ul style="margin:0; padding-left:16px;">${errItems}${more}</ul>
-                </div>`;
-        }
-
-        resultDiv.innerHTML = `
-            <div style="background:#F0FDF4; border:1px solid #86EFAC; border-radius:8px; padding:14px 16px;">
-                <p style="margin:0; font-size:13px; font-weight:700; color:#16A34A;">
-                    <i class="fas fa-check-circle"></i> Import Successful!
-                </p>
-                <p style="margin:4px 0 0; font-size:12px; color:#166534;">
-                    <strong>${data.created}</strong> record(s) imported successfully.
-                </p>
-            </div>
-            ${errHtml}
-            <div style="margin-top:12px; text-align:center;">
-                <button onclick="location.reload()"
-                        style="padding:8px 24px; background:#16A34A; color:white; border:none;
-                               border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">
-                    <i class="fas fa-sync-alt"></i> Refresh Table
-                </button>
-            </div>`;
+    // ─────────────────────────────────────────────────
+    // 8.  GALLERY PREVIEW
+    // ─────────────────────────────────────────────────
+    var currentGalleryIndex = 0, currentGalleryImages = [];
+    function previewGallery(urls, title) {
+        currentGalleryImages = Array.isArray(urls) ? urls : urls.split(',');
+        currentGalleryIndex = 0;
+        if (!currentGalleryImages.length) return;
+        showGalleryModal(title);
     }
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-const ctx = document.getElementById('propertyPieChart');
-
-new Chart(ctx, {
-    type: 'pie',
-    data: {
-        labels: ['Residential', 'Commercial', 'PG'],
-        datasets: [{
-            data: [32, 12, 4],
-            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b']
-        }]
+    function showGalleryModal(title) {
+        var total = currentGalleryImages.length, cur = currentGalleryImages[currentGalleryIndex];
+        var navHtml = total > 1 ? '<div style="display:flex;justify-content:space-between;position:absolute;top:50%;left:0;right:0;transform:translateY(-50%);padding:0 10px;pointer-events:none"><button onclick="changeGalleryImage(-1)" style="pointer-events:auto;background:rgba(0,0,0,.5);color:white;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem"><i class="fas fa-chevron-left"></i></button><button onclick="changeGalleryImage(1)" style="pointer-events:auto;background:rgba(0,0,0,.5);color:white;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem"><i class="fas fa-chevron-right"></i></button></div><div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:white;padding:4px 12px;border-radius:12px;font-size:.8rem;font-weight:bold">' + (currentGalleryIndex+1) + ' / ' + total + '</div>' : '';
+        var thumbs = currentGalleryImages.map(function(img, idx){
+            return '<img src="'+img+'" onclick="jumpToGalleryImage('+idx+')" style="width:60px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer;border:2px solid '+(idx===currentGalleryIndex?'#667eea':'transparent')+';opacity:'+(idx===currentGalleryIndex?'1':'.6')+';transition:all .2s">';
+        }).join('');
+        Swal.fire({
+            title: title,
+            html: '<div style="position:relative;width:100%;height:60vh;background:#f8fafc;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center"><img id="swalGalleryImage" src="'+cur+'" style="max-width:100%;max-height:100%;object-fit:contain;transition:opacity .3s">'+navHtml+'</div><div style="display:flex;gap:8px;margin-top:15px;overflow-x:auto;padding-bottom:5px">'+thumbs+'</div>',
+            width: '800px', showCloseButton: true, showConfirmButton: false, padding: '1.5em',
+            background: '#fff', backdrop: 'rgba(0,0,0,.85)',
+            didOpen: function(){ document.activeElement.blur(); }
+        });
     }
-});
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-// --- Single Delete ---
-function deleteCommercial(propertyId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this! All associated images and media will be deleted.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444', 
-        cancelButtonColor: '#94a3b8',  
-        confirmButtonText: '<i class="fas fa-trash-alt"></i> Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({ title: 'Deleting...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
-
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
-            const deleteUrl = `/Admin_App/commercial/delete/${propertyId}/`;
-
-            fetch(deleteUrl, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error(`Server returned HTTP ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire({ icon: 'success', title: 'Deleted!', text: 'The commercial property has been deleted.', timer: 1500, showConfirmButton: false });
-                    const row = document.getElementById(`row-${propertyId}`);
-                    if (row) {
-                        row.style.transition = "all 0.4s ease";
-                        row.style.opacity = "0";
-                        row.style.transform = "translateX(-20px)";
-                        setTimeout(() => row.remove(), 400); 
-                    } else {
-                        setTimeout(() => window.location.reload(), 1500); 
-                    }
-                } else {
-                    Swal.fire('Error!', data.message || 'Could not delete property.', 'error');
-                }
-            })
-            .catch(error => {
-                Swal.fire('Error!', `Server connection failed: ${error.message}`, 'error');
-            });
-        }
-    });
-}
-
-// --- Bulk Delete JS ---
-function toggleDeleteInputs() {
-    const type = document.getElementById('deleteType').value;
-    document.getElementById('dateRangeInputs').style.display = (type === 'date_range') ? 'flex' : 'none';
-    document.getElementById('uploaderInput').style.display = (type === 'by_uploader') ? 'block' : 'none';
-    document.getElementById('fileInput').style.display = (type === 'by_file') ? 'block' : 'none';
-}
-
-function executeBulkDelete() {
-    const type = document.getElementById('deleteType').value;
-    if (!type) {
-        Swal.fire('Warning', 'Please select a delete criteria.', 'warning');
-        return;
+    function changeGalleryImage(dir) {
+        currentGalleryIndex = (currentGalleryIndex + dir + currentGalleryImages.length) % currentGalleryImages.length;
+        var img = document.getElementById('swalGalleryImage');
+        if (img) { img.style.opacity = '0'; setTimeout(function(){ showGalleryModal(Swal.getTitle().textContent); }, 150); }
+    }
+    function jumpToGalleryImage(idx) {
+        if (idx === currentGalleryIndex) return;
+        currentGalleryIndex = idx;
+        showGalleryModal(Swal.getTitle().textContent);
     }
 
-    let payload = { delete_type: type };
-
-    if (type === 'date_range') {
-        payload.from_date = document.getElementById('fromDate').value;
-        payload.to_date = document.getElementById('toDate').value;
-        if (!payload.from_date || !payload.to_date) {
-            Swal.fire('Warning', 'Please select both From and To dates.', 'warning');
-            return;
-        }
-    } else if (type === 'by_uploader') {
-        payload.uploader_text = document.getElementById('uploaderText').value;
-        if (!payload.uploader_text) {
-            Swal.fire('Warning', 'Please enter the uploader detail.', 'warning');
-            return;
-        }
-    } else if (type === 'by_file') {
-        payload.file_name = document.getElementById('selectedFile').value;
-        if (!payload.file_name) {
-            Swal.fire('Warning', 'Please select an Excel file from the list.', 'warning');
-            return;
-        }
-    } else if (type === 'current_page') {
-        const rows = document.querySelectorAll('tr[id^="row-"]');
-        const ids = Array.from(rows).map(row => row.id.split('-')[1]);
-        if (ids.length === 0) {
-            Swal.fire('Warning', 'No data on the current page to delete.', 'warning');
-            return;
-        }
-        payload.page_ids = ids;
-    }
-
-    Swal.fire({
-        title: 'Are you absolutely sure?',
-        text: "This action will permanently delete the selected Commercial records and their media!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Yes, delete them!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
-
-            fetch("{% url 'commercial_bulk_delete' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire('Deleted!', data.message, 'success').then(() => {
-                        window.location.reload();
-                    });
-                } else {
-                    Swal.fire('Error', data.message, 'error');
-                }
-            })
-            .catch(err => Swal.fire('Error', 'Server error occurred.', 'error'));
-        }
-    });
+    function forceExport(format) {
+    // 1. Grab the current URL (which includes all your active search filters)
+    var currentUrl = new URL(window.location.href);
+    
+    // 2. Forcefully add the download parameter to the URL
+    currentUrl.searchParams.set('download', format);
+    
+    // 3. Tell the browser to instantly visit this exact URL
+    window.location.href = currentUrl.toString();
 }
-</script>
+    </script>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    new Chart(document.getElementById('rentalIncomeChart'), {
-        type: 'bar',
-        data: {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-            datasets: [{ label: 'Rent', data: [50000, 60000, 55000, 70000], backgroundColor: '#3b82f6' }]
-        }
-    });
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    new Chart(document.getElementById('occupancyDoughnutChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Occupied', 'Vacant'],
-            datasets: [{ data: [80, 20], backgroundColor: ['#10b981', '#ef4444'] }]
-        }
-    });
 
-    new Chart(document.getElementById('rentRangeChart'), {
-        type: 'bar',
-        data: {
-            labels: ['0-10k', '10-25k', '25k+'],
-            datasets: [{ label: 'Properties', data: [10, 20, 5], backgroundColor: '#f59e0b' }]
-        }
-    });
-});
-</script>
 
-<script>
-let currentGalleryIndex = 0;
-let currentGalleryImages = [];
-
-function previewGallery(urls_array, title) {
-    currentGalleryImages = typeof urls_array === 'string' ? urls_array.split(',') : urls_array;
-    currentGalleryIndex = 0;
-    if (currentGalleryImages.length === 0) return;
-    showGalleryModal(title);
+<style>
+/* Keeps the newline formatting \n generated by Python for the error list */
+.format-pre {
+    white-space: pre-wrap;
+    text-align: left; 
 }
+</style>
 
-function showGalleryModal(title) {
-    const total = currentGalleryImages.length;
-    const currentUrl = currentGalleryImages[currentGalleryIndex];
-
-    let navHtml = '';
-    if (total > 1) {
-        navHtml = `
-            <div style="display: flex; justify-content: space-between; position: absolute; top: 50%; left: 0; right: 0; transform: translateY(-50%); padding: 0 10px; pointer-events: none;">
-                <button onclick="changeGalleryImage(-1)" style="pointer-events: auto; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s;"><i class="fas fa-chevron-left"></i></button>
-                <button onclick="changeGalleryImage(1)" style="pointer-events: auto; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: background 0.2s;"><i class="fas fa-chevron-right"></i></button>
-            </div>
-            <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">
-                ${currentGalleryIndex + 1} / ${total}
-            </div>
-        `;
-    }
-
-    const contentHtml = `
-        <div style="position: relative; width: 100%; height: 60vh; background: #f8fafc; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-            <img id="swalGalleryImage" src="${currentUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.3s ease;">
-            ${navHtml}
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 15px; overflow-x: auto; padding-bottom: 5px;">
-            ${currentGalleryImages.map((img, idx) => `
-                <img src="${img}" 
-                     onclick="jumpToGalleryImage(${idx})"
-                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 2px solid ${idx === currentGalleryIndex ? '#667eea' : 'transparent'}; opacity: ${idx === currentGalleryIndex ? '1' : '0.6'}; transition: all 0.2s ease;">
-            `).join('')}
-        </div>
-    `;
-
-    Swal.fire({
-        title: title,
-        html: contentHtml,
-        width: '800px',
-        showCloseButton: true,
-        showConfirmButton: false,
-        padding: '1.5em',
-        background: '#fff',
-        backdrop: 'rgba(0,0,0,0.85)',
-        didOpen: () => { document.activeElement.blur(); }
-    });
-}
-
-function changeGalleryImage(direction) {
-    currentGalleryIndex += direction;
-    if (currentGalleryIndex >= currentGalleryImages.length) currentGalleryIndex = 0;
-    if (currentGalleryIndex < 0) currentGalleryIndex = currentGalleryImages.length - 1;
-    const imgEl = document.getElementById('swalGalleryImage');
-    if (imgEl) {
-        imgEl.style.opacity = '0';
-        setTimeout(() => { showGalleryModal(Swal.getTitle().textContent); }, 150);
-    }
-}
-
-function jumpToGalleryImage(index) {
-    if (index === currentGalleryIndex) return;
-    currentGalleryIndex = index;
-    showGalleryModal(Swal.getTitle().textContent);
-}
-</script>
 </body>
 </html>

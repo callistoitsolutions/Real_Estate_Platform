@@ -30,6 +30,50 @@
 
     * { box-sizing: border-box; }
 
+
+ /* Modal Background Overlay */
+.property-image-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 999999 !important; /* Force to the very front */
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85); /* Dark transparent background */
+}
+
+/* Modal Content Box */
+.property-image-modal .modal-content {
+    background-color: #fefefe;
+    margin: 5vh auto; /* Centers it vertically */
+    padding: 20px;
+    border-radius: 12px;
+    width: 80%;
+    max-width: 900px;
+    max-height: 80vh; 
+    overflow-y: auto; /* Scroll if there are tons of images */
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+/* The Close Button */
+.property-image-modal .close-modal {
+    color: #888;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.property-image-modal .close-modal:hover,
+.property-image-modal .close-modal:focus {
+    color: #111;
+    text-decoration: none;
+}
     /* ── Page Header ── */
     .page-header {
         background: var(--primary-gradient);
@@ -50,6 +94,60 @@
     .btn-primary-custom.solid { background: white; color: var(--primary); border-color: white; }
     .btn-primary-custom.solid:hover { background: #f0f0ff; color: var(--primary); }
 
+
+    .row-divider { display: flex; align-items: center; text-align: center; margin: 30px 0 15px; color: #6b7280; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+    .row-divider::before, .row-divider::after { content: ''; flex: 1; border-bottom: 2px solid #e5e7eb; }
+    .row-divider:not(:empty)::before { margin-right: 15px; }
+    .row-divider:not(:empty)::after { margin-left: 15px; }
+
+    /* ── KPI Cards (Matching Screenshots) ── */
+    .kpi-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 10px; }
+    .kpi-card { flex: 1; min-width: 170px; background: #fff; border-radius: 12px; padding: 18px; position: relative; border: 1px solid #f3f4f6; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    
+    /* Bottom Border Colors */
+    .kpi-card.b-red { border-bottom: 4px solid #ef4444; }
+    .kpi-card.b-blue { border-bottom: 4px solid #3b82f6; }
+    .kpi-card.b-orange { border-bottom: 4px solid #f97316; }
+    .kpi-card.b-green { border-bottom: 4px solid #10b981; }
+    .kpi-card.b-pink { border-bottom: 4px solid #ec4899; }
+    .kpi-card.b-purple { border-bottom: 4px solid #8b5cf6; }
+    .kpi-card.b-cyan { border-bottom: 4px solid #06b6d4; }
+
+    /* Tags */
+    .badge-tag { position: absolute; top: 12px; right: 12px; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 12px; text-transform: uppercase; }
+    .tag-existing { background: #f3f4f6; color: #6b7280; }
+    .tag-new { background: #10b981; color: #fff; }
+
+    /* Icons */
+    .kpi-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 15px; }
+    .ic-red { background: #fee2e2; color: #ef4444; }
+    .ic-blue { background: #eff6ff; color: #3b82f6; }
+    .ic-orange { background: #ffedd5; color: #f97316; }
+    .ic-green { background: #d1fae5; color: #10b981; }
+    .ic-pink { background: #fce7f3; color: #ec4899; }
+    .ic-purple { background: #ede9fe; color: #8b5cf6; }
+    .ic-cyan { background: #cffafe; color: #06b6d4; }
+
+    .kpi-val { font-size: 28px; font-weight: 800; color: #111827; line-height: 1; margin-bottom: 6px; }
+    .kpi-label { font-size: 13px; font-weight: 700; color: #6b7280; margin-bottom: 6px; }
+    .kpi-desc { font-size: 11px; color: #9ca3af; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+    .c-up { color: #10b981; font-weight: 600; }
+    .c-down { color: #ef4444; font-weight: 600; }
+
+    /* ── Advanced Search Bar (Matching Image 4) ── */
+    .advanced-search-bar { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin-bottom: 24px; margin-top: 30px; }
+    .search-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 150px; }
+    .search-group.wide { flex: 2; min-width: 250px; }
+    .search-group label { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+    .filter-input { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; color: #374151; background: #f9fafb; outline: none; transition: border-color 0.2s; }
+    .filter-input:focus { border-color: #4F46E5; background: #fff; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+    
+    .search-actions { display: flex; gap: 10px; margin-bottom: 2px; flex-wrap: wrap; }
+    .btn-run-search { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .btn-run-search:hover { background: #2563eb; }
+    .btn-reset { background: #fff; color: #374151; border: 1px solid #d1d5db; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+    
+    .results-badge { background: #eff6ff; color: #2563eb; font-size: 13px; font-weight: 700; padding: 8px 16px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; width: 100%; margin-top: 5px; border: 1px solid #bfdbfe; }
     /* ── Stats Grid ── */
     .stats-grid {
         display: grid;
@@ -366,14 +464,17 @@
     <div class="page-header">
         <div class="page-header-content">
             <h1 class="page-title">
-                <i class="fas fa-home"></i> Residential Property Listings
+                <i class="fas fa-home"></i> Rental Residential Property Listings
             </h1>
             <div class="page-actions">
                 <a href="{% url 'residential' %}" class="btn-primary-custom solid">
-                    <i class="fas fa-plus-circle"></i> Add Property
+                    <i class="fas fa-plus-circle"></i> Add Rental Residential Property Listing
                 </a>
+                <a href="{% url 'rental_residential_logs' %}" class="btn-primary-custom" style="background: #764ba2; border-color: #764ba2;">
+    <i class="fas fa-history"></i> View Activity Logs
+</a>
                 <button class="btn-primary-custom" data-toggle="modal" data-target="#exampleModalCenter">
-                    <i class="fas fa-file-excel"></i> Import Excel
+                    <i class="fas fa-file-excel"></i>  Download/Upload Rental Residential Property Data Via Excel File
                 </button>
                 <button class="btn-primary-custom" data-toggle="modal" data-target="#bulkDeleteModal" style="background: #ef4444; border-color: #ef4444;">
                     <i class="fas fa-trash-alt"></i> Bulk Delete
@@ -382,46 +483,219 @@
         </div>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-card primary">
-            <div class="stat-icon primary"><i class="fas fa-home"></i></div>
-            <div class="stat-value">{{ total_count|default:"0" }}</div>
-            <div class="stat-label">Total Properties</div>
-            <span class="stat-change neutral"><i class="fas fa-database"></i> All records</span>
+    
+  
+
+    <div class="row-divider"><span>OCCUPANCY OVERVIEW</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-red">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-red"><i class="fas fa-home"></i></div>
+            <div class="kpi-val">{{ total_count }}</div>
+            <div class="kpi-label">Total Properties</div>
+            <div class="kpi-desc"><i class="fas fa-database"></i> All listed records</div>
         </div>
-        <div class="stat-card success">
-            <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
-            <div class="stat-value">{{ active_count|default:"0" }}</div>
-            <div class="stat-label">Active Listings</div>
-            <span class="stat-change positive"><i class="fas fa-chart-line"></i> Live</span>
+        <div class="kpi-card b-blue">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-blue"><i class="fas fa-wifi"></i></div>
+            <div class="kpi-val">{{ active_count }}</div>
+            <div class="kpi-label">Active Listings</div>
+            <div class="kpi-desc"><i class="fas fa-circle" style="color:#10b981; font-size:8px;"></i> Live on portal</div>
         </div>
-        <div class="stat-card info">
-            <div class="stat-icon info"><i class="fas fa-rupee-sign"></i></div>
-            <div class="stat-value">{% if avg_rent %}₹{{ avg_rent|floatformat:"0" }}{% else %}—{% endif %}</div>
-            <div class="stat-label">Avg Monthly Rent</div>
-            <span class="stat-change neutral"><i class="fas fa-chart-bar"></i> Average</span>
+        <div class="kpi-card b-orange">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-orange"><i class="fas fa-lock"></i></div>
+            <div class="kpi-val">{{ occupied_count }}</div>
+            <div class="kpi-label">Occupied Properties</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> {{ occupancy_rate }}% occupancy rate</div>
         </div>
-        <div class="stat-card warning">
-            <div class="stat-icon warning"><i class="fas fa-bed"></i></div>
-            <div class="stat-value">{{ furnished_count|default:"0" }}</div>
-            <div class="stat-label">Furnished Units</div>
-            <span class="stat-change neutral"><i class="fas fa-couch"></i> Ready to move</span>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-door-open"></i></div>
+            <div class="kpi-val">{{ vacant_count }}</div>
+            <div class="kpi-label">Vacant Properties</div>
+            <div class="kpi-desc c-down"><i class="fas fa-arrow-down"></i> {{ vacancy_rate }}% vacant</div>
         </div>
-        <div class="stat-card danger">
-            <div class="stat-icon danger"><i class="fas fa-key"></i></div>
-            <div class="stat-value">{{ available_count|default:"0" }}</div>
-            <div class="stat-label">Available Now</div>
-            <span class="stat-change positive"><i class="fas fa-arrow-up"></i> Vacant</span>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-chart-pie"></i></div>
+            <div class="kpi-val">{{ occupancy_rate }}%</div>
+            <div class="kpi-label">Occupancy Rate</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> Good performance</div>
         </div>
-        <div class="stat-card dark">
-            <div class="stat-icon dark"><i class="fas fa-city"></i></div>
-            <div class="stat-value">{{ city_count|default:"0" }}</div>
-            <div class="stat-label">Cities Covered</div>
-            <span class="stat-change neutral"><i class="fas fa-map-marker-alt"></i> Locations</span>
+        <div class="kpi-card b-pink">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-pink"><i class="fas fa-percent"></i></div>
+            <div class="kpi-val">{{ vacancy_rate }}%</div>
+            <div class="kpi-label">Vacancy Rate</div>
+            <div class="kpi-desc"><i class="fas fa-circle" style="color:#ef4444; font-size:8px;"></i> {{ vacant_count }} units empty</div>
         </div>
     </div>
 
-    <div class="analytics-section">
+    <div class="row-divider"><span> REVENUE SUMMARY</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-orange">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-orange"><b>Rs</b></div>
+            <div class="kpi-val">₹{{ avg_rent|floatformat:"0" }}</div>
+            <div class="kpi-label">Avg Monthly Rent</div>
+            <div class="kpi-desc"><i class="fas fa-calculator"></i> Average across all</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-coins"></i></div>
+            <div class="kpi-val">₹{{ total_revenue|floatformat:"0" }}</div>
+            <div class="kpi-label">Monthly Revenue</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> Total rental income</div>
+        </div>
+        <div class="kpi-card b-purple">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-purple"><i class="fas fa-piggy-bank"></i></div>
+            <div class="kpi-val">₹{{ total_security_deposit|floatformat:"0" }}</div>
+            <div class="kpi-label">Security Deposit Total</div>
+            <div class="kpi-desc"><i class="fas fa-lock"></i> Locked asset amount</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-arrow-up"></i></div>
+            <div class="kpi-val">₹{{ max_rent|floatformat:"0" }}</div>
+            <div class="kpi-label">Highest Rent</div>
+            <div class="kpi-desc"><i class="fas fa-crown" style="color:#f59e0b;"></i> Premium property</div>
+        </div>
+        <div class="kpi-card b-purple">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-purple"><i class="fas fa-arrow-down"></i></div>
+            <div class="kpi-val">₹{{ min_rent|floatformat:"0" }}</div>
+            <div class="kpi-label">Lowest Rent</div>
+            <div class="kpi-desc"><i class="fas fa-tag"></i> Budget listing</div>
+        </div>
+    </div>
+
+    <div class="row-divider"><span> PROPERTY BUSINESS SUMMARY</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-cyan">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-cyan"><i class="fas fa-couch"></i></div>
+            <div class="kpi-val">{{ furnished_count }}</div>
+            <div class="kpi-label">Furnished Units</div>
+            <div class="kpi-desc"><i class="fas fa-info-circle"></i> Ready to move in</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-key"></i></div>
+            <div class="kpi-val">{{ available_count }}</div>
+            <div class="kpi-label">Available Now</div>
+            <div class="kpi-desc"><i class="fas fa-circle" style="color:#10b981; font-size:8px;"></i> Ready to rent</div>
+        </div>
+        <div class="kpi-card b-purple">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-purple"><i class="fas fa-star"></i></div>
+            <div class="kpi-val">{{ premium_properties_count }}</div>
+            <div class="kpi-label">Premium Rentals</div>
+            <div class="kpi-desc">Rs Above ₹50,000/mo</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-tags"></i></div>
+            <div class="kpi-val">{{ affordable_properties_count }}</div>
+            <div class="kpi-label">Affordable Rentals</div>
+            <div class="kpi-desc">Rs Under ₹15,000/mo</div>
+        </div>
+        <div class="kpi-card b-orange">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-orange"><i class="fas fa-running"></i></div>
+            <div class="kpi-val">{{ ready_to_move_count }}</div>
+            <div class="kpi-label">Ready To Move</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> Fast conversion</div>
+        </div>
+    </div>
+
+    <div class="row-divider"><span> LEASE DURATION & LISTING QUALITY</span></div>
+    <div class="kpi-row">
+        <div class="kpi-card b-blue">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-blue"><i class="fas fa-hourglass-half"></i></div>
+            <div class="kpi-val">{{ short_lease_count }}</div>
+            <div class="kpi-label">Short Lease</div>
+            <div class="kpi-desc"><i class="fas fa-calendar"></i> 6 months duration</div>
+        </div>
+        <div class="kpi-card b-purple">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-purple"><i class="fas fa-calendar-alt"></i></div>
+            <div class="kpi-val">{{ long_lease_count }}</div>
+            <div class="kpi-label">Long Lease</div>
+            <div class="kpi-desc"><i class="fas fa-calendar"></i> 12 months duration</div>
+        </div>
+        <div class="kpi-card b-green">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-green"><i class="fas fa-images"></i></div>
+            <div class="kpi-val">{{ with_images_count }}</div>
+            <div class="kpi-label">Properties With Images</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> Visual listings</div>
+        </div>
+        <div class="kpi-card b-pink">
+            <span class="badge-tag tag-new">NEW</span>
+            <div class="kpi-icon ic-pink"><i class="fas fa-user-check"></i></div>
+            <div class="kpi-val">{{ with_owner_count }}</div>
+            <div class="kpi-label">Owner Details Available</div>
+            <div class="kpi-desc c-up"><i class="fas fa-arrow-up"></i> Data complete</div>
+        </div>
+        <div class="kpi-card b-orange">
+            <span class="badge-tag tag-existing">EXISTING</span>
+            <div class="kpi-icon ic-orange"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="kpi-val">{{ city_count }}</div>
+            <div class="kpi-label">Cities Covered</div>
+            <div class="kpi-desc"><i class="fas fa-globe"></i> Geographic spread</div>
+        </div>
+    </div>
+    <div class="row-divider"><span>PERFORMANCE INSIGHTS</span></div>
+    <div class="kpi-row">
+        
+        <div class="kpi-card b-green">
+            <div class="kpi-icon ic-green"><i class="fas fa-arrow-up"></i></div>
+            <div class="kpi-val">{% if max_rent %}₹{{ max_rent }}{% else %}—{% endif %}</div>
+            <div class="kpi-label">Highest Rent Property</div>
+            <div class="kpi-desc"><i class="fas fa-crown" style="color:#f59e0b;"></i> Premium tier</div>
+        </div>
+        
+        <div class="kpi-card b-purple">
+            <div class="kpi-icon ic-purple"><i class="fas fa-arrow-down"></i></div>
+            <div class="kpi-val">{% if min_rent %}₹{{ min_rent }}{% else %}—{% endif %}</div>
+            <div class="kpi-label">Lowest Rent Property</div>
+            <div class="kpi-desc"><i class="fas fa-tag"></i> Budget tier</div>
+        </div>
+
+        <div class="kpi-card b-orange">
+            <div class="kpi-icon ic-orange"><i class="fas fa-shield-alt"></i></div>
+            <div class="kpi-val">{% if avg_deposit %}₹{{ avg_deposit|floatformat:"0" }}{% else %}—{% endif %}</div>
+            <div class="kpi-label">Avg Security Deposit</div>
+            <div class="kpi-desc"><i class="fas fa-lock"></i> Protected capital</div>
+        </div>
+
+        <div class="kpi-card b-cyan">
+            <div class="kpi-icon ic-cyan"><i class="fas fa-ruler-combined"></i></div>
+            <div class="kpi-val">{% if avg_area %}{{ avg_area|floatformat:"0" }} sqft{% else %}—{% endif %}</div>
+            <div class="kpi-label">Avg Built-up Area</div>
+            <div class="kpi-desc"><i class="fas fa-chart-area"></i> Spatial average</div>
+        </div>
+
+        <div class="kpi-card b-red">
+            <div class="kpi-icon ic-red"><i class="fas fa-user-check"></i></div>
+            <div class="kpi-val">{{ with_owner_count|default:"0" }}</div>
+            <div class="kpi-label">Verified Owners</div>
+            <div class="kpi-desc"><i class="fas fa-id-card"></i> Direct contacts</div>
+        </div>
+
+        <div class="kpi-card b-blue">
+            <div class="kpi-icon ic-blue"><i class="fas fa-images"></i></div>
+            <div class="kpi-val">{{ with_images_count|default:"0" }}</div>
+            <div class="kpi-label">Listings with Photos</div>
+            <div class="kpi-desc"><i class="fas fa-camera"></i> Visual appeal</div>
+        </div>
+
+    </div>
+
+     <div class="analytics-section">
         <div class="chart-container">
             <div class="chart-header">
                 <h3 class="chart-title"><i class="fas fa-chart-pie"></i> BHK Distribution</h3>
@@ -460,96 +734,215 @@
         </div>
     </div>
 
-    <div class="quick-stats">
-        <h3 class="quick-stats-title"><i class="fas fa-chart-line"></i> Performance Insights</h3>
-        <div class="stats-row">
-            <div class="stat-item">
-                <div class="stat-item-icon" style="color:#10b981;"><i class="fas fa-rupee-sign"></i></div>
-                <div class="stat-item-value">{% if max_rent %}₹{{ max_rent }}{% else %}—{% endif %}</div>
-                <div class="stat-item-label">Highest Rent</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-item-icon" style="color:#3b82f6;"><i class="fas fa-rupee-sign"></i></div>
-                <div class="stat-item-value">{% if min_rent %}₹{{ min_rent }}{% else %}—{% endif %}</div>
-                <div class="stat-item-label">Lowest Rent</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-item-icon" style="color:#f59e0b;"><i class="fas fa-shield-alt"></i></div>
-                <div class="stat-item-value">{% if avg_deposit %}₹{{ avg_deposit|floatformat:"0" }}{% else %}—{% endif %}</div>
-                <div class="stat-item-label">Avg Deposit</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-item-icon" style="color:#8b5cf6;"><i class="fas fa-vector-square"></i></div>
-                <div class="stat-item-value">{% if avg_area %}{{ avg_area|floatformat:"0" }} sqft{% else %}—{% endif %}</div>
-                <div class="stat-item-label">Avg Built-up Area</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-item-icon" style="color:#ef4444;"><i class="fas fa-user-tie"></i></div>
-                <div class="stat-item-value">{{ with_owner_count|default:"0" }}</div>
-                <div class="stat-item-label">With Owner Info</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-item-icon" style="color:#0ea5e9;"><i class="fas fa-images"></i></div>
-                <div class="stat-item-value">{{ with_images_count|default:"0" }}</div>
-                <div class="stat-item-label">With Images</div>
-            </div>
-        </div>
-    </div>
-
     <div class="properties-section">
 
         <div class="search-bar-wrap">
-            <form method="GET" action="" class="search-form">
-                <input type="text" name="search" value="{{ search_query }}"
-                       class="search-input"
-                       placeholder="Search title, city, type, owner...">
-                <button type="submit" class="search-btn">
-                    <i class="fas fa-search"></i> Search
-                </button>
+          <style>
+        .active-tag {
+            background: #eff6ff; color: #2563eb; font-size: 12px; font-weight: 600; 
+            padding: 4px 12px; border-radius: 20px; display: inline-flex; 
+            align-items: center; gap: 6px; border: 1px solid #bfdbfe;
+        }
+        .active-tag i { cursor: pointer; color: #3b82f6; transition: 0.2s; }
+        .active-tag i:hover { color: #1e3a8a; }
+        /* Hide the manual search button since we are auto-submitting */
+        .btn-run-search { display: none; } 
+    </style>
+
+    <form method="GET" action="" class="advanced-search-bar" id="liveSearchForm">
+        
+        <div class="search-group wide">
+            <label><i class="fas fa-search"></i> SEARCH PROPERTIES</label>
+            <input type="text" name="search" id="searchInput" value="{{ search_query }}" class="filter-input" placeholder="Type title, city, locality, owner name...">
+        </div>
+        
+        <div class="search-group">
+            <label>BHK TYPE</label>
+            <select name="bhk_type" class="filter-input" onchange="this.form.submit()">
+                <option value="All BHK">All BHK</option>
+                {% for bhk in unique_bhk %}
+                    <option value="{{ bhk }}" {% if bhk_query == bhk %}selected{% endif %}>{{ bhk }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="search-group">
+            <label>CITY</label>
+            <select name="city" class="filter-input" onchange="this.form.submit()">
+                <option value="All Cities">All Cities</option>
+                {% for city in unique_cities %}
+                    <option value="{{ city }}" {% if city_query == city %}selected{% endif %}>{{ city }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="search-group">
+            <label>FURNISHING</label>
+            <select name="furnishing" class="filter-input" onchange="this.form.submit()">
+                <option value="All">All</option>
+                {% for f in unique_furnish %}
+                    <option value="{{ f }}" {% if furnish_query == f %}selected{% endif %}>{{ f }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="search-group">
+            <label>POSSESSION</label>
+            <select name="possession" class="filter-input" onchange="this.form.submit()">
+                <option value="All Status">All Status</option>
+                {% for p in unique_possession %}
+                    <option value="{{ p }}" {% if possession_query == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="search-group">
+            <label>PROPERTY TYPE</label>
+            <select name="property_type" class="filter-input" onchange="this.form.submit()">
+                <option value="All Types">All Types</option>
+                {% for pt in unique_property_types %}
+                    <option value="{{ pt }}" {% if prop_type_query == pt %}selected{% endif %}>{{ pt }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="search-group">
+            <label>LISTED BY</label>
+            <select name="listed_by" class="filter-input" onchange="this.form.submit()">
+                <option value="All Roles">All Roles</option>
+                {% for role in unique_roles %}
+                    <option value="{{ role }}" {% if listed_by_query == role %}selected{% endif %}>{{ role }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="search-group">
+            <label>BUDGET</label>
+            <select name="budget" class="filter-input" onchange="this.form.submit()">
+                <option value="All Budgets">All Budgets</option>
+                <option value="under_10k" {% if budget_query == 'under_10k' %}selected{% endif %}>Under ₹10,000</option>
+                <option value="10k_25k" {% if budget_query == '10k_25k' %}selected{% endif %}>₹10,000 - ₹25,000</option>
+                <option value="25k_50k" {% if budget_query == '25k_50k' %}selected{% endif %}>₹25,000 - ₹50,000</option>
+                <option value="above_50k" {% if budget_query == 'above_50k' %}selected{% endif %}>Above ₹50,000</option>
+            </select>
+        </div>
+
+        <div class="search-actions" style="margin-top:auto; padding-bottom:2px;">
+            <button type="submit" style="display:none;"></button>
+            <a href="{% url 'residential_list' %}" class="btn-reset"><i class="fas fa-times"></i> Reset</a>
+        </div>
+        
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+            <div class="results-badge" style="width: fit-content;">
+                <i class="fas fa-filter"></i> Showing <strong style="margin: 0 4px; font-size: 15px; color: #1d4ed8;">{{ filtered_count }}</strong> of {{ total_count }} properties
+            </div>
+            
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 {% if search_query %}
-                <a href="{% url 'residential_list' %}" class="clear-btn">
-                    <i class="fas fa-times"></i> Clear
-                </a>
+                    <span class="active-tag">Search: {{ search_query }} <i class="fas fa-times" onclick="clearFilterText()"></i></span>
                 {% endif %}
-            </form>
+                {% if bhk_query and bhk_query != 'All BHK' %}
+                    <span class="active-tag">BHK: {{ bhk_query }} <i class="fas fa-times" onclick="clearFilterSelect('bhk_type')"></i></span>
+                {% endif %}
+                {% if city_query and city_query != 'All Cities' %}
+                    <span class="active-tag">City: {{ city_query }} <i class="fas fa-times" onclick="clearFilterSelect('city')"></i></span>
+                {% endif %}
+                {% if furnish_query and furnish_query != 'All' %}
+                    <span class="active-tag">Furnishing: {{ furnish_query }} <i class="fas fa-times" onclick="clearFilterSelect('furnishing')"></i></span>
+                {% endif %}
+                {% if possession_query and possession_query != 'All Status' %}
+                    <span class="active-tag">Possession: {{ possession_query }} <i class="fas fa-times" onclick="clearFilterSelect('possession')"></i></span>
+                {% endif %}
+                {% if prop_type_query and prop_type_query != 'All Types' %}
+                    <span class="active-tag">Type: {{ prop_type_query }} <i class="fas fa-times" onclick="clearFilterSelect('property_type')"></i></span>
+                {% endif %}
+                {% if listed_by_query and listed_by_query != 'All Roles' %}
+                    <span class="active-tag">Listed By: {{ listed_by_query }} <i class="fas fa-times" onclick="clearFilterSelect('listed_by')"></i></span>
+                {% endif %}
+                {% if budget_query and budget_query != 'All Budgets' %}
+                    <span class="active-tag">Budget: {{ budget_query }} <i class="fas fa-times" onclick="clearFilterSelect('budget')"></i></span>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+    <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+    <form id="dateSearchForm" method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+        
+        {% for key, value in request.GET.items %}
+            {% if key != 'from_date' and key != 'to_date' %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
+
+        <div>
+            <label for="from_date" style="font-weight: bold; font-size: 14px;">Start Date</label><br>
+            <input type="date" id="from_date" name="from_date" value="{{ request.GET.from_date }}" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        
+        <div>
+            <label for="to_date" style="font-weight: bold; font-size: 14px;">End Date</label><br>
+            <input type="date" id="to_date" name="to_date" value="{{ request.GET.to_date }}" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        </div>
+        
+        <div>
+            <button type="submit" onclick="return validateDateSearch()" style="padding: 9px 15px; background: #3182ce; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <i class="fas fa-search"></i> Search Dates
+            </button>
+           <a href="{% url 'residential_list' %}" style="padding: 9px 15px; background: #cbd5e0; color: #2d3748; text-decoration: none; border-radius: 4px; margin-left: 8px;">
+    Clear
+</a>
+        </div>
+    </form>
+</div>
+
+           
             <div style="display:flex; gap:8px; align-items:center;">
                 <small style="color:#888; font-size:13px;">
                     <i class="fas fa-database"></i> Total: <strong>{{ total_count }}</strong> records
                 </small>
-                <a href="?search={{ search_query }}&download=csv" class="download-csv">
-                    <i class="fas fa-file-csv"></i> Download CSV
-                </a>
+               
+
+    <a href="?download=csv&search={{ search_query }}&bhk_type={{ bhk_query }}&city={{ city_query }}&furnishing={{ furnish_query }}&possession={{ possession_query }}" 
+       class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-file-csv"></i> Download CSV
+    </a>
+
+    <a href="?download=excel&search={{ search_query }}&bhk_type={{ bhk_query }}&city={{ city_query }}&furnishing={{ furnish_query }}&possession={{ possession_query }}" 
+       class="btn btn-outline-success btn-sm">
+        <i class="fas fa-file-excel"></i> Download Excel
+    </a>
+
+
             </div>
         </div>
 
-        <div class="table-responsive">
-           <div class="table-responsive">
+       <div class="table-responsive">
     <table class="properties-table" id="rentalTable">
         <thead>
             <tr>
                 <th>Sr.No</th>
-                <th>Images</th>
-                <th>Property Title</th>
-                <th>Purpose</th>
-                <th>Type</th>
-                <th>BHK</th>
+                <th>Property Id</th>
+                <th>Images</th> <th>Property Title</th>
+                <th>Property Type</th>
+                <th>BHK Type</th>
                 <th>Renting Option</th>
-                <th>Furnishing</th>
-                <th>Available For</th>
                 <th>Built-Up Area</th>
                 <th>Bathrooms</th>
                 <th>Balconies</th>
                 <th>Floor No.</th>
                 <th>Total Floors</th>
                 <th>Facing</th>
+                <th>Furnishing Status</th>
+                <th>Available For</th>
                 <th>Zone</th>
-                <th>Ownership</th>
-                <th>Construction</th>
-                <th>Prop. Age</th>
+                <th>Ownership Type</th>
+                <th>Construction Status</th>
+                <th>Property Age</th>
                 <th>Carpet Area</th>
                 <th>Plot Area</th>
-                <th>Building Name</th>
-                <th>Possession</th>
+                <th>Building / Society Name</th>
+                <th>Possession Status</th>
                 <th>Available From</th>
                 <th>Lease Duration</th>
                 <th>Brokerage</th>
@@ -559,13 +952,12 @@
                 <th>Security Deposit</th>
                 <th>Maintenance Type</th>
                 <th>Maintenance Amt</th>
-                <th>Expected Price</th>
                 <th>Address</th>
                 <th>City</th>
-                <th>Locality</th>
+                <th>Locality/Area</th>
                 <th>State</th>
                 <th>Pincode</th>
-                <th>Road Connectivity</th>
+                <th>Main Road Connectivity</th>
                 <th>Amenities</th>
                 <th>Facilities</th>
                 <th>Description</th>
@@ -578,96 +970,133 @@
                 <th>UB Email</th>
                 <th>UB Contact</th>
                 <th>UB Role</th>
-                <th>Actions</th>
+                <th>Upload File Name</th>
+                
+                <th>Created At</th>
+                <th style="position:sticky;right:0;background:#f8fafc;z-index:2;">Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for prop in page_obj %}
-            <tr id="row-{{ prop.id }}">
+            <tr id="row-{{ prop.rental_residential_id }}">
                 <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                <td>{{ prop.rental_residential_id|default:"—" }}</td>
+     <td>
+    <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;" onclick="openImageModal('modal-{{ prop.id }}')">
 
-                <td>
-                    <div style="display:flex; gap:4px; flex-wrap:wrap; width: 60px;">
-                        {% if prop.images.all %}
-                            {% for img in prop.images.all|slice:":1" %} <img src="{{ img.image.url }}" class="property-image" alt="Property Image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
-                            {% endfor %}
-                        {% else %}
-                            <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=120&h=80&fit=crop" class="property-image" alt="Placeholder" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
-                        {% endif %}
+        {% if prop.images.all %}
+            <div style="position: relative; width: 50px; height: 50px; min-width: 50px;" title="Click to view all images">
+
+                {% with first_img=prop.images.all|first %}
+                    <img src="{{ first_img.image.url }}"
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                {% endwith %}
+
+                {% if prop.images.count > 1 %}
+                    <div style="
+                        position: absolute;
+                        bottom: -4px;
+                        right: -4px;
+                        background: rgba(0,0,0,0.8);
+                        color: #fff;
+                        font-size: 11px;
+                        padding: 2px 6px;
+                        border-radius: 10px;
+                        border: 1px solid white;
+                        font-weight: bold;
+                        line-height: 1;">
+                        +{{ prop.images.count|add:"-1" }}
                     </div>
-                </td>
+                {% endif %}
 
-                <td class="truncate-cell" title="{{ prop.property_title }}">{{ prop.property_title|default:"—" }}</td>
-                <td>{{ prop.property_purpose|default:"—" }}</td>
-                <td><span class="badge badge-residential" style="background:#667eea; color:white; padding:4px 8px; border-radius:6px;">{{ prop.property_type|default:"—" }}</span></td>
+            </div>
+        {% else %}
+            <div style="
+                width: 50px;
+                height: 50px;
+                min-width: 50px;
+                border-radius: 8px;
+                background: linear-gradient(135deg, #2563eb, #1e40af);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+
+                <i class="fas fa-home" style="font-size: 16px;"></i>
+
+                <span style="
+                    font-size: 6px;
+                    font-weight: 700;
+                    margin-top: 2px;
+                    line-height: 1;">
+                    EstateFlow
+                </span>
+            </div>
+        {% endif %}
+
+    </div>
+</td>
+                <td>{{ prop.property_title|default:"—" }}</td>
+                <td>{{ prop.property_type|default:"—" }}</td>
                 <td>{{ prop.bhk_type|default:"—" }}</td>
                 <td>{{ prop.renting_option|default:"—" }}</td>
-                <td>{{ prop.furnishing_status|default:"—" }}</td>
-                <td>{{ prop.available_for|default:"—" }}</td>
                 <td>{{ prop.built_up_area|default:"—" }}</td>
                 <td>{{ prop.bathrooms|default:"—" }}</td>
                 <td>{{ prop.balconies|default:"—" }}</td>
                 <td>{{ prop.floor_number|default:"—" }}</td>
                 <td>{{ prop.total_floors|default:"—" }}</td>
                 <td>{{ prop.facing|default:"—" }}</td>
-
+                <td>{{ prop.furnishing_status|default:"—" }}</td>
+                <td>{{ prop.available_for|default:"—" }}</td>
                 <td>{{ prop.zone|default:"—" }}</td>
                 <td>{{ prop.ownership_type|default:"—" }}</td>
                 <td>{{ prop.construction_status|default:"—" }}</td>
                 <td>{{ prop.property_age|default:"—" }}</td>
                 <td>{{ prop.carpet_area|default:"—" }}</td>
                 <td>{{ prop.plot_area|default:"—" }}</td>
-                <td class="truncate-cell" title="{{ prop.building_name }}">{{ prop.building_name|default:"—" }}</td>
-
+                <td>{{ prop.building_name|default:"—" }}</td>
                 <td>{{ prop.possession_status|default:"—" }}</td>
                 <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
                 <td>{{ prop.lease_duration|default:"—" }}</td>
                 <td>{{ prop.brokerage|default:"—" }}</td>
                 <td>{{ prop.brokerage_percentage|default:"—" }}</td>
                 <td>{{ prop.manual_brokerage|default:"—" }}</td>
-
-                <td style="font-weight:bold; color:#10b981;">₹{{ prop.monthly_rent|default:"—" }}</td>
+                <td>₹{{ prop.monthly_rent|default:"—" }}</td>
                 <td>₹{{ prop.security_deposit|default:"—" }}</td>
                 <td>{{ prop.maintenance_type|default:"—" }}</td>
                 <td>{{ prop.maintenance_amount|default:"—" }}</td>
-                <td>{{ prop.expected_price|default:"—" }}</td>
-
-                <td class="truncate-cell" title="{{ prop.address }}">{{ prop.address|default:"—" }}</td>
+                <td>{{ prop.address|default:"—" }}</td>
                 <td>{{ prop.city|default:"—" }}</td>
                 <td>{{ prop.locality|default:"—" }}</td>
                 <td>{{ prop.state|default:"—" }}</td>
                 <td>{{ prop.pincode|default:"—" }}</td>
                 <td>{{ prop.road_connectivity|default:"—" }}</td>
-
-                <td class="truncate-cell" title="{{ prop.amenities }}">{{ prop.amenities|default:"—" }}</td>
-                <td class="truncate-cell" title="{{ prop.facilities }}">{{ prop.facilities|default:"—" }}</td>
-
-                <td class="truncate-cell" title="{{ prop.description|striptags }}">
-                    {{ prop.description|striptags|truncatechars:50|default:"—" }}
-                </td>
-                <td class="truncate-cell" title="{{ prop.rent_residential_desc|striptags }}">
-                    {{ prop.rent_residential_desc|striptags|truncatechars:50|default:"—" }}
-                </td>
-
+                <td>{{ prop.amenities|default:"—" }}</td>
+                <td>{{ prop.facilities|default:"—" }}</td>
+                <td>{{ prop.description|striptags|truncatechars:50|default:"—" }}</td>
+                <td>{{ prop.rent_residential_desc|striptags|truncatechars:50|default:"—" }}</td>
                 <td>{{ prop.owner_name|default:"—" }}</td>
                 <td>{{ prop.contact_number|default:"—" }}</td>
                 <td>{{ prop.email|default:"—" }}</td>
                 <td>{{ prop.alternate_contact|default:"—" }}</td>
-
                 <td>{{ prop.uploaded_by_name|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_email|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_role|default:"—" }}</td>
-
-                <td style="position: sticky; right: 0; background: white; border-left: 1px solid #e9ecef; box-shadow: -2px 0 5px rgba(0,0,0,0.02);">
-                    <div class="action-buttons" style="display:flex; gap:8px;">
-                        <button class="btn-action btn-view" style="border:none; background:#f0f9ff; color:#0369a1; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="window.location.href='{% url 'rental_residential_view' prop.id %}'" title="View Details">
+              <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI Listing Form" }}</small></td>
+               
+                <td>{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
+                <td style="position:sticky;right:0;background:white;z-index:1;">
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn-action btn-view" onclick="window.location.href='{% url 'rental_residential_view' prop.rental_residential_id %}'">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="btn-action btn-edit" style="border:none; background:#fef3c7; color:#d97706; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="window.location.href='{% url 'rental_residential_edit' prop.id %}'" title="Edit Property">
+                        <button class="btn-action btn-edit" onclick="window.location.href='{% url 'rental_residential_edit' prop.rental_residential_id %}'">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn-action btn-delete" style="border:none; background:#fee2e2; color:#dc2626; padding:6px 10px; border-radius:6px; cursor:pointer;" onclick="deleteProperty({{ prop.id }})" title="Delete Property">
+                        <button class="btn-action btn-delete" onclick="deleteProperty('{{ prop.rental_residential_id }}')">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
@@ -675,7 +1104,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="52">
+                <td colspan="56">
                     <div class="empty-state" style="text-align: center; padding: 40px; color: #718096;">
                         <i class="fas fa-home" style="font-size: 3rem; color: #cbd5e0; margin-bottom: 15px; display: block;"></i>
                         No properties found.
@@ -686,7 +1115,6 @@
         </tbody>
     </table>
 </div>
-        </div>
 
         {% if page_obj.paginator.num_pages > 1 %}
         <div class="pagination-wrap">
@@ -717,13 +1145,33 @@
     </div>
 </div>
 
+
+
+{% for prop in residential_list %} 
+    <div id="modal-{{ prop.id }}" class="property-image-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeImageModal('modal-{{ prop.id }}')">&times;</span>
+            <h3 style="margin-top: 0; margin-bottom: 15px; text-align: center;">Property Images</h3>
+            
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                {% if prop.images.all %}
+                    {% for img in prop.images.all %}
+                        <img src="{{ img.image.url }}" style="width: 200px; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                    {% endfor %}
+                {% else %}
+                    <p style="text-align: center; width: 100%;">No additional images available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endfor %}
 <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="fas fa-file-excel" style="margin-right:8px;"></i>
-                    Import Rental Residential Data
+                   Download & Upload  Rental Residential Property Data Via Excel File
                 </h5>
                 <button type="button" class="close" data-dismiss="modal"
                         style="color:white; opacity:1; font-size:22px; background:none; border:none; line-height:1;">
@@ -745,13 +1193,13 @@
                     <a href="{% url 'download_residential_template' %}"
                        style="padding:7px 16px; background:#4F46E5; color:white; border-radius:6px;
                               text-decoration:none; font-size:12px; font-weight:600; white-space:nowrap;">
-                        <i class="fas fa-download"></i> Download Template
+                        <i class="fas fa-download"></i> Export Rental Residential Property Data
                     </a>
                 </div>
 
                 <div class="form-group">
                     <label style="font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; display:block;">
-                        Upload Excel File <span style="color:red;">*</span>
+                       Upload Rental Residential Property Data Via Excel <span style="color:red;">*</span>
                     </label>
                     <div class="dropzone"
                          onclick="document.getElementById('rental_file').click()"
@@ -1176,6 +1624,242 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     $("#Rent")?.addClass("active");
 });
+</script>
+
+<script>
+    // 1. Debounce logic for the text input (auto submits 500ms after user stops typing)
+    let typingTimer;
+    const typingInterval = 500; 
+    const searchInput = document.getElementById('searchInput');
+    const form = document.getElementById('liveSearchForm');
+
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function () {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                form.submit();
+            }, typingInterval);
+        });
+        
+        searchInput.addEventListener('keydown', function () {
+            clearTimeout(typingTimer);
+        });
+        
+        // Auto-focus logic to keep cursor active after reload
+        const len = searchInput.value.length;
+        if (len) {
+            searchInput.focus();
+            searchInput.setSelectionRange(len, len);
+        }
+    }
+
+    // 2. Logic to clear individual tags and auto-submit
+    function clearFilterSelect(selectName) {
+        const select = form.querySelector(`select[name="${selectName}"]`);
+        if(select) {
+            select.selectedIndex = 0; // Set to "All..."
+            form.submit();
+        }
+    }
+
+    function clearFilterText() {
+        if(searchInput) {
+            searchInput.value = '';
+            form.submit();
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+    function openImageModal(modalId) {
+        // 1. Find the modal
+        var modal = document.getElementById(modalId);
+        
+        // 2. Check if it actually exists
+        if (!modal) {
+            console.error("ERROR: Could not find a modal with the ID: " + modalId);
+            console.error("This means your Django loop for the modals is not rendering this specific ID.");
+            return; // Stop running so the page doesn't crash
+        }
+
+        // 3. Open it
+        modal.style.display = "block";
+        document.body.style.overflow = "hidden"; 
+    }
+
+    function closeImageModal(modalId) {
+        var modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = "none";
+            document.body.style.overflow = "auto"; 
+        }
+    }
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('property-image-modal')) {
+            event.target.style.display = "none";
+            document.body.style.overflow = "auto";
+        }
+    }
+</script>
+
+
+
+<script>
+
+
+function submitImport() {
+    const fileInput = document.getElementById('rental_file');
+    
+    if (!fileInput.files || !fileInput.files[0]) { 
+        Swal.fire('No File Selected', 'Please click or drag a valid Excel workbook file to upload.', 'warning'); 
+        return; 
+    }
+    
+    const formData = new FormData();
+    formData.append('rental_file', fileInput.files[0]);
+
+    Swal.fire({
+        title: 'Analyzing File Matrix...',
+        text: 'Please wait while we perform duplicate checking across the database.',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    const progressDiv = document.getElementById('import-progress');
+    const progressBar = document.getElementById('progress-bar');
+    if (progressDiv && progressBar) {
+        progressDiv.style.display = 'block';
+        let progress = 0;
+        window.importInterval = setInterval(() => {
+            progress = Math.min(progress + 15, 85);
+            progressBar.style.width = progress + '%';
+        }, 150);
+    }
+
+    fetch("{% url 'import_residential_excel' %}", {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        body: formData
+    })
+    .then(async (res) => {
+        if (window.importInterval) clearInterval(window.importInterval);
+        if (progressBar) progressBar.style.width = '100%';
+        setTimeout(() => { if (progressDiv) progressDiv.style.display = 'none'; }, 400);
+
+        if (!res.ok) throw new Error(`Server execution error status: ${res.status}`);
+        const data = await res.json();
+
+        // Condition 1: Same file name, completely identical internal contents
+        if (data.status === 'duplicate_filename_and_data') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Duplicate File Action blocked',
+                text: data.message,
+                confirmButtonColor: '#3b82f6'
+            });
+            clearFile();
+            return;
+        }
+
+        // Condition 2: Different file name, but matching duplicate property content
+        if (data.status === 'duplicate_data_different_filename') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Identical Dataset Blocked',
+                text: data.message,
+                confirmButtonColor: '#f59e0b'
+            });
+            clearFile();
+            return;
+        }
+
+        // Standard formatting engine loop responses
+        let errorHtml = "";
+        if (data.errors && data.errors.length > 0) {
+            errorHtml = `<div style="text-align: left; font-size: 13px; max-height: 150px; overflow-y: auto; background: #FEF2F2; color: #DC2626; padding: 12px; border-radius: 8px; border: 1px solid #FCA5A5; margin-top: 15px;">
+                            <ul style="margin-bottom: 0; padding-left: 20px;">`;
+            data.errors.forEach(err => { errorHtml += `<li><b>${err}</b></li>`; });
+            errorHtml += `</ul></div>`;
+        }
+
+        let statsHtml = `<div style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap: wrap;">`;
+        if (data.created > 0) statsHtml += `<span style="background:#10b981; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-plus-circle"></i> ${data.created} Created</span>`;
+        if (data.updated > 0) statsHtml += `<span style="background:#3b82f6; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-edit"></i> ${data.updated} Updated</span>`;
+        if (data.skipped > 0) statsHtml += `<span style="background:#f59e0b; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-forward"></i> ${data.skipped} Skipped</span>`;
+        statsHtml += `</div>`;
+
+        Swal.fire({
+            icon: data.error_count > 0 ? 'warning' : 'success',
+            title: data.error_count > 0 ? 'Import Content Anomalies' : 'Import Complete!',
+            html: `<p style="font-size:14px; color:#4b5563; margin-bottom:0;">${data.message}</p>` + statsHtml + errorHtml,
+            confirmButtonText: 'Acknowledge',
+            confirmButtonColor: '#667eea',
+            width: '550px'
+        }).then(() => {
+            if (data.created > 0 || data.updated > 0) {
+                window.location.reload();
+            } else {
+                clearFile();
+            }
+        });
+    })
+    .catch(err => {
+        if (window.importInterval) clearInterval(window.importInterval);
+        if (progressDiv) progressDiv.style.display = 'none';
+        Swal.fire({
+            icon: 'error',
+            title: 'System Crash Error',
+            text: `Critical operational error context: ${err.message}`,
+            confirmButtonColor: '#667eea'
+        });
+    });
+}
+
+</script>
+
+
+<script>
+    // 1. Validate the form before submitting
+    function validateDateSearch() {
+        const fromDate = document.getElementById('from_date').value;
+        const toDate = document.getElementById('to_date').value;
+
+        // Check if both are empty
+        if (!fromDate && !toDate) {
+            alert("Please select at least a 'From Date' or 'To Date' to search.");
+            return false;
+        }
+
+        // Check if From Date is greater than To Date
+        if (fromDate && toDate) {
+            if (new Date(fromDate) > new Date(toDate)) {
+                alert("Invalid Date Range: 'From Date' cannot be later than 'To Date'.");
+                return false;
+            }
+        }
+        
+        // If everything is fine, allow form submission
+        return true; 
+    }
+
+    // 2. Show alert if search resulted in no data
+    window.onload = function() {
+        // Check the URL for date parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const hasDateSearch = urlParams.has('from_date') || urlParams.has('to_date');
+        
+        // Check if the empty state div exists on the page
+        const isEmptyState = document.querySelector('.empty-state') !== null;
+
+        // If a search was made but the table is empty, trigger the alert
+        if (hasDateSearch && isEmptyState) {
+            alert("No properties found for the selected date range.");
+        }
+    };
 </script>
 
 </body>
