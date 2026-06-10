@@ -466,47 +466,37 @@
                         </div>
                         <a href="{% url 'commercial_list' %}" class="btn-reset"><i class="fas fa-times"></i> Reset All</a>
                     </div>
-                    <a href="?search={{ search_query }}&property_type={{ prop_type_query }}&city={{ city_query }}&zone_type={{ zone_query }}&possession={{ possession_query }}&listed_by={{ listed_by_query }}&budget={{ budget_query }}&from_date={{ from_date }}&to_date={{ to_date }}&download=csv"
-                       style="font-size:12px;font-weight:700;color:#10b981;text-decoration:none;padding:8px 12px;border:1px solid #10b981;border-radius:6px;background:white">
-                        <i class="fas fa-download"></i> Export CSV
-                    </a>
+                    
+                    
+
                 </div>
 
-                <!-- Active filter tags -->
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    {% if search_query %}
-                        <span class="active-tag">Search: {{ search_query }} <i class="fas fa-times" onclick="clearFilterText()"></i></span>
-                    {% endif %}
-                    {% if prop_type_query and prop_type_query != 'All Types' %}
-                        <span class="active-tag">Type: {{ prop_type_query }} <i class="fas fa-times" onclick="clearFilterSelect('property_type','All Types')"></i></span>
-                    {% endif %}
-                    {% if city_query and city_query != 'All Cities' %}
-                        <span class="active-tag">City: {{ city_query }} <i class="fas fa-times" onclick="clearFilterSelect('city','All Cities')"></i></span>
-                    {% endif %}
-                    {% if zone_query and zone_query != 'All Zones' %}
-                        <span class="active-tag">Zone: {{ zone_query }} <i class="fas fa-times" onclick="clearFilterSelect('zone_type','All Zones')"></i></span>
-                    {% endif %}
-                    {% if possession_query and possession_query != 'All Status' %}
-                        <span class="active-tag">Possession: {{ possession_query }} <i class="fas fa-times" onclick="clearFilterSelect('possession','All Status')"></i></span>
-                    {% endif %}
-                    {% if listed_by_query and listed_by_query != 'All Roles' %}
-                        <span class="active-tag">Listed By: {{ listed_by_query }} <i class="fas fa-times" onclick="clearFilterSelect('listed_by','All Roles')"></i></span>
-                    {% endif %}
-                    {% if budget_query and budget_query != 'All Budgets' %}
-                        <span class="active-tag">Budget: {{ budget_query }} <i class="fas fa-times" onclick="clearFilterSelect('budget','All Budgets')"></i></span>
-                    {% endif %}
-                    {% if from_date %}
-                        <span class="active-tag">From: {{ from_date }} <i class="fas fa-times" onclick="clearDate('from_date')"></i></span>
-                    {% endif %}
-                    {% if to_date %}
-                        <span class="active-tag">To: {{ to_date }} <i class="fas fa-times" onclick="clearDate('to_date')"></i></span>
-                    {% endif %}
-                </div>
-            </div>
+            
+
+
+
+
+ 
         </form>
 
         <!-- ═══ TABLE ═══ -->
        <div class="table-responsive">
+
+        <div style="display:flex; gap:10px;">
+    <button type="submit" 
+            formaction="{% url 'export_commercial_rent' %}" 
+            name="format" value="csv" 
+            class="btn btn-primary btn-sm" style="height:38px;">
+        <i class="fas fa-file-csv"></i> Download CSV
+    </button>
+    
+    <button type="submit" 
+            formaction="{% url 'export_commercial_rent' %}" 
+            name="format" value="excel" 
+            class="btn btn-success btn-sm" style="height:38px;">
+        <i class="fas fa-file-excel"></i> Download Excel
+    </button>
+</div>
     <table class="properties-table" id="commercialTable">
         <thead>
             <tr>
@@ -517,18 +507,18 @@
              
                 <th>Video</th>
                 <th>Property Type</th>
-                <th>Condition</th>
+                <th>Property Condition</th>
                 <th>City</th>
                 <th>Area / Locality</th>
-                <th>Full Address</th>
-                <th>Building Name</th>
+                <th>Property Address</th>
+                <th>Building / Project Name</th>
                 <th>Possession Status</th>
                 <th>Available From</th>
                 <th>Age of Property</th>
                 <th>Zone Type</th>
                 <th>Location Hub</th>
-                <th>Ownership</th>
-                <th>Construction</th>
+                <th>Ownership Type</th>
+                <th>Construction Status</th>
                 <th>Built-up Area (sqft)</th>
                 <th>Carpet Area (sqft)</th>
                 <th>Expected Rent</th>
@@ -559,7 +549,7 @@
                 <th>Amenities</th>
                 <th>Nearby Facilities</th>
                 <th>Property Summary</th>
-                <th>Detailed Description</th>
+                <th>Property Description</th>
                 <th>Owner Name</th>
                 <th>Contact Number</th>
                 <th>Email Address</th>
@@ -1339,6 +1329,17 @@
         currentGalleryIndex = idx;
         showGalleryModal(Swal.getTitle().textContent);
     }
+
+    function forceExport(format) {
+    // 1. Grab the current URL (which includes all your active search filters)
+    var currentUrl = new URL(window.location.href);
+    
+    // 2. Forcefully add the download parameter to the URL
+    currentUrl.searchParams.set('download', format);
+    
+    // 3. Tell the browser to instantly visit this exact URL
+    window.location.href = currentUrl.toString();
+}
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

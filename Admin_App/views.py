@@ -1,5 +1,5 @@
 from django.shortcuts import render,HttpResponse
-
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 # Create your views here.
 from django.shortcuts import render
 from django.contrib import messages
@@ -65,7 +65,9 @@ from openpyxl.styles import Font, PatternFill
 from datetime import timedelta
 from django.utils import timezone
 
-
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 import csv
 import json
 # I added 'Sum' to the end of this line:
@@ -1374,12 +1376,233 @@ def _date(val):
 
 
 
+
+# Assuming CommercialRentalProperty and Admin_Login are imported
+
+
+
+
+
+def export_commercial_rent(request):
+    """Dedicated view for exporting commercial properties to CSV or Excel."""
+    
+    # ── 1. Re-apply the same search filters so the export matches the screen ──
+    try:
+        properties = CommercialRentalProperty.objects.filter(is_deleted=False).order_by('-id')
+    except Exception:
+        properties = CommercialRentalProperty.objects.all().order_by('-id')
+
+    search_query    = request.GET.get('search', '').strip()
+    prop_type_query = request.GET.get('property_type', '').strip()
+    city_query      = request.GET.get('city', '').strip()
+    zone_query      = request.GET.get('zone_type', '').strip()
+    possession_query= request.GET.get('possession', '').strip()
+    listed_by_query = request.GET.get('listed_by', '').strip()
+    budget_query    = request.GET.get('budget', '').strip()
+    from_date       = request.GET.get('from_date', '').strip()
+    to_date         = request.GET.get('to_date', '').strip()
+
+    if search_query:
+        properties = properties.filter(
+            Q(property_title__icontains=search_query) |
+            Q(building_name__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(area_locality__icontains=search_query) |
+            Q(owner_name__icontains=search_query)
+        )
+    if prop_type_query and prop_type_query != 'All Types':
+        properties = properties.filter(property_type__icontains=prop_type_query)
+    if city_query and city_query != 'All Cities':
+        properties = properties.filter(city__icontains=city_query)
+    if zone_query and zone_query != 'All Zones':
+        properties = properties.filter(zone_type__icontains=zone_query)
+    if possession_query and possession_query != 'All Status':
+        properties = properties.filter(possession_status__icontains=possession_query)
+    if listed_by_query and listed_by_query != 'All Roles':
+        properties = properties.filter(uploaded_by_role__icontains=listed_by_query)
+    if from_date:
+        properties = properties.filter(created_at__date__gte=from_date)
+    if to_date:
+        properties = properties.filter(created_at__date__lte=to_date)
+    if budget_query and budget_query != 'All Budgets':
+        if budget_query == 'under_25k': properties = properties.filter(expected_rent__lt=25000)
+        elif budget_query == '25k_1L': properties = properties.filter(expected_rent__gte=25000, expected_rent__lte=100000)
+        elif budget_query == '1L_5L': properties = properties.filter(expected_rent__gte=100000, expected_rent__lte=500000)
+        elif budget_query == 'above_5L': properties = properties.filter(expected_rent__gt=500000)
+
+    # ── 2. Exhaustive Field Mapping (Strictly following DB sequence) ──
+    EXPORT_COLS = [
+        ("System Data", "id", False, "Database ID"),
+        ("System Data", "commercial_rental_id", False, "System Generated ID"),
+        ("System Data", "property_title", False, "Auto Generated Title"),
+        ("Basic Info", "property_type", True, "office-space / shop / warehouse / industrial / land"),
+        ("Basic Info", "property_condition", True, "bare-shell / warm-shell / fitted / furnished"),
+        ("Basic Info", "city", True, "City name"),
+        ("Basic Info", "area_locality", True, "Area/locality"),
+        ("Basic Info", "property_address", True, "Complete address"),
+        ("Basic Info", "building_name", True, "Building/project name"),
+        ("Basic Info", "possession_status", True, "ready-to-move / under-construction"),
+        ("Basic Info", "available_from", False, "YYYY-MM-DD"),
+        ("Basic Info", "age_of_property", True, "0-1 / 1-3 / 3-5 / 5-10 / 10+"),
+        ("Basic Info", "zone_type", False, "industrial / commercial / residential / special-economic"),
+        ("Basic Info", "location_hub", False, "it-park / business-district / mall / standalone"),
+        ("Basic Info", "ownership_type", True, "freehold / leasehold / co-operative"),
+        ("Basic Info", "construction_status", False, "new / resale"),
+        ("Area & Pricing", "builtup_area", True, "Number in sq.ft"),
+        ("Area & Pricing", "carpet_area", False, "Number in sq.ft"),
+        ("Area & Pricing", "expected_rent", True, "Monthly rent in ₹"),
+        ("Area & Pricing", "security_deposit", False, "Deposit in ₹"),
+        ("Area & Pricing", "maintenance_charges", False, "Monthly maintenance in ₹"),
+        ("Area & Pricing", "negotiable", False, "Yes / No"),
+        ("Area & Pricing", "brokerage", False, "Yes / No"),
+        ("Area & Pricing", "brokerage_percentage", False, "1% / 1.5% / 2% / Negotiable / Manual"),
+        ("Area & Pricing", "manual_brokerage", False, "e.g. 2.5%"),
+        ("Area & Pricing", "dg_ups_included", False, "true / false"),
+        ("Area & Pricing", "electricity_included", False, "true / false"),
+        ("Area & Pricing", "water_included", False, "true / false"),
+        ("Area & Pricing", "lockin_period", False, "Lock-in months"),
+        ("Area & Pricing", "rent_increase", False, "% per year"),
+        ("Building", "total_floors", False, "Total floors"),
+        ("Building", "your_floor", False, "Floor of property"),
+        ("Building", "staircases", False, "Number of staircases"),
+        ("Building", "passenger_lifts", False, "Number (0 if none)"),
+        ("Building", "service_lifts", False, "Number (0 if none)"),
+        ("Building", "private_parking", False, "Private parking spots"),
+        ("Building", "min_seats", False, "Min seating"),
+        ("Building", "max_seats", False, "Max seating"),
+        ("Building", "cabins", False, "Number of cabins"),
+        ("Building", "meeting_rooms", False, "Number of meeting rooms"),
+        ("Building", "private_washroom", False, "Number (0 if none)"),
+        ("Building", "public_washroom", False, "Number (0 if none)"),
+        ("Building", "flooring_type", False, "marble / vitrified / granite / wooden / ceramic"),
+        ("Amenities", "amenities", True, "Comma-separated"),
+        ("Amenities", "nearby_facilities", True, "Comma-separated"),
+        ("Amenities", "property_summary", False, "Short description"),
+        ("Amenities", "property_description", False, "Detailed description"),
+        ("Media & Contact", "video", False, "Video file path"),
+        ("Media & Contact", "owner_name", True, "Full name"),
+        ("Media & Contact", "contact_number", True, "+91 XXXXXXXXXX"),
+        ("Media & Contact", "email", True, "email@example.com"),
+        ("Media & Contact", "alternate_contact", False, "+91 XXXXXXXXXX"),
+        ("Uploader Tracking", "uploaded_by_name", False, "Auto-filled"),
+        ("Uploader Tracking", "uploaded_by_email", False, "Auto-filled"),
+        ("Uploader Tracking", "uploaded_by_contact", False, "Auto-filled"),
+        ("Uploader Tracking", "uploaded_by_role", False, "Auto-filled"),
+        ("System Tracking", "created_at", False, "Datetime created"),
+        ("System Tracking", "is_deleted", False, "True/False"),
+        ("System Tracking", "deleted_at", False, "Datetime deleted"),
+        ("System Tracking", "upload_file_name", False, "Bulk upload source"),
+        ("System Tracking", "upload_file_hash", False, "File hash"),
+        ("System Tracking", "deleted_by", False, "Deleted by user"),
+    ]
+
+    export_format = request.GET.get('format', 'excel')
+
+    # ── 3. EXCEL EXPORT ──
+    if export_format == 'excel':
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Commercial Rental"
+
+        HDR_BG  = "667EEA"
+        REQ_BG  = "FEF3C7"
+        OPT_BG  = "F0FDF4"
+        thin = Side(style="thin", color="CBD5E1")
+        bdr  = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+        sec_spans = OrderedDict()
+        for i, (sec, *_) in enumerate(EXPORT_COLS):
+            sec_spans.setdefault(sec, []).append(i + 1)
+
+        for sec, cols in sec_spans.items():
+            c = ws.cell(row=1, column=cols[0], value=f"📋 {sec}")
+            c.font = Font(bold=True, color="FFFFFF", name="Arial", size=11)
+            c.fill = PatternFill("solid", fgColor=HDR_BG)
+            c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            c.border = bdr
+            if len(cols) > 1:
+                ws.merge_cells(start_row=1, start_column=cols[0], end_row=1, end_column=cols[-1])
+
+        for ci, (sec, field, req, hint) in enumerate(EXPORT_COLS, 1):
+            lc = ws.cell(row=2, column=ci, value=field + (" *" if req else ""))
+            lc.font, lc.fill, lc.border = Font(bold=True, size=9), PatternFill("solid", fgColor=REQ_BG if req else OPT_BG), bdr
+            lc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+            hc = ws.cell(row=3, column=ci, value=hint)
+            hc.font, hc.fill, hc.border = Font(italic=True, color="64748B", size=8), PatternFill("solid", fgColor="FFFFFF"), bdr
+            hc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            ws.column_dimensions[get_column_letter(ci)].width = max(18, len(field) + 4)
+
+        for row_idx, prop in enumerate(properties, start=4):
+            for col_idx, (_, field_name, _, _) in enumerate(EXPORT_COLS, start=1):
+                val = getattr(prop, field_name, "")
+                
+                # Try to format the value, catch empty file errors safely
+                try:
+                    if val is True: val = "Yes"
+                    elif val is False: val = "No"
+                    elif hasattr(val, 'strftime'): val = val.strftime('%Y-%m-%d %H:%M')
+                    elif isinstance(val, list): val = ", ".join(map(str, val))
+                    elif hasattr(val, 'url'): val = val.url if val else ""
+                except ValueError:
+                    val = "" # If Django panics about an empty video, just leave it blank
+                
+                cell = ws.cell(row=row_idx, column=col_idx, value=str(val) if val is not None else "")
+                cell.alignment, cell.border = Alignment(vertical="center", wrap_text=True), bdr
+
+        ws.row_dimensions[1].height, ws.row_dimensions[2].height, ws.row_dimensions[3].height = 28, 36, 42
+        ws.freeze_panes = "A4"
+
+        buf = io.BytesIO()
+        wb.save(buf)
+        buf.seek(0)
+        response = HttpResponse(buf.getvalue(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response["Content-Disposition"] = 'attachment; filename="Commercial_Properties.xlsx"'
+        return response
+
+    # ── 4. CSV EXPORT ──
+    elif export_format == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="Commercial_Properties.csv"'
+        writer = csv.writer(response)
+        
+        writer.writerow([field for _, field, _, _ in EXPORT_COLS])
+        
+        for prop in properties:
+            row_data = []
+            for _, field_name, _, _ in EXPORT_COLS:
+                val = getattr(prop, field_name, "")
+                
+                # Try to format the value, catch empty file errors safely
+                try:
+                    if val is True: val = "Yes"
+                    elif val is False: val = "No"
+                    elif hasattr(val, 'strftime'): val = val.strftime('%Y-%m-%d %H:%M')
+                    elif isinstance(val, list): val = ", ".join(map(str, val))
+                    elif hasattr(val, 'url'): val = val.url if val else ""
+                except ValueError:
+                    val = "" # Catch empty video/image files
+                    
+                row_data.append(str(val) if val is not None else "")
+            writer.writerow(row_data)
+
+
+# Make sure you import your models here!
+# from .models import CommercialRentalProperty, Admin_Login
+
 def commercial_list(request):
     session_id = request.session.get('Admin_id')
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
 
-    admin_obj = Admin_Login.objects.get(id=session_id)
+    try:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+    except Admin_Login.DoesNotExist:
+        return render(request, 'home_page/Adminlogin.html')
+
+
+    print(">>> YES! THE VIEW IS RUNNING! <<<")
+    print(f">>> THE DOWNLOAD PARAMETER IS: {request.GET.get('download')} <<<")
 
     # ── 1. GET ALL SEARCH PARAMS ──
     search_query    = request.GET.get('search', '').strip()
@@ -1419,7 +1642,6 @@ def commercial_list(request):
     if listed_by_query and listed_by_query != 'All Roles':
         properties = properties.filter(uploaded_by_role__icontains=listed_by_query)
 
-    # Date range filter
     if from_date:
         try:
             properties = properties.filter(created_at__date__gte=from_date)
@@ -1431,7 +1653,6 @@ def commercial_list(request):
         except Exception:
             pass
 
-    # Budget ranges
     if budget_query and budget_query != 'All Budgets':
         if budget_query == 'under_25k':
             properties = properties.filter(expected_rent__lt=25000)
@@ -1442,47 +1663,201 @@ def commercial_list(request):
         elif budget_query == 'above_5L':
             properties = properties.filter(expected_rent__gt=500000)
 
+    # ── Exhaustive Field Definition for Exports ──
+    EXPORT_COLS = [
+        ("System Data", "id", False, "Database ID"),
+        ("System Data", "commercial_rental_id", False, "System Generated ID"),
+        ("System Data", "property_title", False, "Auto Generated Title"),
+        
+        ("Basic Info", "property_type", True, "office-space / shop / warehouse / industrial / land"),
+        ("Basic Info", "property_condition", True, "bare-shell / warm-shell / fitted / furnished"),
+        ("Basic Info", "city", True, "City name"),
+        ("Basic Info", "area_locality", True, "Area/locality"),
+        ("Basic Info", "property_address", True, "Complete address"),
+        ("Basic Info", "building_name", True, "Building/project name"),
+        ("Basic Info", "possession_status", True, "ready-to-move / under-construction"),
+        ("Basic Info", "available_from", False, "YYYY-MM-DD"),
+        ("Basic Info", "age_of_property", True, "0-1 / 1-3 / 3-5 / 5-10 / 10+"),
+        ("Basic Info", "zone_type", False, "industrial / commercial / residential / special-economic"),
+        ("Basic Info", "location_hub", False, "it-park / business-district / mall / standalone"),
+        ("Basic Info", "ownership_type", True, "freehold / leasehold / co-operative"),
+        ("Basic Info", "construction_status", False, "new / resale"),
+        
+        ("Area & Pricing", "builtup_area", True, "Number in sq.ft"),
+        ("Area & Pricing", "carpet_area", False, "Number in sq.ft"),
+        ("Area & Pricing", "expected_rent", True, "Monthly rent in ₹"),
+        ("Area & Pricing", "security_deposit", False, "Deposit in ₹"),
+        ("Area & Pricing", "maintenance_charges", False, "Monthly maintenance in ₹"),
+        ("Area & Pricing", "negotiable", False, "Yes / No"),
+        ("Area & Pricing", "brokerage", False, "Yes / No"),
+        ("Area & Pricing", "brokerage_percentage", False, "1% / 1.5% / 2% / Negotiable / Manual"),
+        ("Area & Pricing", "manual_brokerage", False, "e.g. 2.5%"),
+        ("Area & Pricing", "dg_ups_included", False, "true / false"),
+        ("Area & Pricing", "electricity_included", False, "true / false"),
+        ("Area & Pricing", "water_included", False, "true / false"),
+        ("Area & Pricing", "lockin_period", False, "Lock-in months"),
+        ("Area & Pricing", "rent_increase", False, "% per year"),
+        
+        ("Building", "total_floors", False, "Total floors"),
+        ("Building", "your_floor", False, "Floor of property"),
+        ("Building", "staircases", False, "Number of staircases"),
+        ("Building", "passenger_lifts", False, "Number (0 if none)"),
+        ("Building", "service_lifts", False, "Number (0 if none)"),
+        ("Building", "private_parking", False, "Private parking spots"),
+        ("Building", "min_seats", False, "Min seating"),
+        ("Building", "max_seats", False, "Max seating"),
+        ("Building", "cabins", False, "Number of cabins"),
+        ("Building", "meeting_rooms", False, "Number of meeting rooms"),
+        ("Building", "private_washroom", False, "Number (0 if none)"),
+        ("Building", "public_washroom", False, "Number (0 if none)"),
+        ("Building", "flooring_type", False, "marble / vitrified / granite / wooden / ceramic"),
+        
+        ("Amenities", "amenities", True, "Comma-separated"),
+        ("Amenities", "nearby_facilities", True, "Comma-separated"),
+        ("Amenities", "property_summary", False, "Short description"),
+        ("Amenities", "property_description", False, "Detailed description"),
+        
+        ("Media & Contact", "video", False, "Video file path"),
+        ("Media & Contact", "owner_name", True, "Full name"),
+        ("Media & Contact", "contact_number", True, "+91 XXXXXXXXXX"),
+        ("Media & Contact", "email", True, "email@example.com"),
+        ("Media & Contact", "alternate_contact", False, "+91 XXXXXXXXXX"),
+        
+        ("Uploader Tracking", "uploaded_by_name", False, "Auto-filled"),
+        ("Uploader Tracking", "uploaded_by_email", False, "Auto-filled"),
+        ("Uploader Tracking", "uploaded_by_contact", False, "Auto-filled"),
+        ("Uploader Tracking", "uploaded_by_role", False, "Auto-filled"),
+        
+        ("System Tracking", "created_at", False, "Datetime created"),
+        ("System Tracking", "is_deleted", False, "True/False"),
+        ("System Tracking", "deleted_at", False, "Datetime deleted"),
+        ("System Tracking", "upload_file_name", False, "Bulk upload source"),
+        ("System Tracking", "upload_file_hash", False, "File hash"),
+        ("System Tracking", "deleted_by", False, "Deleted by user"),
+    ]
+
+    # ════════════════════════════════════════════════
+    # 🛑 ROBUST EXPORT LOGIC 🛑
+    # ════════════════════════════════════════════════
+
+    # ── Excel Download ──
+    if request.GET.get('download') == 'excel':
+        try:
+            print("--- STARTING EXCEL GENERATION ---")
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = "Commercial Rental"
+
+            HDR_BG  = "667EEA"
+            REQ_BG  = "FEF3C7"
+            OPT_BG  = "F0FDF4"
+            thin = Side(style="thin", color="CBD5E1")
+            bdr  = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+            # Row 1: Section Banners
+            sec_spans = OrderedDict()
+            for i, (sec, *_) in enumerate(EXPORT_COLS):
+                sec_spans.setdefault(sec, []).append(i + 1)
+
+            for sec, cols in sec_spans.items():
+                c = ws.cell(row=1, column=cols[0], value=f"📋 {sec}")
+                c.font      = Font(bold=True, color="FFFFFF", name="Arial", size=11)
+                c.fill      = PatternFill("solid", fgColor=HDR_BG)
+                c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                c.border    = bdr
+                if len(cols) > 1:
+                    ws.merge_cells(start_row=1, start_column=cols[0], end_row=1, end_column=cols[-1])
+
+            # Rows 2 & 3: Labels and Hints
+            for ci, (sec, field, req, hint) in enumerate(EXPORT_COLS, 1):
+                lc = ws.cell(row=2, column=ci, value=field + (" *" if req else ""))
+                lc.font      = Font(bold=True, color="1E293B", name="Arial", size=9)
+                lc.fill      = PatternFill("solid", fgColor=REQ_BG if req else OPT_BG)
+                lc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                lc.border    = bdr
+
+                hc = ws.cell(row=3, column=ci, value=hint)
+                hc.font      = Font(italic=True, color="64748B", name="Arial", size=8)
+                hc.fill      = PatternFill("solid", fgColor="FFFFFF")
+                hc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                hc.border    = bdr
+
+                ws.column_dimensions[get_column_letter(ci)].width = max(18, len(field) + 4)
+
+            print(f"--- FETCHING DATA FOR EXCEL. ROWS FOUND: {properties.count()} ---")
+            # Rows 4+: Database Data Injection
+            for row_idx, prop in enumerate(properties, start=4):
+                for col_idx, (_, field_name, _, _) in enumerate(EXPORT_COLS, start=1):
+                    val = getattr(prop, field_name, "")
+                    
+                    if val is True: val = "Yes"
+                    elif val is False: val = "No"
+                    elif hasattr(val, 'strftime'): val = val.strftime('%Y-%m-%d %H:%M')
+                    elif isinstance(val, list): val = ", ".join(map(str, val))
+                    elif hasattr(val, 'url'): val = val.url if val else ""
+                    
+                    cell = ws.cell(row=row_idx, column=col_idx, value=str(val) if val is not None else "")
+                    cell.alignment = Alignment(vertical="center", wrap_text=True)
+                    cell.border = bdr
+
+            ws.row_dimensions[1].height = 28
+            ws.row_dimensions[2].height = 36
+            ws.row_dimensions[3].height = 42
+            ws.freeze_panes = "A4"
+
+            print("--- EXCEL FILE BUILT, SENDING RESPONSE ---")
+            buf = io.BytesIO()
+            wb.save(buf)
+            buf.seek(0)
+            
+            response = HttpResponse(
+                buf.getvalue(),
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+            response["Content-Disposition"] = 'attachment; filename="Commercial_Rental_Export.xlsx"'
+            return response
+
+        except Exception as e:
+            # THIS IS CRITICAL: If it fails, it will output the exact error to your browser screen!
+            error_msg = f"ERROR GENERATING EXCEL:\n\n{str(e)}\n\n{traceback.format_exc()}"
+            print(error_msg)
+            return HttpResponse(f"<pre>{error_msg}</pre>", status=500)
+
     # ── CSV Download ──
     if request.GET.get('download') == 'csv':
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="commercial_rental_properties.csv"'
-        writer = csv.writer(response)
-        writer.writerow([
-            'Property Title', 'Property Type', 'City', 'Area/Locality', 'Address',
-            'Building Name', 'Possession Status', 'Available From', 'Age', 'Zone Type',
-            'Location Hub', 'Condition', 'Ownership Type', 'Construction Status',
-            'Builtup Area', 'Carpet Area', 'Expected Rent', 'Security Deposit',
-            'Maintenance', 'Negotiable', 'Brokerage', 'Brokerage %', 'Manual Brokerage',
-            'DG/UPS', 'Electricity', 'Water', 'Lock-in Period', 'Rent Increase',
-            'Total Floors', 'Your Floor', 'Staircases', 'Passenger Lifts', 'Service Lifts',
-            'Private Parking', 'Min Seats', 'Max Seats', 'Cabins', 'Meeting Rooms',
-            'Private Washroom', 'Public Washroom', 'Flooring',
-            'Owner Name', 'Contact Number', 'Email', 'Alternate Contact',
-            'Uploaded By Name', 'Uploaded By Email', 'Uploaded By Contact', 'Uploaded By Role',
-            'Created At',
-        ])
-        for p in properties:
-            writer.writerow([
-                p.property_title, p.property_type, p.city, p.area_locality, p.property_address,
-                p.building_name, p.possession_status,
-                p.available_from.strftime('%d-%m-%Y') if p.available_from else '',
-                p.age_of_property, p.zone_type, p.location_hub, p.property_condition,
-                p.ownership_type, p.construction_status,
-                p.builtup_area, p.carpet_area, p.expected_rent, p.security_deposit,
-                p.maintenance_charges, p.negotiable, p.brokerage,
-                p.brokerage_percentage, p.manual_brokerage,
-                p.dg_ups_included, p.electricity_included, p.water_included,
-                p.lockin_period, p.rent_increase,
-                p.total_floors, p.your_floor, p.staircases, p.passenger_lifts,
-                p.service_lifts, p.private_parking,
-                p.min_seats, p.max_seats, p.cabins, p.meeting_rooms,
-                p.private_washroom, p.public_washroom, p.flooring_type,
-                p.owner_name, p.contact_number, p.email, p.alternate_contact,
-                p.uploaded_by_name, p.uploaded_by_email,
-                p.uploaded_by_contact, p.uploaded_by_role,
-                p.created_at.strftime('%d-%m-%Y') if p.created_at else '',
-            ])
-        return response
+        try:
+            print("--- STARTING CSV GENERATION ---")
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="commercial_rental_properties.csv"'
+            writer = csv.writer(response)
+            
+            writer.writerow([field for _, field, _, _ in EXPORT_COLS])
+            
+            print(f"--- FETCHING DATA FOR CSV. ROWS FOUND: {properties.count()} ---")
+            for prop in properties:
+                row_data = []
+                for _, field_name, _, _ in EXPORT_COLS:
+                    val = getattr(prop, field_name, "")
+                    if val is True: val = "Yes"
+                    elif val is False: val = "No"
+                    elif hasattr(val, 'strftime'): val = val.strftime('%Y-%m-%d %H:%M')
+                    elif isinstance(val, list): val = ", ".join(map(str, val))
+                    elif hasattr(val, 'url'): val = val.url if val else ""
+                    row_data.append(val if val is not None else "")
+                writer.writerow(row_data)
+            
+            print("--- CSV FILE BUILT, SENDING RESPONSE ---")
+            return response
+            
+        except Exception as e:
+            error_msg = f"ERROR GENERATING CSV:\n\n{str(e)}\n\n{traceback.format_exc()}"
+            print(error_msg)
+            return HttpResponse(f"<pre>{error_msg}</pre>", status=500)
+
+
+    # ════════════════════════════════════════════════
+    # END EXPORT LOGIC
+    # ════════════════════════════════════════════════
 
     # ── Pagination ──
     paginator    = Paginator(properties, 10)
@@ -1574,7 +1949,6 @@ def commercial_list(request):
     # CHART DATA  (JSON → template → JS)
     # ════════════════════════════════════════════
 
-    # 1. Property-type pie
     prop_type_dist = list(
         all_props.exclude(property_type__isnull=True).exclude(property_type='')
         .values('property_type').annotate(cnt=Count('id')).order_by('-cnt')[:8]
@@ -1582,7 +1956,6 @@ def commercial_list(request):
     prop_type_labels_json = json.dumps([x['property_type'] for x in prop_type_dist])
     prop_type_counts_json = json.dumps([x['cnt']           for x in prop_type_dist])
 
-    # 2. Rent-range bar
     rent_range_data = {
         'Under ₹25k':  all_props.filter(expected_rent__lt=25000).count(),
         '₹25k–1L':     all_props.filter(expected_rent__gte=25000,  expected_rent__lt=100000).count(),
@@ -1592,10 +1965,8 @@ def commercial_list(request):
     rent_range_labels_json = json.dumps(list(rent_range_data.keys()))
     rent_range_counts_json = json.dumps(list(rent_range_data.values()))
 
-    # 3. Occupancy doughnut
     occupancy_json = json.dumps([occupied_count, vacant_count, max(0, total_count - occupied_count - vacant_count)])
 
-    # 4. Monthly listed count + expected revenue (last 6 months)
     six_months_ago = timezone.now() - timedelta(days=180)
     monthly_qs = (
         all_props.filter(created_at__gte=six_months_ago)
@@ -1607,7 +1978,6 @@ def commercial_list(request):
     monthly_labels_json  = json.dumps([x['month'].strftime('%b %Y') for x in monthly_qs])
     monthly_revenue_json = json.dumps([float(x['revenue'] or 0) for x in monthly_qs])
 
-    # ── Placeholder quick stats (replace with real models if available) ──
     total_tenants    = occupied_count
     collection_rate  = 0
     pending_payments = 0
@@ -1617,7 +1987,6 @@ def commercial_list(request):
         'admin_obj': admin_obj,
         'page_obj': page_obj,
 
-        # Search params
         'search_query':     search_query,
         'prop_type_query':  prop_type_query,
         'city_query':       city_query,
@@ -1628,7 +1997,6 @@ def commercial_list(request):
         'from_date':        from_date,
         'to_date':          to_date,
 
-        # Dropdown options
         'unique_property_types': unique_property_types,
         'unique_cities':         unique_cities,
         'unique_zones':          unique_zones,
@@ -1636,7 +2004,6 @@ def commercial_list(request):
         'unique_roles':          unique_roles,
         'uploaded_files':        uploaded_files,
 
-        # KPI numbers
         'filtered_count':            filtered_count,
         'total_count':               total_count,
         'active_count':              active_count,
@@ -1663,13 +2030,11 @@ def commercial_list(request):
         'image_pct':                 image_pct,
         'premium_pct':               premium_pct,
 
-        # Quick-stat placeholders
         'total_tenants':    total_tenants,
         'collection_rate':  collection_rate,
         'pending_payments': pending_payments,
         'maintenance_req':  maintenance_req,
 
-        # Chart JSON
         'prop_type_labels_json':  prop_type_labels_json,
         'prop_type_counts_json':  prop_type_counts_json,
         'rent_range_labels_json': rent_range_labels_json,
@@ -1679,9 +2044,6 @@ def commercial_list(request):
         'monthly_revenue_json':   monthly_revenue_json,
     }
     return render(request, 'admin_user/Reports/Rental/commercial_list.html', context)
-
-# ─────────────────────────────────────────────
-#  Import Excel View
 # ─────────────────────────────────────────────
 
 def _decimal(v):
@@ -1969,109 +2331,9 @@ def download_commercial_template(request):
 # ─────────────────────────────────────────────────────────────
 # LIST VIEW
 # ─────────────────────────────────────────────────────────────
-<<<<<<< HEAD
 
 
 
-=======
-# def pg_list(request):
-#     session_id = request.session.get('Admin_id')
-#     if not session_id:
-#         return render(request, 'home_page/Adminlogin.html')
-
-#     try:
-#         admin_obj = Admin_Login.objects.get(id=session_id)
-#     except Admin_Login.DoesNotExist:
-#         return render(request, 'home_page/Adminlogin.html')
-
-#     search_query = request.GET.get('search', '').strip()
-#     pg_for_filter = request.GET.get('pg_for', '').strip()       # boys / girls / co-living
-#     city_filter   = request.GET.get('city', '').strip()
-
-#     # Base queryset — newest first
-#     properties = PGColivingProperty.objects.all().order_by('-id')
-
-#     # ── Search ────────────────────────────────────────────────
-#     if search_query:
-#         properties = properties.filter(
-#             Q(pg_name__icontains=search_query)       |
-#             Q(city__icontains=search_query)          |
-#             Q(locality__icontains=search_query)      |
-#             Q(building_name__icontains=search_query) |
-#             Q(owner_name__icontains=search_query)    |
-#             Q(contact_number__icontains=search_query)
-#         )
-
-#     # ── Filters ───────────────────────────────────────────────
-#     if pg_for_filter:
-#         properties = properties.filter(pg_for=pg_for_filter)
-
-#     if city_filter:
-#         properties = properties.filter(city__icontains=city_filter)
-
-#     total_count = properties.count()
-
-#     # ── CSV Download ──────────────────────────────────────────
-#     if request.GET.get('download') == 'csv':
-#         response = HttpResponse(content_type='text/csv')
-#         response['Content-Disposition'] = 'attachment; filename="pg_coliving_properties.csv"'
-#         writer = csv.writer(response)
-
-#         writer.writerow([
-#             'ID', 'PG Name', 'City', 'Locality', 'Building Name',
-#             'PG For', 'Furnishing', 'Room Type', 'Total Beds',
-#             'Rent', 'Security Deposit', 'Min Stay',
-#             'Meals Available', 'Owner Name', 'Contact', 'Email',
-#             'Added On',
-#         ])
-
-#         for p in properties:
-#             writer.writerow([
-#                 p.id,
-#                 p.pg_name,
-#                 p.city,
-#                 p.locality,
-#                 p.building_name or '',
-#                 p.get_pg_for_display(),
-#                 p.get_furnishing_type_display(),
-#                 p.get_room_type_display(),
-#                 p.total_beds,
-#                 p.rent,
-#                 p.security_deposit,
-#                 p.minimum_stay,
-#                 'Yes' if p.meals_available else 'No',
-#                 p.owner_name,
-#                 p.contact_number,
-#                 p.email,
-#                 p.created_at.strftime('%d-%m-%Y') if p.created_at else '',
-#             ])
-
-#         return response
-
-#     # ── Pagination ────────────────────────────────────────────
-#     paginator   = Paginator(properties, 10)
-#     page_number = request.GET.get('page', 1)
-#     page_obj    = paginator.get_page(page_number)
-
-#     # Distinct cities for filter dropdown
-#     cities = (PGColivingProperty.objects
-#               .values_list('city', flat=True)
-#               .distinct()
-#               .order_by('city'))
-
-#     print("----------------------------",admin_obj)
-
-#     context = {
-#         'admin_obj':     admin_obj,
-#         'page_obj':      page_obj,
-#         'search_query':  search_query,
-#         'pg_for_filter': pg_for_filter,
-#         'city_filter':   city_filter,
-#         'total_count':   total_count,
-#         'cities':        cities,
-#     }
-#     return render(request, 'admin_user/Reports/Rental/pg_list.html', context)
->>>>>>> d0f149b2c74d1fc5cd4a07f46e5105a392471ff5
 
 
 # ─────────────────────────────────────────────────────────────
@@ -4099,6 +4361,7 @@ def _get_client_ip(request):
     return request.META.get('REMOTE_ADDR', '127.0.0.1')
 
 
+
 def _get_deleter_name(request):
     """Helper function to get the name of the person deleting the property."""
     admin_id = request.session.get('Admin_id')
@@ -5045,6 +5308,54 @@ def rental_residential_delete(request, pk):
 
 
 
+
+
+def global_recycle_bin(request):
+    """Unified Recycle Bin displaying deleted items from all property modules."""
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    def calculate_retention(queryset):
+        now = timezone.now()
+        items = list(queryset)
+
+        for item in items:
+            if item.deleted_at:
+                expiry_date = item.deleted_at + timedelta(days=30)
+                item.days_left = max((expiry_date - now).days, 0)
+            else:
+                item.days_left = 30
+        return items
+
+    rental_deleted = calculate_retention(RentalResidentialProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    commercial_deleted = calculate_retention(CommercialRentalProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    pg_deleted = calculate_retention(PGColivingProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    resale_deleted = calculate_retention(ResaleResidentialProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    commercial_resale_deleted = calculate_retention(CommercialResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    plot_sale_deleted = calculate_retention(PlotSaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    industrial_resale_deleted = calculate_retention(IndustrialResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+    agricultural_resale_deleted = calculate_retention(AgriculturalResaleProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
+
+    context = {
+        'rental_deleted': rental_deleted, 'rental_count': len(rental_deleted),
+        'commercial_deleted': commercial_deleted, 'commercial_count': len(commercial_deleted),
+        'pg_deleted': pg_deleted, 'pg_count': len(pg_deleted),
+        'resale_deleted': resale_deleted, 'resale_count': len(resale_deleted),
+        'commercial_resale_deleted': commercial_resale_deleted, 'commercial_resale_count': len(commercial_resale_deleted),
+        'plot_sale_deleted': plot_sale_deleted, 'plot_sale_count': len(plot_sale_deleted),
+        'industrial_resale_deleted': industrial_resale_deleted, 'industrial_resale_count': len(industrial_resale_deleted),
+        'agricultural_resale_deleted': agricultural_resale_deleted, 'agricultural_resale_count': len(agricultural_resale_deleted),
+        'total_deleted_all': (
+            len(rental_deleted) + len(commercial_deleted) + len(pg_deleted) +
+            len(resale_deleted) + len(commercial_resale_deleted) + len(plot_sale_deleted) +
+            len(industrial_resale_deleted) + len(agricultural_resale_deleted)
+        )
+    }
+
+    return render(request, 'admin_user/Reports/Rental/global_recycle_bin.html', context)
+
+
 def system_audit_logs(request):
     """A completely separate view for tracking Deletion and Restore Audit Logs."""
     session_id = request.session.get('Admin_id')
@@ -5052,11 +5363,9 @@ def system_audit_logs(request):
         return render(request, 'home_page/Adminlogin.html')
 
     admin_obj = Admin_Login.objects.get(id=session_id)
-
     deletion_logs = []
     restore_logs = []
 
-    # Map all your 8 models
     models_map = {
         'Rental Residential': RentalResidentialProperty,
         'Commercial Rental': CommercialRentalProperty,
@@ -5068,36 +5377,51 @@ def system_audit_logs(request):
         'Agricultural Resale': AgriculturalResaleProperty,
     }
 
+    def get_display_id(obj):
+        # Look for custom model unique IDs before falling back to PK
+        id_fields = [
+            'rental_residential_id', 'commercial_rental_id', 'pg_property_id', 
+            'property_id', 'commercial_id', 'plot_property_id', 
+            'industrial_id', 'agri_property_id'
+        ]
+        for field in id_fields:
+            if hasattr(obj, field) and getattr(obj, field):
+                return getattr(obj, field)
+        return obj.pk
+
+    def get_display_title(obj):
+        if hasattr(obj, 'property_title') and obj.property_title:
+            return obj.property_title
+        elif hasattr(obj, 'title') and obj.title:
+            return obj.title
+        elif hasattr(obj, 'plot_title') and obj.plot_title:
+            return obj.plot_title
+        return 'N/A'
+
     for module_name, model in models_map.items():
         # 1. Fetch Deletion Logs
         try:
             deleted_items = model.objects.filter(is_deleted=True).exclude(deleted_at__isnull=True)
             for p in deleted_items:
-                # Dynamically find the title/name field since different models use different names
-                title = getattr(p, 'property_title', getattr(p, 'building_name', getattr(p, 'pg_name', getattr(p, 'title', getattr(p, 'plot_title', getattr(p, 'property_type', 'N/A'))))))
-                
                 deletion_logs.append({
                     'module': module_name,
-                    'id': p.id,
-                    'title': title,
-                    'by': getattr(p, 'deleted_by', 'System Admin'),
+                    'id': get_display_id(p),
+                    'title': get_display_title(p),
+                    'by': getattr(p, 'deleted_by', 'System Admin') or 'System Admin',
                     'date': p.deleted_at
                 })
         except Exception:
             pass
 
-        # 2. Fetch Restore Logs
+        # 2. Fetch Restore Logs (if restored_at is later implemented in models)
         try:
-            # Assumes you added restored_at and restored_by to your models!
             restored_items = model.objects.filter(restored_at__isnull=False)
             for p in restored_items:
-                title = getattr(p, 'property_title', getattr(p, 'building_name', getattr(p, 'pg_name', getattr(p, 'title', getattr(p, 'plot_title', getattr(p, 'property_type', 'N/A'))))))
-                
                 restore_logs.append({
                     'module': module_name,
-                    'id': p.id,
-                    'title': title,
-                    'by': getattr(p, 'restored_by', 'System Admin'),
+                    'id': get_display_id(p),
+                    'title': get_display_title(p),
+                    'by': getattr(p, 'restored_by', 'System Admin') or 'System Admin',
                     'date': p.restored_at
                 })
         except Exception:
@@ -5108,7 +5432,7 @@ def system_audit_logs(request):
     restore_logs.sort(key=lambda x: x['date'] if x['date'] else timezone.now(), reverse=True)
 
     context = {
-        'admin_obj':admin_obj,
+        'admin_obj': admin_obj,
         'deletion_logs': deletion_logs,
         'restore_logs': restore_logs,
         'deletion_count': len(deletion_logs),
@@ -5117,142 +5441,6 @@ def system_audit_logs(request):
     }
 
     return render(request, 'admin_user/Reports/Rental/audit_logs.html', context)
-
-
-
-
-
-def global_recycle_bin(request):
-    """Unified Recycle Bin displaying deleted items from all property modules."""
-
-    session_id = request.session.get('Admin_id')
-    if not session_id:
-        return render(request, 'home_page/Adminlogin.html')
-
-<<<<<<< HEAD
-=======
-    admin_obj = Admin_Login.objects.get(id=session_id)
-
-    # Helper function to calculate auto-delete countdown (30 days)
->>>>>>> d0f149b2c74d1fc5cd4a07f46e5105a392471ff5
-    def calculate_retention(queryset):
-        now = timezone.now()
-
-        items = list(queryset)
-
-        for item in items:
-            if item.deleted_at:
-                expiry_date = item.deleted_at + timedelta(days=30)
-                item.days_left = max((expiry_date - now).days, 0)
-            else:
-                item.days_left = 30
-
-        return items
-
-    rental_deleted = calculate_retention(
-        RentalResidentialProperty.objects.filter(
-            is_deleted=True
-        ).order_by('-deleted_at')
-    )
-
-    commercial_deleted = calculate_retention(
-        CommercialRentalProperty.objects.filter(
-            is_deleted=True
-        ).order_by('-deleted_at')
-    )
-
-    pg_deleted = calculate_retention(
-        PGColivingProperty.objects.filter(
-            is_deleted=True
-        ).order_by('-deleted_at')
-    )
-
-    resale_deleted = calculate_retention(
-        ResaleResidentialProperty.objects.filter(
-            is_deleted=True
-        ).order_by('-deleted_at')
-    )
-
-    commercial_resale_deleted = calculate_retention(
-        CommercialResaleProperty.objects.filter(
-            is_deleted=True
-        ).order_by('-deleted_at')
-    )
-
-    plot_sale_deleted = calculate_retention(
-        PlotSaleProperty.objects.filter(
-            is_deleted=True
-        ).order_by('-deleted_at')
-    )
-
-    industrial_resale_deleted = calculate_retention(
-        IndustrialResaleProperty.objects.filter(
-            is_deleted=True
-        ).order_by('-deleted_at')
-    )
-
-    agricultural_resale_deleted = calculate_retention(
-        AgriculturalResaleProperty.objects.filter(
-            is_deleted=True
-        ).order_by('-deleted_at')
-    )
-
-    context = {
-<<<<<<< HEAD
-        'rental_deleted': rental_deleted,
-        'rental_count': len(rental_deleted),
-
-        'commercial_deleted': commercial_deleted,
-        'commercial_count': len(commercial_deleted),
-
-        'pg_deleted': pg_deleted,
-        'pg_count': len(pg_deleted),
-
-        'resale_deleted': resale_deleted,
-        'resale_count': len(resale_deleted),
-
-        'commercial_resale_deleted': commercial_resale_deleted,
-        'commercial_resale_count': len(commercial_resale_deleted),
-
-        'plot_sale_deleted': plot_sale_deleted,
-        'plot_sale_count': len(plot_sale_deleted),
-
-        'industrial_resale_deleted': industrial_resale_deleted,
-        'industrial_resale_count': len(industrial_resale_deleted),
-
-        'agricultural_resale_deleted': agricultural_resale_deleted,
-        'agricultural_resale_count': len(agricultural_resale_deleted),
-
-=======
-        'admin_obj':admin_obj,
-        'rental_deleted': rental_deleted, 'rental_count': len(rental_deleted),
-        'commercial_deleted': commercial_deleted, 'commercial_count': len(commercial_deleted),
-        'pg_deleted': pg_deleted, 'pg_count': len(pg_deleted),
-        'resale_deleted': resale_deleted, 'resale_count': len(resale_deleted),
-        'commercial_resale_deleted': commercial_resale_deleted, 'commercial_resale_count': len(commercial_resale_deleted),
-        'plot_sale_deleted': plot_sale_deleted, 'plot_sale_count': len(plot_sale_deleted),
-        'industrial_resale_deleted': industrial_resale_deleted, 'industrial_resale_count': len(industrial_resale_deleted),
-        'agricultural_resale_deleted': agricultural_resale_deleted, 'agricultural_resale_count': len(agricultural_resale_deleted),
-        
->>>>>>> d0f149b2c74d1fc5cd4a07f46e5105a392471ff5
-        'total_deleted_all': (
-            len(rental_deleted)
-            + len(commercial_deleted)
-            + len(pg_deleted)
-            + len(resale_deleted)
-            + len(commercial_resale_deleted)
-            + len(plot_sale_deleted)
-            + len(industrial_resale_deleted)
-            + len(agricultural_resale_deleted)
-        )
-    }
-
-    return render(
-        request,
-        'admin_user/Reports/Rental/global_recycle_bin.html',
-        context
-    )
-
 
 
 @require_POST
@@ -5530,8 +5718,7 @@ RENTAL_RES_COLUMN_MAP = [
 
 
 
-from datetime import datetime
-from decimal import Decimal, InvalidOperation
+
 
 
 
@@ -5548,16 +5735,43 @@ def import_residential_excel(request):
     if not excel_file.name.endswith(".xlsx"):
         return JsonResponse({"status": "error", "message": "Only .xlsx files allowed."}, status=400)
 
-    # Establish operator system identities tracking maps
-    session_id = request.session.get('Admin_id')
-    user_identity = "Automated Engine"
-    if session_id:
-        try:
-            admin_obj = Admin_Login.objects.get(id=session_id)
-            user_identity = admin_obj.email or admin_obj.username
-        except Admin_Login.DoesNotExist:
-            pass
+    # =========================================================
+    # 1. ESTABLISH UPLOADER IDENTITY (Copied from manual add)
+    # =========================================================
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
 
+    admin_obj = None
+    user_obj = None
+
+    if admin_id:
+        admin_obj = Admin_Login.objects.filter(id=admin_id).first()
+    if user_id:
+        user_obj = User_Details.objects.filter(id=user_id).first()
+
+    # Default fallbacks
+    uploader_name = ""
+    uploader_email = ""
+    uploader_contact = ""
+    uploader_role = "Automated Engine"
+    user_identity = "Automated Engine"
+
+    if admin_obj:
+        uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
+        uploader_email = getattr(admin_obj, 'email', '')
+        uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
+        uploader_role = "Admin"
+        user_identity = uploader_email or uploader_name
+    elif user_obj:
+        uploader_name = user_obj.user_name
+        uploader_email = user_obj.user_email
+        uploader_contact = user_obj.user_phone
+        uploader_role = "User"
+        user_identity = uploader_email or uploader_name
+
+    # =========================================================
+    # 2. PARSE EXCEL FILE
+    # =========================================================
     try:
         wb = openpyxl.load_workbook(excel_file, data_only=True)
         ws = wb.active
@@ -5612,6 +5826,9 @@ def import_residential_excel(request):
 
     wb.close()
 
+    # =========================================================
+    # 3. DUPLICATE & OVERLAP CHECKS
+    # =========================================================
     file_name_exists = RentalResidentialProperty.objects.filter(upload_file_name=excel_file.name).exists()
     total_scanned_rows = len(parsed_rows)
     different_file_rows = 0
@@ -5653,14 +5870,23 @@ def import_residential_excel(request):
             "message": "Data Overlap Alert: The property rows inside this workbook already exist verbatim in the system under another filename."
         })
 
-    # Process workbook writes to dataset matrices safely
+    # =========================================================
+    # 4. DATABASE WRITE & UPLOADER INJECTION
+    # =========================================================
     created, updated, skipped, errors = 0, 0, 0, []
     for item in parsed_rows:
         o_data = item['data']
         r_id = item['row_id']
+        
+        # ---> INJECT UPLOADER DETAILS INTO THE DICTIONARY HERE <---
         o_data["upload_file_name"] = excel_file.name
+        o_data["uploaded_by_name"] = uploader_name
+        o_data["uploaded_by_email"] = uploader_email
+        o_data["uploaded_by_contact"] = uploader_contact
+        o_data["uploaded_by_role"] = uploader_role
 
         try:
+            # Update Existing
             if r_id and r_id != "None":
                 prop = RentalResidentialProperty.objects.filter(rental_residential_id=r_id).first()
                 if prop:
@@ -5669,6 +5895,7 @@ def import_residential_excel(request):
                     updated += 1
                     continue
 
+            # Create New if not Duplicate
             dup_exists = RentalResidentialProperty.objects.filter(
                 property_title=o_data.get('property_title'),
                 address=o_data.get('address'),
@@ -5685,11 +5912,11 @@ def import_residential_excel(request):
             errors.append(f"Row {item['row_idx']} processing failure: {str(e)}")
 
     # =====================================================
-    # AUDIT LOGIC: File-wise Workbook Log Creation Entry
+    # 5. AUDIT LOGIC: File-wise Workbook Log Creation Entry
     # =====================================================
     RentalActivityLog.objects.create(
         user_identity=user_identity,
-        user_role="Admin",
+        user_role=uploader_role, # Updated to use the resolved role!
         action_type='EXCEL_IMPORT',
         property_id="Multiple / Sheet Records",
         targeted_fields="bulk_action",
@@ -5710,7 +5937,6 @@ def import_residential_excel(request):
         "message": f"{created} Created | {updated} Updated | {skipped} Skipped due to system rules.",
         "created": created, "updated": updated, "skipped": skipped, "error_count": len(errors), "errors": errors
     })
-
 
  
 def download_residential_template(request):
@@ -6296,10 +6522,12 @@ def _to_date(val):
 # COMMERCIAL DETAILS VIEW
 # ═══════════════════════════════════════
 def commercial_view(request, pk):
-    sid, admin_obj = _get_admin(request)
-    if not sid:
+    # Standard security session management protocol
+    session_id = request.session.get('Admin_id')
+    if not session_id:
         return render(request, 'home_page/Adminlogin.html')
-
+        
+    admin_obj = Admin_Login.objects.get(id=session_id)
     prop = get_object_or_404(CommercialRentalProperty, pk=pk)
 
     return render(request, 'admin_user/Reports/Rental/commercial_detail.html', {
@@ -6384,8 +6612,7 @@ def commercial_edit(request, pk):
             prop.alternate_contact = p.get('alternate_contact')
 
             # Core media attachments upload logic handlers
-            if 'floor_plan' in request.FILES:
-                prop.floor_plan = request.FILES['floor_plan']
+          
             if 'video' in request.FILES:
                 prop.video = request.FILES['video']
 
@@ -7156,10 +7383,238 @@ def commercial_bulk_delete(request):
 
 
 
+
+# Make sure your models are imported
+# from .models import PGColivingProperty, PGRoomDetail
+
+
+
+
+def export_pg_coliving(request):
+    """Dedicated view for exporting PG/Coliving properties to CSV or Excel with System Meta."""
+    
+    try:
+        properties = PGColivingProperty.objects.filter(is_deleted=False).order_by('-created_at')
+    except Exception:
+        properties = PGColivingProperty.objects.all().order_by('-created_at')
+
+    # ── Apply Search Filters ──
+    search_query = request.GET.get('search', '').strip()
+    city_query   = request.GET.get('city', '').strip()
+    pg_for_query = request.GET.get('pg_for', '').strip()
+    from_date    = request.GET.get('from_date', '').strip()
+    to_date      = request.GET.get('to_date', '').strip()
+
+    if search_query:
+        properties = properties.filter(
+            Q(property_title__icontains=search_query) |
+            Q(building_name__icontains=search_query) |
+            Q(locality__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(owner_name__icontains=search_query)
+        )
+    if city_query and city_query != 'All Cities':
+        properties = properties.filter(city__icontains=city_query)
+    if pg_for_query and pg_for_query != 'All Types':
+        properties = properties.filter(pg_for__icontains=pg_for_query)
+    if from_date:
+        properties = properties.filter(created_at__date__gte=from_date)
+    if to_date:
+        properties = properties.filter(created_at__date__lte=to_date)
+
+    # ── EXACT MATCH TO IMPORT SEQUENCE + SYSTEM META FOR AUDIT ──
+    EXPORT_COLS = [
+        ("📋 Basic Info", "property_title", True, "Auto Generated*"),
+        ("📋 Basic Info", "city", True, "city *"),
+        ("📋 Basic Info", "building_name", False, "building / project name"),
+        ("📋 Basic Info", "locality", True, "locality *"),
+       
+        ("📋 Basic Info", "property_address", True, "property address *"),
+        ("📋 Basic Info", "total_beds", True, "total beds *"),
+        ("📋 Basic Info", "pg_for", True, "pg for * (boys/girls/co_living)"),
+        ("📋 Basic Info", "furnishing_type", True, "furnishing type * (fully-furnished/semi-furnished/unfurnished)"),
+        ("📋 Basic Info", "sharing_type", False, "sharing type"),
+        ("📋 Basic Info", "best_suited_for", False, "best suited for (students/working professionals/any)"),
+        ("📋 Basic Info", "property_managed_by", False, "property managed by (owner/caretaker)"),
+        ("📋 Basic Info", "manager_stays", False, "property manager stays at property? (true/false)"),
+        ("📋 Basic Info", "notice_period", False, "notice period (days)"),
+        ("📋 Basic Info", "lockin_period", False, "lock-in period (days)"),
+        ("📋 Basic Info", "minimum_stay", True, "minimum stay (months) *"),
+        ("📋 Basic Info", "available_from", True, "available from * (yyyy-mm-dd)"),
+
+        ("🛏 Room 1", "room_type_1", True, "room_type_1 *"),
+        ("🛏 Room 1", "room_beds_1", True, "room_beds_1 *"),
+        ("🛏 Room 1", "room_rent_1", True, "room_rent_1 *"),
+        ("🛏 Room 1", "room_deposit_1", True, "room_deposit_1 *"),
+        ("🛏 Room 1", "room_brokerage_1", False, "room_brokerage_1"),
+        ("🛏 Room 1", "room_brokerage_percent_1", False, "room_brokerage_percent_1"),
+        ("🛏 Room 1", "room_manual_brokerage_1", False, "room_manual_brokerage_1"),
+        ("🛏 Room 1", "room_facilities_1", False, "room_facilities_1"),
+
+        ("🛏 Room 2", "room_type_2", False, "room_type_2"),
+        ("🛏 Room 2", "room_beds_2", False, "room_beds_2"),
+        ("🛏 Room 2", "room_rent_2", False, "room_rent_2"),
+        ("🛏 Room 2", "room_deposit_2", False, "room_deposit_2"),
+        ("🛏 Room 2", "room_brokerage_2", False, "room_brokerage_2"),
+        ("🛏 Room 2", "room_brokerage_percent_2", False, "room_brokerage_percent_2"),
+        ("🛏 Room 2", "room_manual_brokerage_2", False, "room_manual_brokerage_2"),
+        ("🛏 Room 2", "room_facilities_2", False, "room_facilities_2"),
+
+        ("🍽 Meals", "meals_available", False, "meals available? (true/false)"),
+        ("🍽 Meals", "meal_offerings", False, "meal offerings (breakfast,lunch,dinner)"),
+        ("🍽 Meals", "meal_speciality", False, "meal speciality (veg/non-veg/both)"),
+
+        ("📏 PG Regulations", "opposite_sex_allowed", False, "opposite sex allowed? (true/false)"),
+        ("📏 PG Regulations", "any_time_allowed", False, "any time allowed? (true/false)"),
+        ("📏 PG Regulations", "visitors_allowed", False, "visitors allowed? (true/false)"),
+        ("📏 PG Regulations", "guardian_allowed", False, "guardian allowed? (true/false)"),
+        ("📏 PG Regulations", "drinking_allowed", False, "drinking allowed? (true/false)"),
+        ("📏 PG Regulations", "smoking_allowed", False, "smoking allowed? (true/false)"),
+
+        ("🏷 Property Description & Amenties", "property_description", False, "property description"),
+        ("🏷 Property Description & Amenties", "amenities", False, "amenities (wifi,cctv,geyser,...)"),
+        ("🏷 Property Description & Amenties", "nearby_facilities", False, "nearby facilities (college,market,...)"),
+
+        ("📞 Contact Info", "owner_name", True, "owner name *"),
+        ("📞 Contact Info", "contact_number", True, "contact number *"),
+        ("📞 Contact Info", "email", True, "email *"),
+        ("📞 Contact Info", "alternate_contact", False, "alternate contact"),
+
+        # 🛑 AUDIT LOG SYSTEM FIELDS 🛑
+        ("⚙️ System Meta", "pg_property_id", False, "system pg ID"),
+        ("⚙️ System Meta", "uploaded_by_name", False, "uploaded by (name)"),
+        ("⚙️ System Meta", "uploaded_by_email", False, "uploaded by (email)"),
+        ("⚙️ System Meta", "uploaded_by_role", False, "uploader role"),
+        ("⚙️ System Meta", "uploaded_by_contact", False, "uploader contact"),
+        ("⚙️ System Meta", "upload_file_name", False, "source file name"),
+        ("⚙️ System Meta", "created_at", False, "record created at"),
+        ("⚙️ System Meta", "updated_at", False, "record updated at"),
+        ("⚙️ System Meta", "is_deleted", False, "is deleted? (true/false)"),
+        ("⚙️ System Meta", "deleted_at", False, "deleted at timestamp"),
+        ("⚙️ System Meta", "deleted_by", False, "deleted by user"),
+    ]
+
+    export_format = request.GET.get('format', 'excel')
+
+    # ── EXCEL EXPORT ──
+    if export_format == 'excel':
+        try:
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = "PG Listings Export"
+
+            HDR_BG, ROOM1_BG, ROOM2_BG = "1F4E79", "2E75B6", "5B9BD5"
+            META_BG = "475569"
+            REQ_BG, OPT_BG = "FFD7D7", "DDEBF7"
+            thin = Side(style="thin", color="BBBBBB")
+            bdr  = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+            sec_spans = OrderedDict()
+            for i, (sec, *_) in enumerate(EXPORT_COLS):
+                sec_spans.setdefault(sec, []).append(i + 1)
+
+            # Draw Banners
+            for sec, cols in sec_spans.items():
+                c = ws.cell(row=1, column=cols[0], value=sec)
+                c.font = Font(bold=True, color="FFFFFF", size=10)
+                if "Room 1" in sec: c.fill = PatternFill("solid", fgColor=ROOM1_BG)
+                elif "Room 2" in sec: c.fill = PatternFill("solid", fgColor=ROOM2_BG)
+                elif "System Meta" in sec: c.fill = PatternFill("solid", fgColor=META_BG)
+                else: c.fill = PatternFill("solid", fgColor=HDR_BG)
+                c.alignment, c.border = Alignment(horizontal="center", vertical="center"), bdr
+                if len(cols) > 1: ws.merge_cells(start_row=1, start_column=cols[0], end_row=1, end_column=cols[-1])
+
+            # Draw Headers
+            for ci, (sec, field, req, hint) in enumerate(EXPORT_COLS, 1):
+                lc = ws.cell(row=2, column=ci, value=hint) 
+                lc.font, lc.border = Font(bold=True, size=9), bdr
+                lc.fill = PatternFill("solid", fgColor=REQ_BG if req else OPT_BG)
+                lc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                ws.column_dimensions[get_column_letter(ci)].width = max(18, len(hint) * 0.9)
+
+            # Process Data
+            for row_idx, prop in enumerate(properties, start=3):
+                rooms = list(prop.rooms.all().order_by('id'))
+                room1 = rooms[0] if len(rooms) > 0 else None
+                room2 = rooms[1] if len(rooms) > 1 else None
+
+                for col_idx, (_, field_name, _, _) in enumerate(EXPORT_COLS, start=1):
+                    val = ""
+                    if field_name.endswith("_1") and room1: val = getattr(room1, field_name.replace("_1", ""), "")
+                    elif field_name.endswith("_2") and room2: val = getattr(room2, field_name.replace("_2", ""), "")
+                    elif hasattr(prop, field_name): val = getattr(prop, field_name, "")
+                    
+                    try:
+                        if val is True: val = "True"
+                        elif val is False: val = "False"
+                        elif hasattr(val, 'strftime'): 
+                            val = val.strftime('%Y-%m-%d %H:%M:%S') if "at" in field_name else val.strftime('%Y-%m-%d')
+                        elif isinstance(val, list): val = ", ".join(map(str, val))
+                        elif hasattr(val, 'url'): val = val.url if val else ""
+                    except ValueError: val = ""
+                    
+                    cell = ws.cell(row=row_idx, column=col_idx, value=str(val) if val is not None else "")
+                    cell.alignment, cell.border = Alignment(vertical="center", wrap_text=True), bdr
+
+            ws.row_dimensions[1].height, ws.row_dimensions[2].height = 28, 36
+            ws.freeze_panes = "A3"
+
+            buf = io.BytesIO()
+            wb.save(buf)
+            buf.seek(0)
+            response = HttpResponse(buf.getvalue(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            response["Content-Disposition"] = 'attachment; filename="PG_Coliving_Export_With_Audit.xlsx"'
+            return response
+            
+        except Exception as e:
+            return HttpResponse(f"<pre>ERROR GENERATING EXCEL:\n{str(e)}\n{traceback.format_exc()}</pre>", status=500)
+
+    # ── CSV EXPORT ──
+    elif export_format == 'csv':
+        try:
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="PG_Coliving_Export_With_Audit.csv"'
+            writer = csv.writer(response)
+            
+            writer.writerow([hint for _, _, _, hint in EXPORT_COLS])
+            
+            for prop in properties:
+                rooms = list(prop.rooms.all().order_by('id'))
+                room1 = rooms[0] if len(rooms) > 0 else None
+                room2 = rooms[1] if len(rooms) > 1 else None
+
+                row_data = []
+                for _, field_name, _, _ in EXPORT_COLS:
+                    val = ""
+                    if field_name.endswith("_1") and room1: val = getattr(room1, field_name.replace("_1", ""), "")
+                    elif field_name.endswith("_2") and room2: val = getattr(room2, field_name.replace("_2", ""), "")
+                    elif hasattr(prop, field_name): val = getattr(prop, field_name, "")
+                    
+                    try:
+                        if val is True: val = "True"
+                        elif val is False: val = "False"
+                        elif hasattr(val, 'strftime'): 
+                            val = val.strftime('%Y-%m-%d %H:%M:%S') if "at" in field_name else val.strftime('%Y-%m-%d')
+                        elif isinstance(val, list): val = ", ".join(map(str, val))
+                        elif hasattr(val, 'url'): val = val.url if val else ""
+                    except ValueError: val = ""
+                        
+                    row_data.append(str(val) if val is not None else "")
+                writer.writerow(row_data)
+                
+            return response
+            
+        except Exception as e:
+            return HttpResponse(f"<pre>ERROR GENERATING CSV:\n{str(e)}\n{traceback.format_exc()}</pre>", status=500)
+
+
 def pg_list(request):
     session_id = request.session.get('Admin_id')
+
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
 
     # ── READ FILTER STRINGS ──
     search_query   = request.GET.get('search', '').strip()
@@ -7172,7 +7627,7 @@ def pg_list(request):
     to_date        = request.GET.get('to_date', '').strip()
 
     # ── FILTER SOFT DELETIONS ──
-    all_props = PGColivingProperty.objects.filter(is_deleted=False)
+    all_props  = PGColivingProperty.objects.filter(is_deleted=False)
     properties = all_props.order_by('-created_at')
 
     if search_query:
@@ -7199,88 +7654,281 @@ def pg_list(request):
     if to_date:
         properties = properties.filter(created_at__date__lte=to_date)
 
-    # ── CSV DOWNLOAD ENGINE ──
+    # ══════════════════════════════════════════════════════════════
+    # EXPORT HELPERS  (shared by both Excel & CSV)
+    # ══════════════════════════════════════════════════════════════
+    EXPORT_HEADERS = [
+        "pg_property_id", "property_title", "city", "building_name",
+        "locality", "property_address", "total_beds", "pg_for",
+        "furnishing_type", "sharing_type", "best_suited_for",
+        # Room 1
+        "room_type_1", "room_beds_1", "room_rent_1", "room_deposit_1",
+        "room_brokerage_1", "room_brokerage_percent_1",
+        "room_manual_brokerage_1", "room_facilities_1",
+        # Room 2
+        "room_type_2", "room_beds_2", "room_rent_2", "room_deposit_2",
+        "room_brokerage_2", "room_brokerage_percent_2",
+        "room_manual_brokerage_2", "room_facilities_2",
+        # Meals
+        "meals_available", "meal_offerings", "meal_speciality",
+        # Rules
+        "notice_period", "lockin_period", "minimum_stay",
+        "available_from", "property_managed_by", "manager_stays",
+        "opposite_sex_allowed", "any_time_allowed", "visitors_allowed",
+        "guardian_allowed", "drinking_allowed", "smoking_allowed",
+        # Amenities
+        "property_description", "amenities", "nearby_facilities",
+        # Contact
+        "owner_name", "contact_number", "email", "alternate_contact",
+        # Uploader
+        "uploaded_by_name", "uploaded_by_email",
+        "uploaded_by_contact", "uploaded_by_role",
+        # Audit
+        "upload_file_name", "created_at",
+    ]
+
+    def _room_slot(rooms_list, idx):
+        """Return flat dict for a room slot (0-based idx)."""
+        n = idx + 1
+        r = rooms_list[idx] if idx < len(rooms_list) else None
+        if r:
+            return {
+                f"room_type_{n}":              r.room_type,
+                f"room_beds_{n}":              r.room_beds,
+                f"room_rent_{n}":              r.room_rent,
+                f"room_deposit_{n}":           r.room_deposit,
+                f"room_brokerage_{n}":         r.room_brokerage,
+                f"room_brokerage_percent_{n}": r.room_brokerage_percent or "",
+                f"room_manual_brokerage_{n}":  r.room_manual_brokerage or "",
+                f"room_facilities_{n}":        r.room_facilities or "",
+            }
+        return {f"room_type_{n}": "", f"room_beds_{n}": "", f"room_rent_{n}": "",
+                f"room_deposit_{n}": "", f"room_brokerage_{n}": "",
+                f"room_brokerage_percent_{n}": "", f"room_manual_brokerage_{n}": "",
+                f"room_facilities_{n}": ""}
+
+    def _build_export_rows(qs):
+        """Build list-of-dicts for export from the given queryset."""
+        rows = []
+        for prop in qs.prefetch_related('rooms'):
+            rooms_list = list(prop.rooms.all())
+            row = {
+                "pg_property_id":       prop.pg_property_id,
+                "property_title":       prop.property_title or "",
+                "city":                 prop.city,
+                "building_name":        prop.building_name or "",
+                "locality":             prop.locality,
+                "property_address":     prop.property_address,
+                "total_beds":           prop.total_beds,
+                "pg_for":               prop.pg_for,
+                "furnishing_type":      prop.furnishing_type,
+                "sharing_type":         prop.sharing_type or "",
+                "best_suited_for":      prop.best_suited_for or "",
+                **_room_slot(rooms_list, 0),
+                **_room_slot(rooms_list, 1),
+                "meals_available":      prop.meals_available,
+                "meal_offerings":       prop.meal_offerings or "",
+                "meal_speciality":      prop.meal_speciality or "",
+                "notice_period":        prop.notice_period or "",
+                "lockin_period":        prop.lockin_period or "",
+                "minimum_stay":         prop.minimum_stay,
+                "available_from":       prop.available_from.strftime("%Y-%m-%d") if prop.available_from else "",
+                "property_managed_by":  prop.property_managed_by or "",
+                "manager_stays":        prop.manager_stays,
+                "opposite_sex_allowed": prop.opposite_sex_allowed,
+                "any_time_allowed":     prop.any_time_allowed,
+                "visitors_allowed":     prop.visitors_allowed,
+                "guardian_allowed":     prop.guardian_allowed,
+                "drinking_allowed":     prop.drinking_allowed,
+                "smoking_allowed":      prop.smoking_allowed,
+                "property_description": prop.property_description or "",
+                "amenities":            prop.amenities or "",
+                "nearby_facilities":    prop.nearby_facilities or "",
+                "owner_name":           prop.owner_name,
+                "contact_number":       prop.contact_number,
+                "email":                prop.email,
+                "alternate_contact":    prop.alternate_contact or "",
+                "uploaded_by_name":     prop.uploaded_by_name or "",
+                "uploaded_by_email":    prop.uploaded_by_email or "",
+                "uploaded_by_contact":  prop.uploaded_by_contact or "",
+                "uploaded_by_role":     prop.uploaded_by_role or "",
+                "upload_file_name":     prop.upload_file_name or "",
+                "created_at":           prop.created_at.strftime("%Y-%m-%d %H:%M") if prop.created_at else "",
+            }
+            rows.append(row)
+        return rows
+
+    # ── EXCEL DOWNLOAD ────────────────────────────────────────────────────────
+    if request.GET.get('download') == 'excel':
+        from openpyxl.styles import Font, PatternFill, Alignment
+        from openpyxl.utils import get_column_letter
+
+        rows = _build_export_rows(properties)
+
+        wb  = openpyxl.Workbook()
+        ws  = wb.active
+        ws.title = "PG Listings"
+
+        HDR_FILL   = PatternFill("solid", start_color="1F4E79")
+        ROOM1_FILL = PatternFill("solid", start_color="2E75B6")
+        ROOM2_FILL = PatternFill("solid", start_color="5B9BD5")
+        HDR_FONT   = Font(bold=True, color="FFFFFF", size=10)
+        COL_FONT   = Font(bold=True, size=9)
+        CENTER     = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+        # Row 1 — section labels
+        section_map = [
+            (1,  11, "📋 Basic Info"),
+            (12, 19, "🛏 Room 1"),
+            (20, 27, "🛏 Room 2"),
+            (28, 30, "🍽 Meals"),
+            (31, 42, "📏 Rules"),
+            (43, 45, "🏷 Amenities"),
+            (46, 49, "📞 Contact"),
+            (50, 53, "👤 Uploader"),
+            (54, 55, "📁 Audit"),
+        ]
+        for sc, ec, label in section_map:
+            ws.merge_cells(start_row=1, start_column=sc, end_row=1, end_column=ec)
+            c = ws.cell(row=1, column=sc, value=label)
+            c.fill = ROOM1_FILL if "Room 1" in label else ROOM2_FILL if "Room 2" in label else HDR_FILL
+            c.font = HDR_FONT
+            c.alignment = CENTER
+
+        # Row 2 — column headers
+        ROOM1_CI = set(range(12, 20))
+        ROOM2_CI = set(range(20, 28))
+        for ci, h in enumerate(EXPORT_HEADERS, 1):
+            c = ws.cell(row=2, column=ci, value=h)
+            c.font = COL_FONT
+            c.alignment = CENTER
+            if ci in ROOM1_CI:
+                c.fill = PatternFill("solid", start_color="DDEEFF")
+            elif ci in ROOM2_CI:
+                c.fill = PatternFill("solid", start_color="EEE8FF")
+            else:
+                c.fill = PatternFill("solid", start_color="F0F4FF")
+
+        # Data rows from row 3
+        for row in rows:
+            ws.append([row.get(h, "") for h in EXPORT_HEADERS])
+
+        ws.row_dimensions[1].height = 20
+        ws.row_dimensions[2].height = 30
+        ws.freeze_panes = "A3"
+
+        for ci, h in enumerate(EXPORT_HEADERS, 1):
+            cl = get_column_letter(ci)
+            if any(k in h for k in ("address", "description", "facilities")):
+                ws.column_dimensions[cl].width = 30
+            elif any(k in h for k in ("brokerage_percent", "manual_brokerage")):
+                ws.column_dimensions[cl].width = 22
+            else:
+                ws.column_dimensions[cl].width = max(15, len(h) * 0.9)
+
+        buf = io.BytesIO()
+        wb.save(buf)
+        buf.seek(0)
+        response = HttpResponse(
+            buf.read(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="pg_listings_export.xlsx"'
+        return response
+
+    # ── CSV DOWNLOAD ──────────────────────────────────────────────────────────
     if request.GET.get('download') == 'csv':
+        rows = _build_export_rows(properties)
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="pg_listings.csv"'
+        response['Content-Disposition'] = 'attachment; filename="pg_listings_export.csv"'
         writer = csv.writer(response)
-        writer.writerow(['Property ID', 'Title', 'City', 'Locality', 'Building', 'Beds', 'PG For', 'Furnishing', 'Meals', 'Owner', 'Contact', 'Created At'])
-        for p in properties:
-            writer.writerow([p.pg_property_id, p.property_title, p.city, p.locality, p.building_name or '', p.total_beds, p.pg_for, p.furnishing_type, p.meals_available, p.owner_name, p.contact_number, p.created_at.strftime('%Y-%m-%d')])
+        writer.writerow(EXPORT_HEADERS)
+        for row in rows:
+            writer.writerow([row.get(h, "") for h in EXPORT_HEADERS])
         return response
 
     # ── PAGINATION SYSTEM ──
     paginator = Paginator(properties, 10)
-    page_obj = paginator.get_page(request.GET.get('page', 1))
+    page_obj  = paginator.get_page(request.GET.get('page', 1))
 
     # ── SUMMARY CARD KPI AGGREGATIONS ──
-    total_count = properties.count()
-    boys_count = properties.filter(pg_for__iexact='Boys').count()
-    girls_count = properties.filter(pg_for__iexact='Girls').count()
+    total_count    = properties.count()
+    boys_count     = properties.filter(pg_for__iexact='Boys').count()
+    girls_count    = properties.filter(pg_for__iexact='Girls').count()
     coliving_count = properties.filter(pg_for__iexact='Co-living').count()
-    total_beds = properties.aggregate(t=Sum('total_beds'))['t'] or 0
-    city_count = properties.values('city').distinct().count()
+    total_beds     = properties.aggregate(t=Sum('total_beds'))['t'] or 0
+    city_count     = properties.values('city').distinct().count()
 
-    boys_pct = round((boys_count / total_count * 100), 1) if total_count else 0
-    girls_pct = round((girls_count / total_count * 100), 1) if total_count else 0
-    coliving_pct = round((coliving_count / total_count * 100), 1) if total_count else 0
+    boys_pct     = round((boys_count    / total_count * 100), 1) if total_count else 0
+    girls_pct    = round((girls_count   / total_count * 100), 1) if total_count else 0
+    coliving_pct = round((coliving_count/ total_count * 100), 1) if total_count else 0
 
-    # Financial operations aggregations using PGRoomDetail relational inner joins
-    rent_stats = PGRoomDetail.objects.filter(property__in=properties).aggregate(avg_rent=Avg('room_rent'), max_rent=Max('room_rent'), min_rent=Min('room_rent'), avg_dep=Avg('room_deposit'), tot_rev=Sum('room_rent'), tot_dep=Sum('room_deposit'))
-    
-    # Extra Dashboard count maps
+    rent_stats = PGRoomDetail.objects.filter(property__in=properties).aggregate(
+        avg_rent=Avg('room_rent'), max_rent=Max('room_rent'), min_rent=Min('room_rent'),
+        avg_dep=Avg('room_deposit'), tot_rev=Sum('room_rent'), tot_dep=Sum('room_deposit')
+    )
+
     meals_available_count = properties.filter(meals_available=True).count()
-    meals_pct = round((meals_available_count / total_count * 100), 1) if total_count else 0
+    meals_pct     = round((meals_available_count / total_count * 100), 1) if total_count else 0
     furnished_count = properties.filter(furnishing_type__icontains='Fully').count()
-    furnished_pct = round((furnished_count / total_count * 100), 1) if total_count else 0
+    furnished_pct   = round((furnished_count / total_count * 100), 1) if total_count else 0
     single_room_count = properties.filter(rooms__room_type__iexact='single').distinct().count()
-    shared_room_count = properties.filter(rooms__room_type__in=['double', 'triple', 'quad']).distinct().count()
-    anytime_entry = properties.filter(any_time_allowed=True).count()
-    visitors_allowed = properties.filter(visitors_allowed=True).count()
-    premium_pg_count = properties.filter(rooms__room_rent__gte=10000).distinct().count()
+    shared_room_count = properties.filter(rooms__room_type__in=['double','triple','quad']).distinct().count()
+    anytime_entry   = properties.filter(any_time_allowed=True).count()
+    visitors_allowed= properties.filter(visitors_allowed=True).count()
+    premium_pg_count= properties.filter(rooms__room_rent__gte=10000).distinct().count()
     budget_pg_count = properties.filter(rooms__room_rent__lt=5000).distinct().count()
-    with_owner_count = properties.exclude(owner_name='').count()
-    try: with_images_count = properties.filter(images__isnull=False).distinct().count()
-    except Exception: with_images_count = 0
+    with_owner_count= properties.exclude(owner_name='').count()
+    try:
+        with_images_count = properties.filter(images__isnull=False).distinct().count()
+    except Exception:
+        with_images_count = 0
 
-    # ── CHARTS STRUCTURAL JSON OBJECTS ──
-    pg_for_qs = properties.values('pg_for').annotate(c=Count('pg_property_id')).order_by('-c')
+    uploaded_files = PGColivingProperty.objects.filter(
+        is_deleted=False, upload_file_name__isnull=False
+    ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct().order_by('upload_file_name')
+
+    # ── CHARTS ──
+    pg_for_qs     = properties.values('pg_for').annotate(c=Count('pg_property_id')).order_by('-c')
     pg_for_labels = json.dumps([i['pg_for'] for i in pg_for_qs])
-    pg_for_data = json.dumps([i['c'] for i in pg_for_qs])
+    pg_for_data   = json.dumps([i['c']      for i in pg_for_qs])
 
-    rent_buckets = [('Under ₹3k', 0, 3000), ('₹3k–5k', 3000, 5000), ('₹5k–8k', 5000, 8000), ('₹8k–12k', 8000, 12000), ('Above ₹12k', 12000, 999999)]
+    rent_buckets      = [('Under ₹3k',0,3000),('₹3k–5k',3000,5000),('₹5k–8k',5000,8000),('₹8k–12k',8000,12000),('Above ₹12k',12000,999999)]
     rent_range_labels = json.dumps([b[0] for b in rent_buckets])
-    rent_range_data = json.dumps([properties.filter(rooms__room_rent__gte=lo, rooms__room_rent__lt=hi).distinct().count() for _, lo, hi in rent_buckets])
+    rent_range_data   = json.dumps([properties.filter(rooms__room_rent__gte=lo, rooms__room_rent__lt=hi).distinct().count() for _, lo, hi in rent_buckets])
 
-    furnish_qs = properties.values('furnishing_type').annotate(c=Count('pg_property_id')).order_by('-c')
-    furnishing_labels = json.dumps([i['furnishing_type'] for i in furnish_qs])
-    furnishing_data = json.dumps([i['c'] for i in furnish_qs])
+    furnish_qs       = properties.values('furnishing_type').annotate(c=Count('pg_property_id')).order_by('-c')
+    furnishing_labels= json.dumps([i['furnishing_type'] for i in furnish_qs])
+    furnishing_data  = json.dumps([i['c']               for i in furnish_qs])
 
-    city_qs = properties.values('city').annotate(c=Count('pg_property_id')).order_by('-c')[:5]
+    city_qs     = properties.values('city').annotate(c=Count('pg_property_id')).order_by('-c')[:5]
     city_labels = json.dumps([i['city'] for i in city_qs])
-    city_data = json.dumps([i['c'] for i in city_qs])
-    
+    city_data   = json.dumps([i['c']    for i in city_qs])
+
     cities = all_props.values_list('city', flat=True).distinct().order_by('city')
 
-    return render(request, 'admin_user/Reports/Rental/pg_list.html', {
+    return render(request, 'admin_user/Reports/Rental/pg_list.html', {'admin_obj': admin_obj,
         'page_obj': page_obj, 'search_query': search_query, 'pg_for_filter': pg_for_filter,
         'city_filter': city_filter, 'furnish_filter': furnish_filter, 'meals_filter': meals_filter,
         'sharing_filter': sharing_filter, 'from_date': from_date, 'to_date': to_date, 'cities': cities,
-        'total_count': total_count, 'city_count': city_count, 'boys_count': boys_count, 'girls_count': girls_count,
-        'coliving_count': coliving_count, 'total_beds': total_beds, 'boys_pct': boys_pct, 'girls_pct': girls_pct,
-        'coliving_pct': coliving_pct, 'avg_rent': rent_stats['avg_rent'] or 0, 'max_rent': rent_stats['max_rent'] or 0,
-        'min_rent': rent_stats['min_rent'] or 0, 'total_revenue': rent_stats['tot_rev'] or 0, 'total_deposit': rent_stats['tot_dep'] or 0,
-        'avg_deposit': rent_stats['avg_dep'] or 0, 'meals_available_count': meals_available_count, 'meals_pct': meals_pct,
-        'furnished_count': furnished_count, 'furnished_pct': furnished_pct, 'single_room_count': single_room_count,
-        'shared_room_count': shared_room_count, 'non_veg_allowed': meals_available_count, 'with_images_count': with_images_count,
-        'anytime_entry': anytime_entry, 'visitors_allowed': visitors_allowed, 'premium_pg_count': premium_pg_count,
-        'budget_pg_count': budget_pg_count, 'with_owner_count': with_owner_count,
-        'pg_for_labels': pg_for_labels, 'pg_for_data': pg_for_data, 'rent_range_labels': rent_range_labels,
-        'rent_range_data': rent_range_data, 'furnishing_labels': furnishing_labels, 'furnishing_data': furnishing_data,
+        'total_count': total_count, 'city_count': city_count, 'boys_count': boys_count,
+        'girls_count': girls_count, 'coliving_count': coliving_count, 'total_beds': total_beds,
+        'boys_pct': boys_pct, 'girls_pct': girls_pct, 'coliving_pct': coliving_pct,
+        'avg_rent': rent_stats['avg_rent'] or 0, 'max_rent': rent_stats['max_rent'] or 0,
+        'min_rent': rent_stats['min_rent'] or 0, 'total_revenue': rent_stats['tot_rev'] or 0,
+        'total_deposit': rent_stats['tot_dep'] or 0, 'avg_deposit': rent_stats['avg_dep'] or 0,
+        'meals_available_count': meals_available_count, 'meals_pct': meals_pct,
+        'furnished_count': furnished_count, 'furnished_pct': furnished_pct,
+        'single_room_count': single_room_count, 'shared_room_count': shared_room_count,
+        'non_veg_allowed': meals_available_count, 'with_images_count': with_images_count,
+        'anytime_entry': anytime_entry, 'visitors_allowed': visitors_allowed,
+        'premium_pg_count': premium_pg_count, 'budget_pg_count': budget_pg_count,
+        'with_owner_count': with_owner_count, 'uploaded_files': uploaded_files,
+        'pg_for_labels': pg_for_labels, 'pg_for_data': pg_for_data,
+        'rent_range_labels': rent_range_labels, 'rent_range_data': rent_range_data,
+        'furnishing_labels': furnishing_labels, 'furnishing_data': furnishing_data,
         'city_labels': city_labels, 'city_data': city_data,
     })
-
-
 
 
 @csrf_exempt
@@ -7420,159 +8068,186 @@ def add_pg(request):
 
 
 
-<<<<<<< HEAD
-=======
-    admin_obj = Admin_Login.objects.get(id=session_id)
-
-    search = request.GET.get('search', '')
-    qs = PGColivingProperty.objects.all().order_by('-id')
->>>>>>> d0f149b2c74d1fc5cd4a07f46e5105a392471ff5
 
 
-<<<<<<< HEAD
-=======
-    if request.GET.get('download') == 'csv':
-        res = HttpResponse(content_type='text/csv')
-        res['Content-Disposition'] = 'attachment; filename="pg.csv"'
-        w = csv.writer(res)
-        w.writerow(["PG", "City", "Total Beds", "Owner", "Contact"])
-        for p in qs:
-            w.writerow([p.pg_name, p.city, p.total_beds, p.owner_name, p.contact_number])
-        return res
-
-    # ── Fetch unique uploaded file names for the Bulk Delete modal ──
-    try:
-        # Note: Replace 'upload_file_name' with your actual model field name if different
-        uploaded_files = PGColivingProperty.objects.exclude(
-            upload_file_name__isnull=True
-        ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
-    except Exception:
-        uploaded_files = []
-
-    paginator = Paginator(qs, 10)
-    page = paginator.get_page(request.GET.get('page'))
-
-    # ==========================================
-    # DASHBOARD AGGREGATION LOGIC
-    # ==========================================
-    
-    # 1. Get counts for property types
-    pg_count = PGColivingProperty.objects.count()
-    
-    try:
-        # Assuming you have these models imported
-        commercial_count = CommercialRentalProperty.objects.count()
-        # residential_count = ResidentialRentalProperty.objects.count() # Update with your actual model name
-        residential_count = 32 # Placeholder: replace with actual query
-    except NameError:
-        commercial_count = 0
-        residential_count = 0
-
-    total_properties = pg_count + commercial_count + residential_count
-
-    # 2. Get PG Specific Stats
-    total_pg_beds = PGColivingProperty.objects.aggregate(total=Sum('total_beds'))['total'] or 0
-    
-    # Pack data for charts (Converting to JSON for safe Javascript usage)
-    chart_data = {
-        "property_distribution": [residential_count, commercial_count, pg_count],
-        "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-        "rental_income": [120000, 150000, 180000, 210000, 250000, 300000], # Mock data: replace with real monthly aggregation
-    }
-
-    return render(request, 'admin_user/Reports/Rental/pg_list.html', {
-        "page_obj": page,
-        "search": search,
-        'admin_obj':admin_obj,
-        
-        # Pass Stats to template
-        "total_properties": total_properties,
-        "residential_count": residential_count,
-        "commercial_count": commercial_count,
-        "pg_count": pg_count,
-        "total_pg_beds": total_pg_beds,
-        "active_listings": total_properties, # Assuming all are active for now
-        "chart_data_json": json.dumps(chart_data), # Send secure JSON to JS
-        "uploaded_files": uploaded_files, # Passed files to template here
-    })
->>>>>>> d0f149b2c74d1fc5cd4a07f46e5105a392471ff5
 
 
+@require_POST
 def pg_bulk_delete(request):
-    """Handles Advanced Bulk Deletions for PG / Co-living Properties."""
-    if request.method != 'POST':
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-        
-    session_id = request.session.get('Admin_id')
-    if not session_id:
-        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
+
+    sid, _ = _get_admin(request)
+
+    if not sid:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Unauthorized access.'
+        })
 
     try:
         data = json.loads(request.body)
+
         delete_type = data.get('delete_type')
+
         properties = PGColivingProperty.objects.all()
-        
+
+        # =====================================================
+        # DELETE ALL
+        # =====================================================
         if delete_type == 'delete_all':
+
             count = properties.count()
+
             properties.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted ALL {count} PG properties.'})
-            
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully deleted ALL {count} PG properties.'
+            })
+
+        # =====================================================
+        # CURRENT PAGE DELETE
+        # =====================================================
         elif delete_type == 'current_page':
+
             page_ids = data.get('page_ids', [])
-            target_props = properties.filter(id__in=page_ids)
+
+            target_props = properties.filter(
+                pg_property_id__in=page_ids
+            )
+
             count = target_props.count()
+
             target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} PG properties from current page.'})
-            
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully deleted {count} PG properties from current page.'
+            })
+
+        # =====================================================
+        # DATE RANGE DELETE
+        # =====================================================
         elif delete_type == 'date_range':
+
             from_date = data.get('from_date')
             to_date = data.get('to_date')
-            # Adjust 'created_at' if your model uses a different date field
-            target_props = properties.filter(created_at__range=[from_date, to_date])
-            count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} PG properties in date range.'})
-            
-        elif delete_type == 'latest_month':
-            thirty_days_ago = timezone.now() - timedelta(days=30)
-            target_props = properties.filter(created_at__gte=thirty_days_ago)
-            count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} PG properties from the last 30 days.'})
-            
-        elif delete_type == 'old_data':
-            six_months_ago = timezone.now() - timedelta(days=180)
-            target_props = properties.filter(created_at__lt=six_months_ago)
-            count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} older PG properties.'})
-            
-        elif delete_type == 'by_uploader':
-            uploader = data.get('uploader_text', '')
-            target_props = properties.filter(
-                Q(owner_name__icontains=uploader) | # Using owner_name as fallback if uploaded_by isn't present
-                Q(email__icontains=uploader) 
-                # Add Q(uploaded_by_name__icontains=uploader) if your PG model has this field
-            )
-            count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} PG properties uploaded by {uploader}.'})
 
-        elif delete_type == 'by_file':
-            file_name = data.get('file_name', '')
-            # Replace 'upload_file_name' with your exact database field name
-            target_props = properties.filter(upload_file_name=file_name) 
+            target_props = properties.filter(
+                created_at__date__range=[from_date, to_date]
+            )
+
             count = target_props.count()
-            if count == 0:
-                return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
+
             target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} PG properties from {file_name}.'})
-            
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully deleted {count} PG properties in selected date range.'
+            })
+
+        # =====================================================
+        # LAST 30 DAYS
+        # =====================================================
+        elif delete_type == 'latest_month':
+
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+
+            target_props = properties.filter(
+                created_at__gte=thirty_days_ago
+            )
+
+            count = target_props.count()
+
+            target_props.delete()
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully deleted {count} latest PG properties.'
+            })
+
+        # =====================================================
+        # OLD DATA
+        # =====================================================
+        elif delete_type == 'old_data':
+
+            six_months_ago = timezone.now() - timedelta(days=180)
+
+            target_props = properties.filter(
+                created_at__lt=six_months_ago
+            )
+
+            count = target_props.count()
+
+            target_props.delete()
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully deleted {count} old PG properties.'
+            })
+
+        # =====================================================
+        # BY UPLOADER
+        # =====================================================
+        elif delete_type == 'by_uploader':
+
+            uploader = data.get('uploader_text', '')
+
+            target_props = properties.filter(
+                Q(uploaded_by_name__icontains=uploader) |
+                Q(uploaded_by_email__icontains=uploader) |
+                Q(uploaded_by_contact__icontains=uploader) |
+                Q(owner_name__icontains=uploader)
+            )
+
+            count = target_props.count()
+
+            target_props.delete()
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully deleted {count} PG properties uploaded by "{uploader}".'
+            })
+
+        # =====================================================
+        # BY FILE NAME
+        # =====================================================
+        elif delete_type == 'by_file':
+
+            file_name = data.get('file_name', '')
+
+            target_props = properties.filter(
+                upload_file_name=file_name
+            )
+
+            count = target_props.count()
+
+            if count == 0:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'No properties found for file: {file_name}'
+                })
+
+            target_props.delete()
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully deleted {count} PG properties from "{file_name}".'
+            })
+
+        # =====================================================
+        # UNKNOWN
+        # =====================================================
         else:
-            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Unknown delete criteria.'
+            })
 
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
 
 
 
@@ -7605,26 +8280,42 @@ COLUMN_MAP = [
     ("city *",                                                              "city",                 _str,  False),
     ("building / project name",                                             "building_name",        _str,  False),
     ("locality *",                                                          "locality",             _str,  False),
-    ("pg name *",                                                           "property_title",       _str,  False),  # auto-gen if blank, but we still pass it
+    ("pg name *",                                                           "property_title",       _str,  False),
     ("property address *",                                                  "property_address",     _str,  False),
     ("total beds *",                                                        "total_beds",           _int,  False),
-    ("pg for * (boys/girls/both)",                                          "pg_for",               _str,  False),
+    ("pg for * (boys/girls/co_living)",                                          "pg_for",               _str,  False),
     ("furnishing type * (fully-furnished/semi-furnished/unfurnished)",      "furnishing_type",      _str,  False),
     ("best suited for (students/working professionals/any)",                "best_suited_for",      _str,  False),
     ("property managed by (owner/caretaker)",                               "property_managed_by",  _str,  False),
-    ("manager stays? (true/false)",                                         "manager_stays",        _bool, False),
+    ("property manager stays at property? (true/false)",                    "manager_stays",        _bool, False),
     ("notice period (days)",                                                "notice_period",        _int,  False),
     ("lock-in period (days)",                                               "lockin_period",        _int,  False),
     ("minimum stay (months) *",                                             "minimum_stay",         _int,  False),
     ("available from * (yyyy-mm-dd)",                                       "available_from",       _date, False),
-    # room col — value is the pipe-string; handled separately
-    ("single|1|8000|16000|yes|1%||,double|2|6000|12000|no||",              "__room_details__",     _str,  True),
+    # ── Room 1 columns ────────────────────────────────────────────────────────
+    ("room_type_1 *",                                                       "__room_type_1__",      _str,  True),
+    ("room_beds_1 *",                                                       "__room_beds_1__",      _int,  True),
+    ("room_rent_1 *",                                                       "__room_rent_1__",      _str,  True),
+    ("room_deposit_1 *",                                                    "__room_deposit_1__",   _str,  True),
+    ("room_brokerage_1",                                                    "__room_brokerage_1__", _str,  True),
+    ("room_brokerage_percent_1",                                            "__room_brokerage_percent_1__", _str, True),
+    ("room_manual_brokerage_1",                                             "__room_manual_brokerage_1__",  _str, True),
+    ("room_facilities_1",                                                   "__room_facilities_1__",_str,  True),
+    # ── Room 2 columns ────────────────────────────────────────────────────────
+    ("room_type_2",                                                         "__room_type_2__",      _str,  True),
+    ("room_beds_2",                                                         "__room_beds_2__",      _int,  True),
+    ("room_rent_2",                                                         "__room_rent_2__",      _str,  True),
+    ("room_deposit_2",                                                      "__room_deposit_2__",   _str,  True),
+    ("room_brokerage_2",                                                    "__room_brokerage_2__", _str,  True),
+    ("room_brokerage_percent_2",                                            "__room_brokerage_percent_2__", _str, True),
+    ("room_manual_brokerage_2",                                             "__room_manual_brokerage_2__",  _str, True),
+    ("room_facilities_2",                                                   "__room_facilities_2__",_str,  True),
+    # ── Rest of fields ─────────────────────────────────────────────────────────
     ("meals available? (true/false)",                                       "meals_available",      _bool, False),
     ("meal offerings (breakfast,lunch,dinner)",                             "meal_offerings",       _str,  False),
     ("meal speciality (veg/non-veg/both)",                                  "meal_speciality",      _str,  False),
-    # non_veg_allowed not in model — skip
     ("opposite sex allowed? (true/false)",                                  "opposite_sex_allowed", _bool, False),
-    ("any time entry allowed? (true/false)",                                "any_time_allowed",     _bool, False),
+    ("any time allowed? (true/false)",                                       "any_time_allowed",     _bool, False),
     ("visitors allowed? (true/false)",                                      "visitors_allowed",     _bool, False),
     ("guardian allowed? (true/false)",                                      "guardian_allowed",     _bool, False),
     ("drinking allowed? (true/false)",                                      "drinking_allowed",     _bool, False),
@@ -7637,7 +8328,28 @@ COLUMN_MAP = [
     ("email *",                                                             "email",                _str,  False),
     ("alternate contact",                                                   "alternate_contact",    _str,  False),
 ]
-
+ 
+# Updated REQUIRED_HEADERS — room type 1 is now required
+REQUIRED_HEADERS = {
+    "city *",
+    "locality *",
+    "property address *",
+    "total beds *",
+    "pg for * (boys/girls/co_living)",
+    "furnishing type * (fully-furnished/semi-furnished/unfurnished)",
+    "minimum stay (months) *",
+    "available from * (yyyy-mm-dd)",
+    "room_type_1 *",
+    "room_beds_1 *",
+    "room_rent_1 *",
+    "room_deposit_1 *",
+    "owner name *",
+    "contact number *",
+    "email *",
+}
+ 
+# Number of room slots supported
+ROOM_SLOTS = 2
 # Required fields validated on model data dict
 REQUIRED_FIELDS = [
     "city", "locality", "property_address",
@@ -7646,20 +8358,7 @@ REQUIRED_FIELDS = [
     "owner_name", "contact_number", "email",
 ]
 
-# Minimum required headers (lowercased) that MUST appear in the uploaded file
-REQUIRED_HEADERS = {
-    "city *",
-    "locality *",
-    "property address *",
-    "total beds *",
-    "pg for * (boys/girls/both)",
-    "furnishing type * (fully-furnished/semi-furnished/unfurnished)",
-    "minimum stay (months) *",
-    "available from * (yyyy-mm-dd)",
-    "owner name *",
-    "contact number *",
-    "email *",
-}
+
 
 
 # ─── Room detail parser ───────────────────────────────────────────────────────
@@ -7691,8 +8390,7 @@ def _parse_room_details(raw):
 @csrf_exempt
 @require_POST
 def import_pg_excel(request):
-
-    if not request.session.get('Admin_id'):
+    if not request.session.get('Admin_id') and not request.session.get('User_id'):
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 
     file = request.FILES.get('file')
@@ -7702,31 +8400,36 @@ def import_pg_excel(request):
     file_name = file.name.strip()
 
     try:
-        wb = openpyxl.load_workbook(io.BytesIO(file.read()), data_only=True)
+        wb = openpyxl.load_workbook(io.BytesIO(file.read()), data_only=True, read_only=True)
         ws = wb.active
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Invalid Excel file: {e}'}, status=400)
 
     all_rows = list(ws.iter_rows(values_only=True))
+    wb.close()
+
     if len(all_rows) < 2:
         return JsonResponse({'status': 'error', 'message': 'File is empty or missing headers.'}, status=400)
 
-    # Detect header row: row 1 = section titles (merged), row 2 = real col headers
-    # If row 0 cells are all None except merged starts → row 1 is section row, row 1 (index 1) is headers
     row0 = [str(c).strip().lower() if c else "" for c in all_rows[0]]
     row1 = [str(c).strip().lower() if c else "" for c in all_rows[1]]
 
-    # If row0 contains "step" clues → headers are in row1
-    if any("step" in v or "📋" in v for v in row0 if v):
+    if any("step" in v or "📋" in v or "room" in v for v in row0 if v):
         header_row = row1
-        data_start  = 2   # data begins at index 2
+        data_start = 2
+        if len(all_rows) > 2:
+            row2 = all_rows[2]
+            non_empty = [c for c in row2 if c is not None and str(c).strip()]
+            if len(non_empty) > 3 and all(
+                isinstance(c, str) and len(c) > 10 for c in non_empty[:5]
+            ):
+                data_start = 3
     else:
         header_row = row0
-        data_start  = 1
+        data_start = 1
 
     col_index = {h: i for i, h in enumerate(header_row) if h}
 
-    # ── Validate template format ──────────────────────────────────────────────
     missing_headers = REQUIRED_HEADERS - set(col_index.keys())
     if missing_headers:
         return JsonResponse({
@@ -7737,323 +8440,446 @@ def import_pg_excel(request):
             )
         }, status=400)
 
-    # ── Find room_details column index (its header is the sample pipe-string) ─
-    room_col_idx = None
-    for h, idx in col_index.items():
-        if "|" in h and ("single" in h or "double" in h):
-            room_col_idx = idx
-            break
+    # ── Uploader identity ─────────────────────────────────────────────────────
+    admin_id = request.session.get('Admin_id')
+    user_id  = request.session.get('User_id')
 
-    # ── Same-file check ───────────────────────────────────────────────────────
-    file_already_exists = PGColivingProperty.objects.filter(
-        upload_file_name=file_name, is_deleted=False
-    ).exists()
+    admin_obj = Admin_Login.objects.filter(id=admin_id).first() if admin_id else None
+    user_obj  = User_Details.objects.filter(id=user_id).first()  if user_id  else None
 
-    uploader_name = request.session.get(
-    "Admin_name",
-    request.session.get("User_name", "Admin")
-    )
+    uploader_name    = ""
+    uploader_email   = ""
+    uploader_contact = ""
+    uploader_role    = "Automated Engine"
 
-    uploader_email = request.session.get(
-    "Admin_email",
-    request.session.get("User_email", "")
-    )
+    if admin_obj:
+        uploader_name    = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
+        uploader_email   = getattr(admin_obj, 'email', '')
+        uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
+        uploader_role    = "Admin"
+    elif user_obj:
+        uploader_name    = user_obj.user_name
+        uploader_email   = user_obj.user_email
+        uploader_contact = user_obj.user_phone
+        uploader_role    = "User"
 
-    uploader_contact = request.session.get(
-    "Admin_contact",
-    request.session.get("User_contact", "")
-    )
-
-    uploader_role = (
-    "Admin"
-    if request.session.get("Admin_id")
-    else "User"
-    )
-
-    # Build lookup from COLUMN_MAP: excel_key → (model_field, converter)
-    col_lookup = {excel_key: (field, conv) for excel_key, field, conv, _ in COLUMN_MAP}
-
-    imported          = 0
-    skipped           = 0
-    errors            = []
-    same_file_skipped = 0
-
+    col_lookup   = {excel_key: (field, conv) for excel_key, field, conv, _ in COLUMN_MAP}
     model_fields = {f.name for f in PGColivingProperty._meta.get_fields() if hasattr(f, 'column')}
+    meta_fields  = {
+        "uploaded_by_name", "uploaded_by_email", "uploaded_by_contact",
+        "uploaded_by_role", "upload_file_name"
+    }
+
+    # ── PRE-FETCH all fingerprints in ONE query (no per-row DB hits) ──────────
+    # Fingerprint = (contact_number, email, property_address, locality)
+    # For "different file same data" check we need the full set
+    existing_all = set(
+        PGColivingProperty.objects.filter(is_deleted=False)
+        .values_list('contact_number', 'email', 'property_address', 'locality')
+    )
+    # For "same file same data same user" check
+    same_file_same_user_fps = set(
+        PGColivingProperty.objects.filter(
+            upload_file_name=file_name,
+            uploaded_by_email=uploader_email,
+            is_deleted=False
+        ).values_list('contact_number', 'email', 'property_address', 'locality')
+    )
+    # For "same file different user" check
+    same_file_all_fps = set(
+        PGColivingProperty.objects.filter(
+            upload_file_name=file_name,
+            is_deleted=False
+        ).values_list('contact_number', 'email', 'property_address', 'locality')
+    )
+
+    imported                    = 0
+    skipped                     = 0
+    errors                      = []
+    same_file_same_user_skipped = 0
+    same_file_diff_user_skipped = 0
+    diff_file_same_data_skipped = 0
+
+    pg_objects_to_create = []
+    room_data_per_row    = []
 
     for row_num, row in enumerate(all_rows[data_start:], start=data_start + 1):
 
         if all(c is None or str(c).strip() == "" for c in row):
             continue
 
-        data         = {}
-        room_raw     = ""
+        data     = {}
+        room_map = {}
 
-        # Map each column
         for excel_key, (model_field, conv) in col_lookup.items():
-            if model_field == "__room_details__":
-                continue
             idx = col_index.get(excel_key)
-            if idx is not None and idx < len(row):
+            if idx is None or idx >= len(row):
+                continue
+            raw = row[idx]
+
+            if model_field.startswith("__room_") and model_field.endswith("__"):
+                inner = model_field[2:-2]
+                parts = inner.rsplit("_", 1)
+                if len(parts) == 2 and parts[1].isdigit():
+                    slot      = int(parts[1])
+                    field_key = parts[0]
+                    try:
+                        val = conv(raw)
+                    except Exception:
+                        val = None
+                    room_map.setdefault(slot, {})[field_key] = val
+                continue
+
+            if model_field in model_fields:
                 try:
-                    val = conv(row[idx])
-                    if model_field in model_fields:
-                        data[model_field] = val
+                    data[model_field] = conv(raw)
                 except Exception:
                     data[model_field] = None
 
-        # property_title: leave blank → model.save() auto-generates it
-        # If user typed a PG name, keep it; otherwise let save() build it
         if not data.get("property_title"):
-            data.pop("property_title", None)   # let model handle it
+            data.pop("property_title", None)
 
-        # Room details
-        if room_col_idx is not None and room_col_idx < len(row):
-            room_raw = str(row[room_col_idx] or "").strip()
-
-        # ── Required field check ──────────────────────────────────────────────
         missing = [f for f in REQUIRED_FIELDS if not data.get(f)]
         if missing:
             skipped += 1
             errors.append(f"Row {row_num}: Missing → {', '.join(missing)}")
             continue
 
-        # ── Uploader ──────────────────────────────────────────────────────────
-        # Ignore uploader values from Excel
-        data.pop("uploaded_by_name", None)
-        data.pop("uploaded_by_email", None)
-        data.pop("uploaded_by_contact", None)
-        data.pop("uploaded_by_role", None)
-
-# Save actual logged-in user details
-        data["uploaded_by_name"] = uploader_name
-        data["uploaded_by_email"] = uploader_email
-        data["uploaded_by_contact"] = uploader_contact
-        data["uploaded_by_role"] = uploader_role
-        data["upload_file_name"] = file_name
-
-        # ── Duplicate: same file, same core fields → skip ─────────────────────
-        if file_already_exists:
-            dupe = PGColivingProperty.objects.filter(
-                upload_file_name=file_name,
-                contact_number=data.get("contact_number", ""),
-                email=data.get("email", ""),
-                property_address=data.get("property_address", ""),
-                is_deleted=False,
-            ).exists()
-            if dupe:
-                same_file_skipped += 1
-                skipped += 1
+        rooms = []
+        for slot in range(1, ROOM_SLOTS + 1):
+            rd = room_map.get(slot, {})
+            if not rd.get("room_type") and not rd.get("room_rent"):
                 continue
+            rooms.append({
+                "room_type":              rd.get("room_type") or "single",
+                "room_beds":              rd.get("room_beds") or 1,
+                "room_rent":              float(rd.get("room_rent") or 0),
+                "room_deposit":           float(rd.get("room_deposit") or 0),
+                "room_brokerage":         rd.get("room_brokerage") or "No",
+                "room_brokerage_percent": rd.get("room_brokerage_percent") or "",
+                "room_manual_brokerage":  rd.get("room_manual_brokerage") or "",
+                "room_facilities":        rd.get("room_facilities") or "",
+            })
 
-        # ── Duplicate: different file, same property ──────────────────────────
-        dupe_diff_file = PGColivingProperty.objects.filter(
-            contact_number=data.get("contact_number", ""),
-            email=data.get("email", ""),
-            property_address=data.get("property_address", ""),
-            locality=data.get("locality", ""),
-            is_deleted=False,
-        ).exclude(upload_file_name=file_name).exists()
+        data["uploaded_by_name"]    = uploader_name
+        data["uploaded_by_email"]   = uploader_email
+        data["uploaded_by_contact"] = uploader_contact
+        data["uploaded_by_role"]    = uploader_role
+        data["upload_file_name"]    = file_name
 
-        if dupe_diff_file:
+        fingerprint = (
+            data.get("contact_number", ""),
+            data.get("email", ""),
+            data.get("property_address", ""),
+            data.get("locality", ""),
+        )
+
+        # ── CASE 1: Same file + same user + same data → skip silently ─────────
+        if fingerprint in same_file_same_user_fps:
+            same_file_same_user_skipped += 1
             skipped += 1
-            errors.append(f"Row {row_num}: Duplicate — same property already exists from a different file.")
             continue
 
-        # ── Strip unknown keys ────────────────────────────────────────────────
-        data = {k: v for k, v in data.items() if k in model_fields}
-
-        # ── Save ──────────────────────────────────────────────────────────────
-        try:
-            pg = PGColivingProperty.objects.create(**data)
-            for room in _parse_room_details(room_raw):
-                PGRoomDetail.objects.create(property=pg, **room)
-            imported += 1
-        except Exception as e:
+        # ── CASE 2: Same file + different user + same data → block with info ──
+        if fingerprint in same_file_all_fps and fingerprint not in same_file_same_user_fps:
+            same_file_diff_user_skipped += 1
             skipped += 1
-            errors.append(f"Row {row_num}: {e}")
+            errors.append(
+                f"Row {row_num}: Already uploaded by a different user with the same file."
+            )
+            continue
 
-    same_file_flag = same_file_skipped > 0 and imported == 0
+        # ── CASE 3: Different file + same data → block ────────────────────────
+        # (fingerprint exists in DB but NOT from this file at all)
+        if fingerprint in existing_all and fingerprint not in same_file_all_fps:
+            diff_file_same_data_skipped += 1
+            skipped += 1
+            errors.append(
+                f"Row {row_num}: Duplicate — same property data already exists from a different file."
+            )
+            continue
+
+        # ── CASE 4: Same file + NEW data → ALLOW (just skip same-data check) ─
+        # Falls through to insert below
+
+        data = {k: v for k, v in data.items() if k in model_fields or k in meta_fields}
+
+        pg_objects_to_create.append(PGColivingProperty(**data))
+        room_data_per_row.append(rooms)
+
+        # Update in-memory sets so later rows in THIS upload don't re-collide
+        existing_all.add(fingerprint)
+        same_file_all_fps.add(fingerprint)
+        same_file_same_user_fps.add(fingerprint)
+
+    # ── BULK INSERT ───────────────────────────────────────────────────────────
+    if pg_objects_to_create:
+        try:
+            created = PGColivingProperty.objects.bulk_create(
+                pg_objects_to_create,
+                batch_size=200,
+            )
+            imported = len(created)
+
+            room_objects = []
+            for pg, rooms in zip(created, room_data_per_row):
+                for room in rooms:
+                    room_objects.append(PGRoomDetail(property=pg, **room))
+            if room_objects:
+                PGRoomDetail.objects.bulk_create(room_objects, batch_size=500)
+
+        except Exception as e:
+            for pg_obj, rooms in zip(pg_objects_to_create, room_data_per_row):
+                try:
+                    pg_obj.save()
+                    for room in rooms:
+                        PGRoomDetail.objects.create(property=pg_obj, **room)
+                    imported += 1
+                except Exception as row_err:
+                    skipped += 1
+                    errors.append(f"Save error: {row_err}")
 
     return JsonResponse({
-        "status":          "success",
-        "imported":        imported,
-        "skipped":         skipped,
-        "errors":          errors[:10],
-        "same_file":       same_file_flag,
-        "same_file_count": same_file_skipped,
-        "message":         f"{imported} imported, {skipped} skipped",
+        "status":                        "success",
+        "imported":                      imported,
+        "skipped":                       skipped,
+        "errors":                        errors[:10],
+        "same_file_same_user_skipped":   same_file_same_user_skipped,
+        "same_file_diff_user_skipped":   same_file_diff_user_skipped,
+        "diff_file_same_data_skipped":   diff_file_same_data_skipped,
+        "uploader_name":                 uploader_name,
+        "file_name":                     file_name,
+        "message":                       f"{imported} imported, {skipped} skipped",
     })
-
 
 # ─── DOWNLOAD TEMPLATE VIEW ───────────────────────────────────────────────────
 def download_pg_template(request):
-
     if not request.session.get('Admin_id'):
         from django.shortcuts import render
         return render(request, 'home_page/Adminlogin.html')
-
+ 
+    import io
+    import openpyxl
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from openpyxl.utils import get_column_letter
-
+    from openpyxl.comments import Comment
+    from django.http import HttpResponse
+ 
     wb  = openpyxl.Workbook()
     ws  = wb.active
-    ws.title = "PG Import"
-
+    ws.title = "PG Listings"
+ 
+    # ── Strict Sequence & Exact Lowercase Headers ─────────────────────────────
     sections = [
-        ("📋 Step 1: Basic Info", [
-            ("city",               "City *",                                                              True),
-            ("building_name",      "Building / Project Name",                                             False),
-            ("locality",           "Locality *",                                                          True),
-            ("property_title",     "PG Name *",                                                          True),
-            ("property_address",   "Property Address *",                                                  True),
-            ("total_beds",         "Total Beds *",                                                        True),
-            ("pg_for",             "PG For * (boys/girls/both)",                                          True),
-            ("furnishing_type",    "Furnishing Type * (fully-furnished/semi-furnished/unfurnished)",       True),
-            ("best_suited_for",    "Best Suited For (students/working professionals/any)",                 False),
-            ("property_managed_by","Property Managed By (owner/caretaker)",                               False),
-            ("manager_stays",      "Manager Stays? (True/False)",                                         False),
-            ("notice_period",      "Notice Period (Days)",                                                False),
-            ("lockin_period",      "Lock-in Period (Days)",                                               False),
-            ("minimum_stay",       "Minimum Stay (Months) *",                                             True),
-            ("available_from",     "Available From * (YYYY-MM-DD)",                                       True),
+        ("📋 Basic Info", [
+            ("property_title",     "Auto Generated By System",                                   False),
+            ("city",               "city *",                                                      True),
+            ("building_name",      "building / project name",                                     False),
+            ("locality",           "locality *",                                                  True),
+            
+            ("property_address",   "property address *",                                          True),
+            ("total_beds",         "total beds *",                                                True),
+            ("pg_for",             "pg for * (boys/girls/co_living)",                             True),
+            ("furnishing_type",    "furnishing type * (fully-furnished/semi-furnished/unfurnished)", True),
+            ("sharing_type",       "sharing type",                                                False), # <-- Added missing field
+            ("best_suited_for",    "best suited for (students/working professionals/any)",        False),
+            ("meals_available",    "meals available? (true/false)",           False),
+            ("meal_offerings",     "meal offerings (breakfast,lunch,dinner)", False),
+            ("meal_speciality",    "meal speciality (veg/non-veg/both)",      False),
+          
+            ("notice_period",      "notice period (days)",                                        False),
+            ("lockin_period",      "lock-in period (days)",                                       False),
+            ("minimum_stay",       "minimum stay (months) *",                                     True),
+            ("available_from",     "available from * (yyyy-mm-dd)",                               True),
+            ("property_managed_by","property managed by (owner/caretaker)",                       False),
+            ("manager_stays",      "property manager stays at property? (true/false)",            False),
         ]),
-        ("📋 Step 2: Room Details  ▶  Format: type|beds|rent|deposit|brokerage(Yes/No)|brokerage%|manual_brokerage  — separate room types with comma", [
-            ("room_details", "single|1|8000|16000|Yes|1%||,double|2|6000|12000|No||", False),
+        ("🛏 Room 1", [
+            ("room_type_1",              "room_type_1 *",              True),
+            ("room_beds_1",              "room_beds_1 *",              True),
+            ("room_rent_1",              "room_rent_1 *",              True),
+            ("room_deposit_1",           "room_deposit_1 *",           True),
+            ("room_brokerage_1",         "room_brokerage_1",           False),
+            ("room_brokerage_percent_1", "room_brokerage_percent_1",   False),
+            ("room_manual_brokerage_1",  "room_manual_brokerage_1",    False),
+            ("room_facilities_1",        "room_facilities_1",          False),
         ]),
-        ("📋 Step 3: Meals", [
-            ("meals_available", "Meals Available? (True/False)",           False),
-            ("meal_offerings",  "Meal Offerings (Breakfast,Lunch,Dinner)", False),
-            ("meal_speciality", "Meal Speciality (Veg/Non-Veg/Both)",      False),
+        ("🛏 Room 2", [
+            ("room_type_2",              "room_type_2",                False),
+            ("room_beds_2",              "room_beds_2",                False),
+            ("room_rent_2",              "room_rent_2",                False),
+            ("room_deposit_2",           "room_deposit_2",             False),
+            ("room_brokerage_2",         "room_brokerage_2",           False),
+            ("room_brokerage_percent_2", "room_brokerage_percent_2",   False),
+            ("room_manual_brokerage_2",  "room_manual_brokerage_2",    False),
+            ("room_facilities_2",        "room_facilities_2",          False),
         ]),
-        ("📋 Step 4: Rules", [
-            ("opposite_sex_allowed", "Opposite Sex Allowed? (True/False)",   False),
-            ("any_time_allowed",     "Any Time Entry Allowed? (True/False)", False),
-            ("visitors_allowed",     "Visitors Allowed? (True/False)",       False),
-            ("guardian_allowed",     "Guardian Allowed? (True/False)",       False),
-            ("drinking_allowed",     "Drinking Allowed? (True/False)",       False),
-            ("smoking_allowed",      "Smoking Allowed? (True/False)",        False),
+        
+        ("📏 PG Regulations", [
+            ("opposite_sex_allowed", "opposite sex allowed? (true/false)",   False),
+            ("any_time_allowed",     "any time allowed? (true/false)",       False),
+            ("visitors_allowed",     "visitors allowed? (true/false)",       False),
+            ("guardian_allowed",     "guardian allowed? (true/false)",       False),
+            ("drinking_allowed",     "drinking allowed? (true/false)",       False),
+            ("smoking_allowed",      "smoking allowed? (true/false)",        False),
         ]),
-        ("📋 Step 5: Amenities & Description", [
-            ("amenities",            "Amenities (WiFi,CCTV,Geyser,...)",        False),
-            ("nearby_facilities",    "Nearby Facilities (College,Market,...)",   False),
-            ("property_description", "Property Description",                    False),
+        ("🏷  Property Description & Amenties/Nearby Facilities", [
+            ("property_description", "property description",                   False),
+            ("amenities",            "amenities (wifi,cctv,geyser,...)",       False),
+            ("nearby_facilities",    "nearby facilities (college,market,...)", False),
+            
         ]),
-        ("📋 Step 6: Contact Info", [
-            ("owner_name",       "Owner Name *",      True),
-            ("contact_number",   "Contact Number *",  True),
-            ("email",            "Email *",           True),
-            ("alternate_contact","Alternate Contact", False),
+        ("📞 Contact Info", [
+            ("owner_name",        "owner name *",      True),
+            ("contact_number",    "contact number *",  True),
+            ("email",             "email *",           True),
+            ("alternate_contact", "alternate contact", False),
         ]),
     ]
-
-    SECTION_FILL = PatternFill("solid", start_color="1F4E79")
-    SECTION_FONT = Font(bold=True, color="FFFFFF", size=10)
-    REQ_FILL     = PatternFill("solid", start_color="FFD7D7")
-    OPT_FILL     = PatternFill("solid", start_color="DDEBF7")
-    SAMPLE_FILL  = PatternFill("solid", start_color="F2F2F2")
-    HDR_FONT     = Font(bold=True, size=9)
-    AUTOGEN_FILL = PatternFill("solid", start_color="FFF3CD")   # yellow = auto-generated
-    CENTER       = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    LEFT         = Alignment(horizontal="left",   vertical="center", wrap_text=True)
-    thin         = Side(style="thin", color="BBBBBB")
-    BORDER       = Border(left=thin, right=thin, top=thin, bottom=thin)
-
+ 
+    # ── Styles ────────────────────────────────────────────────────────────────
+    SECTION_FILL  = PatternFill("solid", start_color="1F4E79")
+    ROOM1_FILL    = PatternFill("solid", start_color="2E75B6")
+    ROOM2_FILL    = PatternFill("solid", start_color="5B9BD5")
+    SECTION_FONT  = Font(bold=True, color="FFFFFF", size=10)
+    REQ_FILL      = PatternFill("solid", start_color="FFD7D7")
+    OPT_FILL      = PatternFill("solid", start_color="DDEBF7")
+    ROOM_REQ_FILL = PatternFill("solid", start_color="FFE4B5")
+    ROOM_OPT_FILL = PatternFill("solid", start_color="E8F4FD")
+    SAMPLE_FILL   = PatternFill("solid", start_color="F2F2F2")
+    AUTOGEN_FILL  = PatternFill("solid", start_color="FFF3CD")
+    HDR_FONT      = Font(bold=True, size=9)
+    CENTER        = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    LEFT          = Alignment(horizontal="left",   vertical="center", wrap_text=True)
+    thin          = Side(style="thin", color="BBBBBB")
+    BORDER        = Border(left=thin, right=thin, top=thin, bottom=thin)
+ 
     all_cols      = []
     section_spans = []
-    for sec_label, fields in sections:
+ 
+    for sec_idx, (sec_label, fields) in enumerate(sections):
         sc = len(all_cols) + 1
         for fkey, fheader, req in fields:
-            all_cols.append((fkey, fheader, req))
-        section_spans.append((sec_label, sc, len(all_cols)))
-
-    # Row 1 — section headers
-    for sec_label, sc, ec in section_spans:
+            all_cols.append((fkey, fheader, req, sec_idx))
+        section_spans.append((sec_label, sc, len(all_cols), sec_idx))
+ 
+    # Row 1: Section headers
+    for sec_label, sc, ec, sec_idx in section_spans:
         ws.merge_cells(start_row=1, start_column=sc, end_row=1, end_column=ec)
         c = ws.cell(row=1, column=sc, value=sec_label)
-        c.fill = SECTION_FILL; c.font = SECTION_FONT; c.alignment = CENTER
-
-    # Row 2 — column headers
-    for ci, (fkey, fheader, req) in enumerate(all_cols, 1):
+        if "Room 1" in sec_label: c.fill = ROOM1_FILL
+        elif "Room 2" in sec_label: c.fill = ROOM2_FILL
+        else: c.fill = SECTION_FILL
+        c.font = SECTION_FONT
+        c.alignment = CENTER
+ 
+    # Row 2 & 3: Column headers and hints
+    for ci, (fkey, fheader, req, sec_idx) in enumerate(all_cols, 1):
+        # Header
         c = ws.cell(row=2, column=ci, value=fheader)
-        if fkey == "property_title":
-            c.fill = AUTOGEN_FILL   # yellow = auto-generated if blank
-        else:
-            c.fill = REQ_FILL if req else OPT_FILL
-        c.font = HDR_FONT; c.alignment = CENTER; c.border = BORDER
+        is_room = fkey.startswith("room_")
+        if fkey == "property_title": c.fill = AUTOGEN_FILL
+        elif is_room and req: c.fill = ROOM_REQ_FILL
+        elif is_room: c.fill = ROOM_OPT_FILL
+        elif req: c.fill = REQ_FILL
+        else: c.fill = OPT_FILL
+        c.font, c.alignment, c.border = HDR_FONT, CENTER, BORDER
 
-    # Row 3 — sample data  (property_title intentionally blank → auto-gen)
+        # Hint
+        hint = ""
+        if fkey == "city": hint = "Text – name of city"
+        elif fkey == "available_from": hint = "YYYY-MM-DD"
+        elif fkey == "sharing_type": hint = "single / double / triple"
+        c_hint = ws.cell(row=3, column=ci, value=hint)
+        c_hint.font, c_hint.alignment, c_hint.border = Font(italic=True, color="777777", size=8), LEFT, BORDER
+ 
+    # Row 4: Sample data
+   # ── Row 4: sample data (Aligned with new sequence) ────────────────────────
     samples = {
+        # 📋 Basic Info
+        "property_title": "",  # Blank -> Auto-generated by system
         "city": "Nagpur",
         "building_name": "ABC Building",
         "locality": "Dharampeth",
-        "property_title": "",    # ← blank: model.save() will auto-generate
-        "property_address": "123, Near Metro, Dharampeth, Nagpur",
+        "property_address": "123, Near Metro Station, Dharampeth, Nagpur",
         "total_beds": 50,
         "pg_for": "boys",
         "furnishing_type": "fully-furnished",
+        "sharing_type": "double",
         "best_suited_for": "students",
-        "property_managed_by": "owner",
-        "manager_stays": "True",
+        "meals_available": "True",
+        "meal_offerings": "Breakfast,Dinner",
+        "meal_speciality": "Veg",
         "notice_period": 30,
         "lockin_period": 90,
         "minimum_stay": 3,
         "available_from": "2026-07-01",
-        "room_details": "single|1|8000|16000|Yes|1%||,double|2|6000|12000|No||",
-        "meals_available": "True",
-        "meal_offerings": "Breakfast,Dinner",
-        "meal_speciality": "Veg",
+        "property_managed_by": "owner",
+        "manager_stays": "True",
+
+        # 🛏 Room 1
+        "room_type_1": "double",
+        "room_beds_1": 2,
+        "room_rent_1": 8000,
+        "room_deposit_1": 15000,
+        "room_brokerage_1": "Yes",
+        "room_brokerage_percent_1": "1%",
+        "room_manual_brokerage_1": "",
+        "room_facilities_1": "AC,Wi-Fi,Attached Bathroom",
+
+        # 🛏 Room 2
+        "room_type_2": "single",
+        "room_beds_2": 1,
+        "room_rent_2": 12000,
+        "room_deposit_2": 20000,
+        "room_brokerage_2": "No",
+        "room_brokerage_percent_2": "",
+        "room_manual_brokerage_2": "",
+        "room_facilities_2": "AC,Wardrobe",
+
+        # 📏 PG Regulations
         "opposite_sex_allowed": "False",
         "any_time_allowed": "True",
         "visitors_allowed": "True",
         "guardian_allowed": "True",
         "drinking_allowed": "False",
         "smoking_allowed": "False",
-        "amenities": "WiFi,CCTV,Geyser",
-        "nearby_facilities": "College,Market,Hospital",
-        "property_description": "Well-managed PG with modern amenities.",
+
+        # 🏷 Property Description & Amenities
+        "property_description": "Premium and secure PG with modern amenities, ideal for students and professionals.",
+        "amenities": "WiFi,CCTV,Geyser,Washing Machine",
+        "nearby_facilities": "College,Market,Hospital,Metro Station",
+
+        # 📞 Contact Info
         "owner_name": "Mr. Sharma",
         "contact_number": "9876543210",
         "email": "sharma@email.com",
         "alternate_contact": "9999999999",
     }
-    for ci, (fkey, fheader, _) in enumerate(all_cols, 1):
+ 
+    for ci, (fkey, fheader, _, sec_idx) in enumerate(all_cols, 1):
         val = samples.get(fkey, "")
-        c = ws.cell(row=3, column=ci, value=val)
+        c = ws.cell(row=4, column=ci, value=val)
         if fkey == "property_title":
-            c.value = ""    # keep blank to show auto-gen behaviour
             c.font = Font(italic=True, color="999999", size=9)
-            # add comment hint
-            from openpyxl.comments import Comment
-            comment = Comment("Leave blank — auto-generated as:\n'Premium boys PG at ABC Building Dharampeth'", "System")
-            c.comment = comment
-        c.fill = SAMPLE_FILL; c.alignment = LEFT; c.border = BORDER
-
-    # Row 4 — legend
-    ws.merge_cells(start_row=4, start_column=1, end_row=4, end_column=len(all_cols))
-    lc = ws.cell(row=4, column=1,
-        value="🔴 Red = Required  |  🔵 Blue = Optional  |  🟡 Yellow = Auto-generated (leave blank)  |  Row 3 = SAMPLE — delete before uploading  |  Do NOT rename headers")
-    lc.font = Font(italic=True, color="555555", size=9)
-    lc.alignment = LEFT
-
-    for ci, (fkey, fheader, _) in enumerate(all_cols, 1):
-        cl = get_column_letter(ci)
-        if fkey == "room_details":                   ws.column_dimensions[cl].width = 65
-        elif fkey in ("property_address", "property_description"): ws.column_dimensions[cl].width = 32
-        else: ws.column_dimensions[cl].width = max(18, len(fheader) * 0.85)
-
-    ws.row_dimensions[1].height = 24
-    ws.row_dimensions[2].height = 48
-    ws.row_dimensions[3].height = 20
-    ws.freeze_panes = "A3"
-
+            c.comment = Comment("Leave blank — auto-generated.", "System")
+        c.fill, c.alignment, c.border = SAMPLE_FILL, LEFT, BORDER
+ 
+    ws.merge_cells(start_row=5, start_column=1, end_row=5, end_column=len(all_cols))
+    lc = ws.cell(row=5, column=1, value=("🔴 Red = Required | Row 3 = Hints | Row 4 = SAMPLE — delete before uploading"))
+    lc.font, lc.alignment = Font(italic=True, color="555555", size=9), LEFT
+ 
+    for ci, (fkey, fheader, _, __) in enumerate(all_cols, 1):
+        ws.column_dimensions[get_column_letter(ci)].width = max(18, len(fheader) * 0.9)
+ 
+    ws.row_dimensions[1].height, ws.row_dimensions[2].height = 22, 42
+    ws.row_dimensions[3].height, ws.row_dimensions[4].height = 28, 18
+    ws.freeze_panes = "A5"
+ 
     buf = io.BytesIO()
     wb.save(buf)
     buf.seek(0)
-
-    response = HttpResponse(
-        buf.read(),
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
+    response = HttpResponse(buf.read(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename="pg_import_template.xlsx"'
     return response
 
@@ -8063,227 +8889,590 @@ def download_pg_template(request):
 
 
 
+# =========================================================
+# EDIT PAGE VIEW
+# =========================================================
 
 def pg_edit_page(request, property_id):
-    """Renders the multi-step edit interface form filled with existing asset data."""
-    pg = get_object_or_404(PGColivingProperty, pg_property_id=property_id)
-    
-    # Static data configurations matching your form expectations
-    ameneties_obj = [
-        {"amenties_name": "Wi-Fi High Speed", "amenties_icon": "fas fa-wifi"},
-        {"amenties_name": "Power Backup", "amenties_icon": "fas fa-plug"},
-        {"amenties_name": "RO Water Filtration", "amenties_icon": "fas fa-tint"},
-        {"amenties_name": "Housekeeping Service", "amenties_icon": "fas fa-broom"},
-        {"amenties_name": "CCTV Surveillance", "amenties_icon": "fas fa-shield-alt"},
-        {"amenties_name": "Washing Machine", "amenties_icon": "fas fa-tshirt"}
-    ]
-    facilities_obj = [
-        {"facilities_name": "Metro Station", "facilities_icon": "fas fa-subway"},
-        {"facilities_name": "Food Court / Market", "facilities_icon": "fas fa-shopping-basket"},
-        {"facilities_name": "Hospital / Clinic", "facilities_icon": "fas fa-hospital"},
-        {"facilities_name": "IT Hub / Business Park", "facilities_icon": "fas fa-building"}
-    ]
-    
-    # Split comma-separated database string metrics into lists for template checkboxes
-    selected_amenities = pg.amenities.split(",") if pg.amenities else []
-    selected_facilities = pg.nearby_facilities.split(",") if pg.nearby_facilities else []
 
-    return render(request, "admin_user/Reports/Rental/pg_edit.html", {
+    # =====================================================
+    # ADMIN SESSION CHECK
+    # =====================================================
+    session_id = request.session.get('Admin_id')
+
+    if not session_id:
+        return render(
+            request,
+            'home_page/Adminlogin.html'
+        )
+
+    admin_obj = Admin_Login.objects.get(
+        id=session_id
+    )
+
+    # =====================================================
+    # FETCH PROPERTY
+    # =====================================================
+    pg = get_object_or_404(
+        PGColivingProperty,
+        pg_property_id=property_id
+    )
+
+    # =====================================================
+    # AMENITIES DATA
+    # =====================================================
+    ameneties_obj = Ameneties_Details.objects.all()
+
+    # =====================================================
+    # FACILITIES DATA
+    # =====================================================
+    facilities_obj = Facilities_Details.objects.all()
+
+    # =====================================================
+    # SPLIT AMENITIES
+    # =====================================================
+    selected_amenities = []
+
+    if pg.amenities:
+
+        selected_amenities = [
+            x.strip()
+            for x in pg.amenities.split(",")
+            if x.strip()
+        ]
+
+    # =====================================================
+    # SPLIT FACILITIES
+    # =====================================================
+    selected_facilities = []
+
+    if pg.nearby_facilities:
+
+        selected_facilities = [
+            x.strip()
+            for x in pg.nearby_facilities.split(",")
+            if x.strip()
+        ]
+
+    # =====================================================
+    # ROOM FACILITIES SPLIT
+    # =====================================================
+    rooms = pg.rooms.all()
+
+    for room in rooms:
+
+        if room.room_facilities:
+
+            room.facility_list = [
+                x.strip()
+                for x in room.room_facilities.split(",")
+                if x.strip()
+            ]
+
+        else:
+            room.facility_list = []
+
+    # =====================================================
+    # CONTEXT
+    # =====================================================
+    context = {
+
+        # ADMIN
+        "admin_obj": admin_obj,
+
+        # PROPERTY
         "pg": pg,
+
+        # AMENITIES
         "ameneties_obj": ameneties_obj,
+
+        # FACILITIES
         "facilities_obj": facilities_obj,
+
+        # SELECTED VALUES
         "selected_amenities": selected_amenities,
         "selected_facilities": selected_facilities,
-    })
 
+        # ROOMS
+        "rooms": rooms,
+    }
 
-@csrf_exempt
+    return render(
+        request,
+        "admin_user/Reports/Rental/pg_edit.html",
+        context
+    )
+
+# =========================================================
+# UPDATE PG PROPERTY
+
+@require_POST
 def pg_edit(request, property_id):
-    """Processes the asynchronous multi-part POST payload to update data records."""
-    if request.method != "POST":
-        return JsonResponse({
-            "status": "error", 
-            "message": f"Invalid Request Protocol: Expected POST, received {request.method}."
-        })
+
+    # =====================================================
+    # ADMIN SESSION CHECK
+    # =====================================================
+    session_id = request.session.get('Admin_id')
+
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
 
     try:
-        pg = get_object_or_404(PGColivingProperty, pg_property_id=property_id)
 
+        print("========== POST DATA ==========")
+        print(request.POST)
+
+        print("========== FILES ==========")
+        print(request.FILES)
+
+        # =====================================================
+        # FETCH PROPERTY
+        # =====================================================
+        pg = get_object_or_404(
+            PGColivingProperty,
+            pg_property_id=property_id
+        )
+
+        # =================================================
+        # UPDATE ADMIN / UPLOADER DETAILS
+        # =================================================
+        pg.uploaded_by_name = admin_obj.name
+        pg.uploaded_by_email = admin_obj.email
+        pg.uploaded_by_contact = admin_obj.phone
+        pg.uploaded_by_role = admin_obj.role
+
+        # =================================================
+        # MULTI SELECT LIST HELPER
+        # =================================================
         def get_list(name):
             return ",".join(request.POST.getlist(name))
 
         with transaction.atomic():
-            # ✅ 1. UPDATE CORE RECORD PROPERTIES
-            pg.property_title = request.POST.get("property_title")
-            pg.city = request.POST.get("city")
-            pg.building_name = request.POST.get("building_name")
-            pg.locality = request.POST.get("locality")
-            pg.property_address = request.POST.get("property_address")
-            pg.total_beds = int(request.POST.get("total_beds") or 0)
-            pg.pg_for = request.POST.get("pg_for")
-            pg.furnishing_type = request.POST.get("furnishing_type")
-            pg.sharing_type = request.POST.get("sharing_type")
-            pg.best_suited_for = request.POST.get("best_suited_for")
 
+            # =================================================
+            # BASIC DETAILS
+            # =================================================
+            pg.property_title = request.POST.get(
+                "property_title", ""
+            )
+
+            pg.city = request.POST.get(
+                "city", ""
+            )
+
+            pg.building_name = request.POST.get(
+                "building_name", ""
+            )
+
+            pg.locality = request.POST.get(
+                "locality", ""
+            )
+
+            pg.property_address = request.POST.get(
+                "property_address", ""
+            )
+
+            pg.total_beds = int(
+                request.POST.get("total_beds") or 0
+            )
+
+            pg.pg_for = request.POST.get(
+                "pg_for", ""
+            )
+
+            pg.furnishing_type = request.POST.get(
+                "furnishing_type", ""
+            )
+
+            pg.sharing_type = request.POST.get(
+                "sharing_type", ""
+            )
+
+            pg.best_suited_for = request.POST.get(
+                "best_suited_for", ""
+            )
+
+            # =================================================
+            # AMENITIES
+            # =================================================
             pg.amenities = get_list("amenities[]")
+
             pg.nearby_facilities = get_list("facilities[]")
 
-            # MEALS HANDLERS
-            pg.meals_available = True if request.POST.get("meals_available") in ["on", "true"] else False
-            pg.meal_offerings = request.POST.get("meal_offerings") if pg.meals_available else None
-            pg.meal_speciality = request.POST.get("meal_speciality") if pg.meals_available else None
+            # =================================================
+            # MEALS
+            # =================================================
+            pg.meals_available = (
+                request.POST.get("meals_available")
+                in ["on", "true", "True", "1"]
+            )
 
-            # RULES & POLICIES
-            pg.notice_period = request.POST.get("notice_period") or None
-            pg.lockin_period = request.POST.get("lockin_period") or None
-            pg.minimum_stay = int(request.POST.get("minimum_stay") or 1)
-            pg.available_from = request.POST.get("available_from")
-            pg.property_managed_by = request.POST.get("property_managed_by")
-            pg.manager_stays = True if request.POST.get("manager_stays") == "true" else False
-            
-            # TOGGLE SWITCH PROTOCOLS
-            pg.opposite_sex_allowed = 'opposite_sex_allowed' in request.POST
-            pg.any_time_allowed = 'any_time_allowed' in request.POST
-            pg.visitors_allowed = 'visitors_allowed' in request.POST
-            pg.guardian_allowed = 'guardian_allowed' in request.POST
-            pg.drinking_allowed = 'drinking_allowed' in request.POST
-            pg.smoking_allowed = 'smoking_allowed' in request.POST
-            
-            pg.property_description = request.POST.get("property_description")
+            if pg.meals_available:
 
-            # MEDIA TOUR FILE INTERACTION
+                pg.meal_offerings = request.POST.get(
+                    "meal_offerings", ""
+                )
+
+                pg.meal_speciality = request.POST.get(
+                    "meal_speciality", ""
+                )
+
+            else:
+
+                pg.meal_offerings = None
+                pg.meal_speciality = None
+
+            # =================================================
+            # RULES
+            # =================================================
+            pg.notice_period = (
+                request.POST.get("notice_period") or None
+            )
+
+            pg.lockin_period = (
+                request.POST.get("lockin_period") or None
+            )
+
+            pg.minimum_stay = int(
+                request.POST.get("minimum_stay") or 1
+            )
+
+            pg.available_from = request.POST.get(
+                "available_from"
+            )
+
+            pg.property_managed_by = request.POST.get(
+                "property_managed_by", ""
+            )
+
+            # =================================================
+            # MANAGER STAYS — RADIO BUTTON FIX
+            # =================================================
+            pg.manager_stays = (
+                request.POST.get("manager_stays") == "true"
+            )
+
+            # =================================================
+            # BOOLEAN CHECKBOXES
+            # =================================================
+            pg.opposite_sex_allowed = (
+                "opposite_sex_allowed" in request.POST
+            )
+
+            pg.any_time_allowed = (
+                "any_time_allowed" in request.POST
+            )
+
+            pg.visitors_allowed = (
+                "visitors_allowed" in request.POST
+            )
+
+            pg.guardian_allowed = (
+                "guardian_allowed" in request.POST
+            )
+
+            pg.drinking_allowed = (
+                "drinking_allowed" in request.POST
+            )
+
+            pg.smoking_allowed = (
+                "smoking_allowed" in request.POST
+            )
+
+            # =================================================
+            # DESCRIPTION
+            # =================================================
+            pg.property_description = request.POST.get(
+                "property_description", ""
+            )
+
+            # =================================================
+            # VIDEO
+            # =================================================
             if request.FILES.get("video"):
+
+                if pg.video:
+                    pg.video.delete(save=False)
+
                 pg.video = request.FILES.get("video")
 
-            # CONTACT STRINGS
-            pg.owner_name = request.POST.get("owner_name")
-            pg.contact_number = request.POST.get("contact_number")
-            pg.email = request.POST.get("email")
-            pg.alternate_contact = request.POST.get("alternate_contact")
+            # =================================================
+            # CONTACT
+            # =================================================
+            pg.owner_name = request.POST.get(
+                "owner_name", ""
+            )
 
+            pg.contact_number = request.POST.get(
+                "contact_number", ""
+            )
+
+            pg.email = request.POST.get(
+                "email", ""
+            )
+
+            pg.alternate_contact = request.POST.get(
+                "alternate_contact", ""
+            )
+
+            # =================================================
+            # SAVE PROPERTY
+            # =================================================
             pg.save()
 
-            # ✅ 2. ATOMIC RESET & FLUSH RELATIONAL CHILD variant lines (PGRoomDetail)
+            # =================================================
+            # DELETE OLD ROOMS
+            # =================================================
             pg.rooms.all().delete()
 
+            # =================================================
+            # ROOM ARRAYS
+            # =================================================
             room_types = request.POST.getlist('room_type[]')
-            room_beds = request.POST.getlist('room_beds[]')
-            room_rents = request.POST.getlist('room_rent[]')
-            room_deposits = request.POST.getlist('room_deposit[]')
-            room_brokerages = request.POST.getlist('room_brokerage[]')
-            room_brokerage_percents = request.POST.getlist('room_brokerage_percent[]')
-            room_manual_brokerages = request.POST.getlist('room_manual_brokerage[]')
 
+            room_beds = request.POST.getlist('room_beds[]')
+
+            room_rents = request.POST.getlist('room_rent[]')
+
+            room_deposits = request.POST.getlist('room_deposit[]')
+
+            room_brokerages = request.POST.getlist('room_brokerage[]')
+
+            room_brokerage_percents = request.POST.getlist(
+                'room_brokerage_percent[]'
+            )
+
+            room_manual_brokerages = request.POST.getlist(
+                'room_manual_brokerage[]'
+            )
+
+            # =================================================
+            # CREATE NEW ROOMS
+            # =================================================
             for idx in range(len(room_types)):
+
                 facilities_key = f'room_facilities_{idx + 1}[]'
-                room_facilities_str = ",".join(request.POST.getlist(facilities_key))
+
+                room_facilities_str = ",".join(
+                    request.POST.getlist(facilities_key)
+                )
 
                 PGRoomDetail.objects.create(
                     property=pg,
+
                     room_type=room_types[idx],
-                    room_beds=int(room_beds[idx] or 1),
-                    room_rent=room_rents[idx] or 0.00,
-                    room_deposit=room_deposits[idx] or 0.00,
-                    room_brokerage=room_brokerages[idx] if idx < len(room_brokerages) else '',
-                    room_brokerage_percent=room_brokerage_percents[idx] if idx < len(room_brokerage_percents) else '',
-                    room_manual_brokerage=room_manual_brokerages[idx] if idx < len(room_manual_brokerages) else '',
+
+                    room_beds=int(
+                        room_beds[idx] or 1
+                    ),
+
+                    room_rent=room_rents[idx] or 0,
+
+                    room_deposit=room_deposits[idx] or 0,
+
+                    room_brokerage=(
+                        room_brokerages[idx]
+                        if idx < len(room_brokerages)
+                        else ''
+                    ),
+
+                    room_brokerage_percent=(
+                        room_brokerage_percents[idx]
+                        if idx < len(room_brokerage_percents)
+                        else ''
+                    ),
+
+                    room_manual_brokerage=(
+                        room_manual_brokerages[idx]
+                        if idx < len(room_manual_brokerages)
+                        else ''
+                    ),
+
                     room_facilities=room_facilities_str
                 )
 
-            # ✅ 3. DYNAMIC IMAGE APPEND PIPELINE
+            # =================================================
+            # IMAGE UPLOAD
+            # =================================================
             new_images = request.FILES.getlist("property_images[]")
-            if new_images:
-                current_total = pg.images.count()
-                if current_total + len(new_images) > 10:
-                    return JsonResponse({
-                        "status": "error", 
-                        "message": f"Gallery limits hit. Maximum limit is 10 images. You have {current_total} active images."
-                    })
-                for img in new_images:
-                    PGPropertyImage.objects.create(property=pg, image=img)
 
+            if new_images:
+
+                current_total = pg.images.count()
+
+                if current_total + len(new_images) > 10:
+
+                    return JsonResponse({
+                        "status": "error",
+                        "message": (
+                            f"Maximum 10 images allowed. "
+                            f"Current images: {current_total}"
+                        )
+                    })
+
+                for img in new_images:
+
+                    PGPropertyImage.objects.create(
+                        property=pg,
+                        image=img
+                    )
+
+        # =====================================================
+        # SUCCESS RESPONSE
+        # =====================================================
         return JsonResponse({
-            "status": "success", 
-            "message": "PG Record Suite Modifications Deployed Successfully.",
-            "redirect_url": "/Admin_App/pg_list/"  # Adjust this redirect target to match your dashboard page
+            "status": "success",
+            "message": "PG Property Updated Successfully.",
+            "redirect_url": reverse('pg_list')
         })
 
     except Exception as e:
-        return JsonResponse({"status": "error", "message": f"System Interruption: {str(e)}"})
 
+        print("========== ERROR ==========")
+        print(str(e))
 
+        return JsonResponse({
+            "status": "error",
+            "message": str(e)
+        })
 
 
 
 @require_POST
 def pg_coliving_delete(request, pk):
+
     sid, _ = _get_admin(request)
     if not sid:
-        return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Unauthorized'
+        }, status=401)
 
     try:
         deleter_name = _get_deleter_name(request)
 
-        pg = get_object_or_404(PGColivingProperty, pk=pk)
+        # ✅ USING NEW PRIMARY KEY FIELD
+        pg = get_object_or_404(
+            PGColivingProperty,
+            pg_property_id=pk
+        )
+
         pg.is_deleted = True
         pg.deleted_at = timezone.now()
-        pg.deleted_by = deleter_name # 👈 SAVE THE NAME HERE
+        pg.deleted_by = deleter_name
         pg.save()
-        
-        return JsonResponse({'status': 'success', 'message': 'Moved to Recycle Bin successfully!'})
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Moved to Recycle Bin successfully!'
+        })
+
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
+
 
 @require_POST
 def pg_restore(request, id):
-    PGColivingProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
-    return JsonResponse({'status': 'success', 'message': 'PG property restored!'})
+
+    sid, _ = _get_admin(request)
+    if not sid:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Unauthorized'
+        }, status=401)
+
+    PGColivingProperty.objects.filter(
+        pg_property_id=id
+    ).update(
+        is_deleted=False,
+        deleted_at=None,
+        deleted_by=None
+    )
+
+    return JsonResponse({
+        'status': 'success',
+        'message': 'PG Property Restored Successfully!'
+    })
 
 
-
+# =========================================================
+# HARD DELETE
+# =========================================================
 @require_POST
 def pg_hard_delete(request, id):
-    PGColivingProperty.objects.filter(id=id).delete()
-    return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
+
+    sid, _ = _get_admin(request)
+    if not sid:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Unauthorized'
+        }, status=401)
+
+    try:
+        pg = get_object_or_404(
+            PGColivingProperty,
+            pg_property_id=id
+        )
+
+        # ✅ DELETE RELATED IMAGES
+        for img in pg.images.all():
+            if img.image:
+                img.image.delete(save=False)
+
+        # ✅ DELETE VIDEO
+        if pg.video:
+            pg.video.delete(save=False)
+
+        # ✅ DELETE PROPERTY
+        pg.delete()
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Permanently Deleted Successfully!'
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
+
 
 
 
 def pg_coliving_view(request, pk):
-    sid, admin_obj = _get_admin(request) # Use your standard auth check
-    if not sid:
-        return redirect('login')
-
+    # session_id = request.session.get('Admin_id')
+    # admin_obj = Admin_Login.objects.get(id=session_id)
+    # ^ Replace with your standard auth logic
+    
     pg = get_object_or_404(PGColivingProperty, pk=pk)
 
-    # 1. Parse Room Details
-    parsed_rooms = []
-    if pg.room_details:
-        room_strings = pg.room_details.split(',')
-        for rs in room_strings:
-            parts = rs.split('|')
-            if len(parts) >= 4:
-                parsed_rooms.append({
-                    'type': parts[0].title(),
-                    'beds': parts[1],
-                    'rent': parts[2],
-                    'deposit': parts[3],
-                    'brokerage': parts[4] if len(parts) > 4 else '',
-                    'brokerage_percent': parts[5] if len(parts) > 5 else '',
-                    'manual_brokerage': parts[6] if len(parts) > 6 else '',
-                })
+    # 1. Safely query the new relational Room models
+    parsed_rooms = pg.rooms.all()
+    
+    # Calculate sidebar pricing metrics dynamically
+    rent_stats = parsed_rooms.aggregate(min_rent=Min('room_rent'), max_rent=Max('room_rent'))
+    starting_rent = rent_stats['min_rent'] or 0
 
-    # 2. Parse Comma-Separated Strings into Lists for "Chip" styling in HTML
+    # 2. Parse Comma-Separated Strings into Lists for HTML "Chips"
     def split_to_list(db_string):
-        return [x.strip() for x in db_string.split(',')] if db_string else []
+        return [x.strip() for x in db_string.split(',') if x.strip()] if db_string else []
 
     context = {
-        'admin_obj': admin_obj,
+        # 'admin_obj': admin_obj,
         'pg': pg,
         'parsed_rooms': parsed_rooms,
+        'starting_rent': starting_rent, # Passed to the sidebar
         'pg_for_list': split_to_list(pg.pg_for),
         'sharing_type_list': split_to_list(pg.sharing_type),
         'best_suited_list': split_to_list(pg.best_suited_for),
-        'common_area_list': split_to_list(pg.common_area),
         'amenities_list': split_to_list(pg.amenities),
         'facilities_list': split_to_list(pg.nearby_facilities),
         'meal_offerings_list': split_to_list(pg.meal_offerings),
@@ -8300,6 +9489,7 @@ def pg_coliving_view(request, pk):
 
 
 
+
 def plot_sale_add(request):
     admin_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
@@ -8308,56 +9498,34 @@ def plot_sale_add(request):
         return redirect('login')
 
     try:
-        # =============================
-        # GET USER DETAILS
-        # =============================
         if admin_id:
             admin = Admin_Login.objects.get(id=admin_id)
-            uploader_name = admin.name
-            uploader_email = admin.email
-            uploader_phone = admin.phone
-            uploader_role = admin.role
+            uploader_name, uploader_email, uploader_phone, uploader_role = admin.name, admin.email, admin.phone, admin.role
         else:
             user = User_Details.objects.get(id=user_id)
-            uploader_name = user.name
-            uploader_email = user.email
-            uploader_phone = user.phone
-            uploader_role = user.role
+            uploader_name, uploader_email, uploader_phone, uploader_role = user.name, user.email, user.phone, user.role
 
-        # =============================
-        # HANDLE POST
-        # =============================
         if request.method == "POST":
-            # Safely parse boolean choices
-            plot_corner_val = True if request.POST.get('plot_corner') == 'yes' else False
-            plot_fencing_val = True if request.POST.get('plot_fencing') == 'yes' else False
-            plot_loan_val = True if request.POST.get('plot_loan') == 'yes' else False
-
-            # Create the main property listing
             prop = PlotSaleProperty.objects.create(
-                # Step 1
                 plot_title=request.POST.get('plot_title'),
                 plot_area=request.POST.get('plot_area') or 0,
                 resale_plot_type=request.POST.get('resale_plot_type'),
                 plot_road_facing=request.POST.get('plot_road_facing'),
-                plot_corner=plot_corner_val,
+                plot_corner=request.POST.get('plot_corner', 'no'),
                 available_from=request.POST.get('available_from') or None,
                 plot_authority=request.POST.get('plot_authority'),
-                plot_fencing=plot_fencing_val,
+                plot_fencing=request.POST.get('plot_fencing', 'no'),
 
-                # Step 2
                 plot_price=request.POST.get('plot_price') or 0,
-                brokerage=request.POST.get('brokerage'),
+                brokerage=request.POST.get('brokerage', 'No'),
                 brokerage_percentage=request.POST.get('brokerage_percentage'),
                 plot_ownership=request.POST.get('plot_ownership'),
-                plot_loan=plot_loan_val,
+                plot_loan=request.POST.get('plot_loan', 'no'),
                 plot_loan_amount=request.POST.get('plot_loan_amount') or None,
 
-                # Step 3
                 encumbrance_cert=request.FILES.get('encumbrance_cert'),
                 social_video=request.FILES.get('social_video'),
 
-                # Step 4
                 plot_city=request.POST.get('plot_city'),
                 plot_locality=request.POST.get('plot_locality'),
                 plot_address=request.POST.get('plot_address'),
@@ -8365,79 +9533,54 @@ def plot_sale_add(request):
                 plot_owner_contact=request.POST.get('plot_owner_contact'),
                 plot_owner_email=request.POST.get('plot_owner_email'),
 
-                # Uploaded By details
                 uploaded_by_name=uploader_name,
                 uploaded_by_email=uploader_email,
                 uploaded_by_contact=uploader_phone,
                 uploaded_by_role=uploader_role,
             )
 
-            # =============================
-            # SAVE IMAGES (Max 10)
-            # =============================
             images = request.FILES.getlist('property_images[]')
-
             for i, img in enumerate(images):
                 if i >= 10:
-                    break  # Stop if the user somehow bypassed the frontend limit
-                
-                PlotSaleImage.objects.create(
-                    property=prop,
-                    image=img
-                )
+                    break
+                PlotSaleImage.objects.create(property=prop, image=img)
 
-            return JsonResponse({
-                "status": "success",
-                "message": "Plot Listing Added Successfully"
-            })
+            return JsonResponse({"status": "success", "message": "Plot Listing Added Successfully"})
 
     except Exception as e:
         print("ERROR:", str(e))
         traceback.print_exc()
+        return JsonResponse({"status": "error", "message": str(e)})
 
-        return JsonResponse({
-            "status": "error",
-            "message": str(e)
-        })
-
-    # Render your form page for GET requests
-    return render(request, 'admin_user/Reports/Resale/plot_list.html')
+    return render(request, 'admin_user/Reports/Resale/plot_add.html')
 
 
-
-
-def plot_sale_edit(request, id):
+def plot_sale_edit(request, plot_property_id):
     admin_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
 
     if not admin_id and not user_id:
         return redirect('login')
 
-    # Fetch the existing property
-    prop = get_object_or_404(PlotSaleProperty, id=id)
+    # Fixed: Query via explicit primary key string field identifier
+    prop = get_object_or_404(PlotSaleProperty, plot_property_id=plot_property_id)
 
     if request.method == "POST":
         try:
-            # Safely parse boolean choices
-            plot_corner_val = True if request.POST.get('plot_corner') == 'yes' else False
-            plot_fencing_val = True if request.POST.get('plot_fencing') == 'yes' else False
-            plot_loan_val = True if request.POST.get('plot_loan') == 'yes' else False
-
-            # Update the main property listing
             prop.plot_title = request.POST.get('plot_title')
             prop.plot_area = request.POST.get('plot_area') or 0
             prop.resale_plot_type = request.POST.get('resale_plot_type')
             prop.plot_road_facing = request.POST.get('plot_road_facing')
-            prop.plot_corner = plot_corner_val
+            prop.plot_corner = request.POST.get('plot_corner', 'no')
             prop.available_from = request.POST.get('available_from') or None
             prop.plot_authority = request.POST.get('plot_authority')
-            prop.plot_fencing = plot_fencing_val
+            prop.plot_fencing = request.POST.get('plot_fencing', 'no')
 
             prop.plot_price = request.POST.get('plot_price') or 0
-            prop.brokerage = request.POST.get('brokerage')
+            prop.brokerage = request.POST.get('brokerage', 'No')
             prop.brokerage_percentage = request.POST.get('brokerage_percentage')
             prop.plot_ownership = request.POST.get('plot_ownership')
-            prop.plot_loan = plot_loan_val
+            prop.plot_loan = request.POST.get('plot_loan', 'no')
             prop.plot_loan_amount = request.POST.get('plot_loan_amount') or None
 
             prop.plot_city = request.POST.get('plot_city')
@@ -8447,213 +9590,415 @@ def plot_sale_edit(request, id):
             prop.plot_owner_contact = request.POST.get('plot_owner_contact')
             prop.plot_owner_email = request.POST.get('plot_owner_email')
 
-            # Update files ONLY if new ones are uploaded
             if request.FILES.get('encumbrance_cert'):
                 prop.encumbrance_cert = request.FILES.get('encumbrance_cert')
             if request.FILES.get('social_video'):
                 prop.social_video = request.FILES.get('social_video')
 
+            # Force re-triggering auto-title calculation by wiping it clean out before saving modifications
+            prop.property_title = ""
             prop.save()
 
-            # =============================
-            # SAVE NEW IMAGES (Append up to 10 max)
-            # =============================
             new_images = request.FILES.getlist('property_images[]')
-            current_image_count = prop.images.count() # Using the related_name 'images'
+            current_image_count = prop.images.count()
 
             for img in new_images:
                 if current_image_count >= 10:
-                    break # Stop adding if we hit the 10 image limit
+                    break
                 PlotSaleImage.objects.create(property=prop, image=img)
                 current_image_count += 1
 
-            return JsonResponse({
-                "status": "success",
-                "message": "Plot Listing Updated Successfully"
-            })
+            return JsonResponse({"status": "success", "message": "Plot Listing Updated Successfully"})
 
         except Exception as e:
             print("ERROR:", str(e))
             traceback.print_exc()
-            return JsonResponse({
-                "status": "error",
-                "message": str(e)
-            })
+            return JsonResponse({"status": "error", "message": str(e)})
 
-    # For GET requests, render the template with the existing property data
-    context = {
-        'prop': prop,
-        # Fetching session details just for the footer 'Uploaded By' visual if needed, 
-        # though you might want to show the original uploader's data. We'll pass the prop.
-    }
+    context = {'prop': prop, 'existing_images': prop.images.all()}
     return render(request, 'admin_user/Reports/Resale/plot_edit.html', context)
 
 
 
 
-
 # ── 1. MAIN LIST VIEW ──
-def plot_resale_list(request):
-    session_id = request.session.get('Admin_id')
-    if not session_id:
-        return render(request, 'home_page/Adminlogin.html')
-        
-    admin_obj = Admin_Login.objects.get(id=session_id)
-    
-    # 👈 1. Filter out deleted properties!
-    base_qs = PlotSaleProperty.objects.filter(is_deleted=False)
-    
-    # Fetch properties newest first
-    properties = PlotSaleProperty.objects.filter(is_deleted=False).order_by('-created_at')
-    
-    # Calculate stats
-    total_properties = base_qs.count()
-    active_listings = base_qs.filter(plot_price__gt=0).count()
-    
-    # 👈 2. Fetch unique uploaded file names for the Bulk Delete modal
-    try:
-        uploaded_files = base_qs.exclude(
-            upload_file_name__isnull=True
-        ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
-    except Exception:
-        uploaded_files = []
-    
-    context = {
-        'admin_obj': admin_obj,
-        'properties': properties,
-        'total_properties': total_properties,
-        'active_listings': active_listings,
-        'uploaded_files': uploaded_files # 👈 Passed to template here
-    }
-    return render(request, 'admin_user/Reports/Resale/plot_list.html', context)
 
 
-# ── 2. BULK DELETE VIEW (Soft Delete) ──
+
+#
+
+
 @require_POST
 def plot_sale_bulk_delete(request):
-    """Handles Advanced Bulk Deletions for Plot/Land Properties."""
+    """
+    Bulk Soft Delete Plot Sale Properties
+    """
+
     admin_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
-    
+
     if not admin_id and not user_id:
-        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Unauthorized access.'
+        })
 
     try:
+
         data = json.loads(request.body)
+
         delete_type = data.get('delete_type')
-        deleter_name = _get_deleter_name(request) # Using the helper we made earlier
-        
-        properties = PlotSaleProperty.objects.filter(is_deleted=False)
-        
+
+        deleter_name = _get_deleter_name(request)
+
+        properties = PlotSaleProperty.objects.filter(
+            is_deleted=False
+        )
+
+        # ====================================
+        # Delete All
+        # ====================================
+
         if delete_type == 'delete_all':
+
             count = properties.count()
-            properties.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved ALL {count} plots to Recycle Bin.'})
-            
+
+            properties.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} plots moved to recycle bin.'
+            })
+
+        # ====================================
+        # Current Page
+        # ====================================
+
         elif delete_type == 'current_page':
+
             page_ids = data.get('page_ids', [])
-            target_props = properties.filter(id__in=page_ids)
+
+            target_props = properties.filter(
+                plot_property_id__in=page_ids
+            )
+
             count = target_props.count()
-            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} plots from current page to Recycle Bin.'})
-            
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} plots moved to recycle bin.'
+            })
+
+        # ====================================
+        # Date Range
+        # ====================================
+
         elif delete_type == 'date_range':
+
             from_date = data.get('from_date')
             to_date = data.get('to_date')
-            target_props = properties.filter(created_at__date__range=[from_date, to_date])
-            count = target_props.count()
-            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} plots in date range to Recycle Bin.'})
-            
-        elif delete_type == 'latest_month':
-            thirty_days_ago = timezone.now() - timedelta(days=30)
-            target_props = properties.filter(created_at__gte=thirty_days_ago)
-            count = target_props.count()
-            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} plots from the last 30 days to Recycle Bin.'})
-            
-        elif delete_type == 'old_data':
-            six_months_ago = timezone.now() - timedelta(days=180)
-            target_props = properties.filter(created_at__lt=six_months_ago)
-            count = target_props.count()
-            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} older plots to Recycle Bin.'})
-            
-        elif delete_type == 'by_uploader':
-            uploader = data.get('uploader_text', '')
+
+            if not from_date or not to_date:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Please select both dates.'
+                })
+
             target_props = properties.filter(
-                Q(uploaded_by_name__icontains=uploader) | 
-                Q(uploaded_by_email__icontains=uploader) |
-                Q(uploaded_by_role__icontains=uploader)
+                created_at__date__range=[from_date, to_date]
             )
+
             count = target_props.count()
-            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} plots uploaded by {uploader} to Recycle Bin.'})
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} plots deleted between {from_date} and {to_date}.'
+            })
+
+        # ====================================
+        # Last 30 Days
+        # ====================================
+
+        elif delete_type == 'latest_month':
+
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+
+            target_props = properties.filter(
+                created_at__gte=thirty_days_ago
+            )
+
+            count = target_props.count()
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} plots from last 30 days moved to recycle bin.'
+            })
+
+        # ====================================
+        # Older Than 6 Months
+        # ====================================
+
+        elif delete_type == 'old_data':
+
+            six_months_ago = timezone.now() - timedelta(days=180)
+
+            target_props = properties.filter(
+                created_at__lt=six_months_ago
+            )
+
+            count = target_props.count()
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} old plots moved to recycle bin.'
+            })
+
+        # ====================================
+        # By Uploader
+        # ====================================
+
+        elif delete_type == 'by_uploader':
+
+            uploader = data.get('uploader_text', '').strip()
+
+            if not uploader:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Please enter uploader details.'
+                })
+
+            target_props = properties.filter(
+                Q(uploaded_by_name__icontains=uploader) |
+                Q(uploaded_by_email__icontains=uploader) |
+                Q(uploaded_by_role__icontains=uploader) |
+                Q(uploaded_by_contact__icontains=uploader)
+            )
+
+            count = target_props.count()
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} plots uploaded by "{uploader}" moved to recycle bin.'
+            })
+
+        # ====================================
+        # By Imported File
+        # ====================================
 
         elif delete_type == 'by_file':
-            file_name = data.get('file_name', '')
-            target_props = properties.filter(upload_file_name=file_name) 
+
+            file_name = data.get('file_name', '').strip()
+
+            if not file_name:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Please select file.'
+                })
+
+            target_props = properties.filter(
+                upload_file_name=file_name
+            )
+
             count = target_props.count()
+
             if count == 0:
-                return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
-            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} plots from {file_name} to Recycle Bin.'})
-            
-        else:
-            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'No records found for file "{file_name}".'
+                })
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} plots from file "{file_name}" moved to recycle bin.'
+            })
+
+        # ====================================
+        # Unknown Type
+        # ====================================
+
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Invalid delete type.'
+        })
 
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
+
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
+
+  
 
 
 
+def safe_float(val):
+    """Safely converts Excel cell values to float, handling strings, currencies, and spaces."""
+    if val is None:
+        return 0.0
+    try:
+        if isinstance(val, (int, float)):
+            return float(val)
+        clean_val = str(val).replace('₹', '').replace(',', '').strip()
+        return float(clean_val)
+    except (ValueError, TypeError):
+        return 0.0
 
-
-# 2. GENERATE SAMPLE EXCEL TEMPLATE
 def download_plot_resale_template(request):
-    workbook = openpyxl.Workbook()
-    sheet = workbook.active
-    sheet.title = "Plot Import Template"
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
 
-    # Sequence exactly matching your PlotSaleProperty model fields
-    headers = [
-        "Project Name",             # 0: plot_title
-        "Plot Area (sq.ft)",        # 1: plot_area
-        "Plot Type",                # 2: resale_plot_type (open_plot/residential_plot/commercial_plot)
-        "Road Facing",              # 3: plot_road_facing (main/internal/corner)
-        "Corner Plot (yes/no)",     # 4: plot_corner
-        "Available From",           # 5: available_from (YYYY-MM-DD)
-        "Sanctioning Authority",    # 6: plot_authority
-        "Fencing Done (yes/no)",    # 7: plot_fencing
-        "Expected Price",           # 8: plot_price
-        "Brokerage (Yes/No)",       # 9: brokerage
-        "Brokerage %",              # 10: brokerage_percentage
-        "Ownership Type",           # 11: plot_ownership (freehold/leasehold)
-        "Loan on Property (yes/no)",# 12: plot_loan
-        "Loan Amount",              # 13: plot_loan_amount
-        "City",                     # 14: plot_city
-        "Locality",                 # 15: plot_locality
-        "Complete Address",         # 16: plot_address
-        "Owner Name",               # 17: plot_owner_name
-        "Owner Contact",            # 18: plot_owner_contact
-        "Owner Email"               # 19: plot_owner_email
-    ]
-    sheet.append(headers)
+    wb = Workbook()
+    sheet = wb.active
+    sheet.title = "Plot Resale"
 
-    # Sample Data Row
-    sample_data = [
-        "Green Valley Plots", 1500, "residential_plot", "main", "yes", "2026-06-01", 
-        "NIT", "yes", 3500000, "No", "", "freehold", "no", 0, 
-        "Nagpur", "Besa", "Plot 12, Besa Road", "Amit Patil", "9876543210", "amit@example.com"
+    DARK_BG, WHITE, MID_BLUE = "1E293B", "FFFFFF", "3B82F6"
+    LIGHT_BG, HINT_BG, SAMPLE_BG = "F8FAFC", "FEF9C3", "EFF6FF"
+    HINT_FG, BORDER_COLOR = "92400E", "CBD5E1"
+
+    thin   = Side(style="thin",   color=BORDER_COLOR)
+    thick  = Side(style="medium", color="94A3B8")
+    cborder = Border(left=thin, right=thin, top=thin, bottom=thin)
+    hborder = Border(left=thick, right=thick, top=thick, bottom=thick)
+
+    def hfill(h): return PatternFill("solid", fgColor=h)
+
+    sections = [
+        ("📋 Plot Details", [
+            ("plot_title",        "Project / Plot Title *",    "e.g. Green Valley Plots"),
+            ("plot_area",         "Plot Area (sq.ft) *",       "e.g. 1500"),
+            ("resale_plot_type",  "Plot Type *",               "residential_plot / commercial_plot / agricultural"),
+            ("plot_road_facing",  "Road Facing *",             "main / east / west / north / south"),
+            ("plot_corner",       "Corner Plot",               "yes / no"),
+            ("available_from",    "Available From",            "YYYY-MM-DD"),
+            ("plot_authority",    "Plot Authority",            "e.g. NIT / NMRDA / PRIVATE"),
+            ("plot_fencing",      "Fencing",                   "yes / no"),
+        ]),
+        ("📋 Pricing & Legal", [
+            ("plot_price",           "Plot Price (₹) *",       "e.g. 3500000"),
+            ("brokerage",            "Brokerage",              "Yes / No"),
+            ("brokerage_percentage", "Brokerage %",            "e.g. 1% or leave blank"),
+            ("plot_ownership",       "Ownership Type *",       "freehold / leasehold"),
+            ("plot_loan",            "Loan Available *",       "yes / no"),
+            ("plot_loan_amount",     "Loan Amount (₹)",        "e.g. 2000000 (0 if no loan)"),
+        ]),
+        ("📋 Location", [
+            ("plot_city",     "City *",        "e.g. Nagpur"),
+            ("plot_locality", "Locality *",    "e.g. Besa"),
+            ("plot_address",  "Full Address *","Plot 12, Besa Road, Nagpur"),
+        ]),
+        ("📋 Owner Contact", [
+            ("plot_owner_name",    "Owner Name *",    "Full Name"),
+            ("plot_owner_contact", "Owner Contact *", "10-digit mobile"),
+            ("plot_owner_email",   "Owner Email *",   "email@example.com"),
+        ]),
     ]
-    sheet.append(sample_data)
+
+    all_db, all_disp, all_hints = [], [], []
+    section_spans = []
+    col = 1
+    for label, fields in sections:
+        s = col
+        for db, disp, hint in fields:
+            all_db.append(db); all_disp.append(disp); all_hints.append(hint)
+            col += 1
+        section_spans.append((label, s, col - 1))
+
+    for label, sc, ec in section_spans:
+        c = sheet.cell(row=1, column=sc, value=label)
+        c.font      = Font(name="Arial", bold=True, size=11, color=WHITE)
+        c.fill      = hfill(DARK_BG)
+        c.alignment = Alignment(horizontal="center", vertical="center")
+        c.border    = hborder
+        if sc != ec:
+            sheet.merge_cells(start_row=1, start_column=sc, end_row=1, end_column=ec)
+    sheet.row_dimensions[1].height = 30
+
+    for i, db in enumerate(all_db, 1):
+        c = sheet.cell(row=2, column=i, value=db)
+        c.font = Font(name="Arial", bold=True, size=9, color="475569")
+        c.fill = hfill("E2E8F0"); c.alignment = Alignment(horizontal="center", vertical="center"); c.border = cborder
+    sheet.row_dimensions[2].height = 22
+
+    for i, disp in enumerate(all_disp, 1):
+        c = sheet.cell(row=3, column=i, value=disp)
+        c.font = Font(name="Arial", bold=True, size=10, color=("C0392B" if disp.endswith("*") else MID_BLUE))
+        c.fill = hfill(LIGHT_BG); c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True); c.border = cborder
+    sheet.row_dimensions[3].height = 36
+
+    for i, hint in enumerate(all_hints, 1):
+        c = sheet.cell(row=4, column=i, value=hint)
+        c.font = Font(name="Arial", italic=True, size=8, color=HINT_FG)
+        c.fill = hfill(HINT_BG); c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True); c.border = cborder
+    sheet.row_dimensions[4].height = 30
+
+    sample = [
+        "Green Valley Plots", 1500, "residential_plot", "main", "no", "2026-06-01", "NIT", "yes",
+        3500000, "No", "", "freehold", "no", 0,
+        "Nagpur", "Besa", "Plot 12, Besa Road, Nagpur",
+        "Amit Patil", "9876543210", "amit@example.com"
+    ]
+    for i, val in enumerate(sample, 1):
+        c = sheet.cell(row=5, column=i, value=val)
+        c.font = Font(name="Arial", size=9, color="1E3A5F")
+        c.fill = hfill(SAMPLE_BG); c.alignment = Alignment(horizontal="center", vertical="center"); c.border = cborder
+    sheet.row_dimensions[5].height = 22
+
+    widths = [28,14,22,14,13,16,16,12,18,12,14,16,14,18,14,16,32,18,18,26]
+    for i, w in enumerate(widths, 1):
+        sheet.column_dimensions[get_column_letter(i)].width = w
+
+    sheet.freeze_panes = "A6"
+    sheet.sheet_view.zoomScale = 90
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="Plot_Resale_Template.xlsx"'
-    workbook.save(response)
+    response['Content-Disposition'] = 'attachment; filename="PropCRM_Plot_Resale_Template.xlsx"'
+    wb.save(response)
     return response
 
-# 3. IMPORT EXCEL DATA
+
 def import_plot_resale_excel(request):
     session_id = request.session.get('Admin_id')
     if not session_id:
@@ -8662,83 +10007,312 @@ def import_plot_resale_excel(request):
     if request.method == "POST" and request.FILES.get('excel_file'):
         try:
             admin_obj = Admin_Login.objects.get(id=session_id)
-            
             excel_file = request.FILES['excel_file']
+            file_name_str = excel_file.name
+
+            excel_file.seek(0)
             wb = openpyxl.load_workbook(excel_file, data_only=True)
             sheet = wb.active
 
-            # Iterate through rows, skipping header (min_row=2)
-            for row in sheet.iter_rows(min_row=2, values_only=True):
-                # Skip row if Project Name (column 0) is empty
-                if not row[0]:
-                    continue
-                
-                # Safely parse booleans
-                is_corner = True if str(row[4]).strip().lower() == 'yes' else False
-                is_fenced = True if str(row[7]).strip().lower() == 'yes' else False
-                has_loan = True if str(row[12]).strip().lower() == 'yes' else False
+            if sheet.max_row < 3:
+                return JsonResponse({"status": "error", "message": "Empty file uploaded."})
 
-                # Handle potential date parsing from excel (if it's a datetime object, extract date)
+            row3_values = [str(cell.value).strip() if cell.value else "" for cell in sheet[3]]
+            expected_headers = [
+                "Project / Plot Title *", "Plot Area (sq.ft) *", "Plot Type *", "Road Facing *",
+                "Corner Plot", "Available From", "Plot Authority", "Fencing",
+                "Plot Price (₹) *", "Brokerage", "Brokerage %", "Ownership Type *",
+                "Loan Available *", "Loan Amount (₹)",
+                "City *", "Locality *", "Full Address *",
+                "Owner Name *", "Owner Contact *", "Owner Email *",
+            ]
+
+            for idx, key in enumerate(expected_headers):
+                if idx >= len(row3_values) or row3_values[idx].lower() != key.lower():
+                    return JsonResponse({
+                        "status": "error",
+                        "message": f"Column mismatch at position {idx+1}. Expected '{key}', found '{row3_values[idx] if idx < len(row3_values) else 'Missing'}'."
+                    })
+
+            records_to_create = []
+            required_indices = [0, 1, 2, 3, 8, 11, 12, 14, 15, 16, 17, 18, 19]
+            
+            # FIX: Start checking data directly from row 5 (The sample entry)
+            DATA_START_ROW = 5
+
+            for row_idx, row in enumerate(sheet.iter_rows(min_row=DATA_START_ROW, values_only=True), start=DATA_START_ROW):
+                if not row or not any(v is not None and str(v).strip() != "" for v in row):
+                    continue
+
+                # Ignore instruction text hint column labels safely
+                if row[0] and ("e.g. green" in str(row[0]).lower() or "project /" in str(row[0]).lower()):
+                    continue
+
+                for ri in required_indices:
+                    if ri < len(row) and (row[ri] is None or str(row[ri]).strip() == ""):
+                        return JsonResponse({
+                            "status": "error",
+                            "message": f"Row {row_idx}: Required field '{expected_headers[ri]}' is missing."
+                        })
+
+                # Row individual duplicate mapping fingerprint
+                row_raw_string = f"{row[17]}_{row[18]}_{row[0]}_{row[1]}_{row[8]}"  # Owner Contact + Title + Area + Price
+                row_fp = hashlib.md5(row_raw_string.encode('utf-8')).hexdigest()
+
+                if PlotSaleProperty.objects.filter(property_title__icontains=f"[ROW-MD5:{row_fp}]", is_deleted=False).exists():
+                    continue
+
                 avail_date = row[5]
                 if avail_date and hasattr(avail_date, 'date'):
                     avail_date = avail_date.date()
 
-                PlotSaleProperty.objects.create(
-                    plot_title=row[0],
-                    plot_area=row[1] or 0,
-                    resale_plot_type=row[2],
-                    plot_road_facing=row[3],
-                    plot_corner=is_corner,
-                    available_from=avail_date or None,
-                    plot_authority=row[6],
-                    plot_fencing=is_fenced,
-                    plot_price=row[8] or 0,
-                    brokerage=row[9],
-                    brokerage_percentage=row[10],
-                    plot_ownership=row[11],
-                    plot_loan=has_loan,
-                    plot_loan_amount=row[13] or 0,
-                    plot_city=row[14],
-                    plot_locality=row[15],
-                    plot_address=row[16],
-                    plot_owner_name=row[17],
-                    plot_owner_contact=row[18],
-                    plot_owner_email=row[19],
-                    
-                    # Store Uploader Details
-                    uploaded_by_name=admin_obj.name,
-                    uploaded_by_email=admin_obj.email,
-                    uploaded_by_contact=admin_obj.phone,
-                    uploaded_by_role=admin_obj.role
+                records_to_create.append({
+                    "plot_title": str(row[0]).strip(),
+                    "plot_area": safe_float(row[1]),
+                    "resale_plot_type": str(row[2]).strip(),
+                    "plot_road_facing": str(row[3]).strip(),
+                    "plot_corner": str(row[4]).strip().lower() if row[4] else "no",
+                    "available_from": avail_date,
+                    "plot_authority": str(row[6]).strip() if row[6] else None,
+                    "plot_fencing": str(row[7]).strip().lower() if row[7] else "no",
+                    "plot_price": safe_float(row[8]),
+                    "brokerage": str(row[9]).strip() if row[9] else "No",
+                    "brokerage_percentage": str(row[10]).strip() if row[10] else None,
+                    "plot_ownership": str(row[11]).strip(),
+                    "plot_loan": str(row[12]).strip().lower() if row[12] else "no",
+                    "plot_loan_amount": safe_float(row[13]),
+                    "plot_city": str(row[14]).strip(),
+                    "plot_locality": str(row[15]).strip(),
+                    "plot_address": str(row[16]).strip(),
+                    "plot_owner_name": str(row[17]).strip(),
+                    "plot_owner_contact": str(row[18]).strip(),
+                    "plot_owner_email": str(row[19]).strip(),
+                    "row_fingerprint": row_fp
+                })
+
+            if not records_to_create:
+                return JsonResponse({"status": "error", "message": "No new or valid entries found to import."})
+
+            imported_count = 0
+            for r in records_to_create:
+                prop = PlotSaleProperty.objects.create(
+                    plot_title=r["plot_title"], plot_area=r["plot_area"],
+                    resale_plot_type=r["resale_plot_type"], plot_road_facing=r["plot_road_facing"],
+                    plot_corner=r["plot_corner"], available_from=r["available_from"],
+                    plot_authority=r["plot_authority"], plot_fencing=r["plot_fencing"],
+                    plot_price=r["plot_price"], brokerage=r["brokerage"],
+                    brokerage_percentage=r["brokerage_percentage"], plot_ownership=r["plot_ownership"],
+                    plot_loan=r["plot_loan"], plot_loan_amount=r["plot_loan_amount"],
+                    plot_city=r["plot_city"], plot_locality=r["plot_locality"],
+                    plot_address=r["plot_address"], plot_owner_name=r["plot_owner_name"],
+                    plot_owner_contact=r["plot_owner_contact"], plot_owner_email=r["plot_owner_email"],
+                    uploaded_by_name=admin_obj.name, uploaded_by_email=admin_obj.email,
+                    uploaded_by_contact=admin_obj.phone, uploaded_by_role=admin_obj.role,
                 )
-            
-            return JsonResponse({"status": "success", "message": "Excel data imported successfully!"})
+                # Save signature directly inside property_title field tracking boundaries
+                prop.property_title = f"{prop.property_title or ''} [FILE:{file_name_str}] [ROW-MD5:{r['row_fingerprint']}]"
+                prop.save()
+                imported_count += 1
+
+            return JsonResponse({"status": "success", "message": f"Successfully imported {imported_count} listings from {file_name_str}."})
 
         except Exception as e:
             traceback.print_exc()
-            return JsonResponse({"status": "error", "message": f"Format Error: Ensure data matches template. Details: {str(e)}"})
+            return JsonResponse({"status": "error", "message": f"Error: {str(e)}"})
 
-    return JsonResponse({"status": "error", "message": "Invalid Request. File missing."})
-
-
+    return JsonResponse({"status": "error", "message": "Invalid request."})
 
 
 
+
+
+
+
+def plot_resale_list(request):
+
+    session_id = request.session.get('Admin_id')
+
+    if not session_id:
+        return render(request,'home_page/Adminlogin.html')
+
+    try:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+    except Admin_Login.DoesNotExist:
+        return render(request,'home_page/Adminlogin.html')
+
+    base_qs = PlotSaleProperty.objects.filter(
+        is_deleted=False
+    )
+
+    total_properties = base_qs.count()
+
+    properties = base_qs
+
+    search = request.GET.get('search')
+    city = request.GET.get('city')
+    locality = request.GET.get('locality')
+    plot_type = request.GET.get('plot_type')
+    road_facing = request.GET.get('road_facing')
+    corner_plot = request.GET.get('corner_plot')
+    loan = request.GET.get('loan')
+
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+
+    from_date = request.GET.get('from_date')
+    to_date = request.GET.get('to_date')
+
+    # Search
+    if search:
+        properties = properties.filter(
+            Q(plot_property_id__icontains=search) |
+            Q(property_title__icontains=search) |
+            Q(plot_title__icontains=search) |
+            Q(plot_city__icontains=search) |
+            Q(plot_locality__icontains=search) |
+            Q(plot_owner_name__icontains=search) |
+            Q(plot_owner_contact__icontains=search)
+        )
+
+    # City
+    if city:
+        properties = properties.filter(
+            plot_city__icontains=city
+        )
+
+    # Locality
+    if locality:
+        properties = properties.filter(
+            plot_locality__icontains=locality
+        )
+
+    # Plot Type
+    if plot_type:
+        properties = properties.filter(
+            resale_plot_type__icontains=plot_type
+        )
+
+    # Road Facing
+    if road_facing:
+        properties = properties.filter(
+            plot_road_facing__icontains=road_facing
+        )
+
+    # Corner Plot
+    if corner_plot:
+        properties = properties.filter(
+            plot_corner=corner_plot
+        )
+
+    # Loan
+    if loan:
+        properties = properties.filter(
+            plot_loan=loan
+        )
+
+    # Min Price
+    if min_price:
+        properties = properties.filter(
+            plot_price__gte=min_price
+        )
+
+    # Max Price
+    if max_price:
+        properties = properties.filter(
+            plot_price__lte=max_price
+        )
+
+    # Date Filter
+    if from_date:
+        properties = properties.filter(
+            created_at__date__gte=from_date
+        )
+
+    if to_date:
+        properties = properties.filter(
+            created_at__date__lte=to_date
+        )
+
+    properties = properties.order_by('-created_at')
+
+    active_listings = base_qs.filter(
+        plot_price__gt=0
+    ).count()
+
+    residential_count = base_qs.filter(
+        resale_plot_type__icontains='residential'
+    ).count()
+
+    commercial_count = base_qs.filter(
+        resale_plot_type__icontains='commercial'
+    ).count()
+
+    agricultural_count = base_qs.filter(
+        resale_plot_type__icontains='agricultural'
+    ).count()
+
+    finance_ready_count = base_qs.filter(
+        plot_loan='yes'
+    ).count()
+
+    uploaded_files = set()
+
+    for title in base_qs.exclude(
+        property_title__isnull=True
+    ).values_list(
+        'property_title',
+        flat=True
+    ):
+        match = re.search(r'\[FILE:(.+?)\]', title or '')
+
+        if match:
+            uploaded_files.add(match.group(1))
+
+    context = {
+        'admin_obj': admin_obj,
+        'properties': properties,
+        'total_properties': total_properties,
+
+        'active_listings': active_listings,
+        'residential_count': residential_count,
+        'commercial_count': commercial_count,
+        'agricultural_count': agricultural_count,
+        'finance_ready_count': finance_ready_count,
+
+        'uploaded_files': sorted(uploaded_files),
+    }
+
+    return render(
+        request,
+        'admin_user/Reports/Resale/plot_list.html',
+        context
+    )
 # ==========================================
 # 1. DETAILS VIEW PAGE
 # ==========================================
+
+
+
+ 
 def plot_sale_view(request, id):
     session_id = request.session.get('Admin_id')
-    user_id = request.session.get('User_id')
-
+    user_id    = request.session.get('User_id')
+ 
     if not session_id and not user_id:
         return redirect('login')
-
-    # Fetch the specific property
-    prop = get_object_or_404(PlotSaleProperty, id=id)
-    
+ 
+    prop = get_object_or_404(
+        PlotSaleProperty.objects.prefetch_related('images', 'faqs'),
+        plot_property_id=id
+    )
+ 
+    # Safety: regenerate FAQs if missing (old records before migration)
+    if not prop.faqs.exists():
+        prop.generate_auto_faqs()
+ 
     context = {
-        'prop': prop
+        'prop': prop,
+        'faqs': prop.faqs.all(),
     }
     return render(request, 'admin_user/Reports/Resale/plot_view.html', context)
 
@@ -8748,28 +10322,72 @@ def plot_sale_view(request, id):
 
 @require_POST
 def plot_sale_delete(request, id):
+
     try:
+
         deleter_name = _get_deleter_name(request)
-        
-        prop = get_object_or_404(PlotSaleProperty, id=id)
+
+        prop = get_object_or_404(
+            PlotSaleProperty,
+            plot_property_id=id,
+            is_deleted=False
+        )
+
         prop.is_deleted = True
         prop.deleted_at = timezone.now()
-        prop.deleted_by = deleter_name # 👈 SAVE THE NAME HERE
-        prop.save() 
-        return JsonResponse({"status": "success", "message": "Moved to Recycle Bin successfully!"})
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)})
+        prop.deleted_by = deleter_name
+        prop.save()
 
+        return JsonResponse({
+            "status": "success",
+            "message": f"{id} moved to recycle bin successfully."
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "message": str(e)
+        })
 
 @require_POST
 def plot_sale_restore(request, id):
-    PlotSaleProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
-    return JsonResponse({'status': 'success', 'message': 'Plot restored!'})
+
+    updated = PlotSaleProperty.objects.filter(
+        plot_property_id=id
+    ).update(
+        is_deleted=False,
+        deleted_at=None,
+        deleted_by=None
+    )
+
+    if updated:
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Plot restored successfully!'
+        })
+
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Plot not found.'
+    })
 
 @require_POST
 def plot_sale_hard_delete(request, id):
-    PlotSaleProperty.objects.filter(id=id).delete()
-    return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
+
+    deleted, _ = PlotSaleProperty.objects.filter(
+        plot_property_id=id
+    ).delete()
+
+    if deleted:
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Property permanently deleted!'
+        })
+
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Property not found.'
+    })
 
     #####################END VIEW SECTION PLOT RESALE LISTING################
 
@@ -8777,6 +10395,18 @@ def plot_sale_hard_delete(request, id):
     ##############################START VIEW SECTION RESALE INDUSTRIAL LISTING#################
 
     
+
+def safe_parse_date(date_str):
+    if date_str:
+        try:
+            return datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+    return None
+
+
+
+
 def industrial_resale_add(request):
     admin_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
@@ -8785,9 +10415,7 @@ def industrial_resale_add(request):
         return redirect('login')
 
     try:
-        # =============================
-        # GET USER DETAILS
-        # =============================
+        # Resolve administrator identity profiles context
         if admin_id:
             admin = Admin_Login.objects.get(id=admin_id)
             uploader_name = admin.name
@@ -8801,106 +10429,92 @@ def industrial_resale_add(request):
             uploader_phone = user.phone
             uploader_role = user.role
 
-        # =============================
-        # HANDLE POST
-        # =============================
         if request.method == "POST":
-            # Safely parse boolean choices
-            power_val = True if request.POST.get('ind_power') == 'yes' else False
-            crane_val = True if request.POST.get('ind_crane') == 'yes' else False
-            housing_val = True if request.POST.get('ind_housing') == 'yes' else False
+            # Map string toggle parameters safely to systemic database booleans
+            power_val = request.POST.get('power_supply') == 'True'
+            crane_val = request.POST.get('crane_heavy_machinery') == 'True'
+            housing_val = request.POST.get('worker_housing_nearby') == 'True'
+            parsed_avail_date = safe_parse_date(request.POST.get('available_from'))
             
-            loan_val = True if request.POST.get('ind_loan') == 'yes' else False
-            tenants_val = True if request.POST.get('ind_tenants') == 'yes' else False
-            dispute_val = True if request.POST.get('ind_dispute') == 'yes' else False
-            tax_due_val = True if request.POST.get('ind_tax_due') == 'yes' else False
-            tax_cert_val = True if request.POST.get('ind_tax_cert') == 'yes' else False
+            loan_val = request.POST.get('has_loan') == 'True'
+            tenants_val = request.POST.get('existing_tenants') == 'True'
+            dispute_val = request.POST.get('legal_dispute') == 'True'
+            tax_due_val = request.POST.get('tax_due') == 'True'
+            tax_cert_val = request.POST.get('tax_clearance_cert') == 'True'
 
             prop = IndustrialResaleProperty.objects.create(
-                # Step 1
-                property_type=request.POST.get('industrial_property_type'),
-                land_area=request.POST.get('ind_area') or 0,
-                available_from=request.POST.get('available_from') or None,
+                property_title=request.POST.get('property_title'), # Aligned property titles tracking variable
+
+                # Step 1: Specs
+                property_type=request.POST.get('property_type'),
+                land_area=request.POST.get('land_area') or 0,
+                available_from=parsed_avail_date,
                 power_supply=power_val,
-                kva_capacity=request.POST.get('ind_kva') or None,
-                water_supply=request.POST.get('ind_water'),
+                kva_capacity=request.POST.get('kva_capacity') or None,
+                water_supply=request.POST.get('water_supply'),
                 crane_heavy_machinery=crane_val,
-                road_connectivity=request.POST.get('ind_road'),
+                road_connectivity=request.POST.get('road_connectivity'),
                 worker_housing_nearby=housing_val,
 
-                # Step 2
-                expected_price=request.POST.get('ind_price') or 0,
+                # Step 2: Pricing & Legal
+                expected_price=request.POST.get('expected_price') or None,
                 brokerage=request.POST.get('brokerage'),
                 brokerage_percentage=request.POST.get('brokerage_percentage'),
                 manual_brokerage=request.POST.get('manual_brokerage'),
-                sanctioning_authority=request.POST.get('ind_authority'),
-                ownership_type=request.POST.get('ind_ownership'),
+                sanctioning_authority=request.POST.get('sanctioning_authority'),
+                ownership_type=request.POST.get('ownership_type'),
                 
                 has_loan=loan_val,
-                loan_amount=request.POST.get('ind_loan_amount') or None,
-                
+                loan_amount=request.POST.get('loan_amount') or None,
                 existing_tenants=tenants_val,
-                tenant_details=request.POST.get('ind_tenant_details'),
-                
+                tenant_details=request.POST.get('tenant_details'),
                 legal_dispute=dispute_val,
-                dispute_details=request.POST.get('ind_dispute_details'),
-                
+                dispute_details=request.POST.get('dispute_details'),
                 tax_due=tax_due_val,
-                tax_amount=request.POST.get('ind_tax_amount') or None,
+                tax_amount=request.POST.get('tax_amount') or None,
                 tax_clearance_cert=tax_cert_val,
                 
-                property_description=request.POST.get('resale_industrial_desc'),
+                property_description=request.POST.get('property_description'),
 
-                # Step 3
-                compliance_docs=request.FILES.get('ind_compliance'),
-                social_video=request.FILES.get('ind_video'),
+                # Step 3: File Document Streams
+                compliance_docs=request.FILES.get('compliance_docs'),
+                social_video=request.FILES.get('social_video'),
 
-                # Step 4
-                city=request.POST.get('ind_city'),
-                locality=request.POST.get('ind_locality'),
-                complete_address=request.POST.get('ind_address'),
-                owner_name=request.POST.get('ind_owner_name'),
-                owner_contact=request.POST.get('ind_owner_contact'),
-                owner_email=request.POST.get('ind_owner_email'),
-                residency_status=request.POST.get('ind_residency'),
+                # Step 4: Contact Information
+                city=request.POST.get('city'),
+                locality=request.POST.get('locality'),
+                complete_address=request.POST.get('complete_address'),
+                owner_name=request.POST.get('owner_name'),
+                owner_contact=request.POST.get('owner_contact'),
+                owner_email=request.POST.get('owner_email'),
+                residency_status=request.POST.get('residency_status'),
 
-                # Uploader Info
+                # Audit Session Metadata Tracks
                 uploaded_by_name=uploader_name,
                 uploaded_by_email=uploader_email,
                 uploaded_by_contact=uploader_phone,
-                uploaded_by_role=uploader_role,
+                uploaded_by_role=uploader_role
             )
 
-            # =============================
-            # SAVE IMAGES (Min 1 handled in JS, Max 10 handled here and JS)
-            # =============================
+            # Saves multi-image selections in the exact order selected on the frontend dashboard layout
             images = request.FILES.getlist('property_images[]')
-
-            for i, img in enumerate(images):
-                if i >= 10:
-                    break  # Stop at 10 images
-                IndustrialResaleImage.objects.create(
-                    property=prop,
-                    image=img
-                )
+            for idx, img in enumerate(images):
+                if idx >= 10:
+                    break
+                IndustrialResaleImage.objects.create(property=prop, image=img)
 
             return JsonResponse({
                 "status": "success",
-                "message": "Industrial Property Added Successfully"
+                "message": f"Industrial Listing {prop.industrial_id or prop.id} successfully built and posted live!"
             })
 
-    except Exception as e:
-        print("ERROR:", str(e))
+    except Exception as err:
+        print("CRITICAL EXCEPTION ROUTED:", str(err))
         traceback.print_exc()
-        return JsonResponse({
-            "status": "error",
-            "message": str(e)
-        })
+        return JsonResponse({"status": "error", "message": str(err)})
 
-    # For GET requests
     context = {'admin_obj': admin if admin_id else user}
-    return render(request, 'admin_user/Reports/Resale/industrial_list.html', context)
-
+    return render(request, 'admin_user/industrial_resale.html', context)
 
 
 
@@ -8918,53 +10532,68 @@ def industrial_resale_edit(request, id):
     if request.method == "POST":
         try:
             # Safely parse boolean choices
-            prop.power_supply = True if request.POST.get('ind_power') == 'yes' else False
-            prop.crane_heavy_machinery = True if request.POST.get('ind_crane') == 'yes' else False
-            prop.worker_housing_nearby = True if request.POST.get('ind_housing') == 'yes' else False
+            def parse_bool(val):
+                return str(val).strip().lower() in ['yes', 'true', '1', 'on']
+
+            # Update Step 1: Specs
+            prop.property_type = request.POST.get('property_type')
+            prop.land_area = request.POST.get('land_area') or 0.0
             
-            prop.has_loan = True if request.POST.get('ind_loan') == 'yes' else False
-            prop.existing_tenants = True if request.POST.get('ind_tenants') == 'yes' else False
-            prop.legal_dispute = True if request.POST.get('ind_dispute') == 'yes' else False
-            prop.tax_due = True if request.POST.get('ind_tax_due') == 'yes' else False
-            prop.tax_clearance_cert = True if request.POST.get('ind_tax_cert') == 'yes' else False
+            prop.available_from = safe_parse_date(request.POST.get('available_from'))
+          
+            prop.power_supply = parse_bool(request.POST.get('power_supply'))
+            prop.kva_capacity = request.POST.get('kva_capacity') or None
+            prop.water_supply = request.POST.get('water_supply')
+            prop.crane_heavy_machinery = parse_bool(request.POST.get('crane_heavy_machinery'))
+            prop.road_connectivity = request.POST.get('road_connectivity')
+            prop.worker_housing_nearby = parse_bool(request.POST.get('worker_housing_nearby'))
 
-            # Update Step 1
-            prop.property_type = request.POST.get('industrial_property_type')
-            prop.land_area = request.POST.get('ind_area') or 0
-            prop.available_from = request.POST.get('available_from') or None
-            prop.kva_capacity = request.POST.get('ind_kva') or None
-            prop.water_supply = request.POST.get('ind_water')
-            prop.road_connectivity = request.POST.get('ind_road')
-
-            # Update Step 2
-            prop.expected_price = request.POST.get('ind_price') or 0
+            # Update Step 2: Pricing & Legal
+            prop.expected_price = request.POST.get('expected_price') or 0.0
             prop.brokerage = request.POST.get('brokerage')
             prop.brokerage_percentage = request.POST.get('brokerage_percentage')
             prop.manual_brokerage = request.POST.get('manual_brokerage')
-            prop.sanctioning_authority = request.POST.get('ind_authority')
-            prop.ownership_type = request.POST.get('ind_ownership')
-            prop.loan_amount = request.POST.get('ind_loan_amount') or None
-            prop.tenant_details = request.POST.get('ind_tenant_details')
-            prop.dispute_details = request.POST.get('ind_dispute_details')
-            prop.tax_amount = request.POST.get('ind_tax_amount') or None
-            prop.property_description = request.POST.get('resale_industrial_desc')
+            prop.sanctioning_authority = request.POST.get('sanctioning_authority')
+            prop.ownership_type = request.POST.get('ownership_type')
+            
+            prop.has_loan = parse_bool(request.POST.get('has_loan'))
+            prop.loan_amount = request.POST.get('loan_amount') or 0.0
+            
+            prop.existing_tenants = parse_bool(request.POST.get('existing_tenants'))
+            prop.tenant_details = request.POST.get('tenant_details')
+            
+            prop.legal_dispute = parse_bool(request.POST.get('legal_dispute'))
+            prop.dispute_details = request.POST.get('dispute_details')
+            
+            prop.tax_due = parse_bool(request.POST.get('tax_due'))
+            prop.tax_amount = request.POST.get('tax_amount') or 0.0
+            prop.tax_clearance_cert = parse_bool(request.POST.get('tax_clearance_cert'))
+            
+            prop.property_description = request.POST.get('property_description')
 
-            # Update Step 3 (Files - only update if new file is uploaded)
-            if request.FILES.get('ind_compliance'):
-                prop.compliance_docs = request.FILES.get('ind_compliance')
-            if request.FILES.get('ind_video'):
-                prop.social_video = request.FILES.get('ind_video')
+            # Update Step 3: Media & Files
+            if 'compliance_docs' in request.FILES:
+                prop.compliance_docs = request.FILES['compliance_docs']
+            if 'social_video' in request.FILES:
+                prop.social_video = request.FILES['social_video']
 
-            # Update Step 4
-            prop.city = request.POST.get('ind_city')
-            prop.locality = request.POST.get('ind_locality')
-            prop.complete_address = request.POST.get('ind_address')
-            prop.owner_name = request.POST.get('ind_owner_name')
-            prop.owner_contact = request.POST.get('ind_owner_contact')
-            prop.owner_email = request.POST.get('ind_owner_email')
-            prop.residency_status = request.POST.get('ind_residency')
+            # Update Step 4: Location & Contact
+            prop.city = request.POST.get('city')
+            prop.locality = request.POST.get('locality')
+            prop.complete_address = request.POST.get('complete_address')
+            prop.owner_name = request.POST.get('owner_name')
+            prop.owner_contact = request.POST.get('owner_contact')
+            prop.owner_email = request.POST.get('owner_email')
+            prop.residency_status = request.POST.get('residency_status')
 
+            # Save core property attributes
             prop.save()
+
+            # Handle Deletion of Specific Old Images
+            removed_image_ids = request.POST.getlist('removed_images[]')
+            if removed_image_ids:
+                from .models import IndustrialResaleImage  # Ensure imported
+                IndustrialResaleImage.objects.filter(id__in=removed_image_ids, property=prop).delete()
 
             # Save New Images (Append up to 10 max)
             new_images = request.FILES.getlist('property_images[]')
@@ -8973,19 +10602,26 @@ def industrial_resale_edit(request, id):
             for img in new_images:
                 if current_image_count >= 10:
                     break
+                from .models import IndustrialResaleImage
                 IndustrialResaleImage.objects.create(property=prop, image=img)
                 current_image_count += 1
 
             return JsonResponse({"status": "success", "message": "Industrial Property Updated Successfully"})
 
         except Exception as e:
-            print("ERROR:", str(e))
             traceback.print_exc()
             return JsonResponse({"status": "error", "message": str(e)})
 
-    # Render template for GET request
-    context = {'prop': prop}
+    # GET Request: Render edit template with pre-filled data
+    context = {
+        'prop': prop,
+        # Determine uploader for display
+        'admin_obj': Admin_Login.objects.filter(id=admin_id).first() if admin_id else None
+    }
     return render(request, 'admin_user/Resale/industrial_edit.html', context)
+
+
+
 
 
 
@@ -8993,78 +10629,189 @@ def industrial_resale_edit(request, id):
 
 def industrial_resale_list(request):
     session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-        
-        # Fetch all properties in descending order (newest first)
-        properties = IndustrialResaleProperty.objects.filter(is_deleted=False).order_by('-created_at')
-        context = {
-            'admin_obj': admin_obj,
-            'properties': properties
-        }
-        return render(request, 'admin_user/Reports/Resale/industrial_list.html', context)
-    else:
+    if not session_id:
         return render(request, 'home_page/Adminlogin.html')
+        
+    admin_obj = Admin_Login.objects.get(id=session_id)
+    base_qs = IndustrialResaleProperty.objects.filter(is_deleted=False)
+    
+    # ─── Filter Parameters ───
+    search_query = request.GET.get('search', '').strip()
+    city_query = request.GET.get('city', 'All Cities')
+    prop_type_query = request.GET.get('property_type', 'All Types')
+    power_query = request.GET.get('power_supply', 'Any Power Supply')
+    from_date = request.GET.get('from_date', '')
+    to_date = request.GET.get('to_date', '')
 
+    # ─── Apply Filters ───
+    if search_query:
+        base_qs = base_qs.filter(
+            Q(property_title__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(locality__icontains=search_query) |
+            Q(owner_name__icontains=search_query) |
+            Q(industrial_id__icontains=search_query)
+        )
+
+    if city_query != 'All Cities':
+        base_qs = base_qs.filter(city__iexact=city_query)
+        
+    if prop_type_query != 'All Types':
+        base_qs = base_qs.filter(property_type__iexact=prop_type_query)
+        
+    if power_query == 'heavy':
+        base_qs = base_qs.filter(power_supply=True, kva_capacity__gte=100)
+    elif power_query == 'light':
+        base_qs = base_qs.filter(power_supply=True, kva_capacity__lt=100)
+        
+    if from_date and to_date:
+        base_qs = base_qs.filter(created_at__date__gte=from_date, created_at__date__lte=to_date)
+
+    # Sort listings chronologically
+    properties_qs = base_qs.order_by('-created_at')
+
+    # ─── EXPORT LOGIC (CSV / EXCEL) ───
+    download_type = request.GET.get('download')
+    if download_type in ['csv', 'excel']:
+        # Exact headers matching the upload template format (with ID & Title for context)
+        headers = [
+            "Industrial ID", "Property Title", "property_type *", "land_area *", "available_from *", "power_supply",
+            "kva_capacity", "water_supply", "crane_heavy_machinery", "road_connectivity *",
+            "worker_housing_nearby", "expected_price *", "brokerage", "brokerage_percentage",
+            "manual_brokerage", "sanctioning_authority", "ownership_type *", "has_loan",
+            "loan_amount", "existing_tenants", "tenant_details", "legal_dispute",
+            "dispute_details", "tax_due", "tax_amount", "tax_clearance_cert",
+            "property_description *", "city *", "locality *", "complete_address *",
+            "owner_name *", "owner_contact *", "owner_email *", "residency_status *"
+        ]
+
+        if download_type == 'csv':
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="Industrial_Resale_Report.csv"'
+            writer = csv.writer(response)
+            writer.writerow(headers)
+            for prop in properties_qs:
+                writer.writerow([
+                    prop.industrial_id, prop.property_title, prop.property_type, prop.land_area, prop.available_from,
+                    "Yes" if prop.power_supply else "No", prop.kva_capacity, prop.water_supply,
+                    "Yes" if prop.crane_heavy_machinery else "No", prop.road_connectivity,
+                    "Yes" if prop.worker_housing_nearby else "No", prop.expected_price, prop.brokerage,
+                    prop.brokerage_percentage, prop.manual_brokerage, prop.sanctioning_authority, prop.ownership_type,
+                    "Yes" if prop.has_loan else "No", prop.loan_amount, "Yes" if prop.existing_tenants else "No",
+                    prop.tenant_details, "Yes" if prop.legal_dispute else "No", prop.dispute_details,
+                    "Yes" if prop.tax_due else "No", prop.tax_amount, "Yes" if prop.tax_clearance_cert else "No",
+                    prop.property_description, prop.city, prop.locality, prop.complete_address,
+                    prop.owner_name, prop.owner_contact, prop.owner_email, prop.residency_status
+                ])
+            return response
+
+        elif download_type == 'excel':
+            wb = openpyxl.Workbook()
+            sheet = wb.active
+            sheet.title = "Industrial Report Data"
+            sheet.append(headers)
+            for prop in properties_qs:
+                sheet.append([
+                    prop.industrial_id, prop.property_title, prop.property_type, prop.land_area,
+                    str(prop.available_from) if prop.available_from else "",
+                    "Yes" if prop.power_supply else "No", prop.kva_capacity, prop.water_supply,
+                    "Yes" if prop.crane_heavy_machinery else "No", prop.road_connectivity,
+                    "Yes" if prop.worker_housing_nearby else "No", prop.expected_price, prop.brokerage,
+                    prop.brokerage_percentage, prop.manual_brokerage, prop.sanctioning_authority, prop.ownership_type,
+                    "Yes" if prop.has_loan else "No", prop.loan_amount, "Yes" if prop.existing_tenants else "No",
+                    prop.tenant_details, "Yes" if prop.legal_dispute else "No", prop.dispute_details,
+                    "Yes" if prop.tax_due else "No", prop.tax_amount, "Yes" if prop.tax_clearance_cert else "No",
+                    prop.property_description, prop.city, prop.locality, prop.complete_address,
+                    prop.owner_name, prop.owner_contact, prop.owner_email, prop.residency_status
+                ])
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = 'attachment; filename="Industrial_Resale_Report.xlsx"'
+            wb.save(response)
+            return response
+
+    # Pagination
+    paginator = Paginator(properties_qs, 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # ─── Dynamic Statistical Compilations ───
+    total_count = IndustrialResaleProperty.objects.filter(is_deleted=False).count()
+    filtered_count = properties_qs.count()
+    active_listings = properties_qs.filter(expected_price__gt=0).count()
+    warehouse_count = properties_qs.filter(property_type__icontains='warehouse').count()
+    compliance_passed = properties_qs.exclude(compliance_docs='').exclude(compliance_docs__isnull=True).count()
+
+    # ─── Chart Data Aggregation ───
+    small_cap = properties_qs.filter(land_area__lte=20000).count()
+    mid_cap = properties_qs.filter(land_area__gt=20000, land_area__lte=80000).count()
+    large_cap = properties_qs.filter(land_area__gt=80000).count()
+    manufacturing = properties_qs.filter(property_type__icontains='manufacturing').count()
+    cold_storage = properties_qs.filter(property_type__icontains='cold_storage').count()
+    low_risk = properties_qs.filter(tax_due=False, legal_dispute=False).count()
+    medium_risk = properties_qs.filter(tax_due=True, legal_dispute=False).count()
+    high_risk = properties_qs.filter(legal_dispute=True).count()
+
+    unique_cities = IndustrialResaleProperty.objects.filter(is_deleted=False).exclude(city__isnull=True).exclude(city='').values_list('city', flat=True).distinct()
+    unique_property_types = IndustrialResaleProperty.objects.filter(is_deleted=False).exclude(property_type__isnull=True).exclude(property_type='').values_list('property_type', flat=True).distinct()
+    uploaded_files = IndustrialResaleProperty.objects.filter(is_deleted=False).exclude(upload_file_name__isnull=True).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
+
+    context = {
+        'admin_obj': admin_obj,
+        'page_obj': page_obj,
+        'properties': page_obj, 
+        'total_properties': total_count, 
+        'total_count': total_count,
+        'filtered_count': filtered_count,
+        'active_listings': active_listings,
+        'warehouse_count': warehouse_count,
+        'compliance_passed': compliance_passed,
+        'capacity_labels': json.dumps(["Small (≤ 20k sqft)", "Mid (20-80k sqft)", "Large (80k+ sqft)"]),
+        'capacity_data': json.dumps([small_cap, mid_cap, large_cap]),
+        'type_labels': json.dumps(["Warehouse", "Manufacturing", "Cold Storage", "Other"]),
+        'type_data': json.dumps([warehouse_count, manufacturing, cold_storage, filtered_count - (warehouse_count + manufacturing + cold_storage)]),
+        'risk_labels': json.dumps(["Low Risk", "Medium Risk", "High Risk"]),
+        'risk_data': json.dumps([low_risk, medium_risk, high_risk]),
+        'unique_cities': unique_cities,
+        'unique_property_types': unique_property_types,
+        'uploaded_files': uploaded_files,
+        'search_query': search_query,
+        'city_query': city_query,
+        'prop_type_query': prop_type_query,
+        'power_query': power_query,
+    }
+    return render(request, 'admin_user/Reports/Resale/industrial_list.html', context)
 
 
 
 
 def industrial_resale_view(request, id):
     session_id = request.session.get('Admin_id')
-    user_id = request.session.get('User_id')
+    user_id    = request.session.get('User_id')
 
     if not session_id and not user_id:
         return redirect('login')
 
-    # Fetch the specific industrial property
-    prop = get_object_or_404(IndustrialResaleProperty, id=id)
-    
+    # Fetch the property + prefetch related images and DB-stored FAQs
+    prop = get_object_or_404(
+        IndustrialResaleProperty.objects.prefetch_related('images', 'faqs'),
+        id=id
+    )
+
+    # FAQs are now persisted in DB via generate_auto_faqs() called on save().
+    # If for any reason they are missing (e.g. old record), regenerate on the fly.
+    if not prop.faqs.exists():
+        prop.generate_auto_faqs()
+
     context = {
-        'prop': prop
+        'prop': prop,
+        'faqs': prop.faqs.all(),   # QuerySet from IndustrialResaleFAQ table
     }
     return render(request, 'admin_user/Resale/industrial_view.html', context)
 
 
-@require_POST
-def industrial_resale_hard_delete(request, id):
-    IndustrialResaleProperty.objects.filter(id=id).delete()
-    return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
-
-@require_POST
-def industrial_resale_restore(request, id):
-    IndustrialResaleProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
-    return JsonResponse({'status': 'success', 'message': 'Industrial property restored!'})
-
-# ── 1. SINGLE DELETE VIEW (Soft Delete) ──
-@require_POST
-def industrial_resale_delete(request, id):
-    try:
-        # Get the name of the user/admin deleting the property
-        deleter_name = _get_deleter_name(request)
-        
-        # Fetch the property
-        prop = get_object_or_404(IndustrialResaleProperty, id=id)
-        
-        # Soft Delete
-        prop.is_deleted = True
-        prop.deleted_at = timezone.now()
-        prop.deleted_by = deleter_name
-        prop.save() 
-        
-        return JsonResponse({
-            "status": "success", 
-            "message": "Moved to Recycle Bin successfully."
-        })
-        
-    except Exception as e:
-        return JsonResponse({
-            "status": "error", 
-            "message": f"Failed to delete: {str(e)}"
-        })
 
 
-# ── 2. BULK DELETE VIEW (Soft Delete) ──
+
 @require_POST
 def industrial_bulk_delete(request):
     """Handles Advanced Bulk Deletions for Industrial Properties."""
@@ -9077,6 +10824,8 @@ def industrial_bulk_delete(request):
     try:
         data = json.loads(request.body)
         delete_type = data.get('delete_type')
+        
+        # Calling your existing helper function here
         deleter_name = _get_deleter_name(request)
         
         # Target only properties not currently in the Recycle Bin
@@ -9117,7 +10866,7 @@ def industrial_bulk_delete(request):
             return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} older properties to Recycle Bin.'})
             
         elif delete_type == 'by_uploader':
-            uploader = data.get('uploader_text', '')
+            uploader = data.get('uploader_text', '').strip()
             target_props = properties.filter(
                 Q(uploaded_by_name__icontains=uploader) | 
                 Q(uploaded_by_email__icontains=uploader) |
@@ -9129,7 +10878,7 @@ def industrial_bulk_delete(request):
 
         elif delete_type == 'by_file':
             file_name = data.get('file_name', '')
-            # Replace 'upload_file_name' with your exact DB field name
+            # Updated to match exact DB field name
             target_props = properties.filter(upload_file_name=file_name) 
             count = target_props.count()
             if count == 0:
@@ -9144,77 +10893,165 @@ def industrial_bulk_delete(request):
         return JsonResponse({'status': 'error', 'message': str(e)})
 
 
-def download_industrial_resale_template(request):
-    import openpyxl
-    from django.http import HttpResponse
+@require_POST
+def industrial_resale_hard_delete(request, id):
+    """Permanently deletes the record from the database."""
+    try:
+        IndustrialResaleProperty.objects.filter(id=id).delete()
+        return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
 
+
+@require_POST
+def industrial_resale_restore(request, id):
+    """Restores the record from the Recycle Bin."""
+    try:
+        IndustrialResaleProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
+        return JsonResponse({'status': 'success', 'message': 'Industrial property restored!'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)})
+
+# ── 1. SINGLE DELETE VIEW (Soft Delete) ──
+@require_POST
+def industrial_resale_delete(request, id):
+    try:
+        # Get the name of the user/admin deleting the property
+        deleter_name = _get_deleter_name(request)
+        
+        # Fetch the property
+        prop = get_object_or_404(IndustrialResaleProperty, id=id)
+        
+        # Soft Delete
+        prop.is_deleted = True
+        prop.deleted_at = timezone.now()
+        prop.deleted_by = deleter_name
+        prop.save() 
+        
+        return JsonResponse({
+            "status": "success", 
+            "message": "Moved to Recycle Bin successfully."
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            "status": "error", 
+            "message": f"Failed to delete: {str(e)}"
+        })
+
+
+# ── 2. BULK DELETE VIEW (Soft Delete) ──
+
+
+
+
+
+# =========================================================================
+# 1. EXCEL TEMPLATE GENERATOR (STYLED & COLORED)
+# =========================================================================
+def download_industrial_resale_template(request):
     wb = openpyxl.Workbook()
     sheet = wb.active
-    sheet.title = "Industrial Template"
+    sheet.title = "Industrial Resale"
 
-    # ✅ Headers (MATCH DB SEQUENCE EXACTLY)
+    # --- STYLING DEFINITIONS ---
+    section_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid") # Dark Blue
+    header_fill = PatternFill(start_color="DBEAFE", end_color="DBEAFE", fill_type="solid") # Light Blue
+    required_fill = PatternFill(start_color="FEF08A", end_color="FEF08A", fill_type="solid") # Light Yellow
+    
+    white_font_bold = Font(color="FFFFFF", bold=True, size=12)
+    dark_font_bold = Font(color="1E293B", bold=True, size=11)
+    
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    thin_border = Border(
+        left=Side(style='thin', color='CBD5E1'), 
+        right=Side(style='thin', color='CBD5E1'), 
+        top=Side(style='thin', color='CBD5E1'), 
+        bottom=Side(style='thin', color='CBD5E1')
+    )
+
+    # Row 1: Section Headings spanning across cell ranges
+    section_headers = [""] * 32
+    section_headers[0] = "📋 Property & Infrastructure Specifications" # A-I
+    section_headers[9] = "📋 Pricing & Brokerage" # J-N
+    section_headers[14] = "📋 Ownership, Legal & Compliance" # O-Y
+    section_headers[25] = "📋 Geographic Location" # Z-AB
+    section_headers[28] = "📋 Owner Contact Details" # AC-AF
+    
+    sheet.append(section_headers)
+    
+    # Merge Section Blocks
+    sheet.merge_cells('A1:I1')   
+    sheet.merge_cells('J1:N1')   
+    sheet.merge_cells('O1:Y1')  
+    sheet.merge_cells('Z1:AB1')  
+    sheet.merge_cells('AC1:AF1') 
+
+    # Apply Styling to Row 1
+    for cell in sheet[1]:
+        cell.fill = section_fill
+        cell.font = white_font_bold
+        cell.alignment = center_align
+        cell.border = thin_border
+    sheet.row_dimensions[1].height = 30
+
+    # Row 2: Database Field Names Matrix Sequence
     headers = [
-        "Property Type", "Land Area", "Available From (YYYY-MM-DD)", "Power Supply (yes/no)",
-        "KVA Capacity", "Water Supply", "Crane/Heavy Machinery (yes/no)", "Road Connectivity",
-        "Worker Housing Nearby (yes/no)", "Expected Price", "Brokerage (Yes/No)", "Brokerage %",
-        "Manual Brokerage", "Sanctioning Authority", "Ownership Type", "Has Loan (yes/no)",
-        "Loan Amount", "Existing Tenants (yes/no)", "Tenant Details", "Legal Dispute (yes/no)",
-        "Dispute Details", "Tax Due (yes/no)", "Tax Amount", "Tax Clearance Cert (yes/no)",
-        "Property Description", "City", "Locality", "Complete Address",
-        "Owner Name", "Owner Contact", "Owner Email", "Residency Status"
+        "property_type *", "land_area *", "available_from *", "power_supply",
+        "kva_capacity", "water_supply", "crane_heavy_machinery", "road_connectivity *",
+        "worker_housing_nearby", "expected_price *", "brokerage", "brokerage_percentage",
+        "manual_brokerage", "sanctioning_authority", "ownership_type *", "has_loan",
+        "loan_amount", "existing_tenants", "tenant_details", "legal_dispute",
+        "dispute_details", "tax_due", "tax_amount", "tax_clearance_cert",
+        "property_description *", "city *", "locality *", "complete_address *",
+        "owner_name *", "owner_contact *", "owner_email *", "residency_status *"
     ]
-
     sheet.append(headers)
 
-    # ✅ Sample Row (CLEAN + SAFE DATA)
+    # Apply Styling to Row 2
+    for cell in sheet[2]:
+        cell.font = dark_font_bold
+        cell.alignment = center_align
+        cell.border = thin_border
+        # Highlight required fields with yellow, others with light blue
+        if "*" in str(cell.value):
+            cell.fill = required_fill
+        else:
+            cell.fill = header_fill
+            
+        # Adjust column widths automatically based on header length
+        col_letter = cell.column_letter
+        sheet.column_dimensions[col_letter].width = len(str(cell.value)) + 8
+
+    sheet.row_dimensions[2].height = 25
+
+    # Row 3: Live Guideline Data Inputs
     sample_data = [
-        "warehouse",                  # property_type
-        5000,                         # land_area
-        "2026-06-01",                 # available_from
-        "yes",                        # power_supply
-        250,                          # kva_capacity
-        "corporation",                # water_supply
-        "no",                         # crane
-        "highway",                    # road
-        "yes",                        # worker housing
-        15000000,                     # expected_price
-        "Yes",                        # brokerage
-        "2",                          # brokerage % (no % sign)
-        "",                           # manual brokerage
-        "MIDC",                       # authority
-        "freehold",                   # ownership
-        "no",                         # loan
-        0,                            # loan amount
-        "no",                         # tenants
-        "",                           # tenant details
-        "no",                         # dispute
-        "",                           # dispute details
-        "no",                         # tax due
-        0,                            # tax amount
-        "yes",                        # tax clearance
-        "Good industrial shed near highway",  # description
-        "Nagpur",                     # city
-        "Hingna MIDC",                # locality
-        "Plot 42, Phase 1",           # address
-        "Ramesh Verma",               # owner
-        "9876543210",                 # contact
-        "ramesh@example.com",         # email
-        "resident"                    # residency
+        "warehouse", 5000, "2026-06-01", "yes",
+        250, "corporation", "no", "highway",
+        "yes", 15000000, "Yes", "2",
+        "", "MIDC", "freehold", "no",
+        0, "no", "", "no",
+        "", "no", 0, "yes",
+        "Good industrial shed near highway", "Nagpur", "Hingna MIDC", "Plot 42, Phase 1",
+        "Ramesh Verma", "9876543210", "ramesh@example.com", "resident"
     ]
-
     sheet.append(sample_data)
+    
+    # Apply borders to sample data
+    for cell in sheet[3]:
+        cell.border = thin_border
+        cell.alignment = Alignment(horizontal="center", vertical="center")
 
-    # ✅ Response
-    response = HttpResponse(
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-    response['Content-Disposition'] = 'attachment; filename="Industrial_Resale_Template.xlsx"'
-
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="PropCRM_Industrial_Resale_Template.xlsx"'
     wb.save(response)
     return response
 
 
-
+# =========================================================================
+# 2. BULK EXCEL IMPORTER WITH DATA DUPLICATE FINGERPRINTING VALIDATION
+# =========================================================================
 def import_industrial_resale_excel(request):
     session_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
@@ -9222,132 +11059,188 @@ def import_industrial_resale_excel(request):
     if not session_id and not user_id:
         return JsonResponse({"status": "error", "message": "Unauthorized access"})
 
-    if request.method == "POST" and request.FILES.get('excel_file'):
+    if request.method == "POST" and request.FILES.get('industrial_file'):
         try:
-            # ✅ Get uploader (from session)
+            # Resolve Uploader Identity Profile Metrics
             if session_id:
                 uploader = Admin_Login.objects.get(id=session_id)
-                uploader_name = uploader.name
-                uploader_email = uploader.email
-                uploader_contact = uploader.phone
-                uploader_role = "Admin"
+                u_name, u_email, u_phone, u_role = uploader.name, uploader.email, uploader.phone, "Admin"
             else:
                 uploader = User_Details.objects.get(id=user_id)
-                uploader_name = uploader.name
-                uploader_email = uploader.email
-                uploader_contact = uploader.phone
-                uploader_role = uploader.role
+                u_name, u_email, u_phone, u_role = uploader.name, uploader.email, uploader.phone, uploader.role
 
-            excel_file = request.FILES['excel_file']
-            file_name = excel_file.name # 👈 1. GRAB THE FILE NAME HERE
+            excel_file = request.FILES['industrial_file']
+            file_name_str = excel_file.name
 
+            # ── VALIDATION 1: Exact File Name Duplication Check ──
+            same_name_exists = IndustrialResaleProperty.objects.filter(upload_file_name=file_name_str, is_deleted=False).exists()
+            if same_name_exists:
+                return JsonResponse({
+                    "status": "duplicate_filename_and_data",
+                    "message": f"A file named '{file_name_str}' has already been processed. Please rename your file if this is a new dataset."
+                })
+
+            # Compute internal core data stream matrix hash
+            file_content = excel_file.read()
+            excel_file.seek(0)
+            
             wb = openpyxl.load_workbook(excel_file, data_only=True)
             sheet = wb.active
 
-            added_count = 0
-            skipped_count = 0
+            if sheet.max_row < 3:
+                return JsonResponse({"status": "error", "message": "Uploaded spreadsheet lacks data rows. Please fill the template starting from row 3."})
+
+            # Fetch the Column Headers Sequence from Row 2
+            row2_values = [str(cell.value).strip() if cell.value else "" for cell in sheet[2]]
+            
+            expected_headers = [
+                "property_type *", "land_area *", "available_from *", "power_supply",
+                "kva_capacity", "water_supply", "crane_heavy_machinery", "road_connectivity *",
+                "worker_housing_nearby", "expected_price *", "brokerage", "brokerage_percentage",
+                "manual_brokerage", "sanctioning_authority", "ownership_type *", "has_loan",
+                "loan_amount", "existing_tenants", "tenant_details", "legal_dispute",
+                "dispute_details", "tax_due", "tax_amount", "tax_clearance_cert",
+                "property_description *", "city *", "locality *", "complete_address *",
+                "owner_name *", "owner_contact *", "owner_email *", "residency_status *"
+            ]
+
+            # ── VALIDATION 2: Column Layout Mismatch ──
+            for idx, key in enumerate(expected_headers):
+                if idx >= len(row2_values) or row2_values[idx].lower() != key.lower():
+                    return JsonResponse({
+                        "status": "error", 
+                        "message": f"Column structure mismatch! Column {idx+1} must be '{key}' exactly as provided in the template."
+                    })
 
             def parse_bool(val):
-                return str(val).strip().lower() == 'yes'
+                return str(val).strip().lower() in ['yes', 'true', '1']
 
-            for row in sheet.iter_rows(min_row=2, values_only=True):
+            all_rows_data_str = ""
+            records_to_create = []
 
-                if not row[0]:
+            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+                if not row or not any(row):
                     continue
 
-                # ✅ Clean values
-                property_type = str(row[0]).strip() if row[0] else None
-                city = str(row[25]).strip() if row[25] else None
-                address = str(row[27]).strip() if row[27] else None
-                owner_contact = str(row[29]).strip() if row[29] else None
+                # ── VALIDATION 3: Missing Required Column Data ──
+                # Indices matching the asterisk (*) in the template headers
+                required_indices = [0, 1, 2, 7, 9, 14, 24, 25, 26, 27, 28, 29, 30, 31]
+                for ri in required_indices:
+                    if row[ri] is None or str(row[ri]).strip() == "":
+                        return JsonResponse({
+                            "status": "error",
+                            "message": f"Data Validation Error at Row {row_idx}: The required column '{expected_headers[ri]}' cannot be blank."
+                        })
 
-                # ✅ Duplicate check
-                if IndustrialResaleProperty.objects.filter(
-                    property_type=property_type,
-                    city=city,
-                    complete_address=address,
-                    owner_contact=owner_contact
-                ).exists():
-                    skipped_count += 1
-                    continue
+                # Append data components to continuous hashing stream index matrices
+                all_rows_data_str += "".join([str(val) for val in row])
 
-                # ✅ Date handling
                 avail_date = row[2]
-                if hasattr(avail_date, 'date'):
+                if avail_date and hasattr(avail_date, 'date'):
                     avail_date = avail_date.date()
 
-                # ✅ Create object
-                IndustrialResaleProperty.objects.create(
-                    property_type=property_type,
-                    land_area=float(row[1]) if row[1] else None,
-                    available_from=avail_date,
+                records_to_create.append({
+                    "property_type": str(row[0]).strip(),
+                    "land_area": float(row[1]),
+                    "available_from": avail_date,
+                    "power_supply": parse_bool(row[3]),
+                    "kva_capacity": row[4] or None,
+                    "water_supply": str(row[5]).strip() if row[5] else None,
+                    "crane_heavy_machinery": parse_bool(row[6]),
+                    "road_connectivity": str(row[7]).strip(),
+                    "worker_housing_nearby": parse_bool(row[8]),
+                    "expected_price": float(row[9]),
+                    "brokerage": str(row[10]).strip() if row[10] else "No",
+                    "brokerage_percentage": str(row[11]).strip() if row[11] else None,
+                    "manual_brokerage": str(row[12]).strip() if row[12] else None,
+                    "sanctioning_authority": str(row[13]).strip() if row[13] else None,
+                    "ownership_type": str(row[14]).strip(),
+                    "has_loan": parse_bool(row[15]),
+                    "loan_amount": float(row[16]) if row[16] else 0.0,
+                    "existing_tenants": parse_bool(row[17]),
+                    "tenant_details": str(row[18]).strip() if row[18] else None,
+                    "legal_dispute": parse_bool(row[19]),
+                    "dispute_details": str(row[20]).strip() if row[20] else None,
+                    "tax_due": parse_bool(row[21]),
+                    "tax_amount": float(row[22]) if row[22] else 0.0,
+                    "tax_clearance_cert": parse_bool(row[23]),
+                    "property_description": str(row[24]).strip(),
+                    "city": str(row[25]).strip(),
+                    "locality": str(row[26]).strip(),
+                    "complete_address": str(row[27]).strip(),
+                    "owner_name": str(row[28]).strip(),
+                    "owner_contact": str(row[29]).strip(),
+                    "owner_email": str(row[30]).strip(),
+                    "residency_status": str(row[31]).strip(),
+                })
 
-                    power_supply=parse_bool(row[3]),
-                    kva_capacity=row[4] or None,
-                    water_supply=row[5],
-                    crane_heavy_machinery=parse_bool(row[6]),
-                    road_connectivity=row[7],
-                    worker_housing_nearby=parse_bool(row[8]),
+            # ── VALIDATION 4: Exact Data Duplication Check (Content Hash) ──
+            combined_hash_fingerprint = hashlib.md5(all_rows_data_str.encode('utf-8')).hexdigest()
+            same_data_exists = IndustrialResaleProperty.objects.filter(property_description__icontains=f"[MD5:{combined_hash_fingerprint}]", is_deleted=False).exists()
 
-                    expected_price=float(row[9]) if row[9] else None,
-                    brokerage=row[10],
-                    brokerage_percentage=row[11],
-                    manual_brokerage=row[12],
+            if same_data_exists:
+                return JsonResponse({
+                    "status": "duplicate_data_different_filename",
+                    "message": "Duplicate Content Rejected: This exact spreadsheet data matrix has already been imported under a different file name."
+                })
 
-                    sanctioning_authority=row[13],
-                    ownership_type=row[14],
-
-                    has_loan=parse_bool(row[15]),
-                    loan_amount=float(row[16]) if row[16] else None,
-
-                    existing_tenants=parse_bool(row[17]),
-                    tenant_details=row[18],
-
-                    legal_dispute=parse_bool(row[19]),
-                    dispute_details=row[20],
-
-                    tax_due=parse_bool(row[21]),
-                    tax_amount=float(row[22]) if row[22] else None,
-                    tax_clearance_cert=parse_bool(row[23]),
-
-                    property_description=row[24],
-
-                    city=city,
-                    locality=row[26],
-                    complete_address=address,
-
-                    owner_name=row[28],
-                    owner_contact=owner_contact,
-                    owner_email=row[30],
-                    residency_status=row[31],
-
-                    # ✅ Uploader fields 
-                    uploaded_by_name=uploader_name,
-                    uploaded_by_email=uploader_email,
-                    uploaded_by_contact=uploader_contact,
-                    uploaded_by_role=uploader_role,
-                    
-                    # 👈 2. SAVE THE EXCEL FILE NAME IN THE DATABASE
-                    upload_file_name=file_name
+            # Run bulk transactional db block commitments
+            for r in records_to_create:
+                prop = IndustrialResaleProperty.objects.create(
+                    property_type=r["property_type"],
+                    land_area=r["land_area"],
+                    available_from=r["available_from"],
+                    power_supply=r["power_supply"],
+                    kva_capacity=r["kva_capacity"],
+                    water_supply=r["water_supply"],
+                    crane_heavy_machinery=r["crane_heavy_machinery"],
+                    road_connectivity=r["road_connectivity"],
+                    worker_housing_nearby=r["worker_housing_nearby"],
+                    expected_price=r["expected_price"],
+                    brokerage=r["brokerage"],
+                    brokerage_percentage=r["brokerage_percentage"],
+                    manual_brokerage=r["manual_brokerage"],
+                    sanctioning_authority=r["sanctioning_authority"],
+                    ownership_type=r["ownership_type"],
+                    has_loan=r["has_loan"],
+                    loan_amount=r["loan_amount"],
+                    existing_tenants=r["existing_tenants"],
+                    tenant_details=r["tenant_details"],
+                    legal_dispute=r["legal_dispute"],
+                    dispute_details=r["dispute_details"],
+                    tax_due=r["tax_due"],
+                    tax_amount=r["tax_amount"],
+                    tax_clearance_cert=r["tax_clearance_cert"],
+                    property_description=f"{r['property_description']} [MD5:{combined_hash_fingerprint}]",
+                    city=r["city"],
+                    locality=r["locality"],
+                    complete_address=r["complete_address"],
+                    owner_name=r["owner_name"],
+                    owner_contact=r["owner_contact"],
+                    owner_email=r["owner_email"],
+                    residency_status=r["residency_status"],
+                    upload_file_name=file_name_str,
+                    uploaded_by_name=u_name,
+                    uploaded_by_email=u_email,
+                    uploaded_by_contact=u_phone,
+                    uploaded_by_role=u_role
                 )
 
-                added_count += 1
-
-            # ✅ Response
-            if added_count > 0 and skipped_count == 0:
-                return JsonResponse({"status": "success", "message": f"{added_count} properties imported successfully!"})
-            elif added_count > 0 and skipped_count > 0:
-                return JsonResponse({"status": "warning", "message": f"{added_count} imported, {skipped_count} skipped (duplicates)."})
-            elif skipped_count > 0:
-                return JsonResponse({"status": "info", "message": f"All {skipped_count} records already exist."})
-            else:
-                return JsonResponse({"status": "error", "message": "No valid data found."})
+            return JsonResponse({
+                "status": "success", 
+                "created": len(records_to_create),
+                "updated": 0,
+                "skipped": 0,
+                "error_count": 0,
+                "message": f"Successfully parsed and saved {len(records_to_create)} industrial rows from {file_name_str}."
+            })
 
         except Exception as e:
             traceback.print_exc()
-            return JsonResponse({"status": "error", "message": str(e)})
+            return JsonResponse({"status": "error", "message": f"Parsing Error encountered: {str(e)}"})
 
-    return JsonResponse({"status": "error", "message": "Invalid request"})
+    return JsonResponse({"status": "error", "message": "Invalid post configuration payload parameters submitted."})
+
 
     #####################END VIEW SECTION RESALE INDUSTRIL LISTING########################################
 
@@ -11120,122 +13013,108 @@ def commercial_resale_edit(request, id):
 
 
 
+
 def add_agricultural_property(request):
     """
     Handles the 4-step agricultural property listing form submission.
-    Field mapping follows the exact DB model column sequence.
+    Field mapping follows the exact sequential form model schema context.
     """
-    if request.method == 'POST':
-        try:
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+
+    if not admin_id and not user_id:
+        return redirect('login')
+
+    try:
+        # Resolve administrative audit details safely out of current active session structures
+        if admin_id:
+            admin = Admin_Login.objects.get(id=admin_id)
+            uploader_name = admin.name
+            uploader_email = admin.email
+            uploader_phone = admin.phone
+            uploader_role = admin.role
+        else:
+            user = User_Details.objects.get(id=user_id)
+            uploader_name = user.name
+            uploader_email = user.email
+            uploader_phone = user.phone
+            uploader_role = user.role
+
+        if request.method == 'POST':
             def get_decimal(val):
                 """Returns cleaned decimal value or None if blank."""
                 return val if val and str(val).strip() != "" else None
 
             with transaction.atomic():
-
+                # Correctly assign the frontend auto-generated read-only property title
                 property_obj = AgriculturalResaleProperty.objects.create(
+                    title=request.POST.get('property_title'),
 
                     # ── STEP 1: LAND DETAILS ─────────────────────────────────
-                    # DB sequence: agriculture_property_type → village → taluka →
-                    #              district → land_area → soil_type →
-                    #              irrigation_facility → water_source →
-                    #              previous_crops → fertility_status
-
-                    agriculture_property_type = request.POST.get('agriculture_property_type', ''),
-                    village                   = request.POST.get('village', ''),
-                    taluka                    = request.POST.get('taluka', ''),
-                    district                  = request.POST.get('district', ''),
-                    land_area                 = get_decimal(request.POST.get('land_area')),
-                    soil_type                 = request.POST.get('soil_type') or None,
-                    irrigation_facility       = request.POST.get('irrigation_facility', 'no'),
-                    water_source              = request.POST.get('water_source') or None,
-                    previous_crops            = request.POST.get('previous_crops') or None,
-                    fertility_status          = request.POST.get('fertility_status') or None,
+                    # DB sequence match
+                    agriculture_property_type=request.POST.get('agriculture_property_type', ''),
+                    village=request.POST.get('village', ''),
+                    taluka=request.POST.get('taluka', ''),
+                    district=request.POST.get('district', ''),
+                    land_area=get_decimal(request.POST.get('land_area')),
+                    soil_type=request.POST.get('soil_type') or None,
+                    irrigation_facility=request.POST.get('irrigation_facility', 'no'),
+                    water_source=request.POST.get('water_source') or None,
+                    previous_crops=request.POST.get('previous_crops') or None,
+                    fertility_status=request.POST.get('fertility_status') or None,
 
                     # ── STEP 2: PRICING & LEGAL ──────────────────────────────
-                    # DB sequence: expected_price → brokerage → brokerage_percentage →
-                    #              manual_brokerage → ownership_type →
-                    #              agri_loan → loan_amount →
-                    #              agri_tenants → tenant_details →
-                    #              agri_dispute → dispute_details →
-                    #              agri_tax_due → pending_tax_amount →
-                    #              resale_agricultural_desc
-
-                    expected_price            = get_decimal(request.POST.get('expected_price')),
-                    brokerage                 = request.POST.get('brokerage') or None,
-                    brokerage_percentage      = request.POST.get('brokerage_percentage') or None,
-                    manual_brokerage          = request.POST.get('manual_brokerage') or None,
-
-                    ownership_type            = request.POST.get('ownership_type', ''),
-
-                    agri_loan                 = request.POST.get('agri_loan', 'no'),
-                    loan_amount               = (
-                        get_decimal(request.POST.get('loan_amount'))
-                        if request.POST.get('agri_loan') == 'yes'
-                        else None
-                    ),
-
-                    agri_tenants              = request.POST.get('agri_tenants', 'no'),
-                    tenant_details            = (
-                        request.POST.get('tenant_details') or None
-                        if request.POST.get('agri_tenants') == 'yes'
-                        else None
-                    ),
-
-                    agri_dispute              = request.POST.get('agri_dispute', 'no'),
-                    dispute_details           = (
-                        request.POST.get('dispute_details') or None
-                        if request.POST.get('agri_dispute') == 'yes'
-                        else None
-                    ),
-
-                    agri_tax_due              = request.POST.get('agri_tax_due', 'no'),
-                    pending_tax_amount        = (
-                        get_decimal(request.POST.get('pending_tax_amount'))
-                        if request.POST.get('agri_tax_due') == 'yes'
-                        else None
-                    ),
-
-                    resale_agricultural_desc  = request.POST.get('resale_agricultural_desc', ''),
+                    # DB sequence match
+                    expected_price=get_decimal(request.POST.get('expected_price')),
+                    brokerage=request.POST.get('brokerage') or None,
+                    brokerage_percentage=request.POST.get('brokerage_percentage') or None,
+                    manual_brokerage=request.POST.get('manual_brokerage') or None,
+                    ownership_type=request.POST.get('ownership_type', ''),
+                    
+                    agri_loan=request.POST.get('agri_loan', 'no'),
+                    loan_amount=get_decimal(request.POST.get('loan_amount')) if request.POST.get('agri_loan') == 'yes' else None,
+                    
+                    agri_tenants=request.POST.get('agri_tenants', 'no'),
+                    tenant_details=request.POST.get('tenant_details') if request.POST.get('agri_tenants') == 'yes' else None,
+                    
+                    agri_dispute=request.POST.get('agri_dispute', 'no'),
+                    dispute_details=request.POST.get('dispute_details') if request.POST.get('agri_dispute') == 'yes' else None,
+                    
+                    agri_tax_due=request.POST.get('agri_tax_due', 'no'),
+                    pending_tax_amount=get_decimal(request.POST.get('pending_tax_amount')) if request.POST.get('agri_tax_due') == 'yes' else None,
+                    
+                    resale_agricultural_desc=request.POST.get('resale_agricultural_desc', ''),
 
                     # ── STEP 3: LOCATION & OWNER ─────────────────────────────
-                    # DB sequence: city → state → locality → address →
-                    #              owner_name → owner_contact → owner_email →
-                    #              comm_residency
-
-                    city                      = request.POST.get('city', ''),
-                    state                     = request.POST.get('state', ''),
-                    locality                  = request.POST.get('locality', ''),
-                    address                   = request.POST.get('address', ''),
-
-                    owner_name                = request.POST.get('owner_name', ''),
-                    owner_contact             = request.POST.get('owner_contact', ''),
-                    owner_email               = request.POST.get('owner_email', ''),
-                    comm_residency            = request.POST.get('comm_residency', 'resident'),
+                    # DB sequence match
+                    city=request.POST.get('city', ''),
+                    state=request.POST.get('state', ''),
+                    locality=request.POST.get('locality', ''),
+                    address=request.POST.get('address', ''),
+                    
+                    owner_name=request.POST.get('owner_name', ''),
+                    owner_contact=request.POST.get('owner_contact', ''),
+                    owner_email=request.POST.get('owner_email', ''),
+                    comm_residency=request.POST.get('comm_residency', 'resident'),
 
                     # ── STEP 4: UPLOADER AUDIT FIELDS ────────────────────────
-                    # Note: property_images[] and encumbrance_cert are handled
-                    #       separately below (file fields).
-
-                    uploaded_by_name          = request.POST.get('uploaded_by_name') or None,
-                    uploaded_by_email         = request.POST.get('uploaded_by_email') or None,
-                    uploaded_by_contact       = request.POST.get('uploaded_by_contact') or None,
-                    uploaded_by_role          = request.POST.get('uploaded_by_role') or None,
+                    uploaded_by_name=uploader_name,
+                    uploaded_by_email=uploader_email,
+                    uploaded_by_contact=uploader_phone,
+                    uploaded_by_role=uploader_role,
                 )
 
-                # ── FILE FIELDS ──────────────────────────────────────────────
-                # encumbrance_cert  — required document
+                # ── FILE FIELDS HANDLING ─────────────────────────────────
                 if 'encumbrance_cert' in request.FILES:
                     property_obj.encumbrance_cert = request.FILES['encumbrance_cert']
 
-                # property_video — optional media
                 if 'property_video' in request.FILES:
                     property_obj.property_video = request.FILES['property_video']
 
-                # Persist file field changes (title auto-generation happens in save())
                 property_obj.save()
 
-                # ── MULTIPLE IMAGES — child model (max 10) ───────────────────
+                # ── USER-ORDERED IMAGES INJECTION ────────────────────────
+                # Receives files array in the exact visual sort order dictated by frontend Sortable list arrays
                 images = request.FILES.getlist('property_images[]')
                 for img in images[:10]:
                     AgriculturalResaleImage.objects.create(
@@ -11245,209 +13124,24 @@ def add_agricultural_property(request):
 
             return JsonResponse({
                 'status': 'success',
-                'message': f'Property "{property_obj.title}" listed successfully!',
-                # Uncomment and set your redirect URL:
-                # 'redirect_url': '/admin/agricultural-properties/',
+                'message': f'Agricultural Property "{property_obj.title}" published successfully to directories!'
             })
 
-        except Exception as e:
-            import traceback
-            return JsonResponse({
-                'status': 'error',
-                'message': str(e),
-                # Remove in production:
-                'trace': traceback.format_exc(),
-            }, status=400)
+    except Exception as e:
+        print("ERROR:", str(e))
+        traceback.print_exc()
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=400)
 
-    # GET — render the form (pass admin context for uploader fields)
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
-
-
-def agricultural_resale_list(request):
-    session_id = request.session.get('Admin_id')
-    if not session_id:
-        return render(request, 'home_page/Adminlogin.html')
-
-    admin_obj = Admin_Login.objects.get(id=session_id)
-
-    # ============================
-    # EXCEL IMPORT
-    # ============================
-    if request.method == 'POST' and 'excel_file' in request.FILES:
-        excel_file = request.FILES['excel_file']
-        file_name = excel_file.name  # 👈 1. Grab the file name here
-
-        try:
-            df = pd.read_excel(excel_file)
-
-            def get_decimal(val):
-                if pd.isna(val) or str(val).strip() == "":
-                    return None
-                return float(val)
-
-            def get_string(val, default=""):
-                if pd.isna(val):
-                    return default
-                return str(val).strip()
-
-            def clean_yes_no(val):
-                return get_string(val, 'no').lower()
-
-            added_count = 0
-            skipped_count = 0
-
-            for index, row in df.iterrows():
-
-                # DUPLICATE CHECK
-                exists = AgriculturalResaleProperty.objects.filter(
-                    village=get_string(row.get('village')),
-                    city=get_string(row.get('city')),
-                    owner_contact=get_string(row.get('owner_contact')),
-                    address=get_string(row.get('address'))
-                ).exists()
-
-                if exists:
-                    skipped_count += 1
-                    continue
-
-                # CREATE OBJECT
-                AgriculturalResaleProperty.objects.create(
-                    # STEP 1
-                    title=get_string(row.get('title'), 'Agricultural Land Listing'),
-                    agriculture_property_type=get_string(row.get('agriculture_property_type'), 'agriculture_land'),
-
-                    land_area=(
-                        get_decimal(row.get('land_area'))
-                        or get_decimal(row.get('area'))
-                        or 0
-                    ),
-
-                    state=get_string(row.get('state')),
-                    city=get_string(row.get('city')),
-                    district=get_string(row.get('district')),
-                    taluka=get_string(row.get('taluka')),
-                    village=get_string(row.get('village')),
-                    address=(
-                        get_string(row.get('address'))
-                        or get_string(row.get('property_address'))
-                    ),
-
-                    # STEP 2
-                    soil_type=get_string(row.get('soil_type')),
-                    water_source=get_string(row.get('water_source')),
-                    irrigation_facility=clean_yes_no(row.get('irrigation_facility')),
-                    fertility_status=get_string(row.get('fertility_status')),
-                    previous_crops=get_string(row.get('previous_crops')),
-                    resale_agricultural_desc=get_string(row.get('resale_agricultural_desc')),
-
-                    # STEP 3
-                    expected_price=get_decimal(row.get('expected_price')) or 0,
-                    brokerage=get_string(row.get('brokerage'), 'No'),
-                    brokerage_percentage=get_string(row.get('brokerage_percentage')),
-                    manual_brokerage=get_string(row.get('manual_brokerage')),
-                    ownership_type=get_string(row.get('ownership_type'), 'freehold'),
-
-                    agri_loan=clean_yes_no(row.get('agri_loan')),
-                    loan_amount=get_decimal(row.get('loan_amount')) if clean_yes_no(row.get('agri_loan')) == 'yes' else None,
-
-                    agri_tenants=clean_yes_no(row.get('agri_tenants')),
-                    tenant_details=get_string(row.get('tenant_details')) if clean_yes_no(row.get('agri_tenants')) == 'yes' else "",
-
-                    agri_dispute=clean_yes_no(row.get('agri_dispute')),
-                    dispute_details=get_string(row.get('dispute_details')) if clean_yes_no(row.get('agri_dispute')) == 'yes' else "",
-
-                    agri_tax_due=clean_yes_no(row.get('agri_tax_due')),
-                    pending_tax_amount=get_decimal(row.get('pending_tax_amount')) if clean_yes_no(row.get('agri_tax_due')) == 'yes' else None,
-
-                    # STEP 4
-                    owner_name=get_string(row.get('owner_name')),
-                    owner_contact=get_string(row.get('owner_contact')),
-                    owner_email=get_string(row.get('owner_email')),
-                    comm_residency=get_string(row.get('comm_residency'), 'resident'),
-
-                    # UPLOADER
-                    uploaded_by_name=get_string(row.get('uploaded_by_name')) or admin_obj.name,
-                    uploaded_by_email=get_string(row.get('uploaded_by_email')) or admin_obj.email,
-                    uploaded_by_contact=get_string(row.get('uploaded_by_contact')) or admin_obj.phone,
-                    uploaded_by_role=get_string(row.get('uploaded_by_role')) or admin_obj.role,
-                    
-                    # 👈 2. Save the filename so the Bulk Delete Dropdown works!
-                    upload_file_name=file_name 
-                )
-
-                added_count += 1
-
-            # MESSAGES
-            if added_count > 0 and skipped_count == 0:
-                messages.success(request, f"{added_count} records imported successfully!")
-            elif added_count > 0 and skipped_count > 0:
-                messages.warning(request, f"{added_count} added, {skipped_count} skipped (duplicates).")
-            elif skipped_count > 0:
-                messages.info(request, f"All {skipped_count} records already exist.")
-            else:
-                messages.error(request, "No valid data found.")
-
-        except Exception as e:
-            messages.error(request, f"Import Error: {str(e)}")
-
-        return redirect('agricultural_resale_list')
-
-    # ============================
-    # LIST + SEARCH + PAGINATION
-    # ============================
-    
-    # 👈 3. Filter out deleted items from the main query
-    base_qs = AgriculturalResaleProperty.objects.filter(is_deleted=False)
-    
-    properties = base_qs.order_by('-created_at')
-    search_query = request.GET.get('search', '')
-
-    if search_query:
-        properties = properties.filter(
-            Q(village__icontains=search_query) |
-            Q(district__icontains=search_query) |
-            Q(owner_name__icontains=search_query) |
-            Q(agriculture_property_type__icontains=search_query)
-        )
-
-    paginator = Paginator(properties, 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    # 👈 4. Ensure stats only calculate active (non-deleted) items
-    total_properties = base_qs.count()
-    agri_land_count = base_qs.filter(agriculture_property_type='agriculture_land').count()
-    farm_land_count = base_qs.filter(agriculture_property_type='farm_land').count()
-    orchard_land_count = base_qs.filter(agriculture_property_type='orchard_land').count()
-
-    total_value = base_qs.aggregate(
-        Sum('expected_price')
-    )['expected_price__sum'] or 0
-
-    # 👈 5. Fetch unique uploaded file names for the Bulk Delete modal
-    try:
-        # Check if upload_file_name exists on this model. If not, this returns empty list safely.
-        uploaded_files = base_qs.exclude(
-            upload_file_name__isnull=True
-        ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
-    except Exception:
-        uploaded_files = []
-
-    context = {
-        'admin_obj': admin_obj,
-        'page_obj': page_obj,
-        'search_query': search_query,
-        'uploaded_files': uploaded_files, # 👈 Passed to template here
-        'stats': {
-            'total': total_properties,
-            'agri_land': agri_land_count,
-            'farm_land': farm_land_count,
-            'orchard': orchard_land_count,
-            'total_value': total_value
-        }
-    }
-
+    # Context binding fallbacks for rendering standard baseline structural get requests layouts
+    context = {'admin_obj': admin if admin_id else user}
     return render(request, 'admin_user/Reports/Resale/agricultural_list.html', context)
+
+
+
+
 
 
 
@@ -11458,9 +13152,6 @@ def edit_agricultural_property(request, pk):
 
     if request.method == 'POST':
         try:
-            # =========================
-            # SAFE HELPERS
-            # =========================
             def get_decimal(value):
                 if value is None or str(value).strip() == "":
                     return None
@@ -11470,45 +13161,25 @@ def edit_agricultural_property(request, pk):
                 return str(val).strip().lower() if val else 'no'
 
             with transaction.atomic():
-                # =========================
-                # STEP 1: BASIC INFO
-                # =========================
-                property_obj.title = request.POST.get('title', 'Agricultural Land Listing')
+                # ── STEP 1: LAND DETAILS ──────────────────────────────────
                 property_obj.agriculture_property_type = request.POST.get('agriculture_property_type')
-
-                property_obj.land_area = get_decimal(
-                    request.POST.get('land_area') or request.POST.get('area')
-                )
-
-                property_obj.state = request.POST.get('state')
-                property_obj.city = request.POST.get('city')
-                property_obj.district = request.POST.get('district')
-                property_obj.taluka = request.POST.get('taluka')
                 property_obj.village = request.POST.get('village')
-
-                # ✅ FIXED: Handle both 'address' and 'property_address' just in case
-                property_obj.address = request.POST.get('address') or request.POST.get('property_address')
-
-                # =========================
-                # STEP 2: LAND DETAILS
-                # =========================
+                property_obj.taluka = request.POST.get('taluka')
+                property_obj.district = request.POST.get('district')
+                property_obj.land_area = get_decimal(request.POST.get('land_area') or request.POST.get('area'))
                 property_obj.soil_type = request.POST.get('soil_type')
-                property_obj.water_source = request.POST.get('water_source')
                 property_obj.irrigation_facility = clean_yes_no(request.POST.get('irrigation_facility'))
-                property_obj.fertility_status = request.POST.get('fertility_status')
+                property_obj.water_source = request.POST.get('water_source')
                 property_obj.previous_crops = request.POST.get('previous_crops')
-                property_obj.resale_agricultural_desc = request.POST.get('resale_agricultural_desc')
+                property_obj.fertility_status = request.POST.get('fertility_status')
 
-                # =========================
-                # STEP 3: PRICING & LEGAL
-                # =========================
+                # ── STEP 2: PRICING & LEGAL ───────────────────────────────
                 property_obj.expected_price = get_decimal(request.POST.get('expected_price'))
                 property_obj.brokerage = request.POST.get('brokerage')
                 property_obj.brokerage_percentage = request.POST.get('brokerage_percentage')
                 property_obj.manual_brokerage = request.POST.get('manual_brokerage')
-
                 property_obj.ownership_type = request.POST.get('ownership_type')
-
+                
                 property_obj.agri_loan = clean_yes_no(request.POST.get('agri_loan'))
                 property_obj.loan_amount = (
                     get_decimal(request.POST.get('loan_amount'))
@@ -11532,29 +13203,32 @@ def edit_agricultural_property(request, pk):
                     get_decimal(request.POST.get('pending_tax_amount'))
                     if property_obj.agri_tax_due == 'yes' else None
                 )
+                
+                property_obj.resale_agricultural_desc = request.POST.get('resale_agricultural_desc')
 
-                # =========================
-                # STEP 4: OWNER DETAILS
-                # =========================
+                # ── STEP 3: LOCATION & OWNER ─────────────────────────────
+                property_obj.city = request.POST.get('city')
+                property_obj.state = request.POST.get('state')
+                property_obj.locality = request.POST.get('locality')
+                property_obj.address = request.POST.get('address') or request.POST.get('property_address')
+                
                 property_obj.owner_name = request.POST.get('owner_name')
                 property_obj.owner_contact = request.POST.get('owner_contact')
                 property_obj.owner_email = request.POST.get('owner_email')
                 property_obj.comm_residency = request.POST.get('comm_residency', 'resident')
 
-                # =========================
-                # FILE UPLOADS
-                # =========================
+                # ── STEP 4: DOCUMENTS & PHOTOS ────────────────────────────
                 if 'encumbrance_cert' in request.FILES:
                     property_obj.encumbrance_cert = request.FILES['encumbrance_cert']
 
                 if 'property_video' in request.FILES:
                     property_obj.property_video = request.FILES['property_video']
 
+                # Force automated title re-generation logic on update
+                property_obj.title = None 
                 property_obj.save()
 
-                # =========================
-                # MULTIPLE IMAGES
-                # =========================
+                # Multiple Portfolio Image Upload Handling Loops
                 images = request.FILES.getlist('property_images[]')
                 current_count = property_obj.images.count()
 
@@ -11568,8 +13242,7 @@ def edit_agricultural_property(request, pk):
 
             return JsonResponse({
                 'status': 'success',
-                'message': 'Property updated successfully!',
-                # ✅ FIXED: Resolve the URL properly for the JS redirect
+                'message': 'Agricultural listing alterations updated successfully!',
                 'redirect_url': reverse('agricultural_resale_list')
             })
 
@@ -11586,67 +13259,6 @@ def edit_agricultural_property(request, pk):
     )
 
 
-def download_agri_sample_excel(request):
-    # EXACT MATCH WITH FORM + MODEL (NO EXTRA URL FIELDS)
-    columns = [
-        # STEP 1 (Form + DB)
-        "title", "agriculture_property_type", "area", "state", "city",
-        "district", "taluka", "village", "property_address",
-
-        # STEP 2
-        "soil_type", "water_source", "irrigation_facility", "fertility_status",
-        "previous_crops", "resale_agricultural_desc",
-
-        # STEP 3
-        "expected_price", "brokerage", "brokerage_percentage", "manual_brokerage",
-        "ownership_type", "agri_loan", "loan_amount",
-        "agri_tenants", "tenant_details",
-        "agri_dispute", "dispute_details",
-        "agri_tax_due", "pending_tax_amount",
-
-        # STEP 4 (Owner)
-        "owner_name", "owner_contact", "owner_email", "comm_residency",
-
-        # UPLOADER (IMPORTANT)
-        "uploaded_by_name", "uploaded_by_email", "uploaded_by_contact", "uploaded_by_role"
-    ]
-
-    data = [[
-        # STEP 1
-        "Fertile Agricultural Land", "agriculture_land", 5.5, "Maharashtra", "Nagpur",
-        "Nagpur", "Nagpur Rural", "Besa", "Near highway bridge",
-
-        # STEP 2
-        "black", "well", "yes", "high",
-        "Wheat", "Excellent land for farming",
-
-        # STEP 3
-        5000000, "Yes", "2%", "",
-        "freehold", "yes", 200000,
-        "no", "",
-        "no", "",
-        "no", "",
-
-        # STEP 4
-        "Ramesh Patil", "9876543210", "ramesh@example.com", "resident",
-
-        # UPLOADER (for reference only, NOT used in import)
-        "Admin Name", "admin@mail.com", "9999999999", "Admin"
-    ]]
-
-    df = pd.DataFrame(data, columns=columns)
-
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Template')
-
-    output.seek(0)
-    response = HttpResponse(
-        output.read(),
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-    response['Content-Disposition'] = 'attachment; filename="Agricultural_Template.xlsx"'
-    return response
 
 
 @require_POST
@@ -11766,19 +13378,590 @@ def agricultural_bulk_delete(request):
 
 
 
-def view_agricultural_property(request, pk):
-    # Ensure admin is logged in (optional, based on your session logic)
+# =========================================================================
+# 1. DOWNLOAD TEMPLATE
+# =========================================================================
+def download_agri_sample_excel(request):
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+
+    wb = Workbook()
+    sheet = wb.active
+    sheet.title = "Agricultural Resale"
+
+    DARK_BG, WHITE, MID_BLUE = "1E293B", "FFFFFF", "3B82F6"
+    LIGHT_BG, HINT_BG, SAMPLE_BG = "F8FAFC", "FEF9C3", "EFF6FF"
+    HINT_FG, BORDER_COLOR = "92400E", "CBD5E1"
+    thin  = Side(style="thin",   color=BORDER_COLOR)
+    thick = Side(style="medium", color="94A3B8")
+    cb = Border(left=thin, right=thin, top=thin, bottom=thin)
+    hb = Border(left=thick, right=thick, top=thick, bottom=thick)
+    def hfill(h): return PatternFill("solid", fgColor=h)
+
+    sections = [
+        ("📋 Land Details", [
+            ("agriculture_property_type *", "Property Type *",        "agriculture_land / farm_land / orchard_land"),
+            ("village *",                  "Village *",               "e.g. Warud"),
+            ("taluka *",                   "Taluka *",                "e.g. Warud"),
+            ("district *",                 "District *",              "e.g. Amravati"),
+            ("land_area *",                "Land Area (Acres) *",     "e.g. 5.5"),
+            ("soil_type",                  "Soil Type",               "black / red / alluvial / sandy / loamy"),
+            ("irrigation_facility",        "Irrigation Facility",     "yes / no"),
+            ("water_source",               "Water Source",            "well / borewell / canal / river / none"),
+            ("previous_crops",             "Previous Crops",          "e.g. Wheat, Cotton"),
+            ("fertility_status",           "Fertility Status",        "high / medium / low"),
+        ]),
+        ("📋 Pricing", [
+            ("expected_price *",    "Expected Price (₹) *", "e.g. 5000000"),
+            ("brokerage",           "Brokerage",            "Yes / No"),
+            ("brokerage_percentage","Brokerage %",          "e.g. 2% or leave blank"),
+            ("manual_brokerage",    "Manual Brokerage",     "e.g. 50000 or leave blank"),
+        ]),
+        ("📋 Ownership & Legal", [
+            ("ownership_type *",         "Ownership Type *",      "freehold / leasehold"),
+            ("agri_loan *",              "Loan Available *",      "yes / no"),
+            ("loan_amount",              "Loan Amount (₹)",       "e.g. 200000 (0 if no loan)"),
+            ("agri_tenants *",           "Tenants? *",            "yes / no"),
+            ("tenant_details",           "Tenant Details",        "Enter if tenants=yes else leave blank"),
+            ("agri_dispute *",           "Dispute? *",            "yes / no"),
+            ("dispute_details",          "Dispute Details",       "Enter if dispute=yes else leave blank"),
+            ("agri_tax_due *",           "Tax Due? *",            "yes / no"),
+            ("pending_tax_amount",       "Pending Tax (₹)",       "0 if no tax due"),
+            ("resale_agricultural_desc *","Description *",        "Short summary of the land"),
+        ]),
+        ("📋 Address", [
+            ("city *",     "City *",     "e.g. Nagpur"),
+            ("state *",    "State *",    "e.g. Maharashtra"),
+            ("locality *", "Locality *", "e.g. Besa Rural"),
+            ("address *",  "Address *",  "Near highway bridge, Ward No 4"),
+        ]),
+        ("📋 Owner Contact", [
+            ("owner_name *",    "Owner Name *",    "Full Name"),
+            ("owner_contact *", "Owner Contact *", "10-digit mobile"),
+            ("owner_email *",   "Owner Email *",   "email@example.com"),
+            ("comm_residency *","Comm/Residency *","resident / non_resident / commercial"),
+        ]),
+    ]
+
+    all_db, all_disp, all_hints, section_spans = [], [], [], []
+    col = 1
+    for label, fields in sections:
+        s = col
+        for db, disp, hint in fields:
+            all_db.append(db); all_disp.append(disp); all_hints.append(hint); col += 1
+        section_spans.append((label, s, col-1))
+
+    # Row 1 – Section headers
+    for label, sc, ec in section_spans:
+        c = sheet.cell(row=1, column=sc, value=label)
+        c.font=Font(name="Arial",bold=True,size=11,color=WHITE); c.fill=hfill(DARK_BG)
+        c.alignment=Alignment(horizontal="center",vertical="center"); c.border=hb
+        if sc != ec: sheet.merge_cells(start_row=1,start_column=sc,end_row=1,end_column=ec)
+    sheet.row_dimensions[1].height = 30
+
+    # Row 2 – DB fields
+    for i,db in enumerate(all_db,1):
+        c=sheet.cell(row=2,column=i,value=db)
+        c.font=Font(name="Arial",bold=True,size=9,color="475569"); c.fill=hfill("E2E8F0")
+        c.alignment=Alignment(horizontal="center",vertical="center"); c.border=cb
+    sheet.row_dimensions[2].height = 22
+
+    # Row 3 – Display headers
+    for i,disp in enumerate(all_disp,1):
+        c=sheet.cell(row=3,column=i,value=disp)
+        c.font=Font(name="Arial",bold=True,size=10,color=("C0392B" if disp.endswith("*") else MID_BLUE))
+        c.fill=hfill(LIGHT_BG); c.alignment=Alignment(horizontal="center",vertical="center",wrap_text=True); c.border=cb
+    sheet.row_dimensions[3].height = 36
+
+    # Row 4 – Hints
+    for i,hint in enumerate(all_hints,1):
+        c=sheet.cell(row=4,column=i,value=hint)
+        c.font=Font(name="Arial",italic=True,size=8,color=HINT_FG); c.fill=hfill(HINT_BG)
+        c.alignment=Alignment(horizontal="center",vertical="center",wrap_text=True); c.border=cb
+    sheet.row_dimensions[4].height = 30
+
+    # Row 5 – Sample
+    sample = [
+        "agriculture_land","Warud","Warud","Amravati",5.5,"black","yes","well","Wheat","high",
+        5000000,"Yes","2%","","freehold","yes",200000,"no","","no","","no",0,
+        "Excellent land for farming close to arterial link pathways.",
+        "Nagpur","Maharashtra","Besa Rural","Near highway bridge, Ward No 4",
+        "Ramesh Patil","9876543210","ramesh@example.com","resident",
+    ]
+    for i,val in enumerate(sample,1):
+        c=sheet.cell(row=5,column=i,value=val)
+        c.font=Font(name="Arial",size=9,color="1E3A5F"); c.fill=hfill(SAMPLE_BG)
+        c.alignment=Alignment(horizontal="center",vertical="center"); c.border=cb
+    sheet.row_dimensions[5].height = 22
+
+    widths=[22,14,14,14,14,14,14,14,18,12,16,12,14,16,16,12,16,12,20,12,20,12,16,28,14,16,16,28,18,18,24,18]
+    for i,w in enumerate(widths,1): sheet.column_dimensions[get_column_letter(i)].width=w
+    sheet.freeze_panes="A6"; sheet.sheet_view.zoomScale=90
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="PropCRM_Agricultural_Template.xlsx"'
+    wb.save(response)
+    return response
+
+
+
+
+
+
+def safe_float(val):
+    """Safely converts Excel cell values to float, handling strings, currencies, and spaces."""
+    if val is None:
+        return 0.0
+    try:
+        if isinstance(val, (int, float)):
+            return float(val)
+        clean_val = str(val).replace('₹', '').replace(',', '').strip()
+        return float(clean_val)
+    except (ValueError, TypeError):
+        return 0.0
+
+def import_agricultural_resale_excel(request):
     session_id = request.session.get('Admin_id')
     if not session_id:
-        return redirect('admin_login_url_name') # Change to your login URL name
+        return JsonResponse({"status": "error", "message": "Unauthorized access"})
 
-    # Fetch the property
-    property_obj = get_object_or_404(AgriculturalResaleProperty, pk=pk)
+    if request.method == "POST" and request.FILES.get('excel_file'):
+        try:
+            admin_obj = Admin_Login.objects.get(id=session_id)
+            excel_file = request.FILES['excel_file']
+            file_name_str = excel_file.name
+
+            # Load the uploaded file safely from memory stream boundary
+            excel_file.seek(0)
+            wb = openpyxl.load_workbook(excel_file, data_only=True)
+            sheet = wb.active
+
+            if sheet.max_row < 3:
+                return JsonResponse({"status": "error", "message": "Empty file uploaded."})
+
+            # 1. Validate Row 3 Display Headers match what was downloaded
+            row3 = [str(cell.value).strip() if cell.value else "" for cell in sheet[3]]
+            expected = [
+                "Property Type *","Village *","Taluka *","District *","Land Area (Acres) *",
+                "Soil Type","Irrigation Facility","Water Source","Previous Crops","Fertility Status",
+                "Expected Price (₹) *","Brokerage","Brokerage %","Manual Brokerage",
+                "Ownership Type *","Loan Available *","Loan Amount (₹)","Tenants? *","Tenant Details",
+                "Dispute? *","Dispute Details","Tax Due? *","Pending Tax (₹)","Description *",
+                "City *","State *","Locality *","Address *",
+                "Owner Name *","Owner Contact *","Owner Email *","Comm/Residency *",
+            ]
+            
+            for idx, key in enumerate(expected):
+                if idx >= len(row3) or row3[idx].lower() != key.lower():
+                    return JsonResponse({
+                        "status": "error",
+                        "message": f"Column mismatch at {idx+1}. Expected '{key}', found '{row3[idx] if idx<len(row3) else 'Missing'}'."
+                    })
+
+            # Formatting helper wrappers
+            def cs(v): return str(v).strip() if v is not None else ""
+            def yn(v): return cs(v).lower() if v else "no"
+
+            records = []
+            # Index structural mapping of required spreadsheet inputs
+            required_idx = [0, 1, 2, 3, 4, 10, 14, 15, 17, 19, 21, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+
+            # Start reading from Row 5 (The sample record data row generated by your system)
+            DATA_START_ROW = 5 
+
+            for row_idx, row in enumerate(sheet.iter_rows(min_row=DATA_START_ROW, values_only=True), start=DATA_START_ROW):
+                # A. Skip entirely empty rows or whitespace padding rows
+                if not row or not any(v is not None and str(v).strip() != "" for v in row): 
+                    continue
+                
+                # B. Skip Row 4 hint text if it somehow gets included, or rows with clear instruction patterns
+                if row[0] and ("agriculture_land /" in str(row[0]).lower() or str(row[0]).strip().lower().startswith("e.g.")):
+                    continue
+
+                # Fallback check for structural stability
+                if len(row) < len(expected):
+                    return JsonResponse({"status": "error", "message": f"Row {row_idx} does not have enough columns to process."})
+
+                # C. Check mandatory field validations
+                for ri in required_idx:
+                    if row[ri] is None or str(row[ri]).strip() == "":
+                        return JsonResponse({"status": "error", "message": f"Row {row_idx}: Required field '{expected[ri]}' is missing."})
+                
+                # D. Generate an isolated row unique fingerprint to check for duplicates
+                row_raw_string = f"{row[28]}_{row[29]}_{row[1]}_{row[4]}_{row[10]}"  # Owner Name + Contact + Village + Area + Price
+                row_fp = hashlib.md5(row_raw_string.encode()).hexdigest()
+
+                # E. Individual item duplication check
+                if AgriculturalResaleProperty.objects.filter(resale_agricultural_desc__icontains=f"[ROW-MD5:{row_fp}]", is_deleted=False).exists():
+                    continue  # Skip safely if this exact row is already processed and saved in the database
+
+                records.append({
+                    "agriculture_property_type": cs(row[0]),
+                    "village": cs(row[1]), "taluka": cs(row[2]), "district": cs(row[3]),
+                    "land_area": safe_float(row[4]),
+                    "soil_type": cs(row[5]), "irrigation_facility": yn(row[6]),
+                    "water_source": cs(row[7]), "previous_crops": cs(row[8]),
+                    "fertility_status": cs(row[9]),
+                    "expected_price": safe_float(row[10]),
+                    "brokerage": cs(row[11]) if row[11] else "No",
+                    "brokerage_percentage": cs(row[12]), "manual_brokerage": cs(row[13]),
+                    "ownership_type": cs(row[14]), "agri_loan": yn(row[15]),
+                    "loan_amount": safe_float(row[16]) if yn(row[15]) == "yes" else 0.0,
+                    "agri_tenants": yn(row[17]),
+                    "tenant_details": cs(row[18]) if yn(row[17]) == "yes" else "",
+                    "agri_dispute": yn(row[19]),
+                    "dispute_details": cs(row[20]) if yn(row[19]) == "yes" else "",
+                    "agri_tax_due": yn(row[21]),
+                    "pending_tax_amount": safe_float(row[22]) if yn(row[21]) == "yes" else 0.0,
+                    "resale_agricultural_desc": cs(row[23]),
+                    "city": cs(row[24]), "state": cs(row[25]),
+                    "locality": cs(row[26]), "address": cs(row[27]),
+                    "owner_name": cs(row[28]), "owner_contact": cs(row[29]),
+                    "owner_email": cs(row[30]), "comm_residency": cs(row[31]),
+                    "row_fingerprint": row_fp
+                })
+
+            if not records:
+                return JsonResponse({
+                    "status": "error", 
+                    "message": "No new or valid asset records found to import. Rows are either empty or already exist in the system."
+                })
+
+            # 2. Database Creation Loop
+            imported_count = 0
+            for r in records:
+                AgriculturalResaleProperty.objects.create(
+                    agriculture_property_type=r["agriculture_property_type"],
+                    village=r["village"], taluka=r["taluka"], district=r["district"],
+                    land_area=r["land_area"], soil_type=r["soil_type"],
+                    irrigation_facility=r["irrigation_facility"], water_source=r["water_source"],
+                    previous_crops=r["previous_crops"], fertility_status=r["fertility_status"],
+                    expected_price=r["expected_price"], brokerage=r["brokerage"],
+                    brokerage_percentage=r["brokerage_percentage"], manual_brokerage=r["manual_brokerage"],
+                    ownership_type=r["ownership_type"], agri_loan=r["agri_loan"],
+                    loan_amount=r["loan_amount"], agri_tenants=r["agri_tenants"],
+                    tenant_details=r["tenant_details"], agri_dispute=r["agri_dispute"],
+                    dispute_details=r["dispute_details"], agri_tax_due=r["agri_tax_due"],
+                    pending_tax_amount=r["pending_tax_amount"],
+                    resale_agricultural_desc=f"{r['resale_agricultural_desc']} [FILE:{file_name_str}] [ROW-MD5:{r['row_fingerprint']}]",
+                    city=r["city"], state=r["state"], locality=r["locality"], address=r["address"],
+                    owner_name=r["owner_name"], owner_contact=r["owner_contact"],
+                    owner_email=r["owner_email"], comm_residency=r["comm_residency"],
+                    uploaded_by_name=admin_obj.name, uploaded_by_email=admin_obj.email,
+                    uploaded_by_contact=admin_obj.phone, uploaded_by_role=admin_obj.role,
+                    upload_file_name=file_name_str
+                )
+                imported_count += 1
+
+            return JsonResponse({"status": "success", "message": f"Successfully imported {imported_count} records from {file_name_str}."})
+
+        except Exception as e:
+            traceback.print_exc()
+            return JsonResponse({"status": "error", "message": f"System Error: {str(e)}"})
+
+    return JsonResponse({"status": "error", "message": "Invalid request parameters."})
+
+# 3. LIST VIEW
+# =========================================================================
+import re
+
+
+def agricultural_resale_list(request):
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    try:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+    except Admin_Login.DoesNotExist:
+        return render(request, 'home_page/Adminlogin.html')
+
+    # Base Active Dataset
+    base_qs = AgriculturalResaleProperty.objects.filter(is_deleted=False)
     
+    # ── FIXED SEARCH FILTER LOGIC ──────────────────────────────────────
+    search_query = request.GET.get('search', '').strip()
+    properties = base_qs
+
+    if search_query:
+        # Normalize spaces to underscores if a user types "farm land" instead of "farm_land"
+        normalized_query = search_query.replace(' ', '_')
+        
+        properties = properties.filter(
+            Q(village__icontains=search_query) | 
+            Q(district__icontains=search_query) |
+            Q(taluka__icontains=search_query) |
+            Q(city__icontains=search_query) | 
+            Q(state__icontains=search_query) |
+            Q(owner_name__icontains=search_query) | 
+            Q(owner_contact__icontains=search_query) |
+            Q(agriculture_property_type__icontains=search_query) |
+            Q(agriculture_property_type__icontains=normalized_query)
+        )
+
+    # Apply sorting safely AFTER filtering
+    properties = properties.order_by('-created_at')
+
+    # Pagination setup
+    paginator = Paginator(properties, 25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    total_value = base_qs.aggregate(Sum('expected_price'))['expected_price__sum'] or 0
+
+    # Extract historical uploaded filenames from property description footprint strings
+    uploaded_files = set()
+    for desc in base_qs.exclude(resale_agricultural_desc__isnull=True).values_list('resale_agricultural_desc', flat=True):
+        m = re.search(r'\[FILE:(.+?)\]', desc or '')
+        if m: 
+            uploaded_files.add(m.group(1))
+
     context = {
-        'property': property_obj
+        'admin_obj': admin_obj,
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'uploaded_files': sorted(uploaded_files),
+        'stats': {
+            'total': base_qs.count(),
+            'agri_land': base_qs.filter(agriculture_property_type='agriculture_land').count(),
+            'farm_land': base_qs.filter(agriculture_property_type='farm_land').count(),
+            'orchard': base_qs.filter(agriculture_property_type='orchard_land').count(),
+            'total_value': total_value,
+        }
     }
-    return render(request, 'admin_user/Resale//view_agricultural_resale.html', context)
+    return render(request, 'admin_user/Reports/Resale/agricultural_list.html', context)
+
+
+
+
+
+# Helper layout structural definition matching the standard format sequence
+EXPORT_SECTIONS = [
+    ("📋 Land Details", [
+        ("agriculture_property_type", "Property Type *", "agriculture_land / farm_land / orchard_land"),
+        ("village", "Village *", "e.g. Warud"),
+        ("taluka", "Taluka *", "e.g. Warud"),
+        ("district", "District *", "e.g. Amravati"),
+        ("land_area", "Land Area (Acres) *", "e.g. 5.5"),
+        ("soil_type", "Soil Type", "black / red / alluvial / sandy / loamy"),
+        ("irrigation_facility", "Irrigation Facility", "yes / no"),
+        ("water_source", "Water Source", "well / borewell / canal / river / none"),
+        ("previous_crops", "Previous Crops", "e.g. Wheat, Cotton"),
+        ("fertility_status", "Fertility Status", "high / medium / low"),
+    ]),
+    ("📋 Pricing", [
+        ("expected_price", "Expected Price (₹) *", "e.g. 5000000"),
+        ("brokerage", "Brokerage", "Yes / No"),
+        ("brokerage_percentage", "Brokerage %", "e.g. 2% or leave blank"),
+        ("manual_brokerage", "Manual Brokerage", "e.g. 50000 or leave blank"),
+    ]),
+    ("📋 Ownership & Legal", [
+        ("ownership_type", "Ownership Type *", "freehold / leasehold"),
+        ("agri_loan", "Loan Available *", "yes / no"),
+        ("loan_amount", "Loan Amount (₹)", "e.g. 200000 (0 if no loan)"),
+        ("agri_tenants", "Tenants? *", "yes / no"),
+        ("tenant_details", "Tenant Details", "Enter if tenants=yes else leave blank"),
+        ("agri_dispute", "Dispute? *", "yes / no"),
+        ("dispute_details", "Dispute Details", "Enter if dispute=yes else leave blank"),
+        ("agri_tax_due", "Tax Due? *", "yes / no"),
+        ("pending_tax_amount", "Pending Tax (₹)", "0 if no tax due"),
+        ("resale_agricultural_desc", "Description *", "Short summary of the land"),
+    ]),
+    ("📋 Address", [
+        ("city", "City *", "e.g. Nagpur"),
+        ("state", "State *", "e.g. Maharashtra"),
+        ("locality", "Locality *", "e.g. Besa Rural"),
+        ("address", "Address *", "Near highway bridge, Ward No 4"),
+    ]),
+    ("📋 Owner Contact", [
+        ("owner_name", "Owner Name *", "Full Name"),
+        ("owner_contact", "Owner Contact *", "10-digit mobile"),
+        ("owner_email", "Owner Email *", "email@example.com"),
+        ("comm_residency", "Comm/Residency *", "resident / non_resident / commercial"),
+    ]),
+]
+
+def export_agricultural_resale_excel(request):
+    """Generates an Excel data dump built inside the exact import layout format schema."""
+    # Apply identical search parameters from list filter to the export view
+    search_query = request.GET.get('search', '').strip()
+    queryset = AgriculturalResaleProperty.objects.filter(is_deleted=False)
+    if search_query:
+        normalized = search_query.replace(' ', '_')
+        queryset = queryset.filter(
+            Q(village__icontains=search_query) | Q(district__icontains=search_query) |
+            Q(taluka__icontains=search_query) | Q(city__icontains=search_query) |
+            Q(owner_name__icontains=search_query) | Q(agriculture_property_type__icontains=search_query) |
+            Q(agriculture_property_type__icontains=normalized)
+        )
+    queryset = queryset.order_by('-created_at')
+
+    wb = openpyxl.Workbook()
+    sheet = wb.active
+    sheet.title = "Agricultural Export Data"
+
+    # Styling Assets
+    DARK_BG, WHITE, MID_BLUE = "1E293B", "FFFFFF", "3B82F6"
+    LIGHT_BG, HINT_BG = "F8FAFC", "FEF9C3"
+    thin = Side(style="thin", color="CBD5E1")
+    thick = Side(style="medium", color="94A3B8")
+    cb = Border(left=thin, right=thin, top=thin, bottom=thin)
+    hb = Border(left=thick, right=thick, top=thick, bottom=thick)
+    def hfill(h): return PatternFill("solid", fgColor=h)
+
+    all_db, all_disp, all_hints, section_spans = [], [], [], []
+    col = 1
+    for label, fields in EXPORT_SECTIONS:
+        s = col
+        for db, disp, hint in fields:
+            all_db.append(db); all_disp.append(disp); all_hints.append(hint); col += 1
+        section_spans.append((label, s, col-1))
+
+    # Row 1 – Section banners
+    for label, sc, ec in section_spans:
+        c = sheet.cell(row=1, column=sc, value=label)
+        c.font = Font(name="Arial", bold=True, size=11, color=WHITE)
+        c.fill = hfill(DARK_BG)
+        c.alignment = Alignment(horizontal="center", vertical="center")
+        c.border = hb
+        if sc != ec: 
+            sheet.merge_cells(start_row=1, start_column=sc, end_row=1, end_column=ec)
+    sheet.row_dimensions[1].height = 30
+
+    # Row 2 – System keys
+    for i, db in enumerate(all_db, 1):
+        c = sheet.cell(row=2, column=i, value=f"{db} *") if i in [1,2,3,4,5,11,15,16,18,20,22,24,25,26,27,28,29,30,31] else sheet.cell(row=2, column=i, value=db)
+        c.font = Font(name="Arial", bold=True, size=9, color="475569")
+        c.fill = hfill("E2E8F0")
+        c.alignment = Alignment(horizontal="center", vertical="center")
+        c.border = cb
+    sheet.row_dimensions[2].height = 22
+
+    # Row 3 – Display Titles
+    for i, disp in enumerate(all_disp, 1):
+        c = sheet.cell(row=3, column=i, value=disp)
+        c.font = Font(name="Arial", bold=True, size=10, color=("C0392B" if disp.endswith("*") else MID_BLUE))
+        c.fill = hfill(LIGHT_BG)
+        c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        c.border = cb
+    sheet.row_dimensions[3].height = 36
+
+    # Row 4 – Instruction Hints
+    for i, hint in enumerate(all_hints, 1):
+        c = sheet.cell(row=4, column=i, value=hint)
+        c.font = Font(name="Arial", italic=True, size=8, color="92400E")
+        c.fill = hfill(HINT_BG)
+        c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        c.border = cb
+    sheet.row_dimensions[4].height = 30
+
+    # Row 5 onwards – Database Records Injection
+    current_row = 5
+    for item in queryset:
+        for idx, db_field in enumerate(all_db, 1):
+            val = getattr(item, db_field, "")
+            
+            # Clean dynamic descriptions so raw tags aren't visible
+            if db_field == "resale_agricultural_desc" and val:
+                val = re.sub(r'\[FILE:.+?\]|\[ROW-MD5:.+?\]', '', str(val)).strip()
+
+            c = sheet.cell(row=current_row, column=idx, value=val)
+            c.font = Font(name="Arial", size=10)
+            c.border = cb
+            c.alignment = Alignment(horizontal="left", vertical="center")
+        sheet.row_dimensions[current_row].height = 20
+        current_row += 1
+
+    widths = [22,14,14,14,14,14,14,14,18,12,16,12,14,16,16,12,16,12,20,12,20,12,16,28,14,16,16,28,18,18,24,18]
+    for i, w in enumerate(widths, 1): 
+        sheet.column_dimensions[get_column_letter(i)].width = w
+    sheet.freeze_panes = "A5"
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="Agricultural_Properties_Export.xlsx"'
+    wb.save(response)
+    return response
+
+def export_agricultural_resale_csv(request):
+    """Generates a plain-text CSV export preserving identical structural row indexing maps."""
+    search_query = request.GET.get('search', '').strip()
+    queryset = AgriculturalResaleProperty.objects.filter(is_deleted=False)
+    if search_query:
+        normalized = search_query.replace(' ', '_')
+        queryset = queryset.filter(
+            Q(village__icontains=search_query) | Q(district__icontains=search_query) |
+            Q(taluka__icontains=search_query) | Q(city__icontains=search_query) |
+            Q(owner_name__icontains=search_query) | Q(agriculture_property_type__icontains=search_query) |
+            Q(agriculture_property_type__icontains=normalized)
+        )
+    queryset = queryset.order_by('-created_at')
+
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="Agricultural_Properties_Export.csv"'
+    
+    writer = csv.writer(response)
+
+    all_db, all_disp, all_hints = [], [], []
+    for label, fields in EXPORT_SECTIONS:
+        for db, disp, hint in fields:
+            all_db.append(db); all_disp.append(disp); all_hints.append(hint)
+
+    # Re-build matching row headers matrix
+    # Note: Row 1 section names can't easily be merged in flat CSV files, so we pass blank pads
+    section_row = []
+    for label, fields in EXPORT_SECTIONS:
+        section_row.append(label)
+        section_row.extend([""] * (len(fields) - 1))
+        
+    writer.writerow(section_row) # Row 1
+    
+    # Process Row 2 updated required asterisks mapping keys
+    db_row_final = []
+    for i, db in enumerate(all_db, 1):
+        if i in [1,2,3,4,5,11,15,16,18,20,22,24,25,26,27,28,29,30,31]:
+            db_row_final.append(f"{db} *")
+        else:
+            db_row_final.append(db)
+    writer.writerow(db_row_final) # Row 2
+    
+    writer.writerow(all_disp)     # Row 3
+    writer.writerow(all_hints)    # Row 4
+
+    # Inject data loops
+    for item in queryset:
+        row_data = []
+        for db_field in all_db:
+            val = getattr(item, db_field, "")
+            if db_field == "resale_agricultural_desc" and val:
+                val = re.sub(r'\[FILE:.+?\]|\[ROW-MD5:.+?\]', '', str(val)).strip()
+            row_data.append(val)
+        writer.writerow(row_data)
+
+    return response
+
+def view_agricultural_property(request, pk):
+    session_id = request.session.get('Admin_id')
+    user_id    = request.session.get('User_id')
+
+    if not session_id and not user_id:
+        return redirect('admin_login_url_name')
+
+    property_obj = get_object_or_404(
+        AgriculturalResaleProperty.objects.prefetch_related('images', 'faqs'),
+        pk=pk
+    )
+
+    # Safety: regenerate FAQs if missing (old records before migration)
+    if not property_obj.faqs.exists():
+        property_obj.generate_auto_faqs()
+
+    context = {
+        'property': property_obj,
+        'faqs': property_obj.faqs.all(),
+    }
+    return render(request, 'admin_user/Resale/view_agricultural_resale.html', context)
+
 
 ####################END Views Section For AGRICULTURAL Resale Property #######################################
 

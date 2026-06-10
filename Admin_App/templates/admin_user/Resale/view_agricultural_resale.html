@@ -1,365 +1,798 @@
 {% include "admin_user/admin_header.html" %}
 {% load static %}
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
 <style>
-  :root {
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    --danger-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
-    --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    --topbar-height: 70px;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; min-height: 100vh; }
+    :root {
+        --primary: #65a30d;
+        --primary-light: #f7fee7;
+        --primary-dark: #4d7c0f;
+        --dark: #111827;
+        --mid: #374151;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --surface: #f9fafb;
+        --white: #ffffff;
+        --success: #10b981;
+        --danger: #ef4444;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; }
+    body, .main-content { font-family: 'DM Sans', sans-serif; background: #f3f4f8; color: var(--dark); }
 
-  .page-wrapper {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding-bottom: 50px;
-  }
-  
-  .form-container {
-    background: white;
-    border-radius: 20px;
-    padding: 35px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-    margin-top: 20px;
-  }
+    /* ── TOPBAR ── */
+    .prop-topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 0.8rem; color: var(--muted); }
+    .prop-topbar a { color: var(--primary); text-decoration: none; }
+    .prop-id-badge { background: #ecfccb; color: var(--primary-dark); font-weight: 700; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; border: 1px solid #bef264; font-family: monospace; }
+    .prop-cert-ok   { background: #ecfdf5; color: #065f46; font-weight: 600; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; border: 1px solid #a7f3d0; }
+    .prop-cert-warn { background: #fef2f2; color: #991b1b; font-weight: 600; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; border: 1px solid #fca5a5; }
 
-  .form-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #f0f0f0;
-  }
+    /* ── HERO ── */
+    .prop-hero-header { background: var(--white); padding: 20px 0 0; border-bottom: 1px solid var(--border); }
+    .prop-hero-header h1 { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--dark); margin: 0 0 6px; line-height: 1.3; }
+    .prop-hero-location { color: var(--muted); font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
+    .prop-hero-location i { color: var(--primary); }
+    .prop-hero-price-tag { font-size: 2rem; font-weight: 700; color: var(--dark); line-height: 1; }
+    .prop-hero-price-tag span { font-size: 0.9rem; color: var(--muted); font-weight: 400; }
+    .prop-quick-stats { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 0; }
+    .quick-stat-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); padding: 5px 11px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; color: var(--mid); }
+    .quick-stat-chip i { color: var(--primary); font-size: 0.72rem; }
 
-  .btn-back {
-    background: #f8f9fa; color: #2d3748; padding: 10px 20px; border-radius: 12px;
-    border: none; font-weight: 600; text-decoration: none; display: inline-flex;
-    align-items: center; gap: 8px; transition: all 0.3s ease;
-  }
-  .btn-back:hover { background: var(--dark-gradient); color: white; transform: translateY(-2px); }
+    /* ── GALLERY ── */
+    .prop-gallery-grid { display: grid; grid-template-columns: 1.65fr 1fr; grid-template-rows: 1fr 1fr; gap: 6px; height: 420px; overflow: hidden; background: var(--dark); }
+    .prop-gallery-main { grid-row: 1 / 3; position: relative; overflow: hidden; background: #0d1117; cursor: pointer; }
+    .prop-gallery-thumb { position: relative; overflow: hidden; background: #1a2e05; cursor: pointer; }
+    .prop-gallery-thumb img, .prop-gallery-main .walkthrough-slide img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+    .prop-gallery-thumb:hover img { transform: scale(1.05); }
+    .walkthrough-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; display: none; }
+    .walkthrough-slide.active { display: block; opacity: 1; }
+    .gallery-hud { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px 16px 12px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 10; }
+    .btn-play-pause { width: 34px; height: 34px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.75rem; backdrop-filter: blur(4px); }
+    .gallery-timer { color: rgba(255,255,255,0.7); font-size: 0.72rem; font-family: monospace; }
+    .gallery-badge { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.8px; padding: 4px 9px; border-radius: 4px; text-transform: uppercase; backdrop-filter: blur(4px); }
+    .gallery-no-image-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #1a2e05, #65a30d, #3f6212); filter: blur(12px); transform: scale(1.2); }
+    .gallery-no-image-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.38); }
+    .gallery-no-image-icon { width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.12); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; margin: auto; }
+    .thumb-more-overlay { position: absolute; inset: 0; background: rgba(17,24,39,0.7); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .thumb-more-overlay span { color: white; font-size: 1.2rem; font-weight: 700; }
+    .thumb-more-overlay small { display: block; color: rgba(255,255,255,0.6); font-size: 0.7rem; margin-top: 2px; }
+    .prop-image-strip { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: thin; padding-bottom: 2px; }
+    .strip-thumb { flex-shrink: 0; width: 64px; height: 46px; border-radius: 4px; overflow: hidden; cursor: pointer; border: 2px solid transparent; opacity: 0.65; transition: all 0.2s; }
+    .strip-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .strip-thumb.active-thumb { border-color: var(--primary); opacity: 1; }
 
-  .btn-edit {
-    background: var(--primary-gradient); color: white; padding: 10px 20px; border-radius: 12px;
-    border: none; font-weight: 600; text-decoration: none; display: inline-flex;
-    align-items: center; gap: 8px; transition: all 0.3s ease;
-  }
-  .btn-edit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4); }
+    /* ── STICKY NAV ── */
+    .prop-sticky-nav { position: sticky; top: 68px; background: var(--white); border-bottom: 2px solid var(--border); z-index: 990; }
+    .prop-sticky-nav-inner { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
+    .prop-sticky-nav-inner::-webkit-scrollbar { display: none; }
+    .prop-nav-link { color: var(--muted); font-size: 0.8rem; font-weight: 600; text-decoration: none; padding: 14px 18px; border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+    .prop-nav-link i { font-size: 0.75rem; }
+    .prop-nav-link:hover { color: var(--primary); background: var(--primary-light); }
+    .prop-nav-link.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
 
-  .form-section { margin-bottom: 30px; }
-  .section-header {
-    background: var(--primary-gradient); color: white; padding: 15px 20px;
-    border-radius: 12px 12px 0 0; font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 10px;
-  }
-  .section-body {
-    background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none;
-  }
+    /* ── LAYOUT ── */
+    .prop-page-body { padding: 28px 0 60px; }
+    .prop-layout-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+    @media (max-width: 1100px) {
+        .prop-layout-grid { grid-template-columns: 1fr; }
+        .prop-gallery-grid { grid-template-columns: 1fr; height: 260px; }
+        .prop-gallery-thumb { display: none; }
+        .prop-gallery-main { grid-row: 1; }
+    }
 
-  /* Read-Only Text Styles */
-  .detail-group { margin-bottom: 20px; }
-  .detail-label {
-    font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px;
-  }
-  .detail-value {
-    font-size: 1.05rem; color: #0f172a; font-weight: 500; background: white; padding: 10px 15px; border-radius: 8px; border: 1px solid #e2e8f0;
-  }
-  
-  .badge-status {
-    padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: inline-block;
-  }
+    /* ── SECTION CARDS ── */
+    .prop-section { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 20px; scroll-margin-top: 130px; box-shadow: var(--shadow-sm); }
+    .prop-section-title { font-size: 1rem; font-weight: 700; color: var(--dark); margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .prop-section-title .section-icon { width: 32px; height: 32px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 0.8rem; flex-shrink: 0; }
+    .sub-section-heading { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px; margin: 20px 0 12px; display: flex; align-items: center; gap: 7px; }
+    .sub-section-heading:first-child { margin-top: 0; }
+    .sub-section-heading i { color: var(--primary); }
 
-  .gallery-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;
-  }
-  .gallery-img {
-    width: 100%; height: 150px; object-fit: cover; border-radius: 10px; border: 2px solid #e2e8f0; transition: transform 0.3s ease;
-  }
-  .gallery-img:hover { transform: scale(1.05); border-color: #667eea; cursor: pointer; }
+    /* ── SPEC GRID ── */
+    .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .spec-item { padding: 11px 12px; border-bottom: 1px solid #f3f4f6; display: flex; flex-direction: column; gap: 3px; }
+    .spec-item:nth-child(odd) { border-right: 1px solid #f3f4f6; }
+    .spec-item:last-child, .spec-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+    .spec-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .spec-value { font-size: 0.88rem; font-weight: 600; color: var(--dark); }
+    .spec-full { grid-column: 1 / -1; border-right: none !important; }
+    .spec-item.highlight-price { background: linear-gradient(135deg, #f7fee7, #ecfccb); border-radius: 8px; border: 1px solid #bef264 !important; padding: 14px; }
+    .spec-item.highlight-price .spec-label { color: var(--primary-dark); }
+    .spec-item.highlight-price .spec-value { font-size: 1.1rem; color: var(--primary-dark); }
+    .status-ok  { color: var(--success); font-weight: 600; }
+    .status-no  { color: var(--danger); font-weight: 600; }
+    .badge-dispute { background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:12px; font-size:0.72rem; font-weight:700; }
+    .badge-clear   { background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:12px; font-size:0.72rem; font-weight:700; }
+    .address-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; font-size: 0.85rem; color: var(--mid); line-height: 1.6; border-left: 3px solid var(--primary); }
+    .desc-body { font-size: 0.88rem; line-height: 1.8; color: #4b5563; white-space: pre-wrap; }
+    .doc-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: #fee2e2; color: #991b1b; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.85rem; }
+    .doc-link:hover { background: #fca5a5; color: #7f1d1d; }
+    .vid-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: #eff6ff; color: #1d4ed8; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.85rem; }
 
-  .doc-btn {
-    display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px;
-    font-weight: 600; text-decoration: none; transition: all 0.3s ease;
-  }
-  .doc-pdf { background: #e0f2fe; color: #0369a1; }
-  .doc-pdf:hover { background: #bae6fd; color: #0c4a6e; }
-  .doc-vid { background: #fce7f3; color: #be185d; }
-  .doc-vid:hover { background: #fbcfe8; color: #831843; }
+    /* ── FAQ ── */
+    .prop-faq .accordion-item { border: 1px solid var(--border); border-radius: var(--radius-sm) !important; margin-bottom: 10px; overflow: hidden; }
+    .prop-faq .accordion-button { font-weight: 600; font-size: 0.88rem; color: var(--dark); background: var(--white); padding: 14px 16px; box-shadow: none; }
+    .prop-faq .accordion-button:not(.collapsed) { background: var(--primary-light); color: var(--primary-dark); border-bottom: 1px solid #bef264; }
+    .prop-faq .accordion-body { font-size: 0.85rem; line-height: 1.75; color: var(--mid); background: var(--white); padding: 14px 16px; }
+
+    /* ── AUDIT ── */
+    .audit-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 20px; scroll-margin-top: 130px; }
+
+    /* ── SIDEBAR ── */
+    .prop-sidebar { position: sticky; top: 130px; display: flex; flex-direction: column; gap: 16px; }
+    .sidebar-price-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+    .sidebar-price-header { background: linear-gradient(135deg, #3f6212, #65a30d); padding: 20px 20px 16px; color: white; }
+    .sidebar-price-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.8; font-weight: 600; }
+    .sidebar-price-amount { font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin: 4px 0 0; }
+    .sidebar-price-body { padding: 16px 20px; }
+    .sidebar-mini-stat { text-align: center; padding: 10px 0; }
+    .sidebar-mini-stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; }
+    .sidebar-mini-stat-val { font-size: 0.95rem; font-weight: 700; color: var(--dark); margin-top: 3px; }
+    .sidebar-owner-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); }
+    .owner-card-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .owner-avatar { width: 46px; height: 46px; background: linear-gradient(135deg, var(--primary), #a3e635); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; font-weight: 700; flex-shrink: 0; }
+    .owner-name { font-size: 0.95rem; font-weight: 700; color: var(--dark); }
+    .owner-email { font-size: 0.75rem; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .owner-info-row { display: flex; align-items: flex-start; gap: 10px; font-size: 0.82rem; color: var(--mid); padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
+    .owner-info-row:last-of-type { border-bottom: none; }
+    .owner-info-row > i { color: var(--primary); font-size: 0.75rem; margin-top: 3px; flex-shrink: 0; }
+    .owner-phone-masked { font-weight: 600; color: var(--dark); font-family: monospace; letter-spacing: 1px; }
+    .btn-reveal-phone { background: var(--primary-light); color: var(--primary-dark); border: 1px solid #bef264; border-radius: 4px; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; cursor: pointer; }
+    .btn-call-primary { display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #3f6212, #65a30d); color: white; border: none; padding: 11px 16px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.85rem; width: 100%; margin-top: 14px; text-decoration: none; transition: opacity 0.2s; }
+    .btn-call-primary:hover { opacity: 0.9; color: white; }
+    .sidebar-status-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; box-shadow: var(--shadow-sm); }
+    .status-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 0.82rem; }
+    .status-row:last-child { border-bottom: none; }
+    .status-row-label { color: var(--muted); font-weight: 500; }
+    .status-pill-ok  { background:#d1fae5; color:#065f46; padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; }
+    .status-pill-bad { background:#fee2e2; color:#991b1b; padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; }
+    .status-pill-neu { background:#f3f4f6; color:#374151; padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; }
 </style>
 
-<div class="main-content">
-  <div class="page-wrapper">
-    
-    <div class="page-header" style="background: var(--primary-gradient); padding: 30px; border-radius: 20px; color: white;">
-      <h1 style="font-weight: 700; font-size: 1.8rem; margin-bottom: 10px;">
-        <i class="fas fa-eye"></i> Property Details
-      </h1>
-      <p style="opacity: 0.9;">Viewing details for: {{ property.title|default:property.village }}</p>
-    </div>
-
-    <div class="form-container">
-      <div class="form-header">
-        <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">
-          ₹{{ property.expected_price|floatformat:"0"|default:"0" }}
-        </h2>
-        <div style="display:flex; gap:10px;">
-          <a href="{% url 'agricultural_resale_list' %}" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
-          <a href="{% url 'edit_agricultural_property' property.id %}" class="btn-edit"><i class="fas fa-edit"></i> Edit</a>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="section-header"><i class="fas fa-info-circle"></i> Basic Information & Location</div>
-        <div class="section-body">
-          <div class="row">
-            <div class="col-md-12 detail-group">
-              <div class="detail-label">Property Title</div>
-              <div class="detail-value">{{ property.title|default:"-" }}</div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-4 detail-group">
-              <div class="detail-label">Property Type</div>
-              <div class="detail-value">
-                <span class="badge-status" style="background:#dcfce7; color:#166534;">
-                  {{ property.get_agriculture_property_type_display }}
-                </span>
-              </div>
-            </div>
-            <div class="col-md-4 detail-group">
-              <div class="detail-label">Land Area (Acres)</div>
-              <div class="detail-value">{{ property.area|default:"-" }}</div>
-            </div>
-            <div class="col-md-4 detail-group">
-              <div class="detail-label">Ownership Type</div>
-              <div class="detail-value">{{ property.get_ownership_type_display|default:"-" }}</div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">State</div>
-              <div class="detail-value">{{ property.state|default:"-" }}</div>
-            </div>
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">City</div>
-              <div class="detail-value">{{ property.city|default:"-" }}</div>
-            </div>
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">District</div>
-              <div class="detail-value">{{ property.district|default:"-" }}</div>
-            </div>
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">Taluka</div>
-              <div class="detail-value">{{ property.taluka|default:"-" }}</div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12 detail-group">
-              <div class="detail-label">Village & Full Address</div>
-              <div class="detail-value">{{ property.village|default:"-" }} — {{ property.property_address|default:"-" }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="section-header"><i class="fas fa-leaf"></i> Land Specifics</div>
-        <div class="section-body">
-          <div class="row">
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">Soil Type</div>
-              <div class="detail-value">{{ property.get_soil_type_display|default:"-" }}</div>
-            </div>
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">Water Source</div>
-              <div class="detail-value">{{ property.get_water_source_display|default:"-" }}</div>
-            </div>
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">Irrigation Facility</div>
-              <div class="detail-value" style="color: {% if property.irrigation_facility == 'yes' %}#10b981{% else %}#e74c3c{% endif %}; font-weight:700;">
-                <i class="fas {% if property.irrigation_facility == 'yes' %}fa-check{% else %}fa-times{% endif %}"></i> {{ property.irrigation_facility|default:"-"|title }}
-              </div>
-            </div>
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">Fertility Status</div>
-              <div class="detail-value">{{ property.get_fertility_status_display|default:"-" }}</div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12 detail-group">
-              <div class="detail-label">Previous Crops</div>
-              <div class="detail-value">{{ property.previous_crops|default:"-" }}</div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-12 detail-group">
-              <div class="detail-label">Property Description</div>
-              <div class="detail-value" style="white-space: pre-line;">{{ property.resale_agricultural_desc|safe|default:"-" }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="section-header"><i class="fas fa-gavel"></i> Financial & Legal Details</div>
-        <div class="section-body">
-          
-          <div class="row border-bottom pb-3 mb-3">
-            <div class="col-md-4 detail-group mb-0">
-              <div class="detail-label">Brokerage Required?</div>
-              <div class="detail-value">{{ property.brokerage|default:"No" }}</div>
-            </div>
-            <div class="col-md-4 detail-group mb-0">
-              <div class="detail-label">Brokerage Percentage</div>
-              <div class="detail-value">
-                {% if property.brokerage_percentage == 'Manual' %}
-                  {{ property.manual_brokerage|default:"-" }}
+<!-- ── TOPBAR ── -->
+<div class="prop-topbar">
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <a href="{% url 'agricultural_resale_list' %}"><i class="fas fa-home me-1"></i>Dashboard</a>
+                <i class="fas fa-chevron-right" style="font-size:0.65rem;"></i>
+                <a href="{% url 'agricultural_resale_list' %}">Agricultural Properties</a>
+                <i class="fas fa-chevron-right" style="font-size:0.65rem;"></i>
+                <span>{{ property.title|truncatechars:40 }}</span>
+                <span class="prop-id-badge">{{ property.agri_property_id }}</span>
+                {% if property.encumbrance_cert %}
+                    <span class="prop-cert-ok"><i class="fas fa-circle-check"></i> Encumbrance Cert Available</span>
                 {% else %}
-                  {{ property.brokerage_percentage|default:"-" }}
+                    <span class="prop-cert-warn"><i class="fas fa-triangle-exclamation"></i> No Encumbrance Cert</span>
                 {% endif %}
-              </div>
             </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-6 detail-group">
-              <div class="detail-label">Any Loan on Property?</div>
-              <div class="detail-value">
-                <strong style="color: {% if property.agri_loan == 'yes' %}#e74c3c{% else %}#10b981{% endif %};">
-                  {{ property.agri_loan|default:"no"|title }}
-                </strong>
-                {% if property.agri_loan == 'yes' %}
-                  <span style="margin-left: 10px;">Amount: ₹{{ property.loan_amount|floatformat:"0" }}</span>
-                {% endif %}
-              </div>
-            </div>
-            <div class="col-md-6 detail-group">
-              <div class="detail-label">Any Tenants / Lease?</div>
-              <div class="detail-value">
-                <strong style="color: {% if property.agri_tenants == 'yes' %}#f59e0b{% else %}#10b981{% endif %};">
-                  {{ property.agri_tenants|default:"no"|title }}
-                </strong>
-                {% if property.agri_tenants == 'yes' %}
-                  <div style="font-size:0.9rem; margin-top:5px; color:#475569;">{{ property.tenant_details }}</div>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-6 detail-group">
-              <div class="detail-label">Any Legal Dispute?</div>
-              <div class="detail-value">
-                <strong style="color: {% if property.agri_dispute == 'yes' %}#e74c3c{% else %}#10b981{% endif %};">
-                  {{ property.agri_dispute|default:"no"|title }}
-                </strong>
-                {% if property.agri_dispute == 'yes' %}
-                  <div style="font-size:0.9rem; margin-top:5px; color:#475569;">{{ property.dispute_details }}</div>
-                {% endif %}
-              </div>
-            </div>
-            <div class="col-md-6 detail-group">
-              <div class="detail-label">Any Pending Tax?</div>
-              <div class="detail-value">
-                <strong style="color: {% if property.agri_tax_due == 'yes' %}#e74c3c{% else %}#10b981{% endif %};">
-                  {{ property.agri_tax_due|default:"no"|title }}
-                </strong>
-                {% if property.agri_tax_due == 'yes' %}
-                  <span style="margin-left: 10px;">Amount: ₹{{ property.pending_tax_amount|floatformat:"0" }}</span>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="section-header"><i class="fas fa-user-tie"></i> Owner Profile & System Info</div>
-        <div class="section-body">
-          <div class="row">
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">Owner Name</div>
-              <div class="detail-value">{{ property.owner_name|default:"-" }}</div>
-            </div>
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">Contact Number</div>
-              <div class="detail-value">{{ property.owner_contact|default:"-" }}</div>
-            </div>
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">Email Address</div>
-              <div class="detail-value">{{ property.owner_email|default:"-" }}</div>
-            </div>
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">Residency</div>
-              <div class="detail-value">{{ property.get_comm_residency_display|default:"-" }}</div>
-            </div>
-          </div>
-
-          <div class="row mt-3 border-top pt-4">
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">Uploaded By</div>
-              <div class="detail-value">{{ property.uploaded_by_name|default:"System Admin" }}</div>
-            </div>
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">Uploader Role</div>
-              <div class="detail-value">{{ property.uploaded_by_role|default:"-" }}</div>
-            </div>
-            <div class="col-md-3 detail-group">
-              <div class="detail-label">Created On</div>
-              <div class="detail-value">{{ property.created_at|date:"F d, Y h:i A" }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-section">
-        <div class="section-header"><i class="fas fa-images"></i> Documents & Media Gallery</div>
-        <div class="section-body">
-          
-          <div class="row mb-4">
-            <div class="col-md-12" style="display:flex; gap:15px;">
-              {% if property.encumbrance_cert %}
-                <a href="{{ property.encumbrance_cert.url }}" target="_blank" class="doc-btn doc-pdf">
-                  <i class="fas fa-file-pdf"></i> View Encumbrance Certificate
+            <div class="d-flex gap-2">
+                <a href="{% url 'agricultural_resale_list' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600;">
+                    <i class="fas fa-arrow-left"></i> Back
                 </a>
-              {% else %}
-                <div class="doc-btn" style="background:#f1f5f9; color:#94a3b8;"><i class="fas fa-file-pdf"></i> No Certificate</div>
-              {% endif %}
-
-              {% if property.property_video %}
-                <a href="{{ property.property_video.url }}" target="_blank" class="doc-btn doc-vid">
-                  <i class="fas fa-video"></i> View Property Video
+                <a href="{% url 'edit_agricultural_property' property.id %}" class="btn btn-sm d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600; background:var(--primary); color:white;">
+                    <i class="fas fa-edit"></i> Edit
                 </a>
-              {% else %}
-                <div class="doc-btn" style="background:#f1f5f9; color:#94a3b8;"><i class="fas fa-video"></i> No Video</div>
-              {% endif %}
             </div>
-          </div>
-
-          <div class="detail-label">Property Images ({{ property.images.count }})</div>
-          {% if property.images.all %}
-            <div class="gallery-grid">
-              {% for img in property.images.all %}
-                <a href="{{ img.image.url }}" target="_blank">
-                  <img src="{{ img.image.url }}" class="gallery-img" alt="Property Image {{ forloop.counter }}">
-                </a>
-              {% endfor %}
-            </div>
-          {% else %}
-            <div style="padding: 30px; background: white; border: 2px dashed #cbd5e0; border-radius: 12px; text-align: center; color: #94a3b8;">
-              <i class="fas fa-image" style="font-size: 3rem; margin-bottom: 10px;"></i>
-              <p>No images uploaded for this property.</p>
-            </div>
-          {% endif %}
-
         </div>
-      </div>
-
     </div>
-  </div>
+</div>
+
+<!-- ── HERO ── -->
+<div class="prop-hero-header">
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
+            <div style="flex:1; min-width:260px;">
+                <h1>{{ property.title|default:"Agricultural Property" }}</h1>
+                <div class="prop-hero-location">
+                    <i class="fas fa-location-dot"></i>
+                    {{ property.village }}, {{ property.taluka }}, {{ property.district }}
+                </div>
+            </div>
+            <div class="text-end">
+                <div class="prop-hero-price-tag">₹{{ property.expected_price|floatformat:"0"|default:"—" }} <span>Expected Price</span></div>
+                <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">
+                    {{ property.land_area|default:"—" }} Acres &bull; {{ property.agriculture_property_type|default:"Agricultural"|title }}
+                </div>
+            </div>
+        </div>
+        <div class="prop-quick-stats">
+            <div class="quick-stat-chip"><i class="fas fa-seedling"></i> {{ property.agriculture_property_type|default:"Land"|title }}</div>
+            <div class="quick-stat-chip"><i class="fas fa-ruler-combined"></i> {{ property.land_area|default:"—" }} Acres</div>
+            <div class="quick-stat-chip"><i class="fas fa-mountain"></i> {{ property.soil_type|default:"—"|title }} Soil</div>
+            {% if property.irrigation_facility == 'yes' %}<div class="quick-stat-chip"><i class="fas fa-droplet"></i> Irrigation Available</div>{% endif %}
+            {% if property.water_source %}<div class="quick-stat-chip"><i class="fas fa-water"></i> {{ property.water_source|title }}</div>{% endif %}
+            {% if property.fertility_status %}<div class="quick-stat-chip"><i class="fas fa-leaf"></i> {{ property.fertility_status|title }} Fertility</div>{% endif %}
+            <div class="quick-stat-chip"><i class="fas fa-file-shield"></i> {{ property.ownership_type|default:"—"|title }}</div>
+            <div class="quick-stat-chip"><i class="fas fa-map-location-dot"></i> {{ property.state }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── GALLERY ── -->
+<div style="background:#111827;">
+    <div class="container-fluid px-0">
+        <div class="prop-gallery-grid">
+
+            <div class="prop-gallery-main" id="galMain">
+                {% if property.images.all %}
+                    {% for img in property.images.all %}
+                    <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
+                        <img src="{{ img.image.url }}" alt="Agricultural land view {{ forloop.counter }}">
+                    </div>
+                    {% endfor %}
+                    <div class="gallery-hud">
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="btn-play-pause" id="playPauseBtn"><i class="fas fa-pause"></i></button>
+                            <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
+                        </div>
+                        <span class="gallery-badge"><i class="fas fa-play-circle"></i> Land Walkthrough</span>
+                    </div>
+                {% else %}
+                    <div class="w-100 h-100 position-relative overflow-hidden">
+                        <div class="gallery-no-image-bg"></div>
+                        <div class="gallery-no-image-overlay"></div>
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center position-relative">
+                            <div class="text-center text-white">
+                                <div class="gallery-no-image-icon"><i class="fas fa-wheat-awn" style="font-size:60px;"></i></div>
+                                <h2 style="margin-top:20px; font-weight:700;">Agricultural Land</h2>
+                                <p style="color:rgba(255,255,255,0.8); margin:0;">Property Images Not Available</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="prop-gallery-thumb" onclick="setSlide(1)">
+                {% if property.images.count > 1 %}
+                    <img src="{{ property.images.all.1.image.url }}" alt="Land thumb 2">
+                {% else %}
+                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:linear-gradient(135deg,#1a2e05,#65a30d);color:white;">
+                        <i class="fas fa-wheat-awn mb-1"></i><span style="font-size:10px;font-weight:600;">Agriculture</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="prop-gallery-thumb" onclick="setSlide(2)">
+                {% if property.images.count > 2 %}
+                    <img src="{{ property.images.all.2.image.url }}" alt="Land thumb 3">
+                    {% if property.images.count > 3 %}
+                    <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoModal">
+                        <div class="text-center">
+                            <span>+{{ property.images.count|add:"-3" }}</span>
+                            <small>More Photos</small>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:linear-gradient(135deg,#1a2e05,#65a30d);color:white;">
+                        <i class="fas fa-wheat-awn mb-1"></i><span style="font-size:10px;font-weight:600;">Agriculture</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if property.images.all %}
+    <div style="background:#0d1117;padding:8px 16px 12px;">
+        <div class="prop-image-strip" id="imageStrip">
+            {% for img in property.images.all %}
+            <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}" data-slide="{{ forloop.counter0 }}" onclick="setSlide({{ forloop.counter0 }})">
+                <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ── STICKY NAV ── -->
+<div class="prop-sticky-nav">
+    <div class="container-fluid px-4">
+        <div class="prop-sticky-nav-inner">
+            <a class="prop-nav-link active" data-target="overview"       href="#overview"><i class="fas fa-info-circle"></i> Overview</a>
+            <a class="prop-nav-link"        data-target="land"           href="#land"><i class="fas fa-seedling"></i> Land Details</a>
+            <a class="prop-nav-link"        data-target="financials"     href="#financials"><i class="fas fa-file-invoice-dollar"></i> Pricing & Legal</a>
+            <a class="prop-nav-link"        data-target="media"          href="#media"><i class="fas fa-paperclip"></i> Documents</a>
+            <a class="prop-nav-link"        data-target="location"       href="#location"><i class="fas fa-map-marker-alt"></i> Location</a>
+            <a class="prop-nav-link"        data-target="faqs"           href="#faqs"><i class="fas fa-circle-question"></i> FAQs</a>
+            <a class="prop-nav-link"        data-target="audit"          href="#audit"><i class="fas fa-database"></i> Audit</a>
+        </div>
+    </div>
+</div>
+
+<!-- ── BODY ── -->
+<div class="prop-page-body">
+    <div class="container-fluid px-4">
+        <div class="prop-layout-grid">
+
+            <!-- LEFT COLUMN -->
+            <div>
+
+                <!-- OVERVIEW / DESCRIPTION -->
+                <div class="prop-section" id="overview">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-info-circle"></i></span>
+                        Property Description
+                    </div>
+                    <p class="desc-body">{{ property.resale_agricultural_desc|safe|default:"No description provided for this agricultural property." }}</p>
+                </div>
+
+                <!-- STEP 1: LAND DETAILS -->
+                <div class="prop-section" id="land">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-seedling"></i></span>
+                        Land Details & Soil Profile
+                    </div>
+
+                    <div class="sub-section-heading"><i class="fas fa-layer-group"></i> Basic Land Info</div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Property Type</span>
+                            <span class="spec-value">{{ property.agriculture_property_type|default:"—"|title }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Land Area</span>
+                            <span class="spec-value">{{ property.land_area|default:"—" }} Acres</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Village</span>
+                            <span class="spec-value">{{ property.village|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Taluka</span>
+                            <span class="spec-value">{{ property.taluka|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">District</span>
+                            <span class="spec-value">{{ property.district|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">State</span>
+                            <span class="spec-value">{{ property.state|default:"—" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="sub-section-heading"><i class="fas fa-mountain"></i> Soil & Irrigation</div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Soil Type</span>
+                            <span class="spec-value">{{ property.soil_type|default:"—"|title }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Fertility Status</span>
+                            <span class="spec-value">{{ property.fertility_status|default:"—"|title }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Irrigation Facility</span>
+                            <span class="spec-value">
+                                {% if property.irrigation_facility == 'yes' %}
+                                    <span class="status-ok"><i class="fas fa-check-circle me-1"></i>Available</span>
+                                {% else %}
+                                    <span class="status-no"><i class="fas fa-times-circle me-1"></i>Not Available</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Water Source</span>
+                            <span class="spec-value">{{ property.water_source|default:"—"|title }}</span>
+                        </div>
+                        <div class="spec-item spec-full">
+                            <span class="spec-label">Previous Crops Grown</span>
+                            <span class="spec-value">{{ property.previous_crops|default:"—" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: PRICING & LEGAL -->
+                <div class="prop-section" id="financials">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                        Pricing & Legal Status
+                    </div>
+
+                    <div class="sub-section-heading"><i class="fas fa-tag"></i> Pricing & Brokerage</div>
+                    <div class="spec-grid">
+                        <div class="spec-item highlight-price spec-full">
+                            <span class="spec-label">Expected Sale Price</span>
+                            <span class="spec-value">₹{{ property.expected_price|floatformat:"0"|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Brokerage</span>
+                            <span class="spec-value">{{ property.brokerage|default:"No" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Brokerage %</span>
+                            <span class="spec-value">
+                                {% if property.brokerage_percentage == 'Manual' %}
+                                    {{ property.manual_brokerage|default:"—" }}
+                                {% else %}
+                                    {{ property.brokerage_percentage|default:"—" }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="sub-section-heading"><i class="fas fa-gavel"></i> Ownership & Legal</div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Ownership Type</span>
+                            <span class="spec-value">{{ property.ownership_type|default:"—"|title }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Active Loan on Property</span>
+                            <span class="spec-value">
+                                {% if property.agri_loan == 'yes' %}<span class="status-no fw-bold">Yes — ₹{{ property.loan_amount|floatformat:"0" }}</span>{% else %}No{% endif %}
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Existing Tenants / Lease</span>
+                            <span class="spec-value">
+                                {% if property.agri_tenants == 'yes' %}<span class="status-no fw-bold">Yes</span>{% else %}No{% endif %}
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Tenant Details</span>
+                            <span class="spec-value">{{ property.tenant_details|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Legal Dispute</span>
+                            <span class="spec-value">
+                                {% if property.agri_dispute == 'yes' %}<span class="badge-dispute">Under Dispute</span>{% else %}<span class="badge-clear">Clear</span>{% endif %}
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Dispute Details</span>
+                            <span class="spec-value">{{ property.dispute_details|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Tax Dues Pending</span>
+                            <span class="spec-value">
+                                {% if property.agri_tax_due == 'yes' %}<span class="status-no fw-bold">Yes — ₹{{ property.pending_tax_amount|floatformat:"0" }}</span>{% else %}No{% endif %}
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Owner Residency</span>
+                            <span class="spec-value">{{ property.comm_residency|default:"—"|title }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4: DOCUMENTS -->
+                <div class="prop-section" id="media">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-paperclip"></i></span>
+                        Documents & Media
+                    </div>
+                    <div class="d-flex gap-3 flex-wrap">
+                        {% if property.encumbrance_cert %}
+                            <a href="{{ property.encumbrance_cert.url }}" target="_blank" class="doc-link">
+                                <i class="fas fa-file-pdf"></i> View Encumbrance Certificate
+                            </a>
+                        {% else %}
+                            <span class="text-muted fst-italic" style="font-size:0.85rem;"><i class="fas fa-info-circle me-1"></i>No encumbrance certificate uploaded.</span>
+                        {% endif %}
+                        {% if property.property_video %}
+                            <a href="{{ property.property_video.url }}" target="_blank" class="vid-link">
+                                <i class="fas fa-video"></i> Watch Property Video
+                            </a>
+                        {% else %}
+                            <span class="text-muted fst-italic" style="font-size:0.85rem;"><i class="fas fa-info-circle me-1"></i>No video uploaded.</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- STEP 3: LOCATION -->
+                <div class="prop-section" id="location">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-map-marker-alt"></i></span>
+                        Location Details
+                    </div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Village</span>
+                            <span class="spec-value">{{ property.village|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Taluka</span>
+                            <span class="spec-value">{{ property.taluka|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">District</span>
+                            <span class="spec-value">{{ property.district|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">City / Nearest Town</span>
+                            <span class="spec-value">{{ property.city|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">State</span>
+                            <span class="spec-value">{{ property.state|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Locality</span>
+                            <span class="spec-value">{{ property.locality|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item spec-full">
+                            <span class="spec-label">Full Address</span>
+                            <span class="spec-value">
+                                <div class="address-box mt-1">{{ property.address|default:"Address not provided." }}</div>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQs -->
+                <div class="prop-section prop-faq" id="faqs">
+                    <div class="prop-section-title">
+                        <span class="section-icon"><i class="fas fa-circle-question"></i></span>
+                        Auto-Generated FAQs
+                    </div>
+                    <p style="font-size:0.82rem; color:var(--muted); margin-bottom:16px; margin-top:-8px;">
+                        Dynamically generated and stored based on this land's specific attributes.
+                    </p>
+                    <div class="accordion" id="faqAccordion">
+                        {% for faq in faqs %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#faqC{{ forloop.counter }}" aria-expanded="false">
+                                    {{ faq.question }}
+                                </button>
+                            </h2>
+                            <div id="faqC{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">{{ faq.answer }}</div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="alert alert-light border text-muted" style="font-size:0.85rem;">
+                            <i class="fas fa-info-circle me-2"></i>FAQs not yet generated for this property.
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- AUDIT -->
+                <div class="audit-section" id="audit">
+                    <div class="prop-section-title" style="border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:16px;">
+                        <span class="section-icon" style="background:#f3f4f6;"><i class="fas fa-database" style="color:var(--muted);"></i></span>
+                        <span style="color:var(--muted);">System Audit Record</span>
+                    </div>
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Uploaded By</span>
+                            <span class="spec-value">{{ property.uploaded_by_name|default:"System" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Uploader Role</span>
+                            <span class="spec-value">{{ property.uploaded_by_role|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Uploader Email</span>
+                            <span class="spec-value">{{ property.uploaded_by_email|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Uploader Contact</span>
+                            <span class="spec-value">{{ property.uploaded_by_contact|default:"—" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Source File</span>
+                            <span class="spec-value">{{ property.upload_file_name|default:"Web UI" }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Created At</span>
+                            <span class="spec-value">{{ property.created_at|date:"d M Y, H:i" }}</span>
+                        </div>
+                        <div class="spec-item spec-full">
+                            <span class="spec-label">Last Updated</span>
+                            <span class="spec-value">{{ property.updated_at|date:"d M Y, H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SIDEBAR -->
+            <div class="prop-sidebar">
+
+                <!-- Price Card -->
+                <div class="sidebar-price-card">
+                    <div class="sidebar-price-header">
+                        <div class="sidebar-price-label">Expected Sale Price</div>
+                        <div class="sidebar-price-amount">₹{{ property.expected_price|floatformat:"0"|default:"—" }}</div>
+                    </div>
+                    <div class="sidebar-price-body">
+                        <div class="row g-0" style="border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
+                            <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border);">
+                                <div class="sidebar-mini-stat-label">Land Area</div>
+                                <div class="sidebar-mini-stat-val">{{ property.land_area|default:"—" }} Ac</div>
+                            </div>
+                            <div class="col-6 sidebar-mini-stat">
+                                <div class="sidebar-mini-stat-label">Type</div>
+                                <div class="sidebar-mini-stat-val" style="font-size:0.8rem;">{{ property.agriculture_property_type|default:"—"|title }}</div>
+                            </div>
+                        </div>
+                        <div class="mt-3 row g-0" style="border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
+                            <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border);">
+                                <div class="sidebar-mini-stat-label">Soil</div>
+                                <div class="sidebar-mini-stat-val" style="font-size:0.8rem;">{{ property.soil_type|default:"—"|title }}</div>
+                            </div>
+                            <div class="col-6 sidebar-mini-stat">
+                                <div class="sidebar-mini-stat-label">Brokerage</div>
+                                <div class="sidebar-mini-stat-val">{{ property.brokerage|default:"No" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Card -->
+                <div class="sidebar-status-card">
+                    <div class="owner-card-title"><i class="fas fa-shield-halved me-1"></i> Land Status Overview</div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-droplet me-1" style="color:var(--primary);"></i> Irrigation</span>
+                        {% if property.irrigation_facility == 'yes' %}<span class="status-pill-ok">Available</span>{% else %}<span class="status-pill-bad">Not Available</span>{% endif %}
+                    </div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-file-contract me-1" style="color:var(--primary);"></i> Encumbrance Cert</span>
+                        {% if property.encumbrance_cert %}<span class="status-pill-ok">Available</span>{% else %}<span class="status-pill-bad">Missing</span>{% endif %}
+                    </div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-gavel me-1" style="color:var(--primary);"></i> Legal Dispute</span>
+                        {% if property.agri_dispute == 'yes' %}<span class="status-pill-bad">Under Dispute</span>{% else %}<span class="status-pill-ok">Clear</span>{% endif %}
+                    </div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-receipt me-1" style="color:var(--primary);"></i> Tax Dues</span>
+                        {% if property.agri_tax_due == 'yes' %}<span class="status-pill-bad">Pending</span>{% else %}<span class="status-pill-ok">Clear</span>{% endif %}
+                    </div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-bank me-1" style="color:var(--primary);"></i> Active Loan</span>
+                        {% if property.agri_loan == 'yes' %}<span class="status-pill-bad">Yes</span>{% else %}<span class="status-pill-ok">No</span>{% endif %}
+                    </div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-users me-1" style="color:var(--primary);"></i> Tenants / Lease</span>
+                        {% if property.agri_tenants == 'yes' %}<span class="status-pill-neu">Yes</span>{% else %}<span class="status-pill-ok">None</span>{% endif %}
+                    </div>
+                    <div class="status-row">
+                        <span class="status-row-label"><i class="fas fa-leaf me-1" style="color:var(--primary);"></i> Fertility</span>
+                        <span class="status-pill-neu">{{ property.fertility_status|default:"—"|title }}</span>
+                    </div>
+                </div>
+
+                <!-- Owner Card -->
+                <div class="sidebar-owner-card">
+                    <div class="owner-card-title"><i class="fas fa-user-tie me-1"></i> Owner / Contact</div>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="owner-avatar">{{ property.owner_name|slice:":1"|upper|default:"O" }}</div>
+                        <div style="min-width:0;">
+                            <div class="owner-name">{{ property.owner_name|default:"Undisclosed" }}</div>
+                            <div class="owner-email"><i class="fas fa-envelope me-1"></i>{{ property.owner_email|default:"No email" }}</div>
+                        </div>
+                    </div>
+                    <div class="owner-info-row">
+                        <i class="fas fa-id-badge"></i>
+                        <div>
+                            <div style="font-size:0.7rem; color:var(--muted); font-weight:600; text-transform:uppercase;">Residency</div>
+                            <div style="font-weight:600;">{{ property.comm_residency|default:"—"|title }}</div>
+                        </div>
+                    </div>
+                    <div class="owner-info-row">
+                        <i class="fas fa-phone"></i>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="owner-phone-masked" id="sidebarPhone">
+                                {% if property.owner_contact %}
+                                    {{ property.owner_contact|slice:":2" }}XXXXXX{{ property.owner_contact|slice:"-2:" }}
+                                {% else %}Not available{% endif %}
+                            </span>
+                            {% if property.owner_contact %}
+                                <button class="btn-reveal-phone" onclick="revealPhone('sidebarPhone','{{ property.owner_contact }}')">View Number</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <a href="tel:{{ property.owner_contact }}" class="btn-call-primary">
+                        <i class="fas fa-phone-volume"></i> Call Owner
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LIGHTBOX MODAL -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content" style="background:#0d1117; color:white; border:1px solid #1e2733;">
+            <div class="modal-header border-0" style="border-bottom:1px solid #1e2733 !important;">
+                <h5 class="modal-title fw-bold" style="font-size:0.95rem;">
+                    <i class="fas fa-images me-2" style="color:#a3e635;"></i> Agricultural Land Gallery — {{ property.images.count }} Photos
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    {% for img in property.images.all %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div style="height:140px; border-radius:8px; overflow:hidden; background:#1e2733; border:1px solid #374151;">
+                            <img src="{{ img.image.url }}" style="width:100%;height:100%;object-fit:cover;">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const slides = document.querySelectorAll('.walkthrough-slide');
+    const stripThumbs = document.querySelectorAll('.strip-thumb');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const galTimer = document.getElementById('galTimer');
+    const INTERVAL = 4000;
+    let currentSlide = 0, isPlaying = true, ticker = null, startTime = Date.now();
+    const totalDuration = slides.length * INTERVAL;
+
+    function fmt(ms) { const s=Math.floor(ms/1000),m=Math.floor(s/60); return `${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
+
+    window.setSlide = function(idx) {
+        slides.forEach(s => s.classList.remove('active'));
+        stripThumbs.forEach(t => t.classList.remove('active-thumb'));
+        currentSlide = (idx + slides.length) % slides.length;
+        if (slides[currentSlide]) slides[currentSlide].classList.add('active');
+        const at = document.querySelector(`.strip-thumb[data-slide="${currentSlide}"]`);
+        if (at) { at.classList.add('active-thumb'); at.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
+        startTime = Date.now();
+    };
+
+    function tickTimer() {
+        if (!isPlaying || !galTimer) return;
+        const elapsed = (currentSlide * INTERVAL) + ((Date.now() - startTime) % INTERVAL);
+        galTimer.textContent = `${fmt(Math.min(elapsed, totalDuration))} / ${fmt(totalDuration)}`;
+        requestAnimationFrame(tickTimer);
+    }
+
+    if (slides.length > 0) {
+        stripThumbs.forEach(t => t.addEventListener('click', function(){ setSlide(parseInt(this.dataset.slide)); }));
+        if (playPauseBtn) {
+            playPauseBtn.addEventListener('click', function() {
+                if (isPlaying) { clearInterval(ticker); isPlaying=false; this.innerHTML='<i class="fas fa-play"></i>'; }
+                else { ticker=setInterval(()=>setSlide(currentSlide+1),INTERVAL); isPlaying=true; this.innerHTML='<i class="fas fa-pause"></i>'; requestAnimationFrame(tickTimer); }
+            });
+        }
+        setSlide(0);
+        ticker = setInterval(() => setSlide(currentSlide + 1), INTERVAL);
+        requestAnimationFrame(tickTimer);
+    }
+
+    const navLinks = document.querySelectorAll('.prop-nav-link');
+    const sections = document.querySelectorAll('.prop-section[id], .audit-section[id]');
+    function updateNav() {
+        let activeId = null;
+        sections.forEach(sec => { if (window.scrollY >= sec.getBoundingClientRect().top + window.scrollY - 160) activeId = sec.id; });
+        if (activeId) navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('data-target') === activeId));
+    }
+    window.addEventListener('scroll', updateNav, { passive: true });
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const t = document.getElementById(this.getAttribute('data-target'));
+            if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 130, behavior: 'smooth' });
+        });
+    });
+    updateNav();
+});
+
+function revealPhone(elementId, phone) {
+    const el = document.getElementById(elementId);
+    if (el && phone) { el.textContent = phone; el.style.color='var(--primary-dark)'; el.style.fontWeight='700'; const btn=el.nextElementSibling; if(btn) btn.remove(); }
+}
+</script>

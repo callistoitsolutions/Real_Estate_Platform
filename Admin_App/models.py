@@ -732,6 +732,8 @@ class RentalActivityLog(models.Model):
 
 
 
+
+
 class CommercialRentalProperty(models.Model):
     # ═══════════════════════════════════════
     # SYSTEM GENERATED FIELDS
@@ -764,8 +766,6 @@ class CommercialRentalProperty(models.Model):
     expected_rent = models.IntegerField()
     security_deposit = models.IntegerField(blank=True, null=True)
     maintenance_charges = models.IntegerField(blank=True, null=True)
-
-    # Note: Changed to CharField because your HTML form sends 'Yes'/'No' string radio values
     negotiable = models.CharField(max_length=10, blank=True, null=True) 
 
     brokerage = models.CharField(max_length=5, blank=True, null=True)
@@ -808,9 +808,7 @@ class CommercialRentalProperty(models.Model):
     # ═══════════════════════════════════════
     # STEP 4: MEDIA, CONTACT & UPLOADER
     # ═══════════════════════════════════════
-    
     video = models.FileField(upload_to='commercial_rent/videos/', blank=True, null=True)
-
     owner_name = models.CharField(max_length=100)
     contact_number = models.CharField(max_length=20)
     email = models.EmailField()
@@ -821,10 +819,6 @@ class CommercialRentalProperty(models.Model):
     uploaded_by_contact = models.CharField(max_length=20, blank=True, null=True)
     uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
 
-    # ═══════════════════════════════════════
-    # SYSTEM TRACKING DATA
-    # ═══════════════════════════════════════
-    # auto_now_add=True records exactly what date and time the row was created in the DB
     created_at = models.DateTimeField(auto_now_add=True) 
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
@@ -832,26 +826,20 @@ class CommercialRentalProperty(models.Model):
     upload_file_hash = models.CharField(max_length=255, blank=True, null=True)
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
 
-    # ═══════════════════════════════════════
-    # AUTO GENERATION LOGIC
-    # ═══════════════════════════════════════
     def save(self, *args, **kwargs):
-        
-        # 1. Generate Custom ID (e.g., EFCR-5F8B2C) if it doesn't exist
+        # 1. Generate Custom ID
         if not self.commercial_rental_id:
             unique_code = str(uuid.uuid4()).upper()[:6]
             self.commercial_rental_id = f"EFCPR-{unique_code}"
             
-        # 2. Auto-generate the Property Title dynamically
+        # 2. Auto-generate Title
         if not self.property_title:
-            # Format raw strings (e.g., 'warm-shell' -> 'Warm Shell')
             condition = self.property_condition.replace('-', ' ').title() if self.property_condition else ""
             p_type = self.property_type.replace('-', ' ').title() if self.property_type else "Commercial Property"
             locality = self.area_locality.title() if self.area_locality else ""
             city_name = self.city.title() if self.city else ""
             area = f"({self.builtup_area} sq.ft.)" if self.builtup_area else ""
 
-            # Build the title: "Fitted Office Space for Rent in Viman Nagar, Pune (1500 sq.ft.)"
             title_parts = []
             if condition: title_parts.append(condition)
             title_parts.append(p_type)
@@ -859,15 +847,82 @@ class CommercialRentalProperty(models.Model):
             if locality: title_parts.append(f"{locality},")
             if city_name: title_parts.append(city_name)
             if area: title_parts.append(area)
-
-            # Combine everything and remove any extra spaces
             self.property_title = " ".join(title_parts).strip()
 
-        # Save to database
         super().save(*args, **kwargs)
+        
+        # 3. Trigger Auto FAQ Generation
+        self.generate_auto_faqs()
+
+    def generate_auto_faqs(self):
+        """Dynamic programmatic structural commercial data engine."""
+        self.faqs.all().delete()
+        faq_pool = []
+
+        try: rent_val = int(float(str(self.expected_rent or 0).replace(",", "").strip()))
+        except: rent_val = 0
+        try: deposit_val = int(float(str(self.security_deposit or 0).replace(",", "").strip()))
+        except: deposit_val = 0
+        try: maint_val = int(float(str(self.maintenance_charges or 0).replace(",", "").strip()))
+        except: maint_val = 0
+
+        # FAQ 1: Financial Structure
+        if rent_val > 0:
+            maint_str = f" Outgoing maintenance charges are assessed at ₹{maint_val:,} per month." if maint_val > 0 else " Maintenance variables are listed as non-standard or separate obligations."
+            faq_pool.append({
+                "q": f"What is the lease pricing model and security deposit requirement for this {self.property_type}?",
+                "a": f"The financial framework outlines a monthly operational rent of ₹{rent_val:,}. Initiating tenancy requires a security deposit outlay of ₹{deposit_val:,}.{maint_str} The option is noted as negotiable: '{self.negotiable or 'No'}'"
+            })
+
+        # FAQ 2: Area and Layout Spatial Configurations
+        if self.builtup_area:
+            carpet_str = f" with a highly efficient usable carpet operational area of {self.carpet_area} sq.ft." if self.carpet_area else ""
+            faq_pool.append({
+                "q": f"What are the total area parameters and structural placement details for this property?",
+                "a": f"This property delivers a total built-up operational footprint of {self.builtup_area} sq.ft.{carpet_str} The corporate floor plate is situated on floor level {self.your_floor or '—'} out of a complete infrastructure height of {self.total_floors or '—'} levels."
+            })
+
+        # FAQ 3: Workplace Capacity Metrics
+        if self.min_seats or self.cabins:
+            faq_pool.append({
+                "q": f"What are the workplace setup limits, seating layouts, and cabin counts?",
+                "a": f"Architectural planning indicators optimize this warm/fitted shell space for a workflow setup ranging between a minimum of {self.min_seats or 0} seats up to a peak scalability limit of {self.max_seats or 0} workstation spaces. Layout specs define {self.cabins or 0} private executive cabins and {self.meeting_rooms or 0} integrated team conference/meeting rooms."
+            })
+
+        # FAQ 4: Structural Utilities and Infrastructure Compliance
+        faq_pool.append({
+            "q": f"What is the status of critical backup services, power links, and logistical lifts?",
+            "a": f"Logistical compliance values verify that dedicated DG/UPS backup is {'fully included' if self.dg_ups_included else 'omitted/external'}. Grid electricity provision is {'bundled' if self.electricity_included else 'metered separately'}, and internal plumbing water access matches: {'bundled' if self.water_included else 'metered separately'}. Vertical workspace access handles traffic via {self.passenger_lifts or 0} high-speed passenger lifts and {self.service_lifts or 0} heavy-duty commercial cargo/service lifts."
+        })
+
+        # FAQ 5: Lease Terms and Compliance Risk Index
+        if self.lockin_period or self.rent_increase:
+            faq_pool.append({
+                "q": f"What terms govern the baseline lock-in period and annual rental increments?",
+                "a": f"The legal contractual parameters outline a standard non-termination baseline lock-in duration of {self.lockin_period or 0} months. Compounded yearly lease escalation growth schedules are pinned at an annual adjustment increase rating of {self.rent_increase or 0}%."
+            })
+
+        # FAQ 6: Logistics Hub and Zonal Planning Permissions
+        if self.zone_type or self.location_hub:
+            faq_pool.append({
+                "q": f"Which planning zone covers this commercial structure and what is its transit hub classification?",
+                "a": f"The facility is positioned within an authorized '{self.zone_type or 'Commercial'}' corporate zone type. Logistics tracking maps this real estate plot safely under a '{self.location_hub or 'Standalone/Corporate Hub'}' strategic location cluster categorization."
+            })
+
+        for item in faq_pool:
+            CommercialRentalFAQ.objects.create(property=self, question=item["q"], answer=item["a"])
 
     def __str__(self):
         return f"{self.commercial_rental_id} | {self.property_title}"
+
+
+class CommercialRentalFAQ(models.Model):
+    property = models.ForeignKey(CommercialRentalProperty, on_delete=models.CASCADE, related_name='faqs')
+    question = models.CharField(max_length=255)
+    answer = models.TextField()
+
+    def __str__(self):
+        return f"FAQ for {self.property.commercial_rental_id}"
 
 # ✅ MULTIPLE IMAGES MODEL
 class CommercialRentalPropertyImage(models.Model):
@@ -894,39 +949,29 @@ class CommercialRentalPropertyImage(models.Model):
 
 
 
+
+
 def generate_unique_pg_property_id():
     return f"EFPG-{uuid.uuid4().hex[:8].upper()}"
 
 class PGColivingProperty(models.Model):
-    # UNIQUE IDENTIFIER & TIMESTAMPS
-    pg_property_id = models.CharField(
-        max_length=20,
-        primary_key=True,
-        default=generate_unique_pg_property_id,
-        editable=False,
-        unique=True
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    # STEP 1: BASIC INFO
+    # [Keep all your existing fields from pg_property_id down to updated_at...]
+    pg_property_id = models.CharField(max_length=20, primary_key=True, default=generate_unique_pg_property_id, editable=False, unique=True)
     property_title = models.CharField(max_length=200, blank=True, null=True, help_text="Auto-generated based on project context if empty")
     city = models.CharField(max_length=100)
     building_name = models.CharField(max_length=200, blank=True, null=True)
     locality = models.CharField(max_length=200)
     property_address = models.TextField()
     total_beds = models.IntegerField()
-    pg_for = models.CharField(max_length=50)            # Boys, Girls, Co-living
-    furnishing_type = models.CharField(max_length=50)    # Unfurnished, Semi-Furnished, Fully Furnished
+    pg_for = models.CharField(max_length=50)            
+    furnishing_type = models.CharField(max_length=50)    
     sharing_type = models.CharField(max_length=100, blank=True, null=True)
     best_suited_for = models.CharField(max_length=100, blank=True, null=True)
     
-    # MEALS INFO
     meals_available = models.BooleanField(default=False)
-    meal_offerings = models.CharField(max_length=100, blank=True, null=True)   # Breakfast, Lunch, Dinner
-    meal_speciality = models.CharField(max_length=100, blank=True, null=True)   # Veg, Non-Veg, Jain
+    meal_offerings = models.CharField(max_length=100, blank=True, null=True)  
+    meal_speciality = models.CharField(max_length=100, blank=True, null=True)  
     
-    # RULES & MANAGEMENTS
     notice_period = models.IntegerField(blank=True, null=True)
     lockin_period = models.IntegerField(blank=True, null=True)
     minimum_stay = models.IntegerField()
@@ -934,7 +979,6 @@ class PGColivingProperty(models.Model):
     property_managed_by = models.CharField(max_length=50, blank=True, null=True)
     manager_stays = models.BooleanField(default=False)
 
-    # STEP 3: RULES & AMENITIES
     opposite_sex_allowed = models.BooleanField(default=False)
     any_time_allowed = models.BooleanField(default=False)
     visitors_allowed = models.BooleanField(default=False)
@@ -943,13 +987,11 @@ class PGColivingProperty(models.Model):
     smoking_allowed = models.BooleanField(default=False)
     property_description = models.TextField(blank=True, null=True)
     
-    amenities = models.TextField(blank=True, null=True)          # Stored as comma-separated values
-    nearby_facilities = models.TextField(blank=True, null=True)  # Stored as comma-separated values
+    amenities = models.TextField(blank=True, null=True)          
+    nearby_facilities = models.TextField(blank=True, null=True)  
 
-    # STEP 4: MEDIA
     video = models.FileField(upload_to='pg/videos/', blank=True, null=True)
 
-    # CONTACT INFO
     owner_name = models.CharField(max_length=100)
     contact_number = models.CharField(max_length=20)
     email = models.EmailField()
@@ -960,23 +1002,80 @@ class PGColivingProperty(models.Model):
     uploaded_by_contact = models.CharField(max_length=20, blank=True, null=True)
     uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
 
-    # AUDITING SYSTEM
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     upload_file_name = models.CharField(max_length=255, blank=True, null=True)
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        # ✅ FIXED: Target correct property_title attribute instead of invalid pg_property text string field
         if not self.property_title:
             gender_target = self.pg_for if self.pg_for else "Co-Living"
             b_name = f"{self.building_name} " if self.building_name else ""
             self.property_title = f"Premium {gender_target} PG at {b_name}{self.locality}".strip()
         super().save(*args, **kwargs)
+        # Trigger Auto FAQ Generation
+        self.generate_auto_faqs()
+
+    def generate_auto_faqs(self):
+        """Dynamic programmatic structural PG data engine."""
+        self.faqs.all().delete()
+        faq_pool = []
+
+        # FAQ 1: Audience & Sharing
+        faq_pool.append({
+            "q": "Who is eligible to stay at this PG and what are the sharing capacities?",
+            "a": f"This property is specifically designated for {self.pg_for}. It maintains a total infrastructure capacity of {self.total_beds} beds, providing {self.sharing_type or 'multiple'} room sharing configurations. The rooms are {self.furnishing_type}."
+        })
+
+        # FAQ 2: Meals
+        if self.meals_available:
+            faq_pool.append({
+                "q": "Are food and daily meals provided to the residents?",
+                "a": f"Yes, culinary services are bundled. The management provides {self.meal_offerings or 'daily meals'} maintaining a focus on {self.meal_speciality or 'standard'} dietary preferences."
+            })
+        else:
+            faq_pool.append({
+                "q": "Are food and daily meals provided to the residents?",
+                "a": "No, formal meal provisioning is not included in the standard boarding package at this PG."
+            })
+
+        # FAQ 3: Rules & Stays
+        faq_pool.append({
+            "q": "What are the baseline legal stay requirements?",
+            "a": f"Tenants must commit to a minimum operational stay of {self.minimum_stay} months. The contractual lock-in period sits at {self.lockin_period or 0} days, requiring a formal exit notice period of {self.notice_period or 0} days prior to vacating."
+        })
+
+        # FAQ 4: Restrictions
+        rules = []
+        if not self.smoking_allowed: rules.append("smoking is strictly prohibited")
+        if not self.drinking_allowed: rules.append("alcohol consumption is banned")
+        if not self.visitors_allowed: rules.append("external visitors are restricted")
+        if self.any_time_allowed: rules.append("24/7 entry/exit access is permitted")
+        
+        rule_str = ", and ".join(rules).capitalize() if rules else "Standard societal housing guidelines apply."
+        
+        faq_pool.append({
+            "q": "What are the primary lifestyle restrictions and property rules?",
+            "a": f"The property enforces strict living standards to ensure comfort. {rule_str}."
+        })
+
+        for item in faq_pool:
+            PGColivingFAQ.objects.create(property=self, question=item["q"], answer=item["a"])
 
     def __str__(self):
-        # ✅ FIXED: References self.property_title correctly instead of old pg_property_title
         return f"{self.property_title} ({self.pg_property_id})"
+
+
+# ✅ NEW FAQ MODEL
+class PGColivingFAQ(models.Model):
+    property = models.ForeignKey(PGColivingProperty, on_delete=models.CASCADE, related_name='faqs')
+    question = models.CharField(max_length=255)
+    answer = models.TextField()
+
+    def __str__(self):
+        return f"FAQ for {self.property.pg_property_id}"
 
 
 class PGRoomDetail(models.Model):
@@ -1330,62 +1429,264 @@ class CommercialPropertyImage(models.Model):
 
 
 
+
+ 
+def generate_resale_unique_property_id():
+    return f"EFPLT-{uuid.uuid4().hex[:8].upper()}"
+ 
+ 
+# ══════════════════════════════════════════════════════════════════
+#  MODEL 1 — PlotSaleProperty  (MAIN)
+# ══════════════════════════════════════════════════════════════════
+ 
 class PlotSaleProperty(models.Model):
-    # --- Step 1: Plot Specs ---
-    plot_title = models.CharField(max_length=255, blank=True, null=True)
-    plot_area = models.FloatField(blank=True, null=True)
-    resale_plot_type = models.CharField(max_length=100, blank=True, null=True)
-    plot_road_facing = models.CharField(max_length=100, blank=True, null=True)
-    plot_corner = models.BooleanField(default=False)
-    available_from = models.DateField(blank=True, null=True)
-    plot_authority = models.CharField(max_length=150, blank=True, null=True)
-    plot_fencing = models.BooleanField(default=False)
-
-    # --- Step 2: Pricing & Legal ---
-    plot_price = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    brokerage = models.CharField(max_length=10, blank=True, null=True) # Yes/No
+ 
+    plot_property_id = models.CharField(
+        max_length=20,
+        primary_key=True,
+        default=generate_resale_unique_property_id,
+        editable=False
+    )
+    property_title = models.CharField(max_length=255, blank=True, null=True)
+ 
+    # ── STEP 1: Plot Specs ────────────────────────────────────────
+    plot_title        = models.CharField(max_length=255)
+    plot_area         = models.DecimalField(max_digits=12, decimal_places=2)
+    resale_plot_type  = models.CharField(max_length=100)
+    plot_road_facing  = models.CharField(max_length=100)
+    plot_corner       = models.CharField(max_length=10, default='no')
+    available_from    = models.DateField(blank=True, null=True)
+    plot_authority    = models.CharField(max_length=150, blank=True, null=True)
+    plot_fencing      = models.CharField(max_length=10, default='no')
+ 
+    # ── STEP 2: Pricing & Legal ───────────────────────────────────
+    plot_price         = models.DecimalField(max_digits=15, decimal_places=2)
+    price_per_sqft     = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    brokerage          = models.CharField(max_length=10, default='No')
     brokerage_percentage = models.CharField(max_length=50, blank=True, null=True)
-    plot_ownership = models.CharField(max_length=100, blank=True, null=True)
-    plot_loan = models.BooleanField(default=False)
-    plot_loan_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-
-    # --- Step 3: Media & Certificates ---
-    encumbrance_cert = models.FileField(upload_to='plot_docs/certificates/', blank=True, null=True)
-    social_video = models.FileField(upload_to='plot_docs/videos/', blank=True, null=True)
-
-    # --- Step 4: Location & Contact ---
-    plot_city = models.CharField(max_length=100, blank=True, null=True)
-    plot_locality = models.CharField(max_length=150, blank=True, null=True)
-    plot_address = models.TextField(blank=True, null=True)
-    plot_owner_name = models.CharField(max_length=150, blank=True, null=True)
-    plot_owner_contact = models.CharField(max_length=15, blank=True, null=True)
-    plot_owner_email = models.EmailField(blank=True, null=True)
-
-    # --- Uploaded By ------------------------------------
+    plot_ownership     = models.CharField(max_length=100)
+    plot_loan          = models.CharField(max_length=10, default='no')
+    plot_loan_amount   = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+ 
+    # ── STEP 3: Media & Certificates ─────────────────────────────
+    encumbrance_cert  = models.FileField(upload_to='plot_docs/certificates/', null=True, blank=True)
+    social_video      = models.FileField(upload_to='plot_docs/videos/', blank=True, null=True)
+ 
+    # ── STEP 4: Location & Contact ────────────────────────────────
+    plot_city          = models.CharField(max_length=100)
+    plot_locality      = models.CharField(max_length=150)
+    plot_address       = models.TextField()
+ 
+    plot_owner_name    = models.CharField(max_length=150)
+    plot_owner_contact = models.CharField(max_length=20)
+    plot_owner_email   = models.EmailField()
+ 
+    # ── Uploader / Audit ─────────────────────────────────────────
     uploaded_by_name    = models.CharField(max_length=100, blank=True, null=True)
-    uploaded_by_email   = models.EmailField(blank=True, null=True)
-    uploaded_by_contact = models.CharField(max_length=15, blank=True, null=True)
     uploaded_by_role    = models.CharField(max_length=50, blank=True, null=True)
-
+    uploaded_by_email   = models.EmailField(blank=True, null=True)
+    uploaded_by_contact = models.CharField(max_length=30, blank=True, null=True)
+    upload_file_name    = models.CharField(max_length=255, blank=True, null=True)
+ 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
-
-    upload_file_name = models.CharField(max_length=255, blank=True, null=True)
-    deleted_by = models.CharField(max_length=150, blank=True, null=True) # 👈 ADD THIS
-
+    deleted_by = models.CharField(max_length=150, blank=True, null=True)
+ 
+    class Meta:
+        verbose_name        = "Plot Sale Property"
+        verbose_name_plural = "Plot Sale Properties"
+        ordering            = ['-created_at']
+ 
     def __str__(self):
-        return f"{self.plot_title} - {self.plot_locality}"
-
+        return f"{self.plot_title or 'Plot'} ({self.plot_property_id})"
+ 
+    # ── AUTO-FAQ GENERATOR ────────────────────────────────────────
+    def generate_auto_faqs(self):
+        """
+        Deletes old FAQs and bulk-creates 8 fresh ones based on current
+        field values. Called automatically at end of save().
+        """
+        self.faqs.all().delete()
+        faq_pool = []
+ 
+        def safe_money(val):
+            try:
+                v = int(float(str(val or 0).replace(",", "").strip()))
+                return f"Rs.{v:,}" if v else None
+            except Exception:
+                return None
+ 
+        price_str     = safe_money(self.plot_price)
+        loan_str      = safe_money(self.plot_loan_amount)
+        per_sqft_str  = safe_money(self.price_per_sqft)
+ 
+        # FAQ 1 — Core Specs
+        faq_pool.append({
+            "question": "What is the total plot area, type, and where exactly is it located?",
+            "answer": (
+                f"This is a {self.resale_plot_type or 'residential'} plot spanning {self.plot_area or 'unspecified'} Sqft, "
+                f"located in {self.plot_locality or 'the listed locality'}, {self.plot_city or 'city'}. "
+                f"It is available from {self.available_from.strftime('%d %B %Y') if self.available_from else 'immediately'}."
+            )
+        })
+ 
+        # FAQ 2 — Pricing
+        brokerage_text = (
+            f"A brokerage of {self.brokerage_percentage} applies."
+            if str(self.brokerage or '').lower() in ['yes', 'true', '1']
+            else "There is no brokerage applicable for this transaction."
+        )
+        faq_pool.append({
+            "question": "What is the expected price and cost per square foot for this plot?",
+            "answer": (
+                f"The expected sale price is {price_str or 'available on request'}. "
+                + (f"This translates to approximately {per_sqft_str} per Sqft. " if per_sqft_str else "")
+                + brokerage_text
+            )
+        })
+ 
+        # FAQ 3 — Road Facing & Corner
+        corner_text = (
+            "It is a corner plot, offering better road access and higher resale value."
+            if str(self.plot_corner or '').lower() == 'yes'
+            else "This is not a corner plot."
+        )
+        faq_pool.append({
+            "question": "What is the road facing direction and is this a corner plot?",
+            "answer": (
+                f"The plot faces {self.plot_road_facing or 'the main road'}, ensuring good natural light "
+                f"and ventilation for any future construction. {corner_text}"
+            )
+        })
+ 
+        # FAQ 4 — Fencing & Development Ready
+        faq_pool.append({
+            "question": "Is fencing already done on this plot? Is it ready for immediate construction?",
+            "answer": (
+                "Yes, boundary fencing has already been completed on this plot, making it secure "
+                "and ready for immediate construction without additional perimeter work."
+                if str(self.plot_fencing or '').lower() == 'yes' else
+                "Boundary fencing has not yet been done on this plot. The buyer may need to account "
+                "for fencing costs as part of the initial development plan."
+            )
+        })
+ 
+        # FAQ 5 — Authority & Ownership
+        faq_pool.append({
+            "question": "Who is the sanctioning authority and what is the ownership type of this plot?",
+            "answer": (
+                f"The plot is held under {self.plot_ownership or 'standard'} ownership. "
+                + (f"It has been sanctioned and approved by {self.plot_authority}." if self.plot_authority else
+                   "The sanctioning authority details are available on request from the owner.")
+            )
+        })
+ 
+        # FAQ 6 — Encumbrance Certificate
+        faq_pool.append({
+            "question": "Is an encumbrance certificate available for this plot?",
+            "answer": (
+                "Yes, the encumbrance certificate for this plot is available and can be downloaded "
+                "from the Documents section. This confirms the property is free from any undisclosed "
+                "mortgages or legal claims up to the certified date."
+                if self.encumbrance_cert else
+                "An encumbrance certificate has not been uploaded for this plot at present. Buyers are "
+                "advised to request it from the owner before proceeding with the transaction."
+            )
+        })
+ 
+        # FAQ 7 — Loan / Mortgage
+        faq_pool.append({
+            "question": "Is there any active loan or mortgage registered against this plot?",
+            "answer": (
+                f"Yes, there is an active loan of {loan_str} registered against this plot. "
+                f"Buyers should verify clearance of this liability during title transfer."
+                if str(self.plot_loan or '').lower() == 'yes' else
+                "No, there are no active financial loans or mortgages registered against this plot. "
+                "The title is free of any banking encumbrances, enabling clean registration."
+            )
+        })
+ 
+        # FAQ 8 — Why Buy This Plot
+        faq_pool.append({
+            "question": "What makes this plot a good investment opportunity?",
+            "answer": (
+                f"This {self.resale_plot_type or 'residential'} plot in {self.plot_locality or 'a prime locality'}, "
+                f"{self.plot_city or 'city'} offers {self.plot_area or 'ample'} Sqft of land "
+                f"with {self.plot_road_facing or 'good'} road facing. "
+                + ("Being a corner plot adds visibility and access advantage. " if str(self.plot_corner or '').lower() == 'yes' else "")
+                + ("Fencing is already done, reducing upfront development cost. " if str(self.plot_fencing or '').lower() == 'yes' else "")
+                + f"Priced at {price_str or 'a competitive rate'}, it represents strong value in the current market."
+            )
+        })
+ 
+        PlotSaleFAQ.objects.bulk_create([
+            PlotSaleFAQ(property=self, question=f["question"], answer=f["answer"])
+            for f in faq_pool
+        ])
+ 
+    # ── SAVE OVERRIDE ─────────────────────────────────────────────
+    def save(self, *args, **kwargs):
+        # Auto-calculate price per sqft
+        if self.plot_price and self.plot_area:
+            try:
+                area  = float(self.plot_area)
+                price = float(self.plot_price)
+                if area > 0:
+                    self.price_per_sqft = round(price / area, 2)
+            except (ValueError, TypeError):
+                pass
+ 
+        # Auto-generate property_title
+        if not self.property_title:
+            type_lbl = self.resale_plot_type.replace('_', ' ').title() if self.resale_plot_type else "Plot"
+            try:
+                area_val = float(self.plot_area)
+                area_lbl = f"{int(area_val):,} Sqft" if area_val == int(area_val) else f"{area_val:,} Sqft"
+            except (ValueError, TypeError):
+                area_lbl = ""
+            project_ctx  = f" ({self.plot_title})" if self.plot_title else ""
+            locality_ctx = f" at {self.plot_locality}, {self.plot_city}" if self.plot_locality and self.plot_city else ""
+            self.property_title = " ".join(f"Premium {area_lbl} {type_lbl}{project_ctx}{locality_ctx}".split())
+ 
+        super().save(*args, **kwargs)
+ 
+        # Regenerate FAQs on every save
+        self.generate_auto_faqs()
+ 
+ 
+# ══════════════════════════════════════════════════════════════════
+#  MODEL 2 — PlotSaleImage
+# ══════════════════════════════════════════════════════════════════
+ 
 class PlotSaleImage(models.Model):
-    property = models.ForeignKey(PlotSaleProperty, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='plot_docs/images/')
+    property    = models.ForeignKey(PlotSaleProperty, on_delete=models.CASCADE, related_name='images')
+    image       = models.ImageField(upload_to='plot_docs/images/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-
+ 
+    class Meta:
+        ordering = ['uploaded_at']
+ 
     def __str__(self):
-        return f"Image for {self.property.plot_title}"
-    
+        return f"Image for {self.property.plot_property_id}"
+ 
+ 
+# ══════════════════════════════════════════════════════════════════
+#  MODEL 3 — PlotSaleFAQ  (NEW)
+#  Auto-populated by generate_auto_faqs() on every save
+# ══════════════════════════════════════════════════════════════════
+ 
+class PlotSaleFAQ(models.Model):
+    property = models.ForeignKey(PlotSaleProperty, on_delete=models.CASCADE, related_name='faqs')
+    question = models.CharField(max_length=500)
+    answer   = models.TextField()
+ 
+    class Meta:
+        ordering = ['id']
+ 
+    def __str__(self):
+        return f"FAQ: {self.question[:60]}"
 
 #############END MODEL SECTION RESALE PLOT LISTING##################
 
@@ -1394,79 +1695,333 @@ class PlotSaleImage(models.Model):
 
 
 
+
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  MODEL 1 — IndustrialResaleProperty  (MAIN)
+# ══════════════════════════════════════════════════════════════════════
+
 class IndustrialResaleProperty(models.Model):
-    # --- Step 1: Property Specs ---
-    property_type = models.CharField(max_length=100, blank=True, null=True)
-    land_area = models.FloatField(blank=True, null=True) # sq.ft / acres
-    available_from = models.DateField(blank=True, null=True)
-    power_supply = models.BooleanField(default=False)
-    kva_capacity = models.IntegerField(blank=True, null=True)
-    water_supply = models.CharField(max_length=50, blank=True, null=True)
+
+    # ── SYSTEM CONTROL & IDENTIFICATION ──────────────────────────────
+    id            = models.AutoField(primary_key=True)
+    industrial_id = models.CharField(
+        max_length=50,
+        unique=True,
+        editable=False,
+        blank=True,
+        null=True
+    )
+    property_title = models.CharField(max_length=255, blank=True, null=True)
+
+    # ── STEP 1: PROPERTY SPECS ────────────────────────────────────────
+    property_type         = models.CharField(max_length=100, null=True, blank=True)
+    land_area             = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    available_from        = models.DateField(blank=True, null=True)
+    power_supply          = models.BooleanField(default=False)
+    kva_capacity          = models.IntegerField(blank=True, null=True)
+    water_supply          = models.CharField(max_length=50, blank=True, null=True)
     crane_heavy_machinery = models.BooleanField(default=False)
-    road_connectivity = models.CharField(max_length=100, blank=True, null=True)
+    road_connectivity     = models.CharField(max_length=100, blank=True, null=True)
     worker_housing_nearby = models.BooleanField(default=False)
 
-    # --- Step 2: Pricing & Legal ---
-    expected_price = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
-    brokerage = models.CharField(max_length=10, blank=True, null=True)
-    brokerage_percentage = models.CharField(max_length=50, blank=True, null=True)
-    manual_brokerage = models.CharField(max_length=100, blank=True, null=True)
-    
+    # ── STEP 2: PRICING & LEGAL ───────────────────────────────────────
+    expected_price        = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    brokerage             = models.CharField(max_length=10, default='No')
+    brokerage_percentage  = models.CharField(max_length=50, blank=True, null=True)
+    manual_brokerage      = models.CharField(max_length=100, blank=True, null=True)
     sanctioning_authority = models.CharField(max_length=150, blank=True, null=True)
-    ownership_type = models.CharField(max_length=100, blank=True, null=True)
-    
-    has_loan = models.BooleanField(default=False)
-    loan_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    
-    existing_tenants = models.BooleanField(default=False)
-    tenant_details = models.TextField(blank=True, null=True)
-    
-    legal_dispute = models.BooleanField(default=False)
-    dispute_details = models.TextField(blank=True, null=True)
-    
-    tax_due = models.BooleanField(default=False)
-    tax_amount = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    tax_clearance_cert = models.BooleanField(default=False)
-    
-    property_description = models.TextField(blank=True, null=True) # CKEditor field
+    ownership_type        = models.CharField(max_length=100, null=True, blank=True)
 
-    # --- Step 3: Media & Compliance ---
+    has_loan              = models.BooleanField(default=False)
+    loan_amount           = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    existing_tenants      = models.BooleanField(default=False)
+    tenant_details        = models.TextField(blank=True, null=True)
+    legal_dispute         = models.BooleanField(default=False)
+    dispute_details       = models.TextField(blank=True, null=True)
+    tax_due               = models.BooleanField(default=False)
+    tax_amount            = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    tax_clearance_cert    = models.BooleanField(default=False)
+    property_description  = models.TextField(null=True, blank=True)
+
+    # ── STEP 3: MEDIA & COMPLIANCE ───────────────────────────────────
     compliance_docs = models.FileField(upload_to='industrial_docs/compliance/', blank=True, null=True)
-    social_video = models.FileField(upload_to='industrial_docs/videos/', blank=True, null=True)
+    social_video    = models.FileField(upload_to='industrial_docs/videos/', blank=True, null=True)
 
-    # --- Step 4: Location & Contact ---
-    city = models.CharField(max_length=100, blank=True, null=True)
-    locality = models.CharField(max_length=150, blank=True, null=True)
+    # ── STEP 4: LOCATION & CONTACT ───────────────────────────────────
+    city             = models.CharField(max_length=100, blank=True, null=True)
+    locality         = models.CharField(max_length=150, null=True, blank=True)
     complete_address = models.TextField(blank=True, null=True)
-    owner_name = models.CharField(max_length=150, blank=True, null=True)
-    owner_contact = models.CharField(max_length=15, blank=True, null=True)
-    owner_email = models.EmailField(blank=True, null=True)
-    residency_status = models.CharField(max_length=50, blank=True, null=True)
 
-    # --- Uploaded By (Session Tracking) ---
+    owner_name       = models.CharField(max_length=150, null=True, blank=True)
+    owner_contact    = models.CharField(max_length=20, null=True, blank=True)
+    owner_email      = models.EmailField(blank=True, null=True)
+    residency_status = models.CharField(max_length=50, null=True, blank=True)
+
+    # ── UPLOADER Details ─────────────────────────────────────────────
     uploaded_by_name    = models.CharField(max_length=100, blank=True, null=True)
-    uploaded_by_email   = models.EmailField(blank=True, null=True)
-    uploaded_by_contact = models.CharField(max_length=15, blank=True, null=True)
     uploaded_by_role    = models.CharField(max_length=50, blank=True, null=True)
-    upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    uploaded_by_email   = models.EmailField(blank=True, null=True)
+    uploaded_by_contact = models.CharField(max_length=30, blank=True, null=True)
+    upload_file_name    = models.CharField(max_length=255, blank=True, null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_deleted = models.BooleanField(default=False)
-    
     deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.CharField(max_length=150, blank=True, null=True) # 👈 ADD THIS
+    deleted_by = models.CharField(max_length=150, blank=True, null=True)
+
+    # ─────────────────────────────────────────────────────────────────
+    class Meta:
+        verbose_name        = "Industrial Property"
+        verbose_name_plural = "Industrial Properties"
+        ordering            = ['-created_at']
 
     def __str__(self):
-        return f"{self.property_type} in {self.locality}"
+        return self.property_title or f"Industrial #{self.industrial_id}"
+
+    # ── AUTO-FAQ GENERATOR ───────────────────────────────────────────
+    def generate_auto_faqs(self):
+        """
+        Deletes old FAQs for this property and bulk-creates 10 fresh ones
+        based on current field values.
+        Called automatically at the end of save() so they always stay
+        in sync whenever a property is created or updated.
+        """
+        self.faqs.all().delete()
+        faq_pool = []
+
+        # Safe money formatter helper
+        def safe_money(val):
+            try:
+                v = int(float(str(val or 0).replace(",", "").strip()))
+                return f"Rs.{v:,}" if v else None
+            except Exception:
+                return None
+
+        price_str = safe_money(self.expected_price)
+        loan_str  = safe_money(self.loan_amount)
+        tax_str   = safe_money(self.tax_amount)
+
+        # FAQ 1 — Core Specs
+        faq_pool.append({
+            "question": "What is the total land area and specific property type of this industrial asset?",
+            "answer": (
+                f"This is an industrial {self.property_type or 'facility'} with a total land area of "
+                f"{self.land_area or 'unspecified'} Sqft, situated in "
+                f"{self.locality or 'the listed area'}, {self.city or 'city'}. "
+                f"The property is available from "
+                f"{self.available_from.strftime('%d %B %Y') if self.available_from else 'immediately'}."
+            )
+        })
+
+        # FAQ 2 — Pricing & Brokerage
+        brokerage_text = (
+            f"A brokerage of {self.brokerage_percentage} applies."
+            if str(self.brokerage or '').lower() in ['yes', 'true', '1']
+            else "There is no brokerage applicable for this transaction."
+        )
+        faq_pool.append({
+            "question": "What is the expected price and brokerage structure for this property?",
+            "answer": (
+                f"The expected sale price for this industrial property is "
+                f"{price_str or 'available on request'}. {brokerage_text}"
+                + (f" Manual brokerage amount: {self.manual_brokerage}." if self.manual_brokerage else "")
+            )
+        })
+
+        # FAQ 3 — Power Supply
+        if self.power_supply:
+            faq_pool.append({
+                "question": "What is the heavy industrial power supply capacity available at this facility?",
+                "answer": (
+                    f"The property is equipped with an active heavy industrial power supply infrastructure "
+                    f"supporting up to {self.kva_capacity or 'standard'} KVA, making it ideal for "
+                    f"high-load manufacturing, processing, and continuous industrial operations."
+                )
+            })
+        else:
+            faq_pool.append({
+                "question": "Does this property have an industrial-grade power supply?",
+                "answer": (
+                    "Currently, no dedicated heavy industrial power supply is configured at this facility. "
+                    "Standard commercial electricity lines may apply, and a heavy industrial connection "
+                    "would need to be separately sanctioned from the local electricity board."
+                )
+            })
+
+        # FAQ 4 — Crane / Heavy Machinery
+        faq_pool.append({
+            "question": "Can this facility support heavy overhead cranes and large machinery operations?",
+            "answer": (
+                "Yes, the internal structural infrastructure and roofing framework of this facility are "
+                "purpose-built to accommodate heavy machinery operations and overhead crane fitments, "
+                "making it suitable for large-scale manufacturing and logistics."
+                if self.crane_heavy_machinery else
+                "No, this facility is not currently configured or structurally reinforced for heavy overhead "
+                "crane installations. Standard equipment and floor-level machinery operations are supported."
+            )
+        })
+
+        # FAQ 5 — Road Connectivity
+        faq_pool.append({
+            "question": "How is the road connectivity for heavy transport and logistics operations?",
+            "answer": (
+                f"The property benefits from {self.road_connectivity or 'standard'} road connectivity, "
+                f"providing efficient access for heavy trucks, container vehicles, and regular material "
+                f"logistics. This makes it operationally viable for round-the-clock industrial supply chains."
+            )
+        })
+
+        # FAQ 6 — Worker Housing
+        faq_pool.append({
+            "question": "Is worker housing or labour accommodation available near this industrial property?",
+            "answer": (
+                "Yes, worker housing and labour accommodation facilities are available in the immediate "
+                "vicinity of this property, which is highly beneficial for managing factory shift workers "
+                "and reducing daily commute for the workforce."
+                if self.worker_housing_nearby else
+                "There is no dedicated worker housing immediately adjacent to this property. Employers "
+                "may need to arrange transportation or explore nearby residential areas for staff accommodation."
+            )
+        })
+
+        # FAQ 7 — Water Supply
+        faq_pool.append({
+            "question": "What is the status and type of water supply available for industrial operations?",
+            "answer": (
+                f"The property utilises a {self.water_supply or 'standard municipal'} water supply system. "
+                f"This is suitable for the current operational scope and can support standard industrial "
+                f"washing, cooling, and processing requirements."
+            )
+        })
+
+        # FAQ 8 — Legal Dispute & Tax
+        dispute_text = (
+            f"There is an active legal dispute on record: {self.dispute_details}. "
+            if self.legal_dispute else
+            "The property title is completely clear of any legal disputes or encumbrances. "
+        )
+        tax_text = (
+            f"There are pending municipal/property tax dues amounting to {tax_str}."
+            if self.tax_due else
+            "All property and municipal taxes are fully cleared and up to date."
+        )
+        faq_pool.append({
+            "question": "Are there any pending legal disputes or outstanding tax dues on this property?",
+            "answer": dispute_text + tax_text
+        })
+
+        # FAQ 9 — Loan / Mortgage
+        faq_pool.append({
+            "question": "Is there any active financial loan or mortgage registered against this property?",
+            "answer": (
+                f"Yes, there is an active loan/mortgage of {loan_str} currently registered against this "
+                f"property. Buyers should account for this encumbrance during title verification and "
+                f"financing arrangements."
+                if self.has_loan else
+                "No, there are no active financial loans or mortgages registered against this property. "
+                "The title is free of any banking or financial institution encumbrances."
+            )
+        })
+
+        # FAQ 10 — Ownership & Tenants
+        ownership_text = (
+            f"The property is held under {self.ownership_type or 'standard'} ownership"
+            + (f", sanctioned by {self.sanctioning_authority}" if self.sanctioning_authority else "")
+            + ". "
+        )
+        tenant_text = (
+            f"The property currently has active tenants. Details: {self.tenant_details}."
+            if self.existing_tenants else
+            "The property is completely vacant with no existing tenants, enabling immediate possession."
+        )
+        faq_pool.append({
+            "question": "What is the ownership structure, and are there any existing tenants currently occupying this space?",
+            "answer": ownership_text + tenant_text
+        })
+
+        # Bulk insert all 10 FAQs in a single DB query
+        IndustrialResaleFAQ.objects.bulk_create([
+            IndustrialResaleFAQ(property=self, question=f["question"], answer=f["answer"])
+            for f in faq_pool
+        ])
+
+    # ── SAVE OVERRIDE ────────────────────────────────────────────────
+    def save(self, *args, **kwargs):
+
+        # 1. Auto-generate industrial_id if not yet assigned
+        if not self.industrial_id:
+            self.industrial_id = f"EFIND-{uuid.uuid4().hex[:8].upper()}"
+
+        # 2. Auto-generate property_title if not yet assigned
+        if not self.property_title:
+            type_lbl = (
+                self.property_type.replace('_', ' ').title()
+                if self.property_type else "Industrial Asset"
+            )
+            try:
+                area_val = float(self.land_area)
+                area_lbl = (
+                    f"{int(area_val):,} Sqft"
+                    if area_val == int(area_val)
+                    else f"{area_val:,} Sqft"
+                )
+            except (ValueError, TypeError):
+                area_lbl = ""
+            locality_ctx = f" in {self.locality}" if self.locality else ""
+            city_ctx     = f", {self.city}" if self.city else ""
+            self.property_title = " ".join(
+                f"Industrial {area_lbl} {type_lbl}{locality_ctx}{city_ctx}".split()
+            )
+
+        # 3. Save the record first (needs a PK before FAQs can be linked)
+        super().save(*args, **kwargs)
+
+        # 4. Regenerate all 10 FAQs in DB — runs on every create & update
+        self.generate_auto_faqs()
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  MODEL 2 — IndustrialResaleImage
+# ══════════════════════════════════════════════════════════════════════
 
 class IndustrialResaleImage(models.Model):
-    property = models.ForeignKey(IndustrialResaleProperty, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='industrial_docs/images/')
+    property    = models.ForeignKey(
+        IndustrialResaleProperty,
+        on_delete=models.CASCADE,
+        related_name='images'
+    )
+    image       = models.ImageField(upload_to='industrial_docs/images/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['uploaded_at']
+
     def __str__(self):
-        return f"Image for {self.property.id}"
-    
+        return f"Image for {self.property.industrial_id}"
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  MODEL 3 — IndustrialResaleFAQ  (NEW)
+#  Auto-populated by generate_auto_faqs() — do NOT edit rows manually
+# ══════════════════════════════════════════════════════════════════════
+
+class IndustrialResaleFAQ(models.Model):
+    property = models.ForeignKey(
+        IndustrialResaleProperty,
+        on_delete=models.CASCADE,
+        related_name='faqs'
+    )
+    question = models.CharField(max_length=500)
+    answer   = models.TextField()
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return f"FAQ: {self.question[:60]}"
 
 ##################END MODEL SECTION INDUSTRIAL RESALE LISTING################
 
@@ -1476,109 +2031,80 @@ class IndustrialResaleImage(models.Model):
 
 
 
-
-def generate_agricultural_unique_property_id():
-    """Generates a secure, unique alphanumeric primary key identifier."""
-    return f"EFAGR-{uuid.uuid4().hex[:8].upper()}"
-
+# ══════════════════════════════════════════════════════════════════
+#  MODEL 1 — AgriculturalResaleProperty  (MAIN)
+# ══════════════════════════════════════════════════════════════════
 
 class AgriculturalResaleProperty(models.Model):
 
-    # ── SYSTEM CONTROL & IDENTIFICATION ─────────────────────────────────────
+    # ── SYSTEM CONTROL & IDENTIFICATION ──────────────────────────
+    id = models.AutoField(primary_key=True)
     agri_property_id = models.CharField(
-        max_length=20,
-        primary_key=True,
-        default=generate_agricultural_unique_property_id,
-        editable=False,
-        unique=True,
+        max_length=50, unique=True, editable=False,
+        blank=True, null=True,
+        help_text="Automated unique registration tag"
     )
-    # property_title: auto-generated by save(); never filled manually by the user.
-    # The form sends a preview copy via the hidden field `property_title`,
-    # but the backend always re-computes the canonical value in save().
-    property_title = models.CharField(max_length=255, blank=True, null=True)
+    title = models.CharField(max_length=255, blank=True, null=True)
 
-    # ── STEP 1: LAND DETAILS ─────────────────────────────────────────────────
-    # Exact DB column sequence:
-    #   agriculture_property_type → village → taluka → district
-    #   → land_area → soil_type → irrigation_facility → water_source
-    #   → previous_crops → fertility_status
-
-    agriculture_property_type = models.CharField(max_length=50)        # agriculture_land | farm_land | orchard_land
+    # ── STEP 1: LAND DETAILS ──────────────────────────────────────
+    agriculture_property_type = models.CharField(max_length=50)
     village                   = models.CharField(max_length=100)
     taluka                    = models.CharField(max_length=100)
     district                  = models.CharField(max_length=100)
 
-    land_area                 = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # Acres
-    soil_type                 = models.CharField(max_length=50, blank=True, null=True)              # red | black | alluvial | loamy
-    irrigation_facility       = models.CharField(max_length=10, default='no')                      # yes | no
-    water_source              = models.CharField(max_length=50, blank=True, null=True)              # well | borewell | canal | river | none
-    previous_crops            = models.CharField(max_length=255, blank=True, null=True)
-    fertility_status          = models.CharField(max_length=20, blank=True, null=True)              # high | medium | low
+    land_area          = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    soil_type          = models.CharField(max_length=50, blank=True, null=True)
+    irrigation_facility = models.CharField(max_length=10, default='no')
+    water_source       = models.CharField(max_length=50, blank=True, null=True)
+    previous_crops     = models.CharField(max_length=255, blank=True, null=True)
+    fertility_status   = models.CharField(max_length=20, blank=True, null=True)
 
-    # ── STEP 2: PRICING & LEGAL ──────────────────────────────────────────────
-    # Exact DB column sequence:
-    #   expected_price → brokerage → brokerage_percentage → manual_brokerage
-    #   → ownership_type
-    #   → agri_loan → loan_amount
-    #   → agri_tenants → tenant_details
-    #   → agri_dispute → dispute_details
-    #   → agri_tax_due → pending_tax_amount
-    #   → resale_agricultural_desc
+    # ── STEP 2: PRICING & LEGAL ───────────────────────────────────
+    expected_price       = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    brokerage            = models.CharField(max_length=10, blank=True, null=True)
+    brokerage_percentage = models.CharField(max_length=50, blank=True, null=True)
+    manual_brokerage     = models.CharField(max_length=50, blank=True, null=True)
 
-    expected_price            = models.DecimalField(max_digits=15, decimal_places=2)
-    brokerage                 = models.CharField(max_length=10, blank=True, null=True)              # Yes | No
-    brokerage_percentage      = models.CharField(max_length=50, blank=True, null=True)              # 1% | 1.5% | 2% | Negotiable | Manual
-    manual_brokerage          = models.CharField(max_length=50, blank=True, null=True)
+    ownership_type       = models.CharField(max_length=50)
 
-    ownership_type            = models.CharField(max_length=50)                                     # freehold | leasehold
+    agri_loan            = models.CharField(max_length=10, default='no')
+    loan_amount          = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    agri_tenants         = models.CharField(max_length=10, default='no')
+    tenant_details       = models.TextField(blank=True, null=True)
+    agri_dispute         = models.CharField(max_length=10, default='no')
+    dispute_details      = models.TextField(blank=True, null=True)
+    agri_tax_due         = models.CharField(max_length=10, default='no')
+    pending_tax_amount   = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
-    agri_loan                 = models.CharField(max_length=10, default='no')                       # yes | no
-    loan_amount               = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
+    resale_agricultural_desc = models.TextField()
 
-    agri_tenants              = models.CharField(max_length=10, default='no')                       # yes | no
-    tenant_details            = models.TextField(blank=True, null=True)
+    # ── STEP 3: LOCATION & OWNER ──────────────────────────────────
+    city     = models.CharField(max_length=100)
+    state    = models.CharField(max_length=100)
+    locality = models.CharField(max_length=100, blank=True, null=True)
+    address  = models.TextField()
 
-    agri_dispute              = models.CharField(max_length=10, default='no')                       # yes | no
-    dispute_details           = models.TextField(blank=True, null=True)
+    owner_name     = models.CharField(max_length=150)
+    owner_contact  = models.CharField(max_length=20)
+    owner_email    = models.EmailField()
+    comm_residency = models.CharField(max_length=20, default='resident')
 
-    agri_tax_due              = models.CharField(max_length=10, default='no')                       # yes | no
-    pending_tax_amount        = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    # ── STEP 4: DOCUMENTS & PHOTOS ────────────────────────────────
+    encumbrance_cert = models.FileField(upload_to='property/docs/encumbrance/', null=True, blank=True)
+    property_video   = models.FileField(upload_to='property/videos/', blank=True, null=True)
 
-    resale_agricultural_desc  = models.TextField()                                                  # CKEditor rich-text description
+    # ── UPLOADER / AUDIT ─────────────────────────────────────────
+    uploaded_by_name    = models.CharField(max_length=100, blank=True, null=True)
+    uploaded_by_email   = models.EmailField(blank=True, null=True)
+    uploaded_by_contact = models.CharField(max_length=20, blank=True, null=True)
+    uploaded_by_role    = models.CharField(max_length=50, blank=True, null=True)
 
-    # ── STEP 3: LOCATION & OWNER ─────────────────────────────────────────────
-    # Exact DB column sequence:
-    #   city → state → locality → address
-    #   → owner_name → owner_contact → owner_email → comm_residency
-
-    city                      = models.CharField(max_length=100)
-    state                     = models.CharField(max_length=100)
-    locality                  = models.CharField(max_length=100)
-    address                   = models.TextField()
-
-    owner_name                = models.CharField(max_length=150)
-    owner_contact             = models.CharField(max_length=20)
-    owner_email               = models.EmailField()
-    comm_residency            = models.CharField(max_length=20, default='resident')                 # resident | nri | pio
-
-    # ── STEP 4: DOCUMENTS & PHOTOS ───────────────────────────────────────────
-    # Multiple property images are stored in the AgriculturalResaleImage child model.
-    encumbrance_cert          = models.FileField(upload_to='property/docs/encumbrance/')            # Required *
-    property_video            = models.FileField(upload_to='property/videos/', blank=True, null=True)
-
-    # Audit / uploader profile trackers
-    uploaded_by_name          = models.CharField(max_length=100, blank=True, null=True)
-    uploaded_by_email         = models.EmailField(blank=True, null=True)
-    uploaded_by_contact       = models.CharField(max_length=20, blank=True, null=True)
-    uploaded_by_role          = models.CharField(max_length=50, blank=True, null=True)
-
-    # ── SYSTEM METRIC TIMESTAMPS & SOFT-DELETE ───────────────────────────────
-    created_at                = models.DateTimeField(auto_now_add=True)
-    updated_at                = models.DateTimeField(auto_now=True)
-    is_deleted                = models.BooleanField(default=False)
-    deleted_at                = models.DateTimeField(null=True, blank=True)
-    deleted_by                = models.CharField(max_length=150, blank=True, null=True)
-    upload_file_name          = models.CharField(max_length=255, blank=True, null=True)
+    created_at       = models.DateTimeField(auto_now_add=True)
+    updated_at       = models.DateTimeField(auto_now=True)
+    is_deleted       = models.BooleanField(default=False)
+    deleted_at       = models.DateTimeField(null=True, blank=True)
+    deleted_by       = models.CharField(max_length=150, blank=True, null=True)
+    upload_file_name = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         verbose_name        = "Agricultural Property"
@@ -1586,59 +2112,201 @@ class AgriculturalResaleProperty(models.Model):
         ordering            = ['-created_at']
 
     def __str__(self):
-        return f"{self.property_title or 'Agricultural Asset'} ({self.agri_property_id})"
+        return f"{self.title or 'Agricultural Property'} ({self.agri_property_id or self.id})"
 
-    def save(self, *args, **kwargs):
+    # ── AUTO-FAQ GENERATOR ────────────────────────────────────────
+    def generate_auto_faqs(self):
         """
-        Auto-generates property_title if not already set.
-        Pattern: "{area} Fertile {type} in {village}, {taluka} ({district})"
-        The frontend mirrors this logic in buildAutoTitle() for the live preview.
+        Deletes old FAQs and bulk-creates 8 fresh ones based on current
+        field values. Called automatically at the end of save().
         """
-        if not self.property_title:
-            type_lbl = (
-                self.agriculture_property_type.replace('_', ' ').title()
-                if self.agriculture_property_type
-                else "Land"
+        self.faqs.all().delete()
+        faq_pool = []
+
+        def safe_money(val):
+            try:
+                v = int(float(str(val or 0).replace(",", "").strip()))
+                return f"Rs.{v:,}" if v else None
+            except Exception:
+                return None
+
+        price_str     = safe_money(self.expected_price)
+        loan_str      = safe_money(self.loan_amount)
+        tax_str       = safe_money(self.pending_tax_amount)
+
+        # FAQ 1 — Core Land Details
+        faq_pool.append({
+            "question": "What is the total land area, property type, and exact location of this agricultural property?",
+            "answer": (
+                f"This is a {self.agriculture_property_type.replace('_',' ').title() if self.agriculture_property_type else 'agricultural'} "
+                f"land parcel spanning {self.land_area or 'unspecified'} Acres, situated in the village of "
+                f"{self.village or '—'}, Taluka {self.taluka or '—'}, District {self.district or '—'}, {self.state or ''}."
             )
+        })
 
+        # FAQ 2 — Pricing & Brokerage
+        brokerage_text = (
+            f"A brokerage of {self.brokerage_percentage} applies."
+            if str(self.brokerage or '').lower() in ['yes', 'true', '1']
+            else "There is no brokerage applicable for this transaction."
+        )
+        faq_pool.append({
+            "question": "What is the expected price and brokerage structure for this agricultural land?",
+            "answer": (
+                f"The expected sale price for this land is {price_str or 'available on request'}. "
+                + brokerage_text
+                + (f" Manual brokerage amount: {self.manual_brokerage}." if self.manual_brokerage else "")
+            )
+        })
+
+        # FAQ 3 — Soil & Fertility
+        faq_pool.append({
+            "question": "What is the soil type, fertility status, and what crops have been grown previously?",
+            "answer": (
+                f"The land features {self.soil_type or 'standard'} soil with a fertility status classified as "
+                f"'{self.fertility_status or 'not specified'}'. "
+                + (f"Crops previously cultivated on this land include: {self.previous_crops}." if self.previous_crops else
+                   "No specific previous crop history has been recorded.")
+            )
+        })
+
+        # FAQ 4 — Irrigation & Water
+        faq_pool.append({
+            "question": "Is irrigation available on this land, and what is the water source?",
+            "answer": (
+                f"Yes, irrigation facilities are available on this land. "
+                f"The primary water source is {self.water_source or 'on-site/nearby'}. "
+                f"This makes it suitable for year-round cultivation without dependency on seasonal rainfall."
+                if str(self.irrigation_facility or '').lower() == 'yes' else
+                f"Irrigation facilities are currently not available on this land. "
+                f"Farming activities would depend on rainfall or the buyer would need to arrange independent "
+                f"irrigation infrastructure. Water source: {self.water_source or 'Not specified'}."
+            )
+        })
+
+        # FAQ 5 — Ownership & Legal
+        faq_pool.append({
+            "question": "What is the ownership type, and are there any active legal disputes on this land?",
+            "answer": (
+                f"The land is held under {self.ownership_type or 'standard'} ownership. "
+                + (f"There is an active legal dispute on record: {self.dispute_details}. Buyers must verify status before proceeding."
+                   if str(self.agri_dispute or '').lower() == 'yes' else
+                   "The title is completely clear of any legal disputes or encumbrances.")
+            )
+        })
+
+        # FAQ 6 — Tax & Loan
+        tax_text = (
+            f"There are pending land/revenue tax dues amounting to {tax_str}."
+            if str(self.agri_tax_due or '').lower() == 'yes' else
+            "All revenue and land taxes are fully cleared and up to date."
+        )
+        loan_text = (
+            f"Yes, there is an active agricultural loan of {loan_str} registered against this property. "
+            f"Buyers should account for this during title transfer."
+            if str(self.agri_loan or '').lower() == 'yes' else
+            "No active loans or mortgages are registered against this land."
+        )
+        faq_pool.append({
+            "question": "Are there any pending tax dues or active loans registered against this agricultural property?",
+            "answer": tax_text + " " + loan_text
+        })
+
+        # FAQ 7 — Tenants / Lease
+        faq_pool.append({
+            "question": "Is this land currently under any tenancy or lease agreement?",
+            "answer": (
+                f"Yes, this land currently has active tenants or is under a lease agreement. "
+                f"Tenancy details: {self.tenant_details or 'available on request'}. "
+                f"Buyers must factor in tenant rights and lease terms before finalising the purchase."
+                if str(self.agri_tenants or '').lower() == 'yes' else
+                "This land is completely free of any tenancy or lease agreements, enabling the buyer "
+                "to take immediate and unencumbered possession upon completing the sale."
+            )
+        })
+
+        # FAQ 8 — Investment Potential
+        faq_pool.append({
+            "question": "Why is this agricultural land a good investment and what are its key highlights?",
+            "answer": (
+                f"This {self.agriculture_property_type.replace('_',' ').title() if self.agriculture_property_type else 'agricultural'} "
+                f"land of {self.land_area or 'ample'} Acres in {self.village or 'a prime location'}, {self.district or ''} "
+                f"offers {self.soil_type or 'fertile'} soil with {self.fertility_status or 'good'} fertility. "
+                + ("Irrigation is readily available, enabling year-round cultivation. " if str(self.irrigation_facility or '').lower() == 'yes' else "")
+                + (f"Crops like {self.previous_crops} have been successfully grown here. " if self.previous_crops else "")
+                + f"Priced at {price_str or 'a competitive rate'} under {self.ownership_type or 'clear'} ownership, "
+                f"it represents a strong long-term agricultural investment."
+            )
+        })
+
+        AgriculturalResaleFAQ.objects.bulk_create([
+            AgriculturalResaleFAQ(property=self, question=f["question"], answer=f["answer"])
+            for f in faq_pool
+        ])
+
+    # ── SAVE OVERRIDE ─────────────────────────────────────────────
+    def save(self, *args, **kwargs):
+        # 1. Auto-generate unique tracking ID
+        if not self.agri_property_id:
+            self.agri_property_id = f"EFAGR-{uuid.uuid4().hex[:8].upper()}"
+
+        # 2. Auto-generate title
+        if not self.title:
+            type_lbl = self.agriculture_property_type.replace('_', ' ').title() if self.agriculture_property_type else "Land"
             try:
                 area_val = float(self.land_area)
-                area_lbl = (
-                    f"{int(area_val)} Acres"
-                    if area_val == int(area_val)
-                    else f"{area_val} Acres"
-                )
+                area_lbl = f"{int(area_val)} Acres" if area_val == int(area_val) else f"{area_val} Acres"
             except (ValueError, TypeError):
                 area_lbl = ""
-
-            location_ctx = (
-                f" in {self.village}, {self.taluka}"
-                if self.village and self.taluka
-                else (f" in {self.village}" if self.village else "")
-            )
+            location_ctx = f" in {self.village}, {self.taluka}" if self.village and self.taluka else ""
             district_ctx = f" ({self.district})" if self.district else ""
-
-            raw_title = f"{area_lbl} Fertile {type_lbl}{location_ctx}{district_ctx}"
-            self.property_title = " ".join(raw_title.split())   # collapse whitespace
+            self.title = " ".join(f"{area_lbl} Fertile {type_lbl}{location_ctx}{district_ctx}".split())
 
         super().save(*args, **kwargs)
 
+        # 3. Regenerate all FAQs on every create & update
+        self.generate_auto_faqs()
+
+
+# ══════════════════════════════════════════════════════════════════
+#  MODEL 2 — AgriculturalResaleImage
+# ══════════════════════════════════════════════════════════════════
 
 class AgriculturalResaleImage(models.Model):
-    """
-    Child entity for multiple property images uploaded in Step 4.
-    Related to AgriculturalResaleProperty via FK (related_name='images').
-    """
-    property    = models.ForeignKey(
-        AgriculturalResaleProperty,
-        on_delete=models.CASCADE,
-        related_name='images',
-    )
+    property    = models.ForeignKey(AgriculturalResaleProperty, related_name='images', on_delete=models.CASCADE)
     image       = models.ImageField(upload_to='property/images/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['uploaded_at']
+
     def __str__(self):
         return f"Image for {self.property.agri_property_id}"
+
+
+# ══════════════════════════════════════════════════════════════════
+#  MODEL 3 — AgriculturalResaleFAQ  (NEW)
+#  Auto-populated by generate_auto_faqs() on every save
+# ══════════════════════════════════════════════════════════════════
+
+class AgriculturalResaleFAQ(models.Model):
+    property = models.ForeignKey(
+        AgriculturalResaleProperty,
+        on_delete=models.CASCADE,
+        related_name='faqs'
+    )
+    question = models.CharField(max_length=500)
+    answer   = models.TextField()
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return f"FAQ: {self.question[:60]}"
+
+
+
+
 
 
 ##################END MODEL SECTION AGRICULTURAL RESALE LISTING################

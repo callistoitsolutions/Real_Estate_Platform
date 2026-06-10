@@ -1,1263 +1,632 @@
 {% include "admin_user/admin_header.html" %}
 {% load static %}
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <style>
   :root {
     --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-    --danger-gradient: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
-    --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    --sidebar-width: 280px;
-    --sidebar-collapsed-width: 80px;
     --topbar-height: 70px;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); overflow-x: hidden; min-height: 100vh; }
-  .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 998; opacity: 0; transition: opacity 0.3s ease; }
-  .sidebar-overlay.active { display: block; opacity: 1; }
-  .sidebar { position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh; background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%); padding: 20px 0; transition: all 0.3s ease; z-index: 999; box-shadow: 4px 0 15px rgba(0,0,0,0.1); overflow-y: auto; overflow-x: hidden; }
-  .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
-  .sidebar::-webkit-scrollbar { width: 6px; }
-  .sidebar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-  .sidebar-brand { padding: 20px 25px; display: flex; align-items: center; gap: 15px; color: white; text-decoration: none; transition: all 0.3s ease; }
-  .sidebar-brand-icon { width: 45px; height: 45px; background: var(--primary-gradient); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
-  .sidebar-brand-text { font-size: 1.5rem; font-weight: 700; white-space: nowrap; }
-  .sidebar.collapsed .sidebar-brand-text { display: none; }
-  .sidebar-menu { list-style: none; padding: 0; margin: 30px 0 0 0; }
-  .menu-section-title { padding: 15px 25px 10px; color: #7f8c8d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; transition: all 0.3s ease; }
-  .sidebar.collapsed .menu-section-title { opacity: 0; height: 0; padding: 0; margin: 0; }
-  .menu-item { position: relative; }
-  .menu-link { display: flex; align-items: center; padding: 15px 25px; color: #bdc3c7; text-decoration: none; transition: all 0.3s ease; position: relative; gap: 15px; cursor: pointer; }
-  .menu-link:hover { background: rgba(255,255,255,0.05); color: white; }
-  .menu-link.active { background: var(--primary-gradient); color: white; }
-  .menu-link.active::before { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px; background: white; }
-  .menu-icon { width: 24px; font-size: 1.2rem; flex-shrink: 0; text-align: center; }
-  .menu-text { font-size: 0.95rem; font-weight: 500; white-space: nowrap; }
-  .sidebar.collapsed .menu-text { display: none; }
-  .menu-badge { margin-left: auto; background: #e74c3c; color: white; padding: 3px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
-  .sidebar.collapsed .menu-badge { display: none; }
-  .dropdown-icon { margin-left: auto; transition: transform 0.3s ease; font-size: 0.8rem; }
-  .sidebar.collapsed .dropdown-icon { display: none; }
-  .menu-link.dropdown-open .dropdown-icon { transform: rotate(180deg); }
-  .submenu { list-style: none; padding: 0; margin: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: rgba(0,0,0,0.2); }
-  .submenu.active { max-height: 1000px; }
-  .submenu-link { display: flex; align-items: center; padding: 12px 25px 12px 65px; color: #95a5a6; text-decoration: none; font-size: 0.9rem; transition: all 0.3s ease; }
-  .submenu-link:hover { color: white; background: rgba(255,255,255,0.05); }
-  .submenu-link.active { color: #667eea; }
-  .topbar { position: fixed; left: var(--sidebar-width); top: 0; right: 0; height: var(--topbar-height); background: white; box-shadow: 0 2px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; transition: all 0.3s ease; z-index: 997; }
-  .sidebar.collapsed ~ .main-wrapper .topbar { left: var(--sidebar-collapsed-width); }
-  .topbar-left { display: flex; align-items: center; gap: 15px; }
-  .toggle-sidebar { width: 40px; height: 40px; border: none; background: #f8f9fa; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; font-size: 1.2rem; }
-  .toggle-sidebar:hover { background: var(--primary-gradient); color: white; }
-  .topbar-search { position: relative; width: 300px; }
-  .topbar-search input { width: 100%; padding: 10px 40px 10px 15px; border: 2px solid #e9ecef; border-radius: 12px; font-size: 0.9rem; transition: all 0.3s ease; }
-  .topbar-search input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.1); }
-  .topbar-search i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #adb5bd; }
-  .topbar-right { display: flex; align-items: center; gap: 15px; }
-  .topbar-icon { position: relative; width: 40px; height: 40px; border-radius: 10px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; }
-  .topbar-icon:hover { background: var(--primary-gradient); color: white; }
-  .user-profile { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 6px 12px; border-radius: 12px; transition: all 0.3s ease; }
-  .user-profile:hover { background: #f8f9fa; }
-  .user-avatar { width: 38px; height: 38px; border-radius: 10px; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem; }
-  .main-wrapper { transition: all 0.3s ease; width: 100%; }
-  .main-content { margin-left: var(--sidebar-width); margin-top: var(--topbar-height); padding: 30px; min-height: calc(100vh - var(--topbar-height)); transition: all 0.3s ease; }
-  .sidebar.collapsed ~ .main-wrapper .main-content { margin-left: var(--sidebar-collapsed-width); }
+
+  body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; }
+  .main-content { padding: 30px; margin-top: var(--topbar-height); }
   .page-wrapper { display: grid; grid-template-columns: 1fr 350px; gap: 30px; max-width: 1600px; margin: 0 auto; }
-  .page-header { background: var(--primary-gradient); border-radius: 20px; padding: 30px; color: white; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-bottom: 30px; position: relative; overflow: hidden; grid-column: 1 / -1; }
-  .page-header::before { content: ''; position: absolute; top: -50%; right: -10%; width: 300px; height: 300px; background: rgba(255,255,255,0.1); border-radius: 50%; }
-  .page-header-content { position: relative; z-index: 1; }
-  .page-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
-  .page-subtitle { font-size: 0.95rem; opacity: 0.9; }
-  .stepper-container { grid-column: 1 / -1; background: white; border-radius: 20px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+
+  /* Stepper Design Matrix */
+  .stepper-container { grid-column: 1 / -1; background: white; border-radius: 20px; padding: 30px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); }
   .stepper { display: flex; align-items: center; justify-content: space-between; position: relative; }
-  .step-item { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
-  .step-circle { width: 50px; height: 50px; border-radius: 50%; background: #e9ecef; color: #adb5bd; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; border: 3px solid #e9ecef; transition: all 0.3s ease; position: relative; z-index: 2; }
-  .step-circle.active { background: var(--primary-gradient); color: white; border-color: #667eea; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
-  .step-circle.done { background: var(--success-gradient); color: white; border-color: #11998e; }
-  .step-label { margin-top: 10px; font-size: 0.85rem; font-weight: 600; color: #adb5bd; text-align: center; transition: all 0.3s ease; }
-  .step-label.active { color: #667eea; }
-  .step-label.done { color: #11998e; }
-  .step-line { position: absolute; top: 25px; left: 50%; right: -50%; height: 3px; background: #e9ecef; z-index: 1; transition: all 0.3s ease; }
-  .step-item:last-child .step-line { display: none; }
+  .step-item { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; z-index: 2; }
+  .step-circle { width: 50px; height: 50px; border-radius: 50%; background: #e9ecef; color: #4a5568; display: flex; align-items: center; justify-content: center; font-weight: 700; border: 3px solid #fff; transition: 0.3s; }
+  .step-circle.active { background: var(--primary-gradient); color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
+  .step-circle.done { background: var(--success-gradient); color: white; }
+  .step-line { position: absolute; top: 25px; left: 50%; right: -50%; height: 3px; background: #e9ecef; z-index: 1; }
   .step-line.done { background: var(--success-gradient); }
-  .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
-  .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; }
-  .form-title { font-size: 1.5rem; font-weight: 700; color: #2d3748; display: flex; align-items: center; gap: 12px; }
-  .form-title i { width: 45px; height: 45px; background: var(--primary-gradient); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-  .btn-back { background: #f8f9fa; color: #2d3748; padding: 10px 20px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
-  .btn-back:hover { background: var(--dark-gradient); color: white; transform: translateY(-2px); }
+
+  /* Form layouts UI */
+  .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
   .step-content { display: none; }
-  .step-content.active { display: block; animation: fadeIn 0.3s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  .form-section { margin-bottom: 30px; }
-  .section-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
-  .section-body { background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; }
-  .form-label { font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 0.9rem; display: flex; align-items: center; gap: 5px; }
-  .form-label .required { color: #e74c3c; font-size: 1rem; }
-  .form-control { border: 2px solid #e9ecef; border-radius: 12px; padding: 12px 15px; font-size: 0.95rem; transition: all 0.3s ease; font-family: 'Poppins', sans-serif; width: 100%; }
-  .form-control:focus { border-color: #667eea; box-shadow: 0 0 0 4px rgba(102,126,234,0.1); outline: none; }
-  .form-control[readonly] { background: #f0f0f0; color: #6c757d; cursor: not-allowed; border-style: dashed; }
-  select.form-control { appearance: none; background: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 0.75rem center; background-size: 16px; background-color: white; padding-right: 2rem; }
-  textarea.form-control { min-height: 120px; resize: vertical; }
-  .form-text { font-size: 0.8rem; color: #718096; margin-top: 6px; }
+  .step-content.active { display: block; animation: fadeIn 0.4s ease; }
+  .section-header { background: var(--primary-gradient); color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+  .section-body { background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; margin-bottom: 30px; }
+  .form-label { font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 0.85rem; display: block; }
+  .required { color: #e74c3c; }
+  .form-control, .form-select { border: 2px solid #e9ecef; border-radius: 12px; padding: 12px 15px; font-size: 0.95rem; width: 100%; box-sizing: border-box; }
+  .form-control[readonly] { background-color: #e2e8f0; color: #4a5568; cursor: not-allowed; font-weight: 600; }
+  .radio-group { display: flex; gap: 15px; flex-wrap: wrap; padding: 5px 0; }
+  .radio-option { cursor: pointer; display: flex; align-items: center; gap: 8px; background: #fff; padding: 10px 15px; border: 1px solid #e9ecef; border-radius: 10px; transition: 0.3s; }
+  
+  /* Drag & Drop Sortable Images Grid Configuration */
+  .image-upload-area { border: 2px dashed #cbd5e0; border-radius: 15px; padding: 40px; text-align: center; background: #f8f9fa; cursor: pointer; transition: 0.3s; }
+  .image-upload-area:hover { border-color: #667eea; background: #f0f4ff; }
+  .image-preview { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; min-height: 100px; padding: 12px; border: 1px dashed #cbd5e0; border-radius: 12px; background: #fff; }
+  .preview-item { width: 90px; height: 90px; border-radius: 10px; overflow: hidden; border: 2px solid #cbd5e0; position: relative; cursor: grab; user-select: none; }
+  .preview-item:active { cursor: grabbing; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+  .preview-item img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+  .remove-image { position: absolute; top: 4px; right: 4px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 10; }
+  .sortable-ghost { opacity: 0.3; background-color: #667eea; border: 2px dashed #764ba2; }
 
-  /* AUTO-TITLE BANNER */
-  .auto-title-banner {
-    background: linear-gradient(135deg, #e8f4fd 0%, #dbeafe 100%);
-    border: 2px dashed #667eea;
-    border-radius: 12px;
-    padding: 14px 18px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .auto-title-banner i { color: #667eea; font-size: 1.2rem; flex-shrink: 0; }
-  .auto-title-banner .banner-label { font-size: 0.78rem; font-weight: 700; color: #667eea; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
-  .auto-title-preview { font-size: 0.95rem; font-weight: 600; color: #2d3748; font-style: italic; }
+  /* Sidebar display elements */
+  .preview-sidebar { position: sticky; top: 100px; display: flex; flex-direction: column; gap: 20px; }
+  .preview-card { background: #2c3e50; border-radius: 16px; padding: 20px; color: white; }
+  .preview-mock { background: white; border-radius: 12px; overflow: hidden; color: #333; margin-top: 15px; }
+  .preview-image { height: 140px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
+  .preview-price { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 5px 12px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; }
+  .checklist-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); color: #333; }
+  .checklist-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 10px; color: #718096; }
+  .checklist-item.done { color: #11998e; font-weight: 600; }
 
-  .step-nav { display: flex; justify-content: space-between; margin-top: 30px; gap: 15px; }
-  .btn-step { padding: 12px 35px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; }
-  .btn-prev { background: #f8f9fa; color: #2d3748; border: 2px solid #e9ecef; }
-  .btn-prev:hover { background: #e9ecef; }
-  .btn-next { background: var(--primary-gradient); color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
-  .btn-next:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
-  .form-check { padding: 15px; background: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef; }
-  .form-check-input { width: 20px; height: 20px; border: 2px solid #cbd5e0; border-radius: 6px; cursor: pointer; }
-  .form-check-input:checked { background-color: #667eea; border-color: #667eea; }
-  .form-check-label { font-weight: 600; color: #2d3748; margin-left: 10px; cursor: pointer; }
-  .form-footer { margin-top: 30px; padding-top: 25px; border-top: 2px solid #f0f0f0; display: flex; gap: 15px; justify-content: flex-end; }
-  .btn-submit { background: var(--primary-gradient); color: white; padding: 12px 35px; border-radius: 12px; border: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(102,126,234,0.3); font-size: 1rem; }
-  .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(102,126,234,0.4); }
-  .btn-reset { background: #f8f9fa; color: #2d3748; padding: 12px 35px; border-radius: 12px; border: 2px solid #e9ecef; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; }
-  .btn-reset:hover { background: #e9ecef; }
-
-  /* PREVIEW SIDEBAR */
-  .preview-sidebar { position: sticky; top: calc(var(--topbar-height) + 30px); height: fit-content; display: flex; flex-direction: column; gap: 20px; }
-  .preview-card { background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); border-radius: 16px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-  .preview-header { font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.6); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-  .preview-mock { background: white; border-radius: 12px; overflow: hidden; }
-  .preview-image { height: 140px; background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
-  .preview-badges { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; }
-  .preview-badge { font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.95); color: #0f172a; }
-  .preview-price { position: absolute; bottom: 10px; left: 10px; background: rgba(15,23,42,0.9); color: white; font-size: 0.9rem; font-weight: 900; padding: 5px 12px; border-radius: 8px; }
-  .preview-body { padding: 15px; }
-  .preview-title { font-size: 0.85rem; font-weight: 800; color: #0f172a; margin-bottom: 5px; line-height: 1.3; }
-  .preview-location { font-size: 0.75rem; color: #64748b; margin-bottom: 10px; }
-  .preview-specs { display: flex; gap: 12px; font-size: 0.75rem; color: #475569; font-weight: 600; }
-
-  /* IMAGE UPLOAD */
-  .image-upload-area { border: 3px dashed #cbd5e0; border-radius: 15px; padding: 40px; text-align: center; background: #f8f9fa; transition: all 0.3s ease; cursor: pointer; position: relative; overflow: hidden; }
-  .image-upload-area:hover { border-color: #667eea; background: #f0f4ff; transform: scale(1.02); }
-  .image-upload-area.dragover { border-color: #667eea; background: #e6f0ff; }
-  .upload-text { font-size: 1.1rem; color: #4a5568; font-weight: 600; margin-bottom: 8px; }
-  .upload-subtext { font-size: 0.9rem; color: #718096; }
-  .image-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
-  .preview-item { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); aspect-ratio: 1; }
-  .preview-item img { width: 100%; height: 100%; object-fit: cover; }
-  .remove-image { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; background: #e74c3c; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; }
-  .remove-image:hover { background: #c0392b; transform: scale(1.1); }
-
-  /* IMAGE COUNT BADGE */
-  .image-count-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    margin-top: 12px;
-  }
-  .image-count-badge.warning { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-  .image-count-badge.full { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-
-  .radio-option { display: inline-flex; align-items: center; gap: 8px; padding: 10px 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; }
-  .radio-option:hover { border-color: #667eea; background: #f0f4ff; }
-  .radio-option input { cursor: pointer; }
-  .radio-group { display: flex; flex-wrap: wrap; gap: 15px; }
-  .conditional-section { animation: slideDown 0.3s ease; }
-  @keyframes slideDown { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 500px; } }
-
-  .checklist-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-  .checklist-title { font-size: 0.9rem; font-weight: 800; color: #2d3748; margin-bottom: 15px; }
-  .checklist-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 0.85rem; color: #718096; }
-  .checklist-item i { font-size: 0.8rem; width: 18px; }
-  .checklist-item.done { color: #11998e; }
-  .checklist-item.done i { color: #11998e; }
-  .info-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-  .info-title { font-size: 0.85rem; font-weight: 800; color: #2d3748; margin-bottom: 12px; }
-  .info-item { font-size: 0.8rem; color: #475569; padding: 6px 0; display: flex; align-items: flex-start; gap: 8px; }
-  .info-item i { color: #667eea; font-size: 0.75rem; margin-top: 2px; flex-shrink: 0; }
-
-  @media (max-width: 1400px) { .page-wrapper { grid-template-columns: 1fr 300px; } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
   @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } }
-  @media (max-width: 992px) { .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); } .topbar { left: 0 !important; } .main-content { margin-left: 0 !important; } .topbar-search { display: none; } }
-  @media (max-width: 768px) { .page-header { padding: 20px; } .page-title { font-size: 1.5rem; } .form-container { padding: 20px; } .section-body { padding: 15px; } .step-circle { width: 40px; height: 40px; font-size: 0.9rem; } .step-label { display: none; } }
 </style>
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 <div class="main-content">
   <div class="page-wrapper">
-
-    <!-- Page Header -->
-    <div class="page-header">
-      <div class="page-header-content">
-        <h1 class="page-title">🌾 Sell Agricultural Property</h1>
-        <p class="page-subtitle">Complete 4 simple steps to list your agricultural land</p>
-      </div>
-    </div>
-
-    <!-- Stepper -->
     <div class="stepper-container">
-      <div class="stepper" id="stepper">
-        <div class="step-item">
-          <div class="step-circle active" id="sc1">1</div>
-          <div class="step-label active" id="sl1">Land Details</div>
-          <div class="step-line" id="line1"></div>
-        </div>
-        <div class="step-item">
-          <div class="step-circle" id="sc2">2</div>
-          <div class="step-label" id="sl2">Pricing & Legal</div>
-          <div class="step-line" id="line2"></div>
-        </div>
-        <div class="step-item">
-          <div class="step-circle" id="sc3">3</div>
-          <div class="step-label" id="sl3">Location & Owner</div>
-          <div class="step-line" id="line3"></div>
-        </div>
-        <div class="step-item">
-          <div class="step-circle" id="sc4">4</div>
-          <div class="step-label" id="sl4">Documents & Photos</div>
-        </div>
+      <div class="stepper">
+        <div class="step-item"><div class="step-circle active" id="sc1">1</div><span class="mt-2 style='font-weight:600; font-size:0.75rem;'">Land Specs</span><div class="step-line" id="line1"></div></div>
+        <div class="step-item"><div class="step-circle" id="sc2">2</div><span class="mt-2 style='font-weight:600; font-size:0.75rem;'">Pricing & Legal</span><div class="step-line" id="line2"></div></div>
+        <div class="step-item"><div class="step-circle" id="sc3">3</div><span class="mt-2 style='font-weight:600; font-size:0.75rem;'">Location</span><div class="step-line" id="line3"></div></div>
+        <div class="step-item"><div class="step-circle" id="sc4">4</div><span class="mt-2 style='font-weight:600; font-size:0.75rem;'">Documents</span></div>
       </div>
     </div>
 
-    <!-- Form Container -->
     <div class="form-container">
-      <div class="form-header">
-        <div class="form-title">
-          <i class="fas fa-edit"></i>
-          Sell your agricultural property
-        </div>
-        <button class="btn-back" onclick="history.back();">
-          <i class="fas fa-arrow-left"></i> Back to List
-        </button>
-      </div>
-
-      <form method="POST" enctype="multipart/form-data" action="{% url 'add_agricultural_property' %}" id="agriculturalForm">
+      <form action="{% url 'add_agricultural_property' %}" method="POST" enctype="multipart/form-data" id="agriculturalForm">
         {% csrf_token %}
 
-        <!-- ═══════════════════════════════════════════════════════
-             STEP 1 — LAND DETAILS  (DB sequence: agri_property_type → village → taluka → district → land_area → soil_type → irrigation_facility → water_source → previous_crops → fertility_status)
-        ═══════════════════════════════════════════════════════ -->
         <div class="step-content active" id="step1">
-
-          <!-- Auto-generated title preview banner -->
-          <div class="auto-title-banner">
-            <i class="fas fa-magic"></i>
-            <div>
-              <div class="banner-label"><i class="fas fa-lock" style="font-size:0.7rem;"></i> Auto-Generated Property Title (System Preview)</div>
-              <div class="auto-title-preview" id="autoTitlePreview">Fill in land details below to see the auto-generated title…</div>
-            </div>
-          </div>
-          <!-- Hidden field carrying the auto-title to backend (readonly — system fills this) -->
-          <input type="hidden" name="property_title" id="propertyTitleHidden" value="">
-
           <div class="form-section">
-            <div class="section-header">
-              <i class="fas fa-info-circle"></i>
-              Agricultural Land Details
-            </div>
-            <div class="section-body">
-
-              <!-- Row 1: Property Type | Village | Taluka | District -->
-              <div class="row">
-                <div class="col-md-3 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Property Type <span class="required">*</span></label>
-                    <select class="form-select form-control" id="agriculture_property_type" name="agriculture_property_type" required>
-                      <option value="">Select Type</option>
-                      <option value="agriculture_land">Agriculture Land</option>
-                      <option value="farm_land">Farm Land</option>
-                      <option value="orchard_land">Orchard Land</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="col-md-3 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Village <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="agri_village" name="village" placeholder="Village name" required>
-                  </div>
-                </div>
-                <div class="col-md-3 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Taluka <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="agri_taluka" name="taluka" placeholder="Taluka name" required>
-                  </div>
-                </div>
-                <div class="col-md-3 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">District <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="agri_district" name="district" placeholder="District name" required>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Row 2: Land Area | Soil Type | Irrigation Facility -->
-              <div class="row">
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Land Area (Acres) <span class="required">*</span></label>
-                    <input type="number" class="form-control" id="agri_area" name="land_area" placeholder="e.g., 5.00" step="0.01" min="0.01" required>
-                  </div>
-                </div>
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Soil Type</label>
-                    <select class="form-select form-control" id="agri_soil" name="soil_type">
-                      <option value="">Select</option>
-                      <option value="red">Red Soil</option>
-                      <option value="black">Black Soil</option>
-                      <option value="alluvial">Alluvial Soil</option>
-                      <option value="loamy">Loamy Soil</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Irrigation Facility?</label>
-                    <select class="form-select form-control" id="agri_irrigation" name="irrigation_facility">
-                      <option value="no">No</option>
-                      <option value="yes">Yes</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Row 3: Water Source | Previous Crops | Fertility Status -->
-              <div class="row">
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Water Source</label>
-                    <select class="form-select form-control" id="agri_water" name="water_source">
-                      <option value="">Select</option>
-                      <option value="well">Well</option>
-                      <option value="borewell">Borewell</option>
-                      <option value="canal">Canal</option>
-                      <option value="river">River</option>
-                      <option value="none">None</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Previous Crops Grown</label>
-                    <input type="text" class="form-control" id="agri_crops" name="previous_crops" placeholder="e.g., Rice, Wheat">
-                  </div>
-                </div>
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Fertility Status</label>
-                    <select class="form-select form-control" id="agri_fertility" name="fertility_status">
-                      <option value="">Select</option>
-                      <option value="high">High</option>
-                      <option value="medium">Medium</option>
-                      <option value="low">Low</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div><!-- /form-section -->
-
-          <div class="step-nav">
-            <div></div>
-            <button type="button" class="btn-step btn-next" onclick="goToStep(2)">
-              Next — Pricing & Legal <i class="fas fa-arrow-right"></i>
-            </button>
-          </div>
-        </div><!-- /step1 -->
-
-
-        <!-- ═══════════════════════════════════════════════════════
-             STEP 2 — PRICING & LEGAL  (DB sequence: expected_price → brokerage → brokerage_percentage → manual_brokerage → ownership_type → agri_loan/loan_amount → agri_tenants/tenant_details → agri_dispute/dispute_details → agri_tax_due/pending_tax_amount → resale_agricultural_desc)
-        ═══════════════════════════════════════════════════════ -->
-        <div class="step-content" id="step2">
-
-          <!-- Pricing Section -->
-          <div class="form-section">
-            <div class="section-header">
-              <i class="fas fa-indian-rupee-sign"></i>
-              Pricing Details
-            </div>
+            <div class="section-header"><i class="fas fa-seedling"></i> Step 1 — Agricultural Specifications</div>
             <div class="section-body">
               <div class="row">
-                <!-- expected_price -->
-                <div class="col-md-6 mt-2">
+                <div class="col-md-12 mb-3">
                   <div class="form-group">
-                    <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
-                    <input type="number" class="form-control" id="agri_price" name="expected_price" placeholder="e.g., 5000000" required>
+                    <label class="form-label">Property Title (Auto-Generated)</label>
+                    <input type="text" class="form-control" id="agri_title" name="property_title" placeholder="Generates automatically based on Acres, Type, and Village Area Context..." readonly>
                   </div>
                 </div>
-                <!-- brokerage -->
-                <div class="col-md-6 mt-2">
-                  <div class="form-group">
-                    <label class="form-label"><i class="fas fa-handshake"></i> Brokerage</label>
-                    <select class="form-select form-control" name="brokerage" id="brokerageSelect">
-                      <option value="">Select Option</option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                    </select>
-                  </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Agricultural Property Type <span class="required">*</span></label>
+                  <select class="form-select" id="agriculture_property_type" name="agriculture_property_type" required>
+                    <option value="">Select Type</option>
+                    <option value="agriculture_land">Agriculture Land</option>
+                    <option value="farm_land">Farm Land</option>
+                    <option value="orchard_land">Orchard Land</option>
+                  </select>
                 </div>
-                <!-- brokerage_percentage (conditional) -->
-                <div class="col-md-6 mt-2 conditional-section" id="brokerageSection" style="display:none;">
-                  <div class="form-group">
-                    <label class="form-label">Brokerage Percentage</label>
-                    <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
-                      <option value="">Select Brokerage</option>
-                      <option value="1%">1%</option>
-                      <option value="1.5%">1.5%</option>
-                      <option value="2%">2%</option>
-                      <option value="Negotiable">Negotiable</option>
-                      <option value="Manual">Enter Manually</option>
-                    </select>
-                  </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Land Area (Acres) <span class="required">*</span></label>
+                  <input type="number" step="0.01" class="form-control" id="land_area" name="land_area" placeholder="e.g. 4.5" required>
                 </div>
-                <!-- manual_brokerage (conditional) -->
-                <div class="col-md-6 mt-2 conditional-section" id="manualBrokerage" style="display:none;">
-                  <div class="form-group">
-                    <label class="form-label">Enter Brokerage Manually</label>
-                    <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g., 2.5%">
-                  </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Village <span class="required">*</span></label>
+                  <input type="text" class="form-control" id="village" name="village" placeholder="Enter Village" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Taluka <span class="required">*</span></label>
+                  <input type="text" class="form-control" id="taluka" name="taluka" placeholder="Enter Taluka" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">District <span class="required">*</span></label>
+                  <input type="text" class="form-control" id="district" name="district" placeholder="Enter District" required>
+                </div>
+              </div>
+              <div class="row pt-2 border-top">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Soil Type</label>
+                  <select class="form-select" name="soil_type">
+                    <option value="">Select Soil</option>
+                    <option value="red">Red Soil</option>
+                    <option value="black">Black Soil</option>
+                    <option value="alluvial">Alluvial Soil</option>
+                    <option value="loamy">Loamy Soil</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Irrigation Facility Active?</label>
+                  <select class="form-select" name="irrigation_facility">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Water Source Infrastructure</label>
+                  <select class="form-select" name="water_source">
+                    <option value="none">None</option>
+                    <option value="well">Well</option>
+                    <option value="borewell">Borewell</option>
+                    <option value="canal">Canal</option>
+                    <option value="river">River Touch</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Soil Fertility Level</label>
+                  <select class="form-select" name="fertility_status">
+                    <option value="medium">Medium Yield</option>
+                    <option value="high">High Yield</option>
+                    <option value="low">Low Yield</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Previously Cultivated Crops</label>
+                  <input type="text" class="form-control" name="previous_crops" placeholder="e.g. Cotton, Sugar Cane, Rice">
                 </div>
               </div>
             </div>
           </div>
-
-          <!-- Ownership & Legal Section -->
-          <div class="form-section">
-            <div class="section-header">
-              <i class="fas fa-shield-halved"></i>
-              Ownership & Legal Details
-            </div>
-            <div class="section-body">
-
-              <!-- ownership_type -->
-              <div class="row">
-                <div class="col-md-6 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Ownership Type <span class="required">*</span></label>
-                    <select class="form-select form-control" id="agri_ownership" name="ownership_type" required>
-                      <option value="">Select</option>
-                      <option value="freehold">Freehold</option>
-                      <option value="leasehold">Leasehold</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <!-- agri_loan + loan_amount (conditional) -->
-              <div class="row mt-2">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label class="form-label">Loan on Property? <span class="required">*</span></label>
-                    <div class="radio-group">
-                      <label class="radio-option"><input type="radio" name="agri_loan" value="no" required checked> No</label>
-                      <label class="radio-option"><input type="radio" name="agri_loan" value="yes"> Yes</label>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-6 mt-2 conditional-section" id="agri_loan_amount_section" style="display:none;">
-                  <div class="form-group">
-                    <label class="form-label">Loan Amount (₹)</label>
-                    <input type="number" class="form-control" id="agri_loan_amount" name="loan_amount" placeholder="e.g., 2000000">
-                  </div>
-                </div>
-              </div>
-
-              <!-- agri_tenants + tenant_details (conditional) -->
-              <div class="row mt-2">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label class="form-label">Existing Tenants? <span class="required">*</span></label>
-                    <div class="radio-group">
-                      <label class="radio-option"><input type="radio" name="agri_tenants" value="no" required checked> No</label>
-                      <label class="radio-option"><input type="radio" name="agri_tenants" value="yes"> Yes</label>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-12 mt-2 conditional-section" id="agri_tenant_details_section" style="display:none;">
-                  <div class="form-group">
-                    <label class="form-label">Tenant Details</label>
-                    <textarea class="form-control" id="agri_tenant_details" name="tenant_details" placeholder="Tenant information"></textarea>
-                  </div>
-                </div>
-              </div>
-
-              <!-- agri_dispute + dispute_details (conditional) -->
-              <div class="row mt-2">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label class="form-label">Any Legal Dispute? <span class="required">*</span></label>
-                    <div class="radio-group">
-                      <label class="radio-option"><input type="radio" name="agri_dispute" value="no" required checked> No</label>
-                      <label class="radio-option"><input type="radio" name="agri_dispute" value="yes"> Yes</label>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-12 mt-2 conditional-section" id="agri_dispute_details_section" style="display:none;">
-                  <div class="form-group">
-                    <label class="form-label">Dispute Description</label>
-                    <textarea class="form-control" id="agri_dispute_details" name="dispute_details" placeholder="Describe the legal dispute"></textarea>
-                  </div>
-                </div>
-              </div>
-
-              <!-- agri_tax_due + pending_tax_amount (conditional) -->
-              <div class="row mt-2">
-                <div class="col-md-12">
-                  <div class="form-group">
-                    <label class="form-label">Government Tax Dues? <span class="required">*</span></label>
-                    <div class="radio-group">
-                      <label class="radio-option"><input type="radio" name="agri_tax_due" value="no" required checked> No — Tax Paid</label>
-                      <label class="radio-option"><input type="radio" name="agri_tax_due" value="yes"> Yes — Pending</label>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-6 mt-2 conditional-section" id="agri_tax_amount_section" style="display:none;">
-                  <div class="form-group">
-                    <label class="form-label">Pending Tax Amount (₹)</label>
-                    <input type="number" class="form-control" id="agri_tax_amount" name="pending_tax_amount" placeholder="e.g., 20000">
-                  </div>
-                </div>
-              </div>
-
-              <!-- resale_agricultural_desc -->
-              <div class="form-group mt-3">
-                <label class="form-label">Property Description <span class="required">*</span></label>
-                <textarea class="form-control" id="resale_agricultural_desc" name="resale_agricultural_desc"
-                  placeholder="Describe property highlights, location benefits, nearby amenities, road connectivity…" required></textarea>
-              </div>
-
-            </div>
-          </div>
-
-          <div class="step-nav">
-            <button type="button" class="btn-step btn-prev" onclick="goToStep(1)">
-              <i class="fas fa-arrow-left"></i> Back
-            </button>
-            <button type="button" class="btn-step btn-next" onclick="goToStep(3)">
-              Next — Location & Owner <i class="fas fa-arrow-right"></i>
-            </button>
-          </div>
-        </div><!-- /step2 -->
-
-
-        <!-- ═══════════════════════════════════════════════════════
-             STEP 3 — LOCATION & OWNER  (DB sequence: city → state → locality → address → owner_name → owner_contact → owner_email → comm_residency)
-        ═══════════════════════════════════════════════════════ -->
-        <div class="step-content" id="step3">
-
-          <div class="form-section">
-            <div class="section-header">
-              <i class="fas fa-location-dot"></i>
-              Address Details
-            </div>
-            <div class="section-body">
-              <div class="row">
-                <!-- city -->
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">City <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="comm_city" name="city" placeholder="e.g., Nagpur" required>
-                  </div>
-                </div>
-                <!-- state -->
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">State <span class="required">*</span></label>
-                    <input type="text" class="form-control" name="state" placeholder="e.g., Maharashtra" required>
-                  </div>
-                </div>
-                <!-- locality -->
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Area / Locality <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="comm_locality" name="locality" placeholder="e.g., Wardha Road" required>
-                  </div>
-                </div>
-              </div>
-              <!-- address -->
-              <div class="form-group mt-2">
-                <label class="form-label">Full Property Address <span class="required">*</span></label>
-                <textarea class="form-control" id="comm_address" name="address" placeholder="Complete property address including survey/gat number if applicable" required></textarea>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-section">
-            <div class="section-header">
-              <i class="fas fa-user"></i>
-              Owner Contact Information
-            </div>
-            <div class="section-body">
-              <div class="row">
-                <!-- owner_name -->
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Owner Name <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="comm_owner_name" name="owner_name" placeholder="Full name" required>
-                  </div>
-                </div>
-                <!-- owner_contact -->
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Owner Contact <span class="required">*</span></label>
-                    <input type="tel" class="form-control" id="comm_owner_contact" name="owner_contact"
-                      placeholder="10-digit mobile" pattern="[0-9]{10}" maxlength="10" required>
-                  </div>
-                </div>
-                <!-- owner_email -->
-                <div class="col-md-4 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">Email <span class="required">*</span></label>
-                    <input type="email" class="form-control" id="comm_owner_email" name="owner_email" placeholder="email@example.com" required>
-                  </div>
-                </div>
-              </div>
-              <!-- comm_residency -->
-              <div class="form-group mt-2">
-                <label class="form-label">Residential Status <span class="required">*</span></label>
-                <div class="radio-group">
-                  <label class="radio-option"><input type="radio" name="comm_residency" value="resident" required checked> Resident</label>
-                  <label class="radio-option"><input type="radio" name="comm_residency" value="nri"> NRI</label>
-                  <label class="radio-option"><input type="radio" name="comm_residency" value="pio"> PIO</label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="step-nav">
-            <button type="button" class="btn-step btn-prev" onclick="goToStep(2)">
-              <i class="fas fa-arrow-left"></i> Back
-            </button>
-            <button type="button" class="btn-step btn-next" onclick="goToStep(4)">
-              Next — Documents & Photos <i class="fas fa-arrow-right"></i>
-            </button>
-          </div>
-        </div><!-- /step3 -->
-
-
-        <!-- ═══════════════════════════════════════════════════════
-             STEP 4 — DOCUMENTS & PHOTOS  (DB sequence: property_images[] → encumbrance_cert → property_video → uploaded_by_*)
-        ═══════════════════════════════════════════════════════ -->
-        <div class="step-content" id="step4">
-
-          <!-- property_images[] -->
-          <div class="form-section">
-            <div class="section-header">
-              <i class="fas fa-images"></i>
-              Property Images
-            </div>
-            <div class="section-body">
-              <div class="image-upload-area" id="uploadArea">
-                <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
-                <div class="upload-icon">
-                  <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #667eea;"></i>
-                </div>
-                <div class="upload-text">Click or Drag Images Here</div>
-                <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG, WEBP)</div>
-              </div>
-              <!-- Image count badge — shown after first upload -->
-              <div id="imageCountWrap" style="display:none; margin-top:12px;">
-                <span class="image-count-badge" id="imageCountBadge">
-                  <i class="fas fa-images"></i>
-                  <span id="imageCountText">0 / 10 images uploaded</span>
-                </span>
-                <small class="text-muted ms-2" id="imageCountHint"></small>
-              </div>
-              <div class="image-preview" id="imagePreview"></div>
-            </div>
-          </div>
-
-          <!-- encumbrance_cert | property_video -->
-          <div class="form-section">
-            <div class="section-header">
-              <i class="fas fa-file-shield"></i>
-              Documents & Media
-            </div>
-            <div class="section-body">
-              <div class="row">
-                <!-- encumbrance_cert -->
-                <div class="col-md-6 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">
-                      <i class="fa-solid fa-file"></i> Encumbrance Certificate <span class="required">*</span>
-                    </label>
-                    <input type="file" class="form-control" name="encumbrance_cert" id="encumbranceCert" accept="image/*,.pdf" required>
-                    <small class="form-text">Accepted: JPG, PNG, PDF</small>
-                  </div>
-                </div>
-                <!-- property_video -->
-                <div class="col-md-6 mt-2">
-                  <div class="form-group">
-                    <label class="form-label">
-                      <i class="fa-solid fa-camera"></i> Property Video (Social Media)
-                    </label>
-                    <input type="file" class="form-control" name="property_video" accept="video/*">
-                    <small class="form-text">Optional — MP4, MOV (max 100MB)</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- uploaded_by_* -->
-          <div class="form-section">
-            <div class="section-header">
-              <i class="fas fa-upload"></i>
-              Listing Uploaded By
-            </div>
-            <div class="section-body">
-              <div class="row">
-                <div class="col-md-3 mt-2">
-                  <div class="form-group">
-                    <label class="form-label"><i class="fas fa-user"></i> Name</label>
-                    <input type="text" class="form-control" name="uploaded_by_name" value="{{ admin_obj.name }}" readonly>
-                  </div>
-                </div>
-                <div class="col-md-3 mt-2">
-                  <div class="form-group">
-                    <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
-                    <input type="email" class="form-control" name="uploaded_by_email" value="{{ admin_obj.email }}" readonly>
-                  </div>
-                </div>
-                <div class="col-md-3 mt-2">
-                  <div class="form-group">
-                    <label class="form-label"><i class="fas fa-phone"></i> Contact</label>
-                    <input type="text" class="form-control" name="uploaded_by_contact" value="{{ admin_obj.phone }}" readonly>
-                  </div>
-                </div>
-                <div class="col-md-3 mt-2">
-                  <div class="form-group">
-                    <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
-                    <input type="text" class="form-control" name="uploaded_by_role" value="{{ admin_obj.role }}" readonly>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-footer">
-            <button type="button" class="btn-step btn-prev" onclick="goToStep(3)">
-              <i class="fas fa-arrow-left"></i> Back
-            </button>
-            <button type="reset" class="btn-reset" onclick="handleReset()">
-              <i class="fas fa-redo"></i> Reset
-            </button>
-            <button type="submit" class="btn-submit" id="submitBtn">
-              <i class="fas fa-save"></i> Submit Property
-            </button>
-          </div>
-        </div><!-- /step4 -->
-
-      </form>
-    </div><!-- /form-container -->
-
-
-    <!-- ═══════════════════════ PREVIEW SIDEBAR ═══════════════════════ -->
-    <div class="preview-sidebar">
-      <div class="preview-card">
-        <div class="preview-header"><i class="fas fa-eye"></i> Live Preview — Portal Card</div>
-        <div class="preview-mock">
-          <div class="preview-image">
-            🌾
-            <div class="preview-badges">
-              <span class="preview-badge">FOR SALE</span>
-              <span class="preview-badge" style="background:#10b981;color:white;">🌿 Agricultural</span>
-            </div>
-            <div class="preview-price" id="previewPrice">₹ —</div>
-          </div>
-          <div class="preview-body">
-            <div class="preview-title" id="previewTitle">Auto-generated title will appear here</div>
-            <div class="preview-location" id="previewLoc">
-              <i class="fas fa-map-marker-alt" style="color:#667eea;"></i> Village, District
-            </div>
-            <div class="preview-specs">
-              <span id="prevArea">— acres</span>
-              <span id="prevType">Land Type</span>
-            </div>
+          <div class="text-end">
+            <button type="button" class="btn btn-primary px-5 py-2" onclick="goToStep(2)">Next: Pricing & Financials <i class="fas fa-arrow-right ml-2"></i></button>
           </div>
         </div>
-        <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-top:12px;text-align:center;">
-          Will appear in search results & featured section
+
+        <div class="step-content" id="step2">
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-gavel"></i> Step 2 — Pricing, Commission & Legal Conditions</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Expected Sale Value (₹) <span class="required">*</span></label>
+                  <input type="number" class="form-control" id="expected_price" name="expected_price" placeholder="Valuation Amount" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Brokerage Agreement Commission</label>
+                  <select class="form-select" name="brokerage" id="brokerageSelect">
+                    <option value="No">No Brokerage</option>
+                    <option value="Yes">Yes</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3 conditional-field" id="brokerageSection" style="display:none;">
+                  <label class="form-label">Brokerage Scale Percent</label>
+                  <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
+                    <option value="1%">1% Rate</option>
+                    <option value="2%">2% Rate</option>
+                    <option value="Manual">Enter Custom Value Manually</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3 conditional-field" id="manualBrokerage" style="display:none;">
+                  <label class="form-label">Specify Custom Commission Rules</label>
+                  <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. Fixed ₹1.5 Lakh">
+                </div>
+                <div class="col-md-12 mb-3">
+                  <label class="form-label">Title Deeds Ownership Class <span class="required">*</span></label>
+                  <select class="form-select" name="ownership_type" required>
+                    <option value="freehold">Freehold Clear Title</option>
+                    <option value="leasehold">Leasehold Agreement Assignment</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row pt-2 border-top">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Outstanding Agricultural Loan? <span class="required">*</span></label>
+                  <div class="radio-group">
+                     <label class="radio-option"><input type="radio" name="agri_loan" value="no" checked> No</label>
+                     <label class="radio-option"><input type="radio" name="agri_loan" value="yes"> Yes</label>
+                  </div>
+                  <div id="loan_amt_section" style="display:none;" class="mt-2">
+                     <input type="number" class="form-control" name="loan_amount" placeholder="Outstanding Debt Principal (₹)">
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Existing Sharecroppers / Tenants On-Site? <span class="required">*</span></label>
+                  <div class="radio-group">
+                     <label class="radio-option"><input type="radio" name="agri_tenants" value="no" checked> No</label>
+                     <label class="radio-option"><input type="radio" name="agri_tenants" value="yes"> Yes</label>
+                  </div>
+                  <div id="tenant_section" style="display:none;" class="mt-2">
+                     <textarea class="form-control" name="tenant_details" placeholder="Detail sharecropping agreements contexts..."></textarea>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Boundary or Title Dispute Litigation? <span class="required">*</span></label>
+                  <div class="radio-group">
+                     <label class="radio-option"><input type="radio" name="agri_dispute" value="no" checked> No</label>
+                     <label class="radio-option"><input type="radio" name="agri_dispute" value="yes"> Yes</label>
+                  </div>
+                  <div id="dispute_section" style="display:none;" class="mt-2">
+                     <textarea class="form-control" name="dispute_details" placeholder="Describe pending family court or land boundary litigation..."></textarea>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Pending Land Revenue Tax Arrears? <span class="required">*</span></label>
+                  <div class="radio-group">
+                     <label class="radio-option"><input type="radio" name="agri_tax_due" value="no" checked> No</label>
+                     <label class="radio-option"><input type="radio" name="agri_tax_due" value="yes"> Yes</label>
+                  </div>
+                  <div id="tax_section" style="display:none;" class="mt-2">
+                     <input type="number" class="form-control" name="pending_tax_amount" placeholder="Arrears Balance (₹)">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group mt-2">
+                <label class="form-label">Detailed Presentation Copy Description <span class="required">*</span></label>
+                <textarea class="form-control" id="resale_agricultural_desc" name="resale_agricultural_desc" required></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-secondary px-4" onclick="goToStep(1)">Back</button>
+            <button type="button" class="btn btn-primary px-5" onclick="goToStep(3)">Next: Address Details <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <div class="step-content" id="step3">
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-map-pin"></i> Step 3 — Geographical Address Coordinates</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-4 mb-3"><label class="form-label">City <span class="required">*</span></label><input type="text" class="form-control" id="city" name="city" placeholder="e.g. Nagpur" required></div>
+                <div class="col-md-4 mb-3"><label class="form-label">State <span class="required">*</span></label><input type="text" class="form-control" name="state" placeholder="e.g. Maharashtra" required></div>
+                <div class="col-md-4 mb-3"><label class="form-label">Locality Area <span class="required">*</span></label><input type="text" class="form-control" id="locality" name="locality" placeholder="e.g. Umred Area" required></div>
+                <div class="col-md-12 mb-3"><label class="form-label">Complete Physical Plot Address <span class="required">*</span></label><textarea class="form-control" name="address" rows="3" placeholder="Enter complete route directions or land address records..." required></textarea></div>
+              </div>
+              <div class="row pt-3 border-top">
+                <div class="col-md-4 mb-3"><label class="form-label">Primary Owner Name <span class="required">*</span></label><input type="text" class="form-control" name="owner_name" placeholder="Full Registered Name" required></div>
+                <div class="col-md-4 mb-3"><label class="form-label">Direct Contact Number <span class="required">*</span></label><input type="tel" class="form-control" name="owner_contact" placeholder="10-digit smartphone mobile" pattern="[0-9]{10}" required></div>
+                <div class="col-md-4 mb-3"><label class="form-label">Owner Email Profile</label><input type="email" class="form-control" name="owner_email" placeholder="name@email.com"></div>
+                <div class="col-md-12"><label class="form-label">Residency Status <span class="required">*</span></label>
+                  <select class="form-select" name="comm_residency">
+                    <option value="resident">Domestic Resident Citizen</option>
+                    <option value="nri">Non-Resident Indian (NRI)</option>
+                    <option value="pio">Person of Indian Origin (PIO)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-secondary px-4" onclick="goToStep(2)">Back</button>
+            <button type="button" class="btn btn-primary px-5" onclick="goToStep(4)">Next: Media & Upload <i class="fas fa-arrow-right"></i></button>
+          </div>
+        </div>
+
+        <div class="step-content" id="step4">
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-camera"></i> Step 4 — Portfolio Upload Attachments</div>
+            <div class="section-body">
+              <label class="form-label">Upload Farm Portfolio Asset Images <span class="required">*</span></label>
+              <p class="text-muted small"><strong>Interactive Re-Ordering Feature:</strong> Drag and move the preview thumbnails horizontally to set your live portal display order pattern loop.</p>
+              <div class="image-upload-area p-5 text-center" id="uploadArea">
+                <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
+                <i class="fas fa-images fa-3x mb-2" style="color:#667eea;"></i>
+                <p class="mb-1" style="font-weight:600;">Click or Drop High-Res Farm Images Inside This Space</p>
+                <p id="uploadCounterText" class="text-danger mb-0" style="font-size:0.85rem; font-weight:600;">Uploaded: 0 / 10 images</p>
+              </div>
+
+              <div class="image-preview" id="imagePreview"></div>
+
+              <div class="row mt-4 pt-3 border-top">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">7/12 Extract / Encumbrance Certificate Copy (PDF) <span class="required">*</span></label>
+                  <input type="file" class="form-control" name="encumbrance_cert" accept=".pdf" required>
+                  <small class="text-muted">Attach clear scanning vectors verifying clean land registry ownership tracks.</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Walkthrough Video Reel (MP4)</label>
+                  <input type="file" class="form-control" name="property_video" accept="video/*">
+                </div>
+              </div>
+
+              <div class="row mt-3 pt-3 border-top" style="background:rgba(0,0,0,0.02); padding:15px; border-radius:10px;">
+                <div class="col-md-3"><small class="text-muted d-block">Operator Session:</small><strong>{{ admin_obj.name }}</strong></div>
+                <div class="col-md-3"><small class="text-muted d-block">Uploader Role Tag:</small><strong>{{ admin_obj.role }}</strong></div>
+                <div class="col-md-3"><small class="text-muted d-block">Core Email Handle:</small><strong>{{ admin_obj.email }}</strong></div>
+                <div class="col-md-3"><small class="text-muted d-block">Mobile Link Meta:</small><strong>{{ admin_obj.phone }}</strong></div>
+              </div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-secondary px-4" onclick="goToStep(3)">Back</button>
+            <button type="submit" class="btn btn-success px-5" id="submitBtn" style="background:var(--success-gradient); border:none;">Commit & Publish Listing <i class="fas fa-save ml-2"></i></button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="preview-sidebar">
+      <div class="preview-card">
+        <div class="preview-mock">
+          <div class="preview-image">🌾
+            <div class="preview-price" id="p_price">₹ 0</div>
+          </div>
+          <div class="p-3">
+            <div id="p_title" style="font-weight:800; font-size:0.95rem; color:#1a252f; margin-bottom:5px;">Your Property Title</div>
+            <div style="font-size:0.75rem; color:#64748b; margin-top:5px;"><i class="fas fa-map-marker-alt" style="color:#667eea;"></i> <span id="p_loc">Location Area</span></div>
+            <div class="mt-2" style="font-weight:700; font-size:0.85rem; color:#2d3748;" id="p_area">0 Acres Tracked</div>
+          </div>
         </div>
       </div>
 
       <div class="checklist-card">
-        <div class="checklist-title">📋 Listing Checklist</div>
-        <div class="checklist-item" id="cl-type"><i class="fas fa-circle"></i> Property type selected</div>
-        <div class="checklist-item" id="cl-location"><i class="fas fa-circle"></i> Location details added</div>
-        <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i> Land area entered</div>
-        <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Expected price set</div>
-        <div class="checklist-item" id="cl-owner"><i class="fas fa-circle"></i> Owner details filled</div>
-        <div class="checklist-item" id="cl-docs"><i class="fas fa-circle"></i> Images uploaded</div>
-      </div>
-
-      <div class="info-card">
-        <div class="info-title">💡 Pro Tips for Faster Sales</div>
-        <div class="info-item"><i class="fas fa-camera"></i> Add clear land photos showing boundaries</div>
-        <div class="info-item"><i class="fas fa-file-alt"></i> Upload all legal documents</div>
-        <div class="info-item"><i class="fas fa-water"></i> Highlight water source & irrigation</div>
-        <div class="info-item"><i class="fas fa-road"></i> Mention road connectivity & access</div>
-        <div class="info-item"><i class="fas fa-chart-line"></i> Price competitively based on market</div>
+        <h6 style="font-weight:800; font-size:0.9rem; margin-bottom:15px;">📋 Listing Verification Check</h6>
+        <div class="checklist-item" id="cl-type"><i class="fas fa-circle"></i> Agriculture Type selected</div>
+        <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i> Acres area dimensions filled</div>
+        <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Price index logged</div>
+        <div class="checklist-item" id="cl-loc"><i class="fas fa-circle"></i> Zonal coordinates checked</div>
       </div>
     </div>
+  </div>
+</div>
 
-  </div><!-- /page-wrapper -->
-</div><!-- /main-content -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  /* ══════════════════════════════════════════════════
-     STATE
-  ══════════════════════════════════════════════════ */
   let currentStep = 1;
-  let selectedFiles = [];
+  let selectedFiles = []; // Master unified dynamic array storage matching image changes
 
-  /* ══════════════════════════════════════════════════
-     AUTO-TITLE GENERATOR  (mirrors backend save() logic)
-     "{area} Fertile {type} in {village}, {taluka} ({district})"
-  ══════════════════════════════════════════════════ */
-  function buildAutoTitle() {
-    const type    = document.getElementById('agriculture_property_type')?.value || '';
-    const village = document.getElementById('agri_village')?.value.trim() || '';
-    const taluka  = document.getElementById('agri_taluka')?.value.trim() || '';
-    const district= document.getElementById('agri_district')?.value.trim() || '';
-    const areaRaw = parseFloat(document.getElementById('agri_area')?.value) || 0;
-
-    const typeLabel = type ? type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '';
-    const areaLabel = areaRaw > 0
-      ? (Number.isInteger(areaRaw) ? areaRaw + ' Acres' : areaRaw.toFixed(2) + ' Acres')
-      : '';
-
-    const locationPart = village && taluka ? ` in ${village}, ${taluka}` : (village ? ` in ${village}` : '');
-    const districtPart = district ? ` (${district})` : '';
-
-    const parts = [areaLabel, 'Fertile', typeLabel + locationPart + districtPart].filter(Boolean);
-    return parts.join(' ').replace(/\s+/g, ' ').trim();
-  }
-
-  function refreshAutoTitle() {
-    const title = buildAutoTitle();
-    const preview = document.getElementById('autoTitlePreview');
-    const hidden  = document.getElementById('propertyTitleHidden');
-    if (title) {
-      preview.textContent = title;
-      preview.style.color = '#2d3748';
-      hidden.value = title;
-      // Also update portal card
-      document.getElementById('previewTitle').textContent = title;
-    } else {
-      preview.textContent = 'Fill in land details below to see the auto-generated title…';
-      preview.style.color = '#a0aec0';
-      hidden.value = '';
-      document.getElementById('previewTitle').textContent = 'Auto-generated title will appear here';
+  window.onload = function() {
+    if (typeof CKEDITOR !== 'undefined' && document.getElementById('resale_agricultural_desc')) {
+      CKEDITOR.replace('resale_agricultural_desc');
     }
+    initializeSortableDragMechanics();
+  };
+
+  // INITIALIZE MANUALLY SORTABLE DRAG/DROP DRAG EVENTS ON THUMBNAILS
+  function initializeSortableDragMechanics() {
+    const previewContainer = document.getElementById('imagePreview');
+    if (!previewContainer) return;
+
+    new Sortable(previewContainer, {
+      animation: 250,
+      ghostClass: 'sortable-ghost',
+      onEnd: function() {
+        // Re-align master lookup data variables sequential arrays matching drag adjustments
+        let visualListNames = Array.from(document.querySelectorAll('.preview-item')).map(el => el.dataset.fileName);
+        let newlySortedQueue = [];
+
+        visualListNames.forEach(name => {
+          let fileObj = selectedFiles.find(f => f.name === name);
+          if (fileObj) newlySortedQueue.push(fileObj);
+        });
+
+        selectedFiles = newlySortedQueue;
+        updatePreview();
+      }
+    });
   }
 
-  /* ══════════════════════════════════════════════════
-     STEPPER NAVIGATION
-  ══════════════════════════════════════════════════ */
   function goToStep(n) {
-    syncCKEditor();
-    if (n > currentStep && !validateStep(currentStep)) return false;
-
+    if (n > currentStep && !validateStep(currentStep)) return;
     document.getElementById('step' + currentStep).classList.remove('active');
     document.getElementById('step' + n).classList.add('active');
 
     for (let i = 1; i <= 4; i++) {
-      const sc   = document.getElementById('sc' + i);
-      const sl   = document.getElementById('sl' + i);
+      const sc = document.getElementById('sc' + i);
       const line = document.getElementById('line' + i);
-      sc.className = 'step-circle';
-      sl.className = 'step-label';
-      if (line) line.className = 'step-line';
-
       if (i < n) {
-        sc.classList.add('done');
-        sl.classList.add('done');
-        sc.innerHTML = '<i class="fas fa-check" style="font-size:.7rem;"></i>';
-        if (line) line.classList.add('done');
+        if(sc) { sc.className = 'step-circle done'; sc.innerHTML = '<i class="fas fa-check"></i>'; }
+        if(line) line.classList.add('done');
       } else if (i === n) {
-        sc.classList.add('active');
-        sl.classList.add('active');
-        sc.textContent = i;
+        if(sc) { sc.className = 'step-circle active'; sc.innerHTML = i; }
+        if(line) line.classList.remove('done');
       } else {
-        sc.textContent = i;
+        if(sc) { sc.className = 'step-circle'; sc.innerHTML = i; }
       }
     }
     currentStep = n;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    updatePreview();
   }
 
-  /* ══════════════════════════════════════════════════
-     STEP VALIDATION
-  ══════════════════════════════════════════════════ */
   function validateStep(step) {
     const stepEl = document.getElementById('step' + step);
-    const required = stepEl.querySelectorAll('[required]');
-    const missing = [];
+    const requiredFields = stepEl.querySelectorAll('[required]');
+    let missing = [];
 
-    required.forEach(field => {
-      if (field.type === 'radio') {
-        const group = stepEl.querySelectorAll(`[name="${field.name}"]`);
-        if (!Array.from(group).some(r => r.checked)) {
-          const lbl = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
-          if (lbl && !missing.includes(lbl)) missing.push(lbl);
-        }
-      } else if (field.type === 'file') {
-        if (!field.files || field.files.length === 0) {
-          const lbl = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
-          if (lbl && !missing.includes(lbl)) missing.push(lbl);
-        }
-      } else if (!field.value.trim()) {
-        const lbl = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
-        if (lbl && !missing.includes(lbl)) missing.push(lbl);
+    requiredFields.forEach(f => {
+      if (f.type === 'radio') {
+          if (!stepEl.querySelector(`input[name="${f.name}"]:checked`)) missing.push(f.name);
+      } else if (!f.value.trim() && f.name !== 'resale_agricultural_desc') { 
+          const label = f.previousElementSibling?.innerText || "Field";
+          missing.push(label.replace('*', '').trim());
       }
     });
 
-    // Extra: phone must be exactly 10 digits
-    if (step === 3) {
-      const phone = document.getElementById('comm_owner_contact');
-      if (phone && phone.value && !/^[0-9]{10}$/.test(phone.value.trim())) {
-        missing.push('Owner Contact (must be 10 digits)');
-      }
-    }
-
-    if (missing.length) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Required Fields Missing',
-        html: `<p style="margin-bottom:10px;">Please fill the following fields before proceeding:</p>
-               <ul style="text-align:left;display:inline-block;line-height:2;">
-                 ${missing.map(f => `<li><i class="fas fa-exclamation-circle" style="color:#e74c3c;margin-right:6px;"></i>${f}</li>`).join('')}
-               </ul>`,
-        confirmButtonColor: '#667eea',
-        confirmButtonText: 'Got it!'
-      });
+    if (missing.length > 0) {
+      Swal.fire({ icon: 'warning', title: 'Missing Parameter Metrics', html: `Please check mandatory elements: <br><b>${missing.join(', ')}</b>`, confirmButtonColor: '#667eea' });
       return false;
     }
     return true;
   }
 
-  /* ══════════════════════════════════════════════════
-     LIVE PREVIEW + CHECKLIST
-  ══════════════════════════════════════════════════ */
+  function generateAssetTitle() {
+    const typeEl = document.getElementById('agriculture_property_type');
+    const typeText = typeEl.options[typeEl.selectedIndex]?.text || "";
+    const area = document.getElementById('land_area').value.trim();
+    const vil = document.getElementById('village').value.trim();
+    const tal = document.getElementById('taluka').value.trim();
+
+    if (!typeText || !area || !vil) return "";
+    let areaLabel = parseFloat(area).toLocaleString('en-IN') + " Acres";
+    let locationSegment = tal ? ` in ${vil}, ${tal}` : ` in ${vil}`;
+    return `${areaLabel} Fertile ${typeText}${locationSegment}`;
+  }
+
   function updatePreview() {
-    refreshAutoTitle();
+    const type = document.getElementById('agriculture_property_type');
+    const area = document.getElementById('land_area').value;
+    const price = document.getElementById('expected_price').value;
+    const city = document.getElementById('city').value;
+    const loc = document.getElementById('locality').value;
 
-    const price = document.getElementById('agri_price')?.value;
-    document.getElementById('previewPrice').textContent =
-      price ? '₹' + parseInt(price).toLocaleString('en-IN') : '₹ —';
+    const dynamicTitle = generateAssetTitle();
+    const titleInput = document.getElementById('agri_title');
+    if (titleInput) titleInput.value = dynamicTitle;
 
-    const propType = document.getElementById('agriculture_property_type')?.value;
-    document.getElementById('prevType').textContent =
-      propType ? propType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Land Type';
+    const previewTitle = document.getElementById('p_title');
+    if (previewTitle) previewTitle.innerText = dynamicTitle || "Premium Agricultural Accommodation";
 
-    const area = document.getElementById('agri_area')?.value;
-    document.getElementById('prevArea').textContent = area ? area + ' acres' : '— acres';
+    const previewArea = document.getElementById('p_area');
+    if (previewArea) previewArea.innerText = area ? parseFloat(area).toLocaleString('en-IN') + " Acres Tracked" : "0 Acres Tracked";
 
-    const village  = document.getElementById('agri_village')?.value;
-    const district = document.getElementById('agri_district')?.value;
-    if (village || district) {
-      document.getElementById('previewLoc').innerHTML =
-        '<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ' +
-        (village || 'Village') + ', ' + (district || 'District');
-    }
-    updateChecklist();
+    const previewPrice = document.getElementById('p_price');
+    if (previewPrice) previewPrice.innerText = price ? '₹ ' + parseInt(price).toLocaleString('en-IN') : '₹ 0';
+
+    const previewLoc = document.getElementById('p_loc');
+    if (previewLoc) previewLoc.innerText = (city || loc) ? `${loc}, ${city}` : "Location Area";
+
+    updateCheck('cl-type', !!type.value);
+    updateCheck('cl-area', !!area);
+    updateCheck('cl-price', !!price);
+    updateCheck('cl-loc', !!city && !!loc);
+    
+    const counterText = document.getElementById('uploadCounterText');
+    if (counterText) counterText.innerText = `Uploaded: ${selectedFiles.length} / 10 images`;
   }
 
-  function updateChecklist() {
-    setCheck('cl-type',     !!document.getElementById('agriculture_property_type')?.value);
-    setCheck('cl-location', !!(document.getElementById('agri_village')?.value && document.getElementById('agri_district')?.value));
-    setCheck('cl-area',     !!document.getElementById('agri_area')?.value);
-    setCheck('cl-price',    !!document.getElementById('agri_price')?.value);
-    setCheck('cl-owner',    !!document.getElementById('comm_owner_name')?.value);
-    setCheck('cl-docs',     selectedFiles.length > 0);
-  }
-
-  function setCheck(id, done) {
+  function updateCheck(id, done) {
     const el = document.getElementById(id);
     if (!el) return;
     el.className = 'checklist-item' + (done ? ' done' : '');
     el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
   }
 
-  /* ══════════════════════════════════════════════════
-     IMAGE UPLOAD — WITH COUNT BADGE
-  ══════════════════════════════════════════════════ */
-  function updateImageCountBadge() {
-    const wrap   = document.getElementById('imageCountWrap');
-    const badge  = document.getElementById('imageCountBadge');
-    const text   = document.getElementById('imageCountText');
-    const hint   = document.getElementById('imageCountHint');
-    const n      = selectedFiles.length;
+  // Hook change event loops for updates on previews
+  ['land_area', 'village', 'taluka', 'city', 'locality', 'expected_price'].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.addEventListener('input', updatePreview);
+  });
+  
+  const typeDropdown = document.getElementById('agriculture_property_type');
+  if (typeDropdown) typeDropdown.addEventListener('change', updatePreview);
 
-    if (n === 0) { wrap.style.display = 'none'; return; }
-    wrap.style.display = 'block';
-    text.textContent = `${n} / 10 image${n > 1 ? 's' : ''} uploaded`;
+  // Conditional field visibilities triggers loops
+  document.querySelectorAll('input[name="agri_loan"]').forEach(r => r.onchange = (e) => 
+    document.getElementById('loan_amt_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
+  document.querySelectorAll('input[name="agri_tenants"]').forEach(r => r.onchange = (e) => 
+    document.getElementById('tenant_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
+  document.querySelectorAll('input[name="agri_dispute"]').forEach(r => r.onchange = (e) => 
+    document.getElementById('dispute_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
+  document.querySelectorAll('input[name="agri_tax_due"]').forEach(r => r.onchange = (e) => 
+    document.getElementById('tax_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
 
-    badge.className = 'image-count-badge';
-    if (n === 10)      { badge.classList.add('full');    hint.textContent = '✅ Maximum reached'; }
-    else if (n >= 7)   { badge.classList.add('warning'); hint.textContent = `${10 - n} slot${10-n>1?'s':''} remaining`; }
-    hint.textContent = n < 7 ? `${10 - n} more can be added` : hint.textContent;
-
-    setCheck('cl-docs', n > 0);
-  }
-
-  function handleFiles(files) {
-    const fileArray = Array.from(files);
-    const remaining = 10 - selectedFiles.length;
-    if (fileArray.length > remaining) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Too Many Files',
-        html: `You can add <b>${remaining}</b> more image${remaining !== 1 ? 's' : ''}.<br>Maximum 10 images allowed.`,
-        confirmButtonColor: '#667eea'
-      });
-    }
-    fileArray.slice(0, remaining).forEach(file => {
-      if (file.type.startsWith('image/')) {
-        selectedFiles.push(file);
-        displayImage(file);
-      }
-    });
-    syncFileInput();
-  }
-
-  function displayImage(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const div = document.createElement('div');
-      div.className = 'preview-item';
-      div.dataset.fileName = file.name;
-      div.innerHTML = `
-        <img src="${e.target.result}" alt="Preview" title="${file.name}">
-        <button type="button" class="remove-image" onclick="removeImage(this,'${file.name.replace(/'/g,"\\'")}')">
-          <i class="fas fa-times"></i>
-        </button>`;
-      document.getElementById('imagePreview').appendChild(div);
+  const brokerageSelect = document.getElementById("brokerageSelect");
+  if (brokerageSelect) {
+    brokerageSelect.onchange = function() {
+        document.getElementById('brokerageSection').style.display = this.value === "Yes" ? "block" : "none";
     };
-    reader.readAsDataURL(file);
+  }
+  const brokeragePercentage = document.getElementById("brokeragePercentage");
+  if (brokeragePercentage) {
+    brokeragePercentage.onchange = function() {
+        document.getElementById('manualBrokerage').style.display = this.value === "Manual" ? "block" : "none";
+    };
   }
 
-  window.removeImage = function(button, fileName) {
-    selectedFiles = selectedFiles.filter(f => f.name !== fileName);
-    button.closest('.preview-item').remove();
-    syncFileInput();
-    updateImageCountBadge();
-  };
+  // Dynamic Multi-Image queue handlers
+  const uploadArea = document.getElementById('uploadArea');
+  const imageInput = document.getElementById('imageInput');
+  const imagePreview = document.getElementById('imagePreview');
 
-  function syncFileInput() {
-    const dt = new DataTransfer();
-    selectedFiles.forEach(f => dt.items.add(f));
-    document.getElementById('imageInput').files = dt.files;
-    updateImageCountBadge();
-    setCheck('cl-docs', selectedFiles.length > 0);
-  }
-
-  /* ══════════════════════════════════════════════════
-     CKEDITOR SYNC
-  ══════════════════════════════════════════════════ */
-  function syncCKEditor() {
-    if (typeof CKEDITOR !== 'undefined') {
-      for (const instance in CKEDITOR.instances) {
-        CKEDITOR.instances[instance].updateElement();
-      }
-    }
-  }
-
-  /* ══════════════════════════════════════════════════
-     RESET HANDLER
-  ══════════════════════════════════════════════════ */
-  function handleReset() {
-    Swal.fire({
-      icon: 'question',
-      title: 'Reset Form?',
-      text: 'All entered data will be cleared. This cannot be undone.',
-      showCancelButton: true,
-      confirmButtonColor: '#e74c3c',
-      cancelButtonColor: '#667eea',
-      confirmButtonText: 'Yes, Reset',
-      cancelButtonText: 'Cancel'
-    }).then(result => {
-      if (result.isConfirmed) {
-        selectedFiles = [];
-        document.getElementById('imagePreview').innerHTML = '';
-        document.getElementById('imageCountWrap').style.display = 'none';
-        document.getElementById('agriculturalForm').reset();
-        goToStep(1);
-        refreshAutoTitle();
-        updatePreview();
-      }
-    });
-    return false;
-  }
-
-  /* ══════════════════════════════════════════════════
-     INIT
-  ══════════════════════════════════════════════════ */
-  document.addEventListener('DOMContentLoaded', function () {
-
-    // Live preview on every input change
-    document.querySelectorAll('input, select, textarea').forEach(el => {
-      el.addEventListener('change', updatePreview);
-      el.addEventListener('input', updatePreview);
-    });
-
-    // Brokerage toggles
-    document.getElementById('brokerageSelect')?.addEventListener('change', function () {
-      document.getElementById('brokerageSection').style.display = (this.value === 'Yes') ? 'block' : 'none';
-      if (this.value !== 'Yes') document.getElementById('manualBrokerage').style.display = 'none';
-    });
-    document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
-      document.getElementById('manualBrokerage').style.display = (this.value === 'Manual') ? 'block' : 'none';
-    });
-
-    // Conditional legal toggles
-    document.querySelectorAll('input[name="agri_loan"]').forEach(r =>
-      r.addEventListener('change', function () {
-        document.getElementById('agri_loan_amount_section').style.display = (this.value === 'yes') ? 'block' : 'none';
-      })
-    );
-    document.querySelectorAll('input[name="agri_tenants"]').forEach(r =>
-      r.addEventListener('change', function () {
-        document.getElementById('agri_tenant_details_section').style.display = (this.value === 'yes') ? 'block' : 'none';
-      })
-    );
-    document.querySelectorAll('input[name="agri_dispute"]').forEach(r =>
-      r.addEventListener('change', function () {
-        document.getElementById('agri_dispute_details_section').style.display = (this.value === 'yes') ? 'block' : 'none';
-      })
-    );
-    document.querySelectorAll('input[name="agri_tax_due"]').forEach(r =>
-      r.addEventListener('change', function () {
-        document.getElementById('agri_tax_amount_section').style.display = (this.value === 'yes') ? 'block' : 'none';
-      })
-    );
-
-    // Image upload area
-    const uploadArea  = document.getElementById('uploadArea');
-    const imageInput  = document.getElementById('imageInput');
-    uploadArea?.addEventListener('click', () => imageInput.click());
-    uploadArea?.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-    uploadArea?.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-    uploadArea?.addEventListener('drop', e => {
-      e.preventDefault();
-      uploadArea.classList.remove('dragover');
-      handleFiles(e.dataTransfer.files);
-    });
-    imageInput?.addEventListener('change', e => handleFiles(e.target.files));
-
-    // Form submit via AJAX
-    document.getElementById('agriculturalForm')?.addEventListener('submit', function (e) {
-      e.preventDefault();
-      syncCKEditor();
-      refreshAutoTitle(); // Ensure hidden field is populated before submit
-
-      if (!validateStep(4)) return;
-
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-
-      Swal.fire({
-        title: 'Submitting Property…',
-        text: 'Please wait while we save your listing.',
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading()
-      });
-
-      fetch(this.action, {
-        method: 'POST',
-        body: new FormData(this),
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      })
-      .then(res => res.json())
-      .then(data => {
-        btn.disabled = false;
-        if (data.status === 'success' || data.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Property Listed!',
-            text: data.message || 'Agricultural property submitted successfully!',
-            confirmButtonColor: '#11998e'
-          }).then(() => {
-            if (data.redirect_url) window.location.href = data.redirect_url;
-            else location.reload();
-          });
-        } else {
-          Swal.fire({ icon: 'error', title: 'Submission Failed', text: data.message || 'Please check your inputs and try again.', confirmButtonColor: '#e74c3c' });
+  if (uploadArea && imageInput) {
+    uploadArea.onclick = () => imageInput.click();
+    imageInput.onchange = (e) => {
+        let filesIncoming = Array.from(e.target.files);
+        if (selectedFiles.length + filesIncoming.length > 10) {
+            Swal.fire('Limit Exceeded', 'Maximum 10 images allowed across portfolio profiles.', 'warning');
+            filesIncoming = filesIncoming.slice(0, 10 - selectedFiles.length);
         }
-      })
-      .catch(() => {
-        btn.disabled = false;
-        Swal.fire({ icon: 'error', title: 'Server Error', text: 'Could not connect. Please try again later.', confirmButtonColor: '#e74c3c' });
-      });
-    });
+        selectedFiles = selectedFiles.concat(filesIncoming);
+        renderThumbnails();
+    };
+  }
 
+  function renderThumbnails() {
+    imagePreview.innerHTML = '';
+    selectedFiles.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            div.setAttribute('data-file-name', file.name); // Data label tracking sort changes
+            div.innerHTML = `
+                <img src="${ev.target.result}">
+                <button type="button" class="remove-image" onclick="removeImage('${file.name}')"><i class="fas fa-times"></i></button>
+            `;
+            imagePreview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
     updatePreview();
+  }
+
+  function removeImage(nameLookupKey) {
+    selectedFiles = selectedFiles.filter(f => f.name !== nameLookupKey);
+    renderThumbnails();
+  }
+
+  // DOUBLE-CHECK CONFIRMATION POPUP SYSTEM IMPLEMENTATION BEFORE DISPATCH
+  document.getElementById('agriculturalForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Stop default immediate submission
+
+    if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.resale_agricultural_desc) {
+        CKEDITOR.instances.resale_agricultural_desc.updateElement();
+    }
+
+    if (!validateStep(4)) return;
+
+    if (selectedFiles.length < 1) {
+        Swal.fire('Images Missing', 'Upload at least one farm property picture matching asset metrics.', 'warning');
+        goToStep(4);
+        return;
+    }
+
+    // Fire SweetAlert confirmation block
+    Swal.fire({
+        title: 'Confirm Submission?',
+        text: 'Are you sure you want to publish this agricultural property resale listing?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#11998e',
+        cancelButtonColor: '#2c3e50',
+        confirmButtonText: 'Yes, Submit Listing!',
+        cancelButtonText: 'Review Form Data'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            executeFormAjaxSubmit(this);
+        }
+    });
   });
 
-  /* ══════════════════════════════════════════════════
-     SIDEBAR
-  ══════════════════════════════════════════════════ */
-  function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    if (window.innerWidth <= 768) {
-      sidebar.classList.toggle('active');
-      overlay.classList.toggle('active');
-      document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-    } else {
-      sidebar.classList.toggle('collapsed');
-    }
-  }
-  function closeSidebar() {
-    document.getElementById('sidebar').classList.remove('active');
-    document.getElementById('sidebarOverlay').classList.remove('active');
-    document.body.style.overflow = '';
-  }
-  function toggleSubmenu(event, element) {
-    event.preventDefault(); event.stopPropagation();
-    const submenu = element.nextElementSibling;
-    document.querySelectorAll('.submenu').forEach(s => { if (s !== submenu) s.classList.remove('active'); });
-    document.querySelectorAll('.menu-link').forEach(l => { if (l !== element) l.classList.remove('dropdown-open'); });
-    submenu.classList.toggle('active');
-    element.classList.toggle('dropdown-open');
-    return false;
-  }
+  // COMMITS DYNAMIC REORDERED ARRAYS TO CENTRAL AJAX HANDLERS
+  function executeFormAjaxSubmit(formElement) {
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Request...';
+    submitBtn.disabled = true;
 
-  $("#Resale").addClass("active");
+    let finalFormData = new FormData(formElement);
+    
+    // Clear field references, append sequentially according to the sorted list
+    finalFormData.delete('property_images[]');
+    selectedFiles.forEach(file => finalFormData.append('property_images[]', file));
 
-  // CKEditor init
-  window.onload = function () {
-    if (typeof CKEDITOR !== 'undefined') {
-      if (CKEDITOR.instances.resale_agricultural_desc) CKEDITOR.instances.resale_agricultural_desc.destroy();
-      CKEDITOR.replace('resale_agricultural_desc');
-    }
-  };
+    fetch(formElement.getAttribute('action'), {
+        method: 'POST',
+        body: finalFormData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            Swal.fire({ icon: 'success', title: 'Listing Active!', text: data.message, confirmButtonColor: '#38ef7d' })
+            .then(() => window.location.reload());
+        } else {
+            Swal.fire({ icon: 'error', title: 'Listing Failed', text: data.message });
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    })
+    .catch(err => {
+        Swal.fire('Error', 'Connection pipeline failure.', 'error');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+  }
 </script>
-</body>
-</html>

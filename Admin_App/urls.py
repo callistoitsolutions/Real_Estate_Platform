@@ -479,6 +479,10 @@ urlpatterns = [
     path('commercial/edit/<int:pk>/',  views.commercial_edit,   name='commercial_edit'),
     path('commercial/delete/<int:pk>/', views.commercial_delete, name='commercial_delete'),
     path('commercial_rental_add', views.commercial_rental_add, name='commercial_rental_add'),
+    
+
+    path('commercial/export/', views.export_commercial_rent, name='export_commercial_rent'),
+
 
 
 #########################END URL SECTION OF COMMERICIAL RENTAL LISTING##############################
@@ -489,14 +493,21 @@ urlpatterns = [
     path('add-pg/', views.add_pg, name='add_pg'),
     path('Admin_App/pg/import-excel/',       views.import_pg_excel,       name='import_pg_excel'),
     path('Admin_App/pg/download-template/',  views.download_pg_template,  name='download_pg_template'),
-    
-    path('pg-coliving/restore/<int:id>/', views.pg_restore, name='pg_restore'),
-    path('pg-coliving/hard-delete/<int:id>/', views.pg_hard_delete, name='pg_hard_delete'),
+   
+    path('pg-coliving/export/', views.export_pg_coliving, name='export_pg_coliving'),
+
+    path('pg-coliving/restore/<str:id>/', views.pg_restore, name='pg_restore'),
+    path('pg-coliving/hard-delete/<str:id>/', views.pg_hard_delete, name='pg_hard_delete'),
     path('pg-coliving/bulk-delete/', views.pg_bulk_delete, name='pg_bulk_delete'),
 
-    path('pg-coliving/view/<int:pk>/', views.pg_coliving_view, name='pg_coliving_view'),
+    path('pg-coliving/view/<str:pk>/', views.pg_coliving_view, name='pg_coliving_view'),
 
-    path('pg-coliving/delete/<int:pk>/', views.pg_coliving_delete, name='pg_coliving_delete'),
+    path(
+    'pg-coliving/delete/<str:pk>/',
+    views.pg_coliving_delete,
+    name='pg_coliving_delete'
+    ),
+
 
   
     # 1. Route to render the HTML Edit Form Page interface (GET request)
@@ -559,16 +570,23 @@ urlpatterns = [
 
     path('plot-sale/add/', views.plot_sale_add, name='plot_sale_add'),
    
-    path('plot-sale/edit/<int:id>/', views.plot_sale_edit, name='plot_sale_edit'),
+    
 
     path('plot-sale/bulk-delete/', views.plot_sale_bulk_delete, name='plot_sale_bulk_delete'),
     path('plot-resale/download-template/', views.download_plot_resale_template, name='download_plot_resale_template'),
     path('plot-resale/import/', views.import_plot_resale_excel, name='import_plot_resale_excel'),
-    path('plot-sale/restore/<int:id>/', views.plot_sale_restore, name='plot_sale_restore'),
-    path('plot-sale/hard-delete/<int:id>/', views.plot_sale_hard_delete, name='plot_sale_hard_delete'),
+    path('plot-sale/restore/<str:id>/', views.plot_sale_restore, name='plot_sale_restore'),
+    path('plot-sale/hard-delete/<str:id>/', views.plot_sale_hard_delete, name='plot_sale_hard_delete'),
 
-    path('plot-resale/view/<int:id>/', views.plot_sale_view, name='plot_sale_view'),
-    path('plot-resale/delete/<int:id>/', views.plot_sale_delete, name='plot_sale_delete'),
+    path('plot-resale/view/<str:id>/', views.plot_sale_view, name='plot_sale_view'),
+    
+
+    path(
+    'plot-resale/delete/<str:id>/',
+    views.plot_sale_delete,
+    name='plot_sale_delete'
+    ),
+    path( 'plot-sale/edit/<str:plot_property_id>/',views.plot_sale_edit,name='plot_sale_edit'),
 
 
 
@@ -605,15 +623,26 @@ urlpatterns = [
     ################START URL SECTION RESALE AGRICULTURAL LISTING######################################################
   
     path('admin/add-agricultural-property/', views.add_agricultural_property, name='add_agricultural_property'),
+  
     path('admin/edit-agricultural/<int:pk>/', views.edit_agricultural_property, name='edit_agricultural_property'),
+
    
     path('agricultural-resale/bulk-delete/', views.agricultural_bulk_delete, name='agricultural_bulk_delete'),
     path('delete-agricultural/<int:pk>/', views.delete_agricultural_property, name='delete_agricultural_property'),
 
-    path('admin/view-agricultural/<int:pk>/', views.view_agricultural_property, name='view_agricultural_property'),
+    path('admin/view-agricultural/<str:pk>/', views.view_agricultural_property, name='view_agricultural_property'),
+    
+    path('import_agricultural_resale_excel', views.import_agricultural_resale_excel, name='import_agricultural_resale_excel'),
     
     path('admin/download-agri-sample/', views.download_agri_sample_excel, name='download_agri_sample_excel'),
- 
+
+    path('export/agricultural-resale/excel/', views.export_agricultural_resale_excel, name='export_agricultural_resale_excel'),
+    
+    # CSV Export URL
+    path('export/agricultural-resale/csv/', views.export_agricultural_resale_csv, name='export_agricultural_resale_csv'),
+
+    
+
 
     path('agricultural-resale/restore/<int:id>/', views.agricultural_resale_restore, name='agricultural_resale_restore'),
     path('agricultural-resale/hard-delete/<int:id>/', views.agricultural_resale_hard_delete, name='agricultural_resale_hard_delete'),

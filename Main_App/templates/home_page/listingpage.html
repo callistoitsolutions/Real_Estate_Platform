@@ -248,9 +248,6 @@ a{text-decoration:none;color:inherit;}
 
 {% include 'home_page/header.html' %}
 
-<!-- ════════════════════════════
-     TOP SEARCH BAR
-════════════════════════════ -->
 <div class="top-bar">
   <div class="top-bar-inner">
     <div class="type-toggle">
@@ -260,7 +257,6 @@ a{text-decoration:none;color:inherit;}
 
     <div class="loc-wrap">
       <div class="loc-bar" id="locBar" onclick="document.getElementById('locInput').focus()">
-        <!-- Existing area chips (multiple) -->
         {% for area in areas_list %}
           <span class="loc-chip">
             {{ area|title }}
@@ -283,13 +279,9 @@ a{text-decoration:none;color:inherit;}
   </div>
 </div>
 
-<!-- ════════════════════════════
-     FILTER STRIP
-════════════════════════════ -->
 <div class="filter-strip">
   <div class="filter-strip-inner">
 
-    <!-- BHK -->
     <div class="fpill {% if current_bhk %}active{% endif %}" id="pill-bhk" onclick="togglePanel('panel-bhk',this)">
       {% if current_bhk %}<span class="dot"></span> {{ current_bhk }}{% else %}BHK Type{% endif %}
       <i class="bi bi-chevron-down chevron"></i>
@@ -297,24 +289,17 @@ a{text-decoration:none;color:inherit;}
         <div class="pp-title">BHK Configuration</div>
         <div class="pp-options">
           <button class="pp-btn {% if current_bhk == '1RK' %}sel{% endif %}" onclick="selectBHK(this,'1RK')">1RK</button>
-
-<button class="pp-btn {% if current_bhk == '1BHK' %}sel{% endif %}" onclick="selectBHK(this,'1BHK')">1BHK</button>
-
-<button class="pp-btn {% if current_bhk == '2BHK' %}sel{% endif %}" onclick="selectBHK(this,'2BHK')">2BHK</button>
-
-<button class="pp-btn {% if current_bhk == '3BHK' %}sel{% endif %}" onclick="selectBHK(this,'3BHK')">3BHK</button>
-
-<button class="pp-btn {% if current_bhk == '4BHK' %}sel{% endif %}" onclick="selectBHK(this,'4BHK')">4BHK</button>
-
-<button class="pp-btn {% if current_bhk == '5BHK' %}sel{% endif %}" onclick="selectBHK(this,'5BHK')">5BHK</button>
-
-<button class="pp-btn {% if current_bhk == '5+BHK' %}sel{% endif %}" onclick="selectBHK(this,'5+BHK')">5+BHK</button>
+          <button class="pp-btn {% if current_bhk == '1BHK' %}sel{% endif %}" onclick="selectBHK(this,'1BHK')">1BHK</button>
+          <button class="pp-btn {% if current_bhk == '2BHK' %}sel{% endif %}" onclick="selectBHK(this,'2BHK')">2BHK</button>
+          <button class="pp-btn {% if current_bhk == '3BHK' %}sel{% endif %}" onclick="selectBHK(this,'3BHK')">3BHK</button>
+          <button class="pp-btn {% if current_bhk == '4BHK' %}sel{% endif %}" onclick="selectBHK(this,'4BHK')">4BHK</button>
+          <button class="pp-btn {% if current_bhk == '5BHK' %}sel{% endif %}" onclick="selectBHK(this,'5BHK')">5BHK</button>
+          <button class="pp-btn {% if current_bhk == '5+BHK' %}sel{% endif %}" onclick="selectBHK(this,'5+BHK')">5+BHK</button>
           <button class="pp-btn" onclick="selectBHK(this,'')">Any</button>
         </div>
       </div>
     </div>
 
-    <!-- Budget -->
     <div class="fpill {% if budget_min or budget_max %}active{% endif %}" id="pill-budget" onclick="togglePanel('panel-budget',this)">
       {% if budget_min or budget_max %}
         <span class="dot"></span>
@@ -325,7 +310,6 @@ a{text-decoration:none;color:inherit;}
       <i class="bi bi-chevron-down chevron"></i>
       <div class="pill-panel budget-panel" id="panel-budget" onclick="event.stopPropagation()">
         <div class="pp-title">Budget Range</div>
-        <!-- Histogram bars -->
         <div class="budget-hist" id="budgetHist">
           <div class="hist-bar in-range" style="height:25%"></div>
           <div class="hist-bar in-range" style="height:40%"></div>
@@ -354,63 +338,28 @@ a{text-decoration:none;color:inherit;}
       </div>
     </div>
 
-    <!-- Listed By -->
-   <!-- Listed By -->
-<div class="fpill {% if filter_owner or filter_agent or filter_builder %}active{% endif %}"
-     id="pill-listed"
-     onclick="togglePanel('panel-listed',this)">
-
-  {% if filter_owner %}
-      <span class="dot"></span> Owner
-
-  {% elif filter_agent %}
-      <span class="dot"></span> Agent
-
-  {% elif filter_builder %}
-      <span class="dot"></span> Builder
-
-  {% else %}
-      Listed By
-  {% endif %}
-
-  <i class="bi bi-chevron-down chevron"></i>
-
-  <div class="pill-panel"
-       id="panel-listed"
-       onclick="event.stopPropagation()">
-
-    <div class="pp-title">Listed By</div>
-
-    <div class="pp-options">
-
-      <!-- OWNER -->
-      <button class="pp-btn {% if filter_owner %}sel{% endif %}"
-              onclick="selectListedBy('owner')">
-        Owner
-      </button>
-
-      <!-- AGENT -->
-      <button class="pp-btn {% if filter_agent %}sel{% endif %}"
-              onclick="selectListedBy('agent')">
-        Agent
-      </button>
-
-      <!-- BUILDER -->
-      <button class="pp-btn {% if filter_builder %}sel{% endif %}"
-              onclick="selectListedBy('builder')">
-        Builder
-      </button>
-
-      <!-- ANY -->
-      <button class="pp-btn {% if not filter_owner and not filter_agent and not filter_builder %}sel{% endif %}"
-              onclick="selectListedBy('')">
-        Any
-      </button>
-
+    <div class="fpill {% if filter_owner or filter_agent or filter_builder %}active{% endif %}" id="pill-listed" onclick="togglePanel('panel-listed',this)">
+      {% if filter_owner %}
+          <span class="dot"></span> Owner
+      {% elif filter_agent %}
+          <span class="dot"></span> Agent
+      {% elif filter_builder %}
+          <span class="dot"></span> Builder
+      {% else %}
+          Listed By
+      {% endif %}
+      <i class="bi bi-chevron-down chevron"></i>
+      <div class="pill-panel" id="panel-listed" onclick="event.stopPropagation()">
+        <div class="pp-title">Listed By</div>
+        <div class="pp-options">
+          <button class="pp-btn {% if filter_owner %}sel{% endif %}" onclick="selectListedBy('owner')">Owner</button>
+          <button class="pp-btn {% if filter_agent %}sel{% endif %}" onclick="selectListedBy('agent')">Agent</button>
+          <button class="pp-btn {% if filter_builder %}sel{% endif %}" onclick="selectListedBy('builder')">Builder</button>
+          <button class="pp-btn {% if not filter_owner and not filter_agent and not filter_builder %}sel{% endif %}" onclick="selectListedBy('')">Any</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-    <!-- Furnishing -->
+
     <div class="fpill {% if current_furnishing %}active{% endif %}" id="pill-furn" onclick="togglePanel('panel-furn',this)">
       {% if current_furnishing %}<span class="dot"></span> {{ current_furnishing|title }}{% else %}Furnishing{% endif %}
       <i class="bi bi-chevron-down chevron"></i>
@@ -425,26 +374,19 @@ a{text-decoration:none;color:inherit;}
       </div>
     </div>
 
-    <!-- Property Type -->
     <div class="fpill {% if current_prop_type %}active{% endif %}" id="pill-ptype" onclick="togglePanel('panel-ptype',this)">
       {% if current_prop_type %}<span class="dot"></span> {{ current_prop_type }}{% else %}Property Type{% endif %}
       <i class="bi bi-chevron-down chevron"></i>
       <div class="pill-panel" id="panel-ptype" onclick="event.stopPropagation()">
         <div class="pp-title">Property Type</div>
         <div class="pp-options">
-        <button class="pp-btn {% if current_prop_type == 'Apartment' %}sel{% endif %}" onclick="selectPropType(this,'Apartment')">Apartment</button>
-
-<button class="pp-btn {% if current_prop_type == 'Independent House' %}sel{% endif %}" onclick="selectPropType(this,'Independent House')">Independent House</button>
-
-<button class="pp-btn {% if current_prop_type == 'Independent Floor' %}sel{% endif %}" onclick="selectPropType(this,'Independent Floor')">Independent Floor</button>
-
-<button class="pp-btn {% if current_prop_type == 'Studio' %}sel{% endif %}" onclick="selectPropType(this,'Studio')">Studio</button>
-
-<button class="pp-btn {% if current_prop_type == 'Duplex' %}sel{% endif %}" onclick="selectPropType(this,'Duplex')">Duplex</button>
-
-<button class="pp-btn {% if current_prop_type == 'Penthouse' %}sel{% endif %}" onclick="selectPropType(this,'Penthouse')">Penthouse</button>
-
-<button class="pp-btn {% if current_prop_type == 'Villa' %}sel{% endif %}" onclick="selectPropType(this,'Villa')">Villa</button>
+          <button class="pp-btn {% if current_prop_type == 'Apartment' %}sel{% endif %}" onclick="selectPropType(this,'Apartment')">Apartment</button>
+          <button class="pp-btn {% if current_prop_type == 'Independent House' %}sel{% endif %}" onclick="selectPropType(this,'Independent House')">Independent House</button>
+          <button class="pp-btn {% if current_prop_type == 'Independent Floor' %}sel{% endif %}" onclick="selectPropType(this,'Independent Floor')">Independent Floor</button>
+          <button class="pp-btn {% if current_prop_type == 'Studio' %}sel{% endif %}" onclick="selectPropType(this,'Studio')">Studio</button>
+          <button class="pp-btn {% if current_prop_type == 'Duplex' %}sel{% endif %}" onclick="selectPropType(this,'Duplex')">Duplex</button>
+          <button class="pp-btn {% if current_prop_type == 'Penthouse' %}sel{% endif %}" onclick="selectPropType(this,'Penthouse')">Penthouse</button>
+          <button class="pp-btn {% if current_prop_type == 'Villa' %}sel{% endif %}" onclick="selectPropType(this,'Villa')">Villa</button>
           <button class="pp-btn" onclick="selectPropType(this,'')">Any</button>
         </div>
       </div>
@@ -452,27 +394,23 @@ a{text-decoration:none;color:inherit;}
 
     <div class="fs-divider"></div>
 
-    <!-- Verified -->
     <div class="fpill {% if filter_verified %}active{% endif %}" onclick="toggleFilter('verified',this)">
       {% if filter_verified %}<span class="dot"></span>{% endif %}
       <i class="bi bi-patch-check-fill" style="font-size:0.8rem;color:{% if filter_verified %}var(--primary){% else %}var(--muted){% endif %};"></i>
       Verified
     </div>
 
-    <!-- Pet Friendly -->
     <div class="fpill {% if filter_pet %}active{% endif %}" onclick="toggleFilter('pet',this)">
       {% if filter_pet %}<span class="dot"></span>{% endif %}
       🐾 Pet Friendly
     </div>
 
-    <!-- More Filters -->
     <div class="fpill" onclick="openMoreFilters()" style="{% if active_more_count > 0 %}background:var(--primary-light);border-color:var(--primary);color:var(--primary);{% endif %}">
       {% if active_more_count > 0 %}<span class="dot"></span>{% endif %}
       <i class="bi bi-sliders" style="font-size:0.85rem;"></i>
       More Filters{% if active_more_count > 0 %} ({{ active_more_count }}){% endif %}
     </div>
 
-    <!-- Reset -->
     {% if active_filter_count > 0 %}
     <div class="fpill" onclick="resetAllFilters()" style="color:#ef4444;border-color:#fecaca;">
       <i class="bi bi-x-circle" style="font-size:0.85rem;"></i> Reset
@@ -482,9 +420,6 @@ a{text-decoration:none;color:inherit;}
   </div>
 </div>
 
-<!-- ════════════════════════════
-     MORE FILTERS DRAWER
-════════════════════════════ -->
 <div class="mf-overlay" id="mfOverlay" onclick="closeMoreFilters()"></div>
 <div class="mf-drawer" id="mfDrawer">
   <div class="mf-head">
@@ -492,7 +427,6 @@ a{text-decoration:none;color:inherit;}
     <button class="mf-close" onclick="closeMoreFilters()"><i class="bi bi-x-lg"></i></button>
   </div>
   <div class="mf-layout">
-    <!-- Sidebar nav -->
     <div class="mf-sidebar">
       <div class="mf-sidebar-item active" onclick="switchMFSection('sec-verified',this)">Verified</div>
       <div class="mf-sidebar-item" onclick="switchMFSection('sec-lease',this)">Lease Type</div>
@@ -503,7 +437,6 @@ a{text-decoration:none;color:inherit;}
       <div class="mf-sidebar-item" onclick="switchMFSection('sec-parking',this)">Parking</div>
       <div class="mf-sidebar-item" onclick="switchMFSection('sec-added',this)">Added</div>
     </div>
-    <!-- Content -->
     <div class="mf-content">
       <div class="mf-section active" id="sec-verified">
         <div class="mf-section-title">Verified</div>
@@ -551,29 +484,18 @@ a{text-decoration:none;color:inherit;}
       <div class="mf-section" id="sec-amenities">
         <div class="mf-section-title">Amenities</div>
         <div class="mf-options" id="amenitiesBtns">
-         <button class="mf-btn" data-amenity="Lift" onclick="toggleAmenity(this,'Lift')">Lift</button>
-
-<button class="mf-btn" data-amenity="Power Backup" onclick="toggleAmenity(this,'Power Backup')">Power Backup</button>
-
-<button class="mf-btn" data-amenity="Security" onclick="toggleAmenity(this,'Security')">Security</button>
-
-<button class="mf-btn" data-amenity="CCTV" onclick="toggleAmenity(this,'CCTV')">CCTV</button>
-
-<button class="mf-btn" data-amenity="Gym" onclick="toggleAmenity(this,'Gym')">Gym</button>
-
-<button class="mf-btn" data-amenity="Swimming Pool" onclick="toggleAmenity(this,'Swimming Pool')">Swimming Pool</button>
-
-<button class="mf-btn" data-amenity="Club House" onclick="toggleAmenity(this,'Club House')">Club House</button>
-
-<button class="mf-btn" data-amenity="Park" onclick="toggleAmenity(this,'Park')">Park</button>
-
-<button class="mf-btn" data-amenity="Intercom" onclick="toggleAmenity(this,'Intercom')">Intercom</button>
-
-<button class="mf-btn" data-amenity="Gated Society" onclick="toggleAmenity(this,'Gated Society')">Gated Society</button>
-
-<button class="mf-btn" data-amenity="Vastu Compliant" onclick="toggleAmenity(this,'Vastu Compliant')">Vastu Compliant</button>
-
-<button class="mf-btn" data-amenity="Water Supply 24x7" onclick="toggleAmenity(this,'Water Supply 24x7')">Water Supply 24x7</button>
+          <button class="mf-btn" data-amenity="Lift" onclick="toggleAmenity(this,'Lift')">Lift</button>
+          <button class="mf-btn" data-amenity="Power Backup" onclick="toggleAmenity(this,'Power Backup')">Power Backup</button>
+          <button class="mf-btn" data-amenity="Security" onclick="toggleAmenity(this,'Security')">Security</button>
+          <button class="mf-btn" data-amenity="CCTV" onclick="toggleAmenity(this,'CCTV')">CCTV</button>
+          <button class="mf-btn" data-amenity="Gym" onclick="toggleAmenity(this,'Gym')">Gym</button>
+          <button class="mf-btn" data-amenity="Swimming Pool" onclick="toggleAmenity(this,'Swimming Pool')">Swimming Pool</button>
+          <button class="mf-btn" data-amenity="Club House" onclick="toggleAmenity(this,'Club House')">Club House</button>
+          <button class="mf-btn" data-amenity="Park" onclick="toggleAmenity(this,'Park')">Park</button>
+          <button class="mf-btn" data-amenity="Intercom" onclick="toggleAmenity(this,'Intercom')">Intercom</button>
+          <button class="mf-btn" data-amenity="Gated Society" onclick="toggleAmenity(this,'Gated Society')">Gated Society</button>
+          <button class="mf-btn" data-amenity="Vastu Compliant" onclick="toggleAmenity(this,'Vastu Compliant')">Vastu Compliant</button>
+          <button class="mf-btn" data-amenity="Water Supply 24x7" onclick="toggleAmenity(this,'Water Supply 24x7')">Water Supply 24x7</button>
         </div>
       </div>
       <div class="mf-section" id="sec-parking">
@@ -600,12 +522,8 @@ a{text-decoration:none;color:inherit;}
   </div>
 </div>
 
-<!-- ════════════════════════════
-     MAIN CONTENT
-════════════════════════════ -->
 <div class="page-wrap">
 
-  <!-- breadcrumb -->
   <div style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;">
     <a href="/" style="color:var(--body-text);">Home</a>
     <span style="margin:0 5px;">›</span>
@@ -618,7 +536,6 @@ a{text-decoration:none;color:inherit;}
     {% endfor %}
   </div>
 
-  <!-- applied filter chips -->
   {% if active_filter_count > 0 %}
   <div class="applied-row">
     {% for area in areas_list %}
@@ -670,7 +587,6 @@ a{text-decoration:none;color:inherit;}
   </div>
   {% endif %}
 
-  <!-- results header -->
   <div class="results-hdr">
     <div>
       <div class="rh-count">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of <strong>{{ total|default:"0" }}</strong> properties</div>
@@ -688,12 +604,10 @@ a{text-decoration:none;color:inherit;}
     </select>
   </div>
 
-  <!-- ── CARDS ── -->
   <div class="listings-col" id="listingsCol">
     {% for p in properties %}
     <a href="/listing/{{ listing_type }}/{{ category|lower|slugify }}/{{ p.id }}/" class="pcard">
 
-      <!-- IMAGE SIDE -->
       <div class="pc-img-wrap">
         {% if p.image_url %}
           <img src="{{ p.image_url }}" alt="{{ p.title }}" loading="lazy">
@@ -718,41 +632,24 @@ a{text-decoration:none;color:inherit;}
             <div class="amt">{{ p.price_display|default:"Price on Request" }}</div>
             {% if listing_type == 'rent' %}<div class="per">per month</div>{% endif %}
           </div>
-          <button class="btn-save" onclick="event.preventDefault();toggleSave({{ p.id }},this)" title="Save">
+          <button class="btn-save" onclick="event.preventDefault();toggleSave('{{ p.id }}',this)" title="Save">
             <i class="bi bi-heart"></i>
           </button>
         </div>
       </div>
 
-      <!-- BODY SIDE -->
-   <div class="pc-body">
-
-    <div class="pc-top">
-
-        <div class="pc-owner-row">
-
+      <div class="pc-body">
+        <div class="pc-top">
+          <div class="pc-owner-row">
             <i class="bi bi-person-circle" style="font-size:0.9rem;"></i>
-
-            <!-- USER NAME -->
-            <strong>
-                {{ p.uploaded_by_name|default:"Unknown User" }}
-            </strong>
-
+            <strong>{{ p.uploaded_by_name|default:"Unknown User" }}</strong>
             <span>·</span>
-
-            <!-- USER ROLE -->
-            <span>
-                {{ p.uploaded_by_role|default:"Owner" }}
-            </span>
-
+            <span>{{ p.uploaded_by_role|default:"Owner" }}</span>
+          </div>
+          {% if p.is_new %}
+          <span class="pc-new-badge">New</span>
+          {% endif %}
         </div>
-
-        {% if p.is_new %}
-        <span class="pc-new-badge">New</span>
-        {% endif %}
-
-    </div>
-
 
         <div>
           <div class="pc-title">{{ p.title }}</div>
@@ -762,7 +659,6 @@ a{text-decoration:none;color:inherit;}
           </div>
         </div>
 
-        <!-- specs bar -->
         <div class="pc-specs">
           {% if p.area %}
           <div class="spec-col">
@@ -793,20 +689,12 @@ a{text-decoration:none;color:inherit;}
             <div class="spec-lbl">Floor</div>
           </div>
           {% endif %}
-          {% if p.bathrooms %}
-          <div class="spec-col" hidden>
-            <div class="spec-val">{{ p.bathrooms }}</div>
-            <div class="spec-lbl">Bathrooms</div>
-          </div>
-          {% endif %}
         </div>
 
-        <!-- short description / summary -->
         {% if p.description %}
         <div class="pc-desc">{{ p.description }}</div>
         {% endif %}
 
-        <!-- amenities + tags -->
         <div class="pc-highlights">
           {% if p.property_type %}
           <span class="hl-tag ptype">
@@ -825,7 +713,6 @@ a{text-decoration:none;color:inherit;}
           {% if p.pg_for %}
           <span class="hl-tag">👤 For {{ p.pg_for|title }}</span>
           {% endif %}
-          <!-- Amenities list (up to 4) -->
           {% for amenity in p.amenities|slice:":4" %}
           <span class="hl-tag">
             <i class="bi bi-check-circle" style="font-size:0.7rem;color:var(--green);"></i>
@@ -839,17 +726,16 @@ a{text-decoration:none;color:inherit;}
           {% endif %}
         </div>
 
-        <!-- footer -->
         <div class="pc-footer">
           <div class="pc-updated">
             <strong>Updated</strong> recently
             {% if p.facing %} · Facing {{ p.facing }}{% endif %}
           </div>
           <div class="pc-btns">
-            <button class="btn-whatsapp" onclick="event.preventDefault();whatsappListing('{{ p.phone }}','{{ p.title }}')">
+            <button class="btn-whatsapp" onclick="event.preventDefault();whatsappListing('{{ p.phone|escapejs }}','{{ p.title|escapejs }}')">
               <i class="fab fa-whatsapp"></i>
             </button>
-            <button class="btn-contact" onclick="event.preventDefault();callListing('{{ p.phone }}','{{ p.owner }}')">
+            <button class="btn-contact" onclick="event.preventDefault();callListing('{{ p.phone|escapejs }}','{{ p.uploaded_by_name|escapejs }}')">
               <i class="bi bi-telephone-fill"></i> Contact
             </button>
           </div>
@@ -866,7 +752,6 @@ a{text-decoration:none;color:inherit;}
     {% endfor %}
   </div>
 
-  <!-- PAGINATION -->
   {% if page_obj.paginator.num_pages > 1 %}
   <div class="pagination-row">
     {% if page_obj.has_previous %}
@@ -896,941 +781,387 @@ a{text-decoration:none;color:inherit;}
   <div class="pg-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} · {{ total }} total results</div>
   {% endif %}
 
-</div><!-- /page-wrap -->
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-
-
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
 <script>
-
 // ════════════════════════════════════════
-// FILTER STATE
+// SECURE FILTER STATE (DEFAULTS APPLIED)
 // ════════════════════════════════════════
-
 const FS = {
-
-  type: '{{ listing_type|escapejs }}',
-
-  category: '{{ category|escapejs }}',
-
+  type: '{{ listing_type|default:"rent"|escapejs }}',
+  category: '{{ category|default:""|escapejs }}',
   areas: {{ areas_json|default:"[]"|safe }},
-
-  bhk: '{{ current_bhk|escapejs }}',
-
-  budget_min: '{{ budget_min|escapejs }}',
-
-  budget_max: '{{ budget_max|escapejs }}',
-
-  furnishing: '{{ current_furnishing|escapejs }}',
-
-  prop_type: '{{ current_prop_type|escapejs }}',
-
-  sort: '{{ current_sort|escapejs }}',
-
-  verified: '{{ filter_verified|escapejs }}',
-
-  owner: '{{ filter_owner|escapejs }}',
-
-  agent: '{{ filter_agent|escapejs }}',
-
-  builder: '{{ filter_builder|escapejs }}',
-
-  pet: '{{ filter_pet|escapejs }}',
-
-  lease: '{{ filter_lease|escapejs }}',
-
-  bathrooms: '{{ filter_bathrooms|escapejs }}',
-
-  area_range: '{{ filter_area_range|escapejs }}',
-
-  age: '{{ filter_age|escapejs }}',
-
+  bhk: '{{ current_bhk|default:""|escapejs }}',
+  budget_min: '{{ budget_min|default:""|escapejs }}',
+  budget_max: '{{ budget_max|default:""|escapejs }}',
+  furnishing: '{{ current_furnishing|default:""|escapejs }}',
+  prop_type: '{{ current_prop_type|default:""|escapejs }}',
+  sort: '{{ current_sort|default:"relevant"|escapejs }}',
+  verified: '{{ filter_verified|default:""|escapejs }}',
+  owner: '{{ filter_owner|default:""|escapejs }}',
+  agent: '{{ filter_agent|default:""|escapejs }}',
+  builder: '{{ filter_builder|default:""|escapejs }}',
+  pet: '{{ filter_pet|default:""|escapejs }}',
+  lease: '{{ filter_lease|default:""|escapejs }}',
+  bathrooms: '{{ filter_bathrooms|default:""|escapejs }}',
+  area_range: '{{ filter_area_range|default:""|escapejs }}',
+  age: '{{ filter_age|default:""|escapejs }}',
   amenities: {{ amenities_json|default:"[]"|safe }},
-
-  parking: '{{ filter_parking|escapejs }}',
-
-  added: '{{ filter_added|escapejs }}',
+  parking: '{{ filter_parking|default:""|escapejs }}',
+  added: '{{ filter_added|default:""|escapejs }}',
 };
 
-
-// ════════════════════════════════════════
-// MORE FILTER STATE
-// ════════════════════════════════════════
-
 let MF = {
-
   verified: FS.verified,
-
   lease: FS.lease,
-
   bathrooms: FS.bathrooms,
-
   area_range: FS.area_range,
-
   age: FS.age,
-
   amenities: [...FS.amenities],
-
   parking: FS.parking,
-
   added: FS.added,
 };
 
-
 // ════════════════════════════════════════
-// BUILD URL
+// URL BUILDER ENGINE
 // ════════════════════════════════════════
-
 function buildURL(page) {
-
   const p = new URLSearchParams();
-
   p.set('type', FS.type);
-
-  if (FS.category)
-      p.set('category', FS.category);
-
-  if (FS.areas.length)
-      p.set('areas', FS.areas.join(','));
-
-  if (FS.bhk)
-      p.set('bhk', FS.bhk);
-
-  if (FS.budget_min)
-      p.set('budget_min', FS.budget_min);
-
-  if (FS.budget_max && FS.budget_max !== '200000')
-      p.set('budget_max', FS.budget_max);
-
-  if (FS.furnishing)
-      p.set('furnishing', FS.furnishing);
-
-  if (FS.prop_type)
-      p.set('prop_type', FS.prop_type);
-
-  if (FS.sort)
-      p.set('sort', FS.sort);
-
-  if (FS.verified)
-      p.set('verified', '1');
-
-  // LISTED BY
-
-  if (FS.owner)
-      p.set('owner', '1');
-
-  if (FS.agent)
-      p.set('agent', '1');
-
-  if (FS.builder)
-      p.set('builder', '1');
-
-  if (FS.pet)
-      p.set('pet', '1');
-
-  if (FS.lease)
-      p.set('lease', FS.lease);
-
-  if (FS.bathrooms)
-      p.set('bathrooms', FS.bathrooms);
-
-  if (FS.area_range)
-      p.set('area_range', FS.area_range);
-
-  if (FS.age)
-      p.set('age', FS.age);
-
-  if (FS.amenities.length)
-      p.set('amenities', FS.amenities.join(','));
-
-  if (FS.parking)
-      p.set('parking', FS.parking);
-
-  if (FS.added)
-      p.set('added', FS.added);
-
-  if (page && page > 1)
-      p.set('page', page);
+  if (FS.category) p.set('category', FS.category);
+  if (FS.areas.length) p.set('areas', FS.areas.join(','));
+  if (FS.bhk) p.set('bhk', FS.bhk);
+  if (FS.budget_min) p.set('budget_min', FS.budget_min);
+  if (FS.budget_max && FS.budget_max !== '200000') p.set('budget_max', FS.budget_max);
+  if (FS.furnishing) p.set('furnishing', FS.furnishing);
+  if (FS.prop_type) p.set('prop_type', FS.prop_type);
+  if (FS.sort) p.set('sort', FS.sort);
+  if (FS.verified) p.set('verified', '1');
+  if (FS.owner) p.set('owner', '1');
+  if (FS.agent) p.set('agent', '1');
+  if (FS.builder) p.set('builder', '1');
+  if (FS.pet) p.set('pet', '1');
+  if (FS.lease) p.set('lease', FS.lease);
+  if (FS.bathrooms) p.set('bathrooms', FS.bathrooms);
+  if (FS.area_range) p.set('area_range', FS.area_range);
+  if (FS.age) p.set('age', FS.age);
+  if (FS.amenities.length) p.set('amenities', FS.amenities.join(','));
+  if (FS.parking) p.set('parking', FS.parking);
+  if (FS.added) p.set('added', FS.added);
+  if (page && page > 1) p.set('page', page);
 
   return window.location.pathname + '?' + p.toString();
 }
 
 function go(page) {
-
   window.location.href = buildURL(page);
 }
 
-
-// ════════════════════════════════════════
-// TYPE TOGGLE
-// ════════════════════════════════════════
-
 function switchType(t) {
-
   FS.type = t;
-
-  document.getElementById('toggleRent')
-      .classList.toggle('active', t === 'rent');
-
-  document.getElementById('toggleSale')
-      .classList.toggle('active', t === 'sale');
-
+  document.getElementById('toggleRent').classList.toggle('active', t === 'rent');
+  document.getElementById('toggleSale').classList.toggle('active', t === 'sale');
   go();
 }
 
-
-// ════════════════════════════════════════
-// LOCATION FILTER
-// ════════════════════════════════════════
-
 function removeAreaChip(area) {
-
-  FS.areas = FS.areas.filter(
-      a => a.toLowerCase() !== area.toLowerCase()
-  );
-
+  FS.areas = FS.areas.filter(a => a.toLowerCase() !== area.toLowerCase());
   go();
 }
 
 function applyLocSearch() {
-
   const inp = document.getElementById('locInput').value.trim();
-
-  if (
-      inp &&
-      !FS.areas.map(a => a.toLowerCase()).includes(inp.toLowerCase())
-  ) {
-      FS.areas.push(inp);
+  if (inp && !FS.areas.map(a => a.toLowerCase()).includes(inp.toLowerCase())) {
+    FS.areas.push(inp);
   }
-
   document.getElementById('locInput').value = '';
-
   go();
 }
 
-
 // ════════════════════════════════════════
-// AUTOCOMPLETE
+// AUTOCOMPLETE ENGINE
 // ════════════════════════════════════════
-
-let acTimer = null;
-
-let acIndex = -1;
-
-let acData = [];
+let acTimer = null, acIndex = -1, acData = [];
 
 function fetchAC(q) {
-
   clearTimeout(acTimer);
-
   q = q.trim();
-
   if (q.length < 2) {
-
-      closeAC();
-
-      return;
+    closeAC();
+    return;
   }
-
   acTimer = setTimeout(() => {
-
-      fetch(`/api/search-suggestions/?q=${encodeURIComponent(q)}&type=${FS.type}`)
-
+    fetch(`/api/search-suggestions/?q=${encodeURIComponent(q)}&type=${FS.type}`)
       .then(r => r.json())
-
       .then(d => renderAC(d.suggestions || []))
-
       .catch(() => closeAC());
-
   }, 220);
 }
 
 function renderAC(items) {
-
   const drop = document.getElementById('acDrop');
-
   acData = items;
-
   acIndex = -1;
-
   if (!items.length) {
-
-      drop.innerHTML = `
-        <div class="ac-empty">
-            No suggestions found
-        </div>
-      `;
-
-      drop.classList.add('open');
-
-      return;
+    drop.innerHTML = `<div class="ac-empty">No suggestions found</div>`;
+    drop.classList.add('open');
+    return;
   }
-
   drop.innerHTML = items.map((it, i) => {
-
-      const city = it.type === 'City';
-
-      const alreadyAdded = FS.areas
-          .map(a => a.toLowerCase())
-          .includes(it.text.toLowerCase());
-
-      return `
-        <div
-            class="ac-item ${alreadyAdded ? 'hl' : ''}"
-            data-i="${i}"
-            onmousedown="pickAC('${it.text.replace(/'/g,"\\'")}')"
-        >
-
-          <div class="ac-icon ${city ? 'city-ic' : ''}">
-              <i class="bi ${city ? 'bi-geo-alt-fill' : 'bi-geo-alt'}"></i>
-          </div>
-
-          <span>${it.text}</span>
-
-          ${
-            alreadyAdded
-            ?
-            `<span style="font-size:0.7rem;color:green;margin-left:auto;">
-                Added
-             </span>`
-            :
-            `<span class="ac-badge ${city ? 'city' : ''}">
-                ${it.type}
-             </span>`
-          }
-
+    const city = it.type === 'City';
+    const alreadyAdded = FS.areas.map(a => a.toLowerCase()).includes(it.text.toLowerCase());
+    return `
+      <div class="ac-item ${alreadyAdded ? 'hl' : ''}" data-i="${i}" onmousedown="pickAC('${it.text.replace(/'/g,"\\'")}')">
+        <div class="ac-icon ${city ? 'city-ic' : ''}">
+          <i class="bi ${city ? 'bi-geo-alt-fill' : 'bi-geo-alt'}"></i>
         </div>
-      `;
-
+        <span>${it.text}</span>
+        ${alreadyAdded ? `<span style="font-size:0.7rem;color:green;margin-left:auto;">Added</span>` : `<span class="ac-badge ${city ? 'city' : ''}">${it.type}</span>`}
+      </div>`;
   }).join('');
-
   drop.classList.add('open');
 }
 
 function pickAC(text) {
-
-  if (
-      !FS.areas.map(a => a.toLowerCase()).includes(text.toLowerCase())
-  ) {
-      FS.areas.push(text);
+  if (!FS.areas.map(a => a.toLowerCase()).includes(text.toLowerCase())) {
+    FS.areas.push(text);
   }
-
   document.getElementById('locInput').value = '';
-
   closeAC();
-
   go();
 }
 
 function closeAC() {
-
   const d = document.getElementById('acDrop');
-
   if (d) {
-
-      d.classList.remove('open');
-
-      d.innerHTML = '';
+    d.classList.remove('open');
+    d.innerHTML = '';
   }
-
   acIndex = -1;
 }
 
 function handleACKey(e) {
-
   const items = document.querySelectorAll('#acDrop .ac-item');
-
   if (e.key === 'ArrowDown') {
-
+    e.preventDefault();
+    acIndex = Math.min(acIndex + 1, items.length - 1);
+    items.forEach((el, i) => { el.classList.toggle('hl', i === acIndex); });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acIndex = Math.max(acIndex - 1, -1);
+    items.forEach((el, i) => { el.classList.toggle('hl', i === acIndex); });
+  } else if (e.key === 'Enter') {
+    if (acIndex >= 0 && acData[acIndex]) {
       e.preventDefault();
-
-      acIndex = Math.min(acIndex + 1, items.length - 1);
-
-      items.forEach((el, i) => {
-          el.classList.toggle('hl', i === acIndex);
-      });
-  }
-
-  else if (e.key === 'ArrowUp') {
-
-      e.preventDefault();
-
-      acIndex = Math.max(acIndex - 1, -1);
-
-      items.forEach((el, i) => {
-          el.classList.toggle('hl', i === acIndex);
-      });
-  }
-
-  else if (e.key === 'Enter') {
-
-      if (acIndex >= 0 && acData[acIndex]) {
-
-          e.preventDefault();
-
-          pickAC(acData[acIndex].text);
-      }
-
-      else {
-
-          applyLocSearch();
-      }
-  }
-
-  else if (e.key === 'Escape') {
-
-      closeAC();
+      pickAC(acData[acIndex].text);
+    } else {
+      applyLocSearch();
+    }
+  } else if (e.key === 'Escape') {
+    closeAC();
   }
 }
 
-
-// ════════════════════════════════════════
-// CLICK EVENTS
-// ════════════════════════════════════════
-
 document.addEventListener('click', e => {
-
-  if (!e.target.closest('.loc-wrap'))
-      closeAC();
-
-  if (!e.target.closest('.fpill'))
-      closeAllPanels();
+  if (!e.target.closest('.loc-wrap')) closeAC();
+  if (!e.target.closest('.fpill')) closeAllPanels();
 });
 
-
-// ════════════════════════════════════════
-// FILTER PANELS
-// ════════════════════════════════════════
-
 function togglePanel(id, pillEl) {
-
   const panel = document.getElementById(id);
-
   const isOpen = panel.classList.contains('open');
-
   closeAllPanels();
-
   if (!isOpen) {
-
-      const rect = pillEl.getBoundingClientRect();
-
-      panel.style.top = (rect.bottom + 6) + 'px';
-
-      const panelW = 260;
-
-      let left = rect.left;
-
-      if (left + panelW > window.innerWidth - 12) {
-
-          left = window.innerWidth - panelW - 12;
-      }
-
-      panel.style.left = left + 'px';
-
-      panel.style.right = 'auto';
-
-      panel.classList.add('open');
+    const rect = pillEl.getBoundingClientRect();
+    panel.style.top = (rect.bottom + 6) + 'px';
+    const panelW = 260;
+    let left = rect.left;
+    if (left + panelW > window.innerWidth - 12) {
+      left = window.innerWidth - panelW - 12;
+    }
+    panel.style.left = left + 'px';
+    panel.style.right = 'auto';
+    panel.classList.add('open');
   }
 }
 
 function closeAllPanels() {
-
-  document.querySelectorAll('.pill-panel')
-      .forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.pill-panel').forEach(p => p.classList.remove('open'));
 }
 
-window.addEventListener(
-  'scroll',
-  closeAllPanels,
-  { passive: true }
-);
+window.addEventListener('scroll', closeAllPanels, { passive: true });
+window.addEventListener('resize', closeAllPanels, { passive: true });
 
-window.addEventListener(
-  'resize',
-  closeAllPanels,
-  { passive: true }
-);
-
-
-// ════════════════════════════════════════
-// FILTER SELECTION
-// ════════════════════════════════════════
-
-function selectBHK(btn, val) {
-
-  FS.bhk = val;
-
-  go();
-}
-
-function selectFurn(btn, val) {
-
-  FS.furnishing = val;
-
-  go();
-}
-
-function selectPropType(btn, val) {
-
-  FS.prop_type = val;
-
-  go();
-}
-
-function toggleFilter(key, pill) {
-
-  FS[key] = FS[key] ? '' : '1';
-
-  go();
-}
-
-
-// ════════════════════════════════════════
-// LISTED BY
-// ════════════════════════════════════════
+function selectBHK(btn, val) { FS.bhk = val; go(); }
+function selectFurn(btn, val) { FS.furnishing = val; go(); }
+function selectPropType(btn, val) { FS.prop_type = val; go(); }
+function toggleFilter(key, pill) { FS[key] = FS[key] ? '' : '1'; go(); }
 
 function selectListedBy(type) {
-
-  FS.owner = '';
-
-  FS.agent = '';
-
-  FS.builder = '';
-
-  if (type === 'owner') {
-
-      FS.owner = '1';
-  }
-
-  else if (type === 'agent') {
-
-      FS.agent = '1';
-  }
-
-  else if (type === 'builder') {
-
-      FS.builder = '1';
-  }
-
+  FS.owner = ''; FS.agent = ''; FS.builder = '';
+  if (type === 'owner') FS.owner = '1';
+  else if (type === 'agent') FS.agent = '1';
+  else if (type === 'builder') FS.builder = '1';
   go();
 }
 
-
-// ════════════════════════════════════════
-// BUDGET RANGE
-// ════════════════════════════════════════
-
 function fmtMoney(v) {
-
   v = parseInt(v);
-
-  if (v >= 100000)
-      return '₹' + (v/100000).toFixed(v%100000===0?0:1) + 'L';
-
-  if (v >= 1000)
-      return '₹' + (v/1000).toFixed(0) + 'K';
-
+  if (v >= 100000) return '₹' + (v/100000).toFixed(v%100000===0?0:1) + 'L';
+  if (v >= 1000) return '₹' + (v/1000).toFixed(0) + 'K';
   return '₹' + v;
 }
 
 function updateRange() {
-
   const rMin = document.getElementById('rangeMin');
-
   const rMax = document.getElementById('rangeMax');
-
-  if (!rMin || !rMax)
-      return;
+  if (!rMin || !rMax) return;
 
   let lo = parseInt(rMin.value);
-
   let hi = parseInt(rMax.value);
-
-  if (lo > hi) {
-
-      rMin.value = hi;
-
-      lo = hi;
-  }
+  if (lo > hi) { rMin.value = hi; lo = hi; }
 
   const pct_lo = (lo / 200000) * 100;
-
   const pct_hi = (hi / 200000) * 100;
 
   const fill = document.getElementById('rangeFill');
-
   if (fill) {
-
-      fill.style.left = pct_lo + '%';
-
-      fill.style.width = (pct_hi - pct_lo) + '%';
+    fill.style.left = pct_lo + '%';
+    fill.style.width = (pct_hi - pct_lo) + '%';
   }
 
   document.getElementById('bValMin').textContent = fmtMoney(lo);
-
-  document.getElementById('bValMax').textContent =
-      hi >= 200000 ? '₹Any' : fmtMoney(hi);
+  document.getElementById('bValMax').textContent = hi >= 200000 ? '₹Any' : fmtMoney(hi);
 
   const bars = document.querySelectorAll('.hist-bar');
-
   bars.forEach((bar, i) => {
-
-      const barPct = (i + 0.5) / bars.length * 100;
-
-      bar.classList.toggle(
-          'in-range',
-          barPct >= pct_lo && barPct <= pct_hi
-      );
+    const barPct = (i + 0.5) / bars.length * 100;
+    bar.classList.toggle('in-range', barPct >= pct_lo && barPct <= pct_hi);
   });
 }
 
 function applyBudget() {
-
-  const lo = parseInt(
-      document.getElementById('rangeMin').value
-  );
-
-  const hi = parseInt(
-      document.getElementById('rangeMax').value
-  );
-
-  FS.budget_min = lo > 0 ? String(lo) : '';
-
-  FS.budget_max = hi < 200000 ? String(hi) : '';
-
+  const lo = document.getElementById('rangeMin').value;
+  const hi = document.getElementById('rangeMax').value;
+  FS.budget_min = parseInt(lo) > 0 ? String(lo) : '';
+  FS.budget_max = parseInt(hi) < 200000 ? String(hi) : '';
   go();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-
-  updateRange();
-});
-
+document.addEventListener('DOMContentLoaded', () => { updateRange(); });
 
 // ════════════════════════════════════════
-// MORE FILTERS
+// MORE FILTERS DRAWER MANAGEMENT
 // ════════════════════════════════════════
-
 function openMoreFilters() {
-
-  document.getElementById('mfOverlay')
-      .classList.add('open');
-
-  document.getElementById('mfDrawer')
-      .classList.add('open');
-
+  document.getElementById('mfOverlay').classList.add('open');
+  document.getElementById('mfDrawer').classList.add('open');
   document.body.style.overflow = 'hidden';
-
-  document.querySelectorAll('#amenitiesBtns .mf-btn')
-      .forEach(btn => {
-
-          btn.classList.toggle(
-              'sel',
-              MF.amenities.includes(btn.dataset.amenity)
-          );
-      });
+  document.querySelectorAll('#amenitiesBtns .mf-btn').forEach(btn => {
+    btn.classList.toggle('sel', MF.amenities.includes(btn.dataset.amenity));
+  });
 }
 
 function closeMoreFilters() {
-
-  document.getElementById('mfOverlay')
-      .classList.remove('open');
-
-  document.getElementById('mfDrawer')
-      .classList.remove('open');
-
+  document.getElementById('mfOverlay').classList.remove('open');
+  document.getElementById('mfDrawer').classList.remove('open');
   document.body.style.overflow = '';
 }
 
 function switchMFSection(sectionId, item) {
-
-  document.querySelectorAll('.mf-section')
-      .forEach(s => s.classList.remove('active'));
-
-  document.querySelectorAll('.mf-sidebar-item')
-      .forEach(s => s.classList.remove('active'));
-
-  document.getElementById(sectionId)
-      .classList.add('active');
-
+  document.querySelectorAll('.mf-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.mf-sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById(sectionId).classList.add('active');
   item.classList.add('active');
 }
 
 function toggleMFBtn(btn, key, val) {
-
   const isActive = btn.classList.contains('sel');
-
-  const siblings = btn.closest('.mf-options')
-      .querySelectorAll('.mf-btn');
-
+  const siblings = btn.closest('.mf-options').querySelectorAll('.mf-btn');
   siblings.forEach(b => b.classList.remove('sel'));
-
   if (!isActive) {
-
-      btn.classList.add('sel');
-
-      MF[key.replace('mf_', '')] = val || '1';
-  }
-
-  else {
-
-      MF[key.replace('mf_', '')] = '';
+    btn.classList.add('sel');
+    MF[key.replace('mf_', '')] = val || '1';
+  } else {
+    MF[key.replace('mf_', '')] = '';
   }
 }
 
 function toggleAmenity(btn, name) {
-
   btn.classList.toggle('sel');
-
   if (btn.classList.contains('sel')) {
-
-      if (!MF.amenities.includes(name)) {
-
-          MF.amenities.push(name);
-      }
-  }
-
-  else {
-
-      MF.amenities = MF.amenities.filter(a => a !== name);
+    if (!MF.amenities.includes(name)) MF.amenities.push(name);
+  } else {
+    MF.amenities = MF.amenities.filter(a => a !== name);
   }
 }
 
 function clearMoreFilters() {
-
-  MF = {
-
-      verified: '',
-
-      lease: '',
-
-      bathrooms: '',
-
-      area_range: '',
-
-      age: '',
-
-      amenities: [],
-
-      parking: '',
-
-      added: '',
-  };
-
-  document.querySelectorAll('#mfDrawer .mf-btn')
-      .forEach(b => b.classList.remove('sel'));
+  MF = { verified: '', lease: '', bathrooms: '', area_range: '', age: '', amenities: [], parking: '', added: '' };
+  document.querySelectorAll('#mfDrawer .mf-btn').forEach(b => b.classList.remove('sel'));
 }
 
 function applyMoreFilters() {
-
   FS.verified = MF.verified;
-
   FS.lease = MF.lease;
-
   FS.bathrooms = MF.bathrooms;
-
   FS.area_range = MF.area_range;
-
   FS.age = MF.age;
-
   FS.amenities = [...MF.amenities];
-
   FS.parking = MF.parking;
-
   FS.added = MF.added;
-
   closeMoreFilters();
-
   go();
 }
 
-
-// ════════════════════════════════════════
-// REMOVE FILTERS
-// ════════════════════════════════════════
-
 function removeFilterParam(key) {
-
   const p = new URLSearchParams(window.location.search);
-
-  const map = {
-
-      bhk: 'bhk',
-
-      budget_min: 'budget_min',
-
-      budget_max: 'budget_max',
-
-      furnishing: 'furnishing',
-
-      prop_type: 'prop_type',
-
-      verified: 'verified',
-
-      owner: 'owner',
-
-      agent: 'agent',
-
-      builder: 'builder',
-
-      pet: 'pet',
-
-      lease: 'lease',
-
-      area: 'areas',
-  };
-
+  const map = { bhk: 'bhk', budget_min: 'budget_min', budget_max: 'budget_max', furnishing: 'furnishing', prop_type: 'prop_type', verified: 'verified', owner: 'owner', agent: 'agent', builder: 'builder', pet: 'pet', lease: 'lease', area: 'areas' };
   p.delete(map[key] || key);
-
-  window.location.href =
-      window.location.pathname + '?' + p.toString();
+  window.location.href = window.location.pathname + '?' + p.toString();
 }
 
 function resetAllFilters() {
-
-  FS.areas = [];
-
-  FS.bhk = '';
-
-  FS.budget_min = '';
-
-  FS.budget_max = '';
-
-  FS.furnishing = '';
-
-  FS.prop_type = '';
-
-  FS.verified = '';
-
-  FS.owner = '';
-
-  FS.agent = '';
-
-  FS.builder = '';
-
-  FS.pet = '';
-
-  FS.lease = '';
-
-  FS.bathrooms = '';
-
-  FS.area_range = '';
-
-  FS.age = '';
-
-  FS.amenities = [];
-
-  FS.parking = '';
-
-  FS.added = '';
-
+  FS.areas = []; FS.bhk = ''; FS.budget_min = ''; FS.budget_max = ''; FS.furnishing = ''; FS.prop_type = ''; FS.verified = ''; FS.owner = ''; FS.agent = ''; FS.builder = ''; FS.pet = ''; FS.lease = ''; FS.bathrooms = ''; FS.area_range = ''; FS.age = ''; FS.amenities = []; FS.parking = ''; FS.added = '';
   go();
 }
 
 function applySorting(val) {
-
   const p = new URLSearchParams(window.location.search);
-
   p.set('sort', val);
-
-  window.location.href =
-      window.location.pathname + '?' + p.toString();
+  window.location.href = window.location.pathname + '?' + p.toString();
 }
 
-
-// ════════════════════════════════════════
-// CARD ACTIONS
-// ════════════════════════════════════════
-
 function toggleSave(id, btn) {
-
   btn.classList.toggle('saved');
-
-  btn.querySelector('i').className =
-      btn.classList.contains('saved')
-      ? 'bi bi-heart-fill'
-      : 'bi bi-heart';
+  btn.querySelector('i').className = btn.classList.contains('saved') ? 'bi bi-heart-fill' : 'bi bi-heart';
 }
 
 function callListing(phone, ownerName) {
-
   Swal.fire({
-
-      title: 'Contact ' + (ownerName || 'Owner'),
-
-      html: `
+    title: 'Contact ' + (ownerName || 'Owner'),
+    html: `
       <div style="text-align:center;padding:10px 0;">
-
-          <div style="
-              width:60px;
-              height:60px;
-              background:#ede8fe;
-              border-radius:50%;
-              display:flex;
-              align-items:center;
-              justify-content:center;
-              margin:0 auto 14px;
-              font-size:1.5rem;
-          ">
-              📞
-          </div>
-
-          <div style="
-              font-size:1.6rem;
-              font-weight:800;
-              color:#6C3CF4;
-              margin-bottom:4px;
-          ">
-              ${phone || 'N/A'}
-          </div>
-
-          <p style="
-              font-size:0.82rem;
-              color:#9098a9;
-          ">
-              Please mention you found this on PropCRM
-          </p>
-
-      </div>
-      `,
-
-      confirmButtonColor: '#6C3CF4',
-
-      confirmButtonText:
-          '<i class="bi bi-telephone-fill" style="margin-right:6px;"></i>Call Now',
-
-      showCancelButton: true,
-
-      cancelButtonText: 'Close'
-  })
-
-  .then(r => {
-
-      if (r.isConfirmed && phone) {
-
-          window.location.href = 'tel:' + phone;
-      }
+        <div style="width:60px;height:60px;background:#ede8fe;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.5rem;">📞</div>
+        <div style="font-size:1.6rem;font-weight:800;color:#6C3CF4;margin-bottom:4px;">${phone || 'N/A'}</div>
+        <p style="font-size:0.82rem;color:#9098a9;">Please mention you found this on PropCRM</p>
+      </div>`,
+    confirmButtonColor: '#6C3CF4',
+    confirmButtonText: '<i class="bi bi-telephone-fill" style="margin-right:6px;"></i>Call Now',
+    showCancelButton: true,
+    cancelButtonText: 'Close'
+  }).then(r => {
+    if (r.isConfirmed && phone) { window.location.href = 'tel:' + phone; }
   });
 }
 
 function whatsappListing(phone, title) {
-
-  if (!phone)
-      return;
-
-  const msg = encodeURIComponent(
-      `Hi, I found your property "${title}" on PropCRM. Is it still available?`
-  );
-
-  window.open(
-      `https://wa.me/91${phone.replace(/\D/g,'')}?text=${msg}`,
-      '_blank'
-  );
+  if (!phone) return;
+  const msg = encodeURIComponent(`Hi, I found your property "${title}" on PropCRM. Is it still available?`);
+  window.open(`https://wa.me/91${phone.replace(/\D/g,'')}?text=${msg}`, '_blank');
 }
-
 </script>
 </body>
 </html>

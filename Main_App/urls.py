@@ -115,12 +115,10 @@ urlpatterns = [
     path('api/search-suggestions/', views.search_suggestions_api, name='search_suggestions'),
     path('listingpage/', views.listings_view, name='listings'),
    
-    path('listing/<str:listing_type>/<str:category>/<int:pk>/', views.property_detail_view, name='property_detail'),
-
-    ############ urls for track utm link #######################
-
-    path('Track_utm_link', views.Track_utm_link, name='Track_utm_link'),
     
+    # Change <int:pk> to <str:pk> to allow alphanumeric UUIDs
+    path('listing/<str:listing_type>/<str:category>/<str:pk>/', views.property_detail_view, name='property_detail'),
+
     path(
         "save-property-enquiry/",
         views.save_property_enquiry,
