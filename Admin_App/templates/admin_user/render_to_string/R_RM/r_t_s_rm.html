@@ -51,6 +51,7 @@
             <th>City</th>
             <th>Address</th>
             <th>Register Date</th>
+            <th>Register Time</th>
         </tr>
     </thead>
 
@@ -102,6 +103,7 @@
             <td>{{ rm.user_city }}</td>
             <td>{{ rm.user_address }}</td>
             <td>{{ rm.user_register_date }}</td>
+            <td>{{ rm.user_register_time }}</td>
 
         </tr>
 
@@ -118,7 +120,7 @@
 
     var table = $('#RmTable').DataTable({
         dom: '<"table-header"Blf>rt<"table-footer"ip>',
-        buttons: ['excel','csv'],
+        buttons: ['excel'],
         paging: true,
         ordering: true,
         info: true,

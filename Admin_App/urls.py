@@ -45,6 +45,10 @@ urlpatterns = [
 
      path('View_Contact_Enquiry/<int:id>',views.View_Contact_Enquiry,name="View_Contact_Enquiry"),
 
+     ######## urls for upload contact enquiries data via excel ###############
+
+     path('Contacts_Data',views.Contacts_Data,name="Contacts_Data"),
+
      ############# urls for ameneties list ############################
 
      path('Ameneties_List',views.Ameneties_List,name="Ameneties_List"),
@@ -116,6 +120,10 @@ urlpatterns = [
     ############## urls for ajax for normal faqs ####################
 
     path('Faq_Ajax',views.Faq_Ajax,name="Faq_Ajax"),
+
+    ############# urls for upload faqs data via excel #####################
+
+    path('Faq_Data',views.Faq_Data,name="Faq_Data"),
 
     ############## urls for delete faqs ############################
 

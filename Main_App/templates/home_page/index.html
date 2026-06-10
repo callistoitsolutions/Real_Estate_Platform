@@ -902,7 +902,7 @@ footer { background: #0f172a; padding: 60px 20px 30px; color: rgba(255,255,255,.
                  data-for="{{ plan.plan_for }}"
                  data-duration="{% if '1' in plan.plan_duration %}1-month{% elif '3' in plan.plan_duration %}3-months{% elif '6' in plan.plan_duration %}6-months{% elif '12' in plan.plan_duration %}12-months{% endif %}">
                 <div class="plan-card {% if 'Standard' in plan.plan_type %}popular{% endif %}">
-                    {% if 'Standard Plan' in plan.plan_type %}<div class="plan-popular-badge">⭐ Most Popular</div>{% endif %}
+                    {% if 'Standard Plan' in plan.plan_type %}<div class="plan-popular-badg     e">⭐ Most Popular</div>{% endif %}
                     <h5 style="font-weight:800;color:#667eea;margin-top:{% if 'Standard' in plan.plan_type %}10px{% else %}0{% endif %};">{{ plan.plan_type }}</h5>
                     <div class="plan-price">
                         ₹{{ plan.plan_offer_price }}

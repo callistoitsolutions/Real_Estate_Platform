@@ -587,6 +587,207 @@ def  View_Contact_Enquiry(request,id):
         return render(request,'home_page/Adminlogin.html')
 
 ############## Views end for view contact enquiries ######################
+
+
+############# Views start for upload contact enquiries data via excel #################
+
+@csrf_exempt
+def Contacts_Data(request):
+    if request.method == 'POST':
+        try:
+            excel_file = request.FILES.get('contact_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
+            
+            # Add file type validation
+            if not excel_file.name.endswith(('.xlsx', '.xls')):
+                return JsonResponse({"status": "0", "msg": "Please upload .xlsx or .xls file only"})
+            
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            success_count = 0
+            error_count = 0
+            skipped_count = 0
+        
+            
+            # Get headers from row 2
+            headers = []
+            for cell in sheet[2]:  # Row 2 has headers
+                if cell.value:
+                    headers.append(str(cell.value).strip())
+                else:
+                    headers.append(None)
+            
+            print("Headers found:", headers)
+            
+            # Find column indices based on header names
+            col_indices = {
+                'name': None,
+                'email': None,
+                'phone': None,
+                'city': None,
+                'enquiry_for': None,
+                'property_type': None,
+                'budget_range': None,
+                'message': None,
+                'contact_mode': None,
+                'contact_time': None,
+            }
+            
+            for idx, header in enumerate(headers):
+                if not header:
+                    continue
+                header_lower = header.lower().strip()
+                if header_lower == 'name':
+                    col_indices['name'] = idx
+                elif header_lower == 'email':
+                    col_indices['email'] = idx
+                elif header_lower == 'phone number':
+                    col_indices['phone'] = idx
+                elif header_lower == 'city':
+                    col_indices['city'] = idx
+                elif header_lower == 'enquiry for':
+                    col_indices['enquiry_for'] = idx
+                elif header_lower == 'property type':
+                    col_indices['property_type'] = idx
+                elif header_lower == 'budget range':
+                    col_indices['budget_range'] = idx
+                elif header_lower == 'message':
+                    col_indices['message'] = idx
+                elif header_lower == 'contact mode':
+                    col_indices['contact_mode'] = idx
+                elif header_lower == 'contact time':
+                    col_indices['contact_time'] = idx
+            
+            print("Column indices:", col_indices)
+            
+            # Start from row 3 (data starts after headers)
+            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+                try:
+                    # Skip completely empty rows
+                    if not any(row):
+                        continue
+                    
+                    print(f"Row {row_idx} raw data: {row[:12] if len(row) > 11 else row}")
+                    
+                    # Get values using column indices
+                    name = row[col_indices['name']] if col_indices['name'] is not None and len(row) > col_indices['name'] else None
+                    email = row[col_indices['email']] if col_indices['email'] is not None and len(row) > col_indices['email'] else None
+                    phone = row[col_indices['phone']] if col_indices['phone'] is not None and len(row) > col_indices['phone'] else None
+                    city = row[col_indices['city']] if col_indices['city'] is not None and len(row) > col_indices['city'] else None
+                    enquiry_for = row[col_indices['enquiry_for']] if col_indices['enquiry_for'] is not None and len(row) > col_indices['enquiry_for'] else None
+                    property_type = row[col_indices['property_type']] if col_indices['property_type'] is not None and len(row) > col_indices['property_type'] else None
+                    budget_range = row[col_indices['budget_range']] if col_indices['budget_range'] is not None and len(row) > col_indices['budget_range'] else None
+                    message = row[col_indices['message']] if col_indices['message'] is not None and len(row) > col_indices['message'] else None
+                    contact_mode = row[col_indices['contact_mode']] if col_indices['contact_mode'] is not None and len(row) > col_indices['contact_mode'] else None
+                    contact_time = row[col_indices['contact_time']] if col_indices['contact_time'] is not None and len(row) > col_indices['contact_time'] else None
+                    
+                    # Skip if no name
+                    if not name:
+                        skipped_count += 1
+                        print(f"Row {row_idx}: No name found, skipping")
+                        continue
+                    
+                    # Convert name to string and strip
+                    name = str(name).strip()
+                    
+                    # Skip if name is a header value
+                    if name.lower() in ['name', 'sr. no.', 'sr no', 'actions', 'none']:
+                        skipped_count += 1
+                        continue
+                    
+                    # Skip if name is a number (Sr. No.)
+                    if name.isdigit():
+                        print(f"Row {row_idx}: Name '{name}' is a number (likely Sr. No.), skipping")
+                        skipped_count += 1
+                        continue
+                    
+                    # Handle phone number
+                    if phone:
+                        if isinstance(phone, (int, float)):
+                            phone = str(int(phone))
+                        else:
+                            phone = str(phone).replace('-', '').replace(' ', '').strip()
+                    else:
+                        print(f"Row {row_idx}: No phone number, skipping")
+                        error_count += 1
+                        continue
+                    
+                    # Split budget range
+                    contact_start_budget = None
+                    contact_end_budget = None
+                    
+                    if budget_range and budget_range not in ['-', '---', None, 'None']:
+                        budget_str = str(budget_range).strip()
+                        if '-' in budget_str:
+                            parts = budget_str.split('-')
+                            if len(parts) == 2:
+                                contact_start_budget = parts[0].strip() if parts[0] else None
+                                contact_end_budget = parts[1].strip() if parts[1] else None
+                        else:
+                            contact_start_budget = budget_str
+                    
+                    # Handle empty values
+                    email = None if not email or str(email) in ['---', 'None', ''] else str(email).strip()
+                    city = None if not city or str(city) in ['---', 'None', ''] else str(city).strip()
+                    enquiry_for = None if not enquiry_for or str(enquiry_for) in ['---', 'None', ''] else str(enquiry_for).strip()
+                    property_type = None if not property_type or str(property_type) in ['---', 'None', ''] else str(property_type).strip()
+                    message = None if not message or str(message) in ['---', 'None', ''] else str(message).strip()
+                    contact_mode = None if not contact_mode or str(contact_mode) in ['---', 'None', ''] else str(contact_mode).strip()
+                    contact_time = None if not contact_time or str(contact_time) in ['---', 'None', ''] else str(contact_time).strip()
+                    
+                    print(f"Row {row_idx}: Importing - Name: {name}, Phone: {phone}, Email: {email}")
+                    
+                    # Create new record
+                    Contact_Enquiry.objects.create(
+                        contact_name=name,
+                        contact_phone=phone,
+                        contact_email=email,
+                        contact_city=city,
+                        contact_en_title=enquiry_for,
+                        contact_en_type=property_type,
+                        contact_start_budget=contact_start_budget,
+                        contact_end_budget=contact_end_budget,
+                        contact_message=message,
+                        contact_mode=contact_mode,
+                        contact_time=contact_time,
+                    )
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+                    print(f"Error in row {row_idx}: {e}")
+                    continue
+            
+            # Prepare response message
+            msg = f"Successfully imported {success_count} contact enquiries."
+            if error_count > 0:
+                msg += f" Failed: {error_count}"
+            if skipped_count > 0:
+                msg += f" Skipped: {skipped_count}"
+            
+            return JsonResponse({
+                "status": "1",
+                "msg": msg,
+                "success_count": success_count,
+                "error_count": error_count,
+                "skipped_count": skipped_count
+            })
+            
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({
+                "status": "0",
+                "msg": f"Error: {str(e)}"
+            })
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request method"})
+  
+
+############### Views end for upload contact enquiries data via excel ###################
    
 
 ############## Views start for ameneties list ##########################
@@ -596,7 +797,7 @@ def Ameneties_List(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        ameneties_obj = Ameneties_Details.objects.all().order_by('-id')
+        ameneties_obj = Ameneties_Details.objects.all().order_by('-amenties_date')
         ameneties_obj_count = Ameneties_Details.objects.all().count()
 
         rendered = render_to_string("admin_user/render_to_string/R_Ameneties/r_t_s_ameneties.html",{'ameneties_obj':ameneties_obj,'ameneties_obj_count':ameneties_obj_count})
@@ -644,40 +845,76 @@ def Ameneties_Ajax(request):
 
 @csrf_exempt
 def Ameneties_Data(request):
-
     if request.method == 'POST':
-
-        excel_file = request.FILES.get('ameneties_file')
-
-        wb = load_workbook(excel_file)
-        sheet = wb.active
-
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-
-            amenties_icon = row[0]
-            amenties_name = row[1]
-
-            if not amenties_icon or not amenties_name:
-                continue
-
-            Ameneties_Details.objects.update_or_create(
-                amenties_name=amenties_name,  # condition to check existing
-                defaults={
-                    "amenties_icon": amenties_icon,
-                    "amenties_date": datetime.today(),
-                    "amenties_time": datetime.now()
-                }
-            )
-
-        return JsonResponse({
-            "status": "1",
-            "msg": "Data Uploaded / Updated Successfully..."
-        })
-
-    return JsonResponse({
-        "status": "0",
-        "msg": "Something went wrong..."
-    })
+        try:
+            excel_file = request.FILES.get('ameneties_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
+            
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            success_count = 0
+            error_count = 0
+            
+            # Data starts from row 3
+            for row in sheet.iter_rows(min_row=3, values_only=True):
+                try:
+                    if not any(row):
+                        continue
+                    
+                    amenties_icon = row[2] if len(row) > 2 else None
+                    amenties_name = row[3] if len(row) > 3 else None
+                    added_date_value = row[4] if len(row) > 4 else None
+                    
+                    if not amenties_icon or not amenties_name:
+                        error_count += 1
+                        continue
+                    
+                    # Clean data
+                    amenties_icon = str(amenties_icon).strip()
+                    amenties_name = str(amenties_name).strip()
+                    
+                    # Handle date: from Excel or today's date
+                    amenties_date = datetime.today()
+                    if added_date_value and str(added_date_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(added_date_value, (date, datetime)):
+                                amenties_date = added_date_value.date() if isinstance(added_date_value, datetime) else added_date_value
+                            else:
+                                date_str = str(added_date_value).strip()
+                                if ',' in date_str:
+                                    amenties_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    amenties_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        except:
+                            pass
+                    
+                    # Update or create
+                    Ameneties_Details.objects.update_or_create(
+                        amenties_name=amenties_name,
+                        defaults={
+                            "amenties_icon": amenties_icon,
+                            "amenties_date": amenties_date,
+                            "amenties_time": datetime.now().time()
+                        }
+                    )
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+            
+            return JsonResponse({
+                "status": "1",
+                "msg": f"Successfully imported {success_count} amenities. Failed: {error_count}"
+            })
+            
+        except Exception as e:
+            return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 ############## Views end for upload ameneties date via excel #######################
 
@@ -726,7 +963,7 @@ def Facilities_List(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        facilities_obj = Facilities_Details.objects.all().order_by('-id')
+        facilities_obj = Facilities_Details.objects.all().order_by('-facilities_date')
         facilities_obj_count = Facilities_Details.objects.all().count()
 
         rendered = render_to_string("admin_user/render_to_string/R_Facilities/r_t_s_facilities.html",{'facilities_obj':facilities_obj,'facilities_obj_count':facilities_obj_count})
@@ -775,38 +1012,75 @@ def Facilities_Ajax(request):
 @csrf_exempt
 def Facilities_Data(request):
     if request.method == 'POST':
-
-        excel_file = request.FILES.get('facilities_file')
-
-        wb = load_workbook(excel_file)
-        sheet = wb.active
-
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-
-            facilities_icon = row[0]
-            facilities_name = row[1]
-
-            if not facilities_icon or not facilities_name:
-                continue
-
-            Facilities_Details.objects.update_or_create(
-                facilities_name=facilities_name,  # condition to check existing
-                defaults={
-                    "facilities_icon": facilities_icon,
-                    "facilities_date": datetime.today(),
-                    "facilities_time": datetime.now()
-                }
-            )
-
-        return JsonResponse({
-            "status": "1",
-            "msg": "Data Uploaded / Updated Successfully..."
-        })
-
-    return JsonResponse({
-        "status": "0",
-        "msg": "Something went wrong..."
-    })
+        try:
+            excel_file = request.FILES.get('facilities_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
+            
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            success_count = 0
+            error_count = 0
+            
+            # Data starts from row 3
+            for row in sheet.iter_rows(min_row=3, values_only=True):
+                try:
+                    if not any(row):
+                        continue
+                    
+                    facilities_icon = row[2] if len(row) > 2 else None
+                    facilities_name = row[3] if len(row) > 3 else None
+                    added_date_value = row[4] if len(row) > 4 else None
+                    
+                    if not facilities_icon or not facilities_name:
+                        error_count += 1
+                        continue
+                    
+                    # Clean data
+                    facilities_icon = str(facilities_icon).strip()
+                    facilities_name = str(facilities_name).strip()
+                    
+                    # Handle date: from Excel or today's date
+                    facilities_date = datetime.today()
+                    if added_date_value and str(added_date_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(added_date_value, (date, datetime)):
+                                facilities_date = added_date_value.date() if isinstance(added_date_value, datetime) else added_date_value
+                            else:
+                                date_str = str(added_date_value).strip()
+                                if ',' in date_str:
+                                    facilities_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    facilities_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        except:
+                            pass
+                    
+                    # Update or create
+                    Facilities_Details.objects.update_or_create(
+                        facilities_name=facilities_name,
+                        defaults={
+                            "facilities_icon": facilities_icon,
+                            "facilities_date": facilities_date,
+                            "facilities_time": datetime.now().time()
+                        }
+                    )
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+            
+            return JsonResponse({
+                "status": "1",
+                "msg": f"Successfully imported {success_count} nearby facilities. Failed: {error_count}"
+            })
+            
+        except Exception as e:
+            return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 ########### Views end for upload facilities data via excel ########################
 
@@ -854,7 +1128,7 @@ def Services_List(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        services_obj = Service_Type_Details.objects.all().order_by('-id')
+        services_obj = Service_Type_Details.objects.all().order_by('-service_upload_date')
         services_obj_count = Service_Type_Details.objects.all().count()
 
         rendered = render_to_string("admin_user/render_to_string/R_Services/r_t_s_services.html",{'services_obj':services_obj,'services_obj_count':services_obj_count})
@@ -904,38 +1178,75 @@ def Services_Ajax(request):
 @csrf_exempt
 def Services_Data(request):
     if request.method == 'POST':
-
-        excel_file = request.FILES.get('services_file')
-
-        wb = load_workbook(excel_file)
-        sheet = wb.active
-
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-
-            service_id = row[0]
-            service_name = row[1]
-
-            if not service_id or not service_id:
-                continue
-
-            Service_Type_Details.objects.update_or_create(
-                service_id=service_id,  # condition to check existing
-                defaults={
-                    "service_name": service_name,
-                    "service_upload_date": datetime.today(),
-                    "service_upload_time": datetime.now()
-                }
-            )
-
-        return JsonResponse({
-            "status": "1",
-            "msg": "Data Uploaded / Updated Successfully..."
-        })
-
-    return JsonResponse({
-        "status": "0",
-        "msg": "Something went wrong..."
-    })
+        try:
+            excel_file = request.FILES.get('services_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
+            
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            success_count = 0
+            error_count = 0
+            
+            # Data starts from row 3
+            for row in sheet.iter_rows(min_row=3, values_only=True):
+                try:
+                    if not any(row):
+                        continue
+                    
+                    service_id = row[2] if len(row) > 2 else None
+                    service_name = row[3] if len(row) > 3 else None
+                    added_date_value = row[4] if len(row) > 4 else None
+                    
+                    if not service_id or not service_name:
+                        error_count += 1
+                        continue
+                    
+                    # Clean data
+                    service_id = str(service_id).strip()
+                    service_name = str(service_name).strip()
+                    
+                    # Handle date: from Excel or today's date
+                    service_upload_date = datetime.today()
+                    if added_date_value and str(added_date_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(added_date_value, (date, datetime)):
+                                service_upload_date = added_date_value.date() if isinstance(added_date_value, datetime) else added_date_value
+                            else:
+                                date_str = str(added_date_value).strip()
+                                if ',' in date_str:
+                                    service_upload_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    service_upload_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        except:
+                            pass
+                    
+                    # Update or create
+                    Service_Type_Details.objects.update_or_create(
+                        service_id=service_id,
+                        defaults={
+                            "service_name": service_name,
+                            "service_upload_date": service_upload_date,
+                            "service_upload_time": datetime.now().time()
+                        }
+                    )
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+            
+            return JsonResponse({
+                "status": "1",
+                "msg": f"Successfully imported {success_count} vendor services. Failed: {error_count}"
+            })
+            
+        except Exception as e:
+            return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 ############ Views end for upload service type details via excel ######################
 
@@ -983,7 +1294,7 @@ def Faqs_List(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        faqs_obj = NormalFAQ.objects.all().order_by('-id')
+        faqs_obj = NormalFAQ.objects.all().order_by('-faq_date')
         faqs_obj_count = NormalFAQ.objects.all().count()
 
         rendered = render_to_string("admin_user/render_to_string/R_FAQ/r_t_s_faq.html",{'faqs_obj':faqs_obj,'faqs_obj_count':faqs_obj_count})
@@ -1042,6 +1353,82 @@ def Faq_Ajax(request):
         return JsonResponse({"status":"1", "msg" : f"FAQ Details updated successfully"})
 
 ############ Views end for ajax for normal faq ##########################
+
+
+############# Views start for upload faq data via excel #######################
+
+@csrf_exempt
+def Faq_Data(request):
+    if request.method == 'POST':
+        try:
+            excel_file = request.FILES.get('faq_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
+            
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            success_count = 0
+            error_count = 0
+            
+            # Data starts from row 3
+            for row in sheet.iter_rows(min_row=3, values_only=True):
+                try:
+                    if not any(row):
+                        continue
+                    
+                    faq_question = row[2] if len(row) > 2 else None
+                    faq_answer = row[3] if len(row) > 3 else None
+                    added_date_value = row[4] if len(row) > 4 else None
+                    
+                    if not faq_question or not faq_answer:
+                        error_count += 1
+                        continue
+                    
+                    # Clean data
+                    faq_question = str(faq_question).strip()
+                    faq_answer = str(faq_answer).strip()
+                    
+                    # Handle date: from Excel or today's date
+                    faq_date = datetime.today()
+                    if added_date_value and str(added_date_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(added_date_value, (date, datetime)):
+                                faq_date = added_date_value.date() if isinstance(added_date_value, datetime) else added_date_value
+                            else:
+                                date_str = str(added_date_value).strip()
+                                if ',' in date_str:
+                                    faq_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    faq_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        except:
+                            pass
+                    
+                    # Update or create
+                    NormalFAQ.objects.update_or_create(
+                        faq_question=faq_question,
+                        faq_answer=faq_answer,
+                        faq_date=faq_date,
+                        faq_time=datetime.now().time()
+                    )
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+            
+            return JsonResponse({
+                "status": "1",
+                "msg": f"Successfully imported {success_count} FAQS. Failed: {error_count}"
+            })
+            
+        except Exception as e:
+            return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request method"})
+
+############# Views end for upload faq data via excel #########################
 
 
 ############## Views start for delete faqs #########################
@@ -1189,86 +1576,102 @@ def Update_Subscriptions(request,id):
 @csrf_exempt
 def Subscriptions_Data(request):
     if request.method == 'POST':
-        excel_file = request.FILES.get('subscriptions_file')
-
-        if not excel_file:
-            return JsonResponse({
-                "status": "0",
-                "msg": "No file uploaded."
-            })
-
         try:
+            excel_file = request.FILES.get('subscriptions_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
+            
             wb = load_workbook(excel_file)
             sheet = wb.active
-
-            # Iterating through rows, skipping the header (min_row=2)
-            for row in sheet.iter_rows(min_row=2, values_only=True):
-                
-                # Unpacking the exact columns from your generated dummy data
-                package_name = row[0]
-                plan_type = row[1]
-                # row[2] is plan_duration which we combined into the package name/desc in the model
-                plan_for = row[3]
-                plan_base_price = row[4]
-                plan_offer_price = row[5]
-                plan_discount = row[6]
-                plan_max_listings = row[7]
-                plan_offer_start_date = row[8]
-                plan_offer_end_date = row[9]
-                plan_desc = row[10]
-
-                # Skip empty rows where package_name is missing
-                if not package_name:
-                    continue
+            
+            success_count = 0
+            error_count = 0
+            
+            # Data starts from row 3
+            for row in sheet.iter_rows(min_row=3, values_only=True):
+                try:
+                    if not any(row):
+                        continue
                     
-                # Format the dates properly for Django DateField if they are strings
-                if isinstance(plan_offer_start_date, str):
-                    try:
-                        plan_offer_start_date = datetime.strptime(plan_offer_start_date, '%Y-%m-%d').date()
-                    except ValueError:
-                        pass # Handle or log date parsing error
-                        
-                if isinstance(plan_offer_end_date, str):
-                    try:
-                        plan_offer_end_date = datetime.strptime(plan_offer_end_date, '%Y-%m-%d').date()
-                    except ValueError:
-                        pass # Handle or log date parsing error
-
-                # Create or Update the subscription plan
-                # Using package_name as the unique identifier to update existing ones
-                Subscription_Details.objects.update_or_create(
-                    package_name=package_name,  # condition to check existing
-                    defaults={
-                        "plan_type": plan_type,
-                        "plan_for": plan_for,
-                        "plan_base_price": plan_base_price,
-                        "plan_offer_price": plan_offer_price,
-                        "plan_discount": plan_discount,
-                        "plan_max_listings": plan_max_listings,
-                        "plan_offer_start_date": plan_offer_start_date,
-                        "plan_offer_end_date": plan_offer_end_date,
-                        "plan_desc": plan_desc,
-                        "plan_upload_date":datetime.today()
-                        # is_active and created_at/updated_at will be handled by model defaults
-                    }
-                )
-
+                    package_name = row[2] if len(row) > 2 else None
+                    plan_type = row[3] if len(row) > 3 else None
+                    plan_duration = row[4] if len(row) > 4 else None
+                    plan_for = row[5] if len(row) > 5 else None
+                    plan_base_price = row[6] if len(row) > 6 else None
+                    plan_offer_price = row[7] if len(row) > 7 else None
+                    plan_discount = row[8] if len(row) > 8 else None
+                    plan_max_listings = row[9] if len(row) > 9 else None
+                    plan_offer_start_date = row[10] if len(row) > 10 else None
+                    plan_offer_end_date = row[11] if len(row) > 11 else None
+                    plan_desc = row[12] if len(row) > 12 else None
+                    added_date_value = row[13] if len(row) > 13 else None
+                    
+                    if not package_name or not plan_type:
+                        error_count += 1
+                        continue
+                    
+                    # Clean data
+                    package_name = str(package_name).strip()
+                    plan_type = str(plan_type).strip()
+                    plan_duration = str(plan_duration).strip()
+                    plan_for = str(plan_for).strip()
+                    plan_base_price = str(plan_base_price).strip()
+                    plan_offer_price = str(plan_offer_price).strip()
+                    plan_discount = str(plan_discount).strip()
+                    plan_max_listings = str(plan_max_listings).strip()
+                    plan_offer_start_date = str(plan_offer_start_date).strip()
+                    plan_offer_end_date = str(plan_offer_end_date).strip()
+                    plan_desc = str(plan_desc).strip()
+                    
+                    # Handle date: from Excel or today's date
+                    plan_upload_date = datetime.today()
+                    if added_date_value and str(added_date_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(added_date_value, (date, datetime)):
+                                plan_upload_date = added_date_value.date() if isinstance(added_date_value, datetime) else added_date_value
+                            else:
+                                date_str = str(added_date_value).strip()
+                                if ',' in date_str:
+                                    plan_upload_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    plan_upload_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        except:
+                            pass
+                    
+                    # Update or create
+                    Subscription_Details.objects.update_or_create(
+                        package_name=package_name,
+                        defaults={
+                            "plan_type":plan_type,
+                            "plan_duration": plan_duration,
+                            "plan_for": plan_for,
+                            "plan_base_price": plan_base_price,
+                            "plan_offer_price": plan_offer_price,
+                            "plan_discount": plan_discount,
+                            "plan_max_listings": plan_max_listings,
+                            "plan_offer_start_date": plan_offer_start_date,
+                            "plan_offer_end_date": plan_offer_end_date,
+                            "plan_desc": plan_desc,
+                            "plan_upload_date": plan_upload_date,
+                            "plan_upload_time": datetime.now().time()
+                        }
+                    )
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+            
             return JsonResponse({
                 "status": "1",
-                "msg": "Subscriptions Uploaded / Updated Successfully..."
+                "msg": f"Successfully imported {success_count} Subscrptions. Failed: {error_count}"
             })
-
+            
         except Exception as e:
-            # It's good practice to log 'e' here in a real application
-            return JsonResponse({
-                "status": "0",
-                "msg": f"An error occurred while processing the file: {str(e)}"
-            })
-
-    return JsonResponse({
-        "status": "0",
-        "msg": "Invalid request method."
-    })
+            return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 ########### Views end for upload subscriptions data via excel ######################
 
@@ -2027,7 +2430,7 @@ def rm_list(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        rm_obj = User_Details.objects.filter(user_role="Relationship Manager").order_by('-id')
+        rm_obj = User_Details.objects.filter(user_role="Relationship Manager").order_by('-user_register_date')
         rm_obj_count = User_Details.objects.filter(user_role="Relationship Manager").count()
 
         rendered = render_to_string("admin_user/render_to_string/R_RM/r_t_s_rm.html",{'rm_obj':rm_obj,'rm_obj_count':rm_obj_count,'Role':'Relationship Manager'})
@@ -2058,63 +2461,106 @@ def Add_RM(request):
 
 @csrf_exempt
 def Rm_Data(request):
-
     if request.method == 'POST':
-
-        excel_file = request.FILES.get('rm_file')
-
-        if not excel_file:
-            return JsonResponse({"status": "0", "msg": "Excel file not found"})
-
-        wb = load_workbook(excel_file)
-        sheet = wb.active
-
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-
-            user_name = row[0]
-            user_email = row[1]
-            user_phone = row[2]
-            user_state = row[3]
-            user_city = row[4]
-            user_address = row[5]
-            user_password = row[6]
-            user_profile = row[7]
-            user_role = row[8]
-
-            if user_password is not None:
-                user_password = str(user_password).split(".")[0]
-
-            if user_phone is not None:
-                user_phone = str(user_phone).split(".")[0]
-
-            if not user_phone:
-                continue
-
-            User_Details.objects.update_or_create(
-                user_phone=user_phone,
-                user_role = user_role,   # unique identifier
-                defaults={
-                    "user_name": user_name,
-                    "user_email": user_email,
-                    "user_state": user_state,
-                    "user_city": user_city,
-                    "user_address": user_address,
-                    "user_profile": user_profile,
-                    "user_password": user_password,
-                    "user_register_date": datetime.today(),
-                    "user_register_time": datetime.now()
-                }
-            )
-
-        return JsonResponse({
-            "status": "1",
-            "msg": "Data Uploaded / Updated Successfully..."
-        })
-
-    return JsonResponse({
-        "status": "0",
-        "msg": "Invalid Request"
-    })
+        try:
+            excel_file = request.FILES.get('rm_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
+            
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            success_count = 0
+            error_count = 0
+            
+            FIXED_ROLE = "Relationship Manager"
+            
+            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+                try:
+                    user_name = row[4] if len(row) > 4 else None
+                    user_email = row[5] if len(row) > 5 else None
+                    user_phone = row[6] if len(row) > 6 else None
+                    user_password = row[7] if len(row) > 7 else None
+                    user_state = row[8] if len(row) > 8 else None
+                    user_city = row[9] if len(row) > 9 else None
+                    user_address = row[10] if len(row) > 10 else None
+                    register_date_value = row[11] if len(row) > 11 else None
+                    
+                    if not user_name or not user_phone:
+                        error_count += 1
+                        continue
+                    
+                    # Clean phone
+                    user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
+                    
+                    # Clean other fields
+                    user_name = str(user_name).strip()
+                    user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
+                    user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
+                    user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
+                    user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+                    
+                    #  Register date: Today's date as default
+                    register_date = datetime.now().date()
+                    
+                    # If date provided in Excel, try to parse it
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_date_value, (date, datetime)):
+                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
+                            else:
+                                date_str = str(register_date_value).strip()
+                                if ',' in date_str:
+                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        except:
+                            pass  # Keep today's date if parsing fails
+                    
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    
+                    if existing_user:
+                        existing_user.user_name = user_name
+                        existing_user.user_email = user_email
+                        existing_user.user_role = FIXED_ROLE
+                        existing_user.user_state = user_state
+                        existing_user.user_city = user_city
+                        existing_user.user_address = user_address
+                        existing_user.user_password = user_password
+                        existing_user.user_register_date = register_date
+                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.save()
+                    else:
+                        User_Details.objects.create(
+                            user_name=user_name,
+                            user_email=user_email,
+                            user_phone=user_phone,
+                            user_role=FIXED_ROLE,
+                            user_state=user_state,
+                            user_city=user_city,
+                            user_address=user_address,
+                            user_password=user_password,
+                            user_register_date=register_date,
+                            user_register_time=datetime.now().time()
+                        )
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+            
+            return JsonResponse({
+                "status": "1",
+                "msg": f"Successfully imported {success_count} Relationship Managers. Failed: {error_count}"
+            })
+            
+        except Exception as e:
+            return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 ########## Views end for data upload functionality via excel #######################
 
@@ -2302,7 +2748,7 @@ def Landlord_List(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        landlord_obj = User_Details.objects.filter(user_role="Landlord").order_by('-id')
+        landlord_obj = User_Details.objects.filter(user_role="Landlord").order_by('-user_register_date')
         landlord_obj_count = User_Details.objects.filter(user_role="Landlord").count()
 
         rendered = render_to_string("admin_user/render_to_string/R_Landlord/r_t_s_landlord.html",{'landlord_obj':landlord_obj,'landlord_obj_count':landlord_obj_count,'Role':'Landlord'})
@@ -2335,63 +2781,107 @@ def Add_Landlord(request):
 @csrf_exempt
 def Landlord_Data(request):
     if request.method == 'POST':
+        try:
+            excel_file = request.FILES.get('landlord_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
+            
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            success_count = 0
+            error_count = 0
+            
+            FIXED_ROLE = "Landlord"
+            
+            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+                try:
+                    user_name = row[4] if len(row) > 4 else None
+                    user_email = row[5] if len(row) > 5 else None
+                    user_phone = row[6] if len(row) > 6 else None
+                    user_password = row[7] if len(row) > 7 else None
+                    user_state = row[8] if len(row) > 8 else None
+                    user_city = row[9] if len(row) > 9 else None
+                    user_address = row[10] if len(row) > 10 else None
+                    register_date_value = row[11] if len(row) > 11 else None
+                    
+                    if not user_name or not user_phone:
+                        error_count += 1
+                        continue
+                    
+                    # Clean phone
+                    user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
+                    
+                    # Clean other fields
+                    user_name = str(user_name).strip()
+                    user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
+                    user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
+                    user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
+                    user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+                    
+                    #  Register date: Today's date as default
+                    register_date = datetime.now().date()
+                    
+                    # If date provided in Excel, try to parse it
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_date_value, (date, datetime)):
+                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
+                            else:
+                                date_str = str(register_date_value).strip()
+                                if ',' in date_str:
+                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        except:
+                            pass  # Keep today's date if parsing fails
+                    
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    
+                    if existing_user:
+                        existing_user.user_name = user_name
+                        existing_user.user_email = user_email
+                        existing_user.user_role = FIXED_ROLE
+                        existing_user.user_state = user_state
+                        existing_user.user_city = user_city
+                        existing_user.user_address = user_address
+                        existing_user.user_password = user_password
+                        existing_user.user_register_date = register_date
+                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.save()
+                    else:
+                        User_Details.objects.create(
+                            user_name=user_name,
+                            user_email=user_email,
+                            user_phone=user_phone,
+                            user_role=FIXED_ROLE,
+                            user_state=user_state,
+                            user_city=user_city,
+                            user_address=user_address,
+                            user_password=user_password,
+                            user_register_date=register_date,
+                            user_register_time=datetime.now().time()
+                        )
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+            
+            return JsonResponse({
+                "status": "1",
+                "msg": f"Successfully imported {success_count} Landlords. Failed: {error_count}"
+            })
+            
+        except Exception as e:
+            return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
-        excel_file = request.FILES.get('landlord_file')
-
-        if not excel_file:
-            return JsonResponse({"status": "0", "msg": "Excel file not found"})
-
-        wb = load_workbook(excel_file)
-        sheet = wb.active
-
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-
-            user_name = row[0]
-            user_email = row[1]
-            user_phone = row[2]
-            user_state = row[3]
-            user_city = row[4]
-            user_address = row[5]
-            user_password = row[6]
-            user_profile = row[7]
-            user_role = row[8]
-
-            if user_password is not None:
-                user_password = str(user_password).split(".")[0]
-
-            if user_phone is not None:
-                user_phone = str(user_phone).split(".")[0]
-
-            if not user_phone:
-                continue
-
-            User_Details.objects.update_or_create(
-                user_phone=user_phone,
-                user_role=user_role,  # unique identifier
-                defaults={
-                    "user_name": user_name,
-                    "user_email": user_email,
-                    "user_state": user_state,
-                    "user_city": user_city,
-                    "user_address": user_address,
-                    "user_profile": user_profile,
-                    "user_password": user_password,
-                    "user_register_date": datetime.today(),
-                    "user_register_time": datetime.now()
-                }
-            )
-
-        return JsonResponse({
-            "status": "1",
-            "msg": "Data Uploaded / Updated Successfully..."
-        })
-
-    return JsonResponse({
-        "status": "0",
-        "msg": "Invalid Request"
-    })
-
-############ Views end for upload landlord data functionality via excel ##################
+############ Views end for upload landlord data functionality via excel #######
 
 
 ############ Views start for delete landlord details ########################
@@ -2453,7 +2943,7 @@ def Tenant_List(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        tenant_obj = User_Details.objects.filter(user_role="Tenant").order_by('-id')
+        tenant_obj = User_Details.objects.filter(user_role="Tenant").order_by('-user_register_date')
         tenant_obj_count = User_Details.objects.filter(user_role="Tenant").count()
 
         rendered = render_to_string("admin_user/render_to_string/R_Tenant/r_t_s_tenant.html",{'tenant_obj':tenant_obj,'tenant_obj_count':tenant_obj_count,'Role':'Tenant'})
@@ -2487,61 +2977,105 @@ def Add_Tenant(request):
 @csrf_exempt
 def Tenant_Data(request):
     if request.method == 'POST':
-
-        excel_file = request.FILES.get('tenant_file')
-
-        if not excel_file:
-            return JsonResponse({"status": "0", "msg": "Excel file not found"})
-
-        wb = load_workbook(excel_file)
-        sheet = wb.active
-
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-
-            user_name = row[0]
-            user_email = row[1]
-            user_phone = row[2]
-            user_state = row[3]
-            user_city = row[4]
-            user_address = row[5]
-            user_password = row[6]
-            user_profile = row[7]
-            user_role = row[8]
-
-            if user_password is not None:
-                user_password = str(user_password).split(".")[0]
-
-            if user_phone is not None:
-                user_phone = str(user_phone).split(".")[0]
-
-            if not user_phone:
-                continue
-
-            User_Details.objects.update_or_create(
-                user_phone=user_phone,
-                user_role=user_role,  # unique identifier
-                defaults={
-                    "user_name": user_name,
-                    "user_email": user_email,
-                    "user_state": user_state,
-                    "user_city": user_city,
-                    "user_address": user_address,
-                    "user_profile": user_profile,
-                    "user_password": user_password,
-                    "user_register_date": datetime.today(),
-                    "user_register_time": datetime.now()
-                }
-            )
-
-        return JsonResponse({
-            "status": "1",
-            "msg": "Data Uploaded / Updated Successfully..."
-        })
-
-    return JsonResponse({
-        "status": "0",
-        "msg": "Invalid Request"
-    })
+        try:
+            excel_file = request.FILES.get('tenant_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
+            
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            success_count = 0
+            error_count = 0
+            
+            FIXED_ROLE = "Tenant"
+            
+            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+                try:
+                    user_name = row[4] if len(row) > 4 else None
+                    user_email = row[5] if len(row) > 5 else None
+                    user_phone = row[6] if len(row) > 6 else None
+                    user_password = row[7] if len(row) > 7 else None
+                    user_state = row[8] if len(row) > 8 else None
+                    user_city = row[9] if len(row) > 9 else None
+                    user_address = row[10] if len(row) > 10 else None
+                    register_date_value = row[11] if len(row) > 11 else None
+                    
+                    if not user_name or not user_phone:
+                        error_count += 1
+                        continue
+                    
+                    # Clean phone
+                    user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
+                    
+                    # Clean other fields
+                    user_name = str(user_name).strip()
+                    user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
+                    user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
+                    user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
+                    user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+                    
+                    #  Register date: Today's date as default
+                    register_date = datetime.now().date()
+                    
+                    # If date provided in Excel, try to parse it
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_date_value, (date, datetime)):
+                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
+                            else:
+                                date_str = str(register_date_value).strip()
+                                if ',' in date_str:
+                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        except:
+                            pass  # Keep today's date if parsing fails
+                    
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    
+                    if existing_user:
+                        existing_user.user_name = user_name
+                        existing_user.user_email = user_email
+                        existing_user.user_role = FIXED_ROLE
+                        existing_user.user_state = user_state
+                        existing_user.user_city = user_city
+                        existing_user.user_address = user_address
+                        existing_user.user_password = user_password
+                        existing_user.user_register_date = register_date
+                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.save()
+                    else:
+                        User_Details.objects.create(
+                            user_name=user_name,
+                            user_email=user_email,
+                            user_phone=user_phone,
+                            user_role=FIXED_ROLE,
+                            user_state=user_state,
+                            user_city=user_city,
+                            user_address=user_address,
+                            user_password=user_password,
+                            user_register_date=register_date,
+                            user_register_time=datetime.now().time()
+                        )
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+            
+            return JsonResponse({
+                "status": "1",
+                "msg": f"Successfully imported {success_count} Tenants. Failed: {error_count}"
+            })
+            
+        except Exception as e:
+            return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 ######### Views end for upload tenant data functionality via excel ####################
 
@@ -2602,7 +3136,7 @@ def Buyer_List(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        buyer_obj = User_Details.objects.filter(user_role="Buyer").order_by('-id')
+        buyer_obj = User_Details.objects.filter(user_role="Buyer").order_by('-user_register_date')
         buyer_obj_count = User_Details.objects.filter(user_role="Buyer").count()
 
         rendered = render_to_string("admin_user/render_to_string/R_Buyer/r_t_s_buyer.html",{'buyer_obj':buyer_obj,'buyer_obj_count':buyer_obj_count,'Role':'Buyer'})
@@ -2635,61 +3169,105 @@ def Add_Buyer(request):
 @csrf_exempt
 def Buyer_Data(request):
     if request.method == 'POST':
-
-        excel_file = request.FILES.get('buyer_file')
-
-        if not excel_file:
-            return JsonResponse({"status": "0", "msg": "Excel file not found"})
-
-        wb = load_workbook(excel_file)
-        sheet = wb.active
-
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-
-            user_name = row[0]
-            user_email = row[1]
-            user_phone = row[2]
-            user_state = row[3]
-            user_city = row[4]
-            user_address = row[5]
-            user_password = row[6]
-            user_profile = row[7]
-            user_role = row[8]
-
-            if user_password is not None:
-                user_password = str(user_password).split(".")[0]
-
-            if user_phone is not None:
-                user_phone = str(user_phone).split(".")[0]
-
-            if not user_phone:
-                continue
-
-            User_Details.objects.update_or_create(
-                user_phone=user_phone,
-                user_role=user_role,  # unique identifier
-                defaults={
-                    "user_name": user_name,
-                    "user_email": user_email,
-                    "user_state": user_state,
-                    "user_city": user_city,
-                    "user_address": user_address,
-                    "user_profile": user_profile,
-                    "user_password": user_password,
-                    "user_register_date": datetime.today(),
-                    "user_register_time": datetime.now()
-                }
-            )
-
-        return JsonResponse({
-            "status": "1",
-            "msg": "Data Uploaded / Updated Successfully..."
-        })
-
-    return JsonResponse({
-        "status": "0",
-        "msg": "Invalid Request"
-    })
+        try:
+            excel_file = request.FILES.get('buyer_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
+            
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            success_count = 0
+            error_count = 0
+            
+            FIXED_ROLE = "Buyer"
+            
+            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+                try:
+                    user_name = row[4] if len(row) > 4 else None
+                    user_email = row[5] if len(row) > 5 else None
+                    user_phone = row[6] if len(row) > 6 else None
+                    user_password = row[7] if len(row) > 7 else None
+                    user_state = row[8] if len(row) > 8 else None
+                    user_city = row[9] if len(row) > 9 else None
+                    user_address = row[10] if len(row) > 10 else None
+                    register_date_value = row[11] if len(row) > 11 else None
+                    
+                    if not user_name or not user_phone:
+                        error_count += 1
+                        continue
+                    
+                    # Clean phone
+                    user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
+                    
+                    # Clean other fields
+                    user_name = str(user_name).strip()
+                    user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
+                    user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
+                    user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
+                    user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+                    
+                    #  Register date: Today's date as default
+                    register_date = datetime.now().date()
+                    
+                    # If date provided in Excel, try to parse it
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_date_value, (date, datetime)):
+                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
+                            else:
+                                date_str = str(register_date_value).strip()
+                                if ',' in date_str:
+                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        except:
+                            pass  # Keep today's date if parsing fails
+                    
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    
+                    if existing_user:
+                        existing_user.user_name = user_name
+                        existing_user.user_email = user_email
+                        existing_user.user_role = FIXED_ROLE
+                        existing_user.user_state = user_state
+                        existing_user.user_city = user_city
+                        existing_user.user_address = user_address
+                        existing_user.user_password = user_password
+                        existing_user.user_register_date = register_date
+                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.save()
+                    else:
+                        User_Details.objects.create(
+                            user_name=user_name,
+                            user_email=user_email,
+                            user_phone=user_phone,
+                            user_role=FIXED_ROLE,
+                            user_state=user_state,
+                            user_city=user_city,
+                            user_address=user_address,
+                            user_password=user_password,
+                            user_register_date=register_date,
+                            user_register_time=datetime.now().time()
+                        )
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+            
+            return JsonResponse({
+                "status": "1",
+                "msg": f"Successfully imported {success_count} Buyers. Failed: {error_count}"
+            })
+            
+        except Exception as e:
+            return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 ######### Views end for buyer data functionality via excel ###########################
 
@@ -2752,7 +3330,7 @@ def Agent_List(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        agent_obj = User_Details.objects.filter(user_role="Agent").order_by('-id')
+        agent_obj = User_Details.objects.filter(user_role="Agent").order_by('-user_register_date')
         agent_obj_count = User_Details.objects.filter(user_role="Agent").count()
 
         rendered = render_to_string("admin_user/render_to_string/R_Agent/r_t_s_agent.html",{'agent_obj':agent_obj,'agent_obj_count':agent_obj_count,'Role':'Agent'})
@@ -2785,65 +3363,139 @@ def Add_Agent(request):
 @csrf_exempt
 def Agent_Data(request):
     if request.method == 'POST':
-
-        excel_file = request.FILES.get('agent_file')
-
-        if not excel_file:
-            return JsonResponse({"status": "0", "msg": "Excel file not found"})
-
-        wb = load_workbook(excel_file)
-        sheet = wb.active
-
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-
-            user_name = row[0]
-            user_email = row[1]
-            user_phone = row[2]
-            user_state = row[3]
-            user_city = row[4]
-            user_address = row[5]
-            user_password = row[6]
-            user_agency_name = row[7]
-            user_license_number = row[8]
-            user_profile = row[9]
-            user_role = row[10]
-
-            if user_password is not None:
-                user_password = str(user_password).split(".")[0]
-
-            if user_phone is not None:
-                user_phone = str(user_phone).split(".")[0]
-
-            if not user_phone:
-                continue
-
-            User_Details.objects.update_or_create(
-                user_phone=user_phone,
-                user_role=user_role,  # unique identifier
-                defaults={
-                    "user_name": user_name,
-                    "user_email": user_email,
-                    "user_state": user_state,
-                    "user_city": user_city,
-                    "user_address": user_address,
-                    "user_profile": user_profile,
-                    "user_password": user_password,
-                    "user_agency_name": user_agency_name,
-                    "user_license_number": user_license_number,
-                    "user_register_date": datetime.today(),
-                    "user_register_time": datetime.now()
-                }
-            )
-
-        return JsonResponse({
-            "status": "1",
-            "msg": "Data Uploaded / Updated Successfully..."
-        })
-
-    return JsonResponse({
-        "status": "0",
-        "msg": "Invalid Request"
-    })
+        try:
+            excel_file = request.FILES.get('agent_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
+            
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            success_count = 0
+            error_count = 0
+            
+            FIXED_ROLE = "Agent"
+            
+            # Data starts from row 3 (row 1 = title, row 2 = headers)
+            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+                try:
+                    
+                    user_name = row[4] if len(row) > 4 else None
+                    user_email = row[5] if len(row) > 5 else None
+                    user_phone = row[6] if len(row) > 6 else None
+                    user_password = row[7] if len(row) > 7 else None
+                    agency_name = row[8] if len(row) > 8 else None
+                    license_number = row[9] if len(row) > 9 else None
+                    user_state = row[10] if len(row) > 10 else None
+                    user_city = row[11] if len(row) > 11 else None
+                    user_address = row[12] if len(row) > 12 else None
+                    register_date_value = row[13] if len(row) > 13 else None
+                    
+                    if not user_name or not user_phone:
+                        error_count += 1
+                        continue
+                    
+                    # Clean phone
+                    if isinstance(user_phone, (int, float)):
+                        user_phone = str(int(user_phone))
+                    else:
+                        user_phone = str(user_phone).replace('-', '').replace(' ', '').strip()
+                    
+                    # Clean name
+                    user_name = str(user_name).strip()
+                    
+                    # Clean password
+                    if user_password:
+                        if isinstance(user_password, (int, float)):
+                            user_password = str(int(user_password))
+                        else:
+                            user_password = str(user_password).split('.')[0].strip()
+                    else:
+                        user_password = 'default123'
+                    
+                    # Clean email
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
+                    
+                    # Clean agency fields
+                    agency_name = str(agency_name).strip() if agency_name and str(agency_name) != '---' else None
+                    license_number = str(license_number).strip() if license_number and str(license_number) != '---' else None
+                    
+                    # Clean address fields
+                    user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
+                    user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
+                    user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+                    
+                    # Register date: Today's date as default
+                    register_date = datetime.now().date()
+                    
+                    # If date provided in Excel, try to parse it
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-', 'None']:
+                        try:
+                            if isinstance(register_date_value, (date, datetime)):
+                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
+                            else:
+                                date_str = str(register_date_value).strip()
+                                if ',' in date_str:
+                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%d/%m/%Y').date()
+                        except:
+                            pass  # Keep today's date if parsing fails
+                    
+                    print(f"Row {row_idx}: Importing Agent - {user_name} ({user_phone}) - Agency: {agency_name or 'N/A'}")
+                    
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    
+                    if existing_user:
+                        existing_user.user_name = user_name
+                        existing_user.user_email = user_email
+                        existing_user.user_role = FIXED_ROLE
+                        existing_user.user_agency_name = agency_name
+                        existing_user.user_license_number = license_number
+                        existing_user.user_state = user_state
+                        existing_user.user_city = user_city
+                        existing_user.user_address = user_address
+                        existing_user.user_password = user_password
+                        existing_user.user_register_date = register_date
+                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.save()
+                        print(f"Row {row_idx}: Updated existing Agent")
+                    else:
+                        User_Details.objects.create(
+                            user_name=user_name,
+                            user_email=user_email,
+                            user_phone=user_phone,
+                            user_role=FIXED_ROLE,
+                            user_agency_name=agency_name,
+                            user_license_number=license_number,
+                            user_state=user_state,
+                            user_city=user_city,
+                            user_address=user_address,
+                            user_password=user_password,
+                            user_register_date=register_date,
+                            user_register_time=datetime.now().time()
+                        )
+                        print(f"Row {row_idx}: Created new Agent")
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+                    print(f"Row {row_idx} error: {e}")
+            
+            return JsonResponse({
+                "status": "1",
+                "msg": f"Successfully imported {success_count} Agents. Failed: {error_count}"
+            })
+            
+        except Exception as e:
+            return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 ########### Views end for upload agent data functionaity via excel #####################
 
@@ -2908,7 +3560,7 @@ def Agency_List(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        agency_obj = User_Details.objects.filter(user_role="Agency/Builder").order_by('-id')
+        agency_obj = User_Details.objects.filter(user_role="Agency/Builder").order_by('-user_register_date')
         agency_obj_count = User_Details.objects.filter(user_role="Agency/Builder").count()
 
         rendered = render_to_string("admin_user/render_to_string/R_Agency/r_t_s_agency.html",{'agency_obj':agency_obj,'agency_obj_count':agency_obj_count,'Role':'Agency'})
@@ -2940,65 +3592,140 @@ def Add_Agency(request):
 @csrf_exempt
 def Agency_Data(request):
     if request.method == 'POST':
+        try:
+            excel_file = request.FILES.get('agency_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
+            
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            success_count = 0
+            error_count = 0
+            
+            FIXED_ROLE = "Agency/Builder"
+            
+            # Data starts from row 3 (row 1 = title, row 2 = headers)
+            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+                try:
+                    
+                    user_name = row[4] if len(row) > 4 else None
+                    user_email = row[5] if len(row) > 5 else None
+                    user_phone = row[6] if len(row) > 6 else None
+                    user_password = row[7] if len(row) > 7 else None
+                    agency_name = row[8] if len(row) > 8 else None
+                    license_number = row[9] if len(row) > 9 else None
+                    user_state = row[10] if len(row) > 10 else None
+                    user_city = row[11] if len(row) > 11 else None
+                    user_address = row[12] if len(row) > 12 else None
+                    register_date_value = row[13] if len(row) > 13 else None
+                    
+                    if not user_name or not user_phone:
+                        error_count += 1
+                        continue
+                    
+                    # Clean phone
+                    if isinstance(user_phone, (int, float)):
+                        user_phone = str(int(user_phone))
+                    else:
+                        user_phone = str(user_phone).replace('-', '').replace(' ', '').strip()
+                    
+                    # Clean name
+                    user_name = str(user_name).strip()
+                    
+                    # Clean password
+                    if user_password:
+                        if isinstance(user_password, (int, float)):
+                            user_password = str(int(user_password))
+                        else:
+                            user_password = str(user_password).split('.')[0].strip()
+                    else:
+                        user_password = 'default123'
+                    
+                    # Clean email
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
+                    
+                    # Clean agency fields
+                    agency_name = str(agency_name).strip() if agency_name and str(agency_name) != '---' else None
+                    license_number = str(license_number).strip() if license_number and str(license_number) != '---' else None
+                    
+                    # Clean address fields
+                    user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
+                    user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
+                    user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+                    
+                    # Register date: Today's date as default
+                    register_date = datetime.now().date()
+                    
+                    # If date provided in Excel, try to parse it
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-', 'None']:
+                        try:
+                            if isinstance(register_date_value, (date, datetime)):
+                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
+                            else:
+                                date_str = str(register_date_value).strip()
+                                if ',' in date_str:
+                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%d/%m/%Y').date()
+                        except:
+                            pass  # Keep today's date if parsing fails
+                    
+                    print(f"Row {row_idx}: Importing Agent - {user_name} ({user_phone}) - Agency: {agency_name or 'N/A'}")
+                    
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    
+                    if existing_user:
+                        existing_user.user_name = user_name
+                        existing_user.user_email = user_email
+                        existing_user.user_role = FIXED_ROLE
+                        existing_user.user_agency_name = agency_name
+                        existing_user.user_license_number = license_number
+                        existing_user.user_state = user_state
+                        existing_user.user_city = user_city
+                        existing_user.user_address = user_address
+                        existing_user.user_password = user_password
+                        existing_user.user_register_date = register_date
+                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.save()
+                        print(f"Row {row_idx}: Updated existing Agent")
+                    else:
+                        User_Details.objects.create(
+                            user_name=user_name,
+                            user_email=user_email,
+                            user_phone=user_phone,
+                            user_role=FIXED_ROLE,
+                            user_agency_name=agency_name,
+                            user_license_number=license_number,
+                            user_state=user_state,
+                            user_city=user_city,
+                            user_address=user_address,
+                            user_password=user_password,
+                            user_register_date=register_date,
+                            user_register_time=datetime.now().time()
+                        )
+                        print(f"Row {row_idx}: Created new Agent")
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+                    print(f"Row {row_idx} error: {e}")
+            
+            return JsonResponse({
+                "status": "1",
+                "msg": f"Successfully imported {success_count} Agency/Builder. Failed: {error_count}"
+            })
+            
+        except Exception as e:
+            return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
-        excel_file = request.FILES.get('agency_file')
-
-        if not excel_file:
-            return JsonResponse({"status": "0", "msg": "Excel file not found"})
-
-        wb = load_workbook(excel_file)
-        sheet = wb.active
-
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-
-            user_name = row[0]
-            user_email = row[1]
-            user_phone = row[2]
-            user_state = row[3]
-            user_city = row[4]
-            user_address = row[5]
-            user_password = row[6]
-            user_agency_name = row[7]
-            user_license_number = row[8]
-            user_profile = row[9]
-            user_role = row[10]
-
-            if user_password is not None:
-                user_password = str(user_password).split(".")[0]
-
-            if user_phone is not None:
-                user_phone = str(user_phone).split(".")[0]
-
-            if not user_phone:
-                continue
-
-            User_Details.objects.update_or_create(
-                user_phone=user_phone,
-                user_role=user_role,  # unique identifier
-                defaults={
-                    "user_name": user_name,
-                    "user_email": user_email,
-                    "user_state": user_state,
-                    "user_city": user_city,
-                    "user_address": user_address,
-                    "user_profile": user_profile,
-                    "user_password": user_password,
-                    "user_agency_name": user_agency_name,
-                    "user_license_number": user_license_number,
-                    "user_register_date": datetime.today(),
-                    "user_register_time": datetime.now()
-                }
-            )
-
-        return JsonResponse({
-            "status": "1",
-            "msg": "Data Uploaded / Updated Successfully..."
-        })
-
-    return JsonResponse({
-        "status": "0",
-        "msg": "Invalid Request"
-    })
 
 ############# Views end for upload agency data functionality via excel ##################
 
@@ -3063,7 +3790,7 @@ def Vendor_List(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        vendor_obj = User_Details.objects.filter(user_role="Vendor").order_by('-id')
+        vendor_obj = User_Details.objects.filter(user_role="Vendor").order_by('-user_register_date')
         vendor_obj_count = User_Details.objects.filter(user_role="Vendor").count()
 
         rendered = render_to_string("admin_user/render_to_string/R_Vendor/r_t_s_vendor.html",{'vendor_obj':vendor_obj,'vendor_obj_count':vendor_obj_count,'Role':'Vendor'})
@@ -3099,72 +3826,173 @@ def Add_Vendor(request):
 @csrf_exempt
 def Vendor_Data(request):
     if request.method == 'POST':
-        excel_file = request.FILES.get('vendor_file')
-
-        if not excel_file:
-            return JsonResponse({"status": "0", "msg": "Excel file not found"})
-
-        wb = load_workbook(excel_file)
-        sheet = wb.active
-
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-            # 1. ADD SAFETY CHECK: Ensure the row has at least 14 columns
-            if len(row) < 14:
-                continue  # Skip rows that don't have all the new vendor fields
-
-            user_name = row[0]
-            user_email = row[1]
-            user_phone = row[2]
-            user_state = row[3]
-            user_city = row[4]
-            user_address = row[5]
-            user_password = row[6]
-           
-            # New Vendor Fields
-            user_service_type = row[8]
-            user_company_name = row[9]
-            user_pan_number = row[10]
-            user_gstin_number = row[11]
-            user_role = row[12]
-            operational_areas = row[13]
-
-            # Cleaning numeric strings
-            if user_password is not None:
-                user_password = str(user_password).split(".")[0]
-
-            if user_phone is not None:
-                user_phone = str(user_phone).split(".")[0]
-
-            if not user_phone:
-                continue
-
-            # Update or Create Logic
-            User_Details.objects.update_or_create(
-                user_phone=user_phone,
-                user_role=user_role,
-                defaults={
-                    "user_name": user_name,
-                    "user_email": user_email,
-                    "user_state": user_state,
-                    "user_city": user_city,
-                    "user_address": user_address,
-                    "user_password": user_password,
-                    "user_service_type": user_service_type,
-                    "user_company_name": user_company_name,
-                    "user_pan_number": user_pan_number,
-                    "user_gstin_number": user_gstin_number,
-                    "user_operational_scope": 'all' if operational_areas == 'All Over India' else 'other',
-                    "selected_regions": operational_areas,
-                    "user_register_date": datetime.today(),
-                    "user_register_time": datetime.now()
-                }
-            )
-
-        return JsonResponse({
-            "status": "1",
-            "msg": "Vendor Data Uploaded / Updated Successfully..."
-        })
-
+        try:
+            excel_file = request.FILES.get('vendor_file')
+            
+            if not excel_file:
+                return JsonResponse({"status": "0", "msg": "Excel file not found"})
+            
+            if not excel_file.name.endswith(('.xlsx', '.xls')):
+                return JsonResponse({"status": "0", "msg": "Please upload .xlsx or .xls file only"})
+            
+            wb = load_workbook(excel_file)
+            sheet = wb.active
+            
+            success_count = 0
+            error_count = 0
+            skipped_count = 0
+            
+            # Data starts from row 3
+            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+                try:
+                    if not any(row) or len(row) < 18:
+                        skipped_count += 1
+                        continue
+                    
+                    user_service_type = row[4] if len(row) > 4 else None
+                    user_name = row[5] if len(row) > 5 else None
+                    user_email = row[6] if len(row) > 6 else None
+                    user_phone = row[7] if len(row) > 7 else None
+                    user_password = row[8] if len(row) > 8 else None
+                    user_state = row[9] if len(row) > 9 else None
+                    user_city = row[10] if len(row) > 10 else None
+                    user_address = row[11] if len(row) > 11 else None
+                    user_company_name = row[12] if len(row) > 12 else None
+                    user_pan_number = row[13] if len(row) > 13 else None
+                    user_gstin_number = row[14] if len(row) > 14 else None
+                    operational_scope = row[15] if len(row) > 15 else None
+                    selected_regions = row[16] if len(row) > 16 else None  
+                    register_date_value = row[17] if len(row) > 17 else None
+                    
+                    # Skip if no name or phone
+                    if not user_name or not user_phone:
+                        skipped_count += 1
+                        print(f"Row {row_idx}: Missing name or phone, skipping")
+                        continue
+                    
+                    # Skip if name is "View Profile" (Profile column value)
+                    user_name_str = str(user_name).strip()
+                    if user_name_str == 'View Profile' or user_name_str == 'None' or user_name_str.isdigit():
+                        print(f"Row {row_idx}: Invalid name '{user_name_str}', skipping")
+                        skipped_count += 1
+                        continue
+                    
+                    # Clean phone
+                    if isinstance(user_phone, (int, float)):
+                        user_phone = str(int(user_phone))
+                    else:
+                        user_phone = str(user_phone).replace('-', '').replace(' ', '').strip()
+                    
+                    # Clean password
+                    if user_password:
+                        if isinstance(user_password, (int, float)):
+                            user_password = str(int(user_password))
+                        else:
+                            user_password = str(user_password).split('.')[0].strip()
+                    else:
+                        user_password = 'default123'
+                    
+                    # Clean email
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
+                    
+                    # Clean address fields
+                    user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
+                    user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
+                    user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+                    
+                    # Clean vendor fields
+                    user_service_type = str(user_service_type).strip() if user_service_type and str(user_service_type) != '---' else None
+                    user_company_name = str(user_company_name).strip() if user_company_name and str(user_company_name) != '---' else None
+                    user_pan_number = str(user_pan_number).strip().upper() if user_pan_number and str(user_pan_number) != '---' else None
+                    user_gstin_number = str(user_gstin_number).strip().upper() if user_gstin_number and str(user_gstin_number) != '---' else None
+                    operational_scope = str(operational_scope).strip() if operational_scope and str(operational_scope) != '---' else None
+                    
+                    #  Clean selected_regions (this is the correct field name)
+                    if selected_regions and str(selected_regions) != '---':
+                        selected_regions = str(selected_regions).strip()
+                    else:
+                        selected_regions = None
+                    
+                    # Register date
+                    register_date = datetime.now().date()
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_date_value, (date, datetime)):
+                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
+                            else:
+                                date_str = str(register_date_value).strip()
+                                if ',' in date_str:
+                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                        except:
+                            pass
+                    
+                    print(f"Row {row_idx}: Importing Vendor - Name: {user_name}, Phone: {user_phone}, Company: {user_company_name}")
+                    
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    
+                    if existing_user:
+                        existing_user.user_name = user_name
+                        existing_user.user_email = user_email
+                        existing_user.user_role = "Vendor"
+                        existing_user.user_service_type = user_service_type
+                        existing_user.user_company_name = user_company_name
+                        existing_user.user_pan_number = user_pan_number
+                        existing_user.user_gstin_number = user_gstin_number
+                        existing_user.user_operational_scope = operational_scope
+                        existing_user.selected_regions = selected_regions
+                        existing_user.user_state = user_state
+                        existing_user.user_city = user_city
+                        existing_user.user_address = user_address
+                        existing_user.user_password = user_password
+                        existing_user.user_register_date = register_date
+                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.save()
+                        print(f"Row {row_idx}: Updated existing Vendor")
+                    else:
+                        User_Details.objects.create(
+                            user_name=user_name,
+                            user_email=user_email,
+                            user_phone=user_phone,
+                            user_role="Vendor",
+                            user_service_type=user_service_type,
+                            user_company_name=user_company_name,
+                            user_pan_number=user_pan_number,
+                            user_gstin_number=user_gstin_number,
+                            user_operational_scope=operational_scope,
+                            selected_regions=selected_regions,
+                            user_state=user_state,
+                            user_city=user_city,
+                            user_address=user_address,
+                            user_password=user_password,
+                            user_register_date=register_date,
+                            user_register_time=datetime.now().time()
+                        )
+                        print(f"Row {row_idx}: Created new Vendor")
+                    
+                    success_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+                    print(f"Row {row_idx} error: {e}")
+            
+            msg = f"Successfully imported {success_count} Vendors."
+            if error_count > 0:
+                msg += f" Failed: {error_count}"
+            if skipped_count > 0:
+                msg += f" Skipped: {skipped_count}"
+            
+            return JsonResponse({
+                "status": "1",
+                "msg": msg
+            })
+            
+        except Exception as e:
+            print(f"Error: {e}")
+            return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
+    
     return JsonResponse({"status": "0", "msg": "Invalid Request"})
 
 

@@ -52,6 +52,7 @@
             <th>Contact Mode</th>
             <th>Contact Time</th>
             <th>Enquiry Date</th>
+            <th>Enquiry Time</th>
         </tr>
     </thead>
 
@@ -101,6 +102,7 @@
             <td>{% if contact.contact_mode == "null" %} --- {% else %}{{contact.contact_mode}}{% endif %}</td>
             <td>{% if contact.contact_time == "null" %} --- {% else %}{{contact.contact_time}}{% endif %}</td>
             <td>{{ contact.contact_enquiry_date }}</td>
+            <td>{{ contact.contact_enquiry_time }}</td>
 
         </tr>
 
@@ -117,7 +119,7 @@
 
     var table = $('#contactTable').DataTable({
         dom: '<"table-header"Blf>rt<"table-footer"ip>',
-        buttons: ['excel','csv'],
+        buttons: ['excel'],
         paging: true,
         ordering: true,
         info: true,

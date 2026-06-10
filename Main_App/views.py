@@ -640,30 +640,16 @@ def Send_Property_Enquiry(request):
         whatsapp_consent_raw = data.get('whatsapp_consent', 'no')
         whatsapp_consent = True if whatsapp_consent_raw == 'yes' else False
 
-        #  Get UTM parameters to find the UTMLink record
+        # Get ALL UTM parameters
         utm_source = data.get('utm_source', '').strip()
         utm_medium = data.get('utm_medium', '').strip()
         utm_campaign = data.get('utm_campaign', '').strip()
-        
-        # print(f"UTM Data - Source: {utm_source}, Medium: {utm_medium}, Campaign: {utm_campaign}")
+        utm_term = data.get('utm_term', '').strip()
+        utm_content = data.get('utm_content', '').strip()
+        utm_path = data.get('utm_path', '').strip()
+        page_url = data.get('page_url', '').strip()
 
-        # Find existing UTMLink record
-        utm_link = None
-        if utm_source and utm_medium and property_id:
-            utm_filter = {
-                'utm_source': utm_source,
-                'utm_medium': utm_medium,
-                'property_id': property_id
-            }
-            if utm_campaign:
-                utm_filter['utm_campaign'] = utm_campaign
-            
-            utm_link = UTMLink.objects.filter(**utm_filter).first()
-            
-            # if utm_link:
-            #     print(f"Found UTMLink: {utm_link.link_id} - Clicks: {utm_link.total_clicks}")
-            # else:
-            #     print(f"No UTMLink found for {utm_source}/{utm_medium}")
+        print(f"UTM Data - Source: {utm_source}, Medium: {utm_medium}, Campaign: {utm_campaign}")
 
         # 3. Find the property
         real_property = None
@@ -671,67 +657,112 @@ def Send_Property_Enquiry(request):
         try:
             if listing_type == "rent" and category == "residential-data":
                 real_property = RentalResidentialProperty.objects.get(id=property_id)
-
             elif listing_type == "rent" and category == "pg-data":
                 real_property = PGColivingProperty.objects.get(id=property_id)
-
             elif listing_type == "rent" and category == "commercial-data":
                 real_property = CommercialRentalProperty.objects.get(id=property_id)
-                
             elif listing_type == "sale" and category == "resale-residential":
                 real_property = ResaleResidentialProperty.objects.get(id=property_id)
-
             elif listing_type == "sale" and category == "commercial-resale":
                 real_property = CommercialResaleProperty.objects.get(id=property_id)
-
             elif listing_type == "sale" and category == "plot-resale":
                 real_property = PlotSaleProperty.objects.get(id=property_id)
-
             elif listing_type == "sale" and category == "industrial-resale":
                 real_property = IndustrialResaleProperty.objects.get(id=property_id)
-
             elif listing_type == "sale" and category == "agricultural-data":
                 real_property = AgriculturalResaleProperty.objects.get(id=property_id)
                 
         except ObjectDoesNotExist as e:
-            # print(f"Property not found: {e}")
             return JsonResponse({"status": "0", "msg": "The requested property could not be found."})
 
         if not real_property:
             return JsonResponse({"status": "0", "msg": "Invalid property type or category arrangement."})
         
-        # 4. Save Enquiry with ForeignKey to UTMLink
+        # 4. Find or Create UTMLink
         property_content_type = ContentType.objects.get_for_model(real_property)
+        utm_link = None
         
+        if utm_source and utm_medium and property_id:
+            # Try to find existing UTMLink with matching UTM parameters
+            utm_filter = {
+                'utm_source': utm_source,
+                'utm_medium': utm_medium,
+                'content_type': property_content_type,
+                'object_id': real_property.id,
+                'listing_type': listing_type,
+                'category': category,
+            }
+            if utm_campaign:
+                utm_filter['utm_campaign'] = utm_campaign
+            if utm_term:
+                utm_filter['utm_term'] = utm_term
+            if utm_content:
+                utm_filter['utm_content'] = utm_content
+            
+            utm_link = UTMLink.objects.filter(**utm_filter).first()
+            
+            if not utm_link:
+                #  Create new UTMLink if not found
+                
+                link_id = str(uuid.uuid4())[:8]
+                
+                # Get property title
+                property_title = getattr(real_property, 'title', None)
+                if not property_title:
+                    property_title = getattr(real_property, 'property_title', str(real_property))
+                
+                utm_link = UTMLink.objects.create(
+                    link_id=link_id,
+                    content_type=property_content_type,
+                    object_id=real_property.id,
+                    property_id=real_property.id,  # If you have this field
+                    property_title=property_title,
+                    listing_type=listing_type,
+                    category=category,
+                    utm_path=utm_path or f"/listing/{listing_type}/{category}/{property_id}/",
+                    utm_url=page_url,
+                    utm_source=utm_source,
+                    utm_medium=utm_medium,
+                    utm_campaign=utm_campaign,
+                    utm_term=utm_term,
+                    utm_content=utm_content,
+                    total_clicks=1,
+                    total_enquiries=0
+                )
+                print(f" Created new UTMLink: {utm_link.link_id}")
+            else:
+                # Update click count for existing UTMLink
+                utm_link.total_clicks = models.F('total_clicks') + 1
+                utm_link.save()
+                utm_link.refresh_from_db()
+                print(f" Updated UTMLink clicks: {utm_link.total_clicks}")
+        
+        # 5. Save Enquiry
         try:
             enquiry = PropertyEnquiry.objects.create(
                 content_type=property_content_type,
                 object_id=real_property.id,
+                
                 enquiry_name=data.get('enquiry_name', '').strip(),
                 country_code=country_code,
                 enquiry_phone=data.get('enquiry_phone', '').strip(),
                 whatsapp_consent=whatsapp_consent,
-                
-                #  Foreign Key to UTMLink (instead of duplicate fields)
                 utm_link=utm_link,
-                
                 enquiry_date=date.today(),
                 enquiry_time=datetime.now().time()
             )
             
-            # print(f"Enquiry saved successfully - ID: {enquiry.id}")
-            # print(f"   UTM Source: {utm_source}, Medium: {utm_medium}")
+            print(f" Enquiry saved - ID: {enquiry.id}")
+            
             if utm_link:
-                print(f"Linked to UTMLink: {utm_link.link_id}")
-
-            # ✅ Update UTMLink statistics (increment enquiry count)
-            if utm_link:
+                print(f"   Linked to UTMLink: {utm_link.link_id}")
+                # Update UTMLink enquiry count
                 utm_link.total_enquiries = models.F('total_enquiries') + 1
                 utm_link.save()
                 utm_link.refresh_from_db()
-                print(f" Updated UTMLink enquiries: {utm_link.total_enquiries}")
+                print(f"   UTMLink total enquiries: {utm_link.total_enquiries}")
             else:
-                print(f" No UTMLink to update for source: {utm_source}, medium: {utm_medium}")
+                print(f" No UTMLink - Enquiry saved without UTM tracking")
         
             return JsonResponse({
                 "status": "1", 
@@ -739,7 +770,7 @@ def Send_Property_Enquiry(request):
             })
             
         except Exception as e:
-            # print(f" Enquiry DB Save Failure: {str(e)}")
+            print(f" Enquiry DB Save Failure: {str(e)}")
             import traceback
             traceback.print_exc()
             return JsonResponse({
@@ -1720,10 +1751,6 @@ def Track_utm_link(request):
         listing_type = data.get('listing_type', 'rent')
         category = data.get('category', 'unknown')
         page_url = data.get('page_url', '')
-
-
-        # GET PATH AND PARAMS FROM REQUEST
-
         utm_path = data.get('utm_path', '/')
         utm_params = data.get('utm_params', '')
         
@@ -1733,30 +1760,69 @@ def Track_utm_link(request):
         # Validate required fields
         if not utm_source:
             return JsonResponse({'success': False, 'error': 'utm_source is required'})
-        
         if not utm_medium:
             return JsonResponse({'success': False, 'error': 'utm_medium is required'})
-        
         if not property_id:
             return JsonResponse({'success': False, 'error': 'property_id is required'})
         
+        #  Find the property and get its ContentType
+        real_property = None
+        property_content_type = None
         
+        # Map category to model
+        try:
+            if listing_type == "rent" and category == "residential-data":
+                real_property = RentalResidentialProperty.objects.get(id=property_id)
+                property_content_type = ContentType.objects.get_for_model(RentalResidentialProperty)
+            elif listing_type == "rent" and category == "pg-data":
+                real_property = PGColivingProperty.objects.get(id=property_id)
+                property_content_type = ContentType.objects.get_for_model(PGColivingProperty)
+            elif listing_type == "rent" and category == "commercial-data":
+                real_property = CommercialRentalProperty.objects.get(id=property_id)
+                property_content_type = ContentType.objects.get_for_model(CommercialRentalProperty)
+            elif listing_type == "sale" and category == "resale-residential":
+                real_property = ResaleResidentialProperty.objects.get(id=property_id)
+                property_content_type = ContentType.objects.get_for_model(ResaleResidentialProperty)
+            elif listing_type == "sale" and category == "commercial-resale":
+                real_property = CommercialResaleProperty.objects.get(id=property_id)
+                property_content_type = ContentType.objects.get_for_model(CommercialResaleProperty)
+            elif listing_type == "sale" and category == "plot-resale":
+                real_property = PlotSaleProperty.objects.get(id=property_id)
+                property_content_type = ContentType.objects.get_for_model(PlotSaleProperty)
+            elif listing_type == "sale" and category == "industrial-resale":
+                real_property = IndustrialResaleProperty.objects.get(id=property_id)
+                property_content_type = ContentType.objects.get_for_model(IndustrialResaleProperty)
+            elif listing_type == "sale" and category == "agricultural-data":
+                real_property = AgriculturalResaleProperty.objects.get(id=property_id)
+                property_content_type = ContentType.objects.get_for_model(AgriculturalResaleProperty)
+        except ObjectDoesNotExist as e:
+            print(f"Property not found: {e}")
+            return JsonResponse({'success': False, 'error': 'Property not found'})
         
-        # Try to find existing UTM link
+        if not property_content_type or not real_property:
+            return JsonResponse({'success': False, 'error': 'Invalid property type'})
+        
+        # Get property title if not provided
+        if property_title == 'Unknown':
+            property_title = getattr(real_property, 'title', None)
+            if not property_title:
+                property_title = getattr(real_property, 'property_title', str(real_property))
+    
+        #  Try to find existing UTM link using Generic FK
         utm_link = UTMLink.objects.filter(
+            content_type=property_content_type,
+            object_id=property_id,
             utm_source=utm_source,
             utm_medium=utm_medium,
-            utm_campaign=utm_campaign,
-            property_id=property_id,
+            utm_campaign=utm_campaign if utm_campaign else '',
             listing_type=listing_type,
             category=category,
         ).first()
-
         
         print(f"Existing UTM link found: {utm_link is not None}")
         
         if utm_link:
-            # UPDATE EXISTING - INCREASE CLICK COUNT
+            #  UPDATE EXISTING - INCREASE CLICK COUNT
             utm_link.total_clicks = models.F('total_clicks') + 1
             utm_link.save()
             utm_link.refresh_from_db()
@@ -1770,26 +1836,30 @@ def Track_utm_link(request):
                 'created': False
             })
         else:
-            # CREATE NEW UTM LINK
+            # CREATE NEW UTM LINK (without property_id field)
+            import uuid
             link_id = str(uuid.uuid4())[:8]
             
             utm_link = UTMLink.objects.create(
                 link_id=link_id,
-                property_id=property_id,
+                content_type=property_content_type,
+                object_id=property_id,
                 property_title=property_title,
                 listing_type=listing_type,
                 category=category,
-                utm_path=utm_path,  
-                utm_url = page_url,      
+                utm_path=utm_path,
+                utm_url=page_url,
                 utm_source=utm_source,
                 utm_medium=utm_medium,
                 utm_campaign=utm_campaign,
                 utm_term=utm_term,
                 utm_content=utm_content,
-                total_clicks=1 
+                total_clicks=1,
+                total_enquiries=0
             )
             
-            print(f"Created new UTM link with ID: {link_id}")
+            print(f" Created new UTM link with ID: {link_id}")
+            print(f"   Source: {utm_source}, Medium: {utm_medium}, Campaign: {utm_campaign}")
             
             return JsonResponse({
                 'success': True,
@@ -1800,7 +1870,7 @@ def Track_utm_link(request):
             })
             
     except Exception as e:
-        print(f"Error in Track_utm_link: {str(e)}")
+        print(f" Error in Track_utm_link: {str(e)}")
         import traceback
         traceback.print_exc()
         return JsonResponse({
