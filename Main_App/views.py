@@ -568,38 +568,24 @@ import math
 ########### Views start for ajax for send property enquiry ########################
 
 
-
-from django.contrib.contenttypes.models import ContentType
-
-
 @csrf_exempt
 def Send_Property_Enquiry(request):
     if request.method == "POST":
-        data = request.POST.dict()   
+        data = request.POST.dict()
         
-        # 1. SECURITY: Retrieve user authentication from the secure session container
-        user_id = request.session.get('User_id') or data.get('user_id')
-        if not user_id:
-            return JsonResponse({"status": "0", "msg": "User session expired. Please log in."})
-
-        try:
-            user_data = User_Details.objects.get(id=user_id)
-        except (User_Details.DoesNotExist, ValueError):
-            return JsonResponse({"status": "0", "msg": "Invalid user account verification."})
-
-        # 2. Extract Data Context Parameters Safely
+        print("=" * 50)
+        print("Send_Property_Enquiry called")
+        print("Received data:", data)
+        print("=" * 50)
+        
+        # 1. Extract Data
         property_id = data.get('property_id')
         listing_type = data.get('listing_type', '')
         category = data.get('category', '')
-        
-        print("---------------------",listing_type)
-        print("---------------------",category)
-        # New country parameters and consent evaluation
         country_code = data.get('country_code', '+91')
-        whatsapp_consent_raw = data.get('whatsapp_consent', 'no')
-        whatsapp_consent = True if whatsapp_consent_raw == 'yes' else False
-
-        # Get ALL UTM parameters
+        whatsapp_consent = data.get('whatsapp_consent', 'no') == 'yes'
+        
+        # Get UTM parameters
         utm_source = data.get('utm_source', '').strip()
         utm_medium = data.get('utm_medium', '').strip()
         utm_campaign = data.get('utm_campaign', '').strip()
@@ -607,15 +593,13 @@ def Send_Property_Enquiry(request):
         utm_content = data.get('utm_content', '').strip()
         utm_path = data.get('utm_path', '').strip()
         page_url = data.get('page_url', '').strip()
+        
 
-        print(f"UTM Data - Source: {utm_source}, Medium: {utm_medium}, Campaign: {utm_campaign}")
-
-        # 3. Find the property
+        # 2. Find the property
         real_property = None
-
-        # 3. CRASH PREVENTION: Safely lookup target records using model-specific tables
+        
         try:
-            if listing_type == "rent" and category == "residential":
+            if listing_type == "rent" and category == "residential-data":
                 real_property = RentalResidentialProperty.objects.get(id=property_id)
             elif listing_type == "rent" and category == "pg-data":
                 real_property = PGColivingProperty.objects.get(id=property_id)
@@ -631,47 +615,41 @@ def Send_Property_Enquiry(request):
                 real_property = IndustrialResaleProperty.objects.get(id=property_id)
             elif listing_type == "sale" and category == "agricultural-data":
                 real_property = AgriculturalResaleProperty.objects.get(id=property_id)
-                
-        except ObjectDoesNotExist as e:
-            return JsonResponse({"status": "0", "msg": "The requested property could not be found."})
-
-        if not real_property:
-            return JsonResponse({"status": "0", "msg": "Invalid property type or category arrangement."})
+        except ObjectDoesNotExist:
+            return JsonResponse({"status": "0", "msg": "Property not found."})
         
-        # 4. Find or Create UTMLink
+        if not real_property:
+            return JsonResponse({"status": "0", "msg": "Invalid property type."})
+        
+        # 3. Get or Create UTMLink using get()
         property_content_type = ContentType.objects.get_for_model(real_property)
         utm_link = None
         
-        if utm_source and utm_medium and property_id:
-            utm_filter = {
-                'object_id': real_property.id,
-                'listing_type': listing_type,
-                'category': category,
-            }
-            if utm_campaign:
-                utm_filter['utm_campaign'] = utm_campaign
-            if utm_term:
-                utm_filter['utm_term'] = utm_term
-            if utm_content:
-                utm_filter['utm_content'] = utm_content
-            
-            utm_link = UTMLink.objects.filter(**utm_filter).first()
-            
-            if not utm_link:
-                #  Create new UTMLink if not found
-                
+        if utm_source and utm_medium:
+            try:
+                # ✅ Try to get existing UTMLink
+                utm_link = UTMLink.objects.get(
+                    utm_source=utm_source,
+                    utm_medium=utm_medium,
+                    utm_campaign=utm_campaign if utm_campaign else '',
+                    utm_term=utm_term if utm_term else '',
+                    utm_content=utm_content if utm_content else '',
+                    content_type=property_content_type,
+                    object_id=real_property.id,
+                    listing_type=listing_type,
+                    category=category,
+                )
+                print(f"✅ Found existing UTMLink: {utm_link.link_id}")
+            except UTMLink.DoesNotExist:
+                # ✅ Create new UTMLink if not exists
+                import uuid
                 link_id = str(uuid.uuid4())[:8]
-                
-                # Get property title
-                property_title = getattr(real_property, 'title', None)
-                if not property_title:
-                    property_title = getattr(real_property, 'property_title', str(real_property))
+                property_title = getattr(real_property, 'title', None) or getattr(real_property, 'property_title', str(real_property))
                 
                 utm_link = UTMLink.objects.create(
                     link_id=link_id,
                     content_type=property_content_type,
                     object_id=real_property.id,
-                    property_id=real_property.id,  # If you have this field
                     property_title=property_title,
                     listing_type=listing_type,
                     category=category,
@@ -682,59 +660,57 @@ def Send_Property_Enquiry(request):
                     utm_campaign=utm_campaign,
                     utm_term=utm_term,
                     utm_content=utm_content,
-                    total_clicks=1,
+                    total_clicks=0,
                     total_enquiries=0
                 )
-                print(f" Created new UTMLink: {utm_link.link_id}")
-            else:
-                # Update click count for existing UTMLink
-                utm_link.total_clicks = models.F('total_clicks') + 1
-                utm_link.save()
-                utm_link.refresh_from_db()
-                print(f" Updated UTMLink clicks: {utm_link.total_clicks}")
+                print(f"✅ Created new UTMLink: {utm_link.link_id}")
+            except UTMLink.MultipleObjectsReturned:
+                # If multiple found, get the first one (should not happen with unique_together)
+                utm_link = UTMLink.objects.filter(
+                    utm_source=utm_source,
+                    utm_medium=utm_medium,
+                    content_type=property_content_type,
+                    object_id=real_property.id,
+                ).first()
+                print(f"⚠️ Multiple UTMLinks found, using first: {utm_link.link_id}")
         
-        # 5. Save Enquiry
+        # 4. Save Enquiry with ONLY utm_link foreign key
         try:
             enquiry = PropertyEnquiry.objects.create(
                 content_type=property_content_type,
                 object_id=real_property.id,
-                
                 enquiry_name=data.get('enquiry_name', '').strip(),
                 country_code=country_code,
                 enquiry_phone=data.get('enquiry_phone', '').strip(),
                 whatsapp_consent=whatsapp_consent,
-                utm_link=utm_link,
-                enquiry_date=date.today(),
+                utm_link=utm_link,  # ✅ Only the foreign key
+                enquiry_date=datetime.now().date(),
                 enquiry_time=datetime.now().time()
             )
             
-            print(f" Enquiry saved - ID: {enquiry.id}")
+            print(f"✅ Enquiry saved - ID: {enquiry.id}")
             
             if utm_link:
-                print(f"   Linked to UTMLink: {utm_link.link_id}")
-                # Update UTMLink enquiry count
+                print(f"   ✅ Linked to UTMLink: {utm_link.link_id}")
                 utm_link.total_enquiries = models.F('total_enquiries') + 1
                 utm_link.save()
-                utm_link.refresh_from_db()
-                print(f"   UTMLink total enquiries: {utm_link.total_enquiries}")
+                print(f"   UTMLink total enquiries: {utm_link.total_enquiries + 1}")
             else:
-                print(f" No UTMLink - Enquiry saved without UTM tracking")
-        
+                print(f"⚠️ No UTM tracking for this enquiry")
+            
             return JsonResponse({
                 "status": "1", 
-                "msg": "Enquiry submitted successfully! We will get back to you soon."
+                "msg": "Enquiry submitted successfully!"
             })
             
         except Exception as e:
-            print(f" Enquiry DB Save Failure: {str(e)}")
-            import traceback
-            traceback.print_exc()
+            print(f"❌ Error: {e}")
             return JsonResponse({
                 "status": "0", 
-                "msg": "Could not save your request. Please try again later."
+                "msg": "Could not save enquiry. Please try again."
             })
-
-    return JsonResponse({"status": "0", "msg": "Invalid HTTP communication architecture."})
+    
+    return JsonResponse({"status": "0", "msg": "Invalid request."})
     
 
 ########### Views end for ajax for send property enquiry ######################
@@ -2124,563 +2100,563 @@ def Track_utm_link(request):
 # HELPER: normalise ANY property object to a flat dict for
 # the listing page cards. Covers all 8 property types.
 # ─────────────────────────────────────────────────────────────
-def _normalize_any_property(obj, sheet_name):
-    LISTING_TYPE = {
-        "Residential Data": "rent",
-        "Commercial Data":  "rent",
-        "PG Data":          "rent",
-        "Resale Residential": "sale",
-        "Commercial Resale":  "sale",
-        "Plot Resale":        "sale",
-        "Agricultural Data":  "sale",
-        "Industrial Resale":  "sale",
-    }
-    CATEGORY = {
-        "Residential Data": "residential",
-        "Commercial Data":  "commercial",
-        "PG Data":          "pg",
-        "Resale Residential": "residential",
-        "Commercial Resale":  "commercial",
-        "Plot Resale":        "plot",
-        "Agricultural Data":  "agriculture",
-        "Industrial Resale":  "industrial",
-    }
-    EMOJI = {
-        "Residential Data": "🏠",
-        "Commercial Data":  "🏢",
-        "PG Data":          "🛏️",
-        "Resale Residential": "🏡",
-        "Commercial Resale":  "🏬",
-        "Plot Resale":        "🌄",
-        "Agricultural Data":  "🌾",
-        "Industrial Resale":  "🏭",
-    }
+# def _normalize_any_property(obj, sheet_name):
+#     LISTING_TYPE = {
+#         "Residential Data": "rent",
+#         "Commercial Data":  "rent",
+#         "PG Data":          "rent",
+#         "Resale Residential": "sale",
+#         "Commercial Resale":  "sale",
+#         "Plot Resale":        "sale",
+#         "Agricultural Data":  "sale",
+#         "Industrial Resale":  "sale",
+#     }
+#     CATEGORY = {
+#         "Residential Data": "residential",
+#         "Commercial Data":  "commercial",
+#         "PG Data":          "pg",
+#         "Resale Residential": "residential",
+#         "Commercial Resale":  "commercial",
+#         "Plot Resale":        "plot",
+#         "Agricultural Data":  "agriculture",
+#         "Industrial Resale":  "industrial",
+#     }
+#     EMOJI = {
+#         "Residential Data": "🏠",
+#         "Commercial Data":  "🏢",
+#         "PG Data":          "🛏️",
+#         "Resale Residential": "🏡",
+#         "Commercial Resale":  "🏬",
+#         "Plot Resale":        "🌄",
+#         "Agricultural Data":  "🌾",
+#         "Industrial Resale":  "🏭",
+#     }
 
-    lt  = LISTING_TYPE.get(sheet_name, "rent")
-    cat = CATEGORY.get(sheet_name,     "residential")
+#     lt  = LISTING_TYPE.get(sheet_name, "rent")
+#     cat = CATEGORY.get(sheet_name,     "residential")
 
-    # ── Price ────────────────────────────────────────────────
-    raw_price = (
-        getattr(obj, 'monthly_rent',   None) or
-        getattr(obj, 'expected_rent',  None) or
-        getattr(obj, 'expected_price', None) or
-        getattr(obj, 'plot_price',     None)
-    )
-    # PG special case
-    if sheet_name == "PG Data" and not raw_price:
-        raw_price = _get_pg_min_price(obj)
+#     # ── Price ────────────────────────────────────────────────
+#     raw_price = (
+#         getattr(obj, 'monthly_rent',   None) or
+#         getattr(obj, 'expected_rent',  None) or
+#         getattr(obj, 'expected_price', None) or
+#         getattr(obj, 'plot_price',     None)
+#     )
+#     # PG special case
+#     if sheet_name == "PG Data" and not raw_price:
+#         raw_price = _get_pg_min_price(obj)
 
-    try:
-        price_f = float(raw_price) if raw_price else 0
-        if price_f > 0:
-            suffix = "/mo" if lt == "rent" else ""
-            price_display = f"₹{price_f:,.0f}{suffix}"
-        else:
-            price_display = "Price on Request"
-    except Exception:
-        price_display = "Price on Request"
+#     try:
+#         price_f = float(raw_price) if raw_price else 0
+#         if price_f > 0:
+#             suffix = "/mo" if lt == "rent" else ""
+#             price_display = f"₹{price_f:,.0f}{suffix}"
+#         else:
+#             price_display = "Price on Request"
+#     except Exception:
+#         price_display = "Price on Request"
 
-    # ── Title ────────────────────────────────────────────────
-    title = (
-        getattr(obj, 'title',          None) or
-        getattr(obj, 'property_title', None) or
-        getattr(obj, 'plot_title',     None) or
-        getattr(obj, 'pg_name',        None) or
-        getattr(obj, 'building_name',  None) or
-        "Property"
-    )
+#     # ── Title ────────────────────────────────────────────────
+#     title = (
+#         getattr(obj, 'title',          None) or
+#         getattr(obj, 'property_title', None) or
+#         getattr(obj, 'plot_title',     None) or
+#         getattr(obj, 'pg_name',        None) or
+#         getattr(obj, 'building_name',  None) or
+#         "Property"
+#     )
 
-    # ── Location ────────────────────────────────────────────
-    locality = (
-        getattr(obj, 'locality',      None) or
-        getattr(obj, 'area_locality', None) or
-        getattr(obj, 'plot_locality', None) or
-        getattr(obj, 'village',       None) or
-        ""
-    )
-    city = (
-        getattr(obj, 'city',      None) or
-        getattr(obj, 'plot_city', None) or
-        ""
-    )
-    location = f"{locality}, {city}".strip(", ") if (locality or city) else "Nagpur"
+#     # ── Location ────────────────────────────────────────────
+#     locality = (
+#         getattr(obj, 'locality',      None) or
+#         getattr(obj, 'area_locality', None) or
+#         getattr(obj, 'plot_locality', None) or
+#         getattr(obj, 'village',       None) or
+#         ""
+#     )
+#     city = (
+#         getattr(obj, 'city',      None) or
+#         getattr(obj, 'plot_city', None) or
+#         ""
+#     )
+#     location = f"{locality}, {city}".strip(", ") if (locality or city) else "Nagpur"
 
-    # ── Area ────────────────────────────────────────────────
-    area = (
-        getattr(obj, 'builtup_area',  None) or
-        getattr(obj, 'built_up_area', None) or
-        None
-    )
-    land_area  = getattr(obj, 'land_area',  None)
-    plot_area  = getattr(obj, 'plot_area',  None)
-    total_beds = getattr(obj, 'total_beds', None)
-    min_seats  = getattr(obj, 'min_seats',  None)
-    kva_capacity = getattr(obj, 'kva_capacity', None)
+#     # ── Area ────────────────────────────────────────────────
+#     area = (
+#         getattr(obj, 'builtup_area',  None) or
+#         getattr(obj, 'built_up_area', None) or
+#         None
+#     )
+#     land_area  = getattr(obj, 'land_area',  None)
+#     plot_area  = getattr(obj, 'plot_area',  None)
+#     total_beds = getattr(obj, 'total_beds', None)
+#     min_seats  = getattr(obj, 'min_seats',  None)
+#     kva_capacity = getattr(obj, 'kva_capacity', None)
 
-    # ── Config ──────────────────────────────────────────────
-    beds = getattr(obj, 'bhk', None) or getattr(obj, 'bhk_type', None)
-    baths = getattr(obj, 'bathrooms', None) or getattr(obj, 'baths', None)
+#     # ── Config ──────────────────────────────────────────────
+#     beds = getattr(obj, 'bhk', None) or getattr(obj, 'bhk_type', None)
+#     baths = getattr(obj, 'bathrooms', None) or getattr(obj, 'baths', None)
 
-    # ── Furnishing ──────────────────────────────────────────
-    furnished = (
-        getattr(obj, 'furnishing_status', None) or
-        getattr(obj, 'furnishing_type',   None) or
-        getattr(obj, 'furnished',         None)
-    )
+#     # ── Furnishing ──────────────────────────────────────────
+#     furnished = (
+#         getattr(obj, 'furnishing_status', None) or
+#         getattr(obj, 'furnishing_type',   None) or
+#         getattr(obj, 'furnished',         None)
+#     )
 
-    # ── Owner ───────────────────────────────────────────────
-    owner_name = (
-        getattr(obj, 'owner_name',       None) or
-        getattr(obj, 'plot_owner_name',  None) or
-        "Owner"
-    )
-    owner_initials = owner_name[0].upper() if owner_name else "O"
+#     # ── Owner ───────────────────────────────────────────────
+#     owner_name = (
+#         getattr(obj, 'owner_name',       None) or
+#         getattr(obj, 'plot_owner_name',  None) or
+#         "Owner"
+#     )
+#     owner_initials = owner_name[0].upper() if owner_name else "O"
 
-    phone = (
-        getattr(obj, 'contact_number',      None) or
-        getattr(obj, 'owner_contact',       None) or
-        getattr(obj, 'plot_owner_contact',  None) or
-        ""
-    )
+#     phone = (
+#         getattr(obj, 'contact_number',      None) or
+#         getattr(obj, 'owner_contact',       None) or
+#         getattr(obj, 'plot_owner_contact',  None) or
+#         ""
+#     )
 
-    # ── Image ───────────────────────────────────────────────
-    image_url = None
-    if hasattr(obj, 'images'):
-        try:
-            first = obj.images.first()
-            if first and first.image:
-                image_url = first.image.url
-        except Exception:
-            pass
+#     # ── Image ───────────────────────────────────────────────
+#     image_url = None
+#     if hasattr(obj, 'images'):
+#         try:
+#             first = obj.images.first()
+#             if first and first.image:
+#                 image_url = first.image.url
+#         except Exception:
+#             pass
 
-    property_type = (
-        getattr(obj, 'property_type',            None) or
-        getattr(obj, 'agriculture_property_type', None) or
-        getattr(obj, 'resale_plot_type',          None)
-    )
+#     property_type = (
+#         getattr(obj, 'property_type',            None) or
+#         getattr(obj, 'agriculture_property_type', None) or
+#         getattr(obj, 'resale_plot_type',          None)
+#     )
 
-    return {
-        'id':             obj.id,
-        'title':          title,
-        'location':       location,
-        'city':           city,
-        'price_display':  price_display,
-        'area':           area,
-        'land_area':      land_area,}
+#     return {
+#         'id':             obj.id,
+#         'title':          title,
+#         'location':       location,
+#         'city':           city,
+#         'price_display':  price_display,
+#         'area':           area,
+#         'land_area':      land_area,}
     
-    p['carpet_area']  = getattr(obj, 'carpet_area',  None)
-    p['plot_area']    = getattr(obj, 'plot_area',    None)
-    p['builtup_area'] = getattr(obj, 'builtup_area', getattr(obj, 'built_up_area', None))
+#     p['carpet_area']  = getattr(obj, 'carpet_area',  None)
+#     p['plot_area']    = getattr(obj, 'plot_area',    None)
+#     p['builtup_area'] = getattr(obj, 'builtup_area', getattr(obj, 'built_up_area', None))
 
-    # FURNISHING & AGE
-    p['furnished'] = (
-        getattr(obj, 'furnishing_status', None) or
-        getattr(obj, 'furnishing_type',   None) or
-        getattr(obj, 'furnished',         None)
-    )
-    p['age']                = getattr(obj, 'age_of_property',   getattr(obj, 'property_age', None))
-    p['property_condition'] = getattr(obj, 'property_condition', None)
-    p['construction_status']= getattr(obj, 'construction_status', None)
+#     # FURNISHING & AGE
+#     p['furnished'] = (
+#         getattr(obj, 'furnishing_status', None) or
+#         getattr(obj, 'furnishing_type',   None) or
+#         getattr(obj, 'furnished',         None)
+#     )
+#     p['age']                = getattr(obj, 'age_of_property',   getattr(obj, 'property_age', None))
+#     p['property_condition'] = getattr(obj, 'property_condition', None)
+#     p['construction_status']= getattr(obj, 'construction_status', None)
 
-    # FACING & FLOOR
-    p['facing'] = getattr(obj, 'facing', getattr(obj, 'plot_road_facing', None))
-    p['floor']  = (
-        getattr(obj, 'floor_number', None) or
-        getattr(obj, 'floor_no',     None) or
-        getattr(obj, 'your_floor',   None)
-    )
-    p['total_floors'] = getattr(obj, 'total_floors', None)
+#     # FACING & FLOOR
+#     p['facing'] = getattr(obj, 'facing', getattr(obj, 'plot_road_facing', None))
+#     p['floor']  = (
+#         getattr(obj, 'floor_number', None) or
+#         getattr(obj, 'floor_no',     None) or
+#         getattr(obj, 'your_floor',   None)
+#     )
+#     p['total_floors'] = getattr(obj, 'total_floors', None)
 
-    # ZONE / LOCATION
-    p['zone']          = getattr(obj, 'zone',          None)
-    p['zone_type']     = getattr(obj, 'zone_type',     None)
-    p['location_hub']  = getattr(obj, 'location_hub',  None)
-    p['society_type']  = getattr(obj, 'society_type',  None)
-    p['water_type']    = getattr(obj, 'water_type',    None)
+#     # ZONE / LOCATION
+#     p['zone']          = getattr(obj, 'zone',          None)
+#     p['zone_type']     = getattr(obj, 'zone_type',     None)
+#     p['location_hub']  = getattr(obj, 'location_hub',  None)
+#     p['society_type']  = getattr(obj, 'society_type',  None)
+#     p['water_type']    = getattr(obj, 'water_type',    None)
 
-    # POSSESSION
-    p['possession']    = getattr(obj, 'possession_status', getattr(obj, 'available_from', None))
-    p['available_from']= getattr(obj, 'available_from',    None)
-    p['lease_duration']= getattr(obj, 'lease_duration',    None)
+#     # POSSESSION
+#     p['possession']    = getattr(obj, 'possession_status', getattr(obj, 'available_from', None))
+#     p['available_from']= getattr(obj, 'available_from',    None)
+#     p['lease_duration']= getattr(obj, 'lease_duration',    None)
 
-    # OWNERSHIP
-    p['ownership']   = getattr(obj, 'ownership_type', getattr(obj, 'plot_ownership', None))
-    p['num_owners']  = getattr(obj, 'num_owners',     None)
+#     # OWNERSHIP
+#     p['ownership']   = getattr(obj, 'ownership_type', getattr(obj, 'plot_ownership', None))
+#     p['num_owners']  = getattr(obj, 'num_owners',     None)
 
-    # ── PRICING ────────────────────────────────────────────
-    # Rental prices
-    p['monthly_rent']     = getattr(obj, 'monthly_rent',     getattr(obj, 'expected_rent', None))
-    p['security_deposit'] = getattr(obj, 'security_deposit', None)
-    p['maintenance']      = getattr(obj, 'maintenance_amount', getattr(obj, 'maintenance_charges', None))
-    p['maintenance_type'] = getattr(obj, 'maintenance_type', None)
-    p['negotiable']       = getattr(obj, 'negotiable',       None)
-    p['is_negotiable']    = getattr(obj, 'is_negotiable',    None)
+#     # ── PRICING ────────────────────────────────────────────
+#     # Rental prices
+#     p['monthly_rent']     = getattr(obj, 'monthly_rent',     getattr(obj, 'expected_rent', None))
+#     p['security_deposit'] = getattr(obj, 'security_deposit', None)
+#     p['maintenance']      = getattr(obj, 'maintenance_amount', getattr(obj, 'maintenance_charges', None))
+#     p['maintenance_type'] = getattr(obj, 'maintenance_type', None)
+#     p['negotiable']       = getattr(obj, 'negotiable',       None)
+#     p['is_negotiable']    = getattr(obj, 'is_negotiable',    None)
 
-    # Sale prices
-    raw_price = (
-        getattr(obj, 'expected_price', None) or
-        getattr(obj, 'plot_price',     None) or
-        getattr(obj, 'monthly_rent',   None) or
-        getattr(obj, 'expected_rent',  None)
-    )
+#     # Sale prices
+#     raw_price = (
+#         getattr(obj, 'expected_price', None) or
+#         getattr(obj, 'plot_price',     None) or
+#         getattr(obj, 'monthly_rent',   None) or
+#         getattr(obj, 'expected_rent',  None)
+#     )
 
-    # PG: no direct price field — parse room_details
-    if seo_page_type == "pg_coliving":
-        pg_prices = _parse_pg_room_prices(obj)
-        p.update(pg_prices)  # single_sharing, double_sharing, etc.
+#     # PG: no direct price field — parse room_details
+#     if seo_page_type == "pg_coliving":
+#         pg_prices = _parse_pg_room_prices(obj)
+#         p.update(pg_prices)  # single_sharing, double_sharing, etc.
 
-        # Set monthly_rent to minimum bed price for sidebar display
-        bed_prices = [v for v in pg_prices.values() if v]
-        if bed_prices:
-            p['monthly_rent'] = min(bed_prices)
-            raw_price = p['monthly_rent']
-        else:
-            pg_min = _get_pg_min_price(obj)
-            if pg_min:
-                p['monthly_rent'] = pg_min
-                raw_price = pg_min
+#         # Set monthly_rent to minimum bed price for sidebar display
+#         bed_prices = [v for v in pg_prices.values() if v]
+#         if bed_prices:
+#             p['monthly_rent'] = min(bed_prices)
+#             raw_price = p['monthly_rent']
+#         else:
+#             pg_min = _get_pg_min_price(obj)
+#             if pg_min:
+#                 p['monthly_rent'] = pg_min
+#                 raw_price = pg_min
 
-    p['raw_price']      = raw_price or 0
-    p['expected_price'] = raw_price or 0
+#     p['raw_price']      = raw_price or 0
+#     p['expected_price'] = raw_price or 0
 
-    try:
-        price_f = float(raw_price) if raw_price else 0
-        p['price_display'] = f"₹{price_f:,.0f}" if price_f > 0 else "Price on Request"
-    except Exception:
-        p['price_display'] = str(raw_price) if raw_price else "Price on Request"
+#     try:
+#         price_f = float(raw_price) if raw_price else 0
+#         p['price_display'] = f"₹{price_f:,.0f}" if price_f > 0 else "Price on Request"
+#     except Exception:
+#         p['price_display'] = str(raw_price) if raw_price else "Price on Request"
 
-    p['price_sqft'] = getattr(obj, 'price_per_sqft', None)
+#     p['price_sqft'] = getattr(obj, 'price_per_sqft', None)
 
-    # Brokerage
-    b_flag = str(getattr(obj, 'brokerage', '')).lower()
-    p['brokerage'] = None
-    if b_flag in ['yes', 'true', '1']:
-        p['brokerage'] = (
-            getattr(obj, 'brokerage_percentage', None) or
-            getattr(obj, 'manual_brokerage',     None) or
-            'Applicable'
-        )
+#     # Brokerage
+#     b_flag = str(getattr(obj, 'brokerage', '')).lower()
+#     p['brokerage'] = None
+#     if b_flag in ['yes', 'true', '1']:
+#         p['brokerage'] = (
+#             getattr(obj, 'brokerage_percentage', None) or
+#             getattr(obj, 'manual_brokerage',     None) or
+#             'Applicable'
+#         )
 
-    # COMMERCIAL SPECS
-    p['min_seats']       = getattr(obj, 'min_seats',       None)
-    p['max_seats']       = getattr(obj, 'max_seats',       None)
-    p['cabins']          = getattr(obj, 'cabins',   getattr(obj, 'num_cabins',    None))
-    p['meeting_rooms']   = getattr(obj, 'meeting_rooms',   None)
-    p['passenger_lifts'] = getattr(obj, 'passenger_lifts', None)
-    p['service_lifts']   = getattr(obj, 'service_lifts',   None)
-    p['private_washroom']= getattr(obj, 'private_washroom', None)
-    p['public_washroom'] = getattr(obj, 'public_washroom',  None)
-    p['staircases']      = getattr(obj, 'staircases', getattr(obj, 'num_staircases', None))
-    p['flooring_type']   = getattr(obj, 'flooring_type',   None)
+#     # COMMERCIAL SPECS
+#     p['min_seats']       = getattr(obj, 'min_seats',       None)
+#     p['max_seats']       = getattr(obj, 'max_seats',       None)
+#     p['cabins']          = getattr(obj, 'cabins',   getattr(obj, 'num_cabins',    None))
+#     p['meeting_rooms']   = getattr(obj, 'meeting_rooms',   None)
+#     p['passenger_lifts'] = getattr(obj, 'passenger_lifts', None)
+#     p['service_lifts']   = getattr(obj, 'service_lifts',   None)
+#     p['private_washroom']= getattr(obj, 'private_washroom', None)
+#     p['public_washroom'] = getattr(obj, 'public_washroom',  None)
+#     p['staircases']      = getattr(obj, 'staircases', getattr(obj, 'num_staircases', None))
+#     p['flooring_type']   = getattr(obj, 'flooring_type',   None)
 
-    # UTILITIES (commercial)
-    p['dg_ups_included']    = getattr(obj, 'dg_ups_included',    False)
-    p['electricity_included']= getattr(obj, 'electricity_included', False)
-    p['water_included']     = getattr(obj, 'water_included',     False)
+#     # UTILITIES (commercial)
+#     p['dg_ups_included']    = getattr(obj, 'dg_ups_included',    False)
+#     p['electricity_included']= getattr(obj, 'electricity_included', False)
+#     p['water_included']     = getattr(obj, 'water_included',     False)
 
-    # RENTAL TERMS
-    p['lockin_period']  = getattr(obj, 'lockin_period',  None)
-    p['rent_increase']  = getattr(obj, 'rent_increase',  None)
-    p['minimum_stay']   = getattr(obj, 'minimum_stay',   None)
-    p['notice_period']  = getattr(obj, 'notice_period',  None)
+#     # RENTAL TERMS
+#     p['lockin_period']  = getattr(obj, 'lockin_period',  None)
+#     p['rent_increase']  = getattr(obj, 'rent_increase',  None)
+#     p['minimum_stay']   = getattr(obj, 'minimum_stay',   None)
+#     p['notice_period']  = getattr(obj, 'notice_period',  None)
 
-    # PG SPECIFIC
-    p['total_beds']          = getattr(obj, 'total_beds',         None)
-    p['sharing_type']        = getattr(obj, 'sharing_type',       None)
-    p['pg_for']              = getattr(obj, 'pg_for',  getattr(obj, 'best_suited_for', None))
-    p['meal_offerings']      = getattr(obj, 'meal_offerings',     None)
-    p['meals_available']     = getattr(obj, 'meals_available',    False)
-    p['meal_speciality']     = getattr(obj, 'meal_speciality',    None)
-    p['room_details']        = getattr(obj, 'room_details',       None)
-    p['common_area']         = getattr(obj, 'common_area',        None)
-    p['property_managed_by'] = getattr(obj, 'property_managed_by', None)
-    p['manager_stays']       = getattr(obj, 'manager_stays',      False)
+#     # PG SPECIFIC
+#     p['total_beds']          = getattr(obj, 'total_beds',         None)
+#     p['sharing_type']        = getattr(obj, 'sharing_type',       None)
+#     p['pg_for']              = getattr(obj, 'pg_for',  getattr(obj, 'best_suited_for', None))
+#     p['meal_offerings']      = getattr(obj, 'meal_offerings',     None)
+#     p['meals_available']     = getattr(obj, 'meals_available',    False)
+#     p['meal_speciality']     = getattr(obj, 'meal_speciality',    None)
+#     p['room_details']        = getattr(obj, 'room_details',       None)
+#     p['common_area']         = getattr(obj, 'common_area',        None)
+#     p['property_managed_by'] = getattr(obj, 'property_managed_by', None)
+#     p['manager_stays']       = getattr(obj, 'manager_stays',      False)
 
-    # PG RULES
-    p['non_veg_allowed']     = getattr(obj, 'non_veg_allowed',      False)
-    p['opposite_sex_allowed']= getattr(obj, 'opposite_sex_allowed', False)
-    p['any_time_allowed']    = getattr(obj, 'any_time_allowed',     False)
-    p['visitors_allowed']    = getattr(obj, 'visitors_allowed',     False)
-    p['guardian_allowed']    = getattr(obj, 'guardian_allowed',     False)
-    p['drinking_allowed']    = getattr(obj, 'drinking_allowed',     False)
-    p['smoking_allowed']     = getattr(obj, 'smoking_allowed',      False)
+#     # PG RULES
+#     p['non_veg_allowed']     = getattr(obj, 'non_veg_allowed',      False)
+#     p['opposite_sex_allowed']= getattr(obj, 'opposite_sex_allowed', False)
+#     p['any_time_allowed']    = getattr(obj, 'any_time_allowed',     False)
+#     p['visitors_allowed']    = getattr(obj, 'visitors_allowed',     False)
+#     p['guardian_allowed']    = getattr(obj, 'guardian_allowed',     False)
+#     p['drinking_allowed']    = getattr(obj, 'drinking_allowed',     False)
+#     p['smoking_allowed']     = getattr(obj, 'smoking_allowed',      False)
 
-    # PLOT
-    p['plot_corner']         = getattr(obj, 'plot_corner',         False)
-    p['plot_fencing']        = getattr(obj, 'plot_fencing',        False)
-    p['plot_road_facing']    = getattr(obj, 'plot_road_facing',    None)
-    p['sanctioning_authority']= getattr(obj, 'sanctioning_authority', getattr(obj, 'plot_authority', None))
+#     # PLOT
+#     p['plot_corner']         = getattr(obj, 'plot_corner',         False)
+#     p['plot_fencing']        = getattr(obj, 'plot_fencing',        False)
+#     p['plot_road_facing']    = getattr(obj, 'plot_road_facing',    None)
+#     p['sanctioning_authority']= getattr(obj, 'sanctioning_authority', getattr(obj, 'plot_authority', None))
 
-    # INDUSTRIAL
-    p['power_kva']            = getattr(obj, 'kva_capacity',          getattr(obj, 'power_supply', None))
-    p['power_supply']         = getattr(obj, 'power_supply',          None)
-    p['water_supply']         = getattr(obj, 'water_supply',          None)
-    p['crane_heavy_machinery']= getattr(obj, 'crane_heavy_machinery', False)
-    p['road_connectivity']    = getattr(obj, 'road_connectivity',     None)
-    p['worker_housing_nearby']= getattr(obj, 'worker_housing_nearby', False)
+#     # INDUSTRIAL
+#     p['power_kva']            = getattr(obj, 'kva_capacity',          getattr(obj, 'power_supply', None))
+#     p['power_supply']         = getattr(obj, 'power_supply',          None)
+#     p['water_supply']         = getattr(obj, 'water_supply',          None)
+#     p['crane_heavy_machinery']= getattr(obj, 'crane_heavy_machinery', False)
+#     p['road_connectivity']    = getattr(obj, 'road_connectivity',     None)
+#     p['worker_housing_nearby']= getattr(obj, 'worker_housing_nearby', False)
 
-    # AGRICULTURE
-    p['soil_type']          = getattr(obj, 'soil_type',          None)
-    p['water_source']       = getattr(obj, 'water_source', getattr(obj, 'water_type', None))
-    p['irrigation_facility']= getattr(obj, 'irrigation_facility', None)
-    p['fertility_status']   = getattr(obj, 'fertility_status',   None)
-    p['previous_crops']     = getattr(obj, 'previous_crops',     None)
-    p['state']              = getattr(obj, 'state',              None)
-    p['district']           = getattr(obj, 'district',           None)
-    p['taluka']             = getattr(obj, 'taluka',             None)
-    p['village']            = getattr(obj, 'village',            None)
+#     # AGRICULTURE
+#     p['soil_type']          = getattr(obj, 'soil_type',          None)
+#     p['water_source']       = getattr(obj, 'water_source', getattr(obj, 'water_type', None))
+#     p['irrigation_facility']= getattr(obj, 'irrigation_facility', None)
+#     p['fertility_status']   = getattr(obj, 'fertility_status',   None)
+#     p['previous_crops']     = getattr(obj, 'previous_crops',     None)
+#     p['state']              = getattr(obj, 'state',              None)
+#     p['district']           = getattr(obj, 'district',           None)
+#     p['taluka']             = getattr(obj, 'taluka',             None)
+#     p['village']            = getattr(obj, 'village',            None)
 
-    # LEGAL
-    def _bool_field(*attrs):
-        for a in attrs:
-            v = getattr(obj, a, None)
-            if v is not None:
-                return str(v).lower() in ['yes', 'true', '1']
-        return False
+#     # LEGAL
+#     def _bool_field(*attrs):
+#         for a in attrs:
+#             v = getattr(obj, a, None)
+#             if v is not None:
+#                 return str(v).lower() in ['yes', 'true', '1']
+#         return False
 
-    p['has_loan']        = _bool_field('has_loan', 'plot_loan', 'agri_loan', 'loan_on_property')
-    p['loan_amount']     = getattr(obj, 'loan_amount', getattr(obj, 'plot_loan_amount', None))
-    p['has_dispute']     = _bool_field('has_legal_dispute', 'legal_dispute', 'agri_dispute')
-    p['dispute_details'] = getattr(obj, 'dispute_details', None)
-    p['has_tax_due']     = _bool_field('has_tax_due', 'tax_due', 'agri_tax_due')
-    p['tax_amount']      = getattr(obj, 'pending_tax_amount', getattr(obj, 'tax_amount', None))
-    p['has_tenants']     = _bool_field('has_tenants', 'existing_tenants', 'agri_tenants')
-    p['tenant_details']  = getattr(obj, 'tenant_details', None)
-    p['fire_noc']        = getattr(obj, 'fire_noc',            None)
-    p['tax_clearance_cert']= getattr(obj, 'tax_clearance_cert', False)
-    p['encumbrance_cert']  = getattr(obj, 'encumbrance_cert',   None)
-    p['compliance_docs']   = getattr(obj, 'compliance_docs',    None)
+#     p['has_loan']        = _bool_field('has_loan', 'plot_loan', 'agri_loan', 'loan_on_property')
+#     p['loan_amount']     = getattr(obj, 'loan_amount', getattr(obj, 'plot_loan_amount', None))
+#     p['has_dispute']     = _bool_field('has_legal_dispute', 'legal_dispute', 'agri_dispute')
+#     p['dispute_details'] = getattr(obj, 'dispute_details', None)
+#     p['has_tax_due']     = _bool_field('has_tax_due', 'tax_due', 'agri_tax_due')
+#     p['tax_amount']      = getattr(obj, 'pending_tax_amount', getattr(obj, 'tax_amount', None))
+#     p['has_tenants']     = _bool_field('has_tenants', 'existing_tenants', 'agri_tenants')
+#     p['tenant_details']  = getattr(obj, 'tenant_details', None)
+#     p['fire_noc']        = getattr(obj, 'fire_noc',            None)
+#     p['tax_clearance_cert']= getattr(obj, 'tax_clearance_cert', False)
+#     p['encumbrance_cert']  = getattr(obj, 'encumbrance_cert',   None)
+#     p['compliance_docs']   = getattr(obj, 'compliance_docs',    None)
 
-    # LOCATION
-    p['city']     = getattr(obj, 'city',     getattr(obj, 'plot_city', getattr(obj, 'state', '')))
-    p['locality'] = (
-        getattr(obj, 'locality',      None) or
-        getattr(obj, 'plot_locality', None) or
-        getattr(obj, 'area_locality', None) or
-        getattr(obj, 'village',       None) or
-        ''
-    )
-    p['address'] = (
-        getattr(obj, 'complete_address',  None) or
-        getattr(obj, 'property_address',  None) or
-        getattr(obj, 'address',           None) or
-        getattr(obj, 'plot_address',      None) or
-        ''
-    )
-    p['building_name'] = getattr(obj, 'building_name', None)
-    p['pincode']       = getattr(obj, 'pincode', '')
+#     # LOCATION
+#     p['city']     = getattr(obj, 'city',     getattr(obj, 'plot_city', getattr(obj, 'state', '')))
+#     p['locality'] = (
+#         getattr(obj, 'locality',      None) or
+#         getattr(obj, 'plot_locality', None) or
+#         getattr(obj, 'area_locality', None) or
+#         getattr(obj, 'village',       None) or
+#         ''
+#     )
+#     p['address'] = (
+#         getattr(obj, 'complete_address',  None) or
+#         getattr(obj, 'property_address',  None) or
+#         getattr(obj, 'address',           None) or
+#         getattr(obj, 'plot_address',      None) or
+#         ''
+#     )
+#     p['building_name'] = getattr(obj, 'building_name', None)
+#     p['pincode']       = getattr(obj, 'pincode', '')
 
-    # DESCRIPTION
-    p['desc'] = (
-        getattr(obj, 'description',            None) or
-        getattr(obj, 'property_description',   None) or
-        getattr(obj, 'rent_residential_desc',  None) or
-        getattr(obj, 'resale_agricultural_desc', None) or
-        getattr(obj, 'pg_description',         None) or
-        ''
-    )
+#     # DESCRIPTION
+#     p['desc'] = (
+#         getattr(obj, 'description',            None) or
+#         getattr(obj, 'property_description',   None) or
+#         getattr(obj, 'rent_residential_desc',  None) or
+#         getattr(obj, 'resale_agricultural_desc', None) or
+#         getattr(obj, 'pg_description',         None) or
+#         ''
+#     )
 
-    # MEDIA
-    p['video'] = (
-        getattr(obj, 'property_video', None) or
-        getattr(obj, 'video',          None) or
-        getattr(obj, 'social_video',   None)
-    )
-    p['floor_plan'] = getattr(obj, 'floor_plan', None)
+#     # MEDIA
+#     p['video'] = (
+#         getattr(obj, 'property_video', None) or
+#         getattr(obj, 'video',          None) or
+#         getattr(obj, 'social_video',   None)
+#     )
+#     p['floor_plan'] = getattr(obj, 'floor_plan', None)
 
-    # OWNER
-    p['owner_name']    = (
-        getattr(obj, 'owner_name',       None) or
-        getattr(obj, 'plot_owner_name',  None) or
-        'Property Owner'
-    )
-    p['owner_contact'] = (
-        getattr(obj, 'contact_number',      None) or
-        getattr(obj, 'owner_contact',       None) or
-        getattr(obj, 'plot_owner_contact',  None) or
-        ''
-    )
-    p['owner_email'] = (
-        getattr(obj, 'email',             None) or
-        getattr(obj, 'owner_email',       None) or
-        getattr(obj, 'plot_owner_email',  None) or
-        ''
-    )
-    p['alternate_contact']  = getattr(obj, 'alternate_contact', None)
-    p['residential_status'] = getattr(obj, 'residential_status', getattr(obj, 'comm_residency', None))
+#     # OWNER
+#     p['owner_name']    = (
+#         getattr(obj, 'owner_name',       None) or
+#         getattr(obj, 'plot_owner_name',  None) or
+#         'Property Owner'
+#     )
+#     p['owner_contact'] = (
+#         getattr(obj, 'contact_number',      None) or
+#         getattr(obj, 'owner_contact',       None) or
+#         getattr(obj, 'plot_owner_contact',  None) or
+#         ''
+#     )
+#     p['owner_email'] = (
+#         getattr(obj, 'email',             None) or
+#         getattr(obj, 'owner_email',       None) or
+#         getattr(obj, 'plot_owner_email',  None) or
+#         ''
+#     )
+#     p['alternate_contact']  = getattr(obj, 'alternate_contact', None)
+#     p['residential_status'] = getattr(obj, 'residential_status', getattr(obj, 'comm_residency', None))
 
-    # UPLOADED BY
-    p['uploaded_by_role']    = getattr(obj, 'uploaded_by_role',    'Owner')
-    p['uploaded_by_name']    = getattr(obj, 'uploaded_by_name',    None)
-    p['uploaded_by_email']   = getattr(obj, 'uploaded_by_email',   None)
-    p['uploaded_by_contact'] = getattr(obj, 'uploaded_by_contact', None)
+#     # UPLOADED BY
+#     p['uploaded_by_role']    = getattr(obj, 'uploaded_by_role',    'Owner')
+#     p['uploaded_by_name']    = getattr(obj, 'uploaded_by_name',    None)
+#     p['uploaded_by_email']   = getattr(obj, 'uploaded_by_email',   None)
+#     p['uploaded_by_contact'] = getattr(obj, 'uploaded_by_contact', None)
 
-    # ── 3. Images & Amenities ────────────────────────────────
-    if hasattr(obj, 'images'):
-        property_images = obj.images.all()
+#     # ── 3. Images & Amenities ────────────────────────────────
+#     if hasattr(obj, 'images'):
+#         property_images = obj.images.all()
 
-    def parse_list(val):
-        if not val:
-            return []
-        if isinstance(val, list):
-            return [str(x).strip() for x in val if x]
-        if isinstance(val, str):
-            try:
-                parsed = json.loads(val)
-                if isinstance(parsed, list):
-                    return [str(x).strip() for x in parsed if x]
-            except Exception:
-                pass
-            return [x.strip() for x in val.split(',') if x.strip()]
-        return []
+#     def parse_list(val):
+#         if not val:
+#             return []
+#         if isinstance(val, list):
+#             return [str(x).strip() for x in val if x]
+#         if isinstance(val, str):
+#             try:
+#                 parsed = json.loads(val)
+#                 if isinstance(parsed, list):
+#                     return [str(x).strip() for x in parsed if x]
+#             except Exception:
+#                 pass
+#             return [x.strip() for x in val.split(',') if x.strip()]
+#         return []
 
-    amenities_list  = parse_list(getattr(obj, 'amenities',          ''))
-    facilities_list = parse_list(getattr(obj, 'nearby_facilities',  getattr(obj, 'facilities', '')))
+#     amenities_list  = parse_list(getattr(obj, 'amenities',          ''))
+#     facilities_list = parse_list(getattr(obj, 'nearby_facilities',  getattr(obj, 'facilities', '')))
 
-    if p.get('dg_ups_included'):    amenities_list.append("DG/UPS Backup")
-    if p.get('electricity_included'): amenities_list.append("Electricity Included")
-    if p.get('water_included'):     amenities_list.append("Water Included")
+#     if p.get('dg_ups_included'):    amenities_list.append("DG/UPS Backup")
+#     if p.get('electricity_included'): amenities_list.append("Electricity Included")
+#     if p.get('water_included'):     amenities_list.append("Water Included")
 
-    # ── 4. EMI Calculator ────────────────────────────────────
-    if listing_type == 'sale' and p['raw_price']:
-        try:
-            principal = float(p['raw_price']) * 0.80
-            r = 8.5 / 12 / 100
-            n = 20 * 12
-            base_emi = int((principal * r * math.pow(1 + r, n)) / (math.pow(1 + r, n) - 1))
-        except Exception:
-            base_emi = 0
+#     # ── 4. EMI Calculator ────────────────────────────────────
+#     if listing_type == 'sale' and p['raw_price']:
+#         try:
+#             principal = float(p['raw_price']) * 0.80
+#             r = 8.5 / 12 / 100
+#             n = 20 * 12
+#             base_emi = int((principal * r * math.pow(1 + r, n)) / (math.pow(1 + r, n) - 1))
+#         except Exception:
+#             base_emi = 0
 
-    # ── 5. Similar Properties ────────────────────────────────
-    similar = []
-    if p.get('city'):
-        try:
-            similar_qs = property_model.objects.filter(is_deleted=False).exclude(id=obj.id)
+#     # ── 5. Similar Properties ────────────────────────────────
+#     similar = []
+#     if p.get('city'):
+#         try:
+#             similar_qs = property_model.objects.filter(is_deleted=False).exclude(id=obj.id)
 
-            city_val = p['city']
-            if hasattr(property_model, 'city'):
-                similar_qs = similar_qs.filter(city__icontains=city_val)
-            elif hasattr(property_model, 'plot_city'):
-                similar_qs = similar_qs.filter(plot_city__icontains=city_val)
+#             city_val = p['city']
+#             if hasattr(property_model, 'city'):
+#                 similar_qs = similar_qs.filter(city__icontains=city_val)
+#             elif hasattr(property_model, 'plot_city'):
+#                 similar_qs = similar_qs.filter(plot_city__icontains=city_val)
 
-            for s_obj in similar_qs[:3]:
-                s_raw = (
-                    getattr(s_obj, 'expected_price', None) or
-                    getattr(s_obj, 'plot_price',     None) or
-                    getattr(s_obj, 'monthly_rent',   None) or
-                    getattr(s_obj, 'expected_rent',  None)
-                )
-                # PG similar price
-                if seo_page_type == "pg_coliving" and not s_raw:
-                    s_raw = _get_pg_min_price(s_obj)
+#             for s_obj in similar_qs[:3]:
+#                 s_raw = (
+#                     getattr(s_obj, 'expected_price', None) or
+#                     getattr(s_obj, 'plot_price',     None) or
+#                     getattr(s_obj, 'monthly_rent',   None) or
+#                     getattr(s_obj, 'expected_rent',  None)
+#                 )
+#                 # PG similar price
+#                 if seo_page_type == "pg_coliving" and not s_raw:
+#                     s_raw = _get_pg_min_price(s_obj)
 
-                try:
-                    s_price_str = f"₹{float(s_raw):,.0f}" if s_raw else "Ask Price"
-                except Exception:
-                    s_price_str = "Ask Price"
+#                 try:
+#                     s_price_str = f"₹{float(s_raw):,.0f}" if s_raw else "Ask Price"
+#                 except Exception:
+#                     s_price_str = "Ask Price"
 
-                s_bhk  = getattr(s_obj, 'bhk', getattr(s_obj, 'bhk_type', ''))
-                s_area = (
-                    getattr(s_obj, 'builtup_area', None) or
-                    getattr(s_obj, 'land_area',    None) or
-                    getattr(s_obj, 'plot_area',    None) or
-                    getattr(s_obj, 'carpet_area',  None)
-                )
-                feature = s_bhk if s_bhk else (f"{s_area} Sq.Ft" if s_area else "Details")
+#                 s_bhk  = getattr(s_obj, 'bhk', getattr(s_obj, 'bhk_type', ''))
+#                 s_area = (
+#                     getattr(s_obj, 'builtup_area', None) or
+#                     getattr(s_obj, 'land_area',    None) or
+#                     getattr(s_obj, 'plot_area',    None) or
+#                     getattr(s_obj, 'carpet_area',  None)
+#                 )
+#                 feature = s_bhk if s_bhk else (f"{s_area} Sq.Ft" if s_area else "Details")
 
-                s_img_url = None
-                if hasattr(s_obj, 'images'):
-                    try:
-                        fi = s_obj.images.first()
-                        if fi and fi.image:
-                            s_img_url = fi.image.url
-                    except Exception:
-                        pass
+#                 s_img_url = None
+#                 if hasattr(s_obj, 'images'):
+#                     try:
+#                         fi = s_obj.images.first()
+#                         if fi and fi.image:
+#                             s_img_url = fi.image.url
+#                     except Exception:
+#                         pass
 
-                similar.append({
-                    'id':            s_obj.id,
-                    'title':         (
-                        getattr(s_obj, 'title',          None) or
-                        getattr(s_obj, 'plot_title',     None) or
-                        getattr(s_obj, 'pg_name',        None) or
-                        getattr(s_obj, 'property_title', 'Property')
-                    ),
-                    'price_display': s_price_str,
-                    'location':      (
-                        getattr(s_obj, 'locality',      None) or
-                        getattr(s_obj, 'plot_locality', None) or
-                        getattr(s_obj, 'area_locality', None) or
-                        ''
-                    ),
-                    'feature':       feature,
-                    'listing_type':  listing_type,
-                    'category':      category,
-                    'image_url':     s_img_url,
-                })
-        except Exception:
-            pass
+#                 similar.append({
+#                     'id':            s_obj.id,
+#                     'title':         (
+#                         getattr(s_obj, 'title',          None) or
+#                         getattr(s_obj, 'plot_title',     None) or
+#                         getattr(s_obj, 'pg_name',        None) or
+#                         getattr(s_obj, 'property_title', 'Property')
+#                     ),
+#                     'price_display': s_price_str,
+#                     'location':      (
+#                         getattr(s_obj, 'locality',      None) or
+#                         getattr(s_obj, 'plot_locality', None) or
+#                         getattr(s_obj, 'area_locality', None) or
+#                         ''
+#                     ),
+#                     'feature':       feature,
+#                     'listing_type':  listing_type,
+#                     'category':      category,
+#                     'image_url':     s_img_url,
+#                 })
+#         except Exception:
+#             pass
 
-    # ── 6. SEO & Auth ────────────────────────────────────────
-    seo = None
-    try:
-        from .models import LocationSEO
-        from django.contrib.contenttypes.models import ContentType
-        seo = LocationSEO.objects.filter(
-            content_type=ContentType.objects.get_for_model(obj),
-            object_id=obj.id,
-            pagetype=seo_page_type,
-            is_active=True,
-        ).first()
-    except Exception:
-        pass
+#     # ── 6. SEO & Auth ────────────────────────────────────────
+#     seo = None
+#     try:
+#         from .models import LocationSEO
+#         from django.contrib.contenttypes.models import ContentType
+#         seo = LocationSEO.objects.filter(
+#             content_type=ContentType.objects.get_for_model(obj),
+#             object_id=obj.id,
+#             pagetype=seo_page_type,
+#             is_active=True,
+#         ).first()
+#     except Exception:
+#         pass
 
-    user_id = request.session.get('user_id') or request.session.get('User_id')
-    logged_user = user_obj = user_subscription = None
-    can_view_contact = False
+#     user_id = request.session.get('user_id') or request.session.get('User_id')
+#     logged_user = user_obj = user_subscription = None
+#     can_view_contact = False
 
-    if user_id:
-        try:
-            from .models import User_Details
-            logged_user = User_Details.objects.filter(id=user_id).first()
-            user_obj    = logged_user
-            try:
-                from .utils import get_active_subscription
-                user_subscription = get_active_subscription(logged_user)
-                if user_subscription:
-                    can_view_contact = True
-            except Exception:
-                pass
-        except Exception:
-            pass
+#     if user_id:
+#         try:
+#             from .models import User_Details
+#             logged_user = User_Details.objects.filter(id=user_id).first()
+#             user_obj    = logged_user
+#             try:
+#                 from .utils import get_active_subscription
+#                 user_subscription = get_active_subscription(logged_user)
+#                 if user_subscription:
+#                     can_view_contact = True
+#             except Exception:
+#                 pass
+#         except Exception:
+#             pass
 
-    # Mask phone
-    masked_phone = "XXXXXXXXXX"
-    if p['owner_contact'] and len(str(p['owner_contact'])) >= 10:
-        ph = str(p['owner_contact'])
-        masked_phone = f"{ph[:2]}XXXXXX{ph[-2:]}"
+#     # Mask phone
+#     masked_phone = "XXXXXXXXXX"
+#     if p['owner_contact'] and len(str(p['owner_contact'])) >= 10:
+#         ph = str(p['owner_contact'])
+#         masked_phone = f"{ph[:2]}XXXXXX{ph[-2:]}"
 
-    # ── 7. Context & Render ──────────────────────────────────
-    context = {
-        "p":                p,
-        "original":         obj,
-        "listing_type":     listing_type,
-        "category":         category,
-        "property_images":  property_images,
-        "amenities_list":   amenities_list,
-        "facilities_list":  facilities_list,
-        "similar":          similar,
-        "base_emi":         base_emi,
-        "raw_price":        p['raw_price'],
-        "seo":              seo,
-        "logged_user":      logged_user,
-        "user_obj":         user_obj,
-        "user_subscription":user_subscription,
-        "can_view_contact": can_view_contact,
-        "masked_phone":     masked_phone,
-        "today":            date.today(),
-        "now":              now(),
-    }
-    return render(request, 'home_page/property_detail.html', context)
+#     # ── 7. Context & Render ──────────────────────────────────
+#     context = {
+#         "p":                p,
+#         "original":         obj,
+#         "listing_type":     listing_type,
+#         "category":         category,
+#         "property_images":  property_images,
+#         "amenities_list":   amenities_list,
+#         "facilities_list":  facilities_list,
+#         "similar":          similar,
+#         "base_emi":         base_emi,
+#         "raw_price":        p['raw_price'],
+#         "seo":              seo,
+#         "logged_user":      logged_user,
+#         "user_obj":         user_obj,
+#         "user_subscription":user_subscription,
+#         "can_view_contact": can_view_contact,
+#         "masked_phone":     masked_phone,
+#         "today":            date.today(),
+#         "now":              now(),
+#     }
+#     return render(request, 'home_page/property_detail.html', context)
 
 
 # ═════════════════════════════════════════════════════════════

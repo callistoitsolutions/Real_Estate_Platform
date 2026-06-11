@@ -3,1253 +3,1647 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>{% if seo %}{{ seo.meta_title }}{% else %}{{ p.title }}{% endif %} | EstateFusion</title>
+<title>{% if seo %}{{ seo.meta_title }}{% else %}{{ p.title }} | EstateFusion{% endif %}</title>
 <meta name="description" content="{% if seo %}{{ seo.meta_description }}{% else %}{{ p.title }} in {{ p.city }}{% endif %}">
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <style>
 :root {
-  --pr: #e84118; --pr2: #c0392b; --pr-light: #fff1eb; --pr-border: #fcd3c1;
-  --sec: #12263a; --muted: #6b7280; --border: #e5e7eb;
-  --bg: #f4f6f9; --card: #ffffff;
-  --green: #059669; --green-bg: #d1fae5; --green-text: #065f46;
+  --pr: #1a56db; --pr2: #1342b0; --pr-light: #ebf0ff; --pr-border: #d1dcff;
+  --accent: #f97316;
+  --dark: #111827; --mid: #374151; --muted: #6b7280; --border: #e5e7eb;
+  --bg: #f3f4f8; --card: #ffffff; --surface: #f9fafb;
+  --green: #10b981; --green-bg: #ecfdf5; --green-text: #065f46;
   --blue: #2563eb; --blue-bg: #dbeafe; --blue-text: #1e40af;
-  --warn: #dc2626; --warn-bg: #fee2e2; --warn-text: #991b1b;
+  --warn: #ef4444; --warn-bg: #fef2f2; --warn-text: #991b1b;
   --yellow: #d97706; --yellow-bg: #fef3c7; --yellow-text: #92400e;
-  --radius: 14px; --radius-sm: 10px;
-  --shadow: 0 2px 16px rgba(0,0,0,0.07); --shadow-md: 0 8px 30px rgba(0,0,0,0.09);
+  --radius: 14px; --radius-sm: 10px; --radius-lg: 16px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  --shadow-md: 0 6px 24px rgba(0,0,0,0.09);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--sec); }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--dark); }
 a { text-decoration: none; color: inherit; }
 
 /* ── BREADCRUMB ── */
 .breadcrumb-bar {
-  max-width: 1400px; margin: 0 auto; padding: 14px 24px 0;
-  font-size: .78rem; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 10px 0; font-size: .78rem; color: var(--muted);
 }
 .breadcrumb-bar a { color: var(--pr); font-weight: 600; }
 .breadcrumb-bar a:hover { text-decoration: underline; }
+.prop-id-badge {
+  background: #f1f5ff; color: var(--pr); font-weight: 700;
+  padding: 3px 10px; border-radius: 20px; font-size: .72rem;
+  border: 1px solid var(--pr-border); font-family: monospace;
+}
+
+/* ── HERO HEADER ── */
+.prop-hero-header {
+  background: var(--card); padding: 20px 0 0;
+  border-bottom: 1px solid var(--border);
+}
+.prop-hero-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.65rem; font-weight: 700; color: var(--dark);
+  margin: 0 0 6px; line-height: 1.3;
+}
+.prop-hero-location { color: var(--muted); font-size: .85rem; display: flex; align-items: center; gap: 5px; }
+.prop-hero-location i { color: var(--pr); }
+.prop-hero-price-tag { font-size: 2rem; font-weight: 700; color: var(--dark); line-height: 1; }
+.prop-hero-price-tag span { font-size: .9rem; color: var(--muted); font-weight: 400; }
+.prop-quick-stats { display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 0; border-top: 1px solid var(--border); margin-top: 12px; }
+.quick-stat-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 5px 12px; border-radius: 20px; font-size: .78rem; font-weight: 600; color: var(--mid);
+}
+.quick-stat-chip i { color: var(--pr); font-size: .72rem; }
 
 /* ── GALLERY ── */
-.gallery-wrap { max-width: 1400px; margin: 14px auto 0; padding: 0 24px; }
-.gallery-grid {
-  display: grid; grid-template-columns: 1.7fr 1fr;
-  grid-template-rows: 265px 175px; gap: 8px; border-radius: 18px; overflow: hidden;
+.prop-gallery-grid {
+  display: grid; grid-template-columns: 1.65fr 1fr;
+  grid-template-rows: 1fr 1fr; gap: 6px; height: 420px; overflow: hidden;
 }
-.gal-main { grid-row: 1 / 3; position: relative; overflow: hidden; cursor: pointer; }
-.gal-side { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; }
-.gal-cell { position: relative; overflow: hidden; cursor: pointer; }
-.gal-img { width: 100%; height: 100%; object-fit: cover; transition: transform .38s; display: block; }
-.gal-cell:hover .gal-img, .gal-main:hover .gal-img { transform: scale(1.05); }
-.gal-placeholder { background: linear-gradient(135deg,#d8dfe8,#c4ced9); display: flex; align-items: center; justify-content: center; font-size: 3rem; }
-.gallery-overlay-btn {
-  position: absolute; bottom: 14px; right: 14px;
-  background: rgba(255,255,255,.95); border: none; border-radius: 10px;
-  padding: 8px 16px; font-size: .8rem; font-weight: 700; color: var(--sec);
-  cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.18);
-  display: flex; align-items: center; gap: 6px; z-index: 3; transition: all .2s;
+.prop-gallery-main { grid-row: 1/3; position: relative; overflow: hidden; background: #0d1117; cursor: pointer; }
+.prop-gallery-thumb { position: relative; overflow: hidden; background: #1e2733; cursor: pointer; }
+.prop-gallery-thumb img, .prop-gallery-main .walkthrough-slide img {
+  width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s;
 }
-.gallery-overlay-btn:hover { background: white; transform: translateY(-1px); }
-.gal-count-badge {
-  position: absolute; bottom: 14px; left: 14px;
-  background: rgba(0,0,0,.55); color: white; border-radius: 8px;
-  padding: 5px 12px; font-size: .75rem; font-weight: 700; z-index: 3;
+.prop-gallery-thumb:hover img { transform: scale(1.05); }
+.walkthrough-slide { position: absolute; inset: 0; opacity: 0; transition: opacity .7s; display: none; }
+.walkthrough-slide.active { display: block; opacity: 1; }
+.gallery-hud {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,.8));
+  padding: 20px 16px 12px; display: flex; justify-content: space-between;
+  align-items: flex-end; z-index: 10;
 }
-
-/* ── MEDIA PLAYER ── */
-.media-wrap { max-width: 1400px; margin: 12px auto; padding: 0 24px; }
-.media-player-card { background: #0c1421; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
-#mediaViewer { width: 100%; height: 470px; display: flex; align-items: center; justify-content: center; position: relative; }
-#activeDisplay { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-#activeDisplay video, #activeDisplay img { width: 100%; height: 100%; object-fit: contain; }
-.media-controls { position: absolute; bottom: 16px; right: 16px; display: flex; gap: 8px; z-index: 5; }
-.mc-btn {
-  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
-  color: white; border-radius: 8px; padding: 7px 14px; font-size: .78rem;
-  font-weight: 700; cursor: pointer; backdrop-filter: blur(6px); transition: background .2s;
-}
-.mc-btn:hover { background: rgba(255,255,255,.25); }
-.media-thumb-strip {
-  display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto;
-  background: #0c1421; scrollbar-width: thin; scrollbar-color: #444 transparent;
-}
-.media-thumb {
-  flex-shrink: 0; width: 90px; height: 64px; border-radius: 8px; overflow: hidden;
-  border: 2px solid transparent; cursor: pointer; transition: border-color .2s;
-}
-.media-thumb:hover, .media-thumb.active { border-color: var(--pr); }
-.media-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.video-thumb-btn {
-  flex-shrink: 0; width: 90px; height: 64px; border-radius: 8px;
-  border: 2px solid #f97316; cursor: pointer; background: #1a1a2e;
+.gallery-hud-left { display: flex; align-items: center; gap: 10px; }
+.btn-play-pause {
+  width: 34px; height: 34px; background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.3); border-radius: 50%; color: white;
   display: flex; align-items: center; justify-content: center;
-  color: #f97316; font-size: .65rem; font-weight: 700; flex-direction: column; gap: 3px;
-  transition: border-color .2s;
+  cursor: pointer; font-size: .75rem; backdrop-filter: blur(4px);
 }
-.video-thumb-btn:hover { border-color: #fb923c; background: #1f1f38; }
-.no-media-placeholder { color: rgba(255,255,255,.25); font-size: 4.5rem; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.no-media-placeholder span { font-size: 1rem; }
-
-/* ── MAIN LAYOUT ── */
-.detail-layout {
-  max-width: 1400px; margin: 0 auto; padding: 22px 24px 70px;
-  display: grid; grid-template-columns: 1fr 390px; gap: 28px; align-items: start;
+.gallery-timer { color: rgba(255,255,255,.7); font-size: .72rem; font-family: monospace; }
+.gallery-badge-walkthrough {
+  background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+  color: white; font-size: .65rem; font-weight: 700; letter-spacing: .8px;
+  padding: 4px 9px; border-radius: 4px; text-transform: uppercase; backdrop-filter: blur(4px);
 }
-
-/* ── PROPERTY HEADER CARD ── */
-.prop-header-card {
-  background: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
-  padding: 28px 30px; margin-bottom: 16px; box-shadow: var(--shadow);
+.thumb-more-overlay {
+  position: absolute; inset: 0; background: rgba(17,24,39,.7);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
 }
-.prop-tags { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 13px; }
-.tag { font-size: .69rem; font-weight: 800; padding: 4px 12px; border-radius: 50px; letter-spacing: .4px; text-transform: uppercase; white-space: nowrap; }
-.tag-sale   { background: #fef3c7; color: #92400e; }
-.tag-rent   { background: var(--blue-bg); color: var(--blue-text); }
-.tag-cat    { background: #f1f5f9; color: #475569; }
-.tag-zone   { background: #ede9fe; color: #5b21b6; }
-.tag-status { background: #ecfdf5; color: #065f46; }
-.tag-condition { background: #fefce8; color: #854d0e; }
+.thumb-more-overlay span { color: white; font-size: 1.2rem; font-weight: 700; }
+.thumb-more-overlay small { display: block; color: rgba(255,255,255,.6); font-size: .7rem; margin-top: 2px; }
 
-.prop-title { font-family: 'Playfair Display', serif; font-size: 1.78rem; font-weight: 800; color: var(--sec); line-height: 1.3; margin-bottom: 10px; }
-.prop-address { font-size: .9rem; color: var(--muted); font-weight: 500; display: flex; align-items: flex-start; gap: 6px; }
-.prop-address i { color: var(--pr); margin-top: 2px; flex-shrink: 0; }
-
-/* PRICE STRIP */
-.price-strip {
-  background: linear-gradient(135deg, #fff8f6 0%, #fff1eb 100%);
-  border: 1.5px solid var(--pr-border); border-radius: 14px; padding: 22px 26px; margin-top: 22px;
-  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px;
+/* No-image placeholder */
+.no-image-placeholder {
+  width: 100%; height: 100%; position: relative; overflow: hidden;
 }
-.price-main-label { font-size: .7rem; font-weight: 800; color: #c2410c; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 4px; }
-.price-main-val { font-size: 2.5rem; font-weight: 800; color: var(--pr); line-height: 1.1; }
-.price-main-val .per-unit { font-size: 1rem; font-weight: 500; color: var(--muted); }
-.price-meta { text-align: right; display: flex; flex-direction: column; gap: 6px; min-width: 160px; }
-.price-meta-item { font-size: .82rem; font-weight: 600; color: var(--sec); display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
-.price-meta-item.neg  { color: var(--green); }
-.price-meta-item.dep  { color: var(--muted); }
-.price-meta-item.brok { color: #dc2626; }
+.no-image-placeholder .bg-blur {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg,#1e3a8a,#2563eb,#1e40af);
+  filter: blur(12px); transform: scale(1.2);
+}
+.no-image-placeholder .bg-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,.35);
+}
+.no-image-placeholder .content {
+  position: relative; z-index: 2;
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+}
+.no-image-placeholder .inner {
+  text-align: center; color: white;
+}
+.no-image-placeholder .icon-circle {
+  width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(255,255,255,.12); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.15);
+  display: flex; align-items: center; justify-content: center; margin: auto;
+}
+.no-image-placeholder .inner h3 { margin-top: 16px; font-weight: 700; letter-spacing: 1px; }
+.no-image-placeholder .inner p { color: rgba(255,255,255,.75); margin: 0; font-size: .9rem; }
+
+/* Thumb strip */
+.prop-image-strip { display: flex; gap: 6px; overflow-x: auto; padding: 8px 16px 12px; scrollbar-width: thin; }
+.strip-thumb {
+  flex-shrink: 0; width: 72px; height: 54px; border-radius: 5px;
+  overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: border-color .2s;
+}
+.strip-thumb.active-thumb { border-color: var(--pr); }
+.strip-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── STICKY NAV ── */
+.prop-sticky-nav {
+  position: sticky; top: 68px; background: var(--card);
+  border-bottom: 2px solid var(--border); z-index: 990;
+}
+.prop-sticky-nav-inner { display: flex; overflow-x: auto; scrollbar-width: none; }
+.prop-sticky-nav-inner::-webkit-scrollbar { display: none; }
+.prop-nav-link {
+  color: var(--muted); font-size: .78rem; font-weight: 600; text-decoration: none;
+  padding: 13px 16px; border-bottom: 3px solid transparent;
+  white-space: nowrap; transition: all .2s; text-transform: uppercase; letter-spacing: .4px;
+  display: flex; align-items: center; gap: 5px;
+}
+.prop-nav-link i { font-size: .72rem; }
+.prop-nav-link:hover, .prop-nav-link.active { color: var(--pr); background: var(--pr-light); }
+.prop-nav-link.active { border-bottom-color: var(--pr); }
+
+/* ── PAGE LAYOUT ── */
+.prop-page-body { padding: 26px 0 60px; }
+.prop-layout-grid {
+  display: grid; grid-template-columns: 1fr 340px;
+  gap: 22px; align-items: start;
+}
 
 /* ── SECTION CARDS ── */
-.sec-card {
-  background: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
-  padding: 26px 28px; margin-bottom: 16px; box-shadow: var(--shadow);
+.prop-section {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 24px;
+  margin-bottom: 18px; scroll-margin-top: 130px;
+  box-shadow: var(--shadow);
 }
-.sec-head {
+.prop-section-title {
+  font-size: 1rem; font-weight: 700; color: var(--dark);
+  margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 10px;
-  font-size: 1rem; font-weight: 800; color: var(--sec);
-  margin-bottom: 22px; padding-bottom: 15px; border-bottom: 1.5px solid #f0f4f8;
 }
-.sec-head-icon {
-  width: 36px; height: 36px; border-radius: 10px; background: var(--pr-light);
-  display: flex; align-items: center; justify-content: center; color: var(--pr); font-size: .9rem; flex-shrink: 0;
+.section-icon {
+  width: 32px; height: 32px; background: var(--pr-light);
+  border-radius: 8px; display: flex; align-items: center;
+  justify-content: center; color: var(--pr); font-size: .8rem; flex-shrink: 0;
 }
 
-/* SPEC GRID (overview tiles) */
-.spec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 12px; }
-.sg-item {
-  background: #f8fafc; border: 1px solid var(--border); border-radius: 12px;
-  padding: 14px 16px; transition: box-shadow .2s, border-color .2s;
+/* Spec grid */
+.spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.spec-item {
+  padding: 11px 12px; border-bottom: 1px solid #f3f4f6;
+  display: flex; flex-direction: column; gap: 3px;
 }
-.sg-item:hover { border-color: var(--pr-border); box-shadow: 0 2px 10px rgba(232,65,24,.07); }
-.sg-lbl { font-size: .67rem; color: var(--muted); font-weight: 700; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .5px; }
-.sg-val { font-size: .98rem; font-weight: 800; color: var(--sec); }
-
-/* INFO TABLE (2-col key-value rows) */
-.info-table { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-.info-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 16px; border-bottom: 1px solid #f0f4f8; gap: 10px;
+.spec-item:nth-child(odd) { border-right: 1px solid #f3f4f6; }
+.spec-item:last-child, .spec-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+.spec-label { font-size: .7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+.spec-value { font-size: .88rem; font-weight: 600; color: var(--dark); }
+.spec-full { grid-column: 1/-1; border-right: none !important; }
+.spec-item.highlight-price {
+  background: linear-gradient(135deg,#f0f4ff,#e8eeff);
+  border-radius: 8px; border: 1px solid var(--pr-border) !important; padding: 14px;
 }
-.info-row:nth-child(odd) { background: #fafbfc; }
-.info-row:hover { background: #f0f9ff; }
-.info-label { font-size: .82rem; color: var(--muted); font-weight: 600; }
-.info-value { font-size: .85rem; font-weight: 700; color: var(--sec); text-align: right; }
-
-/* AMENITIES */
-.amenity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 10px; }
-.amenity-item {
-  display: flex; align-items: center; gap: 10px; padding: 11px 14px;
-  background: #f8fafc; border-radius: 10px; font-size: .83rem; font-weight: 600;
-  border: 1px solid var(--border); color: var(--sec); transition: all .2s;
+.spec-item.highlight-price .spec-label { color: var(--pr); }
+.spec-item.highlight-price .spec-value { font-size: 1.1rem; color: var(--pr); }
+.spec-item.highlight-deposit {
+  background: linear-gradient(135deg,#fff7ed,#ffedd5);
+  border-radius: 8px; border: 1px solid #fed7aa !important; padding: 14px;
 }
-.amenity-item:hover { background: var(--pr-light); border-color: var(--pr-border); }
-.amenity-item i { color: var(--green); font-size: .88rem; }
-.amenity-item.no-item { background: #fff5f5; border-color: #fecaca; }
-.amenity-item.no-item i { color: var(--warn); }
-.amenity-item.blue-item { background: #f0f9ff; border-color: #bae6fd; }
-.amenity-item.blue-item i { color: var(--blue); }
+.spec-item.highlight-deposit .spec-label { color: #ea580c; }
+.spec-item.highlight-deposit .spec-value { font-size: 1.1rem; color: #c2410c; }
 
-/* PG BED PRICING */
-.pg-bed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
-.pg-bed-card {
-  background: linear-gradient(135deg, #fff8f6, #fff1eb);
-  border: 1.5px solid var(--pr-border); border-radius: 14px; padding: 18px 16px; text-align: center; transition: all .2s;
+/* Sub-section label */
+.sub-section-label {
+  font-size: .7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .6px; color: var(--muted); margin-bottom: 12px; margin-top: 18px;
 }
-.pg-bed-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(232,65,24,.12); }
-.pg-bed-type  { font-size: .68rem; font-weight: 800; color: #c2410c; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
-.pg-bed-price { font-size: 1.45rem; font-weight: 800; color: var(--pr); }
-.pg-bed-suffix{ font-size: .78rem; color: var(--muted); font-weight: 500; }
+.sub-section-label:first-child { margin-top: 0; }
 
-/* PG RULES */
-.rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 10px; }
-.rule-item {
-  display: flex; align-items: center; gap: 9px; padding: 10px 14px;
-  border-radius: 10px; border: 1px solid; font-size: .82rem; font-weight: 600; transition: all .15s;
+/* Amenity pills */
+.amenity-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 6px 12px; border-radius: 20px; font-size: .78rem; font-weight: 500; color: var(--mid);
 }
-.rule-allowed { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
-.rule-allowed i { color: var(--green); }
-.rule-not { background: #fff5f5; border-color: #fecaca; color: #b91c1c; }
-.rule-not i { color: var(--warn); }
+.amenity-pill i { color: var(--green); font-size: .68rem; }
+.facility-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #f0fdf4; border: 1px solid #bbf7d0;
+  padding: 6px 12px; border-radius: 20px; font-size: .78rem; font-weight: 500; color: #15803d;
+}
+.facility-pill i { font-size: .68rem; }
 
-/* LEGAL GRID */
-.legal-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+/* Legal grid (sale only) */
+.legal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .legal-item {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 18px; border-radius: 11px; border: 1px solid var(--border); background: #f8fafc;
-  transition: all .2s;
+  padding: 13px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface);
 }
-.legal-item:hover { background: #f0f9ff; border-color: #bae6fd; }
-.legal-label  { font-size: .82rem; font-weight: 600; color: var(--muted); }
+.legal-label { font-size: .82rem; font-weight: 600; color: var(--muted); }
 .legal-status { font-size: .82rem; font-weight: 700; display: flex; align-items: center; gap: 5px; }
-.ls-ok   { color: var(--green); }
-.ls-warn { color: var(--warn); }
-.ls-yellow { color: var(--yellow); }
+.ls-ok { color: var(--green); } .ls-warn { color: var(--warn); } .ls-yellow { color: var(--yellow); }
 
-/* EMI CARD */
-.emi-banner { background: linear-gradient(135deg, var(--sec) 0%, #1e3a5f 100%); border-radius: 14px; padding: 26px; color: white; }
-.emi-label  { font-size: .72rem; font-weight: 700; opacity: .7; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-.emi-amount { font-size: 2.4rem; font-weight: 800; color: #f97316; }
-.emi-note   { font-size: .75rem; opacity: .6; margin-top: 4px; }
-.emi-adjust-btn {
-  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
-  color: white; border-radius: 8px; padding: 9px 18px; font-size: .82rem;
-  font-weight: 700; cursor: pointer; margin-top: 16px; width: 100%; transition: background .2s;
-  font-family: inherit;
+/* Badges */
+.badge-ok { background: var(--green-bg); color: var(--green-text); padding: 3px 10px; border-radius: 6px; font-size: .72rem; font-weight: 700; }
+.badge-warn { background: var(--warn-bg); color: var(--warn-text); padding: 3px 10px; border-radius: 6px; font-size: .72rem; font-weight: 700; }
+.badge-active { background: #ecfdf5; color: var(--green); border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 4px; font-size: .72rem; font-weight: 700; }
+.badge-deleted { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 4px; font-size: .72rem; font-weight: 700; }
+
+/* Address box */
+.address-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--pr); border-radius: var(--radius-sm);
+  padding: 14px; font-size: .85rem; color: var(--mid); line-height: 1.6;
 }
-.emi-adjust-btn:hover { background: rgba(255,255,255,.2); }
-.emi-controls { margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.12); display: none; }
-.emi-control-label { font-size: .74rem; font-weight: 700; opacity: .7; margin-bottom: 6px; }
+
+/* Description */
+.desc-highlight {
+  background: #f8f9ff; border-left: 3px solid var(--pr);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 14px 16px; margin-bottom: 16px;
+  font-size: .88rem; color: var(--mid); line-height: 1.8;
+}
+.desc-body { font-size: .88rem; line-height: 1.8; color: #4b5563; }
+
+/* EMI Card (sale only) */
+.emi-banner {
+  background: linear-gradient(135deg,#12263a 0%,#1e3a5f 100%);
+  border-radius: 14px; padding: 24px; color: white;
+}
+.emi-label { font-size: .7rem; font-weight: 700; opacity: .65; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.emi-amount { font-size: 2.3rem; font-weight: 800; color: var(--accent); }
+.emi-note { font-size: .74rem; opacity: .55; margin-top: 4px; }
+.emi-adjust-btn {
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: white;
+  border-radius: 8px; padding: 9px 18px; font-size: .82rem; font-weight: 700;
+  cursor: pointer; margin-top: 14px; width: 100%; font-family: inherit;
+}
+.emi-controls { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); display: none; }
 .emi-input {
   width: 100%; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
-  border-radius: 8px; padding: 9px 12px; color: white; font-size: .85rem; font-weight: 600; font-family: inherit;
+  border-radius: 8px; padding: 9px 12px; color: white; font-size: .85rem; font-family: inherit;
 }
 
-/* DESCRIPTION */
-.desc-body { font-size: .93rem; color: #4b5563; line-height: 1.88; }
-.desc-body p { margin-bottom: 12px; }
-
-/* MAP */
-.map-placeholder {
-  background: linear-gradient(135deg, #e0f2fe, #e8f5e9);
-  border-radius: 12px; height: 290px; display: flex; align-items: center; justify-content: center;
-  border: 1px dashed #93c5fd; position: relative; overflow: hidden;
+/* FAQ Accordion */
+.prop-faq .accordion-item {
+  border: 1px solid var(--border); border-radius: var(--radius-sm) !important;
+  margin-bottom: 10px; overflow: hidden;
 }
-.map-placeholder::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(0,0,0,.02) 20px,rgba(0,0,0,.02) 22px); }
-.map-pin-badge {
-  background: white; border-radius: 50px; padding: 14px 26px;
-  font-weight: 700; color: var(--sec); box-shadow: 0 8px 30px rgba(0,0,0,.14);
-  display: flex; align-items: center; gap: 10px; z-index: 2; font-size: .9rem;
+.prop-faq .accordion-button {
+  font-weight: 600; font-size: .88rem; color: var(--dark);
+  background: var(--card); padding: 14px 16px; box-shadow: none;
 }
+.prop-faq .accordion-button:not(.collapsed) {
+  background: #f5f7ff; color: var(--pr); border-bottom: 1px solid #e0e7ff;
+}
+.prop-faq .accordion-body { font-size: .85rem; line-height: 1.75; color: var(--mid); background: var(--card); padding: 14px 16px; }
 
-/* SIMILAR PROPERTIES */
-.similar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+/* Empty state */
+.empty-state {
+  text-align: center; padding: 22px; background: var(--surface);
+  border-radius: var(--radius-sm); border: 1px dashed var(--border);
+}
+.empty-state i { font-size: 1.4rem; color: #d1d5db; margin-bottom: 8px; display: block; }
+.empty-state p { font-size: .8rem; color: var(--muted); margin: 0; }
+
+/* Similar cards */
+.similar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .sim-card {
   background: var(--card); border-radius: 14px; border: 1px solid var(--border);
   overflow: hidden; transition: all .25s; display: flex; flex-direction: column;
 }
-.sim-card:hover { transform: translateY(-5px); box-shadow: 0 14px 36px rgba(0,0,0,.11); border-color: var(--pr-border); }
-.sim-img { height: 135px; overflow: hidden; position: relative; background: #dde4ef; }
+.sim-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.1); border-color: var(--pr-border); }
+.sim-img { height: 130px; overflow: hidden; position: relative; background: #dde4ef; }
 .sim-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
 .sim-card:hover .sim-img img { transform: scale(1.07); }
-.sim-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; background: linear-gradient(135deg,#d8dfe8,#c4ced9); }
-.sim-tag { position: absolute; top: 8px; left: 8px; background: var(--pr); color: white; font-size: .63rem; font-weight: 800; padding: 3px 9px; border-radius: 5px; text-transform: uppercase; }
+.sim-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg,#1e3a8a,#2563eb); color: white; font-size: 1.6rem; }
+.sim-tag { position: absolute; top: 8px; left: 8px; background: var(--pr); color: white; font-size: .62rem; font-weight: 800; padding: 3px 9px; border-radius: 5px; text-transform: uppercase; }
 .sim-body { padding: 14px; flex: 1; display: flex; flex-direction: column; }
-.sim-price { font-size: 1.05rem; font-weight: 800; color: var(--pr); }
-.sim-title { font-size: .82rem; font-weight: 700; color: var(--sec); margin: 4px 0 6px; line-height: 1.4; }
-.sim-loc   { font-size: .75rem; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+.sim-price { font-size: 1rem; font-weight: 800; color: var(--pr); }
+.sim-title { font-size: .82rem; font-weight: 700; color: var(--dark); margin: 4px 0 6px; line-height: 1.4; }
+.sim-loc { font-size: .74rem; color: var(--muted); display: flex; align-items: center; gap: 4px; }
 .sim-footer { border-top: 1px solid var(--border); padding-top: 10px; margin-top: auto; display: flex; justify-content: space-between; align-items: center; font-size: .73rem; color: var(--muted); font-weight: 600; }
 
-/* ── BADGES & UTILITIES ── */
-.badge-ok   { background: var(--green-bg); color: var(--green-text); padding: 3px 10px; border-radius: 6px; font-size: .74rem; font-weight: 700; }
-.badge-warn { background: var(--warn-bg); color: var(--warn-text); padding: 3px 10px; border-radius: 6px; font-size: .74rem; font-weight: 700; }
-.badge-yellow { background: var(--yellow-bg); color: var(--yellow-text); padding: 3px 10px; border-radius: 6px; font-size: .74rem; font-weight: 700; }
-.util-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--green-bg); color: var(--green-text); padding: 5px 12px; border-radius: 8px; font-size: .78rem; font-weight: 700; margin: 4px; }
-.util-badge.blue { background: var(--blue-bg); color: var(--blue-text); }
-.util-badge.yellow { background: var(--yellow-bg); color: var(--yellow-text); }
-.floor-plan-img { width: 100%; border-radius: 12px; border: 1px solid var(--border); object-fit: contain; max-height: 500px; background: #f8fafc; }
-.sub-section-label { font-size: .8rem; font-weight: 800; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .4px; }
+/* PG Bed Cards */
+.pg-bed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; }
+.pg-bed-card {
+  background: linear-gradient(135deg,#f0f4ff,#e8eeff);
+  border: 1.5px solid var(--pr-border); border-radius: 14px; padding: 18px 16px; text-align: center;
+}
+.pg-bed-type { font-size: .67rem; font-weight: 800; color: var(--pr); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
+.pg-bed-price { font-size: 1.4rem; font-weight: 800; color: var(--pr); }
+.pg-bed-suffix { font-size: .78rem; color: var(--muted); }
 
 /* ── SIDEBAR ── */
-.contact-card {
-  background: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
-  padding: 26px; position: sticky; top: 80px; box-shadow: var(--shadow-md);
+.prop-sidebar { position: sticky; top: 130px; display: flex; flex-direction: column; gap: 16px; }
+.sidebar-price-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md);
 }
-.cc-price-label { font-size: .69rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 4px; }
-.cc-price-val   { font-size: 2rem; font-weight: 800; color: var(--pr); margin-bottom: 5px; line-height: 1.1; }
-.cc-price-subtext { font-size: .8rem; color: var(--muted); font-weight: 500; }
+.sidebar-price-header {
+  background: linear-gradient(135deg,#1a56db,#3b82f6);
+  padding: 20px 20px 16px; color: white;
+}
+.sidebar-price-label { font-size: .67rem; text-transform: uppercase; letter-spacing: .8px; opacity: .8; font-weight: 600; }
+.sidebar-price-amount { font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin: 4px 0 0; }
+.sidebar-price-amount span { font-size: .85rem; opacity: .7; font-weight: 400; }
+.sidebar-price-body { padding: 16px 20px; }
+.sidebar-mini-stat { text-align: center; padding: 10px 0; }
+.sidebar-mini-stat-label { font-size: .64rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); font-weight: 600; }
+.sidebar-mini-stat-val { font-size: .95rem; font-weight: 700; color: var(--dark); margin-top: 3px; }
 
-.owner-block {
-  display: flex; align-items: center; gap: 13px;
-  padding: 15px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: 18px 0;
+.sidebar-owner-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow);
 }
 .owner-avatar {
-  width: 48px; height: 48px; border-radius: 12px;
-  background: linear-gradient(135deg, var(--sec), #1e3a5f);
-  display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; flex-shrink: 0;
+  width: 46px; height: 46px; background: linear-gradient(135deg,var(--pr),#6366f1);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
 }
-.owner-name { font-weight: 700; color: var(--sec); font-size: .92rem; }
-.owner-role { font-size: .75rem; color: var(--muted); font-weight: 500; margin-top: 1px; }
-.owner-uploaded-by { font-size: .72rem; color: var(--blue); font-weight: 600; margin-top: 2px; }
-
-.cta-btn {
-  width: 100%; padding: 13px; border-radius: 12px; font-size: .88rem;
-  font-weight: 800; cursor: pointer; border: none; margin-bottom: 10px;
-  display: flex; align-items: center; justify-content: center; gap: 9px;
-  transition: all .2s; letter-spacing: .2px; font-family: inherit;
+.owner-name { font-size: .9rem; font-weight: 700; color: var(--dark); }
+.owner-email { font-size: .74rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+.owner-phone-masked { font-size: .82rem; color: var(--mid); font-weight: 500; font-family: monospace; }
+.btn-reveal-phone {
+  font-size: .72rem; color: var(--pr); border: 1px solid var(--pr-border);
+  background: var(--pr-light); padding: 2px 8px; border-radius: 4px;
+  cursor: pointer; font-weight: 600; transition: all .2s;
 }
-.cta-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.16); }
-.cta-primary  { background: linear-gradient(135deg, var(--pr), var(--pr2)); color: white; }
-.cta-whatsapp { background: linear-gradient(135deg,#25d366,#20b558); color: white; }
-.cta-disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
-.cta-disabled:hover { transform: none; box-shadow: none; }
-
+.btn-reveal-phone:hover { background: var(--pr); color: white; border-color: var(--pr); }
+.btn-call-primary {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: linear-gradient(135deg,#1a56db,#3b82f6); color: white;
+  border: none; border-radius: var(--radius-sm); padding: 12px;
+  font-size: .9rem; font-weight: 700; width: 100%; cursor: pointer;
+  text-decoration: none; margin-top: 14px; transition: all .2s;
+  box-shadow: 0 4px 12px rgba(26,86,219,.3);
+}
+.btn-call-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(26,86,219,.4); color: white; }
+.btn-whatsapp-primary {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: linear-gradient(135deg,#25d366,#20b558); color: white;
+  border: none; border-radius: var(--radius-sm); padding: 12px;
+  font-size: .9rem; font-weight: 700; width: 100%; cursor: pointer;
+  text-decoration: none; margin-top: 8px; transition: all .2s;
+}
+.btn-whatsapp-primary:hover { transform: translateY(-1px); color: white; }
+.owner-info-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: .8rem;
+}
+.owner-info-row:last-child { border: none; padding-bottom: 0; }
+.owner-info-row i { color: var(--muted); width: 14px; text-align: center; }
+.sidebar-divider { font-size: .67rem; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); font-weight: 600; margin-bottom: 10px; }
 .masked-phone-block {
-  background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 10px;
-  padding: 15px; text-align: center; margin-bottom: 12px;
+  background: var(--surface); border: 1.5px dashed #cbd5e1; border-radius: 10px;
+  padding: 14px; text-align: center; margin-bottom: 12px;
 }
-.masked-num  { font-size: 1.15rem; font-weight: 800; color: var(--sec); letter-spacing: 2px; }
-.masked-hint { font-size: .71rem; color: var(--muted); margin-top: 4px; }
+.masked-num { font-size: 1.1rem; font-weight: 800; color: var(--dark); letter-spacing: 2px; }
+.masked-hint { font-size: .7rem; color: var(--muted); margin-top: 4px; }
 
-/* ENQUIRY FORM */
-.enq-title { font-size: .85rem; font-weight: 800; color: var(--sec); margin-bottom: 12px; display: flex; align-items: center; gap: 7px; }
-.enq-divider { text-align: center; font-size: .78rem; font-weight: 700; color: var(--muted); margin: 16px 0; position: relative; }
-.enq-divider::before, .enq-divider::after { content: ''; position: absolute; top: 50%; width: 38%; height: 1px; background: var(--border); }
-.enq-divider::before { left: 0; } .enq-divider::after { right: 0; }
+/* Enquiry form */
 .enq-input {
   width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
   padding: 11px 14px; font-size: .83rem; margin-bottom: 10px;
-  font-family: 'DM Sans', sans-serif; transition: border-color .2s; outline: none;
-  background: #fafafa; color: var(--sec);
+  font-family: 'DM Sans', sans-serif; outline: none; background: #fafafa;
 }
-.enq-input:focus { border-color: var(--pr); background: white; box-shadow: 0 0 0 3px rgba(232,65,24,.07); }
+.enq-input:focus { border-color: var(--pr); background: white; }
 .enq-submit {
-  width: 100%; padding: 13px; border-radius: 12px; font-size: .88rem;
-  font-weight: 800; cursor: pointer; border: none; background: var(--sec); color: white;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all .2s; font-family: 'DM Sans', sans-serif;
+  width: 100%; padding: 12px; border-radius: 12px; font-size: .88rem;
+  font-weight: 800; cursor: pointer; border: none;
+  background: var(--dark); color: white; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .2s;
 }
 .enq-submit:hover { background: #1e3a5f; transform: translateY(-1px); }
 
-/* SIDEBAR MINI EMI */
-.sidebar-emi {
-  background: linear-gradient(135deg, #0f1f30, #1a3550);
-  border-radius: 12px; padding: 18px; margin-top: 16px; color: white;
-}
-.sidebar-emi .emi-lbl { font-size: .68rem; font-weight: 700; opacity: .6; text-transform: uppercase; letter-spacing: .5px; }
-.sidebar-emi .emi-val { font-size: 1.5rem; font-weight: 800; color: #f97316; }
-.sidebar-emi .emi-sub { font-size: .72rem; opacity: .5; margin-top: 3px; }
-
-/* TRUST BADGES */
-.trust-badges { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+/* Trust badges */
+.trust-badges { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; padding-top: 14px; border-top: 1px solid var(--border); margin-top: 14px; }
 .trust-item { text-align: center; }
-.trust-item i { font-size: 1.35rem; }
-.trust-item div { font-size: .67rem; font-weight: 700; color: var(--muted); margin-top: 4px; }
+.trust-item i { font-size: 1.3rem; }
+.trust-item div { font-size: .66rem; font-weight: 700; color: var(--muted); margin-top: 3px; }
+
+/* Tags at top */
+.tag { font-size: .69rem; font-weight: 800; padding: 4px 12px; border-radius: 50px; letter-spacing: .4px; text-transform: uppercase; white-space: nowrap; }
+.tag-rent { background: var(--blue-bg); color: var(--blue-text); }
+.tag-sale { background: #fef3c7; color: #92400e; }
+.tag-cat { background: #f1f5f9; color: #475569; }
+.tag-status { background: #ecfdf5; color: #065f46; }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 1150px) {
-  .detail-layout { grid-template-columns: 1fr; }
-  .gallery-grid  { grid-template-columns: 1fr; grid-template-rows: 320px; }
-  .gal-side { display: none; }
-  .info-table { grid-template-columns: 1fr; }
+@media (max-width: 1100px) {
+  .prop-layout-grid { grid-template-columns: 1fr; }
+  .prop-gallery-grid { grid-template-columns: 1fr; height: 260px; }
+  .prop-gallery-thumb { display: none; }
+  .prop-gallery-main { grid-row: 1; }
   .similar-grid { grid-template-columns: 1fr 1fr; }
-  .legal-grid   { grid-template-columns: 1fr; }
-  .contact-card { position: static; }
+  .legal-grid { grid-template-columns: 1fr; }
+  .prop-sidebar { position: static; }
 }
 @media (max-width: 700px) {
   .similar-grid { grid-template-columns: 1fr; }
-  .spec-grid    { grid-template-columns: repeat(2, 1fr); }
-  .prop-title   { font-size: 1.35rem; }
-  #mediaViewer  { height: 260px; }
-  .price-main-val { font-size: 2rem; }
-  .legal-grid { grid-template-columns: 1fr; }
+  .spec-grid { grid-template-columns: 1fr 1fr; }
+  .prop-hero-header h1 { font-size: 1.3rem; }
 }
+
+.auth-step { display: none; animation: fadeInSlideUp 0.4s ease forwards; }
+.auth-step.active-step { display: block; }
+@keyframes fadeInSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+}
+.otp-container { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+.otp-input { width: 50px; height: 55px; text-align: center; font-size: 1.5rem; font-weight: 700; border-radius: 8px; border: 2px solid #e2e8f0; background: white;}
+.otp-input:focus { border-color: #006ce4; outline: none; box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1); }
+
+
 </style>
 </head>
 <body>
 
 {% include 'home_page/header.html' %}
 
-<!-- ═══════════════════════════════════════ BREADCRUMB ═══ -->
+<!-- ═══ BREADCRUMB ═══ -->
 <div class="breadcrumb-bar">
-  <a href="/"><i class="fas fa-home"></i> Home</a>
-  <i class="fas fa-chevron-right" style="font-size:.6rem;opacity:.4;"></i>
-  <a href="/listingpage/?type={{ listing_type }}">{{ listing_type|title }}</a>
-  <i class="fas fa-chevron-right" style="font-size:.6rem;opacity:.4;"></i>
-  <span>{{ p.category_name }}</span>
-  <i class="fas fa-chevron-right" style="font-size:.6rem;opacity:.4;"></i>
-  <span>{{ p.city|default:"Location" }}</span>
-</div>
-
-<!-- ═══════════════════════════════════════ GALLERY ═══ -->
-<div class="gallery-wrap">
-  <div class="gallery-grid">
-    <div class="gal-main" onclick="document.getElementById('mediaViewerSection').scrollIntoView({behavior:'smooth'})">
-      {% if property_images %}
-        <img src="{{ property_images.0.image.url }}" class="gal-img" alt="{{ p.title }}">
-        {% if property_images|length > 3 %}
-          <div class="gal-count-badge"><i class="fas fa-images"></i> +{{ property_images|length }} Photos</div>
-        {% endif %}
-      {% else %}
-        <div class="gal-img gal-placeholder">🏠</div>
-      {% endif %}
-      <button class="gallery-overlay-btn">
-        <i class="fas fa-expand-alt"></i> View All Photos & Video
-      </button>
-    </div>
-    <div class="gal-side">
-      {% for img in property_images|slice:"1:3" %}
-        <div class="gal-cell" onclick="document.getElementById('mediaViewerSection').scrollIntoView({behavior:'smooth'})">
-          <img src="{{ img.image.url }}" class="gal-img" alt="Property View {{ forloop.counter|add:1 }}">
-        </div>
-      {% empty %}
-        <div class="gal-cell gal-placeholder" style="background:#d9dfe8;"></div>
-        <div class="gal-cell gal-placeholder" style="background:#c8d0db;"></div>
-      {% endfor %}
+  <div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <a href="/"><i class="fas fa-home"></i> Home</a>
+        <span class="text-muted">/</span>
+        <a href="/listingpage/?type={{ listing_type }}">{{ listing_type|title }}</a>
+        <span class="text-muted">/</span>
+        <span>{{ p.category_name }}</span>
+        <span class="prop-id-badge">ID: {{ original.pk }}</span>
+      </div>
+      <a href="/listingpage/?type={{ listing_type }}" class="btn btn-sm btn-outline-secondary" style="font-size:.76rem;font-weight:600;">
+        <i class="fas fa-arrow-left"></i> Back
+      </a>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ MEDIA PLAYER ═══ -->
-<div class="media-wrap" id="mediaViewerSection">
-  <div class="media-player-card">
-    <div id="mediaViewer">
-      <div id="activeDisplay">
-        {% if p.video %}
-          <video id="mainVideo" src="{{ p.video.url }}" controls preload="metadata" style="width:100%;height:100%;object-fit:contain;" playsinline>
-            <source src="{{ p.video.url }}" type="video/mp4">
-            Your browser does not support HTML5 video.
-          </video>
-        {% elif property_images %}
-          <img id="mainImage" src="{{ property_images.0.image.url }}" alt="{{ p.title }}" style="width:100%;height:100%;object-fit:contain;">
+<!-- ═══ HERO HEADER ═══ -->
+<div class="prop-hero-header">
+  <div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
+      <div style="flex:1;min-width:260px;">
+        <div class="d-flex gap-2 flex-wrap mb-2">
+          <span class="tag {% if listing_type == 'rent' %}tag-rent{% else %}tag-sale{% endif %}">
+            <i class="fas {% if listing_type == 'rent' %}fa-key{% else %}fa-tag{% endif %}"></i> For {{ listing_type|upper }}
+          </span>
+          <span class="tag tag-cat">{{ p.category_name }}</span>
+          {% if p.possession %}<span class="tag tag-status">{{ p.possession }}</span>{% endif %}
+        </div>
+        <h1>{{ p.title }}</h1>
+        <div class="prop-hero-location">
+          <i class="fas fa-location-dot"></i>
+          {% if p.building_name %}{{ p.building_name }}, {% endif %}
+          {{ p.locality|default:'' }}{% if p.city %}, {{ p.city }}{% endif %}{% if p.state %}, {{ p.state }}{% endif %}
+        </div>
+      </div>
+      <div class="text-end">
+        <div class="prop-hero-price-tag">
+          {% if p.monthly_rent %}₹{{ p.monthly_rent }} <span>/ month</span>
+          {% elif p.expected_price %}₹{{ p.expected_price }}
+          {% else %}<span style="font-size:1.2rem;color:var(--muted);">Price on Request</span>{% endif %}
+        </div>
+        {% if p.maintenance %}
+        <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">+ ₹{{ p.maintenance }} maintenance</div>
+        {% endif %}
+      </div>
+    </div>
+    <!-- Quick stat chips -->
+    <div class="prop-quick-stats">
+      {% if p.beds %}<div class="quick-stat-chip"><i class="fas fa-bed"></i> {{ p.beds }}</div>{% endif %}
+      {% if p.baths %}<div class="quick-stat-chip"><i class="fas fa-bath"></i> {{ p.baths }} Bath</div>{% endif %}
+      {% if p.area %}<div class="quick-stat-chip"><i class="fas fa-ruler-combined"></i> {{ p.area }} sq.ft</div>{% endif %}
+      {% if p.floor and p.total_floors %}<div class="quick-stat-chip"><i class="fas fa-layer-group"></i> Floor {{ p.floor }} of {{ p.total_floors }}</div>{% endif %}
+      {% if p.furnished %}<div class="quick-stat-chip"><i class="fas fa-couch"></i> {{ p.furnished }}</div>{% endif %}
+      {% if p.facing %}<div class="quick-stat-chip"><i class="fas fa-compass"></i> {{ p.facing }} Facing</div>{% endif %}
+      {% if p.available_for %}<div class="quick-stat-chip"><i class="fas fa-users"></i> {{ p.available_for }}</div>{% endif %}
+      {% if p.city %}<div class="quick-stat-chip"><i class="fas fa-map-marker-alt"></i> {{ p.city }}</div>{% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GALLERY ═══ -->
+<div style="background:#111827;">
+  <div class="container-fluid px-0">
+    <div class="prop-gallery-grid">
+
+      <!-- Main slot -->
+      <div class="prop-gallery-main" id="galMain">
+        {% if property_images %}
+          {% for img in property_images %}
+          <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
+            <img src="{{ img.image.url }}" alt="Property view {{ forloop.counter }}">
+          </div>
+          {% endfor %}
+          <div class="gallery-hud">
+            <div class="gallery-hud-left">
+              <button class="btn-play-pause" id="playPauseBtn"><i class="fas fa-pause"></i></button>
+              <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
+            </div>
+            <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> Property Walkthrough</span>
+          </div>
         {% else %}
-          <div class="no-media-placeholder">
-            <span>🏠</span><span>No media available yet</span>
+          <div class="no-image-placeholder">
+            <div class="bg-blur"></div>
+            <div class="bg-overlay"></div>
+            <div class="content">
+              <div class="inner">
+                <div class="icon-circle"><i class="fas fa-home" style="font-size:50px;"></i></div>
+                <h3>EstateFusion</h3>
+                <p>Property Images Not Available</p>
+              </div>
+            </div>
           </div>
         {% endif %}
       </div>
-      <div class="media-controls" id="mediaControls">
-        {% if p.video %}
-          <button class="mc-btn" id="playPauseBtn" onclick="togglePlayPause()"><i class="fas fa-play" id="playPauseIcon"></i> Play / Pause</button>
+
+      <!-- Thumb 1 -->
+      <div class="prop-gallery-thumb" onclick="setSlide(1)" id="galThumb1">
+        {% if property_images|length > 1 %}
+          <img src="{{ property_images.1.image.url }}" alt="Thumbnail 2">
+        {% else %}
+          <div class="no-image-placeholder"><div class="bg-blur"></div><div class="bg-overlay"></div><div class="content"><div class="inner"><i class="fas fa-home" style="font-size:2rem;"></i></div></div></div>
         {% endif %}
-        <button class="mc-btn" onclick="downloadMedia()"><i class="fas fa-download"></i> Download</button>
       </div>
+
+      <!-- Thumb 2 -->
+      <div class="prop-gallery-thumb" onclick="setSlide(2)" id="galThumb2">
+        {% if property_images|length > 2 %}
+          <img src="{{ property_images.2.image.url }}" alt="Thumbnail 3">
+          {% if property_images|length > 3 %}
+          <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoModal">
+            <div class="text-center">
+              <span>+{{ property_images|length|add:"-3" }}</span>
+              <small>More Photos</small>
+            </div>
+          </div>
+          {% endif %}
+        {% else %}
+          <div class="no-image-placeholder"><div class="bg-blur"></div><div class="bg-overlay"></div><div class="content"><div class="inner"><i class="fas fa-home" style="font-size:2rem;"></i></div></div></div>
+        {% endif %}
+      </div>
+
     </div>
-    <div class="media-thumb-strip">
-      {% if p.video %}
-        <div class="video-thumb-btn" id="videoThumb" onclick="activateVideo('{{ p.video.url }}')">
-          <i class="fas fa-play-circle" style="font-size:1.5rem;"></i>
-          <span>Video Tour</span>
-        </div>
-      {% endif %}
+  </div>
+
+  {% if property_images %}
+  <div style="background:#0d1117;padding:8px 16px 12px;">
+    <div class="prop-image-strip" id="imageStrip">
       {% for img in property_images %}
-        <div class="media-thumb {% if forloop.first and not p.video %}active{% endif %}" onclick="activateImage('{{ img.image.url }}', this)">
-          <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
-        </div>
+      <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}" data-slide="{{ forloop.counter0 }}" onclick="setSlide({{ forloop.counter0 }})">
+        <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
+      </div>
       {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ═══ STICKY NAV ═══ -->
+<div class="prop-sticky-nav">
+  <div class="container-fluid px-4">
+    <div class="prop-sticky-nav-inner" id="propNavTabs">
+      <a href="#sec-overview" class="prop-nav-link active" data-target="sec-overview"><i class="fas fa-layer-group"></i> Overview</a>
+      <a href="#sec-pricing" class="prop-nav-link" data-target="sec-pricing"><i class="fas fa-indian-rupee-sign"></i> Pricing</a>
+      {% if listing_type == 'rent' %}
+      <a href="#sec-terms" class="prop-nav-link" data-target="sec-terms"><i class="fas fa-file-contract"></i> Rental Terms</a>
+      {% endif %}
+      {% if listing_type == 'sale' %}
+      <a href="#sec-legal" class="prop-nav-link" data-target="sec-legal"><i class="fas fa-gavel"></i> Legal</a>
+      <a href="#sec-emi" class="prop-nav-link" data-target="sec-emi"><i class="fas fa-calculator"></i> EMI</a>
+      {% endif %}
+      <a href="#sec-location" class="prop-nav-link" data-target="sec-location"><i class="fas fa-map-location-dot"></i> Location</a>
+      <a href="#sec-amenities" class="prop-nav-link" data-target="sec-amenities"><i class="fas fa-wand-magic-sparkles"></i> Amenities</a>
+      <a href="#sec-desc" class="prop-nav-link" data-target="sec-desc"><i class="fas fa-align-left"></i> About</a>
+      <a href="#sec-owner" class="prop-nav-link" data-target="sec-owner"><i class="fas fa-id-card-clip"></i> Contact</a>
+      <a href="#sec-faqs" class="prop-nav-link" data-target="sec-faqs"><i class="fas fa-comments-question"></i> FAQs</a>
+      {% if similar %}
+      <a href="#sec-similar" class="prop-nav-link" data-target="sec-similar"><i class="fas fa-home"></i> Similar</a>
+      {% endif %}
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ MAIN LAYOUT ═══ -->
-<div class="detail-layout">
-<div>
+<!-- ═══ MAIN BODY ═══ -->
+<div class="prop-page-body">
+  <div class="container-fluid px-4">
+    <div class="prop-layout-grid">
 
-  <!-- ══════════════════════════════════════
-       ①  TITLE & PRICE HEADER
-       ══════════════════════════════════════ -->
-  <div class="prop-header-card">
-    <div class="prop-tags">
-      <span class="tag {% if listing_type == 'rent' %}tag-rent{% else %}tag-sale{% endif %}">
-        <i class="fas {% if listing_type == 'rent' %}fa-key{% else %}fa-tag{% endif %}"></i> For {{ listing_type|upper }}
-      </span>
-      <span class="tag tag-cat">{{ p.category_name }}</span>
-      {% if p.construction_status %}<span class="tag tag-zone">{{ p.construction_status|title }}</span>{% endif %}
-      {% if p.zone_type %}<span class="tag tag-zone">{{ p.zone_type|title }}</span>{% endif %}
-      {% if p.property_condition %}<span class="tag tag-condition">{{ p.property_condition|title }}</span>{% endif %}
-      {% if p.possession %}<span class="tag tag-status">{{ p.possession }}</span>{% endif %}
-    </div>
-
-    <h1 class="prop-title">{{ p.title }}</h1>
-
-    <div class="prop-address">
-      <i class="fas fa-map-marker-alt"></i>
-      <span>
-        {% if p.building_name %}{{ p.building_name }}, {% endif %}
-        {{ p.address|default:p.locality }}
-        {% if p.city %}, {{ p.city }}{% endif %}
-        {% if p.pincode %} – {{ p.pincode }}{% endif %}
-        {% if p.district %} · {{ p.district }}{% endif %}
-        {% if p.state %} · {{ p.state }}{% endif %}
-      </span>
-    </div>
-
-    <!-- ── PRICE STRIP ── -->
-    <div class="price-strip">
+      <!-- ════════ LEFT COLUMN ════════ -->
       <div>
-        <div class="price-main-label">
-          {% if listing_type == 'rent' %}
-            {% if p.sharing_type or p.pg_for %}Starting Rent (Per Bed)
-            {% elif category == 'commercial' or category == 'commercial-data' %}Monthly Rent
-            {% else %}Monthly Rent{% endif %}
-          {% else %}
-            {% if category == 'plot' or category == 'plot-resale' %}Plot Price
-            {% else %}Expected Price{% endif %}
+
+        <!-- ① PROPERTY OVERVIEW -->
+        <div class="prop-section" id="sec-overview">
+          <div class="prop-section-title">
+            <div class="section-icon"><i class="fas fa-layer-group"></i></div>
+            Property Overview
+          </div>
+          <div class="spec-grid">
+            <div class="spec-item">
+              <div class="spec-label">Property ID</div>
+              <div class="spec-value" style="font-family:monospace;">{{ original.pk }}</div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">Category</div>
+              <div class="spec-value">{{ p.category_name }}</div>
+            </div>
+            {% if p.beds %}
+            <div class="spec-item">
+              <div class="spec-label">Configuration</div>
+              <div class="spec-value">{{ p.beds }}</div>
+            </div>
+            {% endif %}
+            {% if p.baths %}
+            <div class="spec-item">
+              <div class="spec-label">Bathrooms</div>
+              <div class="spec-value">{{ p.baths }}</div>
+            </div>
+            {% endif %}
+            {% if p.balconies %}
+            <div class="spec-item">
+              <div class="spec-label">Balconies</div>
+              <div class="spec-value">{{ p.balconies }}</div>
+            </div>
+            {% endif %}
+            {% if p.area %}
+            <div class="spec-item">
+              <div class="spec-label">Built-up Area</div>
+              <div class="spec-value">{{ p.area }} sq.ft</div>
+            </div>
+            {% endif %}
+            {% if p.carpet_area %}
+            <div class="spec-item">
+              <div class="spec-label">Carpet Area</div>
+              <div class="spec-value">{{ p.carpet_area }} sq.ft</div>
+            </div>
+            {% endif %}
+            {% if p.plot_area %}
+            <div class="spec-item">
+              <div class="spec-label">Plot Area</div>
+              <div class="spec-value">{{ p.plot_area }} sq.ft</div>
+            </div>
+            {% endif %}
+            {% if p.floor %}
+            <div class="spec-item">
+              <div class="spec-label">Floor</div>
+              <div class="spec-value">{{ p.floor }}{% if p.total_floors %} / {{ p.total_floors }}{% endif %}</div>
+            </div>
+            {% endif %}
+            {% if p.total_floors and not p.floor %}
+            <div class="spec-item">
+              <div class="spec-label">Total Floors</div>
+              <div class="spec-value">{{ p.total_floors }}</div>
+            </div>
+            {% endif %}
+            {% if p.facing %}
+            <div class="spec-item">
+              <div class="spec-label">Facing</div>
+              <div class="spec-value">{{ p.facing }}</div>
+            </div>
+            {% endif %}
+            {% if p.furnished %}
+            <div class="spec-item">
+              <div class="spec-label">Furnishing</div>
+              <div class="spec-value">{{ p.furnished }}</div>
+            </div>
+            {% endif %}
+            {% if p.available_for %}
+            <div class="spec-item">
+              <div class="spec-label">Available For</div>
+              <div class="spec-value">{{ p.available_for }}</div>
+            </div>
+            {% endif %}
+            {% if p.renting_option %}
+            <div class="spec-item">
+              <div class="spec-label">Renting Option</div>
+              <div class="spec-value">{{ p.renting_option }}</div>
+            </div>
+            {% endif %}
+            {% if p.construction_status %}
+            <div class="spec-item">
+              <div class="spec-label">Construction</div>
+              <div class="spec-value">{{ p.construction_status }}</div>
+            </div>
+            {% endif %}
+            {% if p.age %}
+            <div class="spec-item">
+              <div class="spec-label">Property Age</div>
+              <div class="spec-value">{{ p.age }}</div>
+            </div>
+            {% endif %}
+            {% if p.ownership %}
+            <div class="spec-item">
+              <div class="spec-label">Ownership</div>
+              <div class="spec-value">{{ p.ownership }}</div>
+            </div>
+            {% endif %}
+            {% if p.zone %}
+            <div class="spec-item">
+              <div class="spec-label">Zone</div>
+              <div class="spec-value">{{ p.zone }}</div>
+            </div>
+            {% endif %}
+            {% if p.possession %}
+            <div class="spec-item">
+              <div class="spec-label">Possession</div>
+              <div class="spec-value">{{ p.possession }}</div>
+            </div>
+            {% endif %}
+            {% if p.available_from %}
+            <div class="spec-item">
+              <div class="spec-label">Available From</div>
+              <div class="spec-value">{{ p.available_from }}</div>
+            </div>
+            {% endif %}
+            {% if p.building_name %}
+            <div class="spec-item spec-full">
+              <div class="spec-label">Building / Society</div>
+              <div class="spec-value"><i class="fas fa-building text-muted me-1"></i>{{ p.building_name }}</div>
+            </div>
+            {% endif %}
+            <!-- PG specific -->
+            {% if p.total_beds %}
+            <div class="spec-item">
+              <div class="spec-label">Total Beds</div>
+              <div class="spec-value">{{ p.total_beds }}</div>
+            </div>
+            {% endif %}
+            {% if p.pg_for %}
+            <div class="spec-item">
+              <div class="spec-label">PG For</div>
+              <div class="spec-value">{{ p.pg_for }}</div>
+            </div>
+            {% endif %}
+            <!-- Commercial -->
+            {% if p.min_seats %}
+            <div class="spec-item">
+              <div class="spec-label">Seating Capacity</div>
+              <div class="spec-value">{{ p.min_seats }}{% if p.max_seats %} – {{ p.max_seats }}{% endif %}</div>
+            </div>
+            {% endif %}
+            {% if p.cabins %}
+            <div class="spec-item">
+              <div class="spec-label">Cabins</div>
+              <div class="spec-value">{{ p.cabins }}</div>
+            </div>
+            {% endif %}
+            {% if p.flooring_type %}
+            <div class="spec-item">
+              <div class="spec-label">Flooring</div>
+              <div class="spec-value">{{ p.flooring_type }}</div>
+            </div>
+            {% endif %}
+            <!-- Plot -->
+            {% if p.plot_road_facing %}
+            <div class="spec-item">
+              <div class="spec-label">Road Facing</div>
+              <div class="spec-value">{{ p.plot_road_facing }}</div>
+            </div>
+            {% endif %}
+            {% if p.sanctioning_authority %}
+            <div class="spec-item">
+              <div class="spec-label">Authority</div>
+              <div class="spec-value">{{ p.sanctioning_authority }}</div>
+            </div>
+            {% endif %}
+            <!-- Agriculture -->
+            {% if p.soil_type %}
+            <div class="spec-item">
+              <div class="spec-label">Soil Type</div>
+              <div class="spec-value">{{ p.soil_type }}</div>
+            </div>
+            {% endif %}
+            {% if p.fertility_status %}
+            <div class="spec-item">
+              <div class="spec-label">Soil Fertility</div>
+              <div class="spec-value">{{ p.fertility_status }}</div>
+            </div>
+            {% endif %}
+            {% if p.irrigation_facility %}
+            <div class="spec-item">
+              <div class="spec-label">Irrigation</div>
+              <div class="spec-value">{{ p.irrigation_facility }}</div>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- PG Bed Pricing -->
+          {% if p.single_sharing or p.double_sharing or p.triple_sharing %}
+          <div class="sub-section-label mt-4">Bed-wise Pricing</div>
+          <div class="pg-bed-grid">
+            {% if p.single_sharing %}<div class="pg-bed-card"><div class="pg-bed-type">Single</div><div class="pg-bed-price">₹{{ p.single_sharing }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
+            {% if p.double_sharing %}<div class="pg-bed-card"><div class="pg-bed-type">Double</div><div class="pg-bed-price">₹{{ p.double_sharing }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
+            {% if p.triple_sharing %}<div class="pg-bed-card"><div class="pg-bed-type">Triple</div><div class="pg-bed-price">₹{{ p.triple_sharing }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
+            {% if p.four_sharing %}<div class="pg-bed-card"><div class="pg-bed-type">4-Sharing</div><div class="pg-bed-price">₹{{ p.four_sharing }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
+          </div>
           {% endif %}
         </div>
-        <div class="price-main-val">
-          {% if p.monthly_rent %}
-            ₹{{ p.monthly_rent|floatformat:0 }}<span class="per-unit">{% if listing_type == 'rent' %}/mo{% endif %}</span>
-          {% elif p.expected_price %}
-            ₹{{ p.expected_price|floatformat:0 }}
-          {% else %}
-            <span style="font-size:1.5rem;color:var(--muted);">Price on Request</span>
+
+        <!-- ② PRICING -->
+        <div class="prop-section" id="sec-pricing">
+          <div class="prop-section-title">
+            <div class="section-icon"><i class="fas fa-indian-rupee-sign"></i></div>
+            Pricing Details
+          </div>
+          <div class="spec-grid">
+            {% if p.monthly_rent %}
+            <div class="spec-item highlight-price">
+              <div class="spec-label">Monthly Rent</div>
+              <div class="spec-value">₹{{ p.monthly_rent }} / mo</div>
+            </div>
+            {% endif %}
+            {% if p.expected_price and not p.monthly_rent %}
+            <div class="spec-item highlight-price">
+              <div class="spec-label">Expected Price</div>
+              <div class="spec-value">₹{{ p.expected_price }}</div>
+            </div>
+            {% endif %}
+            {% if p.security_deposit %}
+            <div class="spec-item highlight-deposit">
+              <div class="spec-label">Security Deposit</div>
+              <div class="spec-value">₹{{ p.security_deposit }}</div>
+            </div>
+            {% endif %}
+            {% if p.maintenance %}
+            <div class="spec-item">
+              <div class="spec-label">Maintenance Amount</div>
+              <div class="spec-value">₹{{ p.maintenance }}</div>
+            </div>
+            {% endif %}
+            {% if p.maintenance_type %}
+            <div class="spec-item">
+              <div class="spec-label">Maintenance Type</div>
+              <div class="spec-value">{{ p.maintenance_type }}</div>
+            </div>
+            {% endif %}
+            {% if p.price_sqft %}
+            <div class="spec-item">
+              <div class="spec-label">Price per sq.ft</div>
+              <div class="spec-value">₹{{ p.price_sqft }}</div>
+            </div>
+            {% endif %}
+            {% if p.brokerage %}
+            <div class="spec-item">
+              <div class="spec-label">Brokerage</div>
+              <div class="spec-value">{{ p.brokerage }}</div>
+            </div>
+            {% endif %}
+            {% if p.is_negotiable or p.negotiable %}
+            <div class="spec-item">
+              <div class="spec-label">Negotiable</div>
+              <div class="spec-value"><span class="badge-ok">Yes</span></div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- ③ RENTAL TERMS (RENT ONLY) -->
+        {% if listing_type == 'rent' %}
+        {% if p.lockin_period or p.lease_duration or p.minimum_stay or p.notice_period or p.rent_increase %}
+        <div class="prop-section" id="sec-terms">
+          <div class="prop-section-title">
+            <div class="section-icon"><i class="fas fa-file-contract"></i></div>
+            Rental Terms
+          </div>
+          <div class="spec-grid">
+            {% if p.lease_duration %}
+            <div class="spec-item"><div class="spec-label">Lease Duration</div><div class="spec-value">{{ p.lease_duration }}</div></div>
+            {% endif %}
+            {% if p.lockin_period %}
+            <div class="spec-item"><div class="spec-label">Lock-in Period</div><div class="spec-value">{{ p.lockin_period }} Months</div></div>
+            {% endif %}
+            {% if p.minimum_stay %}
+            <div class="spec-item"><div class="spec-label">Minimum Stay</div><div class="spec-value">{{ p.minimum_stay }} Months</div></div>
+            {% endif %}
+            {% if p.notice_period %}
+            <div class="spec-item"><div class="spec-label">Notice Period</div><div class="spec-value">{{ p.notice_period }} Days</div></div>
+            {% endif %}
+            {% if p.rent_increase %}
+            <div class="spec-item"><div class="spec-label">Annual Rent Increase</div><div class="spec-value">{{ p.rent_increase }}%</div></div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+        {% endif %}
+
+        <!-- ④ LEGAL & COMPLIANCE (SALE ONLY) -->
+        {% if listing_type == 'sale' %}
+        <div class="prop-section" id="sec-legal">
+          <div class="prop-section-title">
+            <div class="section-icon"><i class="fas fa-gavel"></i></div>
+            Legal & Ownership Status
+          </div>
+          <div class="legal-grid">
+            <div class="legal-item">
+              <span class="legal-label"><i class="fas fa-landmark me-2" style="opacity:.5;"></i> Active Loan</span>
+              {% if p.has_loan %}
+                <span class="legal-status ls-warn"><i class="fas fa-exclamation-circle"></i> Yes{% if p.loan_amount %} · ₹{{ p.loan_amount }}{% endif %}</span>
+              {% else %}
+                <span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> No Loan</span>
+              {% endif %}
+            </div>
+            <div class="legal-item">
+              <span class="legal-label"><i class="fas fa-balance-scale me-2" style="opacity:.5;"></i> Legal Dispute</span>
+              {% if p.has_dispute %}
+                <span class="legal-status ls-warn"><i class="fas fa-exclamation-triangle"></i> Disputed</span>
+              {% else %}
+                <span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> Clear Title</span>
+              {% endif %}
+            </div>
+            <div class="legal-item">
+              <span class="legal-label"><i class="fas fa-receipt me-2" style="opacity:.5;"></i> Property Tax</span>
+              {% if p.has_tax_due %}
+                <span class="legal-status ls-warn"><i class="fas fa-exclamation-triangle"></i> Pending{% if p.tax_amount %} ₹{{ p.tax_amount }}{% endif %}</span>
+              {% else %}
+                <span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> Cleared</span>
+              {% endif %}
+            </div>
+            <div class="legal-item">
+              <span class="legal-label"><i class="fas fa-user-tie me-2" style="opacity:.5;"></i> Existing Tenants</span>
+              {% if p.has_tenants %}
+                <span class="legal-status ls-yellow"><i class="fas fa-user"></i> Occupied</span>
+              {% else %}
+                <span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> Vacant</span>
+              {% endif %}
+            </div>
+          </div>
+          {% if p.has_dispute and p.dispute_details %}
+          <div class="mt-3 p-3" style="background:#fff5f5;border-radius:10px;border:1px solid #fecaca;">
+            <div style="font-size:.78rem;font-weight:700;color:var(--warn);margin-bottom:5px;"><i class="fas fa-exclamation-triangle"></i> Dispute Details</div>
+            <p style="font-size:.84rem;margin:0;color:#7f1d1d;">{{ p.dispute_details }}</p>
+          </div>
           {% endif %}
         </div>
-      </div>
-      <div class="price-meta">
-        {% if p.price_sqft %}<div class="price-meta-item"><i class="fas fa-ruler-combined" style="opacity:.5;"></i> ₹{{ p.price_sqft }}/sq.ft</div>{% endif %}
-        {% if p.security_deposit %}<div class="price-meta-item dep"><i class="fas fa-shield-alt" style="opacity:.5;"></i> Deposit: ₹{{ p.security_deposit }}</div>{% endif %}
-        {% if p.maintenance %}<div class="price-meta-item dep"><i class="fas fa-tools" style="opacity:.5;"></i> Maintenance: ₹{{ p.maintenance }}/mo</div>{% endif %}
-        {% if p.brokerage %}<div class="price-meta-item brok"><i class="fas fa-percent" style="opacity:.5;"></i> Brokerage: {{ p.brokerage }}</div>{% endif %}
-        {% if p.is_negotiable == 'yes' or p.negotiable == 'Yes' or p.negotiable == True %}
-          <div class="price-meta-item neg"><i class="fas fa-check-circle"></i> Negotiable</div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
 
-  <!-- ══════════════════════════════════════
-       ②  PG BED-WISE PRICING  (PG only)
-       ══════════════════════════════════════ -->
-  {% if p.single_sharing or p.double_sharing or p.triple_sharing or p.four_sharing or p.five_sharing or p.six_sharing %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-bed"></i></div> Bed-wise Pricing</div>
-    <div class="pg-bed-grid">
-      {% if p.single_sharing %}<div class="pg-bed-card"><div class="pg-bed-type">Single Sharing</div><div class="pg-bed-price">₹{{ p.single_sharing|floatformat:0 }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
-      {% if p.double_sharing %}<div class="pg-bed-card"><div class="pg-bed-type">Double Sharing</div><div class="pg-bed-price">₹{{ p.double_sharing|floatformat:0 }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
-      {% if p.triple_sharing %}<div class="pg-bed-card"><div class="pg-bed-type">Triple Sharing</div><div class="pg-bed-price">₹{{ p.triple_sharing|floatformat:0 }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
-      {% if p.four_sharing  %}<div class="pg-bed-card"><div class="pg-bed-type">4-Person Sharing</div><div class="pg-bed-price">₹{{ p.four_sharing|floatformat:0 }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
-      {% if p.five_sharing  %}<div class="pg-bed-card"><div class="pg-bed-type">5-Person Sharing</div><div class="pg-bed-price">₹{{ p.five_sharing|floatformat:0 }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
-      {% if p.six_sharing   %}<div class="pg-bed-card"><div class="pg-bed-type">6-Person Sharing</div><div class="pg-bed-price">₹{{ p.six_sharing|floatformat:0 }}</div><div class="pg-bed-suffix">/month</div></div>{% endif %}
-    </div>
-    {% if p.minimum_stay or p.notice_period or p.lockin_period %}
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
-      {% if p.minimum_stay %}<span class="util-badge"><i class="fas fa-calendar-check"></i> Min. Stay: {{ p.minimum_stay }} months</span>{% endif %}
-      {% if p.notice_period %}<span class="util-badge"><i class="fas fa-bell"></i> Notice: {{ p.notice_period }} days</span>{% endif %}
-      {% if p.lockin_period %}<span class="util-badge"><i class="fas fa-lock"></i> Lock-in: {{ p.lockin_period }} months</span>{% endif %}
-    </div>
-    {% endif %}
-  </div>
-  {% endif %}
-
-  <!-- ══════════════════════════════════════
-       ③  PROPERTY OVERVIEW  (All types)
-       Maps to: Step 1 Basic Info fields
-       ══════════════════════════════════════ -->
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-th-large"></i></div> Property Overview</div>
-    <div class="spec-grid">
-      {# ── Area Fields ── #}
-      {% if p.area %}<div class="sg-item"><div class="sg-lbl">Built-up Area</div><div class="sg-val">{{ p.area }} {% if category == 'agriculture' or category == 'agricultural-data' %}Acres{% else %}Sq.Ft{% endif %}</div></div>{% endif %}
-      {% if p.carpet_area %}<div class="sg-item"><div class="sg-lbl">Carpet Area</div><div class="sg-val">{{ p.carpet_area }} Sq.Ft</div></div>{% endif %}
-      {% if p.plot_area %}<div class="sg-item"><div class="sg-lbl">Plot Area</div><div class="sg-val">{{ p.plot_area }} Sq.Ft</div></div>{% endif %}
-
-      {# ── Configuration (Residential / Rental) ── #}
-      {% if p.beds %}<div class="sg-item"><div class="sg-lbl">Configuration</div><div class="sg-val">{{ p.beds }}</div></div>{% endif %}
-      {% if p.baths %}<div class="sg-item"><div class="sg-lbl">Bathrooms</div><div class="sg-val">{{ p.baths }}</div></div>{% endif %}
-      {% if p.balconies %}<div class="sg-item"><div class="sg-lbl">Balconies</div><div class="sg-val">{{ p.balconies }}</div></div>{% endif %}
-
-      {# ── Parking ── #}
-      {% if p.covered_parking %}<div class="sg-item"><div class="sg-lbl">Covered Parking</div><div class="sg-val">{{ p.covered_parking }} Spots</div></div>{% endif %}
-      {% if p.open_parking %}<div class="sg-item"><div class="sg-lbl">Open Parking</div><div class="sg-val">{{ p.open_parking }} Spots</div></div>{% endif %}
-      {% if p.private_parking %}<div class="sg-item"><div class="sg-lbl">Private Parking</div><div class="sg-val">{{ p.private_parking }} Spots</div></div>{% endif %}
-      {% if p.public_parking %}<div class="sg-item"><div class="sg-lbl">Public Parking</div><div class="sg-val">{{ p.public_parking }} Spots</div></div>{% endif %}
-
-      {# ── Furnishing & Age ── #}
-      {% if p.furnished %}<div class="sg-item"><div class="sg-lbl">Furnishing</div><div class="sg-val">{{ p.furnished|title }}</div></div>{% endif %}
-      {% if p.age %}<div class="sg-item"><div class="sg-lbl">Property Age</div><div class="sg-val">{{ p.age }}</div></div>{% endif %}
-      {% if p.property_condition %}<div class="sg-item"><div class="sg-lbl">Condition</div><div class="sg-val">{{ p.property_condition|title }}</div></div>{% endif %}
-
-      {# ── Facing & Floors ── #}
-      {% if p.facing %}<div class="sg-item"><div class="sg-lbl">Facing</div><div class="sg-val">{{ p.facing }}</div></div>{% endif %}
-      {% if p.floor %}<div class="sg-item"><div class="sg-lbl">Floor</div><div class="sg-val">{{ p.floor }}{% if p.total_floors %} / {{ p.total_floors }}{% endif %}</div></div>{% endif %}
-      {% if p.total_floors and not p.floor %}<div class="sg-item"><div class="sg-lbl">Total Floors</div><div class="sg-val">{{ p.total_floors }}</div></div>{% endif %}
-
-      {# ── Zone & Society (Residential Rent/Sale) ── #}
-      {% if p.zone %}<div class="sg-item"><div class="sg-lbl">Zone</div><div class="sg-val">{{ p.zone|title }}</div></div>{% endif %}
-      {% if p.zone_type %}<div class="sg-item"><div class="sg-lbl">Zone Type</div><div class="sg-val">{{ p.zone_type|title }}</div></div>{% endif %}
-      {% if p.society_type %}<div class="sg-item"><div class="sg-lbl">Society Type</div><div class="sg-val">{{ p.society_type|title }}</div></div>{% endif %}
-      {% if p.water_type %}<div class="sg-item"><div class="sg-lbl">Water Supply</div><div class="sg-val">{{ p.water_type|title }}</div></div>{% endif %}
-      {% if p.location_hub %}<div class="sg-item"><div class="sg-lbl">Location Hub</div><div class="sg-val">{{ p.location_hub|title }}</div></div>{% endif %}
-
-      {# ── Ownership ── #}
-      {% if p.ownership %}<div class="sg-item"><div class="sg-lbl">Ownership</div><div class="sg-val">{{ p.ownership|title }}</div></div>{% endif %}
-      {% if p.num_owners %}<div class="sg-item"><div class="sg-lbl">No. of Owners</div><div class="sg-val">{{ p.num_owners }}</div></div>{% endif %}
-      {% if p.residential_status %}<div class="sg-item"><div class="sg-lbl">Residency</div><div class="sg-val">{{ p.residential_status|upper }}</div></div>{% endif %}
-
-      {# ── Possession / Availability ── #}
-      {% if p.available_from %}<div class="sg-item"><div class="sg-lbl">Available From</div><div class="sg-val">{{ p.available_from }}</div></div>{% endif %}
-      {% if p.renting_option %}<div class="sg-item"><div class="sg-lbl">Renting Option</div><div class="sg-val">{{ p.renting_option|title }}</div></div>{% endif %}
-      {% if p.available_for %}<div class="sg-item"><div class="sg-lbl">Available For</div><div class="sg-val">{{ p.available_for|title }}</div></div>{% endif %}
-      {% if p.construction_status %}<div class="sg-item"><div class="sg-lbl">Construction</div><div class="sg-val">{{ p.construction_status|title }}</div></div>{% endif %}
-
-      {# ── Plot Specifics ── #}
-      {% if p.plot_road_facing %}<div class="sg-item"><div class="sg-lbl">Road Facing</div><div class="sg-val">{{ p.plot_road_facing|title }}</div></div>{% endif %}
-      {% if p.plot_corner %}<div class="sg-item"><div class="sg-lbl">Corner Plot</div><div class="sg-val"><span class="badge-ok">Yes</span></div></div>{% endif %}
-      {% if p.plot_fencing %}<div class="sg-item"><div class="sg-lbl">Boundary Fencing</div><div class="sg-val"><span class="badge-ok">Yes</span></div></div>{% endif %}
-      {% if p.sanctioning_authority %}<div class="sg-item"><div class="sg-lbl">Authority</div><div class="sg-val" style="font-size:.8rem;">{{ p.sanctioning_authority }}</div></div>{% endif %}
-
-      {# ── Total Beds (PG) ── #}
-      {% if p.total_beds %}<div class="sg-item"><div class="sg-lbl">Total Capacity</div><div class="sg-val">{{ p.total_beds }} Beds</div></div>{% endif %}
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       ④  RENTAL TERMS  (Rental only – no legal/EMI)
-       Maps to: Step 2 Pricing fields of rental
-       ══════════════════════════════════════ -->
-  {% if listing_type == 'rent' and p.lockin_period or p.rent_increase or p.minimum_stay or p.notice_period or p.lease_duration or p.maintenance_type %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-file-contract"></i></div> Rental Terms & Conditions</div>
-    <div class="info-table">
-      {% if p.lockin_period %}<div class="info-row"><span class="info-label">Lock-in Period</span><span class="info-value">{{ p.lockin_period }} Months</span></div>{% endif %}
-      {% if p.rent_increase %}<div class="info-row"><span class="info-label">Annual Rent Increase</span><span class="info-value">{{ p.rent_increase }}%</span></div>{% endif %}
-      {% if p.minimum_stay %}<div class="info-row"><span class="info-label">Minimum Stay</span><span class="info-value">{{ p.minimum_stay }} Months</span></div>{% endif %}
-      {% if p.notice_period %}<div class="info-row"><span class="info-label">Notice Period</span><span class="info-value">{{ p.notice_period }} Days</span></div>{% endif %}
-      {% if p.lease_duration %}<div class="info-row"><span class="info-label">Lease Duration</span><span class="info-value">{{ p.lease_duration }}</span></div>{% endif %}
-      {% if p.maintenance_type %}<div class="info-row"><span class="info-label">Maintenance Type</span><span class="info-value">{{ p.maintenance_type|title }}</span></div>{% endif %}
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- ══════════════════════════════════════
-       ⑤  COMMERCIAL SPECIFICATIONS
-       Maps to: Step 2 Area, Pricing & Building (Commercial)
-       ══════════════════════════════════════ -->
-  {% if p.min_seats or p.cabins or p.meeting_rooms or p.private_washroom or p.passenger_lifts or p.flooring_type or p.staircases %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-briefcase"></i></div> Commercial Specifications</div>
-    <div class="info-table" style="margin-bottom:18px;">
-      {% if p.min_seats %}<div class="info-row"><span class="info-label">Seating Capacity</span><span class="info-value">{{ p.min_seats }}{% if p.max_seats %} – {{ p.max_seats }}{% endif %} Seats</span></div>{% endif %}
-      {% if p.cabins %}<div class="info-row"><span class="info-label">Cabins / Offices</span><span class="info-value">{{ p.cabins }}</span></div>{% endif %}
-      {% if p.meeting_rooms %}<div class="info-row"><span class="info-label">Meeting Rooms</span><span class="info-value">{{ p.meeting_rooms }}</span></div>{% endif %}
-      {% if p.private_washroom or p.public_washroom %}<div class="info-row"><span class="info-label">Washrooms</span><span class="info-value">{{ p.private_washroom|default:"0" }} Pvt &middot; {{ p.public_washroom|default:"0" }} Public</span></div>{% endif %}
-      {% if p.passenger_lifts or p.service_lifts %}<div class="info-row"><span class="info-label">Lifts</span><span class="info-value">{{ p.passenger_lifts|default:"0" }} Passenger &middot; {{ p.service_lifts|default:"0" }} Service</span></div>{% endif %}
-      {% if p.staircases %}<div class="info-row"><span class="info-label">Staircases</span><span class="info-value">{{ p.staircases }}</span></div>{% endif %}
-      {% if p.flooring_type %}<div class="info-row"><span class="info-label">Flooring Type</span><span class="info-value">{{ p.flooring_type|title }}</span></div>{% endif %}
-      {% if p.lockin_period and listing_type == 'rent' %}<div class="info-row"><span class="info-label">Lock-in Period</span><span class="info-value">{{ p.lockin_period }} Months</span></div>{% endif %}
-      {% if p.rent_increase and listing_type == 'rent' %}<div class="info-row"><span class="info-label">Rent Escalation</span><span class="info-value">{{ p.rent_increase }}%</span></div>{% endif %}
-    </div>
-
-    {% if p.dg_ups_included or p.electricity_included or p.water_included %}
-    <div class="sub-section-label">Included Utilities</div>
-    <div style="display:flex;flex-wrap:wrap;">
-      {% if p.dg_ups_included %}<span class="util-badge"><i class="fas fa-bolt"></i> DG/UPS Backup</span>{% endif %}
-      {% if p.electricity_included %}<span class="util-badge"><i class="fas fa-plug"></i> Electricity Included</span>{% endif %}
-      {% if p.water_included %}<span class="util-badge"><i class="fas fa-tint"></i> Water Included</span>{% endif %}
-    </div>
-    {% endif %}
-  </div>
-  {% endif %}
-
-  <!-- ══════════════════════════════════════
-       ⑥  PG / HOSTEL DETAILS
-       Maps to: PGColivingProperty Step 1 & Step 3
-       ══════════════════════════════════════ -->
-  {% if p.pg_for or p.sharing_type or p.meals_available or p.property_managed_by %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-house-user"></i></div> PG / Hostel Details</div>
-
-    <div class="info-table" style="margin-bottom:20px;">
-      {% if p.pg_for %}<div class="info-row"><span class="info-label">PG Suited For</span><span class="info-value">{{ p.pg_for|title }}</span></div>{% endif %}
-      {% if p.sharing_type %}<div class="info-row"><span class="info-label">Sharing Options</span><span class="info-value">{{ p.sharing_type|title }}</span></div>{% endif %}
-      {% if p.total_beds %}<div class="info-row"><span class="info-label">Total Capacity</span><span class="info-value">{{ p.total_beds }} Beds</span></div>{% endif %}
-      {% if p.property_managed_by %}<div class="info-row"><span class="info-label">Managed By</span><span class="info-value">{{ p.property_managed_by|title }}</span></div>{% endif %}
-      {% if p.manager_stays %}<div class="info-row"><span class="info-label">Manager On-Site</span><span class="info-value"><span class="badge-ok">Yes</span></span></div>{% endif %}
-      {% if p.meals_available %}<div class="info-row"><span class="info-label">Meals Available</span><span class="info-value"><span class="badge-ok">Yes</span></span></div>{% endif %}
-    </div>
-
-    {% if p.meals_available and p.meal_offerings %}
-    <div class="sub-section-label">Food & Meal Offerings</div>
-    <div style="display:flex;flex-wrap:wrap;margin-bottom:18px;">
-      {% if p.meal_offerings %}<span class="util-badge"><i class="fas fa-utensils"></i> {{ p.meal_offerings }}</span>{% endif %}
-      {% if p.meal_speciality %}<span class="util-badge yellow"><i class="fas fa-leaf"></i> {{ p.meal_speciality }}</span>{% endif %}
-    </div>
-    {% endif %}
-
-    <div class="sub-section-label">House Rules & Permissions</div>
-    <div class="rules-grid">
-      <div class="rule-item {% if p.opposite_sex_allowed %}rule-allowed{% else %}rule-not{% endif %}">
-        <i class="fas {% if p.opposite_sex_allowed %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
-        Opposite Gender {% if p.opposite_sex_allowed %}Allowed{% else %}Not Allowed{% endif %}
-      </div>
-      <div class="rule-item {% if p.any_time_allowed %}rule-allowed{% else %}rule-not{% endif %}">
-        <i class="fas {% if p.any_time_allowed %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
-        24/7 Access {% if p.any_time_allowed %}Allowed{% else %}Not Allowed{% endif %}
-      </div>
-      <div class="rule-item {% if p.visitors_allowed %}rule-allowed{% else %}rule-not{% endif %}">
-        <i class="fas {% if p.visitors_allowed %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
-        Visitors {% if p.visitors_allowed %}Allowed{% else %}Not Allowed{% endif %}
-      </div>
-      <div class="rule-item {% if p.guardian_allowed %}rule-allowed{% else %}rule-not{% endif %}">
-        <i class="fas {% if p.guardian_allowed %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
-        Guardian Stays {% if p.guardian_allowed %}Allowed{% else %}Not Allowed{% endif %}
-      </div>
-      <div class="rule-item {% if p.drinking_allowed %}rule-allowed{% else %}rule-not{% endif %}">
-        <i class="fas {% if p.drinking_allowed %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
-        Drinking {% if p.drinking_allowed %}Allowed{% else %}Not Allowed{% endif %}
-      </div>
-      <div class="rule-item {% if p.smoking_allowed %}rule-allowed{% else %}rule-not{% endif %}">
-        <i class="fas {% if p.smoking_allowed %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
-        Smoking {% if p.smoking_allowed %}Allowed{% else %}Not Allowed{% endif %}
-      </div>
-    </div>
-
-    {% if p.common_area %}
-    <div style="margin-top:16px;padding:14px;background:#f8fafc;border-radius:10px;border:1px solid var(--border);">
-      <div class="sub-section-label" style="margin-bottom:6px;">Common Areas</div>
-      <p style="font-size:.88rem;color:var(--sec);margin:0;">{{ p.common_area }}</p>
-    </div>
-    {% endif %}
-  </div>
-  {% endif %}
-
-  <!-- ══════════════════════════════════════
-       ⑦  LAND & INFRASTRUCTURE  (Plot / Industrial)
-       Maps to: PlotSaleProperty Step 1, IndustrialResaleProperty Step 1
-       ══════════════════════════════════════ -->
-  {% if p.power_supply or p.crane_heavy_machinery or p.road_connectivity or p.worker_housing_nearby or p.water_supply and not p.water_type %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-industry"></i></div> Land & Infrastructure</div>
-    <div class="info-table">
-      {% if p.power_kva %}<div class="info-row"><span class="info-label">Power Supply (KVA)</span><span class="info-value">{{ p.power_kva }} KVA</span></div>{% endif %}
-      {% if p.water_supply %}<div class="info-row"><span class="info-label">Water Supply</span><span class="info-value">{{ p.water_supply|title }}</span></div>{% endif %}
-      {% if p.crane_heavy_machinery %}<div class="info-row"><span class="info-label">Crane / Heavy Machinery</span><span class="info-value"><span class="badge-ok">Supported</span></span></div>{% endif %}
-      {% if p.road_connectivity %}<div class="info-row"><span class="info-label">Road Connectivity</span><span class="info-value">{{ p.road_connectivity|title }}</span></div>{% endif %}
-      {% if p.worker_housing_nearby %}<div class="info-row"><span class="info-label">Worker Housing</span><span class="info-value"><span class="badge-ok">Available Nearby</span></span></div>{% endif %}
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- ══════════════════════════════════════
-       ⑧  AGRICULTURAL DETAILS
-       Maps to: AgriculturalResaleProperty Step 1
-       ══════════════════════════════════════ -->
-  {% if p.soil_type or p.water_source or p.fertility_status or p.irrigation_facility or p.previous_crops %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-seedling"></i></div> Agricultural Details</div>
-    <div class="info-table">
-      {% if p.soil_type %}<div class="info-row"><span class="info-label">Soil Type</span><span class="info-value">{{ p.soil_type|title }}</span></div>{% endif %}
-      {% if p.water_source %}<div class="info-row"><span class="info-label">Water Source</span><span class="info-value">{{ p.water_source|title }}</span></div>{% endif %}
-      {% if p.irrigation_facility %}<div class="info-row"><span class="info-label">Irrigation Facility</span><span class="info-value">{{ p.irrigation_facility|title }}</span></div>{% endif %}
-      {% if p.fertility_status %}<div class="info-row"><span class="info-label">Soil Fertility</span><span class="info-value">{{ p.fertility_status|title }}</span></div>{% endif %}
-      {% if p.previous_crops %}<div class="info-row"><span class="info-label">Previous Crops</span><span class="info-value">{{ p.previous_crops }}</span></div>{% endif %}
-      {% if p.state %}<div class="info-row"><span class="info-label">State</span><span class="info-value">{{ p.state }}</span></div>{% endif %}
-      {% if p.district %}<div class="info-row"><span class="info-label">District</span><span class="info-value">{{ p.district }}</span></div>{% endif %}
-      {% if p.taluka %}<div class="info-row"><span class="info-label">Taluka</span><span class="info-value">{{ p.taluka }}</span></div>{% endif %}
-      {% if p.village %}<div class="info-row"><span class="info-label">Village</span><span class="info-value">{{ p.village }}</span></div>{% endif %}
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- ══════════════════════════════════════
-       ⑨  LEGAL & COMPLIANCE  ← RESALE ONLY
-       Maps to: Step 2 Legal Details (all resale types)
-       NOT shown for rental properties
-       ══════════════════════════════════════ -->
-  {% if listing_type == 'sale' %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-gavel"></i></div> Legal & Ownership Status</div>
-    <div class="legal-grid">
-      <div class="legal-item">
-        <span class="legal-label"><i class="fas fa-landmark" style="margin-right:5px;opacity:.5;"></i> Active Loan</span>
-        {% if p.has_loan %}
-          <span class="legal-status ls-warn"><i class="fas fa-exclamation-circle"></i> Yes{% if p.loan_amount %} · ₹{{ p.loan_amount|floatformat:0 }}{% endif %}</span>
-        {% else %}
-          <span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> No Loan</span>
-        {% endif %}
-      </div>
-      <div class="legal-item">
-        <span class="legal-label"><i class="fas fa-balance-scale" style="margin-right:5px;opacity:.5;"></i> Legal Dispute</span>
-        {% if p.has_dispute %}
-          <span class="legal-status ls-warn"><i class="fas fa-exclamation-triangle"></i> Disputed</span>
-        {% else %}
-          <span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> Clear Title</span>
-        {% endif %}
-      </div>
-      <div class="legal-item">
-        <span class="legal-label"><i class="fas fa-receipt" style="margin-right:5px;opacity:.5;"></i> Property Tax</span>
-        {% if p.has_tax_due %}
-          <span class="legal-status ls-warn"><i class="fas fa-exclamation-triangle"></i> Pending{% if p.tax_amount %} ₹{{ p.tax_amount|floatformat:0 }}{% endif %}</span>
-        {% else %}
-          <span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> Cleared</span>
-        {% endif %}
-      </div>
-      <div class="legal-item">
-        <span class="legal-label"><i class="fas fa-user-tie" style="margin-right:5px;opacity:.5;"></i> Existing Tenants</span>
-        {% if p.has_tenants %}
-          <span class="legal-status ls-yellow"><i class="fas fa-user"></i> Occupied{% if p.tenant_details %} · {{ p.tenant_details|truncatechars:20 }}{% endif %}</span>
-        {% else %}
-          <span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> Vacant</span>
-        {% endif %}
-      </div>
-      {% if p.fire_noc %}
-      <div class="legal-item">
-        <span class="legal-label"><i class="fas fa-fire-extinguisher" style="margin-right:5px;opacity:.5;"></i> Fire NOC</span>
-        <span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> {{ p.fire_noc|title }}</span>
-      </div>
-      {% endif %}
-      {% if p.tax_clearance_cert %}
-      <div class="legal-item">
-        <span class="legal-label"><i class="fas fa-certificate" style="margin-right:5px;opacity:.5;"></i> Tax Clearance</span>
-        <span class="legal-status ls-ok"><i class="fas fa-check-circle"></i> Available</span>
-      </div>
-      {% endif %}
-    </div>
-
-    {# Downloadable Legal Documents #}
-    {% if p.encumbrance_cert or p.compliance_docs %}
-    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
-      <div class="sub-section-label">Legal Documents</div>
-      <div>
-        {% if p.encumbrance_cert %}<a href="{{ p.encumbrance_cert.url }}" target="_blank" class="util-badge"><i class="fas fa-file-alt"></i> Encumbrance Certificate</a>{% endif %}
-        {% if p.compliance_docs %}<a href="{{ p.compliance_docs.url }}" target="_blank" class="util-badge"><i class="fas fa-folder-open"></i> Compliance Docs</a>{% endif %}
-      </div>
-    </div>
-    {% endif %}
-
-    {# Loan & Dispute Details (if applicable) #}
-    {% if p.has_dispute and p.dispute_details %}
-    <div style="margin-top:14px;padding:14px;background:#fff5f5;border-radius:10px;border:1px solid #fecaca;">
-      <div style="font-size:.78rem;font-weight:700;color:var(--warn);margin-bottom:5px;"><i class="fas fa-exclamation-triangle"></i> Dispute Details</div>
-      <p style="font-size:.85rem;margin:0;color:#7f1d1d;">{{ p.dispute_details }}</p>
-    </div>
-    {% endif %}
-  </div>
-  {% endif %}
-
-  <!-- ══════════════════════════════════════
-       ⑩  EMI CALCULATOR  ← RESALE ONLY
-       Not shown for rentals
-       ══════════════════════════════════════ -->
-  {% if listing_type == 'sale' and base_emi > 0 %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-calculator"></i></div> Home Loan & EMI Calculator</div>
-    <div class="emi-banner">
-      <div class="emi-label">Estimated Monthly EMI (80% Loan)</div>
-      <div class="emi-amount">₹<span id="emiResult">{{ base_emi|floatformat:0 }}</span><span style="font-size:1.1rem;font-weight:500;opacity:.7;">/mo</span></div>
-      <div class="emi-note">Based on 80% loan value at 8.5% interest rate for 20 years.</div>
-      <button class="emi-adjust-btn" onclick="document.getElementById('emiControls').style.display='block';this.style.display='none'">
-        <i class="fas fa-sliders-h"></i> Adjust Loan Terms
-      </button>
-      <div class="emi-controls" id="emiControls">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <div class="emi-control-label">Property Value (₹)</div>
-            <input type="number" id="emiPrincipal" class="emi-input" value="{{ raw_price|default:'0'|floatformat:'0' }}" oninput="calculateInteractiveEMI()">
+        <!-- EMI CALCULATOR -->
+        {% if base_emi > 0 %}
+        <div class="prop-section" id="sec-emi">
+          <div class="prop-section-title">
+            <div class="section-icon"><i class="fas fa-calculator"></i></div>
+            Home Loan &amp; EMI Calculator
           </div>
-          <div class="col-md-4">
-            <div class="emi-control-label">Interest Rate (%)</div>
-            <input type="number" id="emiRate" class="emi-input" value="8.5" step="0.1" min="1" oninput="calculateInteractiveEMI()">
-          </div>
-          <div class="col-md-4">
-            <div class="emi-control-label">Tenure (Years)</div>
-            <input type="number" id="emiYears" class="emi-input" value="20" min="1" max="30" oninput="calculateInteractiveEMI()">
+          <div class="emi-banner">
+            <div class="emi-label">Estimated Monthly EMI (80% Loan)</div>
+            <div class="emi-amount">₹<span id="emiResult">{{ base_emi }}</span><span style="font-size:1rem;font-weight:500;opacity:.6;">/mo</span></div>
+            <div class="emi-note">Based on 80% loan · 8.5% interest · 20-year tenure</div>
+            <button class="emi-adjust-btn" onclick="document.getElementById('emiCtrl').style.display='block';this.style.display='none'">
+              <i class="fas fa-sliders-h"></i> Adjust Loan Terms
+            </button>
+            <div class="emi-controls" id="emiCtrl">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div style="font-size:.72rem;opacity:.6;font-weight:700;margin-bottom:5px;">Property Value (₹)</div>
+                  <input type="number" id="emiPrincipal" class="emi-input" value="{{ raw_price|default:'0' }}" oninput="calcEMI()">
+                </div>
+                <div class="col-md-4">
+                  <div style="font-size:.72rem;opacity:.6;font-weight:700;margin-bottom:5px;">Interest Rate (%)</div>
+                  <input type="number" id="emiRate" class="emi-input" value="8.5" step="0.1" oninput="calcEMI()">
+                </div>
+                <div class="col-md-4">
+                  <div style="font-size:.72rem;opacity:.6;font-weight:700;margin-bottom:5px;">Tenure (Years)</div>
+                  <input type="number" id="emiYears" class="emi-input" value="20" min="1" max="30" oninput="calcEMI()">
+                </div>
+              </div>
+              <div style="font-size:.72rem;opacity:.45;margin-top:12px;">Indicative only. Consult a financial advisor for accuracy.</div>
+            </div>
           </div>
         </div>
-        <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);">
-          <div style="font-size:.75rem;opacity:.5;">Calculation is indicative only. Consult a financial advisor for accurate figures.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  {% endif %}
+        {% endif %}
+        {% endif %}
 
-  <!-- ══════════════════════════════════════
-       ⑪  AMENITIES & FEATURES
-       Maps to: Step 3 Amenities (all types)
-       ══════════════════════════════════════ -->
-  {% if amenities_list %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-star"></i></div> Amenities & Features</div>
-    <div class="amenity-grid">
-      {% for item in amenities_list %}
-      <div class="amenity-item"><i class="fas fa-check-circle"></i> {{ item }}</div>
-      {% endfor %}
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- ══════════════════════════════════════
-       ⑫  NEARBY FACILITIES
-       Maps to: Step 3 Nearby Facilities (all types)
-       ══════════════════════════════════════ -->
-  {% if facilities_list %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-map-signs"></i></div> Nearby Facilities</div>
-    <div class="amenity-grid">
-      {% for item in facilities_list %}
-      <div class="amenity-item blue-item"><i class="fas fa-location-arrow"></i> {{ item }}</div>
-      {% endfor %}
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- ══════════════════════════════════════
-       ⑬  ABOUT THIS PROPERTY (Description)
-       Maps to: Step 3 property_description / description
-       ══════════════════════════════════════ -->
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-align-left"></i></div> About This Property</div>
-    <div class="desc-body">
-      {% if p.desc %}
-        {{ p.desc|safe|linebreaks }}
-      {% else %}
-        <p style="color:var(--muted);font-style:italic;">No description provided by the owner.</p>
-      {% endif %}
-
-      {# PG Room Details (if available via room_details) #}
-      {% if p.room_details %}
-      <div class="mt-4 p-4" style="background:#f8fafc;border-radius:12px;border:1px solid var(--border);">
-        <div style="font-size:.82rem;font-weight:700;color:var(--muted);margin-bottom:10px;"><i class="fas fa-bed"></i> Room Details</div>
-        <p style="margin:0;color:var(--sec);">{{ p.room_details|linebreaksbr }}</p>
-      </div>
-      {% endif %}
-
-      {# SEO extra content if defined #}
-      {% if seo and seo.intro_html %}
-      <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">{{ seo.intro_html|safe }}</div>
-      {% endif %}
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       ⑭  FLOOR PLAN  (Step 4 Media)
-       ══════════════════════════════════════ -->
-  {% if p.floor_plan %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-drafting-compass"></i></div> Floor Plan</div>
-    <img src="{{ p.floor_plan.url }}" alt="Floor Plan – {{ p.title }}" class="floor-plan-img">
-  </div>
-  {% endif %}
-
-  <!-- ══════════════════════════════════════
-       ⑮  LOCATION & MAP
-       ══════════════════════════════════════ -->
-  {% if p.city %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-map-marked-alt"></i></div> Location & Map</div>
-    <div style="margin-bottom:14px;">
-      <div class="info-table">
-        {% if p.building_name %}<div class="info-row"><span class="info-label">Building / Society</span><span class="info-value">{{ p.building_name }}</span></div>{% endif %}
-        {% if p.locality %}<div class="info-row"><span class="info-label">Locality</span><span class="info-value">{{ p.locality }}</span></div>{% endif %}
-        {% if p.city %}<div class="info-row"><span class="info-label">City</span><span class="info-value">{{ p.city }}</span></div>{% endif %}
-        {% if p.pincode %}<div class="info-row"><span class="info-label">Pincode</span><span class="info-value">{{ p.pincode }}</span></div>{% endif %}
-        {% if p.state %}<div class="info-row"><span class="info-label">State</span><span class="info-value">{{ p.state }}</span></div>{% endif %}
-      </div>
-    </div>
-    <div class="map-placeholder">
-      <div class="map-pin-badge">
-        <i class="fas fa-map-pin" style="color:var(--pr);font-size:1.2rem;"></i>
-        {{ p.address|default:p.locality }}, {{ p.city }}
-      </div>
-    </div>
-    <div style="margin-top:10px;text-align:center;">
-      <a href="https://maps.google.com/maps?q={{ p.address|default:p.locality }},{{ p.city }}" target="_blank"
-         style="display:inline-flex;align-items:center;gap:7px;color:var(--blue);font-size:.82rem;font-weight:700;text-decoration:none;">
-        <i class="fas fa-external-link-alt"></i> Open in Google Maps
-      </a>
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- ══════════════════════════════════════
-       ⑯  UPLOADED BY / LISTING INFO
-       Maps to: Step 4 Uploader fields
-       ══════════════════════════════════════ -->
-  {% if p.uploaded_by_name or p.uploaded_by_role %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-user-circle"></i></div> Listing Information</div>
-    <div class="info-table">
-      {% if p.uploaded_by_name %}<div class="info-row"><span class="info-label">Listed By</span><span class="info-value">{{ p.uploaded_by_name }}</span></div>{% endif %}
-      {% if p.uploaded_by_role %}<div class="info-row"><span class="info-label">Role</span><span class="info-value">{{ p.uploaded_by_role|title }}</span></div>{% endif %}
-      {% if p.uploaded_by_contact %}<div class="info-row"><span class="info-label">Contact</span><span class="info-value">{{ p.uploaded_by_contact }}</span></div>{% endif %}
-      {% if p.uploaded_by_email %}<div class="info-row"><span class="info-label">Email</span><span class="info-value">{{ p.uploaded_by_email }}</span></div>{% endif %}
-    </div>
-  </div>
-  {% endif %}
-
-  <!-- ══════════════════════════════════════
-       ⑰  SIMILAR PROPERTIES
-       ══════════════════════════════════════ -->
-  {% if similar %}
-  <div class="sec-card">
-    <div class="sec-head"><div class="sec-head-icon"><i class="fas fa-home"></i></div> Similar Properties Nearby</div>
-    <div class="similar-grid">
-      {% for sp in similar %}
-      <a href="/listing/{{ sp.listing_type }}/{{ sp.category|lower|slugify }}/{{ sp.id }}/" class="sim-card" style="text-decoration:none;">
-        <div class="sim-img">
-          {% if sp.image_url %}
-            <img src="{{ sp.image_url }}" alt="{{ sp.title }}">
-          {% else %}
-            <div class="sim-img-placeholder">🏠</div>
+        <!-- ⑤ LOCATION -->
+        <div class="prop-section" id="sec-location">
+          <div class="prop-section-title">
+            <div class="section-icon"><i class="fas fa-map-location-dot"></i></div>
+            Location Details
+          </div>
+          <div class="spec-grid">
+            {% if p.city %}
+            <div class="spec-item"><div class="spec-label">City</div><div class="spec-value">{{ p.city }}</div></div>
+            {% endif %}
+            {% if p.locality %}
+            <div class="spec-item"><div class="spec-label">Locality</div><div class="spec-value">{{ p.locality }}</div></div>
+            {% endif %}
+            {% if p.state %}
+            <div class="spec-item"><div class="spec-label">State</div><div class="spec-value">{{ p.state }}</div></div>
+            {% endif %}
+            {% if p.pincode %}
+            <div class="spec-item"><div class="spec-label">Pincode</div><div class="spec-value" style="font-family:monospace;">{{ p.pincode }}</div></div>
+            {% endif %}
+            {% if p.district %}
+            <div class="spec-item"><div class="spec-label">District</div><div class="spec-value">{{ p.district }}</div></div>
+            {% endif %}
+            {% if p.taluka %}
+            <div class="spec-item"><div class="spec-label">Taluka</div><div class="spec-value">{{ p.taluka }}</div></div>
+            {% endif %}
+            {% if p.road_connectivity %}
+            <div class="spec-item spec-full"><div class="spec-label">Road Connectivity</div><div class="spec-value">{{ p.road_connectivity }}</div></div>
+            {% endif %}
+          </div>
+          {% if p.address %}
+          <div class="mt-3">
+            <div class="spec-label mb-2">Complete Address</div>
+            <div class="address-box">
+              <i class="fas fa-map-pin text-primary me-2"></i>{{ p.address }}
+            </div>
+          </div>
           {% endif %}
-          <span class="sim-tag">{{ sp.listing_type|upper }}</span>
-        </div>
-        <div class="sim-body">
-          <div class="sim-price">{{ sp.price_display }}</div>
-          <div class="sim-title">{{ sp.title|truncatechars:42 }}</div>
-          <div class="sim-loc"><i class="fas fa-map-marker-alt"></i> {{ sp.location|truncatechars:30 }}</div>
-          <div class="sim-footer">
-            <span>{{ sp.feature }}</span>
-            <span style="color:var(--pr);font-weight:800;">View <i class="fas fa-arrow-right"></i></span>
+          <div class="mt-3 text-center">
+            <a href="https://maps.google.com/maps?q={{ p.address|default:p.locality }},{{ p.city }}" target="_blank"
+               style="color:var(--pr);font-size:.82rem;font-weight:700;">
+              <i class="fas fa-external-link-alt me-1"></i> Open in Google Maps
+            </a>
           </div>
         </div>
-      </a>
-      {% endfor %}
-    </div>
-  </div>
-  {% endif %}
 
-</div><!-- /.left-col -->
+        <!-- ⑥ AMENITIES -->
+        <div class="prop-section" id="sec-amenities">
+          <div class="prop-section-title">
+            <div class="section-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+            Amenities &amp; Nearby Facilities
+          </div>
+          <div class="sub-section-label">Amenities</div>
+          <div class="d-flex flex-wrap gap-2 mb-4">
+            {% for item in amenities_list %}
+              <div class="amenity-pill"><i class="fas fa-circle-check"></i> {{ item }}</div>
+            {% empty %}
+              <div class="empty-state w-100" style="padding:14px;"><i class="fas fa-list-check"></i><p>No amenities listed.</p></div>
+            {% endfor %}
+          </div>
+          <div class="sub-section-label">Nearby Facilities</div>
+          <div class="d-flex flex-wrap gap-2">
+            {% for item in facilities_list %}
+              <div class="facility-pill"><i class="fas fa-map-pin"></i> {{ item }}</div>
+            {% empty %}
+              <div class="empty-state w-100" style="padding:14px;"><i class="fas fa-map-marker-alt"></i><p>No nearby facilities listed.</p></div>
+            {% endfor %}
+          </div>
+        </div>
 
-<!-- ═══════════════════════════════════════ RIGHT SIDEBAR ═══ -->
-<aside>
-  <div class="contact-card">
+        <!-- ⑦ DESCRIPTION -->
+        <div class="prop-section" id="sec-desc">
+          <div class="prop-section-title">
+            <div class="section-icon"><i class="fas fa-align-left"></i></div>
+            About This Property
+          </div>
+          <div class="desc-body">
+            {% if p.desc %}
+              <div class="desc-highlight">{{ p.desc|safe }}</div>
+            {% else %}
+              <div class="empty-state"><i class="fas fa-file-alt"></i><p>No description provided.</p></div>
+            {% endif %}
+          </div>
+        </div>
 
-    <!-- PRICE -->
-    <div class="cc-price-label">
-      {% if listing_type == 'rent' %}
-        {% if p.sharing_type or p.pg_for %}Starting Rent (Per Bed){% else %}Monthly Rent{% endif %}
-      {% else %}Property Value{% endif %}
-    </div>
-    <div class="cc-price-val">
-      {% if p.monthly_rent %}₹{{ p.monthly_rent|floatformat:0 }}
-      {% elif p.expected_price %}₹{{ p.expected_price|floatformat:0 }}
-      {% elif p.raw_price %}₹{{ p.raw_price|floatformat:0 }}
-      {% else %}Price on Request{% endif %}
-    </div>
-    <div class="cc-price-subtext">
-      {% if listing_type == 'rent' %}
-        {% if p.sharing_type or p.pg_for %}per bed · per month
-        {% else %}per month{% endif %}
-        {% if p.security_deposit %} · Deposit: ₹{{ p.security_deposit }}{% endif %}
-      {% else %}
-        {% if p.price_sqft %}₹{{ p.price_sqft }} / sq.ft · {% endif %}
-        {% if p.is_negotiable == 'yes' or p.negotiable %}<span style="color:var(--green);font-weight:700;"><i class="fas fa-check-circle"></i> Negotiable</span>{% endif %}
-      {% endif %}
-    </div>
+        <!-- ⑧ CONTACT / OWNER -->
+        <div class="prop-section" id="sec-owner">
+          <div class="prop-section-title">
+            <div class="section-icon"><i class="fas fa-id-card-clip"></i></div>
+            Owner &amp; Contact Information
+          </div>
 
-    <!-- OWNER BLOCK -->
-    <div class="owner-block">
-      <div class="owner-avatar"><i class="fas fa-user"></i></div>
-      <div>
-        <div class="owner-name">{{ p.owner_name|default:"Property Owner" }}</div>
-        <div class="owner-role">{{ p.uploaded_by_role|default:"Owner"|title }}</div>
-        {% if p.uploaded_by_name and p.uploaded_by_name != p.owner_name %}
-          <div class="owner-uploaded-by"><i class="fas fa-user-tag"></i> Listed by: {{ p.uploaded_by_name }}</div>
+          <div class="sub-section-label">Owner Details</div>
+          <div class="spec-grid mb-4">
+            <div class="spec-item">
+              <div class="spec-label">Owner Name</div>
+              <div class="spec-value">{{ p.owner_name|default:"—" }}</div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">Contact Number</div>
+              <div class="spec-value d-flex align-items-center gap-2">
+                {% if can_view_contact %}
+                  <span style="font-family:monospace;">{{ p.owner_contact|default:"—" }}</span>
+                {% else %}
+                  <span class="owner-phone-masked" id="ownerPhoneMain">
+                    {% if p.owner_contact %}{{ p.owner_contact|slice:":2" }}XXXXXX{{ p.owner_contact|slice:"-2:" }}{% else %}—{% endif %}
+                  </span>
+                  {% if p.owner_contact %}
+                  <button class="btn-reveal-phone" onclick="requireSubscription()">View</button>
+                  {% endif %}
+                {% endif %}
+              </div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">Email</div>
+              <div class="spec-value" style="font-size:.82rem;">
+                {% if can_view_contact %}{{ p.owner_email|default:"—" }}{% else %}{{ p.owner_email|slice:":3" }}***@***.com{% endif %}
+              </div>
+            </div>
+            {% if p.alternate_contact %}
+            <div class="spec-item">
+              <div class="spec-label">Alternate Contact</div>
+              <div class="spec-value">
+                {% if can_view_contact %}{{ p.alternate_contact }}{% else %}<span style="font-family:monospace;">{{ p.alternate_contact|slice:":2" }}XXXXXX{{ p.alternate_contact|slice:"-2:" }}</span>{% endif %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="sub-section-label">Listing Uploaded By</div>
+          <div class="spec-grid">
+            <div class="spec-item">
+              <div class="spec-label">Uploader Name</div>
+              <div class="spec-value">{{ p.uploaded_by_name|default:"—" }}</div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">Uploader Role</div>
+              <div class="spec-value">{{ p.uploaded_by_role|default:"—" }}</div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">Uploader Email</div>
+              <div class="spec-value" style="font-size:.82rem;">{{ p.uploaded_by_email|default:"—" }}</div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">Uploader Contact</div>
+              <div class="spec-value">{{ p.uploaded_by_contact|default:"—" }}</div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">Listing Date</div>
+              <div class="spec-value">{{ today }}</div>
+            </div>
+            <div class="spec-item">
+              <div class="spec-label">Listing Status</div>
+              <div class="spec-value"><span class="badge-active">Active</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ⑨ AUTO-GENERATED FAQs -->
+        <div class="prop-section" id="sec-faqs">
+          <div class="prop-section-title">
+            <div class="section-icon"><i class="fas fa-comments-question"></i></div>
+            Frequently Asked Questions
+          </div>
+          <div class="accordion prop-faq" id="faqAccordion">
+            {% for faq in original.faqs.all %}
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="faqHead{{ faq.id }}">
+                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#faqBody{{ faq.id }}"
+                  aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+                  {{ faq.question }}
+                </button>
+              </h2>
+              <div id="faqBody{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">{{ faq.answer }}</div>
+              </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+              <i class="fas fa-database"></i>
+              <p>No FAQs generated for this listing yet. Re-save the property in admin to generate FAQs.</p>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- ⑩ SIMILAR PROPERTIES -->
+        {% if similar %}
+        <div class="prop-section" id="sec-similar">
+          <div class="prop-section-title">
+            <div class="section-icon"><i class="fas fa-home"></i></div>
+            Similar Properties Nearby
+          </div>
+          <div class="similar-grid">
+            {% for sp in similar %}
+            <a href="/listing/{{ sp.listing_type }}/{{ sp.category|lower }}/{{ sp.id }}/" class="sim-card">
+              <div class="sim-img">
+                {% if sp.image_url %}
+                  <img src="{{ sp.image_url }}" alt="{{ sp.title }}">
+                {% else %}
+                  <div class="sim-img-placeholder"><i class="fas fa-home"></i></div>
+                {% endif %}
+                <span class="sim-tag">{{ sp.listing_type|upper }}</span>
+              </div>
+              <div class="sim-body">
+                <div class="sim-price">{{ sp.price_display }}</div>
+                <div class="sim-title">{{ sp.title|truncatechars:42 }}</div>
+                <div class="sim-loc"><i class="fas fa-map-marker-alt"></i> {{ sp.location|truncatechars:28 }}</div>
+                <div class="sim-footer">
+                  <span>{{ sp.feature }}</span>
+                  <span style="color:var(--pr);font-weight:800;">View <i class="fas fa-arrow-right"></i></span>
+                </div>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
         {% endif %}
+
       </div>
-    </div>
+      <!-- ════════ END LEFT COLUMN ════════ -->
 
-    <!-- CONTACT BUTTONS -->
-    {% if p.owner_contact %}
-      {% if can_view_contact %}
-        <button class="cta-btn cta-primary" onclick="callOwner('{{ p.owner_contact }}')">
-          <i class="fas fa-phone-alt"></i> Call Owner
-        </button>
-        <a href="https://wa.me/91{{ p.owner_contact }}?text=Hi%2C%20I%20am%20interested%20in%20{{ p.title|urlencode }}" target="_blank" class="cta-btn cta-whatsapp" style="text-decoration:none;">
-          <i class="fab fa-whatsapp"></i> WhatsApp Owner
-        </a>
-        {% if p.alternate_contact %}
-        <button class="cta-btn" style="background:#f1f5f9;color:var(--sec);" onclick="callOwner('{{ p.alternate_contact }}')">
-          <i class="fas fa-phone"></i> Alternate: {{ p.alternate_contact }}
-        </button>
+      <!-- ════════ SIDEBAR ════════ -->
+      <div class="prop-sidebar">
+
+        <!-- Price card -->
+        <div class="sidebar-price-card">
+          <div class="sidebar-price-header">
+            <div class="sidebar-price-label">
+              {% if listing_type == 'rent' %}Monthly Rent{% else %}Property Price{% endif %}
+            </div>
+            <div class="sidebar-price-amount">
+              {% if p.monthly_rent %}₹{{ p.monthly_rent }} <span>/ mo</span>
+              {% elif p.expected_price %}₹{{ p.expected_price }}
+              {% else %}On Request{% endif %}
+            </div>
+          </div>
+          <div class="sidebar-price-body">
+            <div class="row g-0">
+              <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border);">
+                <div class="sidebar-mini-stat-label">Deposit</div>
+                <div class="sidebar-mini-stat-val">{% if p.security_deposit %}₹{{ p.security_deposit }}{% else %}—{% endif %}</div>
+              </div>
+              <div class="col-6 sidebar-mini-stat">
+                <div class="sidebar-mini-stat-label">Maintenance</div>
+                <div class="sidebar-mini-stat-val">{% if p.maintenance %}₹{{ p.maintenance }}{% else %}—{% endif %}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Owner card -->
+        <div class="sidebar-owner-card">
+          <div class="sidebar-divider">Contact Owner</div>
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="owner-avatar">{{ p.owner_name|slice:":1"|upper|default:"O" }}</div>
+            <div style="min-width:0;">
+              <div class="owner-name">{{ p.owner_name|default:"Property Owner" }}</div>
+              <div class="owner-email"><i class="fas fa-envelope me-1"></i>
+                {% if can_view_contact %}{{ p.owner_email|default:"No email" }}{% else %}{{ p.owner_email|slice:":3"|default:"" }}***@***.com{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Phone display -->
+          <div class="owner-info-row">
+            <i class="fas fa-phone"></i>
+            {% if can_view_contact %}
+              <span style="font-family:monospace;font-weight:700;color:var(--pr);">{{ p.owner_contact|default:"Not provided" }}</span>
+            {% else %}
+              <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="owner-phone-masked" id="sidebarPhone">
+                  {% if p.owner_contact %}{{ p.owner_contact|slice:":2" }}XXXXXX{{ p.owner_contact|slice:"-2:" }}{% else %}Not available{% endif %}
+                </span>
+              </div>
+            {% endif %}
+          </div>
+
+          {% if can_view_contact %}
+            <a href="tel:{{ p.owner_contact }}" class="btn-call-primary">
+              <i class="fas fa-phone-volume"></i> Call Owner
+            </a>
+            <a href="https://wa.me/91{{ p.owner_contact }}?text=Hi%2C+I+am+interested+in+{{ p.title|urlencode }}" target="_blank" class="btn-whatsapp-primary">
+              <i class="fab fa-whatsapp"></i> WhatsApp Owner
+            </a>
+          {% else %}
+            <div class="masked-phone-block">
+              <div class="masked-num">{{ masked_phone }}</div>
+              <div class="masked-hint">Subscribe to view full contact details</div>
+            </div>
+          {% endif %}
+
+          <!-- Enquiry Form -->
+          <div class="fw-bold small mb-2">Get Contact Details</div>
+        <form method="POST" id="enquiryForm" action="{% url 'save_property_enquiry' %}">
+            {% csrf_token %}
+            <input type="hidden" name="property_id" value="{{ original.id }}">
+            <input type="hidden" name="property_title" value="{{ p.title }}">
+            <input type="hidden" name="property_type" value="{{ listing_type }}">
+            <input type="hidden" name="property_location" value="{{ p.location }}">
+            <input type="hidden" name="lead_source" value="property_detail_page">
+            <input type="hidden" name="seo_slug" value="{{ seo.slug }}">
+
+            <!--  ADD THESE HIDDEN UTM FIELDS -->
+
+            <!-- Add these hidden fields inside your enquiry form -->
+            <input type="hidden" name="utm_source" id="enquiry_utm_source" value="">
+            <input type="hidden" name="utm_medium" id="enquiry_utm_medium" value="">
+            <input type="hidden" name="utm_campaign" id="enquiry_utm_campaign" value="">
+            <input type="hidden" name="utm_term" id="enquiry_utm_term" value="">
+            <input type="hidden" name="utm_content" id="enquiry_utm_content" value="">
+            <input type="hidden" name="utm_path" id="enquiry_utm_path" value="">
+            <input type="hidden" name="utm_params" id="enquiry_utm_params" value="">
+            <input type="hidden" name="page_url" id="enquiry_page_url" value="">
+            <input type="hidden" name="property_id" id="enquiry_property_id" value="{{ p.id }}">
+            <input type="hidden" name="property_type" id="enquiry_property_type" value="{{ property_type }}">
+
+            <input type="text" name="enquiry_name" id="enquiry_name" class="form-select mb-2" placeholder="Your Name" required value="{{ user_obj.user_name }}">
+
+            <div class="input-group mb-3">
+                <select name="country_code" id="country_code" class="form-select" style="max-width: 110px; border-radius: 12px 0 0 12px; height: 46px; font-size: 0.9rem; border: 1.5px solid #e2e8f0; background-color: #fff;">
+                    <option value="+91" selected>🇮🇳 +91</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+971">🇦🇪 +971</option>
+                    <option value="+65">🇸🇬 +65</option>
+                    <option value="+61">🇦🇺 +61</option>
+                    <option value="+1">🇨🇦 +1</option>
+                </select>
+                <input type="tel" name="enquiry_phone" id="enquiry_phone" class="form-control" placeholder="Phone Number" required value="{{ user_obj.user_phone }}" style="border-radius: 0 12px 12px 0; height: 46px; font-size: 0.9rem; border: 1.5px solid #e2e8f0; border-left: none;">
+            </div>
+
+            <div class="form-check mb-3 text-start">
+                <input class="form-check-input" type="checkbox" id="whatsappConsent" name="whatsapp_consent" checked style="cursor: pointer; accent-color: #006ce4;">
+                <label class="form-check-label text-muted" for="whatsappConsent" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
+                    I consent to receive property alerts and owner details directly on WhatsApp/SMS. 
+                </label>
+            </div>
+
+            <div class="form-check mb-2 text-start">
+                <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required style="cursor: pointer; accent-color: #006ce4;">
+                {% if p.listing_type == "rent" %}
+
+                  <label class="form-check-label text-muted" for="agreeTerms" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
+                    I am interested in vendor services</span>
+                  </label>
+
+                {% else %}
+
+                  <label class="form-check-label text-muted" for="agreeTerms" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
+                      I am interested in home loan services
+                  </label>
+
+                {% endif %}
+            </div>
+
+            
+
+            {% if user_obj %}
+              <button type="button" name="send_enquiry" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" onclick="Send_Enquiry(this)">Get Contact Details</button>
+            {% else %}
+              <!-- 🟢 FIXED: Changed data-bs-target to #authEnModal -->
+              <button type="button" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#authEnModal">Get Contact Details</button>
+            {% endif %}
+        </form>
+
+          <!-- Trust badges -->
+          <div class="trust-badges">
+            <div class="trust-item"><i class="fas fa-shield-alt" style="color:var(--green);"></i><div>Verified</div></div>
+            <div class="trust-item"><i class="fas fa-user-check" style="color:var(--blue);"></i><div>Direct Owner</div></div>
+            <div class="trust-item"><i class="fas fa-lock" style="color:var(--yellow);"></i><div>Secure</div></div>
+          </div>
+        </div>
+
+        <!-- Sidebar EMI (sale only) -->
+        {% if listing_type == 'sale' and base_emi > 0 %}
+        <div style="background:linear-gradient(135deg,#12263a,#1e3a5f);border-radius:var(--radius-lg);padding:18px;color:white;">
+          <div style="font-size:.68rem;font-weight:700;opacity:.6;text-transform:uppercase;letter-spacing:.5px;">Est. Monthly EMI</div>
+          <div style="font-size:1.5rem;font-weight:800;color:var(--accent);">₹{{ base_emi }}<span style="font-size:.85rem;opacity:.6;">/mo</span></div>
+          <div style="font-size:.72rem;opacity:.45;margin-top:3px;">80% loan · 8.5% · 20 yrs</div>
+        </div>
         {% endif %}
-      {% else %}
-        <div class="masked-phone-block">
-          <div class="masked-num">{{ masked_phone }}</div>
-          <div class="masked-hint">Login or Subscribe to view full number</div>
-        </div>
-        <button class="cta-btn cta-primary" data-bs-toggle="modal" data-bs-target="#authModal">
-          <i class="fas fa-unlock-alt"></i> Login to View Contact
-        </button>
-      {% endif %}
-    {% else %}
-      <button class="cta-btn cta-disabled" disabled><i class="fas fa-phone-slash"></i> Contact Unavailable</button>
-    {% endif %}
 
-    <!-- ENQUIRY FORM -->
-    <div style="margin-top:20px;padding-top:18px;border-top:1px solid var(--border);">
-      <div class="enq-title"><i class="fas fa-paper-plane" style="color:var(--pr);"></i> Get Owner Details</div>
-      <form method="POST" id="enquiryForm" action="{% url 'save_property_enquiry' %}">
-        {% csrf_token %}
-        <input type="hidden" name="property_id" value="{{ original.id }}">
-        <input type="hidden" name="property_title" value="{{ p.title }}">
-        <input type="hidden" name="property_type" value="{{ listing_type }}">
-        <input type="hidden" name="property_location" value="{{ p.locality }}, {{ p.city }}">
-        <input type="hidden" name="lead_source" value="property_detail_page">
-        {% if seo %}<input type="hidden" name="seo_slug" value="{{ seo.slug }}">{% endif %}
+      </div>
+      <!-- ════════ END SIDEBAR ════════ -->
 
-        <input type="text" name="enquiry_name" id="enquiry_name" class="enq-input" placeholder="Your Full Name *" required value="{% if user_obj %}{{ user_obj.user_name }}{% endif %}">
-
-        <div class="input-group mb-2">
-          <select name="country_code" id="country_code" class="form-select" style="max-width:105px;border-radius:10px 0 0 10px;height:44px;font-size:.83rem;border:1.5px solid var(--border);">
-            <option value="+91" selected>🇮🇳 +91</option>
-            <option value="+1">🇺🇸 +1</option>
-            <option value="+44">🇬🇧 +44</option>
-            <option value="+971">🇦🇪 +971</option>
-            <option value="+65">🇸🇬 +65</option>
-            <option value="+61">🇦🇺 +61</option>
-          </select>
-          <input type="tel" name="enquiry_phone" id="enquiry_phone" class="form-control" placeholder="Phone Number *" required value="{% if user_obj %}{{ user_obj.user_phone }}{% endif %}" style="border-radius:0 10px 10px 0;height:44px;font-size:.83rem;border:1.5px solid var(--border);border-left:none;">
-        </div>
-
-        <div class="form-check mb-3 mt-2">
-          <input class="form-check-input" type="checkbox" id="whatsappConsent" name="whatsapp_consent" checked style="cursor:pointer;accent-color:var(--pr);">
-          <label class="form-check-label" for="whatsappConsent" style="font-size:.76rem;color:var(--muted);cursor:pointer;line-height:1.45;">
-            I consent to receive property alerts & owner details on WhatsApp/SMS.
-          </label>
-        </div>
-        <div class="form-check mb-3">
-          <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required style="cursor:pointer;accent-color:var(--pr);">
-          <label class="form-check-label" for="agreeTerms" style="font-size:.76rem;color:var(--muted);cursor:pointer;line-height:1.45;">
-            {% if listing_type == 'rent' %}I am interested in vendor / moving services.{% else %}I am interested in home loan services.{% endif %}
-          </label>
-        </div>
-
-        {% if user_obj %}
-          <button type="button" class="enq-submit" onclick="Send_Enquiry(this)">
-            <i class="fas fa-paper-plane"></i> Get Contact Details
-          </button>
-        {% else %}
-          <button type="button" class="enq-submit" data-bs-toggle="modal" data-bs-target="#authModal">
-            <i class="fas fa-sign-in-alt"></i> Login to Enquire
-          </button>
-        {% endif %}
-      </form>
-    </div>
-
-    <!-- SIDEBAR MINI EMI (resale only) -->
-    {% if listing_type == 'sale' and base_emi > 0 %}
-    <div class="sidebar-emi">
-      <div class="emi-lbl">Estimated EMI</div>
-      <div class="emi-val">₹{{ base_emi|floatformat:0 }}<span style="font-size:.9rem;opacity:.6;">/mo</span></div>
-      <div class="emi-sub">80% loan · 8.5% · 20 yrs · <a href="#" onclick="document.querySelector('#emiResult').scrollIntoView({behavior:'smooth'})" style="color:#f97316;font-weight:700;">Adjust ↑</a></div>
-    </div>
-    {% endif %}
-
-    <!-- TRUST BADGES -->
-    <div class="trust-badges">
-      <div class="trust-item"><i class="fas fa-shield-alt" style="color:var(--green);"></i><div>Verified</div></div>
-      <div class="trust-item"><i class="fas fa-user-check" style="color:var(--blue);"></i><div>Direct Owner</div></div>
-      <div class="trust-item"><i class="fas fa-lock" style="color:var(--yellow);"></i><div>Secure</div></div>
     </div>
   </div>
-</aside>
+</div>
 
-</div><!-- /.detail-layout -->
-
-<!-- ═══════════════════════════════════════ AUTH MODAL ═══ -->
-<div class="modal fade" id="authModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+<!-- AUTH MODAL -->
+<div class="modal fade" id="authEnModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius:18px;border:none;box-shadow:0 20px 50px rgba(0,0,0,.2);">
-      <div class="modal-header border-0 pb-0 px-4 pt-4" style="position:relative;">
-        <h5 class="modal-title" style="font-weight:800;color:var(--sec);font-size:1.15rem;">Login / Register</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" style="position:absolute;right:20px;top:20px;"></button>
+    <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+      
+      <div class="modal-header border-0 pb-0" style="position: relative;">
+        <h5 class="modal-title" style="font-weight: 800; color: #1e293b;">Continue to PropCRM</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 20px;"></button>
       </div>
-      <div class="modal-body p-4">
-        <!-- Nav tabs -->
-        <ul class="nav nav-pills mb-3 justify-content-center" id="authTabs" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="login-tab" data-bs-toggle="pill" data-bs-target="#loginPanel" type="button" style="border-radius:8px;font-weight:700;font-size:.85rem;">Login</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="register-tab" data-bs-toggle="pill" data-bs-target="#registerPanel" type="button" style="border-radius:8px;font-weight:700;font-size:.85rem;">Register</button>
-          </li>
-        </ul>
-        <div class="tab-content">
-          <!-- LOGIN -->
-          <div class="tab-pane fade show active" id="loginPanel">
-            <select id="modal_login_role" class="enq-input">
-              <option value="SelectRole">Select Role</option>
-              <option value="Buyer">Buyer</option>
-              <option value="Tenant">Tenant</option>
-              <option value="Agent">Agent</option>
-              <option value="Owner">Owner</option>
-              <option value="Builder">Builder</option>
-            </select>
-            <input type="text" id="modal_login_email" class="enq-input" placeholder="Email or Mobile">
-            <input type="password" id="modal_login_password" class="enq-input" placeholder="Password">
-            <button class="enq-submit" onclick="processModalLogin(this)"><i class="fas fa-sign-in-alt"></i> Login</button>
+
+      <div class="modal-body pt-3 pb-4 px-4">
+        
+        <div id="step-1-email" class="auth-step active-step">
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Enter your email address to login or create a new account.</p>
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Email Address <span class="text-danger">*</span></label>
+            <input type="email" id="flow_email" class="form-control" placeholder="name@example.com" style="border-radius: 10px; padding: 12px; background: #f8fafc;">
           </div>
-          <!-- REGISTER -->
-          <div class="tab-pane fade" id="registerPanel">
-            <select id="modal_reg_role" class="enq-input">
-              <option value="SelectRole">Select Role</option>
-              <option value="Buyer">Buyer</option>
-              <option value="Tenant">Tenant</option>
-              <option value="Agent">Agent</option>
-              <option value="Owner">Owner</option>
-              <option value="Builder">Builder</option>
-            </select>
-            <input type="text" id="modal_reg_name" class="enq-input" placeholder="Full Name">
-            <input type="email" id="modal_reg_email" class="enq-input" placeholder="Email">
-            <input type="tel" id="modal_reg_mobile" class="enq-input" placeholder="Mobile Number">
-            <input type="password" id="modal_reg_password" class="enq-input" placeholder="Create Password">
-            <button class="enq-submit" onclick="processModalRegister(this)"><i class="fas fa-user-plus"></i> Create Account</button>
-          </div>
+          <button type="button" class="btn w-100 mt-2" onclick="checkEmailExists(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Continue <i class="fas fa-arrow-right ms-1"></i>
+          </button>
         </div>
+
+        <div id="step-2-login" class="auth-step">
+          <button onclick="goToStepAuth('step-1-email')" style="background:none; border:none; color:#64748b; font-size:0.9rem; font-weight:600; margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Welcome back! Please enter your password to continue.</p>
+          
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Password <span class="text-danger">*</span></label>
+            <input type="password" id="flow_password" class="form-control" placeholder="Enter your password" style="border-radius: 10px; padding: 12px; background: #f8fafc;">
+          </div>
+          
+          <button type="button" class="btn w-100 mt-2" onclick="processProgLogin(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Secure Login
+          </button>
+        </div>
+
+        <div id="step-2-otp" class="auth-step">
+          <button onclick="goToStepAuth('step-1-email')" style="background:none; border:none; color:#64748b; font-size:0.9rem; font-weight:600; margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">We've sent a 4-digit code to <strong id="display_otp_email" class="text-dark"></strong>.</p>
+          
+          <div class="otp-container">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+          </div>
+          
+          <button type="button" class="btn w-100 mt-2" onclick="verifyOTP(this)" style="background: #f97316; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Verify OTP
+          </button>
+        </div>
+
+        <div id="step-3-details" class="auth-step">
+          <p style="font-size: 0.9rem; color: #10b981; font-weight: 600; margin-bottom: 20px;"><i class="fas fa-check-circle"></i> Email Verified! Just a few details.</p>
+          
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Full Name <span class="text-danger">*</span></label>
+            <input type="text" id="flow_reg_name" class="form-control" placeholder="John Doe" style="border-radius: 10px; padding: 10px; background: #f8fafc;">
+          </div>
+          
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Mobile Number <span class="text-danger">*</span></label>
+            <input type="tel" id="flow_reg_mobile" class="form-control" placeholder="10 Digits" style="border-radius: 10px; padding: 10px; background: #f8fafc;" maxlength="10">
+          </div>
+          
+          <div class="mb-3">
+             <label style="font-size: 0.8rem; font-weight: 700;">I am a <span class="text-danger">*</span></label>
+             <select id="flow_reg_role" class="form-select" style="border-radius: 10px; padding: 10px; background: #f8fafc;" required>
+               <option value="SelectRole" selected disabled>Choose a role...</option>
+               <option value="Landlord">Landlord</option>
+               <option value="Agent">Agent</option>
+               <option value="Agency/Builder">Agencies / Builder</option>
+               <option value="Vendor">Vendor</option>
+             </select>
+          </div>
+
+          <button type="button" class="btn w-100 mt-3" onclick="processProgRegistration(this)" style="background: #10b981; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Create Account & Continue
+          </button>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
+
+<!-- ═══ FAQ SCHEMA ═══ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for faq in original.faqs.all %}
+    {
+      "@type": "Question",
+      "name": "{{ faq.question|escapejs }}",
+      "acceptedAnswer": { "@type": "Answer", "text": "{{ faq.answer|escapejs }}" }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+
 // ═══════════════════════════════════════════════
-// MEDIA VIEWER
+// MEDIA VIEWER — FIXED VIDEO PLAYBACK
 // ═══════════════════════════════════════════════
-function activateImage(url, thumbEl) {
-  const display = document.getElementById('activeDisplay');
-  display.innerHTML = `<img id="mainImage" src="${url}" alt="Property" style="width:100%;height:100%;object-fit:contain;">`;
-  document.querySelectorAll('.media-thumb').forEach(t => t.classList.remove('active'));
-  if (thumbEl) thumbEl.classList.add('active');
-  document.getElementById('mediaControls').innerHTML = `<button class="mc-btn" onclick="downloadMedia()"><i class="fas fa-download"></i> Download</button>`;
+
+// Track active thumb
+let currentThumb = null;
+let isVideoMode = {% if p.video %}true{% else %}false{% endif %};
+let currentStep = 1;
+
+// --- MODAL TAB SWITCHERS ---
+function goToStepAuth(stepId) {
+    $('.auth-step').removeClass('active-step').hide(); 
+    $('#' + stepId).addClass('active-step').fadeIn(250);
+}
+function moveToNext(current, event) {
+    if (current.value.length >= current.maxLength) {
+        let next = $(current).next('.otp-input');
+        if (next.length) next.focus();
+    }
+    if (event.key === "Backspace" && current.value.length === 0) {
+        let prev = $(current).prev('.otp-input');
+        if (prev.length) prev.focus();
+    }
 }
 
+/* ── FORM STEPPER (WITH LOGIN INTERCEPTION) ── */
+// ═══════════════════════════════════════════════
+// SAFE STEPPER FUNCTION - No UI element manipulation
+// ═══════════════════════════════════════════════
+function goToStep(n) {
+  let userStatus = (typeof isLoggedIn !== 'undefined') ? isLoggedIn : false;
+  
+  if (n === 2 && userStatus === false) {
+      pendingAction = function() { goToStep(2); }; 
+      goToStepAuth('step-1-email');
+      const modal = document.getElementById('authEnModal');
+      if (modal && typeof bootstrap !== 'undefined') {
+        bootstrap.Modal.getOrCreateInstance(modal).show();
+      }
+      return; 
+  }
+  
+  // Simple step tracking - only update currentStep variable
+  // No DOM manipulation that could cause errors
+  currentStep = n;
+  
+  // Only attempt smooth scroll if window exists
+  if (typeof window !== 'undefined') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  
+  // Only call updateReview if it exists
+  if (typeof updateReview === 'function') updateReview();
+}
+
+// On page load: wire up the initial video element (if any)
+document.addEventListener('DOMContentLoaded', function () {
+  const v = document.getElementById('mainVideo');
+  if (v) {
+    wireVideoEvents(v);
+    // Show play icon (video is paused initially — autoplay blocked by browser)
+    setPlayIcon(true);
+  }
+});
+
+function wireVideoEvents(videoEl) {
+  videoEl.addEventListener('play',  () => setPlayIcon(false));
+  videoEl.addEventListener('pause', () => setPlayIcon(true));
+  videoEl.addEventListener('ended', () => setPlayIcon(true));
+  videoEl.addEventListener('error', function () {
+    document.getElementById('activeDisplay').innerHTML =
+      '<div class="no-media-placeholder"><span style="font-size:2rem;">⚠️</span><span>Video could not be loaded</span></div>';
+  });
+}
+
+function setPlayIcon(isPaused) {
+  const icon = document.getElementById('playPauseIcon');
+  if (icon) icon.className = isPaused ? 'fas fa-play' : 'fas fa-pause';
+}
+
+// Called by the video thumbnail button
 function activateVideo(url) {
-  const display = document.getElementById('activeDisplay');
-  display.innerHTML = `<video id="mainVideo" src="${url}" controls preload="metadata" style="width:100%;height:100%;object-fit:contain;" playsinline>
-    <source src="${url}" type="video/mp4">Your browser does not support video.</video>`;
-  document.querySelectorAll('.media-thumb').forEach(t => t.classList.remove('active'));
-  document.getElementById('mediaControls').innerHTML = `
-    <button class="mc-btn" id="playPauseBtn" onclick="togglePlayPause()"><i class="fas fa-play" id="playPauseIcon"></i> Play / Pause</button>
-    <button class="mc-btn" onclick="downloadMedia()"><i class="fas fa-download"></i> Download</button>`;
+  isVideoMode = true;
+  deactivateAllThumbs();
+  const videoThumb = document.getElementById('videoThumb');
+  if (videoThumb) videoThumb.style.borderColor = '#f97316';
+
+  const container = document.getElementById('activeDisplay');
+  container.innerHTML =
+    '<video id="mainVideo" src="' + url + '" controls preload="metadata" playsinline ' +
+    'style="width:100%;height:100%;object-fit:contain;">' +
+    '<source src="' + url + '" type="video/mp4">' +
+    '<source src="' + url + '" type="video/webm">' +
+    '</video>';
+
+  const v = document.getElementById('mainVideo');
+  wireVideoEvents(v);
+  setPlayIcon(true);
+
+  // Attempt play (may be blocked; user can click play manually)
+  v.play().then(() => setPlayIcon(false)).catch(() => setPlayIcon(true));
+
+  // Show play/pause button
+  const ppBtn = document.getElementById('playPauseBtn');
+  if (ppBtn) ppBtn.style.display = '';
 }
 
+// Called by image thumbnails
+function activateImage(url, thumbEl) {
+  isVideoMode = false;
+  deactivateAllThumbs();
+  if (thumbEl) thumbEl.classList.add('active');
+  currentThumb = thumbEl;
+
+  document.getElementById('activeDisplay').innerHTML =
+    '<img id="mainImage" src="' + url + '" alt="Property" style="width:100%;height:100%;object-fit:contain;">';
+
+  // Hide play/pause button (not applicable for images)
+  const ppBtn = document.getElementById('playPauseBtn');
+  if (ppBtn) ppBtn.style.display = 'none';
+}
+
+function deactivateAllThumbs() {
+  document.querySelectorAll('.media-thumb').forEach(t => t.classList.remove('active'));
+}
+
+// Play/Pause toggle
 function togglePlayPause() {
   const v = document.getElementById('mainVideo');
   if (!v) return;
-  if (v.paused) v.play(); else v.pause();
+  if (v.paused) { v.play(); }
+  else          { v.pause(); }
 }
 
+// Download current media
 function downloadMedia() {
   const v = document.getElementById('mainVideo');
   const img = document.getElementById('mainImage');
@@ -1269,9 +1663,126 @@ function calculateInteractiveEMI() {
   const n = parseFloat(document.getElementById('emiYears').value) * 12;
   if (principal > 0 && r > 0 && n > 0) {
     const emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-    const el = document.getElementById('emiResult');
-    if (el) el.innerText = Math.round(emi).toLocaleString('en-IN');
+    document.getElementById('emiResult').innerText = Math.round(emi).toLocaleString('en-IN');
   }
+}
+
+
+// --- PROGRESSIVE AUTHENTICATION API CALLS ---
+function checkEmailExists(_this) {
+    let email = $('#flow_email').val().trim();
+    if (!email) return Swal.fire("Wait", "Please enter a valid email address.", "info");
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Checking...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Check_Email_Api' %}", 
+        data: { 'email': email},
+        success: function(response) {
+            $(_this).prop("disabled", false).html(btnText);
+            if(response.exists) goToStepAuth('step-2-login');
+            else sendOTP(email);
+        },
+        error: function() { $(_this).prop("disabled", false).html(btnText); Swal.fire("Error", "Server error.", "error"); }
+    });
+}
+
+function sendOTP(email) {
+    $('#display_otp_email').text(email);
+    goToStepAuth('step-2-otp'); 
+    $.ajax({ 
+        type: "POST", 
+        url: "{% url 'Send_Otp_Api' %}", 
+        data: { 'email': email } 
+    });
+}
+
+function processProgLogin(_this) {
+    let email = $('#flow_email').val();
+    let password = $('#flow_password').val();
+    if (!password) return Swal.fire("Wait", "Please enter your password.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Logging in...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Prop_Login_Api' %}", 
+        data: { 'email': email, 'password': password },
+        success: function(response) {
+            if(response.status == '1') {
+                isLoggedIn = true; 
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
+                
+                // NO-RELOAD: Update Header UI instantly
+                location.reload();
+                
+                // RESUME PAUSED ACTION
+                if (typeof pendingAction === 'function') {
+                    let action = pendingAction; pendingAction = null; action(); 
+                } else {
+                    Swal.fire("Success", "Logged in successfully!", "success");
+                }
+            } else {
+                $(_this).prop("disabled", false).html(btnText);
+                Swal.fire("Error", response.msg || "Incorrect password", "error");
+            }
+        }
+    });
+}
+
+function verifyOTP(_this) {
+    let otp = "";
+    $('.otp-input').each(function() { otp += $(this).val(); });
+    if(otp.length < 4) return Swal.fire("Wait", "Please enter the 4-digit OTP.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Verifying...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Verify_Otp_Api' %}", 
+        data: { 'email': $('#flow_email').val(), 'otp': otp },
+        success: function(response) {
+            $(_this).prop("disabled", false).html(btnText);
+            if(response.valid) goToStepAuth('step-3-details');
+            else Swal.fire("Error", "Invalid OTP. Try again.", "error");
+        }
+    });
+}
+
+function processProgRegistration(_this) {
+    let email = $('#flow_email').val();
+    let name = $('#flow_reg_name').val();
+    let mobile = $('#flow_reg_mobile').val();
+    let role = $('#flow_reg_role').val();
+
+    if(!name || !mobile || role === "SelectRole") return Swal.fire("Wait", "Please fill in all details.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Creating Account...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Prop_Register_Api' %}", 
+        data: { 'email': email, 'name': name, 'mobile': mobile, 'role': role},
+        success: function(response) {
+            if(response.status == '1') {
+                isLoggedIn = true; 
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
+                
+                // NO-RELOAD: Update Header UI instantly
+                location.reload();
+                
+                // RESUME PAUSED ACTION
+                if (typeof pendingAction === 'function') {
+                    let action = pendingAction; pendingAction = null; action(); 
+                } else {
+                    Swal.fire("Success", "Account created!", "success");
+                }
+            } else {
+                $(_this).prop("disabled", false).html(btnText);
+                Swal.fire("Error", response.msg || "Registration failed.", "error");
+            }
+        }
+    });
 }
 
 // ═══════════════════════════════════════════════
@@ -1279,108 +1790,298 @@ function calculateInteractiveEMI() {
 // ═══════════════════════════════════════════════
 function callOwner(phone) {
   Swal.fire({
-    title: 'Owner Contact',
-    html: `<div style="padding:12px;text-align:center;">
-      <div style="font-size:26px;font-weight:800;color:#e84118;margin-bottom:16px;letter-spacing:1px;">📞 ${phone}</div>
-      <a href="tel:${phone}" class="btn" style="background:#e84118;color:white;border:none;padding:11px 30px;border-radius:10px;font-weight:800;font-size:.95rem;">Call Now</a>
+    title:'Owner Contact',
+    html:`<div style="padding:10px;text-align:center;">
+      <div style="font-size:26px;font-weight:800;color:#e84118;margin-bottom:15px;">📞 ${phone}</div>
+      <a href="tel:${phone}" class="btn btn-danger" style="background:#e84118;border:none;padding:10px 28px;border-radius:10px;font-weight:800;">Call Now</a>
     </div>`,
-    showConfirmButton: false, showCloseButton: true
+    showConfirmButton:false, showCloseButton:true
   });
 }
 
 // ═══════════════════════════════════════════════
 // SEND ENQUIRY
 // ═══════════════════════════════════════════════
+
 function Send_Enquiry(_this) {
-  var name  = $("#enquiry_name").val().trim();
-  var phone = $("#enquiry_phone").val().trim();
-  var code  = $("#country_code").val();
-  var whatsapp = $("#whatsappConsent").is(":checked");
+  var enquiry_name = $("#enquiry_name").val().trim();
+  var enquiry_phone = $("#enquiry_phone").val().trim();
+  
+  // Optional field tracks
+  var enquiry_email = $("#enquiry_email").length ? $("#enquiry_email").val().trim() : "";
+  var enquiry_message = $("#enquiry_message").length ? $("#enquiry_message").val().trim() : "";
 
-  if (!name || !phone) {
-    Swal.fire({icon:'warning', title:'Missing Fields', text:'Please enter your name and phone number.'}); return;
-  }
-  if (!whatsapp) {
-    Swal.fire({icon:'warning', title:'Consent Required', text:'Please agree to receive property alerts to proceed.', confirmButtonColor:'#1e293b'}); return;
+  // 1. Read Country Code and Checkbox states
+  var country_code = $("#country_code").val();
+  var agree_terms = $("#agreeTerms").is(":checked");
+  var whatsapp_consent = $("#whatsappConsent").is(":checked");
+
+  // 2. Validate standard fields
+  if (enquiry_name === "" || enquiry_phone === "") {
+    Swal.fire({title: 'Error', text: 'Please fill the required fields.', icon: 'error'});
+    return;
   }
 
+  // 3. Validate mandatory Terms & Conditions checkbox
+  if (!whatsapp_consent) {
+    Swal.fire({
+      title: 'Consenment Required', 
+      text: 'You must agree to the Consenment to proceed.', 
+      icon: 'warning',
+      confirmButtonColor: '#1e293b'
+    });
+    return;
+  }
+
+  // 4. Get UTM values from hidden fields
+  var utm_source = $("#enquiry_utm_source").val() || "";
+  var utm_medium = $("#enquiry_utm_medium").val() || "";
+  var utm_campaign = $("#enquiry_utm_campaign").val() || "";
+  var utm_term = $("#enquiry_utm_term").val() || "";
+  var utm_content = $("#enquiry_utm_content").val() || "";
+  var utm_path = $("#enquiry_utm_path").val() || "";
+  var utm_params = $("#enquiry_utm_params").val() || "";
+  var page_url = $("#enquiry_page_url").val() || window.location.href;
+
+  console.log("📊 Sending Enquiry with UTM:", {
+    utm_source: utm_source,
+    utm_medium: utm_medium,
+    utm_campaign: utm_campaign
+  });
+
+  // 5. Build the Form Data Object
   var fd = new FormData();
-  fd.append('enquiry_name', name);
-  fd.append('country_code', code);
-  fd.append('enquiry_phone', phone);
-  fd.append('whatsapp_consent', whatsapp ? 'yes' : 'no');
+  fd.append('enquiry_name', enquiry_name);
+  fd.append('country_code', country_code); 
+  fd.append('enquiry_phone', enquiry_phone);
+  fd.append('enquiry_email', enquiry_email);
+  fd.append('enquiry_message', enquiry_message);
+  fd.append('whatsapp_consent', whatsapp_consent ? 'yes' : 'no'); 
+  
+  //  Append UTM fields to FormData
+  fd.append('utm_source', utm_source);
+  fd.append('utm_medium', utm_medium);
+  fd.append('utm_campaign', utm_campaign);
+  fd.append('utm_term', utm_term);
+  fd.append('utm_content', utm_content);
+  fd.append('utm_path', utm_path);
+  fd.append('utm_params', utm_params);
+  fd.append('page_url', page_url);
+  
+  // Django Context variables
   fd.append('listing_type', '{{ listing_type }}');
   fd.append('category', '{{ category }}');
   fd.append('property_id', '{{ p.id }}');
-  fd.append('user_id', '{{ user_obj.id|default:"" }}');
+  fd.append('user_id', '{{ user_obj.id }}');
 
-  $(_this).prop("disabled", true).html('<span class="spinner-border spinner-border-sm me-2"></span>Processing...');
+  // Change button state to loading spinner
+  $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Processing...`);
 
+  // 6. Execute AJAX Request
   $.ajax({
-    method: "POST", url: "{% url 'Send_Property_Enquiry' %}", data: fd,
-    processData: false, contentType: false,
-    success: function(res) {
-      $(_this).prop("disabled", false).html('<i class="fas fa-paper-plane"></i> Get Contact Details');
-      if (res.status == '1') {
-        Swal.fire({icon:'success', title:'Enquiry Sent!', text: res.msg}).then(r => { if (r.isConfirmed) location.reload(); });
+    method: "POST",
+    url: "{% url 'Send_Property_Enquiry' %}",
+    data: fd,
+    processData: false,
+    contentType: false,
+    success: function (response) {
+      // Restore original button layout
+      $(_this).prop("disabled", false).html(`Get Contact Details`);
+      
+      if (response.status == '1') {
+        Swal.fire({title: 'Success!', text: response.msg, icon: 'success'}).then((result) => {
+          if (result.isConfirmed) { location.reload(); }
+        });
       } else {
-        Swal.fire({icon:'error', title:'Failed', text: res.msg});
+        Swal.fire({title: 'Error', text: response.msg, icon: 'error'});
       }
     },
     error: function() {
-      $(_this).prop("disabled", false).html('<i class="fas fa-paper-plane"></i> Get Contact Details');
-      Swal.fire({icon:'error', title:'Network Error', text:'Something went wrong. Please try again.'});
+      $(_this).prop("disabled", false).html(`Get Contact Details`);
+      Swal.fire({title: 'Network Error', text: 'Something went wrong. Please try again.', icon: 'error'});
     }
   });
 }
 
-// ═══════════════════════════════════════════════
-// AUTH MODAL
-// ═══════════════════════════════════════════════
-function processModalLogin(btn) {
-  const identifier = document.getElementById('modal_login_email').value;
-  const password   = document.getElementById('modal_login_password').value;
-  const role       = document.getElementById('modal_login_role').value;
-  if (!identifier || !password || role === 'SelectRole') {
-    Swal.fire({icon:'warning', title:'Missing Input', text:'Please fill all fields and select a role.'}); return;
-  }
-  const orig = btn.innerHTML; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verifying...'; btn.disabled = true;
-  $.ajax({
-    method:'POST', url:'{% url "login" %}', contentType:'application/json',
-    data: JSON.stringify({user_identifier:identifier, user_password:password, user_role:role}),
-    success: function(res) {
-      if (res.status=='1'||res.status=='success') location.reload();
-      else Swal.fire({icon:'error', title:'Login Failed', text: res.msg});
-      btn.innerHTML=orig; btn.disabled=false;
-    },
-    error: function() { btn.innerHTML=orig; btn.disabled=false; Swal.fire({icon:'error',title:'Error',text:'Something went wrong.'}); }
-  });
-}
-
-function processModalRegister(btn) {
-  const name=document.getElementById('modal_reg_name').value;
-  const email=document.getElementById('modal_reg_email').value;
-  const mobile=document.getElementById('modal_reg_mobile').value;
-  const password=document.getElementById('modal_reg_password').value;
-  const role=document.getElementById('modal_reg_role').value;
-  if (!name||!email||!mobile||!password||role==='SelectRole') {
-    Swal.fire({icon:'warning',title:'Missing Input',text:'Please fill all fields.'}); return;
-  }
-  const orig=btn.innerHTML; btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Creating...'; btn.disabled=true;
-  const fd=new FormData();
-  fd.append('role',role); fd.append('full_name',name); fd.append('email',email);
-  fd.append('mobile_number',mobile); fd.append('password',password);
-  fd.append('csrfmiddlewaretoken','{{ csrf_token }}');
-  $.ajax({
-    method:'POST', url:'{% url "signup" %}', data:fd, processData:false, contentType:false,
-    success: function(res) {
-      if (res.status=='1'||res.status=='success') location.reload();
-      else Swal.fire({icon:'error',title:'Failed',text:res.msg});
-      btn.innerHTML=orig; btn.disabled=false;
-    },
-    error: function() { btn.innerHTML=orig; btn.disabled=false; Swal.fire({icon:'error',title:'Error'}); }
-  });
-}
 </script>
+
+<script>
+  
+  console.log("===== PAGE VIEW TRACKING WITH CATEGORY =====");
+
+  document.addEventListener('DOMContentLoaded', function() {
+      console.log("===== DOM LOADED =====");
+      
+      // Get UTM parameters from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      let utm_source = urlParams.get('utm_source') || '';
+      let utm_medium = urlParams.get('utm_medium') || '';
+      let utm_campaign = urlParams.get('utm_campaign') || '';
+      let utm_term = urlParams.get('utm_term') || '';
+      let utm_content = urlParams.get('utm_content') || '';
+      
+      // Get property and category information from template
+      const propertyId = '{{ p.id }}';
+      const propertyTitle = '{{ p.title|escapejs }}';
+      const listingType = '{{ listing_type|default:"rent" }}';
+      
+      // Get category from URL path (e.g., /rent/commercial/ or /rent/residential/)
+      let category = '';
+      const pathMatch = window.location.pathname.match(/\/rent\/([^\/]+)\//);
+      if (pathMatch && pathMatch[1]) {
+          category = pathMatch[1];
+      }
+      
+      // Fallback to template category
+      const templateCategory = '{{ category|default:"" }}';
+      if (templateCategory) {
+          category = templateCategory;
+      }
+      
+      // Fallback to data attribute
+      if (!category) {
+          const categoryAttr = document.body.getAttribute('data-category');
+          if (categoryAttr) category = categoryAttr;
+      }
+      
+      console.log("Property ID:", propertyId);
+      console.log("Property Title:", propertyTitle);
+      console.log("Listing Type:", listingType);
+      console.log("Category:", category);
+      console.log("UTM Source:", utm_source || 'none (will track as direct)');
+      
+      // Get referrer for source detection
+      const referrer = document.referrer;
+      
+      // Auto-detect source if no UTM parameters
+      if (!utm_source) {
+          if (referrer.includes('google.com')) {
+              utm_source = 'google';
+              utm_medium = 'organic';
+              utm_campaign = 'organic_search';
+              console.log("Source detected: Google Search");
+          } 
+          else if (referrer.includes('facebook.com')) {
+              utm_source = 'facebook';
+              utm_medium = 'social';
+              utm_campaign = 'facebook_referral';
+              console.log("Source detected: Facebook");
+          }
+          else if (referrer.includes('whatsapp.com')) {
+              utm_source = 'whatsapp';
+              utm_medium = 'messaging';
+              utm_campaign = 'whatsapp_share';
+              console.log("Source detected: WhatsApp");
+          }
+          else if (referrer === '') {
+              utm_source = 'direct';
+              utm_medium = 'none';
+              utm_campaign = 'direct_visit';
+              console.log("Source detected: Direct Visit");
+          }
+          else {
+              utm_source = 'referral';
+              utm_medium = 'other';
+              utm_campaign = 'external_referral';
+              console.log("Source detected: Referral from", referrer);
+          }
+      } else {
+          console.log("UTM Source from URL:", utm_source);
+      }
+      
+      //  STORE UTM DATA IN SESSION STORAGE (for enquiry form)
+      const utmDataForSession = {
+          utm_source: utm_source,
+          utm_medium: utm_medium,
+          utm_campaign: utm_campaign,
+          utm_term: utm_term,
+          utm_content: utm_content,
+          utm_path: window.location.pathname,
+          utm_params: window.location.search.substring(1),
+          page_url: window.location.href,
+          timestamp: new Date().toISOString()
+      };
+      sessionStorage.setItem('utm_tracking_data', JSON.stringify(utmDataForSession));
+      console.log("UTM data stored in session storage");
+      
+      // Set hidden form fields for enquiry form (if they exist on page)
+      if (document.getElementById('enquiry_utm_source')) {
+          document.getElementById('enquiry_utm_source').value = utm_source;
+          document.getElementById('enquiry_utm_medium').value = utm_medium;
+          document.getElementById('enquiry_utm_campaign').value = utm_campaign;
+          document.getElementById('enquiry_utm_term').value = utm_term;
+          document.getElementById('enquiry_utm_content').value = utm_content;
+          document.getElementById('enquiry_utm_path').value = window.location.pathname;
+          document.getElementById('enquiry_utm_params').value = window.location.search.substring(1);
+          document.getElementById('enquiry_page_url').value = window.location.href;
+          console.log("Enquiry form UTM fields populated");
+      }
+      
+      // Only track if we have property ID
+      if (propertyId && propertyId !== '') {
+          
+          console.log("Sending tracking data to server...");
+          
+          
+          
+          fetch("{% url 'Track_utm_link' %}", {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  // UTM parameters
+                  utm_source: utm_source,
+                  utm_medium: utm_medium,
+                  utm_campaign: utm_campaign,
+                  utm_term: utm_term,
+                  utm_content: utm_content,
+                  
+                  // Property information
+                  property_id: propertyId,
+                  property_title: propertyTitle,
+                  listing_type: listingType,
+                  category: category,
+                  
+                  // URL components
+                  utm_path: window.location.pathname,
+                  utm_params: window.location.search.substring(1),
+                  page_url: window.location.href,
+                  
+                  // Additional tracking
+                  referrer: referrer,
+                  user_agent: navigator.userAgent
+              })
+          })
+          .then(response => {
+              console.log("Response status:", response.status);
+              return response.json();
+          })
+          .then(data => {
+              if (data.success) {
+                  console.log("Page view tracked successfully!");
+                  console.log("Category:", category);
+                  console.log("Source:", utm_source);
+                  console.log("Total views:", data.total_views || data.total_clicks);
+              } else {
+                  console.log("Tracking failed:", data.error);
+              }
+          })
+          .catch(error => {
+              console.log("Fetch error:", error);
+          });
+          
+      } else {
+          console.warn("No property ID found - cannot track");
+      }
+  });
+
+</script>
+
+
 </body>
 </html>
+
+
+
+
