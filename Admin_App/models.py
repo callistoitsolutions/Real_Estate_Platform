@@ -417,7 +417,8 @@ class RentalResidentialProperty(models.Model):
         primary_key=True,
         default=generate_unique_rental_residential_id,
         editable=False,
-        unique=True
+        unique=True,
+        blank=True
     )
 
     property_title = models.CharField(max_length=255, blank=True, null=True)

@@ -554,7 +554,7 @@ def Contact_Enquiries_List(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        contacts_en_obj = Contact_Enquiry.objects.all().order_by('-id')
+        contacts_en_obj = Contact_Enquiry.objects.all().order_by('-contact_enquiry_date')
         contacts_en_obj_count = Contact_Enquiry.objects.all().count()
 
         rendered = render_to_string("admin_user/render_to_string/R_Contact/r_t_s_enquiry.html",{'contacts_en_obj':contacts_en_obj,'contacts_en_obj_count':contacts_en_obj_count})
@@ -618,7 +618,6 @@ def Contacts_Data(request):
             if not excel_file:
                 return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
             
-            # Add file type validation
             if not excel_file.name.endswith(('.xlsx', '.xls')):
                 return JsonResponse({"status": "0", "msg": "Please upload .xlsx or .xls file only"})
             
@@ -628,11 +627,10 @@ def Contacts_Data(request):
             success_count = 0
             error_count = 0
             skipped_count = 0
-        
             
-            # Get headers from row 2
+            # Get headers from row 2 (for debugging)
             headers = []
-            for cell in sheet[2]:  # Row 2 has headers
+            for cell in sheet[2]:
                 if cell.value:
                     headers.append(str(cell.value).strip())
                 else:
@@ -640,7 +638,7 @@ def Contacts_Data(request):
             
             print("Headers found:", headers)
             
-            # Find column indices based on header names
+            # Find column indices based on header names (flexible)
             col_indices = {
                 'name': None,
                 'email': None,
@@ -652,6 +650,8 @@ def Contacts_Data(request):
                 'message': None,
                 'contact_mode': None,
                 'contact_time': None,
+                'enquiry_date': None,
+                'enquiry_time': None,
             }
             
             for idx, header in enumerate(headers):
@@ -678,6 +678,10 @@ def Contacts_Data(request):
                     col_indices['contact_mode'] = idx
                 elif header_lower == 'contact time':
                     col_indices['contact_time'] = idx
+                elif header_lower == 'enquiry date':
+                    col_indices['enquiry_date'] = idx
+                elif header_lower == 'enquiry time':
+                    col_indices['enquiry_time'] = idx
             
             print("Column indices:", col_indices)
             
@@ -688,19 +692,21 @@ def Contacts_Data(request):
                     if not any(row):
                         continue
                     
-                    print(f"Row {row_idx} raw data: {row[:12] if len(row) > 11 else row}")
+                    print(f"Row {row_idx} raw data: {row[:15] if len(row) > 14 else row}")
                     
-                    # Get values using column indices
-                    name = row[col_indices['name']] if col_indices['name'] is not None and len(row) > col_indices['name'] else None
-                    email = row[col_indices['email']] if col_indices['email'] is not None and len(row) > col_indices['email'] else None
-                    phone = row[col_indices['phone']] if col_indices['phone'] is not None and len(row) > col_indices['phone'] else None
-                    city = row[col_indices['city']] if col_indices['city'] is not None and len(row) > col_indices['city'] else None
-                    enquiry_for = row[col_indices['enquiry_for']] if col_indices['enquiry_for'] is not None and len(row) > col_indices['enquiry_for'] else None
-                    property_type = row[col_indices['property_type']] if col_indices['property_type'] is not None and len(row) > col_indices['property_type'] else None
-                    budget_range = row[col_indices['budget_range']] if col_indices['budget_range'] is not None and len(row) > col_indices['budget_range'] else None
-                    message = row[col_indices['message']] if col_indices['message'] is not None and len(row) > col_indices['message'] else None
-                    contact_mode = row[col_indices['contact_mode']] if col_indices['contact_mode'] is not None and len(row) > col_indices['contact_mode'] else None
-                    contact_time = row[col_indices['contact_time']] if col_indices['contact_time'] is not None and len(row) > col_indices['contact_time'] else None
+                    # Get values using column indices (or fixed indices if not found)
+                    name = row[col_indices['name']] if col_indices['name'] is not None and len(row) > col_indices['name'] else (row[2] if len(row) > 2 else None)
+                    email = row[col_indices['email']] if col_indices['email'] is not None and len(row) > col_indices['email'] else (row[3] if len(row) > 3 else None)
+                    phone = row[col_indices['phone']] if col_indices['phone'] is not None and len(row) > col_indices['phone'] else (row[4] if len(row) > 4 else None)
+                    city = row[col_indices['city']] if col_indices['city'] is not None and len(row) > col_indices['city'] else (row[5] if len(row) > 5 else None)
+                    enquiry_for = row[col_indices['enquiry_for']] if col_indices['enquiry_for'] is not None and len(row) > col_indices['enquiry_for'] else (row[6] if len(row) > 6 else None)
+                    property_type = row[col_indices['property_type']] if col_indices['property_type'] is not None and len(row) > col_indices['property_type'] else (row[7] if len(row) > 7 else None)
+                    budget_range = row[col_indices['budget_range']] if col_indices['budget_range'] is not None and len(row) > col_indices['budget_range'] else (row[8] if len(row) > 8 else None)
+                    message = row[col_indices['message']] if col_indices['message'] is not None and len(row) > col_indices['message'] else (row[9] if len(row) > 9 else None)
+                    contact_mode = row[col_indices['contact_mode']] if col_indices['contact_mode'] is not None and len(row) > col_indices['contact_mode'] else (row[10] if len(row) > 10 else None)
+                    contact_time = row[col_indices['contact_time']] if col_indices['contact_time'] is not None and len(row) > col_indices['contact_time'] else (row[11] if len(row) > 11 else None)
+                    enquiry_date_value = row[col_indices['enquiry_date']] if col_indices['enquiry_date'] is not None and len(row) > col_indices['enquiry_date'] else (row[12] if len(row) > 12 else None)
+                    enquiry_time_value = row[col_indices['enquiry_time']] if col_indices['enquiry_time'] is not None and len(row) > col_indices['enquiry_time'] else (row[13] if len(row) > 13 else None)
                     
                     # Skip if no name
                     if not name:
@@ -756,9 +762,40 @@ def Contacts_Data(request):
                     contact_mode = None if not contact_mode or str(contact_mode) in ['---', 'None', ''] else str(contact_mode).strip()
                     contact_time = None if not contact_time or str(contact_time) in ['---', 'None', ''] else str(contact_time).strip()
                     
-                    print(f"Row {row_idx}: Importing - Name: {name}, Phone: {phone}, Email: {email}")
+                    # Handle Enquiry Date
+                    enquiry_date = None
+                    if enquiry_date_value and str(enquiry_date_value).strip() not in ['', '---', '-', 'None']:
+                        try:
+                            if isinstance(enquiry_date_value, (date, datetime)):
+                                enquiry_date = enquiry_date_value.date() if isinstance(enquiry_date_value, datetime) else enquiry_date_value
+                            else:
+                                date_str = str(enquiry_date_value).strip()
+                                if ',' in date_str:
+                                    enquiry_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                elif '-' in date_str:
+                                    enquiry_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    enquiry_date = datetime.strptime(date_str, '%d/%m/%Y').date()
+                        except Exception as e:
+                            print(f"Row {row_idx}: Date parse error: {e}")
                     
-                    # Create new record
+                    # Handle Enquiry Time
+                    enquiry_time = None
+                    if enquiry_time_value and str(enquiry_time_value).strip() not in ['', '---', '-', 'None']:
+                        try:
+                            time_str = str(enquiry_time_value).strip()
+                            # Handle formats like "12:14 p.m." or "12:14 PM"
+                            time_str = time_str.replace('p.m.', 'PM').replace('a.m.', 'AM').replace('.', '')
+                            if 'PM' in time_str or 'AM' in time_str:
+                                enquiry_time = datetime.strptime(time_str, '%I:%M %p').time()
+                            else:
+                                enquiry_time = datetime.strptime(time_str, '%H:%M').time()
+                        except Exception as e:
+                            print(f"Row {row_idx}: Time parse error: {e}")
+                    
+                    print(f"Row {row_idx}: Importing - Name: {name}, Phone: {phone}, Date: {enquiry_date}, Time: {enquiry_time}")
+                    
+                    # Create record with all fields
                     Contact_Enquiry.objects.create(
                         contact_name=name,
                         contact_phone=phone,
@@ -771,6 +808,8 @@ def Contacts_Data(request):
                         contact_message=message,
                         contact_mode=contact_mode,
                         contact_time=contact_time,
+                        contact_enquiry_date=enquiry_date,
+                        contact_enquiry_time=enquiry_time
                     )
                     
                     success_count += 1
@@ -1600,18 +1639,23 @@ def Subscriptions_Data(request):
             if not excel_file:
                 return JsonResponse({"status": "0", "msg": "Please select an Excel file"})
             
+            if not excel_file.name.endswith(('.xlsx', '.xls')):
+                return JsonResponse({"status": "0", "msg": "Please upload .xlsx or .xls file only"})
+            
             wb = load_workbook(excel_file)
             sheet = wb.active
             
             success_count = 0
             error_count = 0
+            skipped_count = 0
             
-            # Data starts from row 3
-            for row in sheet.iter_rows(min_row=3, values_only=True):
+            # Data starts from row 3 (row 1=title, row 2=headers)
+            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
                     if not any(row):
                         continue
                     
+                    # Column mapping
                     package_name = row[2] if len(row) > 2 else None
                     plan_type = row[3] if len(row) > 3 else None
                     plan_duration = row[4] if len(row) > 4 else None
@@ -1626,50 +1670,84 @@ def Subscriptions_Data(request):
                     added_date_value = row[13] if len(row) > 13 else None
                     
                     if not package_name or not plan_type:
-                        error_count += 1
+                        skipped_count += 1
+                        print(f"Row {row_idx}: Missing package_name or plan_type, skipping")
                         continue
                     
-                    # Clean data
+                    # Clean data - handle None values
                     package_name = str(package_name).strip()
-                    plan_type = str(plan_type).strip()
-                    plan_duration = str(plan_duration).strip()
-                    plan_for = str(plan_for).strip()
-                    plan_base_price = str(plan_base_price).strip()
-                    plan_offer_price = str(plan_offer_price).strip()
-                    plan_discount = str(plan_discount).strip()
-                    plan_max_listings = str(plan_max_listings).strip()
-                    plan_offer_start_date = str(plan_offer_start_date).strip()
-                    plan_offer_end_date = str(plan_offer_end_date).strip()
-                    plan_desc = str(plan_desc).strip()
+                    plan_type = str(plan_type).strip() if plan_type else ''
+                    plan_duration = str(plan_duration).strip() if plan_duration else ''
+                    plan_for = str(plan_for).strip() if plan_for else ''
                     
-                    # Handle date: from Excel or today's date
-                    plan_upload_date = datetime.today()
-                    if added_date_value and str(added_date_value).strip() not in ['', '---', '-']:
+                    # Handle numeric fields (convert to int/float)
+                    try:
+                        plan_base_price = float(plan_base_price) if plan_base_price else 0
+                    except:
+                        plan_base_price = 0
+                    
+                    try:
+                        plan_offer_price = float(plan_offer_price) if plan_offer_price else 0
+                    except:
+                        plan_offer_price = 0
+                    
+                    try:
+                        plan_discount = float(plan_discount) if plan_discount else 0
+                    except:
+                        plan_discount = 0
+                    
+                    try:
+                        plan_max_listings = int(plan_max_listings) if plan_max_listings else 0
+                    except:
+                        plan_max_listings = 0
+                    
+                    # Handle description
+                    plan_desc = str(plan_desc).strip() if plan_desc else ''
+                    
+                    # Handle dates
+                    def parse_date(date_value):
+                        if not date_value or str(date_value).strip() in ['', '---', '-']:
+                            return None
                         try:
-                            if isinstance(added_date_value, (date, datetime)):
-                                plan_upload_date = added_date_value.date() if isinstance(added_date_value, datetime) else added_date_value
+                            if isinstance(date_value, (date, datetime)):
+                                return date_value.date() if isinstance(date_value, datetime) else date_value
                             else:
-                                date_str = str(added_date_value).strip()
+                                date_str = str(date_value).strip()
                                 if ',' in date_str:
-                                    plan_upload_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                                    return datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
-                                    plan_upload_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                    return datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    return datetime.strptime(date_str, '%d/%m/%Y').date()
                         except:
-                            pass
+                            return None
+                        return None
+                    
+                    plan_offer_start = parse_date(plan_offer_start_date)
+                    plan_offer_end = parse_date(plan_offer_end_date)
+                    
+                    # Handle upload date (default to today)
+                    plan_upload_date = datetime.now().date()
+                    if added_date_value and str(added_date_value).strip() not in ['', '---', '-']:
+                        parsed = parse_date(added_date_value)
+                        if parsed:
+                            plan_upload_date = parsed
+                    
+                    print(f"Row {row_idx}: Importing - {package_name} ({plan_type})")
                     
                     # Update or create
-                    Subscription_Details.objects.update_or_create(
+                    obj, created = Subscription_Details.objects.update_or_create(
                         package_name=package_name,
                         defaults={
-                            "plan_type":plan_type,
+                            "plan_type": plan_type,
                             "plan_duration": plan_duration,
                             "plan_for": plan_for,
                             "plan_base_price": plan_base_price,
                             "plan_offer_price": plan_offer_price,
                             "plan_discount": plan_discount,
                             "plan_max_listings": plan_max_listings,
-                            "plan_offer_start_date": plan_offer_start_date,
-                            "plan_offer_end_date": plan_offer_end_date,
+                            "plan_offer_start_date": plan_offer_start,
+                            "plan_offer_end_date": plan_offer_end,
                             "plan_desc": plan_desc,
                             "plan_upload_date": plan_upload_date,
                             "plan_upload_time": datetime.now().time()
@@ -1677,16 +1755,28 @@ def Subscriptions_Data(request):
                     )
                     
                     success_count += 1
+                    print(f"Row {row_idx}: {'Created' if created else 'Updated'} - {package_name}")
                     
                 except Exception as e:
                     error_count += 1
+                    print(f"Row {row_idx} error: {e}")
+            
+            msg = f"Successfully imported {success_count} Subscriptions."
+            if error_count > 0:
+                msg += f" Failed: {error_count}"
+            if skipped_count > 0:
+                msg += f" Skipped: {skipped_count}"
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Subscrptions. Failed: {error_count}"
+                "msg": msg,
+                "success_count": success_count,
+                "error_count": error_count,
+                "skipped_count": skipped_count
             })
             
         except Exception as e:
+            print(f"Error: {e}")
             return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
     
     return JsonResponse({"status": "0", "msg": "Invalid request method"})

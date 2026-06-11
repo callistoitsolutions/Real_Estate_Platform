@@ -14,11 +14,19 @@ from Admin_App.models import *
 ############### Contact Enquiries Table/Modal Starts Here #####################
 
 class Contact_Enquiry(models.Model):
-    contact_name = models.CharField(max_length=200)
-    contact_phone = models.CharField(max_length=200)
-    contact_email = models.CharField(max_length=20)
-    contact_en_title = models.CharField(max_length=100, blank=True)
-    contact_message = models.TextField(blank=True)
+    contact_name = models.CharField(max_length=200,blank=True,null=True)
+    contact_phone = models.CharField(max_length=200,blank=True,null=True)
+    contact_email = models.CharField(max_length=20,blank=True,null=True)
+    contact_city = models.CharField(max_length=20,blank=True,null=True)
+
+    contact_en_title = models.CharField(max_length=100, blank=True,null=True)
+    contact_en_type = models.CharField(max_length=100, blank=True,null=True)
+    contact_start_budget = models.CharField(max_length=100, blank=True,null=True)
+    contact_end_budget = models.CharField(max_length=100, blank=True,null=True)
+    contact_message = models.TextField(blank=True,null=True)
+
+    contact_mode = models.CharField(max_length=100, blank=True,null=True)
+    contact_time = models.CharField(max_length=100, blank=True,null=True)
 
     contact_enquiry_date = models.DateField(blank=True,null=True)
     contact_enquiry_time = models.TimeField(blank=True,null=True)
