@@ -7005,6 +7005,8 @@ def rental_residential_view(request, pk):
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
 
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
     # Prefetch core and related assets for the current listing
     prop = get_object_or_404(
         RentalResidentialProperty.objects.prefetch_related('images', 'faqs'), 
@@ -7028,7 +7030,8 @@ def rental_residential_view(request, pk):
         'faqs': prop.faqs.all(), # Dynamic property FAQs
         'amenities_list': amenities_list,
         'facilities_list': facilities_list,
-        'latest_properties': latest_properties, # Direct cross-linking hook
+        'latest_properties': latest_properties,
+        'admin_obj':admin_obj # Direct cross-linking hook
     }
     return render(request, 'admin_user/Reports/Rental/rental_residential_detail.html', context)
 

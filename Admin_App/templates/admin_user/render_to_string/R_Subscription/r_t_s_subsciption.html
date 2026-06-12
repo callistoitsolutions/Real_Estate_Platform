@@ -118,7 +118,21 @@
 
     var table = $('#subscriptionsTable').DataTable({
         dom: '<"table-header"Blf>rt<"table-footer"ip>',
-        buttons: ['excel'],
+        buttons: [
+            {
+                extend: 'excel',
+                text: '<i class="fas fa-building"></i> Export to Excel',
+                className: 'btn-excel',
+                filename: 'Subscriptions_List_' + new Date().toISOString().slice(0,19).replace(/:/g, '-'),
+                title: 'Subscriptions Report',
+                exportOptions: {
+                    columns: ':visible',
+                    modifier: {
+                        page: 'all'
+                    }
+                }
+            }
+        ],
         paging: true,
         ordering: true,
         info: true,

@@ -102,7 +102,21 @@
 
     var table = $('#facilitiesTable').DataTable({
         dom: '<"table-header"Blf>rt<"table-footer"ip>',
-        buttons: ['excel'],
+        buttons: [
+            {
+                extend: 'excel',
+                text: '<i class="fas fa-building"></i> Export to Excel',
+                className: 'btn-excel',
+                filename: 'Facilities_List_' + new Date().toISOString().slice(0,19).replace(/:/g, '-'),
+                title: 'Facilities Report',
+                exportOptions: {
+                    columns: ':visible',
+                    modifier: {
+                        page: 'all'
+                    }
+                }
+            }
+        ],
         paging: true,
         ordering: true,
         info: true,
@@ -111,7 +125,7 @@
         lengthMenu: [5,10,25,50],
         language:{
             search: "",
-            searchPlaceholder: "Search Facilities...",
+            searchPlaceholder: "Search Nearby Facilities...",
             paginate:{
                 previous:"<i class='fas fa-chevron-left'></i>",
                 next:"<i class='fas fa-chevron-right'></i>"
@@ -120,6 +134,6 @@
     });
 
     // Force placeholder
-    $('.dataTables_filter input').attr("placeholder","Search Facilities...");
+    $('.dataTables_filter input').attr("placeholder","Search Nearby Facilities...");
 });
 </script>

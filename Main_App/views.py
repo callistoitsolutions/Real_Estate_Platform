@@ -3192,6 +3192,16 @@ def listings_view(request):
         'active_more_count':   active_more_count,
     }
 
+
+    # ═══════════════════════════════════════════════════════
+    # HANDLE LOGGED-IN USER
+    # ═══════════════════════════════════════════════════════
+    session_id = request.session.get('User_id')
+    if session_id:
+        user_obj = User_Details.objects.filter(id=session_id).first()
+        if user_obj:
+            context['user_obj'] = user_obj
+
     return render(request, 'home_page/listingpage.html', context)
 # ─────────────────────────────────────────────────────────────────────────────
 
