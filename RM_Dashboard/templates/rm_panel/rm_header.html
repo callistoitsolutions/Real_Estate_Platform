@@ -27,6 +27,8 @@
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <style>
         :root {
@@ -1493,6 +1495,170 @@
                 flex-direction: column;
             }
         }
+
+        /* Attention Grabbing Badge Styles */
+        .badge-attention {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        /* Default state (0 enquiries) */
+        .badge-attention {
+            background: #475569;
+            color: #94a3b8;
+        }
+
+        /* When there are enquiries (>0) - Attention grabbing */
+        .badge-attention.has-value {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            animation: pulse-attention 1.5s infinite;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        /* Pulse Animation for Attention */
+        @keyframes pulse-attention {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        /* Shake animation for extra attention */
+        @keyframes shake-attention {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(2px); }
+        }
+
+        /* Optional: Add shake when badge has value */
+        .badge-attention.has-value:hover {
+            animation: shake-attention 0.5s ease;
+        }
+
+        /* Glow effect */
+        .badge-attention.has-value {
+            animation: pulse-attention 1.5s infinite, glow-attention 2s infinite;
+        }
+
+        @keyframes glow-attention {
+            0% {
+                box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+            }
+        }
+
+        /*  FIXED: Mobile Responsive Styles - No Absolute Positioning */
+        @media (max-width: 768px) {
+            /* Menu link adjustment */
+            .menu-link {
+                padding: 12px 20px !important;
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+            
+            /* Menu text wrapper for better layout */
+            .menu-text-wrapper {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex: 1;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            
+            /* Badge styles for mobile - NOT absolute positioned */
+            .badge-attention.has-value {
+                position: relative !important;
+                top: auto !important;
+                right: auto !important;
+                padding: 4px 10px !important;
+                font-size: 10px !important;
+                border-radius: 20px !important;
+                min-width: auto !important;
+                height: auto !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 4px;
+            }
+            
+            /* Show the bell icon on mobile */
+            .badge-attention.has-value i {
+                display: inline-block !important;
+                font-size: 9px;
+            }
+            
+            /* Adjust badge label for mobile */
+            .badge-attention.has-value .badge-label {
+                display: inline;
+            }
+            
+            /* Menu text styling */
+            .menu-text {
+                font-size: 0.85rem;
+                white-space: normal;
+                line-height: 1.3;
+                flex: 1;
+            }
+        }
+
+        /* Extra small phones (below 480px) */
+        @media (max-width: 480px) {
+            .menu-text-wrapper {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            
+            .badge-attention.has-value {
+                align-self: flex-start;
+            }
+            
+            /* Hide "New" label on very small screens, keep number */
+            .badge-attention.has-value .badge-label {
+                display: none;
+            }
+            
+            .badge-attention.has-value {
+                padding: 3px 8px !important;
+                gap: 3px;
+            }
+        }
+
+        /* For tablets (between 481px and 768px) */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .badge-attention.has-value .badge-label {
+                display: inline;
+            }
+            
+            .badge-attention.has-value {
+                padding: 4px 12px !important;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -1522,7 +1688,17 @@
             <li class="menu-item">
                 <a href="{% url "Assign_Enquiry_Rm" %}" class="menu-link" id="Assign_Enquiry">
                     <i class="fas fa-sticky-note menu-icon"></i>
-                    <span class="menu-text" style="color:white;">Assigned Enquiries</span>
+                    <span class="menu-text" style="color:white;">Assigned Enquiries<br>
+                        <span class="badge1 badge-attention {% if enquiry_obj_rm > 0 %}has-value{% endif %}">
+                            {% if enquiry_obj_rm > 0 %}
+                                <i class="fas fa-bell"></i> 
+                                <span class="badge-count">{{ enquiry_obj_rm }}</span>
+                                <span class="badge-label">New</span>
+                            {% else %}
+                                {{ enquiry_obj_rm }}
+                            {% endif %}
+                        </span>
+                    </span>
                 </a>
             </li>
 

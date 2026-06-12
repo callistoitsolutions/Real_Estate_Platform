@@ -586,24 +586,24 @@ class RentalResidentialProperty(models.Model):
 
 
 
-    def save(self, *args, **kwargs):
-        title_parts = []
-        if self.furnishing_status: title_parts.append(self.furnishing_status)
-        if self.bhk_type: title_parts.append(self.bhk_type)
-        title_parts.append(self.property_type if self.property_type else "Property")
-        title_parts.append("for Rent")
+    # def save(self, *args, **kwargs):
+    #     # title_parts = []
+    #     # if self.furnishing_status: title_parts.append(self.furnishing_status)
+    #     # if self.bhk_type: title_parts.append(self.bhk_type)
+    #     # title_parts.append(self.property_type if self.property_type else "Property")
+    #     # title_parts.append("for Rent")
         
-        location = f"in {self.building_name}" if self.building_name else ""
-        if self.locality: location += f", {self.locality}" if location else f"in {self.locality}"
-        if self.city: location += f", {self.city}" if location else f"in {self.city}"
-        if location: title_parts.append(location)
+    #     # location = f"in {self.building_name}" if self.building_name else ""
+    #     # if self.locality: location += f", {self.locality}" if location else f"in {self.locality}"
+    #     # if self.city: location += f", {self.city}" if location else f"in {self.city}"
+    #     # if location: title_parts.append(location)
         
-        if self.built_up_area:
-            title_parts.append(f"({str(self.built_up_area).rstrip('0').rstrip('.')} sq.ft.)")
+    #     # if self.built_up_area:
+    #     #     title_parts.append(f"({str(self.built_up_area).rstrip('0').rstrip('.')} sq.ft.)")
             
-        self.property_title = " ".join(title_parts).strip()[:255]
-        super(RentalResidentialProperty, self).save(*args, **kwargs)
-        self.generate_auto_faqs()
+    #     # self.property_title = " ".join(title_parts).strip()[:255]
+    #     super(RentalResidentialProperty, self).save(*args, **kwargs)
+    #     self.generate_auto_faqs()
     
 
 
@@ -676,7 +676,7 @@ class RentalResidentialProperty(models.Model):
             RentalResidentialFAQ.objects.create(property=self, question=item["q"], answer=item["a"])
 
     def __str__(self):
-        return str(self.property_title) if self.property_title else f"Property #{self.rental_residential_id}"
+        return str(self.id) if self.property_title else f"Property #{self.rental_residential_id}"
 
 
 # ==========================================
