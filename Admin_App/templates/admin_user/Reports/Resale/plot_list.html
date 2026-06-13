@@ -46,6 +46,42 @@
 .action-btn.edit{background:#f0fdf4;color:#16a34a}.action-btn.edit:hover{background:#16a34a;color:#fff}
 .action-btn.del{background:#fff1f2;color:#e11d48}.action-btn.del:hover{background:#e11d48;color:#fff}
 
+/* Styling for the new charts section */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.chart-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chart-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 15px;
+    align-self: flex-start;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 8px;
+    width: 100%;
+}
+
+.canvas-container {
+    position: relative;
+    height: 250px; /* Forces charts to maintain a clean, uniform size */
+    width: 100%;
+}
 .page-header{margin-bottom:24px}
 .page-header-content{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
 .page-title{font-size:24px;font-weight:800;color:var(--text);margin:0;display:flex;align-items:center;gap:12px}
@@ -172,168 +208,139 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="stats-grid">
+    </div>
+
+<div class="charts-grid">
+    <div class="chart-card">
+        <h3 class="chart-title">Property Types Breakdown</h3>
+        <div class="canvas-container">
+            <canvas id="propertyTypeChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <h3 class="chart-title">Plot Features Overview</h3>
+        <div class="canvas-container">
+            <canvas id="featuresChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <h3 class="chart-title">Inventory Pricing Status</h3>
+        <div class="canvas-container">
+            <canvas id="pricingChart"></canvas>
+        </div>
+    </div>
+
+
+    <div class="chart-card">
+        <h3 class="chart-title">New Listings (Last 6 Months)</h3>
+        <div class="canvas-container">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+</div>
+
   <!-- Search & Filter Bar Component -->
   
 
-  <div class="filter-bar">
+ <div class="filter-bar">
     <div class="filter-title">
         <i class="fas fa-filter"></i>
         Filter Inventory Matrix
     </div>
 
     <form method="GET" id="plotFilterForm">
-
         <div class="filter-grid">
 
-            <!-- Global Search -->
             <div class="filter-group">
                 <label>Search</label>
-                <input type="text"
-                       name="search"
-                       value="{{ request.GET.search }}"
-                       placeholder="Property ID, Title, City, Owner, Locality">
+                <input type="text" name="search" class="auto-submit" value="{{ request.GET.search }}" placeholder="ID, Title, City, Owner...">
             </div>
 
-            <!-- City -->
             <div class="filter-group">
                 <label>City</label>
-                <input type="text"
-                       name="city"
-                       value="{{ request.GET.city }}">
+                <input type="text" name="city" class="auto-submit" value="{{ request.GET.city }}">
             </div>
 
-            <!-- Locality -->
             <div class="filter-group">
                 <label>Locality</label>
-                <input type="text"
-                       name="locality"
-                       value="{{ request.GET.locality }}">
+                <input type="text" name="locality" class="auto-submit" value="{{ request.GET.locality }}">
             </div>
 
-            <!-- Plot Type -->
             <div class="filter-group">
                 <label>Plot Type</label>
-                <select name="plot_type">
+                <select name="plot_type" class="auto-submit">
                     <option value="">All Types</option>
-
-                    <option value="residential"
-                        {% if request.GET.plot_type == 'residential' %}selected{% endif %}>
-                        Residential
-                    </option>
-
-                    <option value="commercial"
-                        {% if request.GET.plot_type == 'commercial' %}selected{% endif %}>
-                        Commercial
-                    </option>
-
-                    <option value="agricultural"
-                        {% if request.GET.plot_type == 'agricultural' %}selected{% endif %}>
-                        Agricultural
-                    </option>
+                    <option value="residential" {% if request.GET.plot_type == 'residential' %}selected{% endif %}>Residential</option>
+                    <option value="commercial" {% if request.GET.plot_type == 'commercial' %}selected{% endif %}>Commercial</option>
+                    <option value="agricultural" {% if request.GET.plot_type == 'agricultural' %}selected{% endif %}>Agricultural</option>
                 </select>
             </div>
 
-            <!-- Road Facing -->
             <div class="filter-group">
                 <label>Road Facing</label>
-                <input type="text"
-                       name="road_facing"
-                       value="{{ request.GET.road_facing }}">
+                <input type="text" name="road_facing" class="auto-submit" value="{{ request.GET.road_facing }}">
             </div>
 
-            <!-- Corner Plot -->
             <div class="filter-group">
                 <label>Corner Plot</label>
-                <select name="corner_plot">
+                <select name="corner_plot" class="auto-submit">
                     <option value="">All</option>
-
-                    <option value="yes"
-                        {% if request.GET.corner_plot == 'yes' %}selected{% endif %}>
-                        Yes
-                    </option>
-
-                    <option value="no"
-                        {% if request.GET.corner_plot == 'no' %}selected{% endif %}>
-                        No
-                    </option>
+                    <option value="yes" {% if request.GET.corner_plot == 'yes' %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if request.GET.corner_plot == 'no' %}selected{% endif %}>No</option>
                 </select>
             </div>
 
-            <!-- Loan -->
             <div class="filter-group">
                 <label>Finance Ready</label>
-                <select name="loan">
+                <select name="loan" class="auto-submit">
                     <option value="">All</option>
-
-                    <option value="yes"
-                        {% if request.GET.loan == 'yes' %}selected{% endif %}>
-                        Yes
-                    </option>
-
-                    <option value="no"
-                        {% if request.GET.loan == 'no' %}selected{% endif %}>
-                        No
-                    </option>
+                    <option value="yes" {% if request.GET.loan == 'yes' %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if request.GET.loan == 'no' %}selected{% endif %}>No</option>
                 </select>
             </div>
 
-            <!-- Min Price -->
             <div class="filter-group">
                 <label>Min Price</label>
-                <input type="number"
-                       name="min_price"
-                       value="{{ request.GET.min_price }}">
+                <input type="number" name="min_price" class="auto-submit" value="{{ request.GET.min_price }}">
             </div>
 
-            <!-- Max Price -->
             <div class="filter-group">
                 <label>Max Price</label>
-                <input type="number"
-                       name="max_price"
-                       value="{{ request.GET.max_price }}">
+                <input type="number" name="max_price" class="auto-submit" value="{{ request.GET.max_price }}">
             </div>
 
-            <!-- From Date -->
             <div class="filter-group">
                 <label>From Date</label>
-                <input type="date"
-                       name="from_date"
-                       value="{{ request.GET.from_date }}">
+                <input type="date" name="from_date" id="from_date" value="{{ request.GET.from_date }}">
             </div>
 
-            <!-- To Date -->
             <div class="filter-group">
                 <label>To Date</label>
-                <input type="date"
-                       name="to_date"
-                       value="{{ request.GET.to_date }}">
+                <input type="date" name="to_date" id="to_date" value="{{ request.GET.to_date }}">
             </div>
 
-            <!-- Buttons -->
             <div class="filter-actions">
-
-                <button type="submit"
-                        class="btn btn-success">
-                    <i class="fas fa-search"></i>
-                    Search
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-search"></i> Search
                 </button>
-
-                <a href="{% url 'plot_resale_list' %}"
-                   class="btn btn-danger">
-                    <i class="fas fa-times"></i>
-                    Clear
+                <a href="{% url 'plot_resale_list' %}" class="btn btn-danger">
+                    <i class="fas fa-times"></i> Clear
                 </a>
-
             </div>
-
         </div>
-
     </form>
 
-    <div style="margin-top:10px;font-weight:600;">
+    <div style="margin-top:10px;font-weight:600; color: #1e293b;">
         Showing {{ properties.count }} of {{ total_properties }} Properties
     </div>
 </div>
+
+
   
 
   <!-- Inventory Table Section -->
@@ -348,266 +355,209 @@
 
 
 
-  <div class="table-responsive">
+ <div class="table-responsive">
     <table id="plotTable" class="properties-table display nowrap" style="width:100%">
-     <thead>
-<tr>
-    <th>Sr.No</th>
-    <th>Property ID</th>
-    <th>Generated Title</th>
-    <th>Image Gallery</th>
+        <thead>
+            <tr>
+                <th>Sr.No</th>
+                
+                <th>Image Gallery</th>
+<th>Property ID</th>
+                <th>Property Title</th>
+                <th> Plot Title</th>
+                <th>Plot Area</th>
+                <th>Resale Plot Type</th>
+                <th>Plot Road Facing</th>
+                <th>Corner Plot</th>
+                <th>Sanctioning Authority</th>
+                <th>Plot Fencing</th>
 
-    <!-- STEP 1 : Plot Specs -->
-    <th>Project / Plot Title</th>
-    <th>Plot Area</th>
-    <th>Plot Type</th>
-    <th>Road Facing</th>
-    <th>Corner Plot</th>
-    <th>Available From</th>
-    <th>Authority</th>
-    <th>Fencing</th>
+                <th>Plot Price</th>
+                <th>Price / Sq.ft</th>
+                <th>Brokerage</th>
+                <th>Brokerage %</th>
+                <th>Ownership Type</th>
+                <th>Loan on Property?</th>
+                <th>Plot Loan Amount</th>
 
-    <!-- STEP 2 : Pricing -->
-    <th>Plot Price</th>
-    <th>Price / Sq.ft</th>
-    <th>Brokerage</th>
-    <th>Brokerage %</th>
-    <th>Ownership</th>
-    <th>Loan Available</th>
-    <th>Loan Amount</th>
+                <th>Encumbrance Certificate</th>
+                <th>Uploaded Video</th>
 
-    <!-- STEP 3 : Documents -->
-    <th>Encumbrance Certificate</th>
-    <th>Walkthrough Video</th>
+                <th>Plot City</th>
+                <th>Plot Locality/Area</th>
+                <th>Plot Address</th>
 
-    <!-- STEP 4 : Location -->
-    <th>City</th>
-    <th>Locality</th>
-    <th>Address</th>
+                <th>Plot Owner Name</th>
+                <th>Plot Owner Contact</th>
+                <th>Plot Owner Email</th>
+                <th>Plot Owner Role</th>
 
-    <!-- Owner Details -->
-    <th>Owner Name</th>
-    <th>Owner Contact</th>
-    <th>Owner Email</th>
+                <th>Uploader Name</th>
+                <th>Uploader Role</th>
+                <th>Uploader Email</th>
+                <th>Uploader Contact</th>
+                <th>Upload Source</th>
 
-    <!-- Upload Details -->
-    <th>Uploader Name</th>
-    <th>Uploader Role</th>
-    <th>Uploader Email</th>
-    <th>Uploader Contact</th>
-    <th>Upload File Name</th>
-     <th>Data Uploaded Via</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+     
 
-    <!-- Audit -->
-    <th>Created At</th>
-    
+        <tbody>
+            {% for p in properties %}
+            <tr id="row-{{ p.plot_property_id }}">
+                <td>{{ forloop.counter }}</td>
 
-    <th>Actions</th>
-</tr>
-</thead>
+                <td>
+                    {% if p.images.first %}
+                        <img src="{{ p.images.first.image.url }}" style="max-width:50px;border-radius:4px;">
+                    {% else %}
+                        <div style="width:50px;background:#f0fdf4;padding:5px;border-radius:4px;text-align:center;">
+                            <i class="fas fa-map-marked-alt" style="color:#16a34a;"></i>
+                        </div>
+                    {% endif %}
+                </td>
 
-      <tbody>
-{% for p in properties %}
-<tr id="row-{{ p.plot_property_id }}">
+                <td><strong>{{ p.plot_property_id }}</strong></td>
 
-    <td>{{ forloop.counter }}</td>
+                <td>
+                    <span title="{{ p.property_title }}">
+                        {{ p.property_title|truncatechars:30|default:"-" }}
+                    </span>
+                </td>
 
-    <td>
-        <strong>{{ p.plot_property_id }}</strong>
-    </td>
+                <td>{{ p.plot_title|default:"-" }}</td>
+                
+                <td>
+                    {% if p.plot_area %}
+                        {{ p.plot_area }} sq.ft
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                
+                <td>{{ p.resale_plot_type|default:"-" }}</td>
+                
+                <td>{{ p.plot_road_facing|default:"-" }}</td>
+                
+                <td>
+                    {% if p.corner_plot|lower == 'yes' %}
+                        <span class="badge-yes">Yes</span>
+                    {% else %}
+                        <span class="badge-no">No</span>
+                    {% endif %}
+                </td>
+                
+                <td>{{ p.sanctioning_authority|default:"-" }}</td>
+                
+                <td>
+                    {% if p.plot_fencing|lower == 'yes' %}
+                        <span class="badge-yes">Yes</span>
+                    {% else %}
+                        <span class="badge-no">No</span>
+                    {% endif %}
+                </td>
 
-    <td>
-        <span title="{{ p.property_title }}">
-            {{ p.property_title|truncatechars:30|default:"-" }}
-        </span>
-    </td>
+                <td>
+                    <span class="price-tag">
+                        ₹{{ p.plot_price|floatformat:0 }}
+                    </span>
+                </td>
+                
+                <td>₹{{ p.price_per_sqft|default:"0.00" }}</td>
+                
+                <td>{{ p.brokerage|default:"-" }}</td>
+                
+                <td>{{ p.brokerage_percentage|default:"-" }}</td>
+                
+                <td>{{ p.ownership_type|default:"-" }}</td>
+                
+                <td>
+                    {% if p.loan_on_property|lower == 'yes' %}
+                        <span class="badge-yes">Yes</span>
+                    {% else %}
+                        <span class="badge-no">No</span>
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {% if p.loan_on_property|lower == 'yes' and p.plot_loan_amount %}
+                        ₹{{ p.plot_loan_amount|floatformat:0 }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
 
-    <!-- Image Gallery -->
-    <td>
-        {% if p.images.first %}
-            <img src="{{ p.images.first.image.url }}"
-                 style="max-width:50px;border-radius:4px;">
-        {% else %}
-            <div style="width:50px;background:#f0fdf4;padding:5px;border-radius:4px;text-align:center;">
-                <i class="fas fa-map-marked-alt" style="color:#16a34a;"></i>
-            </div>
-        {% endif %}
-    </td>
+                <td>
+                    {% if p.encumbrance_cert %}
+                        <a href="{{ p.encumbrance_cert.url }}" target="_blank" class="action-btn view">
+                            <i class="fas fa-file-pdf"></i>
+                        </a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {% if p.social_video %}
+                        <a href="{{ p.social_video.url }}" target="_blank" class="action-btn view">
+                            <i class="fas fa-play"></i>
+                        </a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
 
-    <!-- STEP 1 -->
+                <td>{{ p.plot_city|default:"-" }}</td>
+                
+                <td>{{ p.plot_locality|default:"-" }}</td>
+                
+                <td>
+                    <span title="{{ p.plot_address }}">
+                        {{ p.plot_address|truncatechars:40 }}
+                    </span>
+                </td>
 
-    <td>{{ p.plot_title|default:"-" }}</td>
+                <td>{{ p.plot_owner_name|default:"-" }}</td>
+                
+                <td>{{ p.plot_owner_contact|default:"-" }}</td>
+                
+                <td>{{ p.plot_owner_email|default:"-" }}</td>
+                
+                <td>{{ p.plot_owner_role|default:"-" }}</td>
 
-    <td>
-        {% if p.plot_area %}
-            {{ p.plot_area }} sq.ft
-        {% else %}
-            -
-        {% endif %}
-    </td>
+                <td>{{ p.uploaded_by_name|default:"-" }}</td>
+                
+                <td>{{ p.uploaded_by_role|default:"-" }}</td>
+                
+                <td>{{ p.uploaded_by_email|default:"-" }}</td>
+                
+                <td>{{ p.uploaded_by_contact|default:"-" }}</td>
+                
+                <td>
+                    <small class="text-muted">{{ p.upload_file_name|default:"Web UI Listing Form" }}</small>
+                </td>
 
-    <td>{{ p.resale_plot_type|default:"-" }}</td>
+                <td>{{ p.created_at|date:"Y-m-d H:i" }}</td>
 
-    <td>{{ p.plot_road_facing|default:"-" }}</td>
-
-    <td>
-        {% if p.plot_corner == 'yes' %}
-            <span class="badge-yes">Yes</span>
-        {% else %}
-            <span class="badge-no">No</span>
-        {% endif %}
-    </td>
-
-    <td>
-        {{ p.available_from|date:"Y-m-d"|default:"-" }}
-    </td>
-
-    <td>{{ p.plot_authority|default:"-" }}</td>
-
-    <td>
-        {% if p.plot_fencing == 'yes' %}
-            <span class="badge-yes">Yes</span>
-        {% else %}
-            <span class="badge-no">No</span>
-        {% endif %}
-    </td>
-
-    <!-- STEP 2 -->
-
-    <td>
-        <span class="price-tag">
-            ₹{{ p.plot_price|floatformat:0 }}
-        </span>
-    </td>
-
-    <td>
-        ₹{{ p.price_per_sqft|default:"0.00" }}
-    </td>
-
-    <td>{{ p.brokerage|default:"-" }}</td>
-
-    <td>{{ p.brokerage_percentage|default:"-" }}</td>
-
-    <td>{{ p.plot_ownership|default:"-" }}</td>
-
-    <td>
-        {% if p.plot_loan == 'yes' %}
-            <span class="badge-yes">Yes</span>
-        {% else %}
-            <span class="badge-no">No</span>
-        {% endif %}
-    </td>
-
-    <td>
-        {% if p.plot_loan == 'yes' and p.plot_loan_amount %}
-            ₹{{ p.plot_loan_amount|floatformat:0 }}
-        {% else %}
-            -
-        {% endif %}
-    </td>
-
-    <!-- STEP 3 -->
-
-    <td>
-        {% if p.encumbrance_cert %}
-            <a href="{{ p.encumbrance_cert.url }}"
-               target="_blank"
-               class="action-btn view">
-                <i class="fas fa-file-pdf"></i>
-            </a>
-        {% else %}
-            -
-        {% endif %}
-    </td>
-
-    <td>
-        {% if p.social_video %}
-            <a href="{{ p.social_video.url }}"
-               target="_blank"
-               class="action-btn view">
-                <i class="fas fa-play"></i>
-            </a>
-        {% else %}
-            -
-        {% endif %}
-    </td>
-
-    <!-- STEP 4 -->
-
-    <td>{{ p.plot_city|default:"-" }}</td>
-
-    <td>{{ p.plot_locality|default:"-" }}</td>
-
-    <td>
-        <span title="{{ p.plot_address }}">
-            {{ p.plot_address|truncatechars:40 }}
-        </span>
-    </td>
-
-    <!-- Owner Details -->
-
-    <td>{{ p.plot_owner_name|default:"-" }}</td>
-
-    <td>{{ p.plot_owner_contact|default:"-" }}</td>
-
-    <td>{{ p.plot_owner_email|default:"-" }}</td>
-
-    <!-- Upload Details -->
-
-    <td>{{ p.uploaded_by_name|default:"-" }}</td>
-
-    <td>{{ p.uploaded_by_role|default:"-" }}</td>
-
-    <td>{{ p.uploaded_by_email|default:"-" }}</td>
-
-    <td>{{ p.uploaded_by_contact|default:"-" }}</td>
-
-    <td>{{ p.upload_file_name|default:"-" }}</td>
-
-         <td><small class="text-muted">{{ p.upload_file_name|default:"Web UI Listing Form" }}</small></td>
-
-    <!-- Audit -->
-
-    <td>
-        {{ p.created_at|date:"Y-m-d H:i" }}
-    </td>
-
-   
-
-    <!-- Actions -->
-
-    <td>
-        <div style="display:flex;gap:5px">
-
-          <a href="{% url 'plot_sale_edit' p.plot_property_id %}"
-   class="action-btn edit"
-   title="Edit {{ p.plot_property_id }}">
-    <i class="fas fa-edit"></i>
-</a>
-            <button
-    type="button"
-    class="action-btn del"
-    onclick="confirmPlotDelete('{{ p.plot_property_id }}')"
-    title="Move to Recycle Bin">
-    <i class="fas fa-trash"></i>
-</button>
-
-<a href="{% url 'plot_sale_view' p.plot_property_id %}"
-   class="action-btn view"
-   title="View Property">
-    <i class="fas fa-eye"></i>
-</a>
-
-        </div>
-    </td>
-
-</tr>
-{% endfor %}
-</tbody>
-
-
+                <td>
+                    <div style="display:flex;gap:5px">
+                        <a href="{% url 'plot_sale_edit' p.plot_property_id %}" class="action-btn edit" title="Edit {{ p.plot_property_id }}">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button type="button" class="action-btn del" onclick="confirmPlotDelete('{{ p.plot_property_id }}')" title="Move to Recycle Bin">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <a href="{% url 'plot_sale_view' p.plot_property_id %}" class="action-btn view" title="View Property">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
-</div>
 </div>
 
 
@@ -715,6 +665,163 @@ $(document).ready(function(){
     language: {search: 'Local View Filtering:', paginate: {previous: '‹ Prev', next: 'Next ›'}}
   });
 
+  // ==========================================
+  // NEW: Excel Import Form Interceptor
+  // ==========================================
+ 
+
+  // ========================================================
+  // Excel Import Form Interceptor (Watching for 0-import statuses)
+  
+// ========================================================
+$('#importModal form').on('submit', function(e) {
+
+    e.preventDefault();
+
+    const form = this;
+    const actionUrl = $(form).attr('action');
+    const formData = new FormData(form);
+
+    // Loading Popup
+    Swal.fire({
+        title: 'Importing Excel Data...',
+        html: 'Analyzing spreadsheet and validating records.<br>Please wait...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch(actionUrl, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+
+    .then(response => {
+
+        if (!response.ok) {
+            throw new Error('Server communication failed.');
+        }
+
+        return response.json();
+    })
+
+    .then(data => {
+
+        // Create detailed logs HTML
+        let logsHtml = '';
+
+        if (data.logs && data.logs.length > 0) {
+
+            logsHtml = `
+                <div style="
+                    text-align:left;
+                    max-height:250px;
+                    overflow-y:auto;
+                    margin-top:15px;
+                    padding:10px;
+                    background:#f8f9fa;
+                    border-radius:8px;
+                    font-size:13px;
+                    border:1px solid #ddd;
+                ">
+                    ${data.logs.map(log => `• ${log}`).join('<br>')}
+                </div>
+            `;
+        }
+
+        // SUCCESS
+        if (data.status === 'success') {
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Import Complete',
+                html: `
+                    <div style="font-size:15px;">
+                        ${data.message}
+                    </div>
+                    ${logsHtml}
+                `,
+                confirmButtonColor: '#10b981',
+                width: '650px'
+            }).then(() => {
+                window.location.reload();
+            });
+
+        }
+
+        // ZERO IMPORTED / WARNING
+        else if (
+            data.status === 'zero_imported' ||
+            data.status === 'warning'
+        ) {
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Records Imported',
+                html: `
+                    <div style="font-size:15px;">
+                        ${data.message}
+                    </div>
+                    ${logsHtml}
+                `,
+                confirmButtonColor: '#f59e0b',
+                width: '700px'
+            });
+
+        }
+
+        // ERROR
+        else {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Import Failed',
+                html: `
+                    <div style="font-size:15px;">
+                        ${data.message}
+                    </div>
+                    ${logsHtml}
+                `,
+                confirmButtonColor: '#ef4444',
+                width: '700px'
+            });
+        }
+
+    })
+
+    .catch(error => {
+
+        console.error('Import Error:', error);
+
+        Swal.fire({
+            icon: 'error',
+            title: 'System Error',
+            html: `
+                <div style="font-size:15px;">
+                    Failed to communicate with the server.
+                </div>
+                <br>
+                <div style="
+                    color:red;
+                    font-size:13px;
+                    word-break:break-word;
+                ">
+                    ${error.message}
+                </div>
+            `,
+            confirmButtonColor: '#ef4444'
+        });
+
+    });
+
+});
+
+
+
   // Calculate dynamic card values based on active table entries instantly
   calculateDynamicCardMetrics();
 
@@ -730,73 +837,65 @@ $(document).ready(function(){
   $("#Resale").addClass("active");
 });
 
-function calculateDynamicCardMetrics() {
-  let resCount = 0, commCount = 0, agriCount = 0, loanCount = 0;
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // Grab the form and all elements with the 'auto-submit' class
+    const form = document.getElementById('plotFilterForm');
+    const autoSubmitElements = document.querySelectorAll('.auto-submit');
+    
+    // 1. AUTO-SUBMIT LOGIC
+    // Listens for any changes in dropdowns, text inputs, or number fields
+    autoSubmitElements.forEach(element => {
+        element.addEventListener('change', function() {
+            // Automatically submits the GET request to Django
+            form.submit();
+        });
+    });
 
-  // Scan visible table records inside the DOM tree safely
-  dtTable.rows({ filter: 'applied' }).every(function(rowIdx, tableLoop, rowLoop) {
-    const node = $(this.node());
-    const type = node.attr('data-type');
-    const loan = node.attr('data-loan');
+    // 2. DATE RANGE VALIDATION
+    // Only runs when the user explicitly clicks the "Search" button
+    form.addEventListener('submit', function(e) {
+        const fromDateInput = document.getElementById('from_date').value;
+        const toDateInput = document.getElementById('to_date').value;
 
-    if(type === 'residential_plot') resCount++;
-    if(type === 'commercial_plot') commCount++;
-    if(type === 'agricultural') agriCount++;
-    if(loan === 'yes') loanCount++;
-  });
+        // If both dates are filled out, verify the sequence
+        if (fromDateInput && toDateInput) {
+            const fromDate = new Date(fromDateInput);
+            const toDate = new Date(toDateInput);
 
-  // Inject calculated records into top metric badges dynamically
-  document.getElementById('card_count_res').innerText = resCount;
-  document.getElementById('card_count_comm').innerText = commCount;
-  document.getElementById('card_count_agri').innerText = agriCount;
-  document.getElementById('card_count_loan').innerText = loanCount;
-}
+            // If "From" is later than "To", block the search
+            if (fromDate > toDate) {
+                e.preventDefault(); // Stops the form from submitting to the server
+                
+                // Show an error popup
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Date Range',
+                    text: "'From Date' cannot be later than 'To Date'."
+                });
+                
+                // Highlight the field they need to fix
+                document.getElementById('to_date').focus();
+            }
+        }
+    });
 
-function applyLiveFilters(){
-  const title     = document.getElementById('f_title').value.trim().toLowerCase();
-  const city      = document.getElementById('f_city').value.trim().toLowerCase();
-  const locality  = document.getElementById('f_locality').value.trim().toLowerCase();
-  const type      = document.getElementById('f_type').value.toLowerCase();
-  const facing    = document.getElementById('f_facing').value.toLowerCase();
-  const corner    = document.getElementById('f_corner').value.toLowerCase();
-  const priceMin  = parseFloat(document.getElementById('f_price_min').value) || 0;
-  const priceMax  = parseFloat(document.getElementById('f_price_max').value) || Infinity;
-
-  $.fn.dataTable.ext.search.pop();
-  $.fn.dataTable.ext.search.push(function(settings, data, dataIndex){
-    const r = $(dtTable.row(dataIndex).node());
-    if(!r.length) return true;
-
-    const rowPrice = parseFloat(r.attr('data-price')) || 0;
-
-    if(title    && !r.attr('data-title').includes(title))       return false;
-    if(city     && !r.attr('data-city').includes(city))         return false;
-    if(locality && !r.attr('data-locality').includes(locality)) return false;
-    if(type     && r.attr('data-type') !== type)                return false;
-    if(facing   && r.attr('data-facing') !== facing)            return false;
-    if(corner   && r.attr('data-corner') !== corner)            return false;
-    if(rowPrice < priceMin || rowPrice > priceMax)              return false;
-
-    return true;
-  });
-  dtTable.draw();
-  
-  // Recalculate metrics card data so counters scale down as users filter options
-  calculateDynamicCardMetrics();
-}
-
-function resetAllFilters(){
-  document.getElementById('f_backend_search').value = '';
-  ['f_title','f_city','f_locality','f_price_min','f_price_max'].forEach(id=>document.getElementById(id).value='');
-  ['f_type','f_facing','f_corner'].forEach(id=>document.getElementById(id).value='');
-  $.fn.dataTable.ext.search = [];
-  dtTable.search('').draw();
-  calculateDynamicCardMetrics();
-  document.getElementById('plotFilterForm').submit();
-}
-
+    // 3. SMART CALENDAR UX
+    // Automatically blocks out past dates in the "To Date" calendar based on "From Date"
+    const fromField = document.getElementById('from_date');
+    const toField = document.getElementById('to_date');
+    
+    if (fromField && toField) {
+        fromField.addEventListener('change', function() {
+            if(this.value) {
+                // Sets the HTML5 'min' attribute so users can't even click invalid dates
+                toField.min = this.value; 
+            }
+        });
+    }
+    
+});
 function confirmPlotDelete(id) {
-
     Swal.fire({
         title: 'Move Property to Recycle Bin?',
         text: 'You can restore it later from the Recycle Bin.',
@@ -807,9 +906,7 @@ function confirmPlotDelete(id) {
         confirmButtonText: 'Yes, Delete',
         cancelButtonText: 'Cancel'
     })
-
     .then((result) => {
-
         if (!result.isConfirmed) {
             return;
         }
@@ -829,13 +926,9 @@ function confirmPlotDelete(id) {
                 'Content-Type': 'application/json'
             }
         })
-
         .then(response => response.json())
-
         .then(data => {
-
             if (data.status === 'success') {
-
                 Swal.fire({
                     icon: 'success',
                     title: 'Deleted Successfully',
@@ -845,46 +938,33 @@ function confirmPlotDelete(id) {
                 });
 
                 if (typeof dtTable !== 'undefined') {
-
                     dtTable
                         .row($('#row-' + id))
                         .remove()
                         .draw(false);
-
                 } else {
-
                     $('#row-' + id).remove();
-
                 }
 
                 if (typeof calculateDynamicCardMetrics === 'function') {
                     calculateDynamicCardMetrics();
                 }
-
             } else {
-
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
                     text: data.message
                 });
-
             }
-
         })
-
         .catch(error => {
-
             console.error(error);
-
             Swal.fire({
                 icon: 'error',
                 title: 'Server Error',
                 text: 'Unable to delete property.'
             });
-
         });
-
     });
 }
 
@@ -929,11 +1009,174 @@ function executeBulkDelete(){
   });
 }
 
+// ==========================================
+// UPDATED: Pre-upload size/type validations
+// ==========================================
 function checkFile(el){
-  const f = el.files[0]; if(!f) return;
-  if(f.size > 5*1024*1024){ alert('Size constraints matched over 5MB limit.'); el.value=''; return; }
-  if(!f.name.endsWith('.xlsx')){ alert('Only standard .xlsx books accepted.'); el.value=''; return; }
+  const f = el.files[0]; 
+  if(!f) return;
+  
+  if(f.size > 5*1024*1024){ 
+    Swal.fire({
+      icon: 'warning',
+      title: 'File Too Large',
+      text: 'Spreadsheet structural size exceeds the permitted 5MB constraint limit.',
+      confirmButtonColor: '#667eea'
+    });
+    el.value=''; 
+    return; 
+  }
+  
+  if(!f.name.endsWith('.xlsx')){ 
+    Swal.fire({
+      icon: 'error',
+      title: 'Unsupported Extension',
+      text: 'Invalid sheet layout! Only standard .xlsx workbooks are accepted.',
+      confirmButtonColor: '#667eea'
+    });
+    el.value=''; 
+    return; 
+  }
 }
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // Safely parse Django variables with fallbacks to 0
+    const totalProps = parseInt("{{ total_properties|default:'0' }}");
+    const activeListings = parseInt("{{ active_listings|default:'0' }}");
+    const resCount = parseInt("{{ residential_count|default:'0' }}");
+    const commCount = parseInt("{{ commercial_count|default:'0' }}");
+    const agriCount = parseInt("{{ agricultural_count|default:'0' }}");
+    const cornerCount = parseInt("{{ corner_plot_count|default:'0' }}");
+    const fencedCount = parseInt("{{ fenced_plot_count|default:'0' }}");
+    const financeCount = parseInt("{{ finance_ready_count|default:'0' }}");
+
+    // Common styling options for professional look
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+        }
+    };
+
+    // 1. DOUGHNUT CHART - Property Types
+    const ctxType = document.getElementById('propertyTypeChart').getContext('2d');
+    new Chart(ctxType, {
+        type: 'doughnut',
+        data: {
+            labels: ['Residential', 'Commercial', 'Agricultural'],
+            datasets: [{
+                data: [resCount, commCount, agriCount],
+                backgroundColor: ['#3B82F6', '#F59E0B', '#10B981'], // Blue, Orange, Green
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            ...commonOptions,
+            cutout: '65%' // Makes the doughnut ring thinner and more modern
+        }
+    });
+
+    // 2. BAR CHART - Plot Features
+    const ctxFeatures = document.getElementById('featuresChart').getContext('2d');
+    new Chart(ctxFeatures, {
+        type: 'bar',
+        data: {
+            labels: ['Corner Plots', 'Fenced', 'Finance Ready'],
+            datasets: [{
+                label: 'Total Count',
+                data: [cornerCount, fencedCount, financeCount],
+                backgroundColor: ['#14B8A6', '#F97316', '#8B5CF6'], // Teal, Orange, Purple
+                borderRadius: 4 // Rounded tops on the bars
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false } // Hide legend for single dataset bar chart
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 3. PIE CHART - Pricing Status
+    const unpricedCount = totalProps - activeListings;
+    const ctxPricing = document.getElementById('pricingChart').getContext('2d');
+    new Chart(ctxPricing, {
+        type: 'pie',
+        data: {
+            labels: ['Priced Listings', 'Unpriced Inventory'],
+            datasets: [{
+                data: [activeListings, unpricedCount > 0 ? unpricedCount : 0],
+                backgroundColor: ['#22C55E', '#94A3B8'], // Green, Slate Grey
+                borderWidth: 1,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: commonOptions
+    });
+});
+
+// 4. LINE CHART - Growth Trend Over Time
+    const ctxTrend = document.getElementById('trendChart').getContext('2d');
+    
+    // Note: You can pass these lists from your Django view later like:
+    // const months = {{ months_list|safe }};
+    // const growthData = {{ growth_data|safe }};
+    
+    new Chart(ctxTrend, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], // X-Axis (Time)
+            datasets: [{
+                label: 'New Properties',
+                data: [12, 19, 14, 25, 22, 30], // Y-Axis (Counts)
+                borderColor: '#3B82F6', // Blue line
+                backgroundColor: 'rgba(59, 130, 246, 0.1)', // Light blue fill under the line
+                borderWidth: 2,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#3B82F6',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: true, // Fills the area under the line
+                tension: 0.4 // Creates a smooth, curved line instead of sharp angles
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }, // Hiding legend to keep it clean
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            scales: {
+                y: { 
+                    beginAtZero: true,
+                    grid: { borderDash: [4, 4], color: '#e2e8f0' }
+                },
+                x: { 
+                    grid: { display: false } 
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
 </script>
 </body>
 </html>

@@ -20,9 +20,9 @@
     .properties-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
     
     /* ── Action Buttons & Search ── */
-    .btn-restore { background: #d1fae5; color: #059669; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 12px; }
+    .btn-restore { background: #d1fae5; color: #059669; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
     .btn-restore:hover { background: #10b981; color: white; }
-    .btn-hard-delete { background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 12px; }
+    .btn-hard-delete { background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
     .btn-hard-delete:hover { background: #ef4444; color: white; }
     .search-input { max-width: 250px; border-radius: 6px; border: 1px solid #cbd5e1; padding: 6px 12px; font-size: 13px; }
     
@@ -33,23 +33,26 @@
 </style>
 
 <div class="main-content">
-    <div class="page-header">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <h1 style="margin: 0; font-size: 22px; font-weight: 700;">
-                <i class="fas fa-trash-restore"></i> Global Recycle Bin
-            </h1>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <span style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600;">
-                    Total Deleted: {{ total_deleted_all }}
-                </span>
-                {% if total_deleted_all > 0 %}
-                <button class="btn-hard-delete" onclick="emptyAllBins()" style="padding: 8px 16px; font-size: 14px; background: #ef4444; color: white;">
-                    <i class="fas fa-bomb"></i> Empty ALL Bins
-                </button>
-                {% endif %}
-            </div>
+  <div class="page-header">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <h1 style="margin: 0; font-size: 22px; font-weight: 700;">
+            <i class="fas fa-trash-restore"></i> Global Recycle Bin
+        </h1>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <span style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; margin-right: 5px;">
+                Total Deleted: {{ total_deleted_all }}
+            </span>
+            {% if total_deleted_all > 0 %}
+            <button class="btn-restore" onclick="restoreAllBins()" style="padding: 8px 16px; font-size: 14px; background: #10b981; color: white;">
+                <i class="fas fa-undo"></i> Restore ALL Bins
+            </button>
+            <button class="btn-hard-delete" onclick="emptyAllBins()" style="padding: 8px 16px; font-size: 14px; background: #ef4444; color: white;">
+                <i class="fas fa-bomb"></i> Empty ALL Bins
+            </button>
+            {% endif %}
         </div>
     </div>
+</div>
 
     <div style="background: white; padding: 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
         
@@ -66,12 +69,14 @@
 
         <div class="tab-content" id="recycleBinTabsContent">
 
-            <!-- RENTAL RESIDENTIAL -->
             <div class="tab-pane fade show active" id="rental" role="tabpanel">
                 {% if rental_deleted %}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <input type="text" class="form-control search-input" placeholder="🔍 Search by Deleted By..." onkeyup="filterTable('rental-table', this.value)">
-                    <button class="btn-hard-delete" onclick="processBulkDelete('rental-residential', 'Rental Residential')"><i class="fas fa-dumpster-fire"></i> Empty Rental Bin</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-restore" onclick="processBulkRestore('rental-residential', 'Rental Residential')"><i class="fas fa-undo"></i> Restore This Bin</button>
+                        <button class="btn-hard-delete" onclick="processBulkDelete('rental-residential', 'Rental Residential')"><i class="fas fa-dumpster-fire"></i> Empty Rental Bin</button>
+                    </div>
                 </div>
                 {% endif %}
                 <div style="overflow-x: auto;">
@@ -119,12 +124,14 @@
                 </div>
             </div>
 
-            <!-- COMMERCIAL RENT -->
             <div class="tab-pane fade" id="commercial" role="tabpanel">
                 {% if commercial_deleted %}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <input type="text" class="form-control search-input" placeholder="🔍 Search by Deleted By..." onkeyup="filterTable('commercial-table', this.value)">
-                    <button class="btn-hard-delete" onclick="processBulkDelete('commercial', 'Commercial Rental')"><i class="fas fa-dumpster-fire"></i> Empty Commercial Rental Bin</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-restore" onclick="processBulkRestore('commercial', 'Commercial Rental')"><i class="fas fa-undo"></i> Restore This Bin</button>
+                        <button class="btn-hard-delete" onclick="processBulkDelete('commercial', 'Commercial Rental')"><i class="fas fa-dumpster-fire"></i> Empty Commercial Rental Bin</button>
+                    </div>
                 </div>
                 {% endif %}
                 <div style="overflow-x: auto;">
@@ -172,12 +179,14 @@
                 </div>
             </div>
 
-            <!-- PG / COLIVING -->
             <div class="tab-pane fade" id="pg" role="tabpanel">
                 {% if pg_deleted %}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <input type="text" class="form-control search-input" placeholder="🔍 Search by Deleted By..." onkeyup="filterTable('pg-table', this.value)">
-                    <button class="btn-hard-delete" onclick="processBulkDelete('pg-coliving', 'PG/Co-Living')"><i class="fas fa-dumpster-fire"></i> Empty PG Bin</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-restore" onclick="processBulkRestore('pg-coliving', 'PG/Co-Living')"><i class="fas fa-undo"></i> Restore This Bin</button>
+                        <button class="btn-hard-delete" onclick="processBulkDelete('pg-coliving', 'PG/Co-Living')"><i class="fas fa-dumpster-fire"></i> Empty PG Bin</button>
+                    </div>
                 </div>
                 {% endif %}
                 <div style="overflow-x: auto;">
@@ -225,12 +234,14 @@
                 </div>
             </div>
 
-            <!-- RESALE RESIDENTIAL -->
             <div class="tab-pane fade" id="resale" role="tabpanel">
                 {% if resale_deleted %}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <input type="text" class="form-control search-input" placeholder="🔍 Search by Deleted By..." onkeyup="filterTable('resale-table', this.value)">
-                    <button class="btn-hard-delete" onclick="processBulkDelete('resale-residential', 'Resale Residential')"><i class="fas fa-dumpster-fire"></i> Empty Resale Bin</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-restore" onclick="processBulkRestore('resale-residential', 'Resale Residential')"><i class="fas fa-undo"></i> Restore This Bin</button>
+                        <button class="btn-hard-delete" onclick="processBulkDelete('resale-residential', 'Resale Residential')"><i class="fas fa-dumpster-fire"></i> Empty Resale Bin</button>
+                    </div>
                 </div>
                 {% endif %}
                 <div style="overflow-x: auto;">
@@ -278,12 +289,14 @@
                 </div>
             </div>
 
-            <!-- COMMERCIAL RESALE -->
             <div class="tab-pane fade" id="comm-resale" role="tabpanel">
                 {% if commercial_resale_deleted %}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <input type="text" class="form-control search-input" placeholder="🔍 Search by Deleted By..." onkeyup="filterTable('comm-resale-table', this.value)">
-                    <button class="btn-hard-delete" onclick="processBulkDelete('commercial-resale', 'Commercial Resale')"><i class="fas fa-dumpster-fire"></i> Empty Commercial Resale Bin</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-restore" onclick="processBulkRestore('commercial-resale', 'Commercial Resale')"><i class="fas fa-undo"></i> Restore This Bin</button>
+                        <button class="btn-hard-delete" onclick="processBulkDelete('commercial-resale', 'Commercial Resale')"><i class="fas fa-dumpster-fire"></i> Empty Commercial Resale Bin</button>
+                    </div>
                 </div>
                 {% endif %}
                 <div style="overflow-x: auto;">
@@ -331,12 +344,14 @@
                 </div>
             </div>
 
-            <!-- PLOT SALE -->
             <div class="tab-pane fade" id="plot" role="tabpanel">
                 {% if plot_sale_deleted %}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <input type="text" class="form-control search-input" placeholder="🔍 Search by Deleted By..." onkeyup="filterTable('plot-table', this.value)">
-                    <button class="btn-hard-delete" onclick="processBulkDelete('plot-sale', 'Plot Sale')"><i class="fas fa-dumpster-fire"></i> Empty Plot Bin</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-restore" onclick="processBulkRestore('plot-sale', 'Plot Sale')"><i class="fas fa-undo"></i> Restore This Bin</button>
+                        <button class="btn-hard-delete" onclick="processBulkDelete('plot-sale', 'Plot Sale')"><i class="fas fa-dumpster-fire"></i> Empty Plot Bin</button>
+                    </div>
                 </div>
                 {% endif %}
                 <div style="overflow-x: auto;">
@@ -384,12 +399,14 @@
                 </div>
             </div>
 
-            <!-- INDUSTRIAL RESALE -->
             <div class="tab-pane fade" id="industrial" role="tabpanel">
                 {% if industrial_resale_deleted %}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <input type="text" class="form-control search-input" placeholder="🔍 Search by Deleted By..." onkeyup="filterTable('industrial-table', this.value)">
-                    <button class="btn-hard-delete" onclick="processBulkDelete('industrial-resale', 'Industrial Resale')"><i class="fas fa-dumpster-fire"></i> Empty Industrial Bin</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-restore" onclick="processBulkRestore('industrial-resale', 'Industrial Resale')"><i class="fas fa-undo"></i> Restore This Bin</button>
+                        <button class="btn-hard-delete" onclick="processBulkDelete('industrial-resale', 'Industrial Resale')"><i class="fas fa-dumpster-fire"></i> Empty Industrial Bin</button>
+                    </div>
                 </div>
                 {% endif %}
                 <div style="overflow-x: auto;">
@@ -437,12 +454,14 @@
                 </div>
             </div>
 
-            <!-- AGRICULTURAL RESALE -->
             <div class="tab-pane fade" id="agricultural" role="tabpanel">
                 {% if agricultural_resale_deleted %}
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                     <input type="text" class="form-control search-input" placeholder="🔍 Search by Deleted By..." onkeyup="filterTable('agri-table', this.value)">
-                    <button class="btn-hard-delete" onclick="processBulkDelete('agricultural-resale', 'Agricultural Resale')"><i class="fas fa-dumpster-fire"></i> Empty Agricultural Bin</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-restore" onclick="processBulkRestore('agricultural-resale', 'Agricultural Resale')"><i class="fas fa-undo"></i> Restore This Bin</button>
+                        <button class="btn-hard-delete" onclick="processBulkDelete('agricultural-resale', 'Agricultural Resale')"><i class="fas fa-dumpster-fire"></i> Empty Agricultural Bin</button>
+                    </div>
                 </div>
                 {% endif %}
                 <div style="overflow-x: auto;">
@@ -500,14 +519,14 @@
     $("#RecycleBin").addClass("active");
     const csrfToken = '{{ csrf_token }}';
 
-    // Real-time table filter logic for the "Deleted By" column (which is index 4 in the table row)
+    // Real-time table filter logic for the "Deleted By" column (index 4)
     function filterTable(tableId, query) {
         const filter = query.toLowerCase();
         const table = document.getElementById(tableId);
         const tr = table.getElementsByTagName("tr");
 
         for (let i = 1; i < tr.length; i++) {
-            const td = tr[i].getElementsByTagName("td")[4]; // Index 4 targets the "Deleted By" column
+            const td = tr[i].getElementsByTagName("td")[4]; 
             if (td) {
                 const txtValue = td.textContent || td.innerText;
                 if (txtValue.toLowerCase().indexOf(filter) > -1) {
@@ -519,7 +538,7 @@
         }
     }
 
-    // New logic to safely hit ALL your endpoints sequentially to empty everything
+    // safely hits ALL endpoints sequentially to empty everything
     function emptyAllBins() {
         Swal.fire({
             title: 'Empty ALL Recycle Bins?',
@@ -637,6 +656,110 @@
             }
         });
     }
+
+    function restoreAllBins() {
+        Swal.fire({
+            title: 'Restore All Recycle Bins?',
+            text: 'This will instantly restore ALL deleted listings across EVERY single category back to live views.',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="fas fa-undo"></i> Yes, Restore Everything!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ 
+                    title: 'Processing Request...', 
+                    text: 'Re-activating records across databases...', 
+                    allowOutsideClick: false, 
+                    didOpen: () => { Swal.showLoading(); }
+                });
+                
+                const endpoints = [
+                    'rental-residential', 'commercial', 'pg-coliving', 'resale-residential',
+                    'commercial-resale', 'plot-sale', 'industrial-resale', 'agricultural-resale'
+                ];
+
+                const promises = endpoints.map(ep => 
+                    fetch(`/Admin_App/bulk-restore/${ep}/`, {
+                        method: 'POST',
+                        headers: { 
+                            'X-CSRFToken': csrfToken, 
+                            'X-Requested-With': 'XMLHttpRequest' 
+                        }
+                    })
+                );
+
+                Promise.all(promises)
+                    .then(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'All Bins Restored!',
+                            text: 'Every real estate listing has been successfully returned to live status dashboards.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => { 
+                            window.location.reload(); 
+                        });
+                    })
+                    .catch(err => {
+                        console.error("Bulk restoration tracking crash:", err);
+                        Swal.fire('Error', 'Server connection timed out during mass restoration.', 'error');
+                    });
+            }
+        });
+    }
+
+    function processBulkRestore(propertyType, label) {
+        Swal.fire({
+            title: `Restore All ${label} items?`,
+            text: `This will bulk restore all soft-deleted records currently listed inside the ${label} container view.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, Restore All!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ 
+                    title: 'Processing...', 
+                    allowOutsideClick: false, 
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                fetch(`/Admin_App/bulk-restore/${propertyType}/`, {
+                    method: 'POST',
+                    headers: { 
+                        'X-CSRFToken': csrfToken, 
+                        'X-Requested-With': 'XMLHttpRequest' 
+                    }
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP Error Status: ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Restored Successfully!',
+                            text: data.message,
+                            timer: 1800,
+                            showConfirmButton: false
+                        }).then(() => { 
+                            window.location.reload(); 
+                        });
+                    } else {
+                        Swal.fire('Operational Error', data.message, 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error("Single model group restore trace failure:", err);
+                    Swal.fire('Error', 'Network interface broken or server endpoint context timed out.', 'error');
+                });
+        }
+    });
+}
 </script>
 </body>
 </html>

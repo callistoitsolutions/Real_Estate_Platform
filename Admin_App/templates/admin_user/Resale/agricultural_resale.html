@@ -127,7 +127,7 @@
                 </div>
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Irrigation Facility Active?</label>
-                  <select class="form-select" name="irrigation_facility">
+                  <select class="form-select" name="irrigation_facility_active">
                     <option value="no">No</option>
                     <option value="yes">Yes</option>
                   </select>
@@ -143,7 +143,7 @@
                   </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Soil Fertility Level</label>
+                  <label class="form-label"> Fertility Staus</label>
                   <select class="form-select" name="fertility_status">
                     <option value="medium">Medium Yield</option>
                     <option value="high">High Yield</option>
@@ -151,7 +151,7 @@
                   </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Previously Cultivated Crops</label>
+                  <label class="form-label">Previously Crops</label>
                   <input type="text" class="form-control" name="previous_crops" placeholder="e.g. Cotton, Sugar Cane, Rice">
                 </div>
               </div>
@@ -168,7 +168,7 @@
             <div class="section-body">
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Expected Sale Value (₹) <span class="required">*</span></label>
+                  <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
                   <input type="number" class="form-control" id="expected_price" name="expected_price" placeholder="Valuation Amount" required>
                 </div>
                 <div class="col-md-6 mb-3">
@@ -201,7 +201,7 @@
 
               <div class="row pt-2 border-top">
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Outstanding Agricultural Loan? <span class="required">*</span></label>
+                  <label class="form-label"> Loan On Property? <span class="required">*</span></label>
                   <div class="radio-group">
                      <label class="radio-option"><input type="radio" name="agri_loan" value="no" checked> No</label>
                      <label class="radio-option"><input type="radio" name="agri_loan" value="yes"> Yes</label>
@@ -269,7 +269,7 @@
                 <div class="col-md-4 mb-3"><label class="form-label">Direct Contact Number <span class="required">*</span></label><input type="tel" class="form-control" name="owner_contact" placeholder="10-digit smartphone mobile" pattern="[0-9]{10}" required></div>
                 <div class="col-md-4 mb-3"><label class="form-label">Owner Email Profile</label><input type="email" class="form-control" name="owner_email" placeholder="name@email.com"></div>
                 <div class="col-md-12"><label class="form-label">Residency Status <span class="required">*</span></label>
-                  <select class="form-select" name="comm_residency">
+                  <select class="form-select" name="residency_status">
                     <option value="resident">Domestic Resident Citizen</option>
                     <option value="nri">Non-Resident Indian (NRI)</option>
                     <option value="pio">Person of Indian Origin (PIO)</option>

@@ -430,6 +430,8 @@ urlpatterns = [
     path('system-audit-logs/', views.system_audit_logs, name='system_audit_logs'),
     path('rental-residential/bulk-delete/', views.rental_bulk_delete, name='rental_bulk_delete'),
     path('global_recycle_bin', views.global_recycle_bin, name='global_recycle_bin'),
+    path('bulk-restore/<str:property_type>/', views.bulk_restore_route, name='bulk_restore_route'),
+
     #path('rental-residential/recycle-bin/', views.rental_recycle_bin, name='rental_recycle_bin'),
     path(
     'rental-residential/restore/<str:pk>/',
@@ -530,19 +532,32 @@ urlpatterns = [
   #  path('resale_residential_list',            views.resale_residential_list,   name='resale_residential_list'),
     path('resale_residential_view/<int:pk>/',   views.resale_residential_view,   name='resale_residential_view'),
     path('resale_residential_delete/<int:pk>/', views.resale_residential_delete, name='resale_residential_delete'),
-    path('resale-residential/edit/<int:id>/', views.resale_residential_edit, name='resale_residential_edit'),
+    path(
+    'resale-residential/edit/<str:id>/',
+    views.resale_residential_edit,
+    name='resale_residential_edit'
+    ),
     path('resale-residential/restore/<int:id>/', views.resale_restore, name='resale_restore'),
     path('resale-residential/hard-delete/<int:id>/', views.resale_hard_delete, name='resale_hard_delete'),
     
     # Excel Import & Sample Download
     path('resale/import-excel/',     views.resale_residential_import_excel,  name='resale_residential_import_excel'),
     path('resale/sample-excel/',     views.resale_residential_sample_excel,  name='resale_residential_sample_excel'),
+
+
+    path('export_resale_csv/', views.export_resale_csv, name='export_resale_csv'),
+    path('export_resale_excel/', views.export_resale_excel, name='export_resale_excel'),
+
     
     
     ####################End Urls Section For Resindential Resale Property #######################################
     
     #################### START Urls Section For Commercial Resale Property #######################################
     
+ 
+    path('commercial/export/excel/', views.export_commercial_resale_excel, name='export_commercial_resale_excel'),
+    path('commercial/export/csv/', views.export_commercial_resale_csv, name='export_commercial_resale_csv'),
+
      path('add_commercial_property', views.add_commercial_property, name='add_commercial_property'),
 
      path('commercial-resale/import/', views.import_commercial_data, name='import_commercial_data'),
@@ -554,11 +569,11 @@ urlpatterns = [
      
      path('commercial-resale/bulk-delete/', views.commercial_resale_bulk_delete, name='commercial_resale_bulk_delete'),
     
-    path('commercial-resale/restore/<int:id>/', views.commercial_resale_restore, name='commercial_resale_restore'),
-    path('commercial-resale/hard-delete/<int:id>/', views.commercial_resale_hard_delete, name='commercial_resale_hard_delete'),
+    path('commercial-resale/restore/<str:id>/', views.commercial_resale_restore, name='commercial_resale_restore'),
+    path('commercial-resale/hard-delete/<str:id>/', views.commercial_resale_hard_delete, name='commercial_resale_hard_delete'),
 
-    path('commercial-resale/view/<int:id>/', views.commercial_resale_view, name='commercial_resale_view'),
-    path('commercial-resale/edit/<int:id>/', views.commercial_resale_edit, name='commercial_resale_edit'),
+    path('commercial-resale/view/<str:id>/', views.commercial_resale_view, name='commercial_resale_view'),
+    path('commercial-resale/edit/<str:id>/', views.commercial_resale_edit, name='commercial_resale_edit'),
 
 
     ####################End Urls Section For Commercial Resale Property #######################################
@@ -600,15 +615,15 @@ urlpatterns = [
     path('industrial-resale/add/', views.industrial_resale_add, name='industrial_resale_add'),
     
     # URL for Editing Industrial Resale
-    path('industrial-resale/edit/<int:id>/', views.industrial_resale_edit, name='industrial_resale_edit'),
+    path('industrial-resale/edit/<str:id>/', views.industrial_resale_edit, name='industrial_resale_edit'),
 
     
-    path('industrial-resale/view/<int:id>/', views.industrial_resale_view, name='industrial_resale_view'),
+    path('industrial-resale/view/<str:id>/', views.industrial_resale_view, name='industrial_resale_view'),
 
     path('industrial-resale/restore/<int:id>/', views.industrial_resale_restore, name='industrial_resale_restore'),
     path('industrial-resale/hard-delete/<int:id>/', views.industrial_resale_hard_delete, name='industrial_resale_hard_delete'),
 
-    path('industrial-resale/delete/<int:id>/', views.industrial_resale_delete, name='industrial_resale_delete'),
+    path('industrial-resale/delete/<str:id>/', views.industrial_resale_delete, name='industrial_resale_delete'),
 
     path('industrial-resale/bulk-delete/', views.industrial_bulk_delete, name='industrial_bulk_delete'),
   

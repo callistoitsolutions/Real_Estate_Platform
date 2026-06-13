@@ -38,7 +38,8 @@ from datetime import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-
+from django.db import transaction  
+from django.utils import timezone
 import csv
 from datetime import datetime, date
 import io
@@ -75,6 +76,7 @@ from django.db.models import Q, Count, Avg, Max, Min, Sum
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_protect
 
 ########### Crime Officer Views#######
 
@@ -2339,15 +2341,6 @@ def download_commercial_template(request):
 # ─────────────────────────────────────────────────────────────
 # DELETE VIEW  (POST only — called via JS fetch)
 # ─────────────────────────────────────────────────────────────
-@require_POST
-def pg_delete(request, pk):
-    session_id = request.session.get('Admin_id')
-    if not session_id:
-        return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
-
-    prop = get_object_or_404(PGColivingProperty, pk=pk)
-    prop.delete()
-    return JsonResponse({'status': 'success', 'message': 'Property deleted successfully.'})
 
 ########### Views end for pg co living rental list ########################
 
@@ -2420,81 +2413,6 @@ def agricultural_resale(request):
 
 
 
-def resale_residential_bulk_delete(request):
-    """Handles Advanced Bulk Deletions for Resale Residential Properties."""
-    if request.method != 'POST':
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
-        
-    session_id = request.session.get('Admin_id')
-    if not session_id:
-        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
-
-    try:
-        data = json.loads(request.body)
-        delete_type = data.get('delete_type')
-        properties = ResaleResidentialProperty.objects.all()
-        
-        if delete_type == 'delete_all':
-            count = properties.count()
-            properties.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted ALL {count} resale properties.'})
-            
-        elif delete_type == 'current_page':
-            page_ids = data.get('page_ids', [])
-            target_props = properties.filter(id__in=page_ids) # Or pk__in
-            count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} resale properties from current page.'})
-            
-        elif delete_type == 'date_range':
-            from_date = data.get('from_date')
-            to_date = data.get('to_date')
-            # Using created_at for accurate date ranges, change to available_from if needed
-            target_props = properties.filter(created_at__range=[from_date, to_date])
-            count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} resale properties in date range.'})
-            
-        elif delete_type == 'latest_month':
-            thirty_days_ago = timezone.now() - timedelta(days=30)
-            target_props = properties.filter(created_at__gte=thirty_days_ago)
-            count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} resale properties from the last 30 days.'})
-            
-        elif delete_type == 'old_data':
-            six_months_ago = timezone.now() - timedelta(days=180)
-            target_props = properties.filter(created_at__lt=six_months_ago)
-            count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} older resale properties.'})
-            
-        elif delete_type == 'by_uploader':
-            uploader = data.get('uploader_text', '')
-            target_props = properties.filter(
-                Q(uploaded_by_name__icontains=uploader) | 
-                Q(uploaded_by_email__icontains=uploader) |
-                Q(uploaded_by_role__icontains=uploader)
-            )
-            count = target_props.count()
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} resale properties uploaded by {uploader}.'})
-
-        elif delete_type == 'by_file':
-            file_name = data.get('file_name', '')
-            # Replace 'upload_file_name' with your exact database field name for tracking files
-            target_props = properties.filter(upload_file_name=file_name) 
-            count = target_props.count()
-            if count == 0:
-                return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
-            target_props.delete()
-            return JsonResponse({'status': 'success', 'message': f'Successfully deleted {count} resale properties from {file_name}.'})
-            
-        else:
-            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
-
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
 
 
 
@@ -5310,23 +5228,30 @@ def rental_residential_delete(request, pk):
 
 
 
+def calculate_retention(queryset):
+    now = timezone.now()
+    items = list(queryset)
+
+    for item in items:
+        if item.deleted_at:
+            deleted_at = item.deleted_at
+            # Safeguard against offset-naive vs offset-aware datetime comparison errors
+            if timezone.is_naive(deleted_at):
+                deleted_at = timezone.make_aware(deleted_at)
+            expiry_date = deleted_at + timedelta(days=30)
+            item.days_left = max((expiry_date - now).days, 0)
+        else:
+            item.days_left = 30
+    return items
+
+from django.db import transaction
+
+# ── UNIFIED GLOBAL RECYCLE BIN VIEW ──────────────────────────────────────────
 def global_recycle_bin(request):
     """Unified Recycle Bin displaying deleted items from all property modules."""
     session_id = request.session.get('Admin_id')
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
-
-    def calculate_retention(queryset):
-        now = timezone.now()
-        items = list(queryset)
-
-        for item in items:
-            if item.deleted_at:
-                expiry_date = item.deleted_at + timedelta(days=30)
-                item.days_left = max((expiry_date - now).days, 0)
-            else:
-                item.days_left = 30
-        return items
 
     rental_deleted = calculate_retention(RentalResidentialProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
     commercial_deleted = calculate_retention(CommercialRentalProperty.objects.filter(is_deleted=True).order_by('-deleted_at'))
@@ -5352,9 +5277,7 @@ def global_recycle_bin(request):
             len(industrial_resale_deleted) + len(agricultural_resale_deleted)
         )
     }
-
     return render(request, 'admin_user/Reports/Rental/global_recycle_bin.html', context)
-
 
 def system_audit_logs(request):
     """A completely separate view for tracking Deletion and Restore Audit Logs."""
@@ -5443,38 +5366,147 @@ def system_audit_logs(request):
     return render(request, 'admin_user/Reports/Rental/audit_logs.html', context)
 
 
+
+
+
+@csrf_exempt
 @require_POST
-def bulk_hard_delete_properties(request, property_type):
-    """Permanently deletes all soft-deleted items for a specific property type."""
-    session_id = request.session.get('Admin_id')
-    if not session_id:
-        return JsonResponse({'status': 'error', 'message': 'Unauthorized entry.'}, status=403)
-    
-    # Map property type slugs to corresponding models
-    model_mapping = {
-        'rental-residential': RentalResidentialProperty,
-        'commercial': CommercialRentalProperty,
-        'pg-coliving': PGColivingProperty,
-        'resale-residential': ResaleResidentialProperty,
-        'commercial-resale': CommercialResaleProperty,
-        'plot-sale': PlotSaleProperty,
-        'industrial-resale': IndustrialResaleProperty,
-        'agricultural-resale': AgriculturalResaleProperty,
-    }
-    
-    model = model_mapping.get(property_type)
-    if not model:
-        return JsonResponse({'status': 'error', 'message': 'Invalid property module type.'})
-    
+def bulk_restore_route(request, property_type):
+    """
+    Unified bulk-restore engine. Reverses soft-deletion status across 
+    all 8 real estate modules using efficient database batch updates.
+    """
+    admin_id = request.session.get('Admin_id')
+    if not admin_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'}, status=401)
+
     try:
-        # Perform permanent hard delete on all items marked as is_deleted=True
-        deleted_count, _ = model.objects.filter(is_deleted=True).delete()
+        # Complete dictionary mapping for all active property models
+        model_map = {
+            'rental-residential': RentalResidentialProperty,
+            'commercial': CommercialRentalProperty,
+            'pg-coliving': PGColivingProperty,
+            'resale-residential': ResaleResidentialProperty,
+            'commercial-resale': CommercialResaleProperty,
+            'plot-sale': PlotSaleProperty,
+            'industrial-resale': IndustrialResaleProperty,
+            'agricultural-resale': AgriculturalResaleProperty,
+        }
+
+        # Guard against invalid module requests
+        if property_type not in model_map:
+            return JsonResponse({
+                'status': 'error', 
+                'message': f'Invalid property module selector: {property_type}'
+            }, status=400)
+
+        TargetModel = model_map[property_type]
+        
+        # Grab only the records currently marked as soft-deleted
+        deleted_queryset = TargetModel.objects.filter(is_deleted=True)
+        count = deleted_queryset.count()
+
+        if count == 0:
+            readable_name = property_type.replace("-", " ").title()
+            return JsonResponse({
+                'status': 'success', 
+                'message': f'The bin for {readable_name} has no items to restore.'
+            })
+
+        # Perform a high-speed database batch update
+        deleted_queryset.update(
+            is_deleted=False,
+            deleted_at=None,
+            deleted_by=None
+        )
+
         return JsonResponse({
             'status': 'success',
-            'message': f'Permanently wiped all {deleted_count} items from this bin context.'
+            'message': f'Successfully restored {count} properties back to active inventory status.'
         })
+
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
+        return JsonResponse({
+            'status': 'error', 
+            'message': f'Database operational failure during restoration: {str(e)}'
+        }, status=500)
+
+
+@csrf_exempt
+@require_POST
+def bulk_hard_delete_properties(request, property_type):
+
+    """
+    Unified hard-delete engine. Permanently deletes soft-deleted records 
+    across all 8 real estate modules and purges attached media files from disk.
+    """
+    admin_id = request.session.get('Admin_id')
+    if not admin_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'}, status=401)
+
+    try:
+        # 1. Map endpoint slugs to their respective Models
+        model_map = {
+            'rental-residential': RentalResidentialProperty,
+            'commercial': CommercialRentalProperty,
+            'pg-coliving': PGColivingProperty,
+            'resale-residential': ResaleResidentialProperty,
+            'commercial-resale': CommercialResaleProperty,
+            'plot-sale': PlotSaleProperty,
+            'industrial-resale': IndustrialResaleProperty,   
+            'agricultural-resale': AgriculturalResaleProperty,
+        }
+
+        if property_type not in model_map:
+            return JsonResponse({'status': 'error', 'message': f'Invalid property module context: {property_type}'}, status=400)
+
+        TargetModel = model_map[property_type]
+        
+        # 2. Grab all items waiting in the recycle bin for this specific model
+        deleted_queryset = TargetModel.objects.filter(is_deleted=True)
+        count = deleted_queryset.count()
+
+        if count == 0:
+            return JsonResponse({
+                'status': 'success', 
+                'message': f'The bin for {property_type.replace("-", " ").title()} is already completely empty.'
+            })
+
+        # 3. Media Cleanup Loop (Prevents unlinked/orphaned images/videos from filling up the disk)
+        for property_obj in deleted_queryset:
+            # Drop related images if the model utilizes a related images manager
+            if hasattr(property_obj, 'images'):
+                try:
+                    for img in property_obj.images.all():
+                        if img.image:
+                            img.image.delete(save=False)
+                except Exception:
+                    pass  # Fail gracefully if relationship structure differs
+
+            # Drop standalone video files if present
+            if hasattr(property_obj, 'video') and property_obj.video:
+                try:
+                    property_obj.video.delete(save=False)
+                except Exception:
+                    pass
+
+            # Drop standalone image files if present (e.g., plot layouts, agri maps)
+            if hasattr(property_obj, 'image') and property_obj.image:
+                try:
+                    property_obj.image.delete(save=False)
+                except Exception:
+                    pass
+
+        # 4. Wipe rows from the database permanently
+        deleted_queryset.delete()
+
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Permanently purged {count} records and all associated assets from the database.'
+        })
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Database operational failure: {str(e)}'}, status=500)
 
 
 
@@ -7069,6 +7101,7 @@ from django.db.models import Sum, Count
 
 
 
+
 def commercial_list(request):
     session_id = request.session.get('Admin_id')
     if not session_id:
@@ -7088,6 +7121,47 @@ def commercial_list(request):
     budget_query = request.GET.get('budget', '').strip()
     from_date_str = request.GET.get('from_date', '').strip()
     to_date_str = request.GET.get('to_date', '').strip()
+
+    # ═══════════════════════════════════════
+    # DYNAMIC SEARCH DROPDOWN & BUDGET POPULATORS
+    # ═══════════════════════════════════════
+    unfiltered_base = CommercialRentalProperty.objects.filter(is_deleted=False)
+    
+    unique_property_types = unfiltered_base.values_list('property_type', flat=True).distinct()
+    unique_cities = unfiltered_base.values_list('city', flat=True).distinct()
+    unique_zones = unfiltered_base.exclude(zone_type__isnull=True).exclude(zone_type='').values_list('zone_type', flat=True).distinct()
+    unique_possession = unfiltered_base.values_list('possession_status', flat=True).distinct()
+    unique_roles = unfiltered_base.exclude(uploaded_by_role__isnull=True).exclude(uploaded_by_role='').values_list('uploaded_by_role', flat=True).distinct()
+
+    # Financial Aggregations & Dynamic Budget Tier Generation
+    financials = unfiltered_base.aggregate(
+        avg=Avg('expected_rent'), max_r=Max('expected_rent'), min_r=Min('expected_rent'),
+        total_r=Sum('expected_rent'), deposit_total=Sum('security_deposit'), area_avg=Avg('builtup_area')
+    )
+    
+    max_rent = financials['max_r'] or 0
+    min_rent = financials['min_r'] or 0
+
+    dynamic_budgets = []
+    if max_rent > 0:
+        interval = (max_rent - min_rent) / 4
+        if interval == 0:
+            dynamic_budgets.append({
+                'value': 'tier_1', 
+                'label': f"Up to ₹{int(max_rent):,}", 
+                'min': 0, 'max': max_rent
+            })
+        else:
+            b1 = min_rent + interval
+            b2 = min_rent + (interval * 2)
+            b3 = min_rent + (interval * 3)
+
+            dynamic_budgets = [
+                {'value': 'tier_1', 'label': f"Under ₹{int(b1):,}", 'min': 0, 'max': b1},
+                {'value': 'tier_2', 'label': f"₹{int(b1):,} – ₹{int(b2):,}", 'min': b1, 'max': b2},
+                {'value': 'tier_3', 'label': f"₹{int(b2):,} – ₹{int(b3):,}", 'min': b2, 'max': b3},
+                {'value': 'tier_4', 'label': f"Above ₹{int(b3):,}", 'min': b3, 'max': max_rent * 10}
+            ]
 
     # Base Active Queryset 
     properties = CommercialRentalProperty.objects.filter(is_deleted=False)
@@ -7119,16 +7193,12 @@ def commercial_list(request):
     if listed_by_query and listed_by_query != "All Roles":
         properties = properties.filter(uploaded_by_role__iexact=listed_by_query)
 
-    # Budget Range Lookup Filter
+    # Dynamic Budget Range Filter Lookup Execution
     if budget_query and budget_query != "All Budgets":
-        if budget_query == "under_25k":
-            properties = properties.filter(expected_rent__lt=25000)
-        elif budget_query == "25k_1L":
-            properties = properties.filter(expected_rent__gte=25000, expected_rent__lte=100000)
-        elif budget_query == "1L_5L":
-            properties = properties.filter(expected_rent__gte=100000, expected_rent__lte=500000)
-        elif budget_query == "above_5L":
-            properties = properties.filter(expected_rent__gt=500000)
+        for bucket in dynamic_budgets:
+            if budget_query == bucket['value']:
+                properties = properties.filter(expected_rent__gte=bucket['min'], expected_rent__lte=bucket['max'])
+                break
 
     # Created At Date Filter Ranges
     if from_date_str:
@@ -7141,38 +7211,16 @@ def commercial_list(request):
         if t_date:
             properties = properties.filter(created_at__date__lte=t_date)
 
-    # Order parameters sorting to top view
     properties = properties.order_by('-id')
 
-    # ═══════════════════════════════════════
-    # DYNAMIC SEARCH DROPDOWN POPULATORS
-    # ═══════════════════════════════════════
-    unfiltered_base = CommercialRentalProperty.objects.filter(is_deleted=False)
-    
-    unique_property_types = unfiltered_base.values_list('property_type', flat=True).distinct()
-    unique_cities = unfiltered_base.values_list('city', flat=True).distinct()
-    unique_zones = unfiltered_base.exclude(zone_type__isnull=True).exclude(zone_type='').values_list('zone_type', flat=True).distinct()
-    unique_possession = unfiltered_base.values_list('possession_status', flat=True).distinct()
-    unique_roles = unfiltered_base.exclude(uploaded_by_role__isnull=True).exclude(uploaded_by_role='').values_list('uploaded_by_role', flat=True).distinct()
-
-    # ═══════════════════════════════════════
-    # 📊 KPI DASHBOARD DATA CALCULATIONS
-    # ═══════════════════════════════════════
+    # KPI Dashboards metrics logic
     total_properties = unfiltered_base.count()
-    active_listings = unfiltered_base.count() # Base live listings counter
-    
+    active_listings = unfiltered_base.count()
     occupied_count = unfiltered_base.filter(possession_status__icontains="occupied").count()
     vacant_count = unfiltered_base.filter(possession_status__icontains="ready").count()
-
     occupancy_rate = round((occupied_count / total_properties * 100), 1) if total_properties > 0 else 0
     vacancy_rate = round((vacant_count / total_properties * 100), 1) if total_properties > 0 else 0
 
-    # Financial Aggregations
-    financials = unfiltered_base.aggregate(
-        avg=Avg('expected_rent'), max_r=Max('expected_rent'), min_r=Min('expected_rent'),
-        total_r=Sum('expected_rent'), deposit_total=Sum('security_deposit'), area_avg=Avg('builtup_area')
-    )
-    
     avg_rent = financials['avg'] or 0
     max_rent = financials['max_r'] or 0
     min_rent = financials['min_r'] or 0
@@ -7180,43 +7228,31 @@ def commercial_list(request):
     total_security_deposit = financials['deposit_total'] or 0
     avg_area = financials['area_avg'] or 0
 
-    # Business Quality Specs
     ready_to_move_count = vacant_count
     premium_properties_count = unfiltered_base.filter(expected_rent__gte=100000).count()
     affordable_properties_count = unfiltered_base.filter(expected_rent__lt=25000).count()
-    
     short_lease_count = unfiltered_base.filter(lockin_period__lte=6).count()
     long_lease_count = unfiltered_base.filter(lockin_period__gt=11).count()
-    
     with_images_count = unfiltered_base.filter(images__isnull=False).distinct().count()
     with_owner_count = unfiltered_base.exclude(owner_name__isnull=True).exclude(owner_name='').count()
-
     image_pct = round((with_images_count / total_properties * 100), 1) if total_properties > 0 else 0
     verified_pct = round((with_owner_count / total_properties * 100), 1) if total_properties > 0 else 0
 
-    # Placeholders for Quick Stats Segment
     total_tenants = occupied_count
     collection_rate = 98
     pending_payments = unfiltered_base.filter(possession_status__icontains="dispute").count()
     maintenance_req = unfiltered_base.filter(maintenance_charges__gt=0).count()
 
-    # ═══════════════════════════════════════
-    # 📉 CHART AGGREGATIONS (JSON)
-    # ═══════════════════════════════════════
-    # 4a. Property Type Distribution
+    # Chart Serialization Lookups
     pt_qs = unfiltered_base.values('property_type').annotate(count=Count('id')).order_by('-count')
     prop_type_labels_json = json.dumps([item['property_type'].replace('-', ' ').title() for item in pt_qs])
     prop_type_counts_json = json.dumps([item['count'] for item in pt_qs])
 
-    # 4b. Monthly Distribution (Grouped by City for visual split)
     city_qs = unfiltered_base.values('city').annotate(revenue=Sum('expected_rent')).order_by('-revenue')[:6]
     monthly_labels_json = json.dumps([item['city'] for item in city_qs])
     monthly_revenue_json = json.dumps([float(item['revenue'] or 0) for item in city_qs])
-
-    # 4c. Occupancy Array Data
     occupancy_json = json.dumps([occupied_count, vacant_count, total_properties - (occupied_count + vacant_count)])
 
-    # 4d. Rent Ranges
     rent_buckets = [
         ('Under 25k', unfiltered_base.filter(expected_rent__lt=25000).count()),
         ('25k - 1L', unfiltered_base.filter(expected_rent__gte=25000, expected_rent__lte=100000).count()),
@@ -7226,13 +7262,11 @@ def commercial_list(request):
     rent_range_labels_json = json.dumps([b[0] for b in rent_buckets])
     rent_range_counts_json = json.dumps([b[1] for b in rent_buckets])
 
-    # Bulk Delete Selector Queries
     try:
         uploaded_files = unfiltered_base.exclude(upload_file_name__isnull=True).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
     except Exception:
         uploaded_files = []
 
-    # Pagination execution Engine
     paginator = Paginator(properties, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -7260,8 +7294,9 @@ def commercial_list(request):
         'unique_possession': unique_possession,
         'unique_roles': unique_roles,
         'uploaded_files': uploaded_files,
+        'dynamic_budgets': dynamic_budgets,  # Added Context
 
-        # Metrics & KPI Metrics Bindings
+        # Metrics & KPI Bindings
         'total_count': total_properties,
         'active_count': active_listings,
         'occupied_count': occupied_count,
@@ -7297,6 +7332,12 @@ def commercial_list(request):
         'rent_range_labels_json': rent_range_labels_json,
         'rent_range_counts_json': rent_range_counts_json,
     })
+
+
+
+
+
+
 
 def commercial_bulk_delete(request):
     """Handles Advanced Bulk Deletions for Commercial Properties."""
@@ -7424,7 +7465,8 @@ def export_pg_coliving(request):
 
     # ── EXACT MATCH TO IMPORT SEQUENCE + SYSTEM META FOR AUDIT ──
     EXPORT_COLS = [
-        ("📋 Basic Info", "property_title", True, "Auto Generated*"),
+        ("⚙️ System Meta", "pg_property_id", False, "Auto Generated Property pg ID"),
+        ("📋 Basic Info", "property_title", False, "Property Title/Auto Generated"),
         ("📋 Basic Info", "city", True, "city *"),
         ("📋 Basic Info", "building_name", False, "building / project name"),
         ("📋 Basic Info", "locality", True, "locality *"),
@@ -7435,12 +7477,18 @@ def export_pg_coliving(request):
         ("📋 Basic Info", "furnishing_type", True, "furnishing type * (fully-furnished/semi-furnished/unfurnished)"),
         ("📋 Basic Info", "sharing_type", False, "sharing type"),
         ("📋 Basic Info", "best_suited_for", False, "best suited for (students/working professionals/any)"),
-        ("📋 Basic Info", "property_managed_by", False, "property managed by (owner/caretaker)"),
-        ("📋 Basic Info", "manager_stays", False, "property manager stays at property? (true/false)"),
+      
+        ("📋 Basic Info", "meals_available", False, "meals available? (true/false)"),
+        ("📋 Basic Info", "meal_offerings", False, "meal offerings (breakfast,lunch,dinner)"),
+        ("📋 Basic Info", "meal_speciality", False, "meal speciality (veg/non-veg/both)"),
+    
         ("📋 Basic Info", "notice_period", False, "notice period (days)"),
         ("📋 Basic Info", "lockin_period", False, "lock-in period (days)"),
         ("📋 Basic Info", "minimum_stay", True, "minimum stay (months) *"),
         ("📋 Basic Info", "available_from", True, "available from * (yyyy-mm-dd)"),
+        ("📋 Basic Info", "property_managed_by", False, "property managed by (owner/caretaker)"),
+        ("📋 Basic Info", "manager_stays", False, "property manager stays at property? (true/false)"),
+        
 
         ("🛏 Room 1", "room_type_1", True, "room_type_1 *"),
         ("🛏 Room 1", "room_beds_1", True, "room_beds_1 *"),
@@ -7460,9 +7508,7 @@ def export_pg_coliving(request):
         ("🛏 Room 2", "room_manual_brokerage_2", False, "room_manual_brokerage_2"),
         ("🛏 Room 2", "room_facilities_2", False, "room_facilities_2"),
 
-        ("🍽 Meals", "meals_available", False, "meals available? (true/false)"),
-        ("🍽 Meals", "meal_offerings", False, "meal offerings (breakfast,lunch,dinner)"),
-        ("🍽 Meals", "meal_speciality", False, "meal speciality (veg/non-veg/both)"),
+        
 
         ("📏 PG Regulations", "opposite_sex_allowed", False, "opposite sex allowed? (true/false)"),
         ("📏 PG Regulations", "any_time_allowed", False, "any time allowed? (true/false)"),
@@ -7481,7 +7527,7 @@ def export_pg_coliving(request):
         ("📞 Contact Info", "alternate_contact", False, "alternate contact"),
 
         # 🛑 AUDIT LOG SYSTEM FIELDS 🛑
-        ("⚙️ System Meta", "pg_property_id", False, "system pg ID"),
+     
         ("⚙️ System Meta", "uploaded_by_name", False, "uploaded by (name)"),
         ("⚙️ System Meta", "uploaded_by_email", False, "uploaded by (email)"),
         ("⚙️ System Meta", "uploaded_by_role", False, "uploader role"),
@@ -7509,20 +7555,44 @@ def export_pg_coliving(request):
             thin = Side(style="thin", color="BBBBBB")
             bdr  = Border(left=thin, right=thin, top=thin, bottom=thin)
 
-            sec_spans = OrderedDict()
+            # Group column headers into contiguous chunks to separate System Meta sections cleanly
+            contiguous_sections = []
             for i, (sec, *_) in enumerate(EXPORT_COLS):
-                sec_spans.setdefault(sec, []).append(i + 1)
+                col_idx = i + 1
+                if not contiguous_sections or contiguous_sections[-1]['sec'] != sec:
+                    contiguous_sections.append({'sec': sec, 'start': col_idx, 'end': col_idx})
+                else:
+                    contiguous_sections[-1]['end'] = col_idx
 
             # Draw Banners
-            for sec, cols in sec_spans.items():
-                c = ws.cell(row=1, column=cols[0], value=sec)
-                c.font = Font(bold=True, color="FFFFFF", size=10)
-                if "Room 1" in sec: c.fill = PatternFill("solid", fgColor=ROOM1_BG)
-                elif "Room 2" in sec: c.fill = PatternFill("solid", fgColor=ROOM2_BG)
-                elif "System Meta" in sec: c.fill = PatternFill("solid", fgColor=META_BG)
-                else: c.fill = PatternFill("solid", fgColor=HDR_BG)
-                c.alignment, c.border = Alignment(horizontal="center", vertical="center"), bdr
-                if len(cols) > 1: ws.merge_cells(start_row=1, start_column=cols[0], end_row=1, end_column=cols[-1])
+            for item in contiguous_sections:
+                sec = item['sec']
+                start_col = item['start']
+                end_col = item['end']
+
+                if "Room 1" in sec: 
+                    fill_color = ROOM1_BG
+                elif "Room 2" in sec: 
+                    fill_color = ROOM2_BG
+                elif "System Meta" in sec: 
+                    fill_color = META_BG
+                else: 
+                    fill_color = HDR_BG
+
+                # Style cells across the range first to avoid styling MergedCells safely
+                for col in range(start_col, end_col + 1):
+                    cell = ws.cell(row=1, column=col)
+                    cell.fill = PatternFill("solid", fgColor=fill_color)
+                    cell.border = bdr
+
+                # Put text & configurations inside the main tracking cell
+                top_cell = ws.cell(row=1, column=start_col)
+                top_cell.value = sec
+                top_cell.font = Font(bold=True, color="FFFFFF", size=10)
+                top_cell.alignment = Alignment(horizontal="center", vertical="center")
+
+                if start_col < end_col:
+                    ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
 
             # Draw Headers
             for ci, (sec, field, req, hint) in enumerate(EXPORT_COLS, 1):
@@ -7606,7 +7676,6 @@ def export_pg_coliving(request):
             
         except Exception as e:
             return HttpResponse(f"<pre>ERROR GENERATING CSV:\n{str(e)}\n{traceback.format_exc()}</pre>", status=500)
-
 
 def pg_list(request):
     session_id = request.session.get('Admin_id')
@@ -8072,126 +8141,49 @@ def add_pg(request):
 
 
 
+@csrf_exempt
 @require_POST
 def pg_bulk_delete(request):
-
-    sid, _ = _get_admin(request)
-
-    if not sid:
-        return JsonResponse({
-            'status': 'error',
-            'message': 'Unauthorized access.'
-        })
+    """Handles Dashboard side bulk deletion by transforming actions to secure SOFT DELETES."""
+    # Assuming standard session check or your local _get_admin helper logic
+    admin_id = request.session.get('Admin_id')
+    if not admin_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'}, status=401)
 
     try:
+        # Gracefully handle missing or empty payloads
+        if not request.body:
+            return JsonResponse({'status': 'error', 'message': 'Empty request body payload.'}, status=400)
+            
         data = json.loads(request.body)
-
         delete_type = data.get('delete_type')
+        
+        # Target only active, live properties for dashboard actions
+        properties = PGColivingProperty.objects.filter(is_deleted=False)
+        target_props = properties.none()
 
-        properties = PGColivingProperty.objects.all()
-
-        # =====================================================
-        # DELETE ALL
-        # =====================================================
         if delete_type == 'delete_all':
+            target_props = properties
 
-            count = properties.count()
-
-            properties.delete()
-
-            return JsonResponse({
-                'status': 'success',
-                'message': f'Successfully deleted ALL {count} PG properties.'
-            })
-
-        # =====================================================
-        # CURRENT PAGE DELETE
-        # =====================================================
         elif delete_type == 'current_page':
-
             page_ids = data.get('page_ids', [])
+            target_props = properties.filter(pg_property_id__in=page_ids)
 
-            target_props = properties.filter(
-                pg_property_id__in=page_ids
-            )
-
-            count = target_props.count()
-
-            target_props.delete()
-
-            return JsonResponse({
-                'status': 'success',
-                'message': f'Successfully deleted {count} PG properties from current page.'
-            })
-
-        # =====================================================
-        # DATE RANGE DELETE
-        # =====================================================
         elif delete_type == 'date_range':
-
             from_date = data.get('from_date')
             to_date = data.get('to_date')
+            target_props = properties.filter(created_at__date__range=[from_date, to_date])
 
-            target_props = properties.filter(
-                created_at__date__range=[from_date, to_date]
-            )
-
-            count = target_props.count()
-
-            target_props.delete()
-
-            return JsonResponse({
-                'status': 'success',
-                'message': f'Successfully deleted {count} PG properties in selected date range.'
-            })
-
-        # =====================================================
-        # LAST 30 DAYS
-        # =====================================================
         elif delete_type == 'latest_month':
-
             thirty_days_ago = timezone.now() - timedelta(days=30)
+            target_props = properties.filter(created_at__gte=thirty_days_ago)
 
-            target_props = properties.filter(
-                created_at__gte=thirty_days_ago
-            )
-
-            count = target_props.count()
-
-            target_props.delete()
-
-            return JsonResponse({
-                'status': 'success',
-                'message': f'Successfully deleted {count} latest PG properties.'
-            })
-
-        # =====================================================
-        # OLD DATA
-        # =====================================================
         elif delete_type == 'old_data':
-
             six_months_ago = timezone.now() - timedelta(days=180)
+            target_props = properties.filter(created_at__lt=six_months_ago)
 
-            target_props = properties.filter(
-                created_at__lt=six_months_ago
-            )
-
-            count = target_props.count()
-
-            target_props.delete()
-
-            return JsonResponse({
-                'status': 'success',
-                'message': f'Successfully deleted {count} old PG properties.'
-            })
-
-        # =====================================================
-        # BY UPLOADER
-        # =====================================================
         elif delete_type == 'by_uploader':
-
             uploader = data.get('uploader_text', '')
-
             target_props = properties.filter(
                 Q(uploaded_by_name__icontains=uploader) |
                 Q(uploaded_by_email__icontains=uploader) |
@@ -8199,56 +8191,30 @@ def pg_bulk_delete(request):
                 Q(owner_name__icontains=uploader)
             )
 
-            count = target_props.count()
-
-            target_props.delete()
-
-            return JsonResponse({
-                'status': 'success',
-                'message': f'Successfully deleted {count} PG properties uploaded by "{uploader}".'
-            })
-
-        # =====================================================
-        # BY FILE NAME
-        # =====================================================
         elif delete_type == 'by_file':
-
             file_name = data.get('file_name', '')
-
-            target_props = properties.filter(
-                upload_file_name=file_name
-            )
-
-            count = target_props.count()
-
-            if count == 0:
-                return JsonResponse({
-                    'status': 'error',
-                    'message': f'No properties found for file: {file_name}'
-                })
-
-            target_props.delete()
-
-            return JsonResponse({
-                'status': 'success',
-                'message': f'Successfully deleted {count} PG properties from "{file_name}".'
-            })
-
-        # =====================================================
-        # UNKNOWN
-        # =====================================================
+            target_props = properties.filter(upload_file_name=file_name)
         else:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Unknown delete criteria.'
-            })
+            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'}, status=400)
 
-    except Exception as e:
+        count = target_props.count()
+        if count == 0:
+            return JsonResponse({'status': 'success', 'message': 'No matching active records found to process.'})
+
+        # 🚀 FIX: Convert to Soft Delete so records actually land in your Global Recycle Bin
+        target_props.update(
+            is_deleted=True,
+            deleted_at=timezone.now(),
+            deleted_by=request.session.get('Admin_username', 'System Admin')
+        )
+
         return JsonResponse({
-            'status': 'error',
-            'message': str(e)
+            'status': 'success',
+            'message': f'Successfully moved {count} PG properties to the Recycle Bin.'
         })
 
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
 
@@ -8386,7 +8352,7 @@ def _parse_room_details(raw):
     return rooms
 
 
-# ─── IMPORT VIEW ──────────────────────────────────────────────────────────────
+
 @csrf_exempt
 @require_POST
 def import_pg_excel(request):
@@ -8471,13 +8437,10 @@ def import_pg_excel(request):
     }
 
     # ── PRE-FETCH all fingerprints in ONE query (no per-row DB hits) ──────────
-    # Fingerprint = (contact_number, email, property_address, locality)
-    # For "different file same data" check we need the full set
     existing_all = set(
         PGColivingProperty.objects.filter(is_deleted=False)
         .values_list('contact_number', 'email', 'property_address', 'locality')
     )
-    # For "same file same data same user" check
     same_file_same_user_fps = set(
         PGColivingProperty.objects.filter(
             upload_file_name=file_name,
@@ -8485,7 +8448,6 @@ def import_pg_excel(request):
             is_deleted=False
         ).values_list('contact_number', 'email', 'property_address', 'locality')
     )
-    # For "same file different user" check
     same_file_all_fps = set(
         PGColivingProperty.objects.filter(
             upload_file_name=file_name,
@@ -8536,8 +8498,18 @@ def import_pg_excel(request):
                 except Exception:
                     data[model_field] = None
 
-        if not data.get("property_title"):
-            data.pop("property_title", None)
+        # 🚀 AUTO GENERATE PROPERTY TITLE DURING EXCEL IMPORT LOOP IF EMPTY OR STR NULL/NAN
+        incoming_title = str(data.get("property_title", "")).strip()
+        if not data.get("property_title") or incoming_title in ["", "None", "nan", "NaN"]:
+            city_val = str(data.get("city", "")).strip()
+            locality_val = str(data.get("locality", "")).strip()
+            building_val = str(data.get("building_name", "")).strip() if data.get("building_name") else ""
+            pg_for_val = str(data.get("pg_for", "Co-Living")).strip()
+            
+            gender_target = pg_for_val if pg_for_val and pg_for_val not in ["None", "nan", "NaN"] else "Co-Living"
+            b_name = f"{building_val} " if building_val and building_val not in ["None", "nan", "NaN"] else ""
+            
+            data["property_title"] = f"Premium {gender_target} PG at {b_name}{locality_val}".strip()
 
         missing = [f for f in REQUIRED_FIELDS if not data.get(f)]
         if missing:
@@ -8574,13 +8546,11 @@ def import_pg_excel(request):
             data.get("locality", ""),
         )
 
-        # ── CASE 1: Same file + same user + same data → skip silently ─────────
         if fingerprint in same_file_same_user_fps:
             same_file_same_user_skipped += 1
             skipped += 1
             continue
 
-        # ── CASE 2: Same file + different user + same data → block with info ──
         if fingerprint in same_file_all_fps and fingerprint not in same_file_same_user_fps:
             same_file_diff_user_skipped += 1
             skipped += 1
@@ -8589,8 +8559,6 @@ def import_pg_excel(request):
             )
             continue
 
-        # ── CASE 3: Different file + same data → block ────────────────────────
-        # (fingerprint exists in DB but NOT from this file at all)
         if fingerprint in existing_all and fingerprint not in same_file_all_fps:
             diff_file_same_data_skipped += 1
             skipped += 1
@@ -8599,20 +8567,16 @@ def import_pg_excel(request):
             )
             continue
 
-        # ── CASE 4: Same file + NEW data → ALLOW (just skip same-data check) ─
-        # Falls through to insert below
-
         data = {k: v for k, v in data.items() if k in model_fields or k in meta_fields}
 
         pg_objects_to_create.append(PGColivingProperty(**data))
         room_data_per_row.append(rooms)
 
-        # Update in-memory sets so later rows in THIS upload don't re-collide
         existing_all.add(fingerprint)
         same_file_all_fps.add(fingerprint)
         same_file_same_user_fps.add(fingerprint)
 
-    # ── BULK INSERT ───────────────────────────────────────────────────────────
+    # ── BULK INSERT & DYNAMIC AUTO-FAQ EXECUTION ──────────────────────────────
     if pg_objects_to_create:
         try:
             created = PGColivingProperty.objects.bulk_create(
@@ -8620,6 +8584,10 @@ def import_pg_excel(request):
                 batch_size=200,
             )
             imported = len(created)
+
+            # 🚀 RUN BULK GENERATED AUTO-FAQ SEQUENCING FOR CREATED OBJECTS
+            for pg_instance in created:
+                pg_instance.generate_auto_faqs()
 
             room_objects = []
             for pg, rooms in zip(created, room_data_per_row):
@@ -8629,9 +8597,14 @@ def import_pg_excel(request):
                 PGRoomDetail.objects.bulk_create(room_objects, batch_size=500)
 
         except Exception as e:
+            # Re-init counter reset for fallback error validation loop block
+            imported = 0 
             for pg_obj, rooms in zip(pg_objects_to_create, room_data_per_row):
                 try:
                     pg_obj.save()
+                    # 🚀 TRIGGER FAQ PROGRAMMATIC ASSIGNMENT DURING FALLBACK ROW SAVE
+                    pg_obj.generate_auto_faqs()
+                    
                     for room in rooms:
                         PGRoomDetail.objects.create(property=pg_obj, **room)
                     imported += 1
@@ -8651,7 +8624,6 @@ def import_pg_excel(request):
         "file_name":                     file_name,
         "message":                       f"{imported} imported, {skipped} skipped",
     })
-
 # ─── DOWNLOAD TEMPLATE VIEW ───────────────────────────────────────────────────
 def download_pg_template(request):
     if not request.session.get('Admin_id'):
@@ -9336,7 +9308,8 @@ def pg_edit(request, property_id):
         return JsonResponse({
             "status": "error",
             "message": str(e)
-        })
+        }) 
+
 
 
 
@@ -9377,71 +9350,44 @@ def pg_coliving_delete(request, pk):
 
 
 
+@csrf_exempt
 @require_POST
 def pg_restore(request, id):
+    admin_id = request.session.get('Admin_id')
+    if not admin_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 
-    sid, _ = _get_admin(request)
-    if not sid:
-        return JsonResponse({
-            'status': 'error',
-            'message': 'Unauthorized'
-        }, status=401)
-
-    PGColivingProperty.objects.filter(
-        pg_property_id=id
-    ).update(
+    PGColivingProperty.objects.filter(pg_property_id=id).update(
         is_deleted=False,
         deleted_at=None,
         deleted_by=None
     )
-
-    return JsonResponse({
-        'status': 'success',
-        'message': 'PG Property Restored Successfully!'
-    })
-
+    return JsonResponse({'status': 'success', 'message': 'PG Property Restored Successfully!'})
 
 # =========================================================
 # HARD DELETE
 # =========================================================
+@csrf_exempt
 @require_POST
 def pg_hard_delete(request, id):
-
-    sid, _ = _get_admin(request)
-    if not sid:
-        return JsonResponse({
-            'status': 'error',
-            'message': 'Unauthorized'
-        }, status=401)
+    admin_id = request.session.get('Admin_id')
+    if not admin_id:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 
     try:
-        pg = get_object_or_404(
-            PGColivingProperty,
-            pg_property_id=id
-        )
+        pg = get_object_or_404(PGColivingProperty, pg_property_id=id)
 
-        # ✅ DELETE RELATED IMAGES
+        # Clean up related asset files safely
         for img in pg.images.all():
             if img.image:
                 img.image.delete(save=False)
-
-        # ✅ DELETE VIDEO
         if pg.video:
             pg.video.delete(save=False)
 
-        # ✅ DELETE PROPERTY
         pg.delete()
-
-        return JsonResponse({
-            'status': 'success',
-            'message': 'Permanently Deleted Successfully!'
-        })
-
+        return JsonResponse({'status': 'success', 'message': 'Permanently Deleted Successfully!'})
     except Exception as e:
-        return JsonResponse({
-            'status': 'error',
-            'message': str(e)
-        })
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
 
@@ -9492,7 +9438,7 @@ def pg_coliving_view(request, pk):
 
 def plot_sale_add(request):
     admin_id = request.session.get('Admin_id')
-    user_id = request.session.get('User_id')
+    user_id  = request.session.get('User_id')
 
     if not admin_id and not user_id:
         return redirect('login')
@@ -9500,49 +9446,56 @@ def plot_sale_add(request):
     try:
         if admin_id:
             admin = Admin_Login.objects.get(id=admin_id)
-            uploader_name, uploader_email, uploader_phone, uploader_role = admin.name, admin.email, admin.phone, admin.role
+            uploader_name, uploader_email, uploader_phone, uploader_role = (
+                admin.name, admin.email, admin.phone, admin.role
+            )
         else:
             user = User_Details.objects.get(id=user_id)
-            uploader_name, uploader_email, uploader_phone, uploader_role = user.name, user.email, user.phone, user.role
+            uploader_name, uploader_email, uploader_phone, uploader_role = (
+                user.name, user.email, user.phone, user.role
+            )
 
         if request.method == "POST":
             prop = PlotSaleProperty.objects.create(
-                plot_title=request.POST.get('plot_title'),
-                plot_area=request.POST.get('plot_area') or 0,
-                resale_plot_type=request.POST.get('resale_plot_type'),
-                plot_road_facing=request.POST.get('plot_road_facing'),
-                plot_corner=request.POST.get('plot_corner', 'no'),
-                available_from=request.POST.get('available_from') or None,
-                plot_authority=request.POST.get('plot_authority'),
-                plot_fencing=request.POST.get('plot_fencing', 'no'),
+                # ── Step 1: Plot Specs ──────────────────────────────────
+                plot_title            = request.POST.get('plot_title'),
+                plot_area             = request.POST.get('plot_area') or 0,
+                resale_plot_type      = request.POST.get('resale_plot_type'),
+                plot_road_facing      = request.POST.get('plot_road_facing'),
+                corner_plot           = request.POST.get('corner_plot', 'no'),       # ✅ was plot_corner
+                sanctioning_authority = request.POST.get('sanctioning_authority'),   # ✅ was plot_authority
+                plot_fencing          = request.POST.get('plot_fencing', 'no'),
 
-                plot_price=request.POST.get('plot_price') or 0,
-                brokerage=request.POST.get('brokerage', 'No'),
-                brokerage_percentage=request.POST.get('brokerage_percentage'),
-                plot_ownership=request.POST.get('plot_ownership'),
-                plot_loan=request.POST.get('plot_loan', 'no'),
-                plot_loan_amount=request.POST.get('plot_loan_amount') or None,
+                # ── Step 2: Pricing & Legal ─────────────────────────────
+                plot_price            = request.POST.get('plot_price') or 0,
+                brokerage             = request.POST.get('brokerage', 'No'),
+                brokerage_percentage  = request.POST.get('brokerage_percentage'),
+                ownership_type        = request.POST.get('ownership_type'),          # ✅ was plot_ownership
+                loan_on_property      = request.POST.get('loan_on_property', 'no'), # ✅ was plot_loan
+                plot_loan_amount      = request.POST.get('plot_loan_amount') or None,
 
-                encumbrance_cert=request.FILES.get('encumbrance_cert'),
-                social_video=request.FILES.get('social_video'),
+                # ── Step 3: Media ───────────────────────────────────────
+                encumbrance_cert      = request.FILES.get('encumbrance_cert'),
+                social_video          = request.FILES.get('social_video'),
 
-                plot_city=request.POST.get('plot_city'),
-                plot_locality=request.POST.get('plot_locality'),
-                plot_address=request.POST.get('plot_address'),
-                plot_owner_name=request.POST.get('plot_owner_name'),
-                plot_owner_contact=request.POST.get('plot_owner_contact'),
-                plot_owner_email=request.POST.get('plot_owner_email'),
+                # ── Step 4: Location & Owner ────────────────────────────
+                plot_city             = request.POST.get('plot_city'),
+                plot_locality         = request.POST.get('plot_locality'),
+                plot_address          = request.POST.get('plot_address'),
+                plot_owner_name       = request.POST.get('plot_owner_name'),
+                plot_owner_contact    = request.POST.get('plot_owner_contact'),
+                plot_owner_email      = request.POST.get('plot_owner_email'),
+                plot_owner_role       = request.POST.get('plot_owner_role'),         # ✅ was missing
 
-                uploaded_by_name=uploader_name,
-                uploaded_by_email=uploader_email,
-                uploaded_by_contact=uploader_phone,
-                uploaded_by_role=uploader_role,
+                # ── Uploader / Audit ────────────────────────────────────
+                uploaded_by_name      = uploader_name,
+                uploaded_by_email     = uploader_email,
+                uploaded_by_contact   = uploader_phone,
+                uploaded_by_role      = uploader_role,
             )
 
             images = request.FILES.getlist('property_images[]')
-            for i, img in enumerate(images):
-                if i >= 10:
-                    break
+            for i, img in enumerate(images[:10]):
                 PlotSaleImage.objects.create(property=prop, image=img)
 
             return JsonResponse({"status": "success", "message": "Plot Listing Added Successfully"})
@@ -9552,61 +9505,69 @@ def plot_sale_add(request):
         traceback.print_exc()
         return JsonResponse({"status": "error", "message": str(e)})
 
-    return render(request, 'admin_user/Reports/Resale/plot_add.html')
+    admin_obj = Admin_Login.objects.get(id=admin_id) if admin_id else User_Details.objects.get(id=user_id)
+    return render(request, 'admin_user/Reports/Resale/plot_add.html', {'admin_obj': admin_obj})
+
+
+
+
 
 
 def plot_sale_edit(request, plot_property_id):
     admin_id = request.session.get('Admin_id')
-    user_id = request.session.get('User_id')
+    user_id  = request.session.get('User_id')
 
     if not admin_id and not user_id:
         return redirect('login')
 
-    # Fixed: Query via explicit primary key string field identifier
     prop = get_object_or_404(PlotSaleProperty, plot_property_id=plot_property_id)
 
     if request.method == "POST":
         try:
-            prop.plot_title = request.POST.get('plot_title')
-            prop.plot_area = request.POST.get('plot_area') or 0
-            prop.resale_plot_type = request.POST.get('resale_plot_type')
-            prop.plot_road_facing = request.POST.get('plot_road_facing')
-            prop.plot_corner = request.POST.get('plot_corner', 'no')
-            prop.available_from = request.POST.get('available_from') or None
-            prop.plot_authority = request.POST.get('plot_authority')
-            prop.plot_fencing = request.POST.get('plot_fencing', 'no')
+            # ── Step 1: Plot Specs ──────────────────────────────────
+            prop.plot_title            = request.POST.get('plot_title')
+            prop.plot_area             = request.POST.get('plot_area') or 0
+            prop.resale_plot_type      = request.POST.get('resale_plot_type')
+            prop.plot_road_facing      = request.POST.get('plot_road_facing')
+            prop.corner_plot           = request.POST.get('corner_plot', 'no')        # ✅ was plot_corner
+            prop.sanctioning_authority = request.POST.get('sanctioning_authority')    # ✅ was plot_authority
+            prop.plot_fencing          = request.POST.get('plot_fencing', 'no')
 
-            prop.plot_price = request.POST.get('plot_price') or 0
-            prop.brokerage = request.POST.get('brokerage', 'No')
-            prop.brokerage_percentage = request.POST.get('brokerage_percentage')
-            prop.plot_ownership = request.POST.get('plot_ownership')
-            prop.plot_loan = request.POST.get('plot_loan', 'no')
-            prop.plot_loan_amount = request.POST.get('plot_loan_amount') or None
+            # ── Step 2: Pricing & Legal ─────────────────────────────
+            prop.plot_price            = request.POST.get('plot_price') or 0
+            prop.brokerage             = request.POST.get('brokerage', 'No')
+            prop.brokerage_percentage  = request.POST.get('brokerage_percentage')
+            prop.ownership_type        = request.POST.get('ownership_type')           # ✅ was plot_ownership
+            prop.loan_on_property      = request.POST.get('loan_on_property', 'no')  # ✅ was plot_loan
+            prop.plot_loan_amount      = request.POST.get('plot_loan_amount') or None
 
-            prop.plot_city = request.POST.get('plot_city')
-            prop.plot_locality = request.POST.get('plot_locality')
-            prop.plot_address = request.POST.get('plot_address')
-            prop.plot_owner_name = request.POST.get('plot_owner_name')
-            prop.plot_owner_contact = request.POST.get('plot_owner_contact')
-            prop.plot_owner_email = request.POST.get('plot_owner_email')
-
+            # ── Step 3: Media (only update if new file uploaded) ────
             if request.FILES.get('encumbrance_cert'):
-                prop.encumbrance_cert = request.FILES.get('encumbrance_cert')
+                prop.encumbrance_cert  = request.FILES.get('encumbrance_cert')
             if request.FILES.get('social_video'):
-                prop.social_video = request.FILES.get('social_video')
+                prop.social_video      = request.FILES.get('social_video')
 
-            # Force re-triggering auto-title calculation by wiping it clean out before saving modifications
+            # ── Step 4: Location & Owner ────────────────────────────
+            prop.plot_city             = request.POST.get('plot_city')
+            prop.plot_locality         = request.POST.get('plot_locality')
+            prop.plot_address          = request.POST.get('plot_address')
+            prop.plot_owner_name       = request.POST.get('plot_owner_name')
+            prop.plot_owner_contact    = request.POST.get('plot_owner_contact')
+            prop.plot_owner_email      = request.POST.get('plot_owner_email')
+            prop.plot_owner_role       = request.POST.get('plot_owner_role')          # ✅ was missing
+
+            # Wipe title so save() auto-regenerates it
             prop.property_title = ""
             prop.save()
 
-            new_images = request.FILES.getlist('property_images[]')
-            current_image_count = prop.images.count()
-
+            # Handle new images (respect 10 image cap)
+            new_images        = request.FILES.getlist('property_images[]')
+            current_count     = prop.images.count()
             for img in new_images:
-                if current_image_count >= 10:
+                if current_count >= 10:
                     break
                 PlotSaleImage.objects.create(property=prop, image=img)
-                current_image_count += 1
+                current_count += 1
 
             return JsonResponse({"status": "success", "message": "Plot Listing Updated Successfully"})
 
@@ -9615,11 +9576,11 @@ def plot_sale_edit(request, plot_property_id):
             traceback.print_exc()
             return JsonResponse({"status": "error", "message": str(e)})
 
-    context = {'prop': prop, 'existing_images': prop.images.all()}
+    context = {
+        'prop': prop,
+        'existing_images': prop.images.all()
+    }
     return render(request, 'admin_user/Reports/Resale/plot_edit.html', context)
-
-
-
 
 # ── 1. MAIN LIST VIEW ──
 
@@ -9885,11 +9846,26 @@ def safe_float(val):
     except (ValueError, TypeError):
         return 0.0
 
-def download_plot_resale_template(request):
-    from openpyxl import Workbook
-    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-    from openpyxl.utils import get_column_letter
 
+
+
+
+def safe_float(value):
+    try:
+        return float(str(value).replace(",", "").strip())
+    except (ValueError, TypeError):
+        return 0.0
+
+
+
+
+
+from django.views.decorators.csrf import csrf_protect
+
+
+
+
+def download_plot_resale_template(request):
     wb = Workbook()
     sheet = wb.active
     sheet.title = "Plot Resale"
@@ -9907,32 +9883,34 @@ def download_plot_resale_template(request):
 
     sections = [
         ("📋 Plot Details", [
-            ("plot_title",        "Project / Plot Title *",    "e.g. Green Valley Plots"),
-            ("plot_area",         "Plot Area (sq.ft) *",       "e.g. 1500"),
-            ("resale_plot_type",  "Plot Type *",               "residential_plot / commercial_plot / agricultural"),
-            ("plot_road_facing",  "Road Facing *",             "main / east / west / north / south"),
-            ("plot_corner",       "Corner Plot",               "yes / no"),
-            ("available_from",    "Available From",            "YYYY-MM-DD"),
-            ("plot_authority",    "Plot Authority",            "e.g. NIT / NMRDA / PRIVATE"),
-            ("plot_fencing",      "Fencing",                   "yes / no"),
+            ("property_title",        "Property Title",                  "⚠️ AUTO GENERATED - Leave Empty"),
+            ("plot_title",            "Plot Title *",                    "e.g. Green Valley Plots"),
+            ("plot_area",             "Plot Area (sq.ft) *",             "e.g. 1500"),
+            ("resale_plot_type",      "Resale Plot Type *",              "residential / commercial / agricultural"),
+            ("plot_road_facing",      "Plot Road Facing *",              "main / east / west / north / south"),
+            ("corner_plot",           "Corner Plot",                     "yes / no (default: no)"),
+            ("sanctioning_authority", "Sanctioning Authority",           "e.g. NIT / NMRDA / PRIVATE"),
+            ("plot_fencing",          "Plot Fencing",                    "yes / no (default: no)"),
         ]),
         ("📋 Pricing & Legal", [
-            ("plot_price",           "Plot Price (₹) *",       "e.g. 3500000"),
-            ("brokerage",            "Brokerage",              "Yes / No"),
-            ("brokerage_percentage", "Brokerage %",            "e.g. 1% or leave blank"),
-            ("plot_ownership",       "Ownership Type *",       "freehold / leasehold"),
-            ("plot_loan",            "Loan Available *",       "yes / no"),
-            ("plot_loan_amount",     "Loan Amount (₹)",        "e.g. 2000000 (0 if no loan)"),
+            ("plot_price",           "Plot Price (₹) *",                 "e.g. 3500000"),
+            ("price_per_sqft",       "Price Per Sqft",                   "🔄 AUTO CALCULATED - Leave Empty"),
+            ("brokerage",            "Brokerage",                        "Yes / No (default: No)"),
+            ("brokerage_percentage", "Brokerage %",                      "e.g. 1% or leave blank"),
+            ("ownership_type",       "Ownership Type *",                 "freehold / leasehold"),
+            ("loan_on_property",     "Loan on Property *",               "yes / no (default: no)"),
+            ("plot_loan_amount",     "Plot Loan Amount (₹)",             "e.g. 2000000 (0 if no loan)"),
         ]),
         ("📋 Location", [
-            ("plot_city",     "City *",        "e.g. Nagpur"),
-            ("plot_locality", "Locality *",    "e.g. Besa"),
-            ("plot_address",  "Full Address *","Plot 12, Besa Road, Nagpur"),
+            ("plot_city",     "Plot City *",        "e.g. Nagpur"),
+            ("plot_locality", "Plot Locality *",    "e.g. Besa"),
+            ("plot_address",  "Plot Address *",     "Plot 12, Besa Road, Nagpur"),
         ]),
         ("📋 Owner Contact", [
-            ("plot_owner_name",    "Owner Name *",    "Full Name"),
-            ("plot_owner_contact", "Owner Contact *", "10-digit mobile"),
-            ("plot_owner_email",   "Owner Email *",   "email@example.com"),
+            ("plot_owner_name",    "Plot Owner Name *",    "Full Name"),
+            ("plot_owner_contact", "Plot Owner Contact *", "10-digit mobile"),
+            ("plot_owner_email",   "Plot Owner Email *",   "email@example.com"),
+            ("plot_owner_role",    "Plot Owner Role",      "Owner / Agent / Builder"),
         ]),
     ]
 
@@ -9946,6 +9924,7 @@ def download_plot_resale_template(request):
             col += 1
         section_spans.append((label, s, col - 1))
 
+    # Header Row 1
     for label, sc, ec in section_spans:
         c = sheet.cell(row=1, column=sc, value=label)
         c.font      = Font(name="Arial", bold=True, size=11, color=WHITE)
@@ -9956,37 +9935,84 @@ def download_plot_resale_template(request):
             sheet.merge_cells(start_row=1, start_column=sc, end_row=1, end_column=ec)
     sheet.row_dimensions[1].height = 30
 
+    # Row 2 - Database Fields
     for i, db in enumerate(all_db, 1):
         c = sheet.cell(row=2, column=i, value=db)
         c.font = Font(name="Arial", bold=True, size=9, color="475569")
         c.fill = hfill("E2E8F0"); c.alignment = Alignment(horizontal="center", vertical="center"); c.border = cborder
     sheet.row_dimensions[2].height = 22
 
+    # Row 3 - Display Names
     for i, disp in enumerate(all_disp, 1):
         c = sheet.cell(row=3, column=i, value=disp)
         c.font = Font(name="Arial", bold=True, size=10, color=("C0392B" if disp.endswith("*") else MID_BLUE))
         c.fill = hfill(LIGHT_BG); c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True); c.border = cborder
     sheet.row_dimensions[3].height = 36
 
+    # Row 4 - Hints
     for i, hint in enumerate(all_hints, 1):
         c = sheet.cell(row=4, column=i, value=hint)
         c.font = Font(name="Arial", italic=True, size=8, color=HINT_FG)
         c.fill = hfill(HINT_BG); c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True); c.border = cborder
     sheet.row_dimensions[4].height = 30
 
+    # Row 5 - SAMPLE DATA (Marked clearly as SAMPLE)
+    sample_row_label = sheet.cell(row=5, column=1, value="🔴 DELETE THIS ROW BEFORE IMPORT 🔴")
+    sample_row_label.font = Font(name="Arial", bold=True, size=10, color="FF0000")
+    sample_row_label.fill = hfill("FFE5E5")
+    sample_row_label.alignment = Alignment(horizontal="center", vertical="center")
+    sample_row_label.border = cborder
+    
     sample = [
-        "Green Valley Plots", 1500, "residential_plot", "main", "no", "2026-06-01", "NIT", "yes",
-        3500000, "No", "", "freehold", "no", 0,
-        "Nagpur", "Besa", "Plot 12, Besa Road, Nagpur",
-        "Amit Patil", "9876543210", "amit@example.com"
+        "",  # property_title
+        "SAMPLE - Green Valley Plots",  # plot_title (clearly marked as SAMPLE)
+        1500,  # plot_area
+        "residential",  # resale_plot_type
+        "main",  # plot_road_facing
+        "no",  # corner_plot
+        "NIT",  # sanctioning_authority
+        "yes",  # plot_fencing
+        3500000,  # plot_price
+        "",  # price_per_sqft
+        "No",  # brokerage
+        "",  # brokerage_percentage
+        "freehold",  # ownership_type
+        "no",  # loan_on_property
+        0,  # plot_loan_amount
+        "Nagpur",  # plot_city
+        "Besa",  # plot_locality
+        "SAMPLE - Plot 12, Besa Road, Nagpur",  # plot_address
+        "SAMPLE - Amit Patil",  # plot_owner_name
+        "9999999999",  # plot_owner_contact (different from real data)
+        "sample@example.com",  # plot_owner_email
+        "Agent"  # plot_owner_role
     ]
+    
     for i, val in enumerate(sample, 1):
+        if i == 1: continue  # Skip column 1 as we already set it
         c = sheet.cell(row=5, column=i, value=val)
-        c.font = Font(name="Arial", size=9, color="1E3A5F")
-        c.fill = hfill(SAMPLE_BG); c.alignment = Alignment(horizontal="center", vertical="center"); c.border = cborder
-    sheet.row_dimensions[5].height = 22
+        c.font = Font(name="Arial", size=9, color="999999")
+        c.fill = hfill("FFF3F3")
+        c.alignment = Alignment(horizontal="center", vertical="center")
+        c.border = cborder
+    sheet.row_dimensions[5].height = 25
 
-    widths = [28,14,22,14,13,16,16,12,18,12,14,16,14,18,14,16,32,18,18,26]
+    # Row 6 - Empty template row for user data
+    for i in range(1, 23):
+        c = sheet.cell(row=6, column=i, value="")
+        c.fill = hfill(SAMPLE_BG)
+        c.border = cborder
+    
+    # Add instruction text
+    instruction_cell = sheet.cell(row=7, column=1, value="👇 START YOUR DATA FROM ROW 6 👇")
+    instruction_cell.font = Font(name="Arial", bold=True, size=11, color="0066CC")
+    instruction_cell.fill = hfill("E5F3FF")
+    sheet.merge_cells(start_row=7, start_column=1, end_row=7, end_column=22)
+    instruction_cell.alignment = Alignment(horizontal="center", vertical="center")
+    sheet.row_dimensions[7].height = 25
+
+    # Column widths
+    widths = [28, 20, 18, 18, 18, 12, 22, 12, 16, 16, 12, 16, 18, 18, 20, 15, 18, 32, 18, 18, 24, 15]
     for i, w in enumerate(widths, 1):
         sheet.column_dimensions[get_column_letter(i)].width = w
 
@@ -9999,137 +10025,221 @@ def download_plot_resale_template(request):
     return response
 
 
+
+@csrf_protect
 def import_plot_resale_excel(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
     session_id = request.session.get('Admin_id')
     if not session_id:
-        return JsonResponse({"status": "error", "message": "Unauthorized access"})
+        return JsonResponse({'status': 'error', 'message': 'Session expired.'})
 
-    if request.method == "POST" and request.FILES.get('excel_file'):
-        try:
-            admin_obj = Admin_Login.objects.get(id=session_id)
-            excel_file = request.FILES['excel_file']
-            file_name_str = excel_file.name
+    try:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+    except Admin_Login.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Invalid admin.'})
 
-            excel_file.seek(0)
-            wb = openpyxl.load_workbook(excel_file, data_only=True)
-            sheet = wb.active
+    excel_file = request.FILES.get('excel_file')
+    if not excel_file:
+        return JsonResponse({'status': 'error', 'message': 'Please upload Excel file.'})
 
-            if sheet.max_row < 3:
-                return JsonResponse({"status": "error", "message": "Empty file uploaded."})
+    try:
+        wb = openpyxl.load_workbook(excel_file, data_only=True)
+        sheet = wb.active
 
-            row3_values = [str(cell.value).strip() if cell.value else "" for cell in sheet[3]]
-            expected_headers = [
-                "Project / Plot Title *", "Plot Area (sq.ft) *", "Plot Type *", "Road Facing *",
-                "Corner Plot", "Available From", "Plot Authority", "Fencing",
-                "Plot Price (₹) *", "Brokerage", "Brokerage %", "Ownership Type *",
-                "Loan Available *", "Loan Amount (₹)",
-                "City *", "Locality *", "Full Address *",
-                "Owner Name *", "Owner Contact *", "Owner Email *",
-            ]
+        saved_count = 0
+        skipped_count = 0
+        row_logs = []
 
-            for idx, key in enumerate(expected_headers):
-                if idx >= len(row3_values) or row3_values[idx].lower() != key.lower():
-                    return JsonResponse({
-                        "status": "error",
-                        "message": f"Column mismatch at position {idx+1}. Expected '{key}', found '{row3_values[idx] if idx < len(row3_values) else 'Missing'}'."
-                    })
+        def clean_s(v):
+            """Clean string values"""
+            if v is None: return ""
+            s = str(v).strip()
+            # Remove 'SAMPLE - ' prefix if present
+            s = s.replace('SAMPLE - ', '')
+            if s.endswith(".0"): s = s[:-2]
+            return s
 
-            records_to_create = []
-            required_indices = [0, 1, 2, 3, 8, 11, 12, 14, 15, 16, 17, 18, 19]
+        def clean_f(v):
+            """Clean float values"""
+            try:
+                if v in [None, ""]: return 0
+                # Handle string numbers with commas
+                if isinstance(v, str):
+                    v = v.replace(",", "").strip()
+                return float(v)
+            except:
+                return 0
+
+        def is_sample_row(values):
+            """Check if this is a sample/instruction row"""
+            # Check for instruction rows (row 7 in template)
+            if values[0] and "START YOUR DATA" in str(values[0]):
+                return True
             
-            # FIX: Start checking data directly from row 5 (The sample entry)
-            DATA_START_ROW = 5
+            # Check for sample row (marked with SAMPLE in title or owner name)
+            plot_title = clean_s(values[1]) if len(values) > 1 else ""
+            owner_name = clean_s(values[18]) if len(values) > 18 else ""
+            owner_contact = clean_s(values[19]) if len(values) > 19 else ""
+            
+            if "SAMPLE" in plot_title or "SAMPLE" in owner_name:
+                return True
+            
+            # Check for exact sample data match
+            if owner_contact == "9999999999" and "SAMPLE" in owner_name:
+                return True
+                
+            return False
 
-            for row_idx, row in enumerate(sheet.iter_rows(min_row=DATA_START_ROW, values_only=True), start=DATA_START_ROW):
-                if not row or not any(v is not None and str(v).strip() != "" for v in row):
-                    continue
+        # Start from row 6 (after header and sample row)
+        for row_idx in range(6, sheet.max_row + 1):
+            values = []
+            # Fetch 22 columns
+            for col in range(1, 23):
+                cell_value = sheet.cell(row=row_idx, column=col).value
+                values.append(cell_value)
 
-                # Ignore instruction text hint column labels safely
-                if row[0] and ("e.g. green" in str(row[0]).lower() or "project /" in str(row[0]).lower()):
-                    continue
+            # Skip completely empty rows
+            if not any(values):
+                continue
 
-                for ri in required_indices:
-                    if ri < len(row) and (row[ri] is None or str(row[ri]).strip() == ""):
-                        return JsonResponse({
-                            "status": "error",
-                            "message": f"Row {row_idx}: Required field '{expected_headers[ri]}' is missing."
-                        })
+            # Skip sample/instruction rows
+            if is_sample_row(values):
+                skipped_count += 1
+                row_logs.append(f"Row {row_idx}: Template instruction/sample row skipped.")
+                continue
 
-                # Row individual duplicate mapping fingerprint
-                row_raw_string = f"{row[17]}_{row[18]}_{row[0]}_{row[1]}_{row[8]}"  # Owner Contact + Title + Area + Price
-                row_fp = hashlib.md5(row_raw_string.encode('utf-8')).hexdigest()
+            # Extract values (all 22 columns)
+            property_title       = clean_s(values[0]) if len(values) > 0 else ""
+            plot_title           = clean_s(values[1]) if len(values) > 1 else ""
+            plot_area            = clean_f(values[2]) if len(values) > 2 else 0
+            resale_plot_type     = clean_s(values[3]) if len(values) > 3 else ""
+            plot_road_facing     = clean_s(values[4]) if len(values) > 4 else ""
+            corner_plot          = clean_s(values[5]) if len(values) > 5 else "no"
+            sanctioning_authority= clean_s(values[6]) if len(values) > 6 else ""
+            plot_fencing         = clean_s(values[7]) if len(values) > 7 else "no"
+            plot_price           = clean_f(values[8]) if len(values) > 8 else 0
+            price_per_sqft       = clean_f(values[9]) if len(values) > 9 else 0
+            brokerage            = clean_s(values[10]) if len(values) > 10 else "No"
+            brokerage_percentage = clean_s(values[11]) if len(values) > 11 else ""
+            ownership_type       = clean_s(values[12]) if len(values) > 12 else ""
+            loan_on_property     = clean_s(values[13]) if len(values) > 13 else "no"
+            plot_loan_amount     = clean_f(values[14]) if len(values) > 14 else 0
+            plot_city            = clean_s(values[15]) if len(values) > 15 else ""
+            plot_locality        = clean_s(values[16]) if len(values) > 16 else ""
+            plot_address         = clean_s(values[17]) if len(values) > 17 else ""
+            plot_owner_name      = clean_s(values[18]) if len(values) > 18 else ""
+            plot_owner_contact   = clean_s(values[19]) if len(values) > 19 else ""
+            plot_owner_email     = clean_s(values[20]) if len(values) > 20 else ""
+            plot_owner_role      = clean_s(values[21]) if len(values) > 21 else ""
 
-                if PlotSaleProperty.objects.filter(property_title__icontains=f"[ROW-MD5:{row_fp}]", is_deleted=False).exists():
-                    continue
+            # REQUIRED FIELD VALIDATION
+            missing = []
+            if not plot_title: missing.append("Plot Title")
+            if not plot_area or plot_area <= 0: missing.append("Plot Area (>0)")
+            if not plot_price or plot_price <= 0: missing.append("Plot Price (>0)")
+            if not plot_city: missing.append("City")
+            if not plot_locality: missing.append("Locality")
+            if not plot_address: missing.append("Address")
+            if not plot_owner_contact: missing.append("Owner Contact")
+            if not plot_owner_email: missing.append("Owner Email")
+            if not resale_plot_type: missing.append("Resale Plot Type")
+            if not plot_road_facing: missing.append("Plot Road Facing")
+            if not ownership_type: missing.append("Ownership Type")
 
-                avail_date = row[5]
-                if avail_date and hasattr(avail_date, 'date'):
-                    avail_date = avail_date.date()
+            if missing:
+                skipped_count += 1
+                row_logs.append(f"Row {row_idx}: ❌ Missing required fields - {', '.join(missing)}")
+                continue
 
-                records_to_create.append({
-                    "plot_title": str(row[0]).strip(),
-                    "plot_area": safe_float(row[1]),
-                    "resale_plot_type": str(row[2]).strip(),
-                    "plot_road_facing": str(row[3]).strip(),
-                    "plot_corner": str(row[4]).strip().lower() if row[4] else "no",
-                    "available_from": avail_date,
-                    "plot_authority": str(row[6]).strip() if row[6] else None,
-                    "plot_fencing": str(row[7]).strip().lower() if row[7] else "no",
-                    "plot_price": safe_float(row[8]),
-                    "brokerage": str(row[9]).strip() if row[9] else "No",
-                    "brokerage_percentage": str(row[10]).strip() if row[10] else None,
-                    "plot_ownership": str(row[11]).strip(),
-                    "plot_loan": str(row[12]).strip().lower() if row[12] else "no",
-                    "plot_loan_amount": safe_float(row[13]),
-                    "plot_city": str(row[14]).strip(),
-                    "plot_locality": str(row[15]).strip(),
-                    "plot_address": str(row[16]).strip(),
-                    "plot_owner_name": str(row[17]).strip(),
-                    "plot_owner_contact": str(row[18]).strip(),
-                    "plot_owner_email": str(row[19]).strip(),
-                    "row_fingerprint": row_fp
-                })
+            # Validate field values
+            if corner_plot.lower() not in ['yes', 'no']:
+                corner_plot = 'no'
+            if plot_fencing.lower() not in ['yes', 'no']:
+                plot_fencing = 'no'
+            if loan_on_property.lower() not in ['yes', 'no']:
+                loan_on_property = 'no'
+            if brokerage.lower() not in ['yes', 'no']:
+                brokerage = 'No'
 
-            if not records_to_create:
-                return JsonResponse({"status": "error", "message": "No new or valid entries found to import."})
+            # DUPLICATE CHECK
+            duplicate = PlotSaleProperty.objects.filter(
+                plot_city__iexact=plot_city,
+                plot_locality__iexact=plot_locality,
+                plot_address__iexact=plot_address,
+                plot_owner_contact=plot_owner_contact,
+                is_deleted=False
+            ).exists()
 
-            imported_count = 0
-            for r in records_to_create:
-                prop = PlotSaleProperty.objects.create(
-                    plot_title=r["plot_title"], plot_area=r["plot_area"],
-                    resale_plot_type=r["resale_plot_type"], plot_road_facing=r["plot_road_facing"],
-                    plot_corner=r["plot_corner"], available_from=r["available_from"],
-                    plot_authority=r["plot_authority"], plot_fencing=r["plot_fencing"],
-                    plot_price=r["plot_price"], brokerage=r["brokerage"],
-                    brokerage_percentage=r["brokerage_percentage"], plot_ownership=r["plot_ownership"],
-                    plot_loan=r["plot_loan"], plot_loan_amount=r["plot_loan_amount"],
-                    plot_city=r["plot_city"], plot_locality=r["plot_locality"],
-                    plot_address=r["plot_address"], plot_owner_name=r["plot_owner_name"],
-                    plot_owner_contact=r["plot_owner_contact"], plot_owner_email=r["plot_owner_email"],
-                    uploaded_by_name=admin_obj.name, uploaded_by_email=admin_obj.email,
-                    uploaded_by_contact=admin_obj.phone, uploaded_by_role=admin_obj.role,
+            if duplicate:
+                skipped_count += 1
+                row_logs.append(f"Row {row_idx}: ⚠️ Duplicate record skipped (same location & owner contact)")
+                continue
+
+            # CREATE THE PROPERTY
+            try:
+                plot_property = PlotSaleProperty.objects.create(
+                    property_title=property_title or plot_title,
+                    plot_title=plot_title,
+                    plot_area=plot_area,
+                    resale_plot_type=resale_plot_type,
+                    plot_road_facing=plot_road_facing,
+                    corner_plot=corner_plot,
+                    sanctioning_authority=sanctioning_authority if sanctioning_authority else None,
+                    plot_fencing=plot_fencing,
+                    plot_price=plot_price,
+                    # price_per_sqft will be auto-calculated in save()
+                    brokerage=brokerage,
+                    brokerage_percentage=brokerage_percentage if brokerage_percentage else None,
+                    ownership_type=ownership_type,
+                    loan_on_property=loan_on_property,
+                    plot_loan_amount=plot_loan_amount if plot_loan_amount > 0 else None,
+                    plot_city=plot_city,
+                    plot_locality=plot_locality,
+                    plot_address=plot_address,
+                    plot_owner_name=plot_owner_name,
+                    plot_owner_contact=plot_owner_contact,
+                    plot_owner_email=plot_owner_email,
+                    plot_owner_role=plot_owner_role if plot_owner_role else None,
+                    
+                    upload_file_name=excel_file.name,
+                    uploaded_by_name=getattr(admin_obj, 'name', 'Admin'),
+                    uploaded_by_email=getattr(admin_obj, 'email', ''),
+                    is_deleted=False
                 )
-                # Save signature directly inside property_title field tracking boundaries
-                prop.property_title = f"{prop.property_title or ''} [FILE:{file_name_str}] [ROW-MD5:{r['row_fingerprint']}]"
-                prop.save()
-                imported_count += 1
+                saved_count += 1
+                row_logs.append(f"Row {row_idx}: ✅ Successfully imported - ID: {plot_property.plot_property_id}")
+                
+            except Exception as create_error:
+                skipped_count += 1
+                row_logs.append(f"Row {row_idx}: ❌ Creation failed - {str(create_error)}")
 
-            return JsonResponse({"status": "success", "message": f"Successfully imported {imported_count} listings from {file_name_str}."})
+        # Prepare response
+        response_data = {
+            'status': 'success' if saved_count > 0 else 'warning',
+            'saved': saved_count,
+            'skipped': skipped_count,
+            'total_rows_processed': saved_count + skipped_count,
+            'message': f'✅ {saved_count} properties imported successfully. ⚠️ {skipped_count} rows skipped.',
+            'logs': row_logs[-30:] if row_logs else []  # Return last 30 logs
+        }
+        
+        if saved_count == 0:
+            response_data['message'] = f'⚠️ No rows imported. {skipped_count} rows skipped. Please ensure you have added data starting from Row 6.'
+            response_data['status'] = 'error'
+            
+        return JsonResponse(response_data)
 
-        except Exception as e:
-            traceback.print_exc()
-            return JsonResponse({"status": "error", "message": f"Error: {str(e)}"})
-
-    return JsonResponse({"status": "error", "message": "Invalid request."})
-
-
-
-
-
-
+    except Exception as e:
+        import traceback
+        return JsonResponse({
+            'status': 'error', 
+            'message': f'Error processing file: {str(e)}',
+            'traceback': traceback.format_exc()
+        })
 
 def plot_resale_list(request):
-
     session_id = request.session.get('Admin_id')
 
     if not session_id:
@@ -10140,14 +10250,11 @@ def plot_resale_list(request):
     except Admin_Login.DoesNotExist:
         return render(request,'home_page/Adminlogin.html')
 
-    base_qs = PlotSaleProperty.objects.filter(
-        is_deleted=False
-    )
-
+    base_qs = PlotSaleProperty.objects.filter(is_deleted=False)
     total_properties = base_qs.count()
-
     properties = base_qs
 
+    # Get filter parameters
     search = request.GET.get('search')
     city = request.GET.get('city')
     locality = request.GET.get('locality')
@@ -10155,14 +10262,12 @@ def plot_resale_list(request):
     road_facing = request.GET.get('road_facing')
     corner_plot = request.GET.get('corner_plot')
     loan = request.GET.get('loan')
-
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
-
     from_date = request.GET.get('from_date')
     to_date = request.GET.get('to_date')
 
-    # Search
+    # Apply Filters
     if search:
         properties = properties.filter(
             Q(plot_property_id__icontains=search) |
@@ -10174,126 +10279,64 @@ def plot_resale_list(request):
             Q(plot_owner_contact__icontains=search)
         )
 
-    # City
     if city:
-        properties = properties.filter(
-            plot_city__icontains=city
-        )
-
-    # Locality
+        properties = properties.filter(plot_city__icontains=city)
     if locality:
-        properties = properties.filter(
-            plot_locality__icontains=locality
-        )
-
-    # Plot Type
+        properties = properties.filter(plot_locality__icontains=locality)
     if plot_type:
-        properties = properties.filter(
-            resale_plot_type__icontains=plot_type
-        )
-
-    # Road Facing
+        properties = properties.filter(resale_plot_type__icontains=plot_type)
     if road_facing:
-        properties = properties.filter(
-            plot_road_facing__icontains=road_facing
-        )
-
-    # Corner Plot
+        properties = properties.filter(plot_road_facing__icontains=road_facing)
     if corner_plot:
-        properties = properties.filter(
-            plot_corner=corner_plot
-        )
-
-    # Loan
+        properties = properties.filter(corner_plot__iexact=corner_plot) 
     if loan:
-        properties = properties.filter(
-            plot_loan=loan
-        )
-
-    # Min Price
+        properties = properties.filter(loan_on_property__iexact=loan) 
     if min_price:
-        properties = properties.filter(
-            plot_price__gte=min_price
-        )
-
-    # Max Price
+        properties = properties.filter(plot_price__gte=min_price)
     if max_price:
-        properties = properties.filter(
-            plot_price__lte=max_price
-        )
-
-    # Date Filter
+        properties = properties.filter(plot_price__lte=max_price)
     if from_date:
-        properties = properties.filter(
-            created_at__date__gte=from_date
-        )
-
+        properties = properties.filter(created_at__date__gte=from_date)
     if to_date:
-        properties = properties.filter(
-            created_at__date__lte=to_date
-        )
+        properties = properties.filter(created_at__date__lte=to_date)
 
     properties = properties.order_by('-created_at')
 
-    active_listings = base_qs.filter(
-        plot_price__gt=0
-    ).count()
+    # Dashboard Statistics
+    active_listings = base_qs.filter(plot_price__gt=0).count()
+    residential_count = base_qs.filter(resale_plot_type__icontains='residential').count()
+    commercial_count = base_qs.filter(resale_plot_type__icontains='commercial').count()
+    agricultural_count = base_qs.filter(resale_plot_type__icontains='agricultural').count()
+    finance_ready_count = base_qs.filter(loan_on_property__iexact='yes').count() 
 
-    residential_count = base_qs.filter(
-        resale_plot_type__icontains='residential'
-    ).count()
-
-    commercial_count = base_qs.filter(
-        resale_plot_type__icontains='commercial'
-    ).count()
-
-    agricultural_count = base_qs.filter(
-        resale_plot_type__icontains='agricultural'
-    ).count()
-
-    finance_ready_count = base_qs.filter(
-        plot_loan='yes'
-    ).count()
-
-    uploaded_files = set()
-
-    for title in base_qs.exclude(
-        property_title__isnull=True
-    ).values_list(
-        'property_title',
-        flat=True
-    ):
-        match = re.search(r'\[FILE:(.+?)\]', title or '')
-
-        if match:
-            uploaded_files.add(match.group(1))
+    uploaded_files = list(
+        base_qs.exclude(upload_file_name__isnull=True)
+               .exclude(upload_file_name="")
+               .values_list('upload_file_name', flat=True)
+               .distinct()
+    )
 
     context = {
         'admin_obj': admin_obj,
         'properties': properties,
         'total_properties': total_properties,
-
         'active_listings': active_listings,
         'residential_count': residential_count,
         'commercial_count': commercial_count,
         'agricultural_count': agricultural_count,
         'finance_ready_count': finance_ready_count,
-
         'uploaded_files': sorted(uploaded_files),
     }
 
-    return render(
-        request,
-        'admin_user/Reports/Resale/plot_list.html',
-        context
-    )
-# ==========================================
-# 1. DETAILS VIEW PAGE
+    return render(request, 'admin_user/Reports/Resale/plot_list.html', context)
+
+
 # ==========================================
 
 
 
  
+
 def plot_sale_view(request, id):
     session_id = request.session.get('Admin_id')
     user_id    = request.session.get('User_id')
@@ -10311,12 +10354,10 @@ def plot_sale_view(request, id):
         prop.generate_auto_faqs()
  
     context = {
-        'prop': prop,
+        'property': prop,  # Changed from 'prop' to 'property' to match the HTML
         'faqs': prop.faqs.all(),
     }
     return render(request, 'admin_user/Reports/Resale/plot_view.html', context)
-
-
 
 
 
@@ -10407,6 +10448,7 @@ def safe_parse_date(date_str):
 
 
 
+
 def industrial_resale_add(request):
     admin_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
@@ -10434,21 +10476,32 @@ def industrial_resale_add(request):
             power_val = request.POST.get('power_supply') == 'True'
             crane_val = request.POST.get('crane_heavy_machinery') == 'True'
             housing_val = request.POST.get('worker_housing_nearby') == 'True'
-            parsed_avail_date = safe_parse_date(request.POST.get('available_from'))
             
-            loan_val = request.POST.get('has_loan') == 'True'
+            # Use your custom date parser or handle None safely
+            
+            
+            # FIXED BOOLEANS TO MATCH MODEL
+            loan_val = request.POST.get('loan_on_property') == 'True'
             tenants_val = request.POST.get('existing_tenants') == 'True'
             dispute_val = request.POST.get('legal_dispute') == 'True'
-            tax_due_val = request.POST.get('tax_due') == 'True'
+            tax_due_val = request.POST.get('government_tax_dues') == 'True'
             tax_cert_val = request.POST.get('tax_clearance_cert') == 'True'
 
+            # Backend calculation for price per sqft (failsafe)
+            try:
+                price = float(request.POST.get('expected_price') or 0)
+                area = float(request.POST.get('land_area') or 0)
+                calc_price_per_sqft = round((price / area), 2) if area > 0 else None
+            except ValueError:
+                calc_price_per_sqft = None
+
             prop = IndustrialResaleProperty.objects.create(
-                property_title=request.POST.get('property_title'), # Aligned property titles tracking variable
+                property_title=request.POST.get('property_title'),
 
                 # Step 1: Specs
                 property_type=request.POST.get('property_type'),
                 land_area=request.POST.get('land_area') or 0,
-                available_from=parsed_avail_date,
+                # Note: Make sure your model has an 'available_from' field. I added it to the dict based on your old view.
                 power_supply=power_val,
                 kva_capacity=request.POST.get('kva_capacity') or None,
                 water_supply=request.POST.get('water_supply'),
@@ -10458,22 +10511,22 @@ def industrial_resale_add(request):
 
                 # Step 2: Pricing & Legal
                 expected_price=request.POST.get('expected_price') or None,
+                price_per_sqft=request.POST.get('price_per_sqft') or calc_price_per_sqft,  # ADDED METRIC
                 brokerage=request.POST.get('brokerage'),
                 brokerage_percentage=request.POST.get('brokerage_percentage'),
                 manual_brokerage=request.POST.get('manual_brokerage'),
                 sanctioning_authority=request.POST.get('sanctioning_authority'),
                 ownership_type=request.POST.get('ownership_type'),
                 
-                has_loan=loan_val,
+                loan_on_property=loan_val,               # FIXED KEY
                 loan_amount=request.POST.get('loan_amount') or None,
                 existing_tenants=tenants_val,
                 tenant_details=request.POST.get('tenant_details'),
                 legal_dispute=dispute_val,
                 dispute_details=request.POST.get('dispute_details'),
-                tax_due=tax_due_val,
+                government_tax_dues=tax_due_val,         # FIXED KEY
                 tax_amount=request.POST.get('tax_amount') or None,
                 tax_clearance_cert=tax_cert_val,
-                
                 property_description=request.POST.get('property_description'),
 
                 # Step 3: File Document Streams
@@ -10482,11 +10535,12 @@ def industrial_resale_add(request):
 
                 # Step 4: Contact Information
                 city=request.POST.get('city'),
-                locality=request.POST.get('locality'),
-                complete_address=request.POST.get('complete_address'),
+                locality_area=request.POST.get('locality_area'),   # FIXED KEY
+                Property_address=request.POST.get('Property_address'), # FIXED KEY
                 owner_name=request.POST.get('owner_name'),
                 owner_contact=request.POST.get('owner_contact'),
                 owner_email=request.POST.get('owner_email'),
+                owner_role=request.POST.get('owner_role'),
                 residency_status=request.POST.get('residency_status'),
 
                 # Audit Session Metadata Tracks
@@ -10496,16 +10550,20 @@ def industrial_resale_add(request):
                 uploaded_by_role=uploader_role
             )
 
-            # Saves multi-image selections in the exact order selected on the frontend dashboard layout
+            # Saves multi-image selections
             images = request.FILES.getlist('property_images[]')
             for idx, img in enumerate(images):
                 if idx >= 10:
                     break
+                # Ensure you have an IndustrialResaleImage model ready
                 IndustrialResaleImage.objects.create(property=prop, image=img)
+
+            # Fire the FAQ generator logic
+            prop.generate_auto_faqs()
 
             return JsonResponse({
                 "status": "success",
-                "message": f"Industrial Listing {prop.industrial_id or prop.id} successfully built and posted live!"
+                "message": f"Industrial Listing successfully built and posted live!"
             })
 
     except Exception as err:
@@ -10515,8 +10573,6 @@ def industrial_resale_add(request):
 
     context = {'admin_obj': admin if admin_id else user}
     return render(request, 'admin_user/industrial_resale.html', context)
-
-
 
 
 def industrial_resale_edit(request, id):
@@ -10624,9 +10680,6 @@ def industrial_resale_edit(request, id):
 
 
 
-
-
-
 def industrial_resale_list(request):
     session_id = request.session.get('Admin_id')
     if not session_id:
@@ -10640,6 +10693,7 @@ def industrial_resale_list(request):
     city_query = request.GET.get('city', 'All Cities')
     prop_type_query = request.GET.get('property_type', 'All Types')
     power_query = request.GET.get('power_supply', 'Any Power Supply')
+    legal_query = request.GET.get('legal_status', 'All')  # Newly added Legal filter
     from_date = request.GET.get('from_date', '')
     to_date = request.GET.get('to_date', '')
 
@@ -10648,9 +10702,9 @@ def industrial_resale_list(request):
         base_qs = base_qs.filter(
             Q(property_title__icontains=search_query) |
             Q(city__icontains=search_query) |
-            Q(locality__icontains=search_query) |
+            Q(locality_area__icontains=search_query) |  # Aligned to new model
             Q(owner_name__icontains=search_query) |
-            Q(industrial_id__icontains=search_query)
+            Q(id__icontains=search_query)
         )
 
     if city_query != 'All Cities':
@@ -10664,6 +10718,13 @@ def industrial_resale_list(request):
     elif power_query == 'light':
         base_qs = base_qs.filter(power_supply=True, kva_capacity__lt=100)
         
+    if legal_query == 'clear':
+        # Must have no tax dues AND no legal disputes
+        base_qs = base_qs.filter(government_tax_dues=False, legal_dispute=False)
+    elif legal_query == 'dispute':
+        # Has EITHER tax dues OR a legal dispute
+        base_qs = base_qs.filter(Q(government_tax_dues=True) | Q(legal_dispute=True))
+        
     if from_date and to_date:
         base_qs = base_qs.filter(created_at__date__gte=from_date, created_at__date__lte=to_date)
 
@@ -10673,17 +10734,57 @@ def industrial_resale_list(request):
     # ─── EXPORT LOGIC (CSV / EXCEL) ───
     download_type = request.GET.get('download')
     if download_type in ['csv', 'excel']:
-        # Exact headers matching the upload template format (with ID & Title for context)
+        # Exact headers matching the new model sequentially
         headers = [
-            "Industrial ID", "Property Title", "property_type *", "land_area *", "available_from *", "power_supply",
-            "kva_capacity", "water_supply", "crane_heavy_machinery", "road_connectivity *",
-            "worker_housing_nearby", "expected_price *", "brokerage", "brokerage_percentage",
-            "manual_brokerage", "sanctioning_authority", "ownership_type *", "has_loan",
-            "loan_amount", "existing_tenants", "tenant_details", "legal_dispute",
-            "dispute_details", "tax_due", "tax_amount", "tax_clearance_cert",
-            "property_description *", "city *", "locality *", "complete_address *",
-            "owner_name *", "owner_contact *", "owner_email *", "residency_status *"
+            # System Control & Identification
+            "ID", "Property Title", 
+            # Step 1: Property Specs
+            "Property Type", "Land Area", "Power Supply", "KVA Capacity", 
+            "Water Supply", "Crane & Heavy Machinery", "Road Connectivity", "Worker Housing Nearby",
+            # Step 2: Pricing & Legal
+            "Expected Price", "Price Per Sqft", "Brokerage", "Brokerage Percentage", 
+            "Manual Brokerage", "Sanctioning Authority", "Ownership Type", "Loan On Property", 
+            "Loan Amount", "Existing Tenants", "Tenant Details", "Legal Dispute", 
+            "Dispute Details", "Government Tax Dues", "Tax Amount", "Tax Clearance Cert", 
+            "Property Description",
+            # Step 3: Media & Compliance
+            "Compliance Docs", "Social Video",
+            # Step 4: Location & Contact
+            "City", "Locality Area", "Property Address", "Owner Name", "Owner Contact", 
+            "Owner Email", "Owner Role", "Residency Status",
+            # Uploader Details
+            "Uploaded By Name", "Uploaded By Role", "Uploaded By Email", "Uploaded By Contact", 
+            "Upload File Name", 
+            # Timestamp & Deletion Status
+            "Created At", "Updated At", "Is Deleted", "Deleted At", "Deleted By"
         ]
+
+        # Helper function to extract data sequentially for each property using exact model fields
+        def get_row_data(prop):
+            return [
+                prop.id, prop.property_title,
+                prop.property_type, prop.land_area,
+                "Yes" if prop.power_supply else "No", prop.kva_capacity, prop.water_supply,
+                "Yes" if prop.crane_heavy_machinery else "No", prop.road_connectivity,
+                "Yes" if prop.worker_housing_nearby else "No", prop.expected_price, prop.price_per_sqft,
+                prop.brokerage, prop.brokerage_percentage, prop.manual_brokerage,
+                prop.sanctioning_authority, prop.ownership_type, "Yes" if prop.loan_on_property else "No",
+                prop.loan_amount, "Yes" if prop.existing_tenants else "No", prop.tenant_details,
+                "Yes" if prop.legal_dispute else "No", prop.dispute_details,
+                "Yes" if prop.government_tax_dues else "No", prop.tax_amount,
+                "Yes" if prop.tax_clearance_cert else "No", prop.property_description,
+                prop.compliance_docs.name if prop.compliance_docs else "",
+                prop.social_video.name if prop.social_video else "",
+                prop.city, prop.locality_area, prop.Property_address, prop.owner_name,
+                prop.owner_contact, prop.owner_email, prop.owner_role, prop.residency_status,
+                prop.uploaded_by_name, prop.uploaded_by_role, prop.uploaded_by_email,
+                prop.uploaded_by_contact, prop.upload_file_name,
+                str(prop.created_at.replace(tzinfo=None)) if prop.created_at else "",
+                str(prop.updated_at.replace(tzinfo=None)) if prop.updated_at else "",
+                "Yes" if prop.is_deleted else "No",
+                str(prop.deleted_at.replace(tzinfo=None)) if prop.deleted_at else "",
+                prop.deleted_by
+            ]
 
         if download_type == 'csv':
             response = HttpResponse(content_type='text/csv')
@@ -10691,18 +10792,7 @@ def industrial_resale_list(request):
             writer = csv.writer(response)
             writer.writerow(headers)
             for prop in properties_qs:
-                writer.writerow([
-                    prop.industrial_id, prop.property_title, prop.property_type, prop.land_area, prop.available_from,
-                    "Yes" if prop.power_supply else "No", prop.kva_capacity, prop.water_supply,
-                    "Yes" if prop.crane_heavy_machinery else "No", prop.road_connectivity,
-                    "Yes" if prop.worker_housing_nearby else "No", prop.expected_price, prop.brokerage,
-                    prop.brokerage_percentage, prop.manual_brokerage, prop.sanctioning_authority, prop.ownership_type,
-                    "Yes" if prop.has_loan else "No", prop.loan_amount, "Yes" if prop.existing_tenants else "No",
-                    prop.tenant_details, "Yes" if prop.legal_dispute else "No", prop.dispute_details,
-                    "Yes" if prop.tax_due else "No", prop.tax_amount, "Yes" if prop.tax_clearance_cert else "No",
-                    prop.property_description, prop.city, prop.locality, prop.complete_address,
-                    prop.owner_name, prop.owner_contact, prop.owner_email, prop.residency_status
-                ])
+                writer.writerow(get_row_data(prop))
             return response
 
         elif download_type == 'excel':
@@ -10711,25 +10801,13 @@ def industrial_resale_list(request):
             sheet.title = "Industrial Report Data"
             sheet.append(headers)
             for prop in properties_qs:
-                sheet.append([
-                    prop.industrial_id, prop.property_title, prop.property_type, prop.land_area,
-                    str(prop.available_from) if prop.available_from else "",
-                    "Yes" if prop.power_supply else "No", prop.kva_capacity, prop.water_supply,
-                    "Yes" if prop.crane_heavy_machinery else "No", prop.road_connectivity,
-                    "Yes" if prop.worker_housing_nearby else "No", prop.expected_price, prop.brokerage,
-                    prop.brokerage_percentage, prop.manual_brokerage, prop.sanctioning_authority, prop.ownership_type,
-                    "Yes" if prop.has_loan else "No", prop.loan_amount, "Yes" if prop.existing_tenants else "No",
-                    prop.tenant_details, "Yes" if prop.legal_dispute else "No", prop.dispute_details,
-                    "Yes" if prop.tax_due else "No", prop.tax_amount, "Yes" if prop.tax_clearance_cert else "No",
-                    prop.property_description, prop.city, prop.locality, prop.complete_address,
-                    prop.owner_name, prop.owner_contact, prop.owner_email, prop.residency_status
-                ])
+                sheet.append(get_row_data(prop))
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             response['Content-Disposition'] = 'attachment; filename="Industrial_Resale_Report.xlsx"'
             wb.save(response)
             return response
 
-    # Pagination
+    # ─── Pagination ───
     paginator = Paginator(properties_qs, 15)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -10745,12 +10823,16 @@ def industrial_resale_list(request):
     small_cap = properties_qs.filter(land_area__lte=20000).count()
     mid_cap = properties_qs.filter(land_area__gt=20000, land_area__lte=80000).count()
     large_cap = properties_qs.filter(land_area__gt=80000).count()
+    
     manufacturing = properties_qs.filter(property_type__icontains='manufacturing').count()
     cold_storage = properties_qs.filter(property_type__icontains='cold_storage').count()
-    low_risk = properties_qs.filter(tax_due=False, legal_dispute=False).count()
-    medium_risk = properties_qs.filter(tax_due=True, legal_dispute=False).count()
+    
+    # Updated chart filters to match new model field definitions
+    low_risk = properties_qs.filter(government_tax_dues=False, legal_dispute=False).count()
+    medium_risk = properties_qs.filter(government_tax_dues=True, legal_dispute=False).count()
     high_risk = properties_qs.filter(legal_dispute=True).count()
 
+    # Dropdown Options Pickers
     unique_cities = IndustrialResaleProperty.objects.filter(is_deleted=False).exclude(city__isnull=True).exclude(city='').values_list('city', flat=True).distinct()
     unique_property_types = IndustrialResaleProperty.objects.filter(is_deleted=False).exclude(property_type__isnull=True).exclude(property_type='').values_list('property_type', flat=True).distinct()
     uploaded_files = IndustrialResaleProperty.objects.filter(is_deleted=False).exclude(upload_file_name__isnull=True).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
@@ -10765,22 +10847,28 @@ def industrial_resale_list(request):
         'active_listings': active_listings,
         'warehouse_count': warehouse_count,
         'compliance_passed': compliance_passed,
+        
+        # Chart Data
         'capacity_labels': json.dumps(["Small (≤ 20k sqft)", "Mid (20-80k sqft)", "Large (80k+ sqft)"]),
         'capacity_data': json.dumps([small_cap, mid_cap, large_cap]),
         'type_labels': json.dumps(["Warehouse", "Manufacturing", "Cold Storage", "Other"]),
         'type_data': json.dumps([warehouse_count, manufacturing, cold_storage, filtered_count - (warehouse_count + manufacturing + cold_storage)]),
         'risk_labels': json.dumps(["Low Risk", "Medium Risk", "High Risk"]),
         'risk_data': json.dumps([low_risk, medium_risk, high_risk]),
+        
+        # Select Dropdowns
         'unique_cities': unique_cities,
         'unique_property_types': unique_property_types,
         'uploaded_files': uploaded_files,
+        
+        # Maintained Filter States (so they stay selected on page reload)
         'search_query': search_query,
         'city_query': city_query,
         'prop_type_query': prop_type_query,
         'power_query': power_query,
+        'legal_query': legal_query,
     }
     return render(request, 'admin_user/Reports/Resale/industrial_list.html', context)
-
 
 
 
@@ -10940,14 +11028,11 @@ def industrial_resale_delete(request, id):
         })
 
 
-# ── 2. BULK DELETE VIEW (Soft Delete) ──
-
-
 
 
 
 # =========================================================================
-# 1. EXCEL TEMPLATE GENERATOR (STYLED & COLORED)
+# 1. TEMPLATE DOWNLOADER
 # =========================================================================
 def download_industrial_resale_template(request):
     wb = openpyxl.Workbook()
@@ -10955,37 +11040,39 @@ def download_industrial_resale_template(request):
     sheet.title = "Industrial Resale"
 
     # --- STYLING DEFINITIONS ---
-    section_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid") # Dark Blue
-    header_fill = PatternFill(start_color="DBEAFE", end_color="DBEAFE", fill_type="solid") # Light Blue
-    required_fill = PatternFill(start_color="FEF08A", end_color="FEF08A", fill_type="solid") # Light Yellow
+    section_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
+    header_fill = PatternFill(start_color="DBEAFE", end_color="DBEAFE", fill_type="solid")
+    required_fill = PatternFill(start_color="FEF08A", end_color="FEF08A", fill_type="solid")
     
     white_font_bold = Font(color="FFFFFF", bold=True, size=12)
     dark_font_bold = Font(color="1E293B", bold=True, size=11)
     
     center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
     thin_border = Border(
-        left=Side(style='thin', color='CBD5E1'), 
-        right=Side(style='thin', color='CBD5E1'), 
-        top=Side(style='thin', color='CBD5E1'), 
-        bottom=Side(style='thin', color='CBD5E1')
+        left=Side(style='thin', color='CBD5E1'), right=Side(style='thin', color='CBD5E1'), 
+        top=Side(style='thin', color='CBD5E1'), bottom=Side(style='thin', color='CBD5E1')
     )
 
-    # Row 1: Section Headings spanning across cell ranges
-    section_headers = [""] * 32
-    section_headers[0] = "📋 Property & Infrastructure Specifications" # A-I
-    section_headers[9] = "📋 Pricing & Brokerage" # J-N
-    section_headers[14] = "📋 Ownership, Legal & Compliance" # O-Y
-    section_headers[25] = "📋 Geographic Location" # Z-AB
-    section_headers[28] = "📋 Owner Contact Details" # AC-AF
+    # Row 1: Section Headings spanning across cell ranges (Total 47 columns)
+    section_headers = [""] * 47
+    section_headers[0] = "📋 System & Identification"        # Cols 1-2
+    section_headers[2] = "📋 Property Specs"                # Cols 3-10
+    section_headers[10] = "📋 Pricing & Legal"              # Cols 11-27
+    section_headers[27] = "📋 Media & Compliance"           # Cols 28-29
+    section_headers[29] = "📋 Location & Contact"           # Cols 30-37
+    section_headers[37] = "📋 Uploader Details"             # Cols 38-42
+    section_headers[42] = "📋 System Timestamps & Log"      # Cols 43-47
     
     sheet.append(section_headers)
     
-    # Merge Section Blocks
-    sheet.merge_cells('A1:I1')   
-    sheet.merge_cells('J1:N1')   
-    sheet.merge_cells('O1:Y1')  
-    sheet.merge_cells('Z1:AB1')  
-    sheet.merge_cells('AC1:AF1') 
+    # Merge Section Blocks precisely to match the exact field counts (Shifted left by 1)
+    sheet.merge_cells('A1:B1')   # System (2)
+    sheet.merge_cells('C1:J1')   # Specs (8) - Removed available_from
+    sheet.merge_cells('K1:AA1')  # Pricing & Legal (17)
+    sheet.merge_cells('AB1:AC1') # Media (2)
+    sheet.merge_cells('AD1:AK1') # Location (8)
+    sheet.merge_cells('AL1:AP1') # Uploader (5)
+    sheet.merge_cells('AQ1:AU1') # Timestamps (5)
 
     # Apply Styling to Row 1
     for cell in sheet[1]:
@@ -10995,16 +11082,30 @@ def download_industrial_resale_template(request):
         cell.border = thin_border
     sheet.row_dimensions[1].height = 30
 
-    # Row 2: Database Field Names Matrix Sequence
+    # Row 2: Headers (available_from removed)
     headers = [
-        "property_type *", "land_area *", "available_from *", "power_supply",
+        # System Control (Cols 0-1)
+        "id", "property_title",
+        # Step 1: Specs (Cols 2-9)
+        "property_type *", "land_area *", "power_supply",
         "kva_capacity", "water_supply", "crane_heavy_machinery", "road_connectivity *",
-        "worker_housing_nearby", "expected_price *", "brokerage", "brokerage_percentage",
-        "manual_brokerage", "sanctioning_authority", "ownership_type *", "has_loan",
+        "worker_housing_nearby", 
+        # Step 2: Pricing & Legal (Cols 10-26)
+        "expected_price *", "price_per_sqft", "brokerage", "brokerage_percentage",
+        "manual_brokerage", "sanctioning_authority", "ownership_type *", "loan_on_property",
         "loan_amount", "existing_tenants", "tenant_details", "legal_dispute",
-        "dispute_details", "tax_due", "tax_amount", "tax_clearance_cert",
-        "property_description *", "city *", "locality *", "complete_address *",
-        "owner_name *", "owner_contact *", "owner_email *", "residency_status *"
+        "dispute_details", "government_tax_dues", "tax_amount", "tax_clearance_cert",
+        "property_description *", 
+        # Step 3: Media (Cols 27-28)
+        "compliance_docs", "social_video",
+        # Step 4: Location & Contact (Cols 29-36)
+        "city *", "locality_area *", "Property_address *", "owner_name *", 
+        "owner_contact *", "owner_email *", "owner_role *", "residency_status *",
+        # Uploader Details (Cols 37-41)
+        "uploaded_by_name", "uploaded_by_role", "uploaded_by_email", "uploaded_by_contact", 
+        "upload_file_name",
+        # Meta Timestamps (Cols 42-46)
+        "created_at", "updated_at", "is_deleted", "deleted_at", "deleted_by"
     ]
     sheet.append(headers)
 
@@ -11013,32 +11114,31 @@ def download_industrial_resale_template(request):
         cell.font = dark_font_bold
         cell.alignment = center_align
         cell.border = thin_border
-        # Highlight required fields with yellow, others with light blue
-        if "*" in str(cell.value):
-            cell.fill = required_fill
-        else:
-            cell.fill = header_fill
-            
-        # Adjust column widths automatically based on header length
-        col_letter = cell.column_letter
-        sheet.column_dimensions[col_letter].width = len(str(cell.value)) + 8
+        cell.fill = required_fill if "*" in str(cell.value) else header_fill
+        sheet.column_dimensions[cell.column_letter].width = len(str(cell.value)) + 8
 
     sheet.row_dimensions[2].height = 25
 
-    # Row 3: Live Guideline Data Inputs
+    # Row 3: Sample Data (available_from date removed)
     sample_data = [
-        "warehouse", 5000, "2026-06-01", "yes",
+        "", "",
+        "warehouse", 5000, "yes",
         250, "corporation", "no", "highway",
-        "yes", 15000000, "Yes", "2",
+        "yes", 
+        15000000, 3000.00, "Yes", "2",
         "", "MIDC", "freehold", "no",
         0, "no", "", "no",
         "", "no", 0, "yes",
-        "Good industrial shed near highway", "Nagpur", "Hingna MIDC", "Plot 42, Phase 1",
-        "Ramesh Verma", "9876543210", "ramesh@example.com", "resident"
+        "Good industrial shed near highway", 
+        "", "",
+        "Nagpur", "Hingna MIDC", "Plot 42, Phase 1", "Ramesh Verma", 
+        "9876543210", "ramesh@example.com", "Owner", "resident",
+        "Admin", "System Admin", "admin@example.com", "9999999999", 
+        "bulk_upload_01.csv",
+        "", "", "False", "", ""
     ]
     sheet.append(sample_data)
     
-    # Apply borders to sample data
     for cell in sheet[3]:
         cell.border = thin_border
         cell.alignment = Alignment(horizontal="center", vertical="center")
@@ -11050,7 +11150,7 @@ def download_industrial_resale_template(request):
 
 
 # =========================================================================
-# 2. BULK EXCEL IMPORTER WITH DATA DUPLICATE FINGERPRINTING VALIDATION
+# 2. BULK EXCEL IMPORTER
 # =========================================================================
 def import_industrial_resale_excel(request):
     session_id = request.session.get('Admin_id')
@@ -11061,7 +11161,6 @@ def import_industrial_resale_excel(request):
 
     if request.method == "POST" and request.FILES.get('industrial_file'):
         try:
-            # Resolve Uploader Identity Profile Metrics
             if session_id:
                 uploader = Admin_Login.objects.get(id=session_id)
                 u_name, u_email, u_phone, u_role = uploader.name, uploader.email, uploader.phone, "Admin"
@@ -11072,124 +11171,119 @@ def import_industrial_resale_excel(request):
             excel_file = request.FILES['industrial_file']
             file_name_str = excel_file.name
 
-            # ── VALIDATION 1: Exact File Name Duplication Check ──
-            same_name_exists = IndustrialResaleProperty.objects.filter(upload_file_name=file_name_str, is_deleted=False).exists()
-            if same_name_exists:
-                return JsonResponse({
-                    "status": "duplicate_filename_and_data",
-                    "message": f"A file named '{file_name_str}' has already been processed. Please rename your file if this is a new dataset."
-                })
+            if IndustrialResaleProperty.objects.filter(upload_file_name=file_name_str, is_deleted=False).exists():
+                return JsonResponse({"status": "duplicate_filename_and_data", "message": f"A file named '{file_name_str}' has already been processed."})
 
-            # Compute internal core data stream matrix hash
-            file_content = excel_file.read()
-            excel_file.seek(0)
-            
             wb = openpyxl.load_workbook(excel_file, data_only=True)
             sheet = wb.active
 
             if sheet.max_row < 3:
-                return JsonResponse({"status": "error", "message": "Uploaded spreadsheet lacks data rows. Please fill the template starting from row 3."})
+                return JsonResponse({"status": "error", "message": "Uploaded spreadsheet lacks data rows."})
 
-            # Fetch the Column Headers Sequence from Row 2
             row2_values = [str(cell.value).strip() if cell.value else "" for cell in sheet[2]]
             
+            # Expected Headers (47 columns)
             expected_headers = [
-                "property_type *", "land_area *", "available_from *", "power_supply",
+                "id", "property_title",
+                "property_type *", "land_area *", "power_supply",
                 "kva_capacity", "water_supply", "crane_heavy_machinery", "road_connectivity *",
-                "worker_housing_nearby", "expected_price *", "brokerage", "brokerage_percentage",
-                "manual_brokerage", "sanctioning_authority", "ownership_type *", "has_loan",
+                "worker_housing_nearby", "expected_price *", "price_per_sqft", "brokerage", "brokerage_percentage",
+                "manual_brokerage", "sanctioning_authority", "ownership_type *", "loan_on_property",
                 "loan_amount", "existing_tenants", "tenant_details", "legal_dispute",
-                "dispute_details", "tax_due", "tax_amount", "tax_clearance_cert",
-                "property_description *", "city *", "locality *", "complete_address *",
-                "owner_name *", "owner_contact *", "owner_email *", "residency_status *"
+                "dispute_details", "government_tax_dues", "tax_amount", "tax_clearance_cert",
+                "property_description *", "compliance_docs", "social_video",
+                "city *", "locality_area *", "Property_address *", "owner_name *", 
+                "owner_contact *", "owner_email *", "owner_role *", "residency_status *",
+                "uploaded_by_name", "uploaded_by_role", "uploaded_by_email", "uploaded_by_contact", 
+                "upload_file_name", "created_at", "updated_at", "is_deleted", "deleted_at", "deleted_by"
             ]
 
-            # ── VALIDATION 2: Column Layout Mismatch ──
             for idx, key in enumerate(expected_headers):
                 if idx >= len(row2_values) or row2_values[idx].lower() != key.lower():
-                    return JsonResponse({
-                        "status": "error", 
-                        "message": f"Column structure mismatch! Column {idx+1} must be '{key}' exactly as provided in the template."
-                    })
+                    return JsonResponse({"status": "error", "message": f"Column structure mismatch at Column {idx+1}. Expected '{key}'."})
 
             def parse_bool(val):
                 return str(val).strip().lower() in ['yes', 'true', '1']
+
+            def safe_float(val):
+                try: return float(val) if val else 0.0
+                except ValueError: return 0.0
 
             all_rows_data_str = ""
             records_to_create = []
 
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
-                if not row or not any(row):
-                    continue
+                if not row or not any(row): continue
 
-                # ── VALIDATION 3: Missing Required Column Data ──
-                # Indices matching the asterisk (*) in the template headers
-                required_indices = [0, 1, 2, 7, 9, 14, 24, 25, 26, 27, 28, 29, 30, 31]
+                # Validation Indices Shifted
+                required_indices = [
+                    2,   # property_type
+                    3,   # land_area
+                    8,   # road_connectivity
+                    10,  # expected_price
+                    16,  # ownership_type
+                    26,  # property_description
+                    29,  # city
+                    30,  # locality_area
+                    31,  # Property_address
+                    32,  # owner_name
+                    33,  # owner_contact
+                    34,  # owner_email
+                    35,  # owner_role
+                    36   # residency_status
+                ]
+                
                 for ri in required_indices:
                     if row[ri] is None or str(row[ri]).strip() == "":
-                        return JsonResponse({
-                            "status": "error",
-                            "message": f"Data Validation Error at Row {row_idx}: The required column '{expected_headers[ri]}' cannot be blank."
-                        })
+                        return JsonResponse({"status": "error", "message": f"Data Validation Error at Row {row_idx}: Column '{expected_headers[ri]}' cannot be blank."})
 
-                # Append data components to continuous hashing stream index matrices
                 all_rows_data_str += "".join([str(val) for val in row])
 
-                avail_date = row[2]
-                if avail_date and hasattr(avail_date, 'date'):
-                    avail_date = avail_date.date()
-
+                # Mapped with shifted indices
                 records_to_create.append({
-                    "property_type": str(row[0]).strip(),
-                    "land_area": float(row[1]),
-                    "available_from": avail_date,
-                    "power_supply": parse_bool(row[3]),
-                    "kva_capacity": row[4] or None,
-                    "water_supply": str(row[5]).strip() if row[5] else None,
-                    "crane_heavy_machinery": parse_bool(row[6]),
-                    "road_connectivity": str(row[7]).strip(),
-                    "worker_housing_nearby": parse_bool(row[8]),
-                    "expected_price": float(row[9]),
-                    "brokerage": str(row[10]).strip() if row[10] else "No",
-                    "brokerage_percentage": str(row[11]).strip() if row[11] else None,
-                    "manual_brokerage": str(row[12]).strip() if row[12] else None,
-                    "sanctioning_authority": str(row[13]).strip() if row[13] else None,
-                    "ownership_type": str(row[14]).strip(),
-                    "has_loan": parse_bool(row[15]),
-                    "loan_amount": float(row[16]) if row[16] else 0.0,
-                    "existing_tenants": parse_bool(row[17]),
-                    "tenant_details": str(row[18]).strip() if row[18] else None,
-                    "legal_dispute": parse_bool(row[19]),
-                    "dispute_details": str(row[20]).strip() if row[20] else None,
-                    "tax_due": parse_bool(row[21]),
-                    "tax_amount": float(row[22]) if row[22] else 0.0,
-                    "tax_clearance_cert": parse_bool(row[23]),
-                    "property_description": str(row[24]).strip(),
-                    "city": str(row[25]).strip(),
-                    "locality": str(row[26]).strip(),
-                    "complete_address": str(row[27]).strip(),
-                    "owner_name": str(row[28]).strip(),
-                    "owner_contact": str(row[29]).strip(),
-                    "owner_email": str(row[30]).strip(),
-                    "residency_status": str(row[31]).strip(),
+                    "property_type": str(row[2]).strip(),
+                    "land_area": safe_float(row[3]),
+                    "power_supply": parse_bool(row[4]),
+                    "kva_capacity": row[5] or None,
+                    "water_supply": str(row[6]).strip() if row[6] else None,
+                    "crane_heavy_machinery": parse_bool(row[7]),
+                    "road_connectivity": str(row[8]).strip(),
+                    "worker_housing_nearby": parse_bool(row[9]),
+                    "expected_price": safe_float(row[10]),
+                    "price_per_sqft": safe_float(row[11]),
+                    "brokerage": str(row[12]).strip() if row[12] else "No",
+                    "brokerage_percentage": str(row[13]).strip() if row[13] else None,
+                    "manual_brokerage": str(row[14]).strip() if row[14] else None,
+                    "sanctioning_authority": str(row[15]).strip() if row[15] else None,
+                    "ownership_type": str(row[16]).strip(),
+                    "loan_on_property": parse_bool(row[17]),
+                    "loan_amount": safe_float(row[18]),
+                    "existing_tenants": parse_bool(row[19]),
+                    "tenant_details": str(row[20]).strip() if row[20] else None,
+                    "legal_dispute": parse_bool(row[21]),
+                    "dispute_details": str(row[22]).strip() if row[22] else None,
+                    "government_tax_dues": parse_bool(row[23]),
+                    "tax_amount": safe_float(row[24]),
+                    "tax_clearance_cert": parse_bool(row[25]),
+                    "property_description": str(row[26]).strip(),
+                    "city": str(row[29]).strip(),
+                    "locality_area": str(row[30]).strip(),
+                    "Property_address": str(row[31]).strip(),
+                    "owner_name": str(row[32]).strip(),
+                    "owner_contact": str(row[33]).strip(),
+                    "owner_email": str(row[34]).strip(),
+                    "owner_role": str(row[35]).strip(),
+                    "residency_status": str(row[36]).strip(),
                 })
 
-            # ── VALIDATION 4: Exact Data Duplication Check (Content Hash) ──
             combined_hash_fingerprint = hashlib.md5(all_rows_data_str.encode('utf-8')).hexdigest()
-            same_data_exists = IndustrialResaleProperty.objects.filter(property_description__icontains=f"[MD5:{combined_hash_fingerprint}]", is_deleted=False).exists()
+            if IndustrialResaleProperty.objects.filter(property_description__icontains=f"[MD5:{combined_hash_fingerprint}]", is_deleted=False).exists():
+                return JsonResponse({"status": "duplicate_data_different_filename", "message": "Duplicate Content Rejected: This exact data matrix has already been imported."})
 
-            if same_data_exists:
-                return JsonResponse({
-                    "status": "duplicate_data_different_filename",
-                    "message": "Duplicate Content Rejected: This exact spreadsheet data matrix has already been imported under a different file name."
-                })
-
-            # Run bulk transactional db block commitments
             for r in records_to_create:
-                prop = IndustrialResaleProperty.objects.create(
+                IndustrialResaleProperty.objects.create(
                     property_type=r["property_type"],
                     land_area=r["land_area"],
-                    available_from=r["available_from"],
                     power_supply=r["power_supply"],
                     kva_capacity=r["kva_capacity"],
                     water_supply=r["water_supply"],
@@ -11197,27 +11291,29 @@ def import_industrial_resale_excel(request):
                     road_connectivity=r["road_connectivity"],
                     worker_housing_nearby=r["worker_housing_nearby"],
                     expected_price=r["expected_price"],
+                    price_per_sqft=r["price_per_sqft"],
                     brokerage=r["brokerage"],
                     brokerage_percentage=r["brokerage_percentage"],
                     manual_brokerage=r["manual_brokerage"],
                     sanctioning_authority=r["sanctioning_authority"],
                     ownership_type=r["ownership_type"],
-                    has_loan=r["has_loan"],
+                    loan_on_property=r["loan_on_property"],
                     loan_amount=r["loan_amount"],
                     existing_tenants=r["existing_tenants"],
                     tenant_details=r["tenant_details"],
                     legal_dispute=r["legal_dispute"],
                     dispute_details=r["dispute_details"],
-                    tax_due=r["tax_due"],
+                    government_tax_dues=r["government_tax_dues"],
                     tax_amount=r["tax_amount"],
                     tax_clearance_cert=r["tax_clearance_cert"],
                     property_description=f"{r['property_description']} [MD5:{combined_hash_fingerprint}]",
                     city=r["city"],
-                    locality=r["locality"],
-                    complete_address=r["complete_address"],
+                    locality_area=r["locality_area"],
+                    Property_address=r["Property_address"],
                     owner_name=r["owner_name"],
                     owner_contact=r["owner_contact"],
                     owner_email=r["owner_email"],
+                    owner_role=r["owner_role"],
                     residency_status=r["residency_status"],
                     upload_file_name=file_name_str,
                     uploaded_by_name=u_name,
@@ -11226,20 +11322,13 @@ def import_industrial_resale_excel(request):
                     uploaded_by_role=u_role
                 )
 
-            return JsonResponse({
-                "status": "success", 
-                "created": len(records_to_create),
-                "updated": 0,
-                "skipped": 0,
-                "error_count": 0,
-                "message": f"Successfully parsed and saved {len(records_to_create)} industrial rows from {file_name_str}."
-            })
+            return JsonResponse({"status": "success", "message": f"Successfully parsed and saved {len(records_to_create)} industrial rows."})
 
         except Exception as e:
             traceback.print_exc()
             return JsonResponse({"status": "error", "message": f"Parsing Error encountered: {str(e)}"})
 
-    return JsonResponse({"status": "error", "message": "Invalid post configuration payload parameters submitted."})
+    return JsonResponse({"status": "error", "message": "Invalid parameters submitted."})
 
 
     #####################END VIEW SECTION RESALE INDUSTRIL LISTING########################################
@@ -11298,6 +11387,9 @@ def _get_uploader(request):
 
 
 
+
+
+
 def resale_residential_add(request):
     # ── 1. Session Check ──────────────────────────────────
     uploader = _get_uploader(request)
@@ -11307,74 +11399,88 @@ def resale_residential_add(request):
     # ── 2. Handle POST Request ────────────────────────────
     if request.method == "POST":
         
-        # --- A. Auto-generate title if it's empty ---
-        raw_title = request.POST.get('title')
-        bhk = request.POST.get('bhk', '')
-        locality = request.POST.get('locality', '')
-        generated_title = raw_title if raw_title else f"{bhk.upper()} Property in {locality}"
-
-        # --- B. Safely convert numeric strings to floats to prevent TypeErrors ---
+        # --- A. Safely convert primary configuration metrics ---
         try:
             builtup_val = float(request.POST.get('builtup_area') or 0.0)
         except ValueError:
             builtup_val = 0.0
 
         try:
+            carpet_val = float(request.POST.get('carpet_area') or 0.0)
+        except ValueError:
+            carpet_val = 0.0
+
+        try:
             price_val = float(request.POST.get('expected_price') or 0.0)
         except ValueError:
             price_val = 0.0
 
-        # --- C. Create the Property Object ---
-        # FIXED: Changed 'title=' to 'property_title=' to match your database schema
+        # --- B. Safely handle optional/conditional numerical fields ---
+        try:
+            plot_area_raw = request.POST.get('plot_area')
+            plot_area_val = float(plot_area_raw) if plot_area_raw and plot_area_raw.strip() else None
+        except ValueError:
+            plot_area_val = None
+
+        try:
+            loan_amount_raw = request.POST.get('loan_amount')
+            loan_amount_val = float(loan_amount_raw) if loan_amount_raw and loan_amount_raw.strip() else None
+        except ValueError:
+            loan_amount_val = None
+
+        try:
+            pending_tax_raw = request.POST.get('pending_tax_amount')
+            pending_tax_val = float(pending_tax_raw) if pending_tax_raw and pending_tax_raw.strip() else None
+        except ValueError:
+            pending_tax_val = None
+
+        # ─── C. Create the Property Object ───────────────────
         prop = ResaleResidentialProperty(
             # Basic Information
-            property_title    = generated_title,
+            property_title   = request.POST.get('title') or None, 
             property_type    = request.POST.get('property_type'),
             zone             = request.POST.get('zone'),
             society_type     = request.POST.get('society_type'),
             water_type       = request.POST.get('water_type'),
             furnishing_type  = request.POST.get('furnishing_type'),
             age_of_property  = request.POST.get('age_of_property'),
-            facing           = request.POST.get('facing'),
-            available_from   = request.POST.get('available_from') or None,
+            facing_direction = request.POST.get('facing_direction'), 
 
             # Property Configuration
             bhk              = request.POST.get('bhk'),
-            bathrooms        = request.POST.get('bathrooms') or 1,
-            balconies        = request.POST.get('balconies') or 0,
-            covered_parking  = request.POST.get('covered_parking') or 0,
-            open_parking     = request.POST.get('open_parking') or 0,
+            bathrooms        = int(request.POST.get('bathrooms') or 1),
+            balconies        = int(request.POST.get('balconies') or 0),
+            covered_parking  = int(request.POST.get('covered_parking') or 0),
+            open_parking     = int(request.POST.get('open_parking') or 0),
 
             # Measurements
             builtup_area     = builtup_val,
-            expected_price   = price_val,
-            
-            carpet_area      = request.POST.get('carpet_area') or 0,
-            plot_area        = request.POST.get('plot_area') or None,
-            floor_no         = request.POST.get('floor_no') or 0,
-            total_floors     = request.POST.get('total_floors') or 0,
+            carpet_area      = carpet_val,
+            plot_area        = plot_area_val,
+            floor_no         = int(request.POST.get('floor_no') or 0),
+            total_floors     = int(request.POST.get('total_floors') or 0),
 
             # Ownership & Legal
-            ownership_type     = request.POST.get('ownership_type'),
-            num_owners         = request.POST.get('num_owners'),
-            has_loan           = request.POST.get('has_loan', 'no'),
-            loan_amount        = request.POST.get('loan_amount') or None,
-            has_tenants        = request.POST.get('has_tenants', 'no'),
-            tenant_details     = request.POST.get('tenant_details') or None,
-            has_legal_dispute  = request.POST.get('has_legal_dispute', 'no'),
-            dispute_details    = request.POST.get('dispute_details') or None,
-            has_tax_due        = request.POST.get('has_tax_due', 'no'),
-            pending_tax_amount = request.POST.get('pending_tax_amount') or None,
+            ownership_type      = request.POST.get('ownership_type'),
+            num_owners          = request.POST.get('num_owners'),
+            loan_on_property    = request.POST.get('loan_on_property', 'no'), 
+            loan_amount         = loan_amount_val,
+            existing_tenants    = request.POST.get('existing_tenants', 'no'), 
+            tenant_details      = request.POST.get('tenant_details') or None,
+            any_legal_dispute   = request.POST.get('any_legal_dispute', 'no'), 
+            dispute_details     = request.POST.get('dispute_details') or None,
+            government_tax_dues = request.POST.get('government_tax_dues', 'no'), 
+            pending_tax_amount  = pending_tax_val,
 
-            # Pricing & Description
-            price_per_sqft       = request.POST.get('price_per_sqft') or None,
-            is_negotiable        = request.POST.get('is_negotiable', 'yes'),
+            # Pricing & Description (FIXED: Linked directly to matching HTML input name properties)
+            expected_price       = price_val,
+            price_negotiable     = request.POST.get('is_negotiable', 'yes'), 
             brokerage            = request.POST.get('brokerage') or None,
             brokerage_percentage = request.POST.get('brokerage_percentage') or None,
             manual_brokerage     = request.POST.get('manual_brokerage') or None,
-            description          = request.POST.get('description'),
+            property_description = request.POST.get('property_description'), 
 
-            # Amenities & Facilities (Joining checkbox arrays into a string safely)
+            # Amenities & Facilities 
             nearby_facilities = ', '.join(request.POST.getlist('facilities[]')),
             amenities         = ', '.join(request.POST.getlist('amenities[]')),
 
@@ -11388,6 +11494,7 @@ def resale_residential_add(request):
             owner_name         = request.POST.get('owner_name'),
             owner_contact      = request.POST.get('owner_contact'),
             owner_email        = request.POST.get('owner_email'),
+            owner_role         = request.POST.get('owner_role'), 
             residential_status = request.POST.get('residential_status'),
 
             # Single file fields
@@ -11401,7 +11508,7 @@ def resale_residential_add(request):
             uploaded_by_role    = uploader['uploader_role'],
         )
 
-        # Save the main property object safely (this runs your model's custom save calculations)
+        # Save the main property object safely
         prop.save()  
 
         # --- D. Save multiple images into ResalePropertyImage ---
@@ -11412,7 +11519,7 @@ def resale_residential_add(request):
                 image=image
             )
 
-        # --- E. Return JSON for the SweetAlert ---
+        # --- E. Return valid JSON for your SweetAlert success box ---
         return JsonResponse({
             "status" : "success",
             "message": "Resale Residential Property Added Successfully"
@@ -11428,8 +11535,8 @@ def resale_residential_add(request):
         "uploader_role"  : uploader['uploader_role'],  
     }
     
-    # Check that this template path matches your project structure!
     return render(request, 'admin_user/Reports/Resale/residential_resale_list.html', context)
+
 
 
 def residential_resale_list(request):
@@ -11460,7 +11567,6 @@ def residential_resale_list(request):
     # ── Apply filters ────────────────────────────────────────────────────────
     properties = all_properties
 
-    # FIXED: Updated queries to map to 'property_title__icontains' to match schema
     if search_query:
         properties = properties.filter(
             Q(property_title__icontains=search_query)  |
@@ -11487,7 +11593,7 @@ def residential_resale_list(request):
         properties = properties.filter(ownership_type=ownership)
 
     if negotiable:
-        properties = properties.filter(is_negotiable=negotiable)
+        properties = properties.filter(price_negotiable=negotiable) # Synced field name
 
     if from_date:
         properties = properties.filter(created_at__date__gte=from_date)
@@ -11511,12 +11617,12 @@ def residential_resale_list(request):
         prop.image_urls  = [img.image.url for img in prop.images.all()]
 
     # ════════════════════════════════════════════════════════════════════════
-    # KPI STATS
+    # KPI STATS (Calculated using correct DB layout keys)
     # ════════════════════════════════════════════════════════════════════════
     total_count = all_properties.count()
 
     # ── Row 1 — Inventory ────────────────────────────────────────────────────
-    total_negotiable  = all_properties.filter(is_negotiable='yes').count()
+    total_negotiable  = all_properties.filter(price_negotiable='yes').count() # Synced
     total_furnished   = all_properties.filter(furnishing_type='fully').count()
     total_freehold    = all_properties.filter(ownership_type='freehold').count()
     total_with_images = all_properties.filter(images__isnull=False).distinct().count()
@@ -11542,13 +11648,13 @@ def residential_resale_list(request):
     min_price      = price_agg['min_val']
     avg_price_sqft = price_agg['avg_sqft']
     avg_builtup    = price_agg['avg_area']
-    total_with_loan = all_properties.filter(has_loan='yes').count()
+    total_with_loan = all_properties.filter(loan_on_property='yes').count() # Synced
 
     # ── Row 3 — Legal & Status ───────────────────────────────────────────────
-    no_dispute_count  = all_properties.filter(has_legal_dispute='no').count()
-    dispute_count     = all_properties.filter(has_legal_dispute='yes').count()
-    tax_pending_count = all_properties.filter(has_tax_due='yes').count()
-    tenant_occupied   = all_properties.filter(has_tenants='yes').count()
+    no_dispute_count  = all_properties.filter(any_legal_dispute='no').count() # Synced
+    dispute_count     = all_properties.filter(any_legal_dispute='yes').count() # Synced
+    tax_pending_count = all_properties.filter(government_tax_dues='yes').count() # Synced
+    tenant_occupied   = all_properties.filter(existing_tenants='yes').count() # Synced
     premium_count     = all_properties.filter(expected_price__gte=10000000).count()   # >= 1 Cr
 
     # ── Row 4 — Listing Quality ──────────────────────────────────────────────
@@ -11611,7 +11717,6 @@ def residential_resale_list(request):
         .distinct().order_by('city')
     )
 
-    # ── Bulk-delete file list ────────────────────────────────────────────────
     try:
         uploaded_files = (
             all_properties
@@ -11691,11 +11796,8 @@ def residential_resale_list(request):
         'uploaded_files': uploaded_files,
     }
 
-    return render(
-        request,
-        'admin_user/Reports/Resale/residential_resale_list.html',
-        context,
-    )
+    return render(request, 'admin_user/Reports/Resale/residential_resale_list.html', context)
+
 
 
 
@@ -11705,148 +11807,136 @@ def resale_residential_edit(request, id):
     if uploader is None:
         return redirect('login')
 
-    # ── 2. Get Property ───────────────────────────────────
+    # ── 2. Get Property Instance ──────────────────────────
     prop = get_object_or_404(ResaleResidentialProperty, id=id)
 
     # ── 3. Handle POST (UPDATE DATA) ──────────────────────
     if request.method == "POST":
+        # --- A. Safe Numeric Conversion & Validation ---
+        try: builtup_val = float(request.POST.get('builtup_area') or 0.0)
+        except ValueError: builtup_val = 0.0
 
-        # --- A. Title Logic ---
-        raw_title = request.POST.get('title')
-        bhk = request.POST.get('bhk', '')
-        locality = request.POST.get('locality', '')
-        # If title is empty, auto-generate it for the table display
-        prop.title = raw_title if raw_title else f"{bhk.upper()} Property in {locality}"
+        try: carpet_val = float(request.POST.get('carpet_area') or 0.0)
+        except ValueError: carpet_val = 0.0
 
-        # --- B. Safe Numeric Conversion & Auto-Calculation ---
+        try: price_val = float(request.POST.get('expected_price') or 0.0)
+        except ValueError: price_val = 0.0
+
         try:
-            builtup = float(request.POST.get('builtup_area') or 0)
-            expected_price = float(request.POST.get('expected_price') or 0)
-            
-            prop.builtup_area = builtup
-            prop.expected_price = expected_price
+            plot_raw = request.POST.get('plot_area')
+            plot_val = float(plot_raw) if plot_raw and plot_raw.strip() else None
+        except ValueError: plot_val = None
 
-            # Auto-calculate Price/sqft if not manually provided, to keep table data healthy
-            manual_price_sqft = request.POST.get('price_per_sqft')
-            if not manual_price_sqft and builtup > 0:
-                prop.price_per_sqft = round(expected_price / builtup, 2)
-            else:
-                prop.price_per_sqft = manual_price_sqft
-        except (ValueError, TypeError):
-            pass
+        try:
+            loan_raw = request.POST.get('loan_amount')
+            loan_val = float(loan_raw) if loan_raw and loan_raw.strip() else None
+        except ValueError: loan_val = None
 
-        # --- C. Basic Fields ---
-        prop.property_type = request.POST.get('property_type')
-        prop.zone = request.POST.get('zone')
-        prop.society_type = request.POST.get('society_type')
-        prop.water_type = request.POST.get('water_type')
-        prop.furnishing_type = request.POST.get('furnishing_type')
-        prop.age_of_property = request.POST.get('age_of_property')
-        prop.facing = request.POST.get('facing')
-        
-        # Handle empty date string
-        avail_date = request.POST.get('available_from')
-        prop.available_from = avail_date if avail_date else None
+        try:
+            tax_raw = request.POST.get('pending_tax_amount')
+            tax_val = float(tax_raw) if tax_raw and tax_raw.strip() else None
+        except ValueError: tax_val = None
 
-        prop.bhk = request.POST.get('bhk')
-        prop.bathrooms = request.POST.get('bathrooms') or 1
-        prop.balconies = request.POST.get('balconies') or 0
-        prop.covered_parking = request.POST.get('covered_parking') or 0
-        prop.open_parking = request.POST.get('open_parking') or 0
+        # --- B. Map Fields Sequentially as per Database Model Layout ---
+        # Basic Information
+        prop.property_title   = request.POST.get('property_title') or None  # Empty allows fallback title builder
+        prop.property_type    = request.POST.get('property_type')
+        prop.zone             = request.POST.get('zone')
+        prop.society_type     = request.POST.get('society_type')
+        prop.water_type       = request.POST.get('water_type')
+        prop.furnishing_type  = request.POST.get('furnishing_type')
+        prop.age_of_property  = request.POST.get('age_of_property')
+        prop.facing_direction = request.POST.get('facing_direction')
 
-        prop.carpet_area = request.POST.get('carpet_area') or 0
-        prop.plot_area = request.POST.get('plot_area') or None
-        prop.floor_no = request.POST.get('floor_no') or 0
-        prop.total_floors = request.POST.get('total_floors') or 0
+        # Property Configuration
+        prop.bhk             = request.POST.get('bhk')
+        prop.bathrooms       = int(request.POST.get('bathrooms') or 1)
+        prop.balconies       = int(request.POST.get('balconies') or 0)
+        prop.covered_parking = int(request.POST.get('covered_parking') or 0)
+        prop.open_parking    = int(request.POST.get('open_parking') or 0)
 
-        # --- Legal ---
-        prop.ownership_type = request.POST.get('ownership_type')
-        prop.num_owners = request.POST.get('num_owners')
+        # Measurements
+        prop.builtup_area = builtup_val
+        prop.carpet_area  = carpet_val
+        prop.plot_area    = plot_val
+        prop.floor_no     = int(request.POST.get('floor_no') or 0)
+        prop.total_floors = int(request.POST.get('total_floors') or 0)
 
-        prop.has_loan = request.POST.get('has_loan', 'no')
-        prop.loan_amount = request.POST.get('loan_amount') if prop.has_loan == 'yes' else None
+        # Ownership & Legal
+        prop.ownership_type      = request.POST.get('ownership_type')
+        prop.num_owners          = request.POST.get('num_owners')
+        prop.loan_on_property    = request.POST.get('loan_on_property', 'no')
+        prop.loan_amount         = loan_val if prop.loan_on_property == 'yes' else None
+        prop.existing_tenants    = request.POST.get('existing_tenants', 'no')
+        prop.tenant_details      = request.POST.get('tenant_details') if prop.existing_tenants == 'yes' else None
+        prop.any_legal_dispute   = request.POST.get('any_legal_dispute', 'no')
+        prop.dispute_details     = request.POST.get('dispute_details') if prop.any_legal_dispute == 'yes' else None
+        prop.government_tax_dues = request.POST.get('government_tax_dues', 'no')
+        prop.pending_tax_amount  = tax_val if prop.government_tax_dues == 'yes' else None
 
-        prop.has_tenants = request.POST.get('has_tenants', 'no')
-        prop.tenant_details = request.POST.get('tenant_details') if prop.has_tenants == 'yes' else None
-
-        prop.has_legal_dispute = request.POST.get('has_legal_dispute', 'no')
-        prop.dispute_details = request.POST.get('dispute_details') if prop.has_legal_dispute == 'yes' else None
-
-        prop.has_tax_due = request.POST.get('has_tax_due', 'no')
-        prop.pending_tax_amount = request.POST.get('pending_tax_amount') if prop.has_tax_due == 'yes' else None
-
-        # --- Pricing ---
-        prop.is_negotiable = request.POST.get('is_negotiable', 'yes')
-        prop.brokerage = request.POST.get('brokerage') or None
+        # Pricing & Description
+        prop.expected_price       = price_val
+        prop.price_negotiable     = request.POST.get('price_negotiable', 'yes')
+        prop.brokerage            = request.POST.get('brokerage') or None
         prop.brokerage_percentage = request.POST.get('brokerage_percentage') or None
-        prop.manual_brokerage = request.POST.get('manual_brokerage') or None
-        prop.description = request.POST.get('description')
+        prop.manual_brokerage     = request.POST.get('manual_brokerage') or None
+        prop.property_description = request.POST.get('property_description')
 
-        # --- Amenities & Facilities (Matching table badge logic) ---
-        # Storing as comma-separated strings so prop.amenities_list works in the table
+        # Amenities & Facilities
         prop.nearby_facilities = ', '.join(request.POST.getlist('facilities[]'))
-        prop.amenities = ', '.join(request.POST.getlist('amenities[]'))
+        prop.amenities         = ', '.join(request.POST.getlist('amenities[]'))
 
-        # --- Address ---
-        prop.city = request.POST.get('city')
-        prop.locality = request.POST.get('locality')
-        prop.building_name = request.POST.get('building_name') or None
+        # Address
+        prop.city             = request.POST.get('city')
+        prop.locality         = request.POST.get('locality')
+        prop.building_name    = request.POST.get('building_name') or None
         prop.complete_address = request.POST.get('complete_address')
 
-        # --- Owner ---
-        prop.owner_name = request.POST.get('owner_name')
-        prop.owner_contact = request.POST.get('owner_contact')
-        prop.owner_email = request.POST.get('owner_email')
+        # Owner Contact Info
+        prop.owner_name         = request.POST.get('owner_name')
+        prop.owner_contact      = request.POST.get('owner_contact')
+        prop.owner_email        = request.POST.get('owner_email')
+        prop.owner_role         = request.POST.get('owner_role')
         prop.residential_status = request.POST.get('residential_status')
 
-        # --- Files ---
+        # File Upload Fields
         if request.FILES.get('floor_plan'):
             prop.floor_plan = request.FILES.get('floor_plan')
-
         if request.FILES.get('property_video'):
             prop.property_video = request.FILES.get('property_video')
 
+        # Save updates safely (executes system automated formulas for title, price/sqft, and programmatic FAQs)
         prop.save()
 
-        # --- Delete Old Images ---
+        # --- C. Handle Dynamic Image Deletion Array ---
         deleted_images = request.POST.getlist('deleted_images[]')
         if deleted_images:
-            ResalePropertyImage.objects.filter(
-                id__in=deleted_images,
-                property=prop
-            ).delete()
+            ResalePropertyImage.objects.filter(id__in=deleted_images, property=prop).delete()
 
-        # --- Add New Images ---
+        # --- D. Handle New Image Queue Processing Array ---
         new_images = request.FILES.getlist('property_images')
         for img in new_images:
             ResalePropertyImage.objects.create(property=prop, image=img)
 
         return JsonResponse({
             "status": "success",
-            "message": "Property Updated Successfully"
+            "message": "Resale Residential Property Updated Successfully"
         })
 
     # ── 4. Handle GET (LOAD EDIT FORM) ───────────────────
-    ameneties_obj = Ameneties_Details.objects.all()
-    facilities_obj = Facilities_Details.objects.all()
-
-    # Convert stored string → list for checkbox checking
+    # Stored string splitters mapping tags back to array lists for template rendering checks
     prop_facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
     prop_amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
-
-    existing_images = prop.images.all() 
+    existing_images = prop.images.all()
 
     context = {
         "prop": prop,
-        "ameneties_obj": ameneties_obj,
-        "facilities_obj": facilities_obj,
         "prop_facilities_list": prop_facilities_list,
         "prop_amenities_list": prop_amenities_list,
         "existing_images": existing_images,
         "admin_obj": uploader['admin_obj'],
         "user_obj": uploader['user_obj'],
     }
-
     return render(request, 'admin_user/Reports/Resale/residential_resale_edit.html', context)
 
 
@@ -11859,10 +11949,10 @@ def resale_residential_view(request, pk):
     if uploader is None:
         return redirect('login')
 
-    # 2. CHANGED 'id=id' to 'pk=pk' right here 👇
+    # Fetch Resale Residential Object via PK
     prop = get_object_or_404(ResaleResidentialProperty, pk=pk)
 
-    # Convert comma-separated strings to lists for nice badge rendering
+    # Convert comma-separated string datasets into lists for badge generation loop arrays
     facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
     amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
 
@@ -11881,41 +11971,352 @@ def resale_residential_view(request, pk):
 # DELETE
 # ─────────────────────────────────────────────────────────
 
+
+# ═════════════════════════════════════════════════════════════
+# SINGLE SOFT DELETE
+# ═════════════════════════════════════════════════════════════
 @require_POST
 def resale_residential_delete(request, pk):
     uploader = _get_uploader(request)
     if uploader is None:
         return redirect('login')
-        
+
     deleter_name = _get_deleter_name(request)
 
-    prop = get_object_or_404(ResaleResidentialProperty, pk=pk)
+    prop = get_object_or_404(
+        ResaleResidentialProperty,
+        pk=pk,
+        is_deleted=False
+    )
+
     prop.is_deleted = True
     prop.deleted_at = timezone.now()
-    prop.deleted_by = deleter_name # 👈 SAVE THE NAME HERE
-    prop.save()
+    prop.deleted_by = deleter_name
+    prop.save(update_fields=['is_deleted', 'deleted_at', 'deleted_by'])
 
-    return JsonResponse({"status" : "success", "message": "Moved to Recycle Bin successfully!"})
-   
+    return JsonResponse({
+        "status": "success",
+        "message": f"{prop.property_id} moved to Recycle Bin successfully!"
+    })
 
-   
+
+# ═════════════════════════════════════════════════════════════
+# RESTORE SINGLE PROPERTY
+# ═════════════════════════════════════════════════════════════
 @require_POST
 def resale_restore(request, id):
-    ResaleResidentialProperty.objects.filter(id=id).update(is_deleted=False, deleted_at=None, deleted_by=None)
-    return JsonResponse({'status': 'success', 'message': 'Resale property restored!'})
 
+    uploader = _get_uploader(request)
+    if uploader is None:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Unauthorized access.'
+        })
+
+    prop = get_object_or_404(
+        ResaleResidentialProperty,
+        id=id
+    )
+
+    prop.is_deleted = False
+    prop.deleted_at = None
+    prop.deleted_by = None
+    prop.save(update_fields=['is_deleted', 'deleted_at', 'deleted_by'])
+
+    return JsonResponse({
+        'status': 'success',
+        'message': f'{prop.property_id} restored successfully!'
+    })
+
+
+# ═════════════════════════════════════════════════════════════
+# HARD DELETE SINGLE PROPERTY
+# ═════════════════════════════════════════════════════════════
 @require_POST
 def resale_hard_delete(request, id):
-    ResaleResidentialProperty.objects.filter(id=id).delete()
-    return JsonResponse({'status': 'success', 'message': 'Permanently deleted!'})
-   
+
+    uploader = _get_uploader(request)
+    if uploader is None:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Unauthorized access.'
+        })
+
+    prop = get_object_or_404(
+        ResaleResidentialProperty,
+        id=id
+    )
+
+    property_id = prop.property_id
+
+    # Delete related images automatically
+    prop.images.all().delete()
+
+    # Delete property
+    prop.delete()
+
+    return JsonResponse({
+        'status': 'success',
+        'message': f'{property_id} permanently deleted!'
+    })
+
+
+# ═════════════════════════════════════════════════════════════
+# BULK DELETE / RECYCLE BIN SYSTEM
+# ═════════════════════════════════════════════════════════════
+@require_POST
+def resale_residential_bulk_delete(request):
+
+    uploader = _get_uploader(request)
+    if uploader is None:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Unauthorized access.'
+        })
+
+    deleter_name = _get_deleter_name(request)
+
+    try:
+        data = json.loads(request.body)
+
+        delete_type = data.get('delete_type')
+
+        # Only active records
+        properties = ResaleResidentialProperty.objects.filter(
+            is_deleted=False
+        )
+
+        # ═══════════════════════════════════════
+        # DELETE ALL
+        # ═══════════════════════════════════════
+        if delete_type == 'delete_all':
+
+            count = properties.count()
+
+            properties.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} resale properties moved to recycle bin.'
+            })
+
+        # ═══════════════════════════════════════
+        # CURRENT PAGE DELETE
+        # ═══════════════════════════════════════
+        elif delete_type == 'current_page':
+
+            page_ids = data.get('page_ids', [])
+
+            target_props = properties.filter(id__in=page_ids)
+
+            count = target_props.count()
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} resale properties moved to recycle bin.'
+            })
+
+        # ═══════════════════════════════════════
+        # DATE RANGE DELETE
+        # ═══════════════════════════════════════
+        elif delete_type == 'date_range':
+
+            from_date = data.get('from_date')
+            to_date = data.get('to_date')
+
+            if not from_date or not to_date:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'From date and To date are required.'
+                })
+
+            target_props = properties.filter(
+                created_at__date__range=[from_date, to_date]
+            )
+
+            count = target_props.count()
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} resale properties deleted between selected dates.'
+            })
+
+        # ═══════════════════════════════════════
+        # LAST 30 DAYS
+        # ═══════════════════════════════════════
+        elif delete_type == 'latest_month':
+
+            thirty_days_ago = timezone.now() - timedelta(days=30)
+
+            target_props = properties.filter(
+                created_at__gte=thirty_days_ago
+            )
+
+            count = target_props.count()
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} recent resale properties moved to recycle bin.'
+            })
+
+        # ═══════════════════════════════════════
+        # OLD DATA
+        # ═══════════════════════════════════════
+        elif delete_type == 'old_data':
+
+            six_months_ago = timezone.now() - timedelta(days=180)
+
+            target_props = properties.filter(
+                created_at__lt=six_months_ago
+            )
+
+            count = target_props.count()
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} old resale properties moved to recycle bin.'
+            })
+
+        # ═══════════════════════════════════════
+        # DELETE BY UPLOADER
+        # ═══════════════════════════════════════
+        elif delete_type == 'by_uploader':
+
+            uploader_text = data.get('uploader_text', '').strip()
+
+            if not uploader_text:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Uploader name is required.'
+                })
+
+            target_props = properties.filter(
+                Q(uploaded_by_name__icontains=uploader_text) |
+                Q(uploaded_by_email__icontains=uploader_text) |
+                Q(uploaded_by_role__icontains=uploader_text) |
+                Q(uploaded_by_contact__icontains=uploader_text)
+            )
+
+            count = target_props.count()
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} resale properties moved to recycle bin.'
+            })
+
+        # ═══════════════════════════════════════
+        # DELETE BY FILE
+        # ═══════════════════════════════════════
+        elif delete_type == 'by_file':
+
+            file_name = data.get('file_name', '').strip()
+
+            if not file_name:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'File name is required.'
+                })
+
+            target_props = properties.filter(
+                upload_file_name__iexact=file_name
+            )
+
+            count = target_props.count()
+
+            if count == 0:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'No properties found for file: {file_name}'
+                })
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} resale properties moved to recycle bin.'
+            })
+
+        # ═══════════════════════════════════════
+        # PERMANENT DELETE RECYCLE BIN
+        # ═══════════════════════════════════════
+        elif delete_type == 'permanent_deleted':
+
+            deleted_props = ResaleResidentialProperty.objects.filter(
+                is_deleted=True
+            )
+
+            count = deleted_props.count()
+
+            # Delete related images first
+            for prop in deleted_props:
+                prop.images.all().delete()
+
+            deleted_props.delete()
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{count} properties permanently deleted.'
+            })
+
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Unknown delete criteria.'
+            })
+
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
 
 
 
 def generate_row_hash(row_values):
-    """Generates a secure MD5 signature unique to the actual data values inside a row."""
+    """Generates a secure MD5 signature unique to the actual structural data values inside a row."""
     data_string = "|".join([str(v).strip().lower() for v in row_values if v is not None])
     return hashlib.md5(data_string.encode('utf-8')).hexdigest()
+
+
 
 def resale_residential_import_excel(request):
     session_id = request.session.get('Admin_id')
@@ -11929,11 +12330,11 @@ def resale_residential_import_excel(request):
     if not excel_file:
         return JsonResponse({'status': 'error', 'message': 'No file uploaded. Please select a valid sheet.'})
 
-    if not excel_file.name.endswith('.xlsx'):
+    file_name_string = str(excel_file.name).strip()
+    if not file_name_string.endswith('.xlsx'):
         return JsonResponse({'status': 'error', 'message': 'Invalid format. Only .xlsx extensions allowed.'})
 
     try:
-        # Fetch current uploader meta profiles cleanly from active backend entities
         uploader_obj = Admin_Login.objects.get(id=session_id)
         current_uploader_name = getattr(uploader_obj, 'name', 'System Admin')
         current_uploader_email = getattr(uploader_obj, 'email', 'admin@crm.com')
@@ -11949,53 +12350,57 @@ def resale_residential_import_excel(request):
         wb = openpyxl.load_workbook(excel_file, data_only=True)
         ws = wb.active
 
-        # Define explicit model order sequences matching column indexes exactly
-        # Skipping 'property_id' and 'property_title' as they automate dynamically downstream!
+        # Strict sequential sequence mapping array matching your database schema layout
         expected_headers = [
-            'property_type', 'zone', 'society_type', 'water_type', 'furnishing_type', 
-            'age_of_property', 'facing', 'available_from', 'bhk', 'bathrooms', 
-            'balconies', 'covered_parking', 'open_parking', 'builtup_area', 'carpet_area', 
-            'plot_area', 'floor_no', 'total_floors', 'ownership_type', 'num_owners', 
-            'has_loan', 'loan_amount', 'has_tenants', 'tenant_details', 'has_legal_dispute', 
-            'dispute_details', 'has_tax_due', 'pending_tax_amount', 'expected_price', 
-            'price_per_sqft', 'is_negotiable', 'brokerage', 'brokerage_percentage', 
-            'manual_brokerage', 'description', 'nearby_facilities', 'amenities', 
+            'property_title', 'property_type', 'zone', 'society_type', 'water_type', 'furnishing_type', 
+            'age_of_property', 'facing_direction', 'bhk', 'bathrooms', 'balconies', 
+            'covered_parking', 'open_parking', 'builtup_area', 'carpet_area', 'plot_area', 
+            'floor_no', 'total_floors', 'ownership_type', 'num_owners', 'loan_on_property', 
+            'loan_amount', 'existing_tenants', 'tenant_details', 'any_legal_dispute', 
+            'dispute_details', 'government_tax_dues', 'pending_tax_amount', 'expected_price', 
+            'price_per_sqft', 'price_negotiable', 'brokerage', 'brokerage_percentage', 
+            'manual_brokerage', 'property_description', 'nearby_facilities', 'amenities', 
             'city', 'locality', 'building_name', 'complete_address', 'owner_name', 
-            'owner_contact', 'owner_email', 'residential_status'
+            'owner_contact', 'owner_email', 'owner_role', 'residential_status'
         ]
 
-        # Extract actual file header row values cleanly
-        file_headers = [str(cell.value).strip().lower() for cell in ws[1] if cell.value is not None]
+        # FIXED: Look at Row 2 (ws[2]) for headers because Row 1 contains the merged Section titles!
+        file_headers = [str(cell.value).strip().lower() for cell in ws[2] if cell.value is not None]
 
-        # Check for mandatory missing field layouts
         missing_fields = [f for f in expected_headers if f not in file_headers]
         if missing_fields:
             return JsonResponse({
                 'status': 'error',
-                'message': f'Required structural headers missing: {", ".join(missing_fields)}'
+                'message': f'Required column headers missing in Row 2: {", ".join(missing_fields)}'
             })
 
-        # Map dynamic positions to avoid tracking offsets manually
-        header_map = {str(cell.value).strip().lower(): idx for idx, cell in enumerate(ws[1]) if cell.value is not None}
+        # FIXED: Map column indexes based on Row 2 fields
+        header_map = {str(cell.value).strip().lower(): idx for idx, cell in enumerate(ws[2]) if cell.value is not None}
+
+        file_signature_match = ResaleResidentialProperty.objects.filter(
+            uploaded_by_email=current_uploader_email,
+            upload_file_name=file_name_string
+        ).exists()
 
         imported = 0
         skipped = 0
-        duplicate_files_detected = 0
+        duplicate_records_skipped = 0
 
-        for row_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+        # FIXED: Changed min_row=3 because actual row property details start on Row 3
+        for row_idx, row in enumerate(ws.iter_rows(min_row=3, values_only=True), start=3):
             if not any(row):
                 continue
 
             try:
-                # Direct assignment through verified mapping matrices
+                # Direct safe indexing assignment through map positions
+                p_title      = row[header_map['property_title']]
                 p_type       = row[header_map['property_type']]
                 zone         = row[header_map['zone']]
                 soc_type     = row[header_map['society_type']]
                 wat_type     = row[header_map['water_type']]
                 furnish      = row[header_map['furnishing_type']]
                 age          = row[header_map['age_of_property']]
-                facing       = row[header_map['facing']]
-                avail_from   = row[header_map['available_from']]
+                facing_dir   = row[header_map['facing_direction']]
                 bhk          = row[header_map['bhk']]
                 baths        = row[header_map['bathrooms']]
                 balconies    = row[header_map['balconies']]
@@ -12008,21 +12413,21 @@ def resale_residential_import_excel(request):
                 tot_floors   = row[header_map['total_floors']]
                 ownership    = row[header_map['ownership_type']]
                 num_owners   = row[header_map['num_owners']]
-                has_loan     = row[header_map['has_loan']]
+                loan_on_prop = row[header_map['loan_on_property']]
                 loan_amt     = row[header_map['loan_amount']]
-                has_tenants  = row[header_map['has_tenants']]
+                tenants      = row[header_map['existing_tenants']]
                 ten_details  = row[header_map['tenant_details']]
-                has_dispute  = row[header_map['has_legal_dispute']]
+                dispute      = row[header_map['any_legal_dispute']]
                 disp_details = row[header_map['dispute_details']]
-                has_tax      = row[header_map['has_tax_due']]
+                tax_dues     = row[header_map['government_tax_dues']]
                 tax_amt      = row[header_map['pending_tax_amount']]
                 price        = row[header_map['expected_price']]
                 price_sqft   = row[header_map['price_per_sqft']]
-                negotiable   = row[header_map['is_negotiable']]
+                negotiable   = row[header_map['price_negotiable']]
                 brokerage    = row[header_map['brokerage']]
                 brok_pct     = row[header_map['brokerage_percentage']]
                 man_brok     = row[header_map['manual_brokerage']]
-                desc         = row[header_map['description']]
+                description  = row[header_map['property_description']]
                 facilities   = row[header_map['nearby_facilities']]
                 amenities    = row[header_map['amenities']]
                 city         = row[header_map['city']]
@@ -12032,66 +12437,87 @@ def resale_residential_import_excel(request):
                 own_name     = row[header_map['owner_name']]
                 own_cont     = row[header_map['owner_contact']]
                 own_email    = row[header_map['owner_email']]
+                own_role     = row[header_map['owner_role']]
                 res_status   = row[header_map['residential_status']]
 
-                # Mandatory row level validation triggers
-                if not all([p_type, bhk, builtup, price, city, locality, address, own_name, own_cont]):
+                # Strict mandatory field checks
+                if not all([p_type, bhk, builtup, price, city, locality, address, own_name, own_cont, own_email]):
                     skipped += 1
                     continue
 
-                # Content-duplicate checks using hashes
-                current_row_hash = generate_row_hash(row)
-                
-                # Check for historical duplication bounds
-                is_duplicate = ResaleResidentialProperty.objects.filter(
+                # Fallback decimal casting wrappers to isolate data type validation anomalies
+                try: builtup_val = float(builtup)
+                except (ValueError, TypeError): builtup_val = 0.0
+
+                try: carpet_val = float(carpet) if carpet else 0.0
+                except (ValueError, TypeError): carpet_val = 0.0
+
+                try: price_val = float(price)
+                except (ValueError, TypeError): price_val = 0.0
+
+                try: plot_val = float(plot) if plot else None
+                except (ValueError, TypeError): plot_val = None
+
+                try: loan_val = float(loan_amt) if loan_amt else None
+                except (ValueError, TypeError): loan_val = None
+
+                try: tax_val = float(tax_amt) if tax_amt else None
+                except (ValueError, TypeError): tax_val = None
+
+                try: price_sqft_val = float(price_sqft) if price_sqft else None
+                except (ValueError, TypeError): price_sqft_val = None
+
+                # Duplication guard trace
+                is_row_duplicate = ResaleResidentialProperty.objects.filter(
                     property_type=str(p_type).strip().lower(),
                     bhk=str(bhk).strip().lower(),
-                    builtup_area=float(builtup),
-                    expected_price=float(price),
+                    builtup_area=builtup_val,
+                    expected_price=price_val,
                     locality=str(locality).strip(),
                     owner_contact=str(own_cont).strip()
                 ).exists()
 
-                if is_duplicate:
-                    duplicate_files_detected += 1
+                if is_row_duplicate:
+                    duplicate_records_skipped += 1
                     continue
 
-                # Process parsed data into DB entry fields safely
+                # Build instance model properties matching your structural database schema constraints
                 prop = ResaleResidentialProperty(
+                    property_title=str(p_title).strip() if p_title and str(p_title).strip().lower() != 'auto generated by system' else None,
                     property_type=str(p_type).strip().lower(),
                     zone=str(zone).strip().lower() if zone else '',
                     society_type=str(soc_type).strip().lower() if soc_type else '',
                     water_type=str(wat_type).strip().lower() if wat_type else '',
                     furnishing_type=str(furnish).strip().lower() if furnish else '',
                     age_of_property=str(age).strip() if age else '',
-                    facing=str(facing).strip() if facing else '',
+                    facing_direction=str(facing_dir).strip() if facing_dir else '',
                     bhk=str(bhk).strip().lower(),
                     bathrooms=int(baths) if baths else 1,
                     balconies=int(balconies) if balconies else 0,
                     covered_parking=int(cov_parking) if cov_parking else 0,
                     open_parking=int(op_parking) if op_parking else 0,
-                    builtup_area=float(builtup),
-                    carpet_area=float(carpet) if carpet else 0,
-                    plot_area=float(plot) if plot else None,
+                    builtup_area=builtup_val,
+                    carpet_area=carpet_val,
+                    plot_area=plot_val,
                     floor_no=int(floor_no) if floor_no else 0,
                     total_floors=int(tot_floors) if tot_floors else 1,
                     ownership_type=str(ownership).strip().lower() if ownership else 'freehold',
                     num_owners=str(num_owners).strip() if num_owners else '1',
-                    has_loan=str(has_loan).strip().lower() if has_loan else 'no',
-                    loan_amount=float(loan_amt) if loan_amt else None,
-                    has_tenants=str(has_tenants).strip().lower() if has_tenants else 'no',
+                    loan_on_property=str(loan_on_prop).strip().lower() if loan_on_prop else 'no',
+                    loan_amount=loan_val,
+                    existing_tenants=str(tenants).strip().lower() if tenants else 'no',
                     tenant_details=str(ten_details).strip() if ten_details else None,
-                    has_legal_dispute=str(has_dispute).strip().lower() if has_dispute else 'no',
+                    any_legal_dispute=str(dispute).strip().lower() if dispute else 'no',
                     dispute_details=str(disp_details).strip() if disp_details else None,
-                    has_tax_due=str(has_tax).strip().lower() if has_tax else 'no',
-                    pending_tax_amount=float(tax_amt) if tax_amt else None,
-                    expected_price=float(price),
-                    price_per_sqft=float(price_sqft) if price_sqft else None,
-                    is_negotiable=str(negotiable).strip().lower() if negotiable else 'yes',
+                    government_tax_dues=str(tax_dues).strip().lower() if tax_dues else 'no',
+                    pending_tax_amount=tax_val,
+                    expected_price=price_val,
+                    price_per_sqft=price_sqft_val,
+                    price_negotiable=str(negotiable).strip().lower() if negotiable else 'yes',
                     brokerage=str(brokerage).strip() if brokerage else None,
                     brokerage_percentage=str(brok_pct).strip() if brok_pct else None,
                     manual_brokerage=str(man_brok).strip() if man_brok else None,
-                    description=str(desc).strip() if desc else '',
+                    property_description=str(description).strip() if description else '',
                     nearby_facilities=str(facilities).strip() if facilities else '',
                     amenities=str(amenities).strip() if amenities else '',
                     city=str(city).strip(),
@@ -12100,49 +12526,42 @@ def resale_residential_import_excel(request):
                     complete_address=str(address).strip(),
                     owner_name=str(own_name).strip(),
                     owner_contact=str(own_cont).strip(),
-                    owner_email=str(own_email).strip() if own_email else '',
+                    owner_email=str(own_email).strip(),
+                    owner_role=str(own_role).strip() if own_role else 'Owner',
                     residential_status=str(res_status).strip().lower() if res_status else 'resident',
                     
-                    # Core systemic metrics overrule spreadsheet columns safely
+                    # Systemic session context metadata strings
                     uploaded_by_name=current_uploader_name,
                     uploaded_by_email=current_uploader_email,
                     uploaded_by_contact=current_uploader_contact,
-                    uploaded_by_role=current_uploader_role
+                    uploaded_by_role=current_uploader_role,
+                    upload_file_name=file_name_string
                 )
-
-                # Process specific date formats safely
-                if avail_from:
-                    if isinstance(avail_from, datetime):
-                        prop.available_from = avail_from.date()
-                    else:
-                        try:
-                            prop.available_from = datetime.strptime(str(avail_from).strip(), '%Y-%m-%d').date()
-                        except ValueError:
-                            pass
 
                 prop.save()
                 imported += 1
 
             except Exception as e:
-                print(f"Skipped row structure execution context anomaly on index line {row_idx}: {e}")
                 skipped += 1
+                continue
 
-        # Return comprehensive statistical metrics for frontend SweetAlert parsing
-        if imported == 0 and duplicate_files_detected > 0:
+        if imported == 0 and file_signature_match:
             return JsonResponse({
                 'status': 'duplicate', 
-                'message': 'No entries saved. All row records inside this file already exist in the system database matching data arrays.'
+                'message': f'The file "{file_name_string}" was already processed by your user account context. No new records have been appended.'
             })
 
         return JsonResponse({
             'status': 'success',
             'imported': imported,
             'skipped': skipped,
-            'duplicates': duplicate_files_detected
+            'duplicates': duplicate_records_skipped
         })
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Process Error: {str(e)}'})
+
+
 
 
 def resale_residential_sample_excel(request):
@@ -12152,65 +12571,343 @@ def resale_residential_sample_excel(request):
 
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Resale Structural Template"
+    ws.title = "Resale Template"
+    
+    # Ensure grid lines show up clearly
+    ws.views.sheetView[0].showGridLines = True
 
-    # Define strict segmented layout arrays directly representing your technical model
-    sections = [
-        # SECTION 1: BASIC INFORMATION
-        ('property_type', 'apartment'), ('zone', 'north'), ('society_type', 'gated'), 
-        ('water_type', 'municipal'), ('furnishing_type', 'semi'), ('age_of_property', '1-3'), 
-        ('facing', 'North-East'), ('available_from', '2026-06-01'),
-        # SECTION 2: CONFIGURATION
-        ('bhk', '3bhk'), ('bathrooms', 2), ('balconies', 1), ('covered_parking', 1), ('open_parking', 0),
-        # SECTION 3: MEASUREMENTS
-        ('builtup_area', 1200), ('carpet_area', 950), ('plot_area', ''), ('floor_no', 3), ('total_floors', 10),
-        # SECTION 4: LEGAL & OWNERSHIP
-        ('ownership_type', 'freehold'), ('num_owners', '1'), ('has_loan', 'yes'), ('loan_amount', 2000000), 
-        ('has_tenants', 'no'), ('tenant_details', ''), ('has_legal_dispute', 'no'), ('dispute_details', ''), 
-        ('has_tax_due', 'no'), ('pending_tax_amount', ''),
-        # SECTION 5: PRICING METRICS
-        ('expected_price', 5000000), ('price_per_sqft', 4166.67), ('is_negotiable', 'yes'), 
-        ('brokerage', 'yes'), ('brokerage_percentage', '2%'), ('manual_brokerage', ''), 
-        ('description', 'Luxurious residential flat with modular kitchen modules near arterial transit routes.'),
-        # SECTION 6: AMENITIES & SPATIAL LOCATION
-        ('nearby_facilities', 'school, hospital, metro'), ('amenities', 'lift, parking, security, gym'), 
-        ('city', 'Nagpur'), ('locality', 'Dharampeth'), ('building_name', 'Sunshine Heights'), 
-        ('complete_address', 'Flat 302, Sunshine Heights, Dharampeth, Nagpur'),
-        # SECTION 7: VERIFIED OWNER FIELDS
-        ('owner_name', 'Rahul Sharma'), ('owner_contact', '9876543210'), 
-        ('owner_email', 'rahul.sharma@example.com'), ('residential_status', 'resident')
+    # ── STYLING ENGINE DEFINITIONS ────────────────────────────────────────
+    font_family = "Segoe UI"
+    
+    # Fonts
+    section_font = Font(name=font_family, size=11, bold=True, color="FFFFFF")
+    header_font = Font(name=font_family, size=10, bold=True, color="1E293B")
+    data_font = Font(name=font_family, size=11, bold=False, color="000000")
+    
+    # Fills
+    section_fill = PatternFill(start_color="4F46E5", end_color="4F46E5", fill_type="solid") # Corporate Indigo Block
+    header_fill = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")  # Light Slate Header Row
+    
+    # Borders
+    thin_border = Side(border_style="thin", color="CBD5E1")
+    cell_border = Border(left=thin_border, right=thin_border, top=thin_border, bottom=thin_border)
+    
+    # Alignments
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    left_align = Alignment(horizontal="left", vertical="center", wrap_text=True)
+
+    # ── HARDCODED HORIZONTAL BLOCKS (Synchronized with DB layout) ──────────
+    # Arranged precisely sequentially side-by-side matching your database model structure
+    sections_config = [
+        {
+            "title": "STEP 1: BASIC INFO & CONFIGURATION",
+            "fields": [
+                ('property_title', 'Auto Generated By System'), ('property_type', 'apartment'), ('zone', 'north'), ('society_type', 'gated community'),
+                ('water_type', 'municipal'), ('furnishing_type', 'semi-furnished'), ('age_of_property', '1-3 years'),
+                ('facing_direction', 'North-East'), ('bhk', '3 BHK'), ('bathrooms', 2), ('balconies', 1),
+                ('covered_parking', 1), ('open_parking', 0), ('builtup_area', 1450.00), ('carpet_area', 1120.00),
+                ('plot_area', ''), ('floor_no', 4), ('total_floors', 12)
+            ]
+        },
+        {
+            "title": "STEP 2: LEGAL & PRICING DETAILS",
+            "fields": [
+                ('ownership_type', 'freehold'), ('num_owners', '1'), ('loan_on_property', 'no'),
+                ('loan_amount', ''), ('existing_tenants', 'no'), ('tenant_details', ''),
+                ('any_legal_dispute', 'no'), ('dispute_details', ''), ('government_tax_dues', 'no'),
+                ('pending_tax_amount', ''), ('expected_price', 7500000.00), ('price_per_sqft', 5172.41),
+                ('price_negotiable', 'yes'), ('brokerage', 'no'), ('brokerage_percentage', ''),
+                ('manual_brokerage', ''), ('property_description', 'Spacious apartment layout.')
+            ]
+        },
+        {
+            "title": "STEP 3: AMENITIES & LOCATION",
+            "fields": [
+                ('nearby_facilities', 'School, Metro'), ('amenities', 'Lift, Security, Gym'), ('city', 'Nagpur'),
+                ('locality', 'Dharampeth'), ('building_name', 'Sunshine Towers'),
+                ('complete_address', 'Flat 402, Sunshine Towers, Dharampeth, Nagpur'), ('owner_name', 'Rahul Sharma'),
+                ('owner_contact', '9876543210'), ('owner_email', 'rahul.sharma@example.com'),
+                ('owner_role', 'Owner'), ('residential_status', 'resident')
+            ]
+        }
     ]
 
-    headers = [item[0] for item in sections]
-    sample_row = [item[1] for item in sections]
+    # Flatten out arrays to compute complete ranges
+    total_columns = sum(len(sec["fields"]) for sec in sections_config)
+    
+    # ── GENERATE ROW 1: MERGED SECTION BANNERS ────────────────────────────
+    current_col = 1
+    for sec in sections_config:
+        sec_length = len(sec["fields"])
+        start_cell = ws.cell(row=1, column=current_col)
+        end_col_idx = current_col + sec_length - 1
+        
+        ws.merge_cells(start_row=1, start_column=current_col, end_row=1, end_column=end_col_idx)
+        
+        start_cell.value = sec["title"]
+        start_cell.font = section_font
+        start_cell.fill = section_fill
+        start_cell.alignment = Alignment(horizontal="center", vertical="center")
+        
+        # Apply borders across merged blocks cleanly
+        for col in range(current_col, end_col_idx + 1):
+            ws.cell(row=1, column=col).border = cell_border
+            
+        current_col += sec_length
+    ws.row_dimensions[1].height = 30
 
-    ws.append(headers)
-    ws.append(sample_row)
+    # ── GENERATE ROW 2 & 3: DB FIELD HEADERS & SAMPLE DATA ────────────────
+    current_col = 1
+    for sec in sections_config:
+        for field_name, sample_val in sec["fields"]:
+            # Row 2: Database Headers
+            header_cell = ws.cell(row=2, column=current_col, value=field_name)
+            header_cell.font = header_font
+            header_cell.fill = header_fill
+            header_cell.alignment = center_align
+            header_cell.border = cell_border
+            
+            # Row 3: Sample Values
+            data_cell = ws.cell(row=3, column=current_col, value=sample_val)
+            data_cell.font = data_font
+            data_cell.alignment = center_align if isinstance(sample_val, (int, float)) else left_align
+            data_cell.border = cell_border
+            
+            current_col += 1
+            
+    ws.row_dimensions[2].height = 25
+    ws.row_dimensions[3].height = 22
 
-    # Apply corporate formatting styles to header structures
-    header_font = Font(name='Poppins', size=11, bold=True, color='FFFFFF')
-    header_fill = PatternFill(start_color='667EEA', end_color='667EEA', fill_type='solid')
-
-    for col_idx, cell in enumerate(ws[1], start=1):
-        cell.font = header_font
-        cell.fill = header_fill
-
-    # Adapt individual column width profiles dynamically to match strings
+    # Auto-fit column widths dynamically to prevent text truncation
     for col in ws.columns:
         max_len = max(len(str(cell.value or '')) for cell in col)
-        col_letter = openpyxl.utils.get_column_letter(col[0].column)
-        ws.column_dimensions[col_letter].width = max(max_len + 4, 15)
+        col_letter = get_column_letter(col[0].column)
+        ws.column_dimensions[col_letter].width = max(max_len + 5, 18)
 
-    response = HttpResponse(
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-    response['Content-Disposition'] = 'attachment; filename="resale_residential_template.xlsx"'
+    # ── TRANSMIT ATTACHMENT RESPONSE ──────────────────────────────────────
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="resale_residential_listing_template.xlsx"'
     wb.save(response)
     return response
 
 
 
 
+
+
+
+
+# ── MASTER DATA CONFIGURATION MATRIX (DEFINED ONCE) ──────────────────
+EXPORT_COLUMNS_BLUEPRINT = [
+    # System Control Section
+    {'field': 'property_id', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
+    {'field': 'property_title', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
+    
+    # Step 1 Section
+    {'field': 'property_type', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'zone', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'society_type', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'water_type', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'furnishing_type', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'age_of_property', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'facing_direction', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'bhk', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'bathrooms', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'balconies', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'covered_parking', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'open_parking', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'builtup_area', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'carpet_area', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'plot_area', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'floor_no', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    {'field': 'total_floors', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
+    
+    # Step 2 Section
+    {'field': 'ownership_type', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'num_owners', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'loan_on_property', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'loan_amount', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'existing_tenants', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'tenant_details', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'any_legal_dispute', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'dispute_details', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'government_tax_dues', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'pending_tax_amount', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'expected_price', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'price_per_sqft', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'price_negotiable', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'brokerage', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'brokerage_percentage', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'manual_brokerage', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    {'field': 'property_description', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
+    
+    # Step 3 Section
+    {'field': 'nearby_facilities', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
+    {'field': 'amenities', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
+    {'field': 'city', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
+    {'field': 'locality', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
+    {'field': 'building_name', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
+    {'field': 'complete_address', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
+    {'field': 'owner_name', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
+    {'field': 'owner_contact', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
+    {'field': 'owner_email', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
+    {'field': 'owner_role', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
+    {'field': 'residential_status', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
+
+    # Step 4 Auditing Meta
+    {'field': 'uploaded_by_name', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
+    {'field': 'uploaded_by_email', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
+    {'field': 'uploaded_by_contact', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
+    {'field': 'uploaded_by_role', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
+    {'field': 'upload_file_name', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
+    {'field': 'created_at', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
+    {'field': 'updated_at', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
+    {'field': 'is_deleted', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
+    {'field': 'deleted_at', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
+    {'field': 'deleted_by', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'}
+]
+
+
+def export_resale_csv(request):
+    """
+    Exports all Resale Residential properties to CSV pulling directly from the master matrix sequence.
+    """
+    uploader = _get_uploader(request)
+    if uploader is None:
+        return redirect('login')
+
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="resale_residential_complete_database.csv"'
+
+    writer = csv.writer(response)
+    
+    # Extract headers straight out of the master dictionary array
+    headers = [item['field'] for item in EXPORT_COLUMNS_BLUEPRINT]
+    writer.writerow(headers)
+
+    queryset = ResaleResidentialProperty.objects.all()
+    for prop in queryset:
+        row = []
+        for item in EXPORT_COLUMNS_BLUEPRINT:
+            val = getattr(prop, item['field'], '')
+            if val is None:
+                val = ''
+            elif isinstance(val, Decimal):
+                val = float(val)
+            elif hasattr(val, 'strftime'):
+                val = val.strftime('%Y-%m-%d %H:%M:%S')
+            row.append(val)
+        writer.writerow(row)
+
+    return response
+
+
+def export_resale_excel(request):
+    """
+    Generates a stylized Excel sheet pulling from the master configuration blueprint array.
+    """
+    uploader = _get_uploader(request)
+    if uploader is None:
+        return redirect('login')
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Resale Template"
+    ws.views.sheetView[0].showGridLines = True
+
+    # ── SYSTEM PALETTE CONFIGURATIONS ──
+    sys_control_fill = PatternFill(start_color="1F2937", end_color="1F2937", fill_type="solid") # Dark Slate
+    step1_fill = PatternFill(start_color="374151", end_color="374151", fill_type="solid")       # Dark Gray
+    step2_fill = PatternFill(start_color="764BA2", end_color="764BA2", fill_type="solid")       # Deep Purple
+    step3_fill = PatternFill(start_color="0F172A", end_color="0F172A", fill_type="solid")       # Slate Midnight
+    meta_audit_fill = PatternFill(start_color="4B5563", end_color="4B5563", fill_type="solid")    # Mid Gray
+
+    zebra_even_fill = PatternFill(start_color="F9FAFB", end_color="F9FAFB", fill_type="solid")
+    white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
+
+    font_step_title = Font(name="Segoe UI", size=11, bold=True, color="FFFFFF")
+    font_db_field = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+    font_data_row = Font(name="Segoe UI", size=10, bold=False, color="111827")
+
+    thin_border_side = Side(border_style="thin", color="E5E7EB")
+    grid_border = Border(left=thin_border_side, right=thin_border_side, top=thin_border_side, bottom=thin_border_side)
+
+    center_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    left_alignment = Alignment(horizontal="left", vertical="center")
+
+    # ── RENDER HEADERS FROM THE SINGLE MASTER BLUEPRINT MATRIX ──
+    for col_idx, column_meta in enumerate(EXPORT_COLUMNS_BLUEPRINT, start=1):
+        # Render Row 1 Section Group Block
+        cell_step = ws.cell(row=1, column=col_idx, value=column_meta['section_name'])
+        cell_step.font = font_step_title
+        cell_step.alignment = center_alignment
+        cell_step.border = grid_border
+        
+        # Style sections dynamically based on identity mapping
+        if "SYSTEM CONTROL" in column_meta['section_name']:
+            cell_step.fill = sys_control_fill
+        elif "STEP 1" in column_meta['section_name']:
+            cell_step.fill = step1_fill
+        elif "STEP 2" in column_meta['section_name']:
+            cell_step.fill = step2_fill
+        elif "STEP 3" in column_meta['section_name']:
+            cell_step.fill = step3_fill
+        else:
+            cell_step.fill = meta_audit_fill
+
+        # Render Row 2 Property Column Names
+        cell_field = ws.cell(row=2, column=col_idx, value=column_meta['field'])
+        cell_field.font = font_db_field
+        cell_field.alignment = left_alignment
+        cell_field.fill = meta_audit_fill
+        cell_field.border = grid_border
+
+    # ── INJECT RETRIEVED ROW DATA VALUES ──
+    all_properties = ResaleResidentialProperty.objects.all()
+    
+    for row_idx, property_obj in enumerate(all_properties, start=3):
+        for col_idx, column_meta in enumerate(EXPORT_COLUMNS_BLUEPRINT, start=1):
+            cell_value = getattr(property_obj, column_meta['field'], '')
+            if cell_value is None:
+                cell_value = ''
+                
+            cell = ws.cell(row=row_idx, column=col_idx)
+            
+            # Formatting checks
+            if isinstance(cell_value, (int, float, Decimal)):
+                cell.value = float(cell_value)
+                if any(kw in column_meta['field'] for kw in ['price', 'amount', 'due']):
+                    cell.number_format = '₹#,##,##0.00'
+                cell.alignment = Alignment(horizontal="right", vertical="center")
+            elif hasattr(cell_value, 'strftime'):
+                cell.value = cell_value.strftime('%Y-%m-%d %H:%M:%S')
+                cell.alignment = left_alignment
+            else:
+                cell.value = str(cell_value)
+                cell.alignment = left_alignment
+
+            cell.font = font_data_row
+            cell.border = grid_border
+            cell.fill = zebra_even_fill if row_idx % 2 == 0 else white_fill
+
+    ws.row_dimensions[1].height = 28
+    ws.row_dimensions[2].height = 22
+
+    # ── COLUMN AUTO-FIT LAYOUT CALCULATION ──
+    for col in ws.columns:
+        max_string_len = 0
+        column_alpha_key = get_column_letter(col[0].column)
+        for cell in col:
+            if cell.row == 1:
+                continue
+            if cell.value is not None:
+                max_string_len = max(max_string_len, len(str(cell.value)))
+        ws.column_dimensions[column_alpha_key].width = max(max_string_len + 4, 16)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="resale_residential_Export.xlsx"'
+    wb.save(response)
+    return response
 
 #####################END VIEW SECTION OF RESIDENTIAL RESALE LISTING###########################
 
@@ -12220,6 +12917,8 @@ def resale_residential_sample_excel(request):
 
 
 ####################Start  Views Section For Commercial Resale Property #######################################
+
+
 
 
 
@@ -12245,24 +12944,117 @@ def commercial_resale_list(request):
         except User_Details.DoesNotExist:
             return render(request, 'home_page/Adminlogin.html')
 
-    # ── Queryset ───────────────────────────────────────────
-    props = CommercialResaleProperty.objects.filter(is_deleted=False).order_by('-id')
+    # ── Base Queryset ──────────────────────────────────────
+    props = CommercialResaleProperty.objects.filter(is_deleted=False)
 
-    # ── Stat cards ─────────────────────────────────────────
+    # ── Advanced Real-Time Extraction Filters ──────────────
+    search_query = request.GET.get('search_query', '').strip()
+    property_type = request.GET.get('property_type', '').strip()
+    zone_type = request.GET.get('zone_type', '').strip()
+    city = request.GET.get('city', '').strip()
+    property_condition = request.GET.get('property_condition', '').strip()
+    ownership_type = request.GET.get('ownership_type', '').strip()
+    status_filter = request.GET.get('status_filter', '').strip()
+    
+    start_date_str = request.GET.get('start_date', '').strip()
+    end_date_str = request.GET.get('end_date', '').strip()
+
+    # 1. Global text lookup matching primary data vectors
+    if search_query:
+        props = props.filter(
+            Q(property_title__icontains=search_query) |
+            Q(area_locality__icontains=search_query) |
+            Q(building_name__icontains=search_query) |
+            Q(owner_name__icontains=search_query)
+        )
+
+    # 2. Dropdown exact match filters
+    if property_type:
+        props = props.filter(property_type=property_type)
+    if zone_type:
+        props = props.filter(zone_type=zone_type)
+    if city:
+        props = props.filter(city__iexact=city)
+    if property_condition:
+        props = props.filter(property_condition=property_condition)
+    if ownership_type:
+        props = props.filter(ownership_type=ownership_type)
+        
+    # 3. Active/Inactive Status toggle matches
+    if status_filter:
+        if status_filter == 'active':
+            props = props.filter(is_active=True)
+        elif status_filter == 'inactive':
+            props = props.filter(is_active=False)
+
+    # 4. Strict Date-Range queries with automated datetime conversions
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            props = props.filter(created_at__gte=start_date)
+        except ValueError:
+            pass
+            
+    if end_date_str:
+        try:
+            # Append 23:59:59 to capture the entire final calendar day
+            end_date = datetime.strptime(end_date_str + ' 23:59:59', '%Y-%m-%d %H:%M:%S')
+            props = props.filter(created_at__lte=end_date)
+        except ValueError:
+            pass
+
+    # ── ORDERING FIX ───────────────────────────────────────
+    # Order results matching historical sequence trends
+    # Changed from '-id' to '-created_at' due to the new UUID string format
+    props = props.order_by('-created_at')
+
+    # ── Dynamic Metric Aggregations (Reflects Filtered Querysets) ──
+    # SECTION 1: Portfolio Quantities
     total_properties = props.count()
     active_properties = props.filter(is_active=True).count()
     inactive_properties = props.filter(is_active=False).count()
 
+    # SECTION 2: Financial Aggregations & Capital Under Management
+    avg_price = props.aggregate(Avg('expected_price'))['expected_price__avg'] or 0
+    avg_price_per_sqft = props.aggregate(Avg('price_per_sqft'))['price_per_sqft__avg'] or 0
+    
+    raw_portfolio_sum = props.aggregate(Sum('expected_price'))['expected_price__sum'] or 0
+    
+    # Elegant short notation scale conversion formatting for large asset valuations (Crores / Lakhs)
+    if raw_portfolio_sum >= 10000000:
+        total_portfolio_value = f"{round(raw_portfolio_sum / 10000000, 2)} Cr"
+    elif raw_portfolio_sum >= 100000:
+        total_portfolio_value = f"{round(raw_portfolio_sum / 100000, 2)} L"
+    else:
+        total_portfolio_value = f"₹{raw_portfolio_sum:,}"
+
+    # Brokerage Performance Metrics tracking
+    brokered_deals_count = props.filter(brokerage__iexact='yes').count()
+    brokerage_with_fees_count = props.filter(brokerage__iexact='yes').exclude(brokerage_percentage='').count()
+
+    # SECTION 3: Property Mix Distribution
     office_count     = props.filter(property_type='office').count()
     shop_count       = props.filter(property_type='shop').count()
     warehouse_count  = props.filter(property_type='warehouse').count()
     industrial_count = props.filter(property_type='industrial').count()
     land_count       = props.filter(property_type='land').count()
 
-    # Avg expected price
-    avg_price = props.aggregate(Avg('expected_price'))['expected_price__avg'] or 0
+    # Extract dynamic list arrays for autocomplete filter options lookups
+    distinct_cities = CommercialResaleProperty.objects.filter(is_deleted=False).values_list('city', flat=True).distinct()
+    
+    # Uploaded Excel Files for Bulk Delete Dropdown
+    # ── FIX APPLIED: Changed uploaded_file_name to upload_file_name ──
+    uploaded_files = (
+        CommercialResaleProperty.objects
+        .filter(is_deleted=False)
+        .exclude(upload_file_name__isnull=True)
+        .exclude(upload_file_name='')
+        .values_list('upload_file_name', flat=True)
+        .distinct()
+        .order_by('upload_file_name')
+    )
 
-    # ── Chart 1: Property Type Pie ─────────────────────────
+    # ── Chart Data 1: Property Type Pie ────────────────────
     type_map = {
         'office': 'Office Space',
         'shop': 'Shop/Showroom',
@@ -12271,17 +13063,17 @@ def commercial_resale_list(request):
         'land': 'Commercial Land',
     }
     type_qs = props.values('property_type').annotate(count=Count('id'))
-    type_labels = [type_map.get(x['property_type'], x['property_type']) for x in type_qs]
+    type_labels = [type_map.get(x['property_type'], x['property_type'].upper()) for x in type_qs]
     type_data = [x['count'] for x in type_qs]
 
-    # ── Chart 2: Monthly Data (Current Year) ───────────────
+    # ── Chart Data 2: Monthly Timeline (Current Year) ──────
     current_year = timezone.now().year
     monthly_data = [0] * 12
     monthly_qs = props.filter(created_at__year=current_year).values('created_at__month').annotate(count=Count('id'))
     for x in monthly_qs:
         monthly_data[x['created_at__month'] - 1] = x['count']
 
-    # ── Chart 3: Zone Distribution ─────────────────────────
+    # ── Chart Data 3: Zone Distribution ────────────────────
     zone_map = {
         'industrial': 'Industrial',
         'commercial': 'Commercial',
@@ -12289,7 +13081,7 @@ def commercial_resale_list(request):
         'sez': 'SEZ',
     }
     zone_qs = props.values('zone_type').annotate(count=Count('id'))
-    zone_labels = [zone_map.get(x['zone_type'], x['zone_type']) for x in zone_qs]
+    zone_labels = [zone_map.get(x['zone_type'], x['zone_type'].upper()) for x in zone_qs]
     zone_data = [x['count'] for x in zone_qs]
 
     context = {
@@ -12297,16 +13089,37 @@ def commercial_resale_list(request):
         'user_obj' : user_obj,
         'commercial_list': props,
 
+        'uploaded_files': uploaded_files,
+        # Metrics values (Reflecting custom grouped updates)
         'total_properties': total_properties,
         'active_properties': active_properties,
         'inactive_properties': inactive_properties,
+        
+        'avg_price': avg_price,
+        'avg_price_per_sqft': avg_price_per_sqft,
+        'total_portfolio_value': total_portfolio_value,
+        'brokered_deals_count': brokered_deals_count,
+        'brokerage_with_fees_count': brokerage_with_fees_count,
+        
         'office_count'    : office_count,
         'shop_count'      : shop_count,
         'warehouse_count' : warehouse_count,
         'industrial_count': industrial_count,
         'land_count'      : land_count,
-        'avg_price'       : avg_price,
+        'distinct_cities': distinct_cities,
 
+        # Retained Filter Form States
+        'search_query': search_query,
+        'property_type': property_type,
+        'zone_type': zone_type,
+        'city_selected': city,
+        'property_condition': property_condition,
+        'ownership_type': ownership_type,
+        'status_filter': status_filter,
+        'start_date': start_date_str,
+        'end_date': end_date_str,
+
+        # Structured Analytics
         'chart_type_labels' : json.dumps(type_labels),
         'chart_type_data'   : json.dumps(type_data),
         'chart_monthly_data': json.dumps(monthly_data),
@@ -12315,6 +13128,8 @@ def commercial_resale_list(request):
     }
 
     return render(request, 'admin_user/Reports/Resale/commercial_list.html', context)
+
+
 
 
 
@@ -12365,122 +13180,253 @@ def _get_uploader(request):
 import os
 
 
+
+
 def add_commercial_property(request):
-    # ── Step 1: Session check — who is logged in? ──────
     uploader = _get_uploader(request)
     if uploader is None:
-        return redirect('login')   # not logged in → redirect to login
+        return redirect('login')
 
-    # ── Step 2: Handle POST (form submission) ──────────
     if request.method == "POST":
         try:
             prop = CommercialResaleProperty(
-                # ── Basic Information ──────────────────────
-                property_type       = request.POST.get('property_type'),
-                zone_type           = request.POST.get('zone_type'),
-                location_hub        = request.POST.get('location_hub') or None,
-                property_condition  = request.POST.get('property_condition'),
-                ownership_type      = request.POST.get('ownership_type'),
-                age_of_property     = request.POST.get('age_of_property'),
-                available_from      = request.POST.get('available_from') or None,
+                # ── Step 1: Basic Info & Specifications ────────────────
+                property_type      = request.POST.get('property_type'),
+                zone_type          = request.POST.get('zone_type'),
+                location_hub       = request.POST.get('location_hub') or None,
+                property_condition = request.POST.get('property_condition'),
+                ownership_type     = request.POST.get('ownership_type'),
+                age_of_property    = request.POST.get('age_of_property'),
 
-                # ── Commercial Specifications ──────────────
-                num_staircases      = request.POST.get('num_staircases') or None,
-                passenger_lifts     = request.POST.get('passenger_lifts') or 0,
-                service_lifts       = request.POST.get('service_lifts') or 0,
-                num_cabins          = request.POST.get('num_cabins') or None,
-                meeting_rooms       = request.POST.get('meeting_rooms') or None,
-                min_seats           = request.POST.get('min_seats') or None,
-                max_seats           = request.POST.get('max_seats') or None,
-                private_parking     = request.POST.get('private_parking') or 0,
-                public_parking      = request.POST.get('public_parking') or None,
+                # Commercial Specifications
+                num_staircases  = request.POST.get('num_staircases') or 0,
+                passenger_lifts = request.POST.get('passenger_lifts') or 0,
+                service_lifts   = request.POST.get('service_lifts') or 0,
+                num_cabins      = request.POST.get('num_cabins') or 0,
+                meeting_rooms   = request.POST.get('meeting_rooms') or 0,
+                min_seats       = request.POST.get('min_seats') or None,
+                max_seats       = request.POST.get('max_seats') or None,
+                private_parking = request.POST.get('private_parking') or 0,
+                public_parking  = request.POST.get('public_parking') or 0,
 
-                # ── Area & Pricing ─────────────────────────
-                builtup_area        = request.POST.get('builtup_area'),
-                carpet_area         = request.POST.get('carpet_area') or None,
-                plot_area           = request.POST.get('plot_area') or None,
-                brokerage           = request.POST.get('brokerage') or None,
-                brokerage_percentage = request.POST.get('brokerage_percentage') or None,
-                manual_brokerage    = request.POST.get('manual_brokerage') or None,
-                expected_price      = request.POST.get('expected_price'),
+                # Area Measurements
+                builtup_area = request.POST.get('builtup_area'),
+                carpet_area  = request.POST.get('carpet_area') or None,
+                plot_area    = request.POST.get('plot_area') or None,
 
-                # ── Ownership & Legal ──────────────────────
-                num_owners          = request.POST.get('num_owners'),
-                loan_on_property    = request.POST.get('loan_on_property', 'no'),
-                loan_amount         = request.POST.get('loan_amount') or None,
-                existing_tenants    = request.POST.get('existing_tenants', 'no'),
-                tenant_details      = request.POST.get('tenant_details') or None,
-                legal_dispute       = request.POST.get('legal_dispute', 'no'),
-                dispute_details     = request.POST.get('dispute_details') or None,
-                tax_due             = request.POST.get('tax_due', 'no'),
-                pending_tax_amount  = request.POST.get('pending_tax_amount') or None,
-                fire_noc            = request.POST.get('fire_noc') or None,
-                property_description = request.POST.get('property_description'),
+                # ── Step 2: Legal & Pricing ─────────────────────────
+                num_owners              = request.POST.get('num_owners'),
+                loan_on_property        = request.POST.get('loan_on_property', 'no'),
+                loan_amount             = request.POST.get('loan_amount') or None,
+                existing_tenants        = request.POST.get('existing_tenants', 'no'),
+                tenant_details          = request.POST.get('tenant_details') or None,
+                any_legal_dispute       = request.POST.get('any_legal_dispute', 'no'),
+                dispute_details         = request.POST.get('dispute_details') or None,
+                government_tax_dues     = request.POST.get('government_tax_dues', 'no'),
+                pending_tax_amount      = request.POST.get('pending_tax_amount') or None,
+                fire_safety_noc_available = request.POST.get('fire_safety_noc_available') or None,
+
+                # Pricing
+                # NOTE: price_per_sqft is intentionally NOT taken from the form —
+                # it is auto-calculated inside CommercialResaleProperty.save()
+                # from expected_price / builtup_area. The frontend display value
+                # (formatted string like "₹1,234 / sqft") must never be stored directly.
+                brokerage             = request.POST.get('brokerage') or None,
+                brokerage_percentage  = request.POST.get('brokerage_percentage') or None,
+                manual_brokerage      = request.POST.get('manual_brokerage') or None,
+                expected_price        = request.POST.get('expected_price'),
+                property_description  = request.POST.get('property_description'),
                 sanctioning_authority = request.POST.get('sanctioning_authority'),
 
-                # ── Media ──────────────────────────────────
-                floor_plan          = request.FILES.get('floor_plan') or None,
-                property_video      = request.FILES.get('property_video') or None,
+                # ── Step 3: Amenities & Location ───────────────────
+                nearby_facilities = ','.join(request.POST.getlist('nearby_facilities')),
+                amenities         = ','.join(request.POST.getlist('amenities')),
 
-                # ── Amenities & Facilities (checkbox arrays matched with form POST name) ────
-                nearby_facilities   = ','.join(request.POST.getlist('nearby_facilities')),
-                amenities           = ','.join(request.POST.getlist('amenities')),
+                city             = request.POST.get('city'),
+                area_locality    = request.POST.get('area_locality'),
+                building_name    = request.POST.get('building_name') or None,
+                property_address = request.POST.get('property_address'),
 
-                # ── Address ────────────────────────────────
-                city                = request.POST.get('city'),
-                locality            = request.POST.get('locality'),
-                building_name       = request.POST.get('building_name') or None,
-                property_address    = request.POST.get('property_address'),
+                owner_name         = request.POST.get('owner_name'),
+                owner_contact      = request.POST.get('owner_contact'),
+                owner_email        = request.POST.get('owner_email'),
+                owner_role         = request.POST.get('owner_role') or None,  # ✅ ADDED — matches form name="owner_role"
+                residential_status = request.POST.get('residential_status'),
 
-                # ── Owner Contact ──────────────────────────
-                owner_name          = request.POST.get('owner_name'),
-                owner_contact       = request.POST.get('owner_contact'),
-                owner_email         = request.POST.get('owner_email'),
-                residential_status  = request.POST.get('residential_status'),
+                # ── Step 4: Media ───────────────────────────────────
+                floor_plan     = request.FILES.get('floor_plan') or None,
+                property_video = request.FILES.get('property_video') or None,
 
-                # ── Listing Uploaded By (Pre-filled variables) ─────
+                # ── Uploader ────────────────────────────────────────
                 uploaded_by_name    = uploader.get('uploader_name'),
                 uploaded_by_email   = uploader.get('uploader_email'),
                 uploaded_by_contact = uploader.get('uploader_phone'),
                 uploaded_by_role    = uploader.get('uploader_role'),
             )
 
-            # Invokes save() to compute price_per_sqft and write automated property_title
-            prop.save()  
+            prop.save()
 
-            # ── Save multiple property images ───────────────
+            # Save up to 10 property images
             images = request.FILES.getlist('property_images')
-            for image in images[:10]:    
-                CommercialPropertyImage.objects.create(
-                    property=prop,
-                    image=image
-                )
+            for image in images[:10]:
+                CommercialPropertyImage.objects.create(property=prop, image=image)
 
             return JsonResponse({
                 "status": "success",
                 "message": "Commercial Property Added Successfully",
                 "generated_title": prop.property_title
             })
-            
+
         except Exception as e:
             return JsonResponse({
                 "status": "error",
                 "message": f"Database transaction failed: {str(e)}"
             }, status=400)
 
-    # ── Step 3: GET — render form with context objects ──
     context = {
-        "admin_obj"       : uploader.get('admin_obj'), 
-        "user_obj"        : uploader.get('user_obj'), 
-        "uploader_name"   : uploader.get('uploader_name'),
-        "uploader_email"  : uploader.get('uploader_email'),
-        "uploader_phone"  : uploader.get('uploader_phone'),
-        "uploader_role"   : uploader.get('uploader_role'),
-        # Ensure your standard seed querysets are sent down for selection loop structures:
-        "facilities_obj"  : FacilitiesModel.objects.all() if 'FacilitiesModel' in globals() else [],
-        "ameneties_obj"   : AmenitiesModel.objects.all() if 'AmenitiesModel' in globals() else [],
+        "admin_obj"     : uploader.get('admin_obj'),
+        "user_obj"      : uploader.get('user_obj'),
+        "uploader_name" : uploader.get('uploader_name'),
+        "uploader_email": uploader.get('uploader_email'),
+        "uploader_phone": uploader.get('uploader_phone'),
+        "uploader_role" : uploader.get('uploader_role'),
+        "facilities_obj": Facilities_Details.objects.all() if 'Facilities_Details' in globals() else [],
+        "ameneties_obj" : Ameneties_Details.objects.all() if 'Ameneties_Details' in globals() else [],
     }
-    return render(request, 'admin_user/Reports/Resale/commercial_list.html', context)
+    return render(request, 'admin_user/Reports/Resale/commercial_resale.html', context)
+
+
+
+def commercial_resale_edit(request, id):
+    uploader = _get_uploader(request)
+    if uploader is None:
+        return redirect('login')
+
+    prop = get_object_or_404(CommercialResaleProperty, id=id)
+
+    if request.method == "POST":
+        def safe_float(val):
+            try: return float(val) if val else 0.0
+            except ValueError: return 0.0
+            
+        def safe_int(val):
+            try: return int(float(val)) if val else 0
+            except ValueError: return 0
+
+        # ── Basic Information ──────────────────────────────
+        prop.property_title = request.POST.get('property_title') or None  # Updates the title sequence fallback
+        prop.property_type = request.POST.get('property_type')
+        prop.zone_type = request.POST.get('zone_type')
+        prop.location_hub = request.POST.get('location_hub') or None
+        prop.property_condition = request.POST.get('property_condition')
+        prop.ownership_type = request.POST.get('ownership_type')
+        prop.age_of_property = request.POST.get('age_of_property')
+        prop.available_from = request.POST.get('available_from') or None
+
+        # ── Commercial Specifications ──────────────────────
+        prop.num_staircases = safe_int(request.POST.get('num_staircases'))
+        prop.passenger_lifts = safe_int(request.POST.get('passenger_lifts'))
+        prop.service_lifts = safe_int(request.POST.get('service_lifts'))
+        prop.num_cabins = safe_int(request.POST.get('num_cabins'))
+        prop.meeting_rooms = safe_int(request.POST.get('meeting_rooms'))
+        prop.min_seats = safe_int(request.POST.get('min_seats')) if request.POST.get('min_seats') else None
+        prop.max_seats = safe_int(request.POST.get('max_seats')) if request.POST.get('max_seats') else None
+        prop.private_parking = safe_int(request.POST.get('private_parking'))
+        prop.public_parking = safe_int(request.POST.get('public_parking'))
+
+        # ── Area & Pricing ─────────────────────────────────
+        prop.builtup_area = safe_float(request.POST.get('builtup_area'))
+        prop.carpet_area = safe_float(request.POST.get('carpet_area')) if request.POST.get('carpet_area') else None
+        prop.plot_area = safe_float(request.POST.get('plot_area')) if request.POST.get('plot_area') else None
+        
+        prop.brokerage = request.POST.get('brokerage') or None
+        prop.brokerage_percentage = request.POST.get('brokerage_percentage') or None
+        prop.manual_brokerage = request.POST.get('manual_brokerage') or None
+        prop.expected_price = safe_float(request.POST.get('expected_price'))
+
+        # ── Ownership & Legal ──────────────────────────────
+        prop.num_owners = request.POST.get('num_owners', '1')
+        prop.loan_on_property = request.POST.get('loan_on_property', 'no')
+        prop.loan_amount = safe_float(request.POST.get('loan_amount')) if prop.loan_on_property == 'yes' else None
+        
+        prop.existing_tenants = request.POST.get('existing_tenants', 'no')
+        prop.tenant_details = request.POST.get('tenant_details') if prop.existing_tenants == 'yes' else None
+        
+        prop.any_legal_dispute = request.POST.get('any_legal_dispute', 'no') # Updated key
+        prop.dispute_details = request.POST.get('dispute_details') if prop.any_legal_dispute == 'yes' else None
+        
+        prop.government_tax_dues = request.POST.get('government_tax_dues', 'no') # Updated key
+        prop.pending_tax_amount = safe_float(request.POST.get('pending_tax_amount')) if prop.government_tax_dues == 'yes' else None
+        
+        prop.fire_safety_noc_available = request.POST.get('fire_safety_noc_available', 'no') # Updated key
+        prop.property_description = request.POST.get('property_description')
+        prop.sanctioning_authority = request.POST.get('sanctioning_authority')
+
+        # ── Nearby Facilities & Amenities ──────────────────
+        prop.nearby_facilities = ', '.join(request.POST.getlist('nearby_facilities'))
+        prop.amenities = ', '.join(request.POST.getlist('amenities'))
+
+        # ── Address ────────────────────────────────────────
+        prop.city = request.POST.get('city')
+        prop.area_locality = request.POST.get('area_locality') # Updated key
+        prop.building_name = request.POST.get('building_name') or None
+        prop.property_address = request.POST.get('property_address')
+
+        # ── Owner Contact ──────────────────────────────────
+        prop.owner_name = request.POST.get('owner_name')
+        prop.owner_contact = request.POST.get('owner_contact')
+        prop.owner_email = request.POST.get('owner_email')
+        prop.residential_status = request.POST.get('residential_status')
+
+        # ── Media ──────────────────────────────────────────
+        if request.FILES.get('floor_plan'):
+            prop.floor_plan = request.FILES.get('floor_plan')
+        if request.FILES.get('property_video'):
+            prop.property_video = request.FILES.get('property_video')
+
+        prop.save()
+
+        # Handle Image Gallery (Delete marked records)
+        deleted_images = request.POST.getlist('deleted_images[]')
+        if deleted_images:
+            CommercialPropertyImage.objects.filter(id__in=deleted_images, property=prop).delete()
+
+        # Append additional attachments if space remains under current session bounds
+        current_images_count = prop.images.count()
+        new_files = request.FILES.getlist('property_images')
+        available_slots = 10 - current_images_count
+        
+        for img in new_files[:available_slots]:
+            CommercialPropertyImage.objects.create(property=prop, image=img)
+
+        return JsonResponse({"status": "success", "message": "Commercial Property Updated Successfully"})
+
+    # --- GET REQUEST Context ---
+    ameneties_obj = Ameneties_Details.objects.all() if 'Ameneties_Details' in globals() else []
+    facilities_obj = Facilities_Details.objects.all() if 'Facilities_Details' in globals() else []
+    
+    prop_facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+    prop_amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
+    
+    existing_images = prop.images.all() 
+
+    context = {
+        "prop": prop,
+        "ameneties_obj": ameneties_obj,
+        "facilities_obj": facilities_obj,
+        "prop_facilities_list": prop_facilities_list,
+        "prop_amenities_list": prop_amenities_list,
+        "existing_images": existing_images,
+    }
+    return render(request, 'admin_user/Reports/Resale/commercial_resale_edit.html', context)
+
+
+
+
+
+
+
+
 
 def import_test_view(request):
     result = ''
@@ -12504,177 +13450,628 @@ def import_test_view(request):
 
 
 
+
+from openpyxl.worksheet.datavalidation import DataValidation
+
+
+
+
+
+
+def get_filtered_properties(request):
+    """Internal helper to capture the identical data arrays currently viewed inside the frontend lists."""
+    props = CommercialResaleProperty.objects.filter(is_deleted=False)
+    
+    search_query = request.GET.get('search_query', '').strip()
+    property_type = request.GET.get('property_type', '').strip()
+    zone_type = request.GET.get('zone_type', '').strip()
+    city = request.GET.get('city', '').strip()
+    property_condition = request.GET.get('property_condition', '').strip()
+    ownership_type = request.GET.get('ownership_type', '').strip()
+    status_filter = request.GET.get('status_filter', '').strip()
+    start_date_str = request.GET.get('start_date', '').strip()
+    end_date_str = request.GET.get('end_date', '').strip()
+
+    if search_query:
+        props = props.filter(
+            Q(property_title__icontains=search_query) |
+            Q(area_locality__icontains=search_query) |
+            Q(building_name__icontains=search_query) |
+            Q(owner_name__icontains=search_query)
+        )
+    if property_type:
+        props = props.filter(property_type=property_type)
+    if zone_type:
+        props = props.filter(zone_type=zone_type)
+    if city:
+        props = props.filter(city__iexact=city)
+    if property_condition:
+        props = props.filter(property_condition=property_condition)
+    if ownership_type:
+        props = props.filter(ownership_type=ownership_type)
+    if status_filter:
+        if status_filter == 'active':
+            props = props.filter(is_active=True)
+        elif status_filter == 'inactive':
+            props = props.filter(is_active=False)
+            
+    if start_date_str:
+        try:
+            props = props.filter(created_at__gte=datetime.strptime(start_date_str, '%Y-%m-%d'))
+        except ValueError: pass
+    if end_date_str:
+        try:
+            props = props.filter(created_at__lte=datetime.strptime(end_date_str + ' 23:59:59', '%Y-%m-%d %H:%M:%S'))
+        except ValueError: pass
+
+    return props.order_by('-id')
+
+
+
+
+
 @transaction.atomic
 def import_commercial_data(request):
-    if request.method == 'POST' and request.FILES.get('commercial_excel_file'):
-        excel_file = request.FILES['commercial_excel_file']
-        
-        if not excel_file.name.endswith('.xlsx'):
-            return JsonResponse({'status': '0', 'msg': 'Invalid file format. Please upload a .xlsx file.'})
+    """
+    Ingests sectioned double-header master sheets cleanly.
+    Guarantees exact mapping indices to align database content profiles perfectly.
+    """
+    # ── IDENTIFY SESSION OWNER INGESTION AUDITS ─────────────────
+    admin_id = request.session.get('Admin_id')
+    user_id  = request.session.get('User_id')
 
+    if not admin_id and not user_id:
+        return JsonResponse({'status': '0', 'msg': 'Session Expired. Please log in again to perform uploads.'})
+
+    uploader_name, uploader_email, uploader_contact, uploader_role = "System Bulk Import", "", "", "Staff"
+
+    if admin_id:
         try:
-            wb = openpyxl.load_workbook(excel_file)
-            ws = wb.active
+            admin_obj = Admin_Login.objects.get(id=admin_id)
+            uploader_name = getattr(admin_obj, 'name', 'Admin')
+            uploader_email = getattr(admin_obj, 'email', '')
+            uploader_contact = getattr(admin_obj, 'phone', '')
+            uploader_role = getattr(admin_obj, 'role', 'Admin')
+        except Admin_Login.DoesNotExist: pass
+    elif user_id:
+        try:
+            user_obj = User_Details.objects.get(id=user_id)
+            uploader_name = getattr(user_obj, 'name', 'User')
+            uploader_email = getattr(user_obj, 'email', '')
+            uploader_contact = getattr(user_obj, 'phone', '')
+            uploader_role = "User"
+        except User_Details.DoesNotExist: pass
 
-            success_count = 0
-            duplicate_count = 0
+    if request.method != 'POST' or not request.FILES.get('commercial_excel_file'):
+        return JsonResponse({'status': '0', 'msg': 'Missing transactional multipart form document.'})
+        
+    excel_file = request.FILES['commercial_excel_file']
+    filename = excel_file.name
 
-            # Helper function for safe numbers
-            def safe_num(val, is_float=False):
-                if val is None or str(val).strip() == '':
-                    return 0.0 if is_float else 0
-                try:
-                    return float(val) if is_float else int(float(val))
-                except ValueError:
-                    return 0.0 if is_float else 0
+    if not filename.endswith('.xlsx'):
+        return JsonResponse({'status': '0', 'msg': 'Invalid file layout format. Please drop a valid .xlsx file.'})
 
-            # Helper function for dates
-            def safe_date(val):
-                if not val:
-                    return None
-                if isinstance(val, datetime):
-                    return val.date()
-                try:
-                    return datetime.strptime(str(val).strip(), "%Y-%m-%d").date()
-                except ValueError:
-                    return None
+    try:
+        wb = openpyxl.load_workbook(excel_file, data_only=True)
+        ws = wb.active
+        
+        # min_row=3 explicitly bypasses Row 1 (Visual Sections) and Row 2 (Column Headers)
+        rows = list(ws.iter_rows(min_row=3, values_only=True))
+        
+        if not rows or all(all(cell is None for cell in row) for row in rows):
+            return JsonResponse({'status': '0', 'msg': 'The processed workbook contains no usable data records.'})
 
-            # Iterate starting from row 2 (skipping headers)
-            for row in ws.iter_rows(min_row=2, values_only=True):
-                title = str(row[0] or '').strip()
-                if not title: # Skip totally empty rows
-                    continue
+        filename_exists = CommercialResaleProperty.objects.filter(upload_file_name=filename).exists()
+        success_count = 0
+        duplicate_count = 0
+
+        def clean_str(val):
+            return str(val).strip() if val is not None else ""
+
+        def clean_num(val, is_float=False):
+            if val is None or str(val).strip() == '':
+                return 0.0 if is_float else 0
+            try:
+                cleaned_val = str(val).replace('₹', '').replace(',', '').strip()
+                return float(cleaned_val) if is_float else int(float(cleaned_val))
+            except (ValueError, TypeError):
+                return 0.0 if is_float else 0
+
+        # ── ITERATE CELLS POPULATED LAYERS ─────────────────────────
+        for index, row in enumerate(rows, start=3):
+            p_type_raw = clean_str(row[2]).lower()  # Property Type is locked at column index 2 (C)
+            if not p_type_raw:  # Gracefully skip empty bottom trailing lines
+                continue
+
+            # --- CORRECTION SYNC FIELD MANDATORY VALIDATIONS MATRIX ---
+            required_fields = {
+                "Property Type": row[2],
+                "Zone Type": row[3],
+                "Property Condition": row[5],
+                "Ownership Type": row[6],
+                "Age of Property": row[7],
+                "Private Parking": row[15],
+                "Built-up Area (sq.ft)": row[17],
+                "No. of Owners": row[20],
+                "Loan on Property?": row[21],
+                "Existing Tenants?": row[23],
+                "Any Legal Dispute?": row[25],
+                "Government Tax Dues?": row[27],
+                "Expected Price (₹)": row[33],
+                "Property Description": row[35],
+                "Sanctioning Authority": row[36],
+                "City": row[39],
+                "Area/Locality": row[40],
+                "Property Address": row[42],
+                "Owner Name": row[43],
+                "Owner Contact": row[44],
+                "Owner Email": row[45],
+                "Residential Status": row[47],
+            }
+
+            missing_fields = [field for field, val in required_fields.items() if val is None or str(val).strip() == '']
+            if missing_fields:
+                return JsonResponse({
+                    'status': '0', 
+                    'msg': f'Row {index} Stop: The following mandatory attributes are missing/blank: [{", ".join(missing_fields)}]'
+                })
+
+            city = clean_str(row[39])
+            locality = clean_str(row[40])
+            expected_price = clean_num(row[33], is_float=True)
+            builtup_area_val = clean_num(row[17], is_float=True)
+
+            # --- DYNAMIC AND UNIFORM AUTO PROPERTY TITLE GENERATOR ---
+            type_clean_map = {
+                'office': 'Office Space', 'shop': 'Shop / Showroom', 'warehouse': 'Warehouse',
+                'industrial': 'Industrial Plant', 'land': 'Commercial Plot Land'
+            }
+            display_type = type_clean_map.get(p_type_raw, p_type_raw.title())
+            generated_title = f"Premium {int(builtup_area_val)} Sqft {display_type}"
+            building_val = clean_str(row[41])
+            if building_val and building_val != "—" and building_val != "":
+                generated_title += f" in {building_val}"
+            generated_title += f" at {locality}, {city}"
+
+            # --- STRUCTURAL ENFORCED DATA DUPLICATE security checks ---
+            is_data_duplicate = CommercialResaleProperty.objects.filter(
+                property_title=generated_title,
+                property_type=p_type_raw,
+                city=city,
+                expected_price=expected_price,
+                is_deleted=False
+            ).exists()
+
+            if is_data_duplicate:
+                duplicate_count += 1
+                if filename_exists:
+                    return JsonResponse({
+                        'status': '0',
+                        'msg': f'Duplicate Halted: The upload package "{filename}" has already been processed and contains matching rows at index line {index}.'
+                    })
+                continue
+
+            price_per_sqft_calc = round(expected_price / builtup_area_val, 2) if builtup_area_val > 0 else 0.0
+
+            # --- EXECUTE STAGE RECORD COMMITMENT POOLS ---
+            CommercialResaleProperty.objects.create(
+                property_title=generated_title,
                 
-                property_type = str(row[1] or '').strip().lower()
-                city = str(row[37] or '').strip()
-                expected_price = safe_num(row[22], True)
+                # 📋 STEP 1: BASIC INFO & SPECIFICATIONS
+                property_type=p_type_raw,
+                zone_type=clean_str(row[3]).lower(),
+                location_hub=clean_str(row[4]).lower() if row[4] else None,
+                property_condition=clean_str(row[5]).lower(),
+                ownership_type=clean_str(row[6]).lower(),
+                age_of_property=clean_str(row[7]),
+                
+                num_staircases=clean_num(row[8]),
+                passenger_lifts=clean_num(row[9]),
+                service_lifts=clean_num(row[10]),
+                num_cabins=clean_num(row[11]),
+                meeting_rooms=clean_num(row[12]),
+                min_seats=clean_num(row[13]) if row[13] is not None else None,
+                max_seats=clean_num(row[14]) if row[14] is not None else None,
+                private_parking=clean_num(row[15]),
+                public_parking=clean_num(row[16]) if row[16] is not None else 0,
+                
+                builtup_area=builtup_area_val,
+                carpet_area=clean_num(row[18], is_float=True) if row[18] else None,
+                plot_area=clean_num(row[19], is_float=True) if row[19] else None,
+                
+                # 📋 STEP 2: LEGAL & PRICING DETAILS
+                num_owners=clean_str(row[20]),
+                loan_on_property=clean_str(row[21]).lower(),
+                loan_amount=clean_num(row[22], is_float=True) if row[22] else None,
+                existing_tenants=clean_str(row[23]).lower(),
+                tenant_details=clean_str(row[24]) if row[24] else None,
+                any_legal_dispute=clean_str(row[25]).lower(),
+                dispute_details=clean_str(row[26]) if row[26] else None,
+                government_tax_dues=clean_str(row[27]).lower(),
+                pending_tax_amount=clean_num(row[28], is_float=True) if row[28] else None,
+                fire_safety_noc_available=clean_str(row[29]).lower(),
+                
+                brokerage=clean_str(row[30]).lower(),
+                brokerage_percentage=clean_str(row[31]) if row[31] else None,
+                manual_brokerage=clean_str(row[32]) if row[32] else None,
+                expected_price=expected_price,
+                price_per_sqft=price_per_sqft_calc,
+                property_description=clean_str(row[35]),
+                sanctioning_authority=clean_str(row[36]),
+                
+                # 📋 STEP 3: AMENITIES & LOCATION
+                nearby_facilities=clean_str(row[37]) if row[37] else None,
+                amenities=clean_str(row[38]) if row[38] else None,
+                city=city,
+                area_locality=locality,
+                building_name=building_val if building_val else None,
+                property_address=clean_str(row[42]),
+                
+                # CONTACT SEQUENCE DETAILED TRACKING MAPS
+                owner_name=clean_str(row[43]),
+                owner_contact=clean_str(row[44]),
+                owner_email=clean_str(row[45]),
+                residential_status=clean_str(row[47]).lower(),
+                
+                # 📋 STEP 4: META TRACKING SYSTEMS AUDIT CONTROL LOGS
+                uploaded_by_name=uploader_name,
+                uploaded_by_email=uploader_email,
+                uploaded_by_contact=uploader_contact,
+                uploaded_by_role=uploader_role,
+                upload_file_name=filename,
+                is_active=True
+            )
+            success_count += 1
 
-                # --- DUPLICATE CHECK ---
-                # Check if a property with the same Title, Type, City, and Price already exists
-                is_duplicate = CommercialResaleProperty.objects.filter(
-                    title=title,
-                    property_type=property_type,
-                    city=city,
-                    expected_price=expected_price
-                ).exists()
-
-                if is_duplicate:
-                    duplicate_count += 1
-                    continue # Skip this row and move to the next
-
-                # --- CREATE NEW PROPERTY ---
-                CommercialResaleProperty.objects.create(
-                    title=title,
-                    property_type=property_type,
-                    zone_type=str(row[2] or '').lower(),
-                    location_hub=str(row[3] or '').lower(),
-                    property_condition=str(row[4] or '').lower(),
-                    ownership_type=str(row[5] or '').lower(),
-                    age_of_property=str(row[6] or ''),
-                    available_from=safe_date(row[7]),
-
-                    num_staircases=safe_num(row[8]),
-                    passenger_lifts=safe_num(row[9]),
-                    service_lifts=safe_num(row[10]),
-                    num_cabins=safe_num(row[11]),
-                    meeting_rooms=safe_num(row[12]),
-                    min_seats=safe_num(row[13]),
-                    max_seats=safe_num(row[14]),
-                    private_parking=safe_num(row[15]),
-                    public_parking=safe_num(row[16]),
-
-                    builtup_area=safe_num(row[17], True),
-                    carpet_area=safe_num(row[18], True),
-                    plot_area=safe_num(row[19], True),
-                    brokerage=str(row[20] or '').lower(),
-                    brokerage_percentage=str(row[21] or ''),
-                    expected_price=expected_price,
-
-                    num_owners=str(row[23] or '1'),
-                    loan_on_property=str(row[24] or 'no').lower(),
-                    loan_amount=safe_num(row[25], True),
-                    existing_tenants=str(row[26] or 'no').lower(),
-                    tenant_details=str(row[27] or ''),
-                    legal_dispute=str(row[28] or 'no').lower(),
-                    dispute_details=str(row[29] or ''),
-                    tax_due=str(row[30] or 'no').lower(),
-                    pending_tax_amount=safe_num(row[31], True),
-                    fire_noc=str(row[32] or 'no').lower(),
-
-                    property_description=str(row[33] or ''),
-                    sanctioning_authority=str(row[34] or ''),
-                    nearby_facilities=str(row[35] or ''),
-                    amenities=str(row[36] or ''),
-
-                    city=city,
-                    locality=str(row[38] or ''),
-                    building_name=str(row[39] or ''),
-                    property_address=str(row[40] or ''),
-
-                    owner_name=str(row[41] or ''),
-                    owner_contact=str(row[42] or ''),
-                    owner_email=str(row[43] or ''),
-                    residential_status=str(row[44] or 'resident').lower(),
-
-                    uploaded_by_name="Admin Upload",
-                    is_active=True
-                )
-                success_count += 1
-
-            # Prepare the response message
-            if success_count > 0 and duplicate_count == 0:
-                msg = f'{success_count} properties imported successfully!'
-            elif success_count > 0 and duplicate_count > 0:
-                msg = f'{success_count} properties imported. {duplicate_count} duplicate rows were skipped.'
-            elif success_count == 0 and duplicate_count > 0:
-                msg = f'No new properties imported. All {duplicate_count} rows already exist in the database.'
-            else:
-                msg = 'No valid data found in the file to import.'
-
+        if success_count > 0:
+            msg = f'Import Process Completed! Successfully persisted {success_count} real-estate assets records.'
+            if duplicate_count > 0:
+                msg += f' ({duplicate_count} rows filtered out as safe database duplicates).'
             return JsonResponse({'status': '1', 'msg': msg})
+        else:
+            return JsonResponse({'status': '0', 'msg': 'All spreadsheet line profiles match current records. Zero mutations committed.'})
 
-        except Exception as e:
-            return JsonResponse({'status': '0', 'msg': f'Error processing file: {str(e)}'})
+    except Exception as e:
+        return JsonResponse({'status': '0', 'msg': f'Critical runtime exception encountered inside workbook sheets: {str(e)}'})
 
-    return JsonResponse({'status': '0', 'msg': 'Invalid request or missing file.'})
+
 
 
 def download_commercial_sample_excel(request):
+    """
+    Generates a beautifully colored template matching the structural layout setup.
+    Column index 0 is reserved for read-only title generation preview states.
+    """
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Commercial Properties"
+    ws.title = "Commercial Resale"
+    ws.views.sheetView[0].showGridLines = True
 
-    # Exact Sequence of the Model (0 to 44 = 45 Columns)
-    headers = [
-        "Title", "Property Type (office/shop/warehouse/industrial/land)", "Zone Type (industrial/commercial/residential/sez)",
-        "Location Hub", "Condition (new/excellent/good/renovation)", "Ownership (freehold/leasehold/cooperative)", 
-        "Age (0-1/1-3/3-5/5-10/10+)", "Available From (YYYY-MM-DD)", "Staircases", "Passenger Lifts", "Service Lifts", 
-        "Cabins", "Meeting Rooms", "Min Seats", "Max Seats", "Private Parking", "Public Parking", "Builtup Area", 
-        "Carpet Area", "Plot Area", "Brokerage (yes/no)", "Brokerage Percentage", "Expected Price", "Num Owners", 
-        "Loan on Property (yes/no)", "Loan Amount", "Existing Tenants (yes/no)", "Tenant Details", "Legal Dispute (yes/no)", 
-        "Dispute Details", "Tax Due (yes/no)", "Pending Tax Amount", "Fire NOC (yes/no)", "Property Description", 
-        "Sanctioning Authority", "Nearby Facilities (comma separated)", "Amenities (comma separated)", "City", 
-        "Locality", "Building Name", "Property Address", "Owner Name", "Owner Contact", "Owner Email", 
-        "Residential Status (resident/nri/pio)"
+    primary_purple = "667EEA"
+    dark_section_slate = "475569"
+    text_white = "FFFFFF"
+
+    section_font = Font(name="Poppins", size=12, bold=True, color=text_white)
+    header_font = Font(name="Poppins", size=10, bold=True, color=text_white)
+    cell_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    ws.row_dimensions[1].height = 32
+    ws.row_dimensions[2].height = 54
+
+    # --- ROW 1: RENDER COMPACT SECTION MASTER WRAPPERS BLOCK ---
+    sections = [
+        ("📋 Basic Info & Specs", 1, 15, dark_section_slate),
+        ("📋 Area, Pricing & Building Details", 16, 37, primary_purple),
+        ("📋 Amenities & Facilities", 38, 42, dark_section_slate),
+        ("📋 Contact Info & System Logs", 43, 55, primary_purple)
     ]
-    
-    ws.append(headers)
 
-    # Add 1 Sample Row
+    for title, start_col, end_col, color in sections:
+        cell = ws.cell(row=1, column=start_col, value=title)
+        cell.font = section_font
+        cell.alignment = cell_alignment
+        cell.fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
+        ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
+        for col in range(start_col + 1, end_col + 1):
+            ws.cell(row=1, column=col).fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
+
+    # --- ROW 2: ENFORCE COMPLETE 55-COLUMN LABEL ARRANGEMENT ---
+    headers = [
+        "Property Id (Leave Blank - System Generated)", "Property Title (Leave Blank - System Generated)", 
+        "Property Type (office/shop/warehouse/industrial/land) *", "Zone Type (industrial/commercial/residential/sez) *",
+        "Location Hub", "Property Condition (new/excellent/good/renovation) *", "Ownership Type (freehold/leasehold/cooperative) *", 
+        "Age Of The Property (0-1/1-3/3-5/5-10/10+) *", "No.Of.Staircases", "Passenger Lifts", "Service Lifts", 
+        "No.Of.Cabins", "Meeting Rooms", "Min Seats", "Max Seats", "Private Parking *", "Public Parking", "Builtup Area *", 
+        "Carpet Area", "Plot Area", "No.of Owners *",   
+        "Loan on Property (yes/no) *", "Loan Amount", "Existing Tenants (yes/no) *", "Tenant Details", "Any Legal Dispute (yes/no) *", 
+        "Dispute Details", "Government Tax Dues? (yes/no) *", "Pending Tax Amount", "Fire Safety NOC Available? (yes/no) *","Brokerage (yes/no)", "Brokerage Percentage","Manual_Brokarage","Expected Price *","Price Per Sqft/Auto Generated", "Property Description *", 
+        "Sanctioning Authority *", "Nearby Facilities (comma separated)", "Amenities (comma separated)", "City *", 
+        "Area/Locality *", "Building / Project / Society", "Property Address *", "Owner Name *", "Owner Contact *", "Owner Email *","Owner Role",
+        "Residential Status (resident/nri/pio) *", "Uploaded By Name", "Uploaded By Email", "Uploaded By Contact", "Uploaded By Role", "Source File Name", "Created At", "Updated At"
+    ]
+
+    for col_index, header in enumerate(headers, start=1):
+        cell = ws.cell(row=2, column=col_index, value=header)
+        cell.font = header_font
+        cell.alignment = cell_alignment
+        bg_color = "5A67D8" if col_index in range(16, 38) or col_index in range(43, 56) else "334155"
+        cell.fill = PatternFill(start_color=bg_color, end_color=bg_color, fill_type="solid")
+        ws.column_dimensions[openpyxl.utils.get_column_letter(col_index)].width = 24
+
+    # --- ROW 3: RE-ALIGNED SAMPLE PROTO PLATFORM INVENTORIES (55 ELEMENTS) ---
     sample_data = [
-        "Prime IT Park Office", "office", "commercial", "it", "excellent", "freehold", "1-3", "2026-05-01",
-        2, 4, 1, 5, 2, 50, 100, 5, 10, 5000, 4500, 0, "yes", "2%", 15000000, "1", "no", 0, "no", "",
-        "no", "", "no", 0, "yes", "Fully furnished premium office space.", "NMC", "Metro, Mall, Hospital", 
-        "CCTV, Power Backup, Gym", "Nagpur", "Sitabuldi", "Tech Tower", "Floor 4, Tech Tower, Sitabuldi",
-        "Rajesh Kumar", "9876543210", "rajesh@example.com", "resident"
+        "", "", "office", "commercial", "it", "excellent", "freehold", "1-3",
+        2, 4, 1, 5, 2, 50, 100, 5, 10, 5000, 4500, 0, "1",
+        "no", 0, "no", "", "no", "", "no", 0, "yes",
+        "yes", "2%", "", 15000000, "", 
+        "Fully furnished premium office space with modern workstation infrastructure.",
+        "NMC", "Metro Station, Bus Stop, Mall, Hospital", 
+        "CCTV Security, 100% Power Backup, Cafeteria, Central Gym", 
+        "Nagpur", "Sitabuldi", "Tech Tower", "Floor 4, Tech Tower, Main Wardha Road, Sitabuldi",
+        "Rajesh Kumar", "9876543210", "rajesh@example.com", "Owner", "resident",
+        "System Template", "—", "—", "—", "—", "—", "—"
     ]
     ws.append(sample_data)
 
+    def create_dropdown(options, cell_range):
+        dv = DataValidation(type="list", formula1=f'"{",".join(options)}"', allow_blank=True)
+        ws.add_data_validation(dv)
+        dv.add(cell_range)
+
+    # Re-indexedDropdown targets seamlessly link with explicit column indices
+    create_dropdown(["office", "shop", "warehouse", "industrial", "land"], "C3:C100")
+    create_dropdown(["industrial", "commercial", "residential", "sez"], "D3:D100")
+    create_dropdown(["it", "business", "mall", "standalone"], "E3:E100")
+    create_dropdown(["new", "excellent", "good", "renovation"], "F3:F100")
+    create_dropdown(["freehold", "leasehold", "cooperative"], "G3:G100")
+    create_dropdown(["0-1", "1-3", "3-5", "5-10", "10+"], "H3:H100")
+    create_dropdown(["1", "2", "3", "4+"], "U3:U100")
+    create_dropdown(["resident", "nri", "pio"], "AV3:AV100")
+    
+    for col_letter in ["V", "X", "Z", "AB", "AD", "AE"]:
+        create_dropdown(["yes", "no"], f"{col_letter}3:{col_letter}100")
+
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename="Commercial_Resale_Sample.xlsx"'
+    response['Content-Disposition'] = 'attachment; filename="Commercial_Resale_Sample_Master.xlsx"'
     wb.save(response)
     return response
 
+
+
+def export_commercial_resale_excel(request):
+    """
+    Generates the master live database inventory extract.
+    Maintains exact 55-column alignments to protect cell arrays from index shifts.
+    """
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Live Database Extract"
+    ws.views.sheetView[0].showGridLines = True
+
+    primary_purple = "667EEA"
+    dark_section_slate = "475569"
+    text_white = "FFFFFF"
+
+    section_font = Font(name="Poppins", size=12, bold=True, color=text_white)
+    header_font = Font(name="Poppins", size=10, bold=True, color=text_white)
+    cell_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    ws.row_dimensions[1].height = 32
+    ws.row_dimensions[2].height = 54
+
+    sections = [
+        ("📋 Basic Info & Specs", 1, 15, dark_section_slate),
+        ("📋 Area, Pricing & Building Details", 16, 37, primary_purple),
+        ("📋 Amenities & Facilities", 38, 42, dark_section_slate),
+        ("📋 Contact Info & System Logs", 43, 55, primary_purple)
+    ]
+
+    for title, start_col, end_col, color in sections:
+        cell = ws.cell(row=1, column=start_col, value=title)
+        cell.font = section_font
+        cell.alignment = cell_alignment
+        cell.fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
+        ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
+        for col in range(start_col + 1, end_col + 1):
+            ws.cell(row=1, column=col).fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
+
+    headers = [
+        "Property Id","Property Title", "Property Type (office/shop/warehouse/industrial/land) *", "Zone Type (industrial/commercial/residential/sez) *",
+        "Location Hub", "Property Condition (new/excellent/good/renovation) *", "Ownership Type (freehold/leasehold/cooperative) *", 
+        "Age Of The Property (0-1/1-3/3-5/5-10/10+) *", "No.Of.Staircases", "Passenger Lifts", "Service Lifts", 
+        "No.Of.Cabins", "Meeting Rooms", "Min Seats", "Max Seats", "Private Parking *", "Public Parking", "Builtup Area *", 
+        "Carpet Area", "Plot Area", "No.of Owners *",   
+        "Loan on Property (yes/no) *", "Loan Amount", "Existing Tenants (yes/no) *", "Tenant Details", "Any Legal Dispute (yes/no) *", 
+        "Dispute Details", "Government Tax Dues? (yes/no) *", "Pending Tax Amount", "Fire Safety NOC Available? (yes/no) *","Brokerage (yes/no)", "Brokerage Percentage","Manual_Brokarage","Expected Price *","Price Per Sqft/Auto Generated", "Property Description *", 
+        "Sanctioning Authority *", "Nearby Facilities (comma separated)", "Amenities (comma separated)", "City *", 
+        "Area/Locality *", "Building / Project / Society", "Property Address *", "Owner Name *", "Owner Contact *", "Owner Email *","Owner Role",
+        "Residential Status (resident/nri/pio) *", "Uploaded By Name", "Uploaded By Email", "Uploaded By Contact", "Uploaded By Role", "Source File Name", "Created At", "Updated At"
+    ]
+
+    for col_index, header in enumerate(headers, start=1):
+        cell = ws.cell(row=2, column=col_index, value=header)
+        cell.font = header_font
+        cell.alignment = cell_alignment
+        bg_color = "5A67D8" if col_index in range(16, 38) or col_index in range(43, 56) else "334155"
+        cell.fill = PatternFill(start_color=bg_color, end_color=bg_color, fill_type="solid")
+        ws.column_dimensions[openpyxl.utils.get_column_letter(col_index)].width = 24
+
+    properties = get_filtered_properties(request)
+
+    for prop in properties:
+        data_row = [
+           
+            prop.id or "—",
+            prop.property_title or "—",
+            prop.property_type,
+            prop.zone_type,
+            prop.location_hub or "—",
+            prop.property_condition,
+            prop.ownership_type,
+            prop.age_of_property,
+            prop.num_staircases or 0,
+            prop.passenger_lifts or 0,
+            prop.service_lifts or 0,
+            prop.num_cabins or 0,
+            prop.meeting_rooms or 0,
+            prop.min_seats or "—",
+            prop.max_seats or "—",
+            prop.private_parking or 0,
+            prop.public_parking or 0,
+            float(prop.builtup_area),
+            float(prop.carpet_area) if prop.carpet_area else "—",
+            float(prop.plot_area) if prop.plot_area else "—",
+            prop.num_owners or "1",
+            prop.loan_on_property,
+            float(prop.loan_amount) if prop.loan_amount else 0,
+            prop.existing_tenants,
+            prop.tenant_details or "",
+            prop.any_legal_dispute,
+            prop.dispute_details or "",
+            prop.government_tax_dues,
+            float(prop.pending_tax_amount) if prop.pending_tax_amount else 0,
+            prop.fire_safety_noc_available or "no",
+            prop.brokerage or "no",
+            prop.brokerage_percentage or "",
+            prop.manual_brokerage or "",
+            float(prop.expected_price),
+            float(prop.price_per_sqft) if prop.price_per_sqft else 0,
+            prop.property_description,
+            prop.sanctioning_authority,
+            prop.nearby_facilities or "",
+            prop.amenities or "",
+            prop.city,
+            prop.area_locality,
+            prop.building_name or "",
+            prop.property_address,
+            prop.owner_name,
+            prop.owner_contact,
+            prop.owner_email,
+            prop.uploaded_by_role or "Owner",
+            prop.residential_status,
+            prop.uploaded_by_name or "Portal Direct",
+            prop.uploaded_by_email or "—",
+            prop.uploaded_by_contact or "—",
+            prop.uploaded_by_role or "—",
+            prop.upload_file_name or "Web Input Form",
+            prop.created_at.strftime("%Y-%m-%d %H:%M") if prop.created_at else "—",
+            prop.updated_at.strftime("%Y-%m-%d %H:%M") if prop.updated_at else "—"
+        ]
+        ws.append(data_row)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="Commercial_Resale_Export_{datetime.now().strftime("%Y%m%d")}.xlsx"'
+    wb.save(response)
+    return response
+
+
+
+
+
+
+def export_commercial_resale_csv(request):
+    """
+    Flat CSV layout exporter matching the same sequential blueprint matrix.
+    Includes Property Title as index 0 to eliminate data parsing drift.
+    """
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="Commercial_Resale_Export_{datetime.now().strftime("%Y%m%d")}.csv"'
+    
+    writer = csv.writer(response)
+    
+    # ── EXACT 54-COLUMN SEQUENCE MAPPING FROM INDEX 0 TO 53 ──
+    writer.writerow([
+        "Property Id","Property Title","Property Type (office/shop/warehouse/industrial/land) *", 
+        "Zone Type (industrial/commercial/residential/sez) *", "Location Hub", 
+        "Property Condition (new/excellent/good/renovation) *", "Ownership Type (freehold/leasehold/cooperative) *", 
+        "Age Of The Property (0-1/1-3/3-5/5-10/10+) *", "No.Of.Staircases", "Passenger Lifts", 
+        "Service Lifts", "No.Of.Cabins", "Meeting Rooms", "Min Seats", "Max Seats", 
+        "Private Parking *", "Public Parking", "Builtup Area *", "Carpet Area", "Plot Area", "No.of Owners *",   
+        "Loan on Property (yes/no) *", "Loan Amount", "Existing Tenants (yes/no) *", "Tenant Details", 
+        "Any Legal Dispute (yes/no) *", "Dispute Details", "Government Tax Dues? (yes/no) *", "Pending Tax Amount", 
+        "Fire Safety NOC Available? (yes/no) *", "Brokerage (yes/no)", "Brokerage Percentage", "Manual_Brokarage", 
+        "Expected Price *", "Price Per Sqft/Auto Generated", "Property Description *", "Sanctioning Authority *", 
+        "Nearby Facilities (comma separated)", "Amenities (comma separated)", "City *", "Area/Locality *", 
+        "Building / Project / Society", "Property Address *", "Owner Name *", "Owner Contact *", "Owner Email *", 
+        "Owner Role", "Residential Status (resident/nri/pio) *", "Uploaded By Name", "Uploaded By Email", 
+        "Uploaded By Contact", "Uploaded By Role", "Source File Name", "Created At", "Updated At"
+    ])
+    
+    # Pull identical data entries matching active dashboard panel query parameters
+    properties = get_filtered_properties(request)
+    
+    for prop in properties:
+        # Dynamic calculation check fallback if field database values are unpopulated
+        calculated_price_per_sqft = prop.price_per_sqft
+        if not calculated_price_per_sqft and prop.builtup_area > 0:
+            calculated_price_per_sqft = round(float(prop.expected_price) / float(prop.builtup_area), 2)
+
+        writer.writerow([
+
+            prop.commercial_id or "—", 
+            prop.property_title or "—",                         # [0] Property Title
+                                  # [1] Property Id
+            prop.property_type,                                  # [2] Property Type
+            prop.zone_type,                                      # [3] Zone Type
+            prop.location_hub or "—",                            # [4] Location Hub
+            prop.property_condition,                             # [5] Property Condition
+            prop.ownership_type,                                 # [6] Ownership Type
+            prop.age_of_property,                                # [7] Age Of The Property
+            prop.num_staircases or 0,                            # [8] No.Of.Staircases
+            prop.passenger_lifts or 0,                           # [9] Passenger Lifts
+            prop.service_lifts or 0,                             # [10] Service Lifts
+            prop.num_cabins or 0,                                # [11] No.Of.Cabins
+            prop.meeting_rooms or 0,                             # [12] Meeting Rooms
+            prop.min_seats or "—",                               # [13] Min Seats
+            prop.max_seats or "—",                               # [14] Max Seats
+            prop.private_parking or 0,                           # [15] Private Parking
+            prop.public_parking or 0,                            # [16] Public Parking
+            float(prop.builtup_area),                            # [17] Builtup Area
+            float(prop.carpet_area) if prop.carpet_area else "—", # [18] Carpet Area
+            float(prop.plot_area) if prop.plot_area else "—",     # [19] Plot Area
+            prop.num_owners or "1",                              # [20] No.of Owners
+            prop.loan_on_property,                               # [21] Loan on Property (yes/no)
+            float(prop.loan_amount) if prop.loan_amount else 0,  # [22] Loan Amount
+            prop.existing_tenants,                               # [23] Existing Tenants (yes/no)
+            prop.tenant_details or "",                           # [24] Tenant Details
+            prop.any_legal_dispute,                              # [25] Any Legal Dispute (yes/no)
+            prop.dispute_details or "",                          # [26] Dispute Details
+            prop.government_tax_dues,                            # [27] Government Tax Dues? (yes/no)
+            float(prop.pending_tax_amount) if prop.pending_tax_amount else 0, # [28] Pending Tax Amount
+            prop.fire_safety_noc_available or "no",              # [29] Fire Safety NOC Available? (yes/no)
+            prop.brokerage or "no",                              # [30] Brokerage (yes/no)
+            prop.brokerage_percentage or "",                     # [31] Brokerage Percentage
+            prop.manual_brokerage or "",                         # [32] Manual_Brokarage
+            float(prop.expected_price),                          # [33] Expected Price
+            float(calculated_price_per_sqft) if calculated_price_per_sqft else 0, # [34] Price Per Sqft
+            prop.property_description,                           # [35] Property Description
+            prop.sanctioning_authority,                          # [36] Sanctioning Authority
+            prop.nearby_facilities or "",                        # [37] Nearby Facilities
+            prop.amenities or "",                                # [38] Amenities
+            prop.city,                                           # [39] City
+            prop.area_locality,                                  # [40] Area/Locality
+            prop.building_name or "",                            # [41] Building / Project / Society
+            prop.property_address,                               # [42] Property Address
+            prop.owner_name,                                     # [43] Owner Name
+            prop.owner_contact,                                  # [44] Owner Contact
+            prop.owner_email,                                    # [45] Owner Email
+            prop.uploaded_by_role or "Owner",                    # [46] Owner Role
+            prop.residential_status,                             # [47] Residential Status
+            prop.uploaded_by_name or "Portal Direct",            # [48] Uploaded By Name
+            prop.uploaded_by_email or "—",                       # [49] Uploaded By Email
+            prop.uploaded_by_contact or "—",                     # [50] Uploaded By Contact
+            prop.uploaded_by_role or "—",                        # [51] Uploaded By Role
+            prop.upload_file_name or "Web Form Direct",          # [52] Source File Name
+            prop.created_at.strftime("%Y-%m-%d %H:%M") if prop.created_at else "—", # [53] Created At
+            prop.updated_at.strftime("%Y-%m-%d %H:%M") if prop.updated_at else "—"  # [54] Updated At
+        ])
+        
+    return response
+
+
+
+
+    
     # ── Helper functions ─────────────────────────────────
     def val(v, default=''):
         if v is None or str(v).strip() == '':
@@ -12757,82 +14154,202 @@ def delete_commercial_property(request):
 
 
 
+
+# Ensure _get_deleter_name and CommercialResaleProperty are imported
+
 @require_POST
 def commercial_resale_bulk_delete(request):
     """Handles Advanced Bulk Deletions for Commercial Resale Properties."""
+    
     admin_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
-    
+
     if not admin_id and not user_id:
-        return JsonResponse({'status': 'error', 'message': 'Unauthorized access.'})
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Unauthorized access.'
+        })
 
     try:
         data = json.loads(request.body)
         delete_type = data.get('delete_type')
         deleter_name = _get_deleter_name(request)
-        
-        # Target only properties not currently in the Recycle Bin
-        properties = CommercialResaleProperty.objects.filter(is_deleted=False)
-        
+
+        properties = CommercialResaleProperty.objects.filter(
+            is_deleted=False
+        )
+
+        # Delete All
         if delete_type == 'delete_all':
             count = properties.count()
-            properties.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved ALL {count} properties to Recycle Bin.'})
-            
+
+            properties.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully moved ALL {count} properties to Recycle Bin.'
+            })
+
+        # Current Page
         elif delete_type == 'current_page':
             page_ids = data.get('page_ids', [])
+
             target_props = properties.filter(id__in=page_ids)
             count = target_props.count()
-            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from current page to Recycle Bin.'})
-            
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully moved {count} properties from current page to Recycle Bin.'
+            })
+
+        # Date Range
         elif delete_type == 'date_range':
             from_date = data.get('from_date')
             to_date = data.get('to_date')
-            target_props = properties.filter(created_at__date__range=[from_date, to_date])
+
+            target_props = properties.filter(
+                created_at__date__range=[from_date, to_date]
+            )
+
             count = target_props.count()
-            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties in date range to Recycle Bin.'})
-            
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully moved {count} properties in date range to Recycle Bin.'
+            })
+
+        # Latest Month
         elif delete_type == 'latest_month':
             thirty_days_ago = timezone.now() - timedelta(days=30)
-            target_props = properties.filter(created_at__gte=thirty_days_ago)
+
+            target_props = properties.filter(
+                created_at__gte=thirty_days_ago
+            )
+
             count = target_props.count()
-            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from the last 30 days to Recycle Bin.'})
-            
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully moved {count} properties from the last 30 days to Recycle Bin.'
+            })
+
+        # Old Data
         elif delete_type == 'old_data':
             six_months_ago = timezone.now() - timedelta(days=180)
-            target_props = properties.filter(created_at__lt=six_months_ago)
-            count = target_props.count()
-            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} older properties to Recycle Bin.'})
-            
-        elif delete_type == 'by_uploader':
-            uploader = data.get('uploader_text', '')
+
             target_props = properties.filter(
-                Q(uploaded_by_name__icontains=uploader) | 
+                created_at__lt=six_months_ago
+            )
+
+            count = target_props.count()
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully moved {count} older properties to Recycle Bin.'
+            })
+
+        # By Uploader
+        elif delete_type == 'by_uploader':
+            uploader = data.get('uploader_text', '').strip()
+
+            target_props = properties.filter(
+                Q(uploaded_by_name__icontains=uploader) |
                 Q(uploaded_by_email__icontains=uploader) |
                 Q(uploaded_by_role__icontains=uploader)
             )
-            count = target_props.count()
-            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties uploaded by {uploader} to Recycle Bin.'})
 
-        elif delete_type == 'by_file':
-            file_name = data.get('file_name', '')
-            target_props = properties.filter(upload_file_name=file_name) 
             count = target_props.count()
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully moved {count} properties uploaded by "{uploader}" to Recycle Bin.'
+            })
+
+        # By File Name
+        elif delete_type == 'by_file':
+            file_name = data.get('file_name', '').strip()
+
+            if not file_name:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Please select a file name.'
+                })
+
+            # ── FIX APPLIED HERE: Changed uploaded_file_name to upload_file_name ──
+            target_props = properties.filter(
+                upload_file_name__iexact=file_name 
+            )
+
+            count = target_props.count()
+
             if count == 0:
-                return JsonResponse({'status': 'error', 'message': f'No properties found for file: {file_name}'})
-            target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
-            return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from {file_name} to Recycle Bin.'})
-            
-        else:
-            return JsonResponse({'status': 'error', 'message': 'Unknown delete criteria.'})
+                # ── FIX APPLIED HERE ALSO ──
+                available_files = list(
+                    CommercialResaleProperty.objects.filter(
+                        is_deleted=False
+                    )
+                    .exclude(upload_file_name__isnull=True)
+                    .exclude(upload_file_name='')
+                    .values_list('upload_file_name', flat=True)
+                    .distinct()
+                )
+
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'No properties found for file: {file_name}',
+                    'available_files': available_files
+                })
+
+            target_props.update(
+                is_deleted=True,
+                deleted_at=timezone.now(),
+                deleted_by=deleter_name
+            )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully moved {count} properties imported from "{file_name}" to Recycle Bin.'
+            })
 
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)})
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
 
 
 @require_POST
@@ -12864,6 +14381,26 @@ def commercial_resale_hard_delete(request, id):
 
 # --- 1. COMMERCIAL VIEW PAGE ---
 def commercial_resale_view(request, id):
+
+    admin_id = request.session.get('Admin_id')
+    user_id  = request.session.get('User_id')
+
+    if not admin_id and not user_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = None
+    user_obj  = None
+
+    if admin_id:
+        try:
+            admin_obj = Admin_Login.objects.get(id=admin_id)
+        except Admin_Login.DoesNotExist:
+            return render(request, 'home_page/Adminlogin.html')
+    elif user_id:
+        try:
+            user_obj = User_Details.objects.get(id=user_id)
+        except User_Details.DoesNotExist:
+            return render(request, 'home_page/Adminlogin.html')
     prop = get_object_or_404(CommercialResaleProperty, id=id)
     images = prop.images.all()
     
@@ -12872,6 +14409,8 @@ def commercial_resale_view(request, id):
     amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
 
     context = {
+        'admin_obj': admin_obj,
+        'user_obj': user_obj,
         'prop': prop,
         'images': images,
         'facilities_list': facilities_list,
@@ -12883,126 +14422,7 @@ def commercial_resale_view(request, id):
 
 
 
-def commercial_resale_edit(request, id):
-    uploader = _get_uploader(request)
-    if uploader is None:
-        return redirect('login')
 
-    prop = get_object_or_404(CommercialResaleProperty, id=id)
-
-    if request.method == "POST":
-        # Safe Converters
-        def safe_float(val):
-            try: return float(val) if val else 0.0
-            except ValueError: return 0.0
-            
-        def safe_int(val):
-            try: return int(float(val)) if val else 0
-            except ValueError: return 0
-
-        # ── Basic Information ──────────────────────────────
-        prop.title = request.POST.get('title')
-        prop.property_type = request.POST.get('property_type')
-        prop.zone_type = request.POST.get('zone_type')
-        prop.location_hub = request.POST.get('location_hub') or None
-        prop.property_condition = request.POST.get('property_condition')
-        prop.ownership_type = request.POST.get('ownership_type')
-        prop.age_of_property = request.POST.get('age_of_property')
-        prop.available_from = request.POST.get('available_from') or None
-
-        # ── Commercial Specifications ──────────────────────
-        prop.num_staircases = safe_int(request.POST.get('num_staircases'))
-        prop.passenger_lifts = safe_int(request.POST.get('passenger_lifts'))
-        prop.service_lifts = safe_int(request.POST.get('service_lifts'))
-        prop.num_cabins = safe_int(request.POST.get('num_cabins'))
-        prop.meeting_rooms = safe_int(request.POST.get('meeting_rooms'))
-        prop.min_seats = safe_int(request.POST.get('min_seats')) if request.POST.get('min_seats') else None
-        prop.max_seats = safe_int(request.POST.get('max_seats')) if request.POST.get('max_seats') else None
-        prop.private_parking = safe_int(request.POST.get('private_parking'))
-        prop.public_parking = safe_int(request.POST.get('public_parking'))
-
-        # ── Area & Pricing ─────────────────────────────────
-        prop.builtup_area = safe_float(request.POST.get('builtup_area'))
-        prop.carpet_area = safe_float(request.POST.get('carpet_area')) if request.POST.get('carpet_area') else None
-        prop.plot_area = safe_float(request.POST.get('plot_area')) if request.POST.get('plot_area') else None
-        
-        prop.brokerage = request.POST.get('brokerage') or None
-        prop.brokerage_percentage = request.POST.get('brokerage_percentage') or None
-        prop.manual_brokerage = request.POST.get('manual_brokerage') or None
-        prop.expected_price = safe_float(request.POST.get('expected_price'))
-
-        # ── Ownership & Legal ──────────────────────────────
-        prop.num_owners = request.POST.get('num_owners', '1')
-        
-        prop.loan_on_property = request.POST.get('loan_on_property', 'no')
-        prop.loan_amount = safe_float(request.POST.get('loan_amount')) if prop.loan_on_property == 'yes' else None
-        
-        prop.existing_tenants = request.POST.get('existing_tenants', 'no')
-        prop.tenant_details = request.POST.get('tenant_details') if prop.existing_tenants == 'yes' else None
-        
-        prop.legal_dispute = request.POST.get('legal_dispute', 'no')
-        prop.dispute_details = request.POST.get('dispute_details') if prop.legal_dispute == 'yes' else None
-        
-        prop.tax_due = request.POST.get('tax_due', 'no')
-        prop.pending_tax_amount = safe_float(request.POST.get('pending_tax_amount')) if prop.tax_due == 'yes' else None
-        
-        prop.fire_noc = request.POST.get('fire_noc', 'no')
-        prop.property_description = request.POST.get('property_description')
-        prop.sanctioning_authority = request.POST.get('sanctioning_authority')
-
-        # ── Nearby Facilities & Amenities ──────────────────
-        prop.nearby_facilities = ', '.join(request.POST.getlist('facilities[]'))
-        prop.amenities = ', '.join(request.POST.getlist('amenities[]'))
-
-        # ── Address ────────────────────────────────────────
-        prop.city = request.POST.get('city')
-        prop.locality = request.POST.get('locality')
-        prop.building_name = request.POST.get('building_name') or None
-        prop.property_address = request.POST.get('property_address')
-
-        # ── Owner Contact ──────────────────────────────────
-        prop.owner_name = request.POST.get('owner_name')
-        prop.owner_contact = request.POST.get('owner_contact')
-        prop.owner_email = request.POST.get('owner_email')
-        prop.residential_status = request.POST.get('residential_status')
-
-        # ── Media ──────────────────────────────────────────
-        if request.FILES.get('floor_plan'):
-            prop.floor_plan = request.FILES.get('floor_plan')
-        if request.FILES.get('property_video'):
-            prop.property_video = request.FILES.get('property_video')
-
-        prop.save()
-
-        # Handle Image Gallery (Delete checked ones)
-        deleted_images = request.POST.getlist('deleted_images[]')
-        if deleted_images:
-            CommercialPropertyImage.objects.filter(id__in=deleted_images, property=prop).delete()
-
-        # Add New Images
-        for img in request.FILES.getlist('property_images'):
-            CommercialPropertyImage.objects.create(property=prop, image=img)
-
-        return JsonResponse({"status": "success", "message": "Commercial Property Updated Successfully"})
-
-    # --- GET REQUEST Context ---
-    ameneties_obj = Ameneties_Details.objects.all()
-    facilities_obj = Facilities_Details.objects.all()
-    
-    prop_facilities_list = [f.strip() for f in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
-    prop_amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
-    
-    existing_images = prop.images.all() 
-
-    context = {
-        "prop": prop,
-        "ameneties_obj": ameneties_obj,
-        "facilities_obj": facilities_obj,
-        "prop_facilities_list": prop_facilities_list,
-        "prop_amenities_list": prop_amenities_list,
-        "existing_images": existing_images,
-    }
-    return render(request, 'admin_user/Reports/Resale/commercial_resale_edit.html', context)
 
 ####################End Views Section For Commercial Resale Property #######################################
 

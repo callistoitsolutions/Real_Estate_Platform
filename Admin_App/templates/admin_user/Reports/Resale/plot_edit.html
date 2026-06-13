@@ -6,26 +6,26 @@
 
 <style>
     :root {
-        --primary-gradient: linear-gradient(135deg, #2c3e50 0%, #000000 100%);
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         --topbar-height: 70px;
     }
     body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; }
     .main-content { padding: 30px; margin-top: var(--topbar-height); }
     .page-wrapper { display: grid; grid-template-columns: 1fr 350px; gap: 30px; max-width: 1600px; margin: 0 auto; }
-    .page-header { background: var(--primary-gradient); border-radius: 20px; padding: 30px; color: white; grid-column: 1 / -1; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); }
-    .stepper-container { grid-column: 1 / -1; background: white; border-radius: 20px; padding: 30px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); }
+    .page-header { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 20px; padding: 30px; color: white; grid-column: 1 / -1; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+    .stepper-container { grid-column: 1 / -1; background: white; border-radius: 20px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
     .stepper { display: flex; align-items: center; justify-content: space-between; position: relative; }
     .step-item { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; z-index: 2; }
     .step-circle { width: 50px; height: 50px; border-radius: 50%; background: #e9ecef; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: all 0.3s ease; border: 3px solid #fff; }
-    .step-circle.active { background: #2c3e50; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .step-circle.active { background: var(--primary-gradient); color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
     .step-circle.done { background: var(--success-gradient); color: white; }
     .step-line { position: absolute; top: 25px; left: 50%; right: -50%; height: 3px; background: #e9ecef; z-index: 1; }
     .step-line.done { background: var(--success-gradient); }
-    .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); }
+    .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
     .step-content { display: none; }
     .step-content.active { display: block; animation: fadeIn 0.4s ease; }
-    .section-header { background: #2c3e50; color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+    .section-header { background: var(--primary-gradient); color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; display: flex; align-items: center; gap: 10px; }
     .section-body { background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; margin-bottom: 30px; }
     .form-label { font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 0.85rem; display: block; }
     .required { color: #e74c3c; }
@@ -37,277 +37,410 @@
     .preview-image { height: 140px; background: #f0fdf4; display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
     .preview-price { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.85); color: white; padding: 5px 12px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; }
     .checklist-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-    .checklist-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 10px; color: #11998e; font-weight: 600; }
-    .changed-highlight { border: 2px solid #ff9800 !important; background-color: #fff9c4 !important; }
+    .checklist-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 10px; color: #718096; }
+    .checklist-item.done { color: #11998e; font-weight: 600; }
+    .existing-img-wrap { position: relative; width: 85px; height: 85px; border-radius: 8px; overflow: hidden; border: 2px solid #ddd; }
+    .existing-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .delete-img-btn { position: absolute; top: 3px; right: 3px; background: rgba(231,76,60,0.9); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .edit-badge { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-left: 10px; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } }
 </style>
 
 <div class="main-content">
     <div class="page-wrapper">
+
         <div class="page-header">
-            <h1 class="page-title">⚙️ Edit Plot: {{ prop.plot_title }}</h1>
-            <p class="page-subtitle">Modification System Identifier: {{ prop.plot_property_id }}</p>
+            <h1 class="page-title">✏️ Edit Plot & Land Listing <span class="edit-badge">EDITING MODE</span></h1>
+            <p class="page-subtitle">Update listing — <strong>{{ prop.plot_property_id }}</strong> — {{ prop.property_title }}</p>
         </div>
 
         <div class="stepper-container">
             <div class="stepper">
-                <div class="step-item"><div class="step-circle active" id="sc1">1</div><span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Plot Specs</span><div class="step-line" id="line1"></div></div>
-                <div class="step-item"><div class="step-circle" id="sc2">2</div><span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Pricing & Legal</span><div class="step-line" id="line2"></div></div>
-                <div class="step-item"><div class="step-circle" id="sc3">3</div><span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Media</span><div class="step-line" id="line3"></div></div>
-                <div class="step-item"><div class="step-circle" id="sc4">4</div><span class="mt-2" style="font-size: 0.75rem; font-weight: 600;">Location</span></div>
+                <div class="step-item">
+                    <div class="step-circle active" id="sc1">1</div>
+                    <span class="mt-2" style="font-size:0.75rem;font-weight:600;">Plot Specs</span>
+                    <div class="step-line" id="line1"></div>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle" id="sc2">2</div>
+                    <span class="mt-2" style="font-size:0.75rem;font-weight:600;">Pricing & Legal</span>
+                    <div class="step-line" id="line2"></div>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle" id="sc3">3</div>
+                    <span class="mt-2" style="font-size:0.75rem;font-weight:600;">Media</span>
+                    <div class="step-line" id="line3"></div>
+                </div>
+                <div class="step-item">
+                    <div class="step-circle" id="sc4">4</div>
+                    <span class="mt-2" style="font-size:0.75rem;font-weight:600;">Location</span>
+                </div>
             </div>
         </div>
 
         <div class="form-container">
-            <form action="{% url 'plot_sale_edit' prop.plot_property_id %}" method="POST" enctype="multipart/form-data" id="plotForm">
+            <form action="{% url 'plot_sale_edit' prop.plot_property_id %}" method="POST"
+                  enctype="multipart/form-data" id="plotEditForm">
                 {% csrf_token %}
 
+                <!-- ═══════════════ STEP 1 ═══════════════ -->
                 <div class="step-content active" id="step1">
-                    <div class="section-header"><i class="fas fa-edit"></i> Edit Specs Details</div>
+                    <div class="section-header"><i class="fas fa-info-circle"></i> Step 1: Plot/Land Basic Details</div>
                     <div class="section-body">
                         <div class="row">
                             <div class="col-md-12 mt-2">
-                                <label class="form-label">System Generated Property Title <span class="text-muted">(Auto-Generated Read Only Preview)</span></label>
-                                <input type="text" class="form-control" id="property_title" value="{{ prop.property_title }}" readonly style="background-color: #e9ecef; font-weight:600;">
+                                <label class="form-label">Property Title <span class="text-muted">(Auto-Generated, Read Only)</span></label>
+                                <input type="text" class="form-control" id="property_title"
+                                       value="{{ prop.property_title }}"
+                                       placeholder="System generated..." readonly
+                                       style="background-color:#e9ecef;font-weight:600;">
                             </div>
                             <div class="col-md-12 mt-3">
-                                <label class="form-label">Project Name / Custom Plot Title <span class="required">*</span></label>
-                                <input type="text" class="form-control step-validate track-change" data-step="1" data-original="{{ prop.plot_title }}" name="plot_title" id="plot_title" value="{{ prop.plot_title }}" required>
+                                <label class="form-label">Plot Title <span class="required">*</span></label>
+                                <input type="text" class="form-control step-validate" data-step="1"
+                                       name="plot_title" id="plot_title"
+                                       value="{{ prop.plot_title }}" required>
                             </div>
                             <div class="col-md-4 mt-3">
                                 <label class="form-label">Plot Area (sq.ft) <span class="required">*</span></label>
-                                <input type="number" class="form-control step-validate track-change" data-step="1" data-original="{{ prop.plot_area }}" name="plot_area" id="plot_area" value="{{ prop.plot_area|stringformat:'d' }}" required>
+                                <input type="number" class="form-control step-validate" data-step="1"
+                                       name="plot_area" id="plot_area"
+                                       value="{{ prop.plot_area }}" required>
                             </div>
                             <div class="col-md-4 mt-3">
-                                <label class="form-label">Plot Type <span class="required">*</span></label>
-                                <select class="form-select form-control step-validate track-change" data-step="1" data-original="{{ prop.resale_plot_type }}" name="resale_plot_type" id="resale_plot_type" required>
-                                    <option value="open_plot" {% if prop.resale_plot_type == 'open_plot' %}selected{% endif %}>Open Plot</option>
+                                <label class="form-label">Resale Plot Type <span class="required">*</span></label>
+                                <select class="form-select form-control step-validate" data-step="1"
+                                        name="resale_plot_type" id="resale_plot_type" required>
+                                    <option value="">Select</option>
+                                    <option value="open_plot"        {% if prop.resale_plot_type == 'open_plot' %}selected{% endif %}>Open Plot</option>
                                     <option value="residential_plot" {% if prop.resale_plot_type == 'residential_plot' %}selected{% endif %}>Residential Plot</option>
-                                    <option value="commercial_plot" {% if prop.resale_plot_type == 'commercial_plot' %}selected{% endif %}>Commercial Plot</option>
+                                    <option value="commercial_plot"  {% if prop.resale_plot_type == 'commercial_plot' %}selected{% endif %}>Commercial Plot</option>
                                 </select>
                             </div>
                             <div class="col-md-4 mt-3">
-                                <label class="form-label">Road Facing <span class="required">*</span></label>
-                                <select class="form-select form-control step-validate track-change" data-step="1" data-original="{{ prop.plot_road_facing }}" name="plot_road_facing" id="plot_road_facing" required>
-                                    <option value="main" {% if prop.plot_road_facing == 'main' %}selected{% endif %}>Main Road</option>
+                                <label class="form-label">Plot Road Facing <span class="required">*</span></label>
+                                <select class="form-select form-control step-validate" data-step="1"
+                                        name="plot_road_facing" id="plot_road_facing" required>
+                                    <option value="">Select</option>
+                                    <option value="main"     {% if prop.plot_road_facing == 'main' %}selected{% endif %}>Main Road</option>
                                     <option value="internal" {% if prop.plot_road_facing == 'internal' %}selected{% endif %}>Internal Road</option>
-                                    <option value="corner" {% if prop.plot_road_facing == 'corner' %}selected{% endif %}>Corner Plot</option>
+                                    <option value="corner"   {% if prop.plot_road_facing == 'corner' %}selected{% endif %}>Corner Plot</option>
                                 </select>
                             </div>
+
+                            <!-- ✅ corner_plot — matches model -->
                             <div class="col-md-4 mt-3">
                                 <label class="form-label">Corner Plot?</label>
-                                <select class="form-select form-control track-change" data-original="{{ prop.plot_corner }}" name="plot_corner" id="plot_corner">
-                                    <option value="no" {% if prop.plot_corner == 'no' %}selected{% endif %}>No</option>
-                                    <option value="yes" {% if prop.plot_corner == 'yes' %}selected{% endif %}>Yes</option>
+                                <select class="form-select form-control" name="corner_plot" id="corner_plot">
+                                    <option value="no"  {% if prop.corner_plot == 'no' %}selected{% endif %}>No</option>
+                                    <option value="yes" {% if prop.corner_plot == 'yes' %}selected{% endif %}>Yes</option>
                                 </select>
                             </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Available From</label>
-                                <input type="date" class="form-control track-change" data-original="{{ prop.available_from|date:'Y-m-d' }}" name="available_from" value="{{ prop.available_from|date:'Y-m-d' }}">
-                            </div>
+
+                            <!-- ✅ sanctioning_authority — matches model -->
                             <div class="col-md-4 mt-3">
                                 <label class="form-label">Sanctioning Authority</label>
-                                <input type="text" class="form-control track-change" data-original="{{ prop.plot_authority }}" name="plot_authority" id="plot_authority" value="{{ prop.plot_authority }}">
+                                <input type="text" class="form-control"
+                                       name="sanctioning_authority" id="sanctioning_authority"
+                                       value="{{ prop.sanctioning_authority|default:'' }}"
+                                       placeholder="e.g., MHADA, CIDCO">
                             </div>
                         </div>
+
                         <div class="form-group mt-3">
-                            <label class="form-label">Fencing Done?</label>
+                            <label class="form-label">Plot Fencing?</label>
                             <div class="radio-group">
-                                <label class="radio-option"><input type="radio" class="track-change" data-original="{{ prop.plot_fencing }}" name="plot_fencing" value="no" {% if prop.plot_fencing == 'no' %}checked{% endif %}> No</label>
-                                <label class="radio-option"><input type="radio" class="track-change" data-original="{{ prop.plot_fencing }}" name="plot_fencing" value="yes" {% if prop.plot_fencing == 'yes' %}checked{% endif %}> Yes</label>
+                                <label class="radio-option">
+                                    <input type="radio" name="plot_fencing" value="no"
+                                           {% if prop.plot_fencing == 'no' %}checked{% endif %}> No
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="plot_fencing" value="yes"
+                                           {% if prop.plot_fencing == 'yes' %}checked{% endif %}> Yes
+                                </label>
                             </div>
                         </div>
                     </div>
                     <div class="text-end">
-                        <button type="button" class="btn btn-primary px-5 py-2" onclick="goToStep(2)">Next: Pricing <i class="fas fa-arrow-right ml-2"></i></button>
+                        <button type="button" class="btn btn-primary px-5 py-2" onclick="goToStep(2)">
+                            Next: Pricing & Legal <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
                     </div>
                 </div>
 
+                <!-- ═══════════════ STEP 2 ═══════════════ -->
                 <div class="step-content" id="step2">
-                    <div class="section-header"><i class="fas fa-hand-holding-usd"></i> Edit Pricing & Legal</div>
+                    <div class="section-header"><i class="fas fa-hand-holding-usd"></i> Step 2: Pricing & Legal Verification</div>
                     <div class="section-body">
                         <div class="row">
                             <div class="col-md-6 mt-2">
-                                <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
-                                <input type="number" class="form-control step-validate track-change" data-step="2" data-original="{{ prop.plot_price }}" name="plot_price" id="plot_price" value="{{ prop.plot_price|stringformat:'d' }}" required>
+                                <label class="form-label">Plot Price (₹) <span class="required">*</span></label>
+                                <input type="number" class="form-control step-validate" data-step="2"
+                                       name="plot_price" id="plot_price"
+                                       value="{{ prop.plot_price }}" required>
                             </div>
                             <div class="col-md-6 mt-2">
                                 <label class="form-label">Price per Sq.ft (₹)</label>
-                                <input type="number" class="form-control" id="plot_price_per_sqft" value="{{ prop.price_per_sqft|stringformat:'d' }}" readonly style="background-color: #e9ecef;">
+                                <input type="number" class="form-control" id="plot_price_per_sqft"
+                                       value="{{ prop.price_per_sqft|default:'' }}" placeholder="Auto-calculated" readonly>
                             </div>
                             <div class="col-md-6 mt-3">
-                                <label class="form-label">Brokerage Required?</label>
-                                <select class="form-select form-control track-change" data-original="{{ prop.brokerage }}" name="brokerage" id="brokerageSelect">
-                                    <option value="No" {% if prop.brokerage == 'No' %}selected{% endif %}>No</option>
+                                <label class="form-label">Brokerage</label>
+                                <select class="form-select form-control" name="brokerage" id="brokerageSelect">
+                                    <option value="No"  {% if prop.brokerage == 'No' %}selected{% endif %}>No</option>
                                     <option value="Yes" {% if prop.brokerage == 'Yes' %}selected{% endif %}>Yes</option>
                                 </select>
                             </div>
-                            <div class="col-md-6 mt-3" id="brokerageSection" style="{% if prop.brokerage == 'Yes' %}display:block;{% else %}display:none;{% endif %}">
-                                <label class="form-label">Brokerage Percent Rate Metric</label>
-                                <select class="form-select form-control track-change" data-original="{{ prop.brokerage_percentage }}" name="brokerage_percentage" id="brokeragePercentage">
+                            <div class="col-md-6 mt-3" id="brokerageSection"
+                                 style="display:{% if prop.brokerage == 'Yes' %}block{% else %}none{% endif %};">
+                                <label class="form-label">Brokerage Percent</label>
+                                <select class="form-select form-control" name="brokerage_percentage">
                                     <option value="1%" {% if prop.brokerage_percentage == '1%' %}selected{% endif %}>1%</option>
                                     <option value="2%" {% if prop.brokerage_percentage == '2%' %}selected{% endif %}>2%</option>
                                     <option value="3%" {% if prop.brokerage_percentage == '3%' %}selected{% endif %}>3%</option>
                                 </select>
                             </div>
                         </div>
+
                         <div class="row mt-3">
+                            <!-- ✅ ownership_type — matches model -->
                             <div class="col-md-6">
                                 <label class="form-label">Ownership Type <span class="required">*</span></label>
-                                <select class="form-select form-control step-validate track-change" data-step="2" data-original="{{ prop.plot_ownership }}" name="plot_ownership" id="plot_ownership" required>
-                                    <option value="freehold" {% if prop.plot_ownership == 'freehold' %}selected{% endif %}>Freehold</option>
-                                    <option value="leasehold" {% if prop.plot_ownership == 'leasehold' %}selected{% endif %}>Leasehold</option>
+                                <select class="form-select form-control step-validate" data-step="2"
+                                        name="ownership_type" id="ownership_type" required>
+                                    <option value="freehold"  {% if prop.ownership_type == 'freehold' %}selected{% endif %}>Freehold</option>
+                                    <option value="leasehold" {% if prop.ownership_type == 'leasehold' %}selected{% endif %}>Leasehold</option>
                                 </select>
                             </div>
+
+                            <!-- ✅ loan_on_property — matches model -->
                             <div class="col-md-6">
-                                <label class="form-label">Ongoing Loan Status Active? <span class="required">*</span></label>
+                                <label class="form-label">Loan on Property? <span class="required">*</span></label>
                                 <div class="radio-group">
-                                    <label class="radio-option"><input type="radio" class="track-change" data-original="{{ prop.plot_loan }}" name="plot_loan" value="no" {% if prop.plot_loan == 'no' %}checked{% endif %}> No</label>
-                                    <label class="radio-option"><input type="radio" class="track-change" data-original="{{ prop.plot_loan }}" name="plot_loan" value="yes" {% if prop.plot_loan == 'yes' %}checked{% endif %}> Yes</label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="loan_on_property" value="no"
+                                               {% if prop.loan_on_property == 'no' %}checked{% endif %}> No
+                                    </label>
+                                    <label class="radio-option">
+                                        <input type="radio" name="loan_on_property" value="yes"
+                                               {% if prop.loan_on_property == 'yes' %}checked{% endif %}> Yes
+                                    </label>
                                 </div>
-                                <div id="plot_loan_amount_section" style="{% if prop.plot_loan == 'yes' %}display:block;{% else %}display:none;{% endif %}" class="mt-2">
-                                    <label class="form-label">Outstanding Balance Amount (₹)</label>
-                                    <input type="number" class="form-control track-change" data-original="{{ prop.plot_loan_amount }}" name="plot_loan_amount" id="plot_loan_amount" value="{{ prop.plot_loan_amount|stringformat:'d' }}">
+                                <div id="plot_loan_amount_section"
+                                     style="display:{% if prop.loan_on_property == 'yes' %}block{% else %}none{% endif %};"
+                                     class="mt-2">
+                                    <label class="form-label">Plot Loan Amount</label>
+                                    <input type="number" class="form-control"
+                                           name="plot_loan_amount" id="plot_loan_amount"
+                                           value="{{ prop.plot_loan_amount|default:'' }}"
+                                           placeholder="Enter Loan Amount">
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-secondary px-4" onclick="goToStep(1)">Back</button>
-                        <button type="button" class="btn btn-primary px-5" onclick="goToStep(3)">Next: Media Files <i class="fas fa-arrow-right"></i></button>
+                        <button type="button" class="btn btn-primary px-5" onclick="goToStep(3)">
+                            Next: Media Files <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
 
+                <!-- ═══════════════ STEP 3 ═══════════════ -->
                 <div class="step-content" id="step3">
-                    <div class="section-header"><i class="fas fa-images"></i> Edit Media Images (Append Modes)</div>
+                    <div class="section-header"><i class="fas fa-images"></i> Step 3: Media & Verified Certifications</div>
                     <div class="section-body">
-                        <div class="mb-3">
-                            <label class="form-label text-primary">Currently Stored Images in Database Asset Ledger:</label>
-                            <div class="d-flex flex-wrap gap-2 p-2 bg-white border rounded">
-                                {% for imgObj in existing_images %}
-                                    <div style="width:75px; height:75px; border-radius:6px; overflow:hidden; border:1px solid #ccc; position:relative;">
-                                        <img src="{{ imgObj.image.url }}" style="width:100%; height:100%; object-fit:cover;">
-                                        <span style="position:absolute; bottom:0; width:100%; font-size:9px; background:rgba(0,0,0,0.6); color:#fff; text-align:center;">Saved</span>
-                                    </div>
-                                {% empty %}
-                                    <span class="text-muted small p-2">No Gallery Images Uploaded Yet</span>
-                                {% endfor %}
-                            </div>
-                        </div>
 
-                        <div class="image-upload-area p-4 text-center" style="border: 2px dashed #667eea; cursor: pointer; background: #fff; border-radius:10px;" id="uploadArea">
-                            <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
-                            <i class="fas fa-plus-circle fa-2x mb-2" style="color: #2c3e50;"></i>
-                            <h6>Append New Files to Gallery</h6>
-                            <span class="badge bg-dark p-2" id="imageCounter">Limit Check: Max 10 Cumulative Images total</span>
+                        <!-- Existing images -->
+                        {% if existing_images %}
+                        <label class="form-label mb-2">Current Images (click ✕ to delete)</label>
+                        <div class="d-flex flex-wrap gap-2 mb-3" id="existingImagesContainer">
+                            {% for img in existing_images %}
+                            <div class="existing-img-wrap" id="imgWrap_{{ img.id }}">
+                                <img src="{{ img.image.url }}" alt="Plot Image">
+                                <button type="button" class="delete-img-btn"
+                                        onclick="deleteImage({{ img.id }}, this)">✕</button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="image-upload-area p-4 text-center" id="uploadArea"
+                             style="border:2px dashed #cbd5e0;cursor:pointer;background:#fff;border-radius:10px;">
+                            <input type="file" id="imageInput" name="property_images[]"
+                                   multiple accept="image/*" style="display:none;">
+                            <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color:#667eea;"></i>
+                            <h6 class="mb-1">Click or Drag to Add More Images</h6>
+                            <p class="text-muted small">Total across existing + new: Max 10 images</p>
+                            <span class="badge bg-primary p-2 mt-1" id="imageCounter">New: 0 selected</span>
                         </div>
                         <div class="image-preview mt-3 d-flex flex-wrap gap-2" id="imagePreview"></div>
 
                         <div class="row mt-4">
                             <div class="col-md-6">
-                                <label class="form-label">Replace Encumbrance Certificate {% if prop.encumbrance_cert %}<span class="text-success">(File Found)</span>{% endif %}</label>
+                                <label class="form-label">Encumbrance Certificate
+                                    <span class="text-muted">(Leave blank to keep existing)</span>
+                                </label>
+                                {% if prop.encumbrance_cert %}
+                                <div class="mb-2">
+                                    <a href="{{ prop.encumbrance_cert.url }}" target="_blank"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-file"></i> View Current Certificate
+                                    </a>
+                                </div>
+                                {% endif %}
                                 <input type="file" class="form-control" name="encumbrance_cert">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Replace Presentation Video Clip {% if prop.social_video %}<span class="text-success">(Video Found)</span>{% endif %}</label>
+                                <label class="form-label">Upload Video
+                                    <span class="text-muted">(Leave blank to keep existing)</span>
+                                </label>
+                                {% if prop.social_video %}
+                                <div class="mb-2">
+                                    <a href="{{ prop.social_video.url }}" target="_blank"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-video"></i> View Current Video
+                                    </a>
+                                </div>
+                                {% endif %}
                                 <input type="file" class="form-control" name="social_video" accept="video/*">
                             </div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-secondary px-4" onclick="goToStep(2)">Back</button>
-                        <button type="button" class="btn btn-primary px-5" onclick="goToStep(4)">Next: Location Info <i class="fas fa-arrow-right"></i></button>
+                        <button type="button" class="btn btn-primary px-5" onclick="goToStep(4)">
+                            Next: Location Details <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
                 </div>
 
+                <!-- ═══════════════ STEP 4 ═══════════════ -->
                 <div class="step-content" id="step4">
-                    <div class="section-header"><i class="fas fa-map-marker-alt"></i> Edit Location Details</div>
+                    <div class="section-header"><i class="fas fa-map-marker-alt"></i> Step 4: Geographic Location & Owner Info</div>
                     <div class="section-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <label class="form-label">City <span class="required">*</span></label>
-                                <input type="text" class="form-control step-validate track-change" data-step="4" data-original="{{ prop.plot_city }}" name="plot_city" id="plot_city" value="{{ prop.plot_city }}" required>
+                                <label class="form-label">Plot City <span class="required">*</span></label>
+                                <input type="text" class="form-control step-validate" data-step="4"
+                                       name="plot_city" id="plot_city"
+                                       value="{{ prop.plot_city }}" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Locality / Zone Area <span class="required">*</span></label>
-                                <input type="text" class="form-control step-validate track-change" data-step="4" data-original="{{ prop.plot_locality }}" name="plot_locality" id="plot_locality" value="{{ prop.plot_locality }}" required>
+                                <label class="form-label">Plot Locality/Area <span class="required">*</span></label>
+                                <input type="text" class="form-control step-validate" data-step="4"
+                                       name="plot_locality" id="plot_locality"
+                                       value="{{ prop.plot_locality }}" required>
                             </div>
                             <div class="col-md-12 mt-3">
-                                <label class="form-label">Complete Physical Plot Address Location <span class="required">*</span></label>
-                                <textarea class="form-control step-validate track-change" data-step="4" data-original="{{ prop.plot_address }}" name="plot_address" id="plot_address" rows="3" required>{{ prop.plot_address }}</textarea>
+                                <label class="form-label">Plot Address <span class="required">*</span></label>
+                                <textarea class="form-control step-validate" data-step="4"
+                                          name="plot_address" id="plot_address" rows="3" required>{{ prop.plot_address }}</textarea>
                             </div>
                             <div class="col-md-4 mt-3">
-                                <label class="form-label">Legal Owner Full Name <span class="required">*</span></label>
-                                <input type="text" class="form-control step-validate track-change" data-step="4" data-original="{{ prop.plot_owner_name }}" name="plot_owner_name" id="plot_owner_name" value="{{ prop.plot_owner_name }}" required>
+                                <label class="form-label">Plot Owner Name <span class="required">*</span></label>
+                                <input type="text" class="form-control step-validate" data-step="4"
+                                       name="plot_owner_name" id="plot_owner_name"
+                                       value="{{ prop.plot_owner_name }}" required>
                             </div>
                             <div class="col-md-4 mt-3">
-                                <label class="form-label">Primary Owner Contact Phone <span class="required">*</span></label>
-                                <input type="tel" class="form-control step-validate track-change" data-step="4" data-original="{{ prop.plot_owner_contact }}" name="plot_owner_contact" id="plot_owner_contact" value="{{ prop.plot_owner_contact }}" pattern="[0-9]{10}" required>
+                                <label class="form-label">Plot Owner Contact <span class="required">*</span></label>
+                                <input type="tel" class="form-control step-validate" data-step="4"
+                                       name="plot_owner_contact" id="plot_owner_contact"
+                                       value="{{ prop.plot_owner_contact }}"
+                                       pattern="[0-9]{10}" placeholder="10 Digit Number" required>
                             </div>
                             <div class="col-md-4 mt-3">
-                                <label class="form-label">Owner Electronic Mail Email <span class="required">*</span></label>
-                                <input type="email" class="form-control step-validate track-change" data-step="4" data-original="{{ prop.plot_owner_email }}" name="plot_owner_email" id="plot_owner_email" value="{{ prop.plot_owner_email }}" required>
+                                <label class="form-label">Plot Owner Email <span class="required">*</span></label>
+                                <input type="email" class="form-control step-validate" data-step="4"
+                                       name="plot_owner_email" id="plot_owner_email"
+                                       value="{{ prop.plot_owner_email }}" required>
+                            </div>
+                            <!-- ✅ plot_owner_role — was missing in old edit -->
+                            <div class="col-md-4 mt-3">
+                                <label class="form-label">Plot Owner Role <span class="required">*</span></label>
+                                <input type="text" class="form-control step-validate" data-step="4"
+                                       name="plot_owner_role" id="plot_owner_role"
+                                       value="{{ prop.plot_owner_role|default:'' }}" required>
                             </div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-between">
                         <button type="button" class="btn btn-secondary px-4" onclick="goToStep(3)">Back</button>
-                        <button type="submit" class="btn btn-success px-5" id="submitBtn">Save Ledger Updates <i class="fas fa-check-double ml-2"></i></button>
+                        <button type="submit" class="btn btn-warning px-5 text-white fw-bold" id="submitBtn">
+                            <i class="fas fa-save mr-2"></i> Update Property Listing
+                        </button>
                     </div>
                 </div>
+
             </form>
         </div>
 
+        <!-- ═══════════════ SIDEBAR ═══════════════ -->
         <div class="preview-sidebar">
             <div class="preview-card">
-                <div class="preview-header" style="font-size: 0.8rem; opacity: 0.7; font-weight: 700; text-transform: uppercase;">Portal Card Live Preview</div>
+                <div style="font-size:0.8rem;opacity:0.7;font-weight:700;text-transform:uppercase;">
+                    Live Preview
+                </div>
                 <div class="preview-mock">
                     <div class="preview-image">🗺️
-                        <div class="preview-price" id="p_price">₹ 0</div>
+                        <div class="preview-price" id="p_price">
+                            ₹ {{ prop.plot_price|floatformat:0 }}
+                        </div>
                     </div>
                     <div class="p-3">
-                        <div style="font-weight: 800; font-size: 0.95rem; color: #2d3748;" id="p_title">Your Project Name</div>
-                        <div style="font-size: 0.75rem; color: #718096; margin-top: 5px;">
-                            <i class="fas fa-map-marker-alt" style="color: #667eea;"></i> <span id="p_loc">City, Locality</span>
+                        <div style="font-weight:800;font-size:0.95rem;color:#2d3748;" id="p_title">
+                            {{ prop.plot_title }}
                         </div>
-                        <div class="mt-2" style="font-weight: 700; font-size: 0.8rem; color: #4a5568;">
-                            <span id="p_area">0</span> sq.ft • <span id="p_type">Plot Type</span>
+                        <div style="font-size:0.75rem;color:#718096;margin-top:5px;">
+                            <i class="fas fa-map-marker-alt" style="color:#667eea;"></i>
+                            <span id="p_loc">{{ prop.plot_city }}, {{ prop.plot_locality }}</span>
+                        </div>
+                        <div class="mt-2" style="font-weight:700;font-size:0.8rem;color:#4a5568;">
+                            <span id="p_area">{{ prop.plot_area }}</span> sq.ft •
+                            <span id="p_type">{{ prop.resale_plot_type }}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="checklist-card">
-                <h6 style="font-weight: 800; font-size: 0.9rem; margin-bottom: 12px; color:#2c3e50;"><i class="fas fa-history"></i> Current Records Status</h6>
-                <div class="checklist-item"><i class="fas fa-check-circle"></i> Baseline Record Loaded</div>
-                <div class="text-muted small mt-2">Any modified settings will highlight yellow instantly on the control layout boards.</div>
+                <h6 style="font-weight:800;font-size:0.9rem;margin-bottom:15px;">📋 Edit Progress Check</h6>
+                <div class="checklist-item done" id="cl-title"><i class="fas fa-check-circle"></i> Plot Title present</div>
+                <div class="checklist-item done" id="cl-area"><i class="fas fa-check-circle"></i> Area filled</div>
+                <div class="checklist-item done" id="cl-price"><i class="fas fa-check-circle"></i> Price set</div>
+                <div class="checklist-item {% if existing_images %}done{% endif %}" id="cl-images">
+                    <i class="fas {% if existing_images %}fa-check-circle{% else %}fa-circle{% endif %}"></i>
+                    Images ({{ existing_images|length }}/10)
+                </div>
+                <div class="checklist-item done" id="cl-loc"><i class="fas fa-check-circle"></i> Location set</div>
             </div>
         </div>
+
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     let currentStep = 1;
-    const dbImageCount = parseInt("{{ prop.images.count }}") || 0;
 
     function goToStep(n) {
         if (n > currentStep && !validateStepSequence(currentStep)) return;
         document.getElementById('step' + currentStep).classList.remove('active');
         document.getElementById('step' + n).classList.add('active');
-
         for (let i = 1; i <= 4; i++) {
-            const sc = document.getElementById('sc' + i);
+            const sc   = document.getElementById('sc' + i);
             const line = document.getElementById('line' + i);
             if (i < n) {
                 sc.className = 'step-circle done'; sc.innerHTML = '✓';
-                if(line) line.classList.add('done');
+                if (line) line.classList.add('done');
             } else if (i === n) {
                 sc.className = 'step-circle active'; sc.innerHTML = i;
-                if(line) line.classList.remove('done');
+                if (line) line.classList.remove('done');
             } else {
                 sc.className = 'step-circle'; sc.innerHTML = i;
-                if(line) line.classList.remove('done');
+                if (line) line.classList.remove('done');
             }
         }
         currentStep = n;
@@ -319,16 +452,16 @@
         let missing = [];
         fields.forEach(field => {
             if (!field.value.trim()) {
-                let labelText = field.previousElementSibling?.innerText || field.placeholder || "Required Field";
-                missing.push(labelText.replace('*', '').trim());
+                let label = field.previousElementSibling?.innerText || field.placeholder || "Required Field";
+                missing.push(label.replace('*', '').trim());
             }
         });
         if (missing.length > 0) {
             Swal.fire({
                 icon: 'warning',
-                title: 'Required Modification Missing',
-                html: 'The following fields cannot be left blank:<br><ul class="text-start mt-2"><li>' + missing.join('</li><li>') + '</li></ul>',
-                confirmButtonColor: '#2c3e50'
+                title: 'Incomplete Fields',
+                html: 'Please fill these before continuing:<br><ul class="text-start mt-2"><li>' + missing.join('</li><li>') + '</li></ul>',
+                confirmButtonColor: '#667eea'
             });
             return false;
         }
@@ -336,26 +469,26 @@
     }
 
     function updateLivePreviews() {
-        const title = document.getElementById('plot_title').value;
-        const area = document.getElementById('plot_area').value;
-        const typeEl = document.getElementById('resale_plot_type');
+        const title   = document.getElementById('plot_title').value;
+        const area    = document.getElementById('plot_area').value;
+        const typeEl  = document.getElementById('resale_plot_type');
         const typeTxt = typeEl.options[typeEl.selectedIndex]?.text || "";
-        const price = document.getElementById('plot_price').value;
-        const city = document.getElementById('plot_city').value;
-        const loc = document.getElementById('plot_locality').value;
+        const price   = document.getElementById('plot_price').value;
+        const city    = document.getElementById('plot_city')     ? document.getElementById('plot_city').value     : '';
+        const loc     = document.getElementById('plot_locality') ? document.getElementById('plot_locality').value : '';
 
         let autoName = "Premium ";
-        if(area) autoName += Number(area).toLocaleString('en-IN') + " Sqft ";
-        if(typeEl.value) autoName += typeTxt + " ";
-        if(title) autoName += "(" + title + ") ";
-        if(loc || city) autoName += "at " + [loc, city].filter(Boolean).join(', ');
-        
+        if (area)        autoName += Number(area).toLocaleString('en-IN') + " Sqft ";
+        if (typeEl.value) autoName += typeTxt + " ";
+        if (title)       autoName += "(" + title + ") ";
+        if (loc || city) autoName += "at " + [loc, city].filter(Boolean).join(', ');
         document.getElementById('property_title').value = autoName.trim();
-        document.getElementById('p_title').innerText = title || "";
+
+        document.getElementById('p_title').innerText = title || "Plot Title";
         document.getElementById('p_price').innerText = price ? '₹ ' + parseInt(price).toLocaleString('en-IN') : '₹ 0';
-        document.getElementById('p_area').innerText = area || "0";
-        document.getElementById('p_type').innerText = typeEl.value ? typeTxt : "";
-        document.getElementById('p_loc').innerText = `${city}, ${loc}`;
+        document.getElementById('p_area').innerText  = area || "0";
+        document.getElementById('p_type').innerText  = typeEl.value ? typeTxt : "Plot Type";
+        document.getElementById('p_loc').innerText   = (city || loc) ? `${city}, ${loc}` : "City, Locality";
 
         if (price && area && area > 0) {
             document.getElementById('plot_price_per_sqft').value = Math.round(price / area);
@@ -363,131 +496,142 @@
             document.getElementById('plot_price_per_sqft').value = "";
         }
 
-        // Live track modification system highlighting logic
-        document.querySelectorAll('.track-change').forEach(el => {
-            let orig = el.getAttribute('data-original');
-            let current = el.value;
-            if(el.type === 'radio') {
-                if(el.checked && el.value !== orig) {
-                    el.closest('.radio-group').classList.add('changed-highlight');
-                } else if (el.checked && el.value === orig) {
-                    el.closest('.radio-group').classList.remove('changed-highlight');
-                }
-                return;
-            }
-            if(current !== orig) {
-                el.classList.add('changed-highlight');
-            } else {
-                el.classList.remove('changed-highlight');
-            }
-        });
+        updateCheckItem('cl-title',  !!title);
+        updateCheckItem('cl-area',   !!area);
+        updateCheckItem('cl-price',  !!price);
+        updateCheckItem('cl-loc',    !!city && !!loc);
     }
 
-    document.querySelectorAll('input, select, textarea').forEach(el => el.addEventListener('input', updateLivePreviews));
+    function updateCheckItem(id, done) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.className = 'checklist-item' + (done ? ' done' : '');
+        el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+    }
 
-    document.querySelectorAll('input[name="plot_loan"]').forEach(r => r.onchange = (e) => {
-        document.getElementById('plot_loan_amount_section').style.display = e.target.value === 'yes' ? 'block' : 'none';
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+        el.addEventListener('input', updateLivePreviews);
     });
 
-    document.getElementById("brokerageSelect").onchange = function() {
-        document.getElementById('brokerageSection').style.display = this.value === "Yes" ? "block" : "none";
+    // ✅ loan_on_property toggle
+    document.querySelectorAll('input[name="loan_on_property"]').forEach(r => {
+        r.onchange = (e) => {
+            document.getElementById('plot_loan_amount_section').style.display =
+                e.target.value === 'yes' ? 'block' : 'none';
+            if (e.target.value === 'no') document.getElementById('plot_loan_amount').value = "";
+        };
+    });
+
+    document.getElementById('brokerageSelect').onchange = function () {
+        document.getElementById('brokerageSection').style.display =
+            this.value === 'Yes' ? 'block' : 'none';
     };
 
-    const uploadArea = document.getElementById('uploadArea');
-    const imageInput = document.getElementById('imageInput');
+    // New image upload preview
+    const uploadArea   = document.getElementById('uploadArea');
+    const imageInput   = document.getElementById('imageInput');
     const imagePreview = document.getElementById('imagePreview');
 
     uploadArea.onclick = () => imageInput.click();
     imageInput.onchange = () => {
         imagePreview.innerHTML = '';
-        const newFilesCount = imageInput.files.length;
-        const totalCumulative = dbImageCount + newFilesCount;
+        const files = Array.from(imageInput.files);
+        const existingCount = document.querySelectorAll('#existingImagesContainer .existing-img-wrap').length;
+        const totalAllowed  = 10 - existingCount;
 
-        if(totalCumulative > 10) {
+        if (files.length > totalAllowed) {
             Swal.fire({
-                icon: 'error',
-                title: 'Allocation Overflow',
-                text: `Database currently contains ${dbImageCount} images. You can append a maximum of ${10 - dbImageCount} new images.`
+                icon: 'warning',
+                title: 'Image Limit',
+                text: `You already have ${existingCount} image(s). You can only add ${totalAllowed} more.`
             });
             imageInput.value = "";
+            document.getElementById('imageCounter').innerText = "New: 0 selected";
             return;
         }
 
-        document.getElementById('imageCounter').innerText = `Appended: +${newFilesCount} (Total: ${totalCumulative}/10)`;
-
-        Array.from(imageInput.files).forEach(file => {
+        document.getElementById('imageCounter').innerText = `New: ${files.length} selected`;
+        files.forEach(file => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const div = document.createElement('div');
-                div.style = "width:75px; height:75px; border-radius:6px; overflow:hidden; border:2px dashed #ff9800; position:relative;";
-                div.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;"><span style="position:absolute; bottom:0; width:100%; font-size:9px; background:rgba(255,152,0,0.9); color:#000; text-align:center; font-weight:700;">Pending</span>`;
+                div.style = "width:85px;height:85px;border-radius:8px;overflow:hidden;border:2px solid #667eea;";
+                div.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
                 imagePreview.appendChild(div);
             };
             reader.readAsDataURL(file);
         });
     };
 
-    // Advanced Diff UI Confirmation logic implementation block
-    document.getElementById('plotForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (!validateStepSequence(4)) return;
-
-        let totalChanges = [];
-        document.querySelectorAll('.track-change').forEach(el => {
-            if(el.type === 'radio' && !el.checked) return;
-            let orig = el.getAttribute('data-original');
-            let current = el.value;
-            if(current !== orig) {
-                let nameLabel = el.name.replace('plot_', '').replace('_', ' ').toUpperCase();
-                totalChanges.push(`<b>${nameLabel}:</b> <span class="text-danger">${orig || '[Blank]'}</span> → <span class="text-success">${current}</span>`);
-            }
-        });
-
-        if(imageInput.files.length > 0) {
-            totalChanges.push(`<b>GALLERY:</b> Appending ${imageInput.files.length} new structural photos`);
-        }
-
-        let confirmationHtml = "Are you sure you want to finalize these changes?";
-        if(totalChanges.length > 0) {
-            confirmationHtml = '<div class="text-start p-2 bg-light rounded style="font-size:13px;"><p class="mb-2 font-weight-bold text-center text-warning">MODIFICATION DELTA DETECTED:</p>' + totalChanges.join('<br>') + '</div><p class="mt-3 text-center">Commit adjustments to permanent ledger?</p>';
-        }
-
+    // Delete existing image via AJAX
+    function deleteImage(imgId, btn) {
         Swal.fire({
-            title: 'Verify Modified Audit?',
-            html: confirmationHtml,
+            title: 'Delete this image?',
+            text: 'This cannot be undone.',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#2c3e50',
-            cancelButtonColor: '#cbd5e0',
-            confirmButtonText: 'Yes, Save Changes!'
-        }).then((result) => {
+            confirmButtonColor: '#e74c3c',
+            cancelButtonColor: '#adb5bd',
+            confirmButtonText: 'Yes, delete it!'
+        }).then(result => {
             if (result.isConfirmed) {
-                const submitBtn = document.getElementById('submitBtn');
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating Ledger Record...';
-                submitBtn.disabled = true;
-
-                let formData = new FormData(this);
-                fetch(this.getAttribute('action'), { method: 'POST', body: formData })
+                fetch(`/plot-image-delete/${imgId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
                 .then(res => res.json())
                 .then(data => {
-                    if(data.status === 'success') {
-                        Swal.fire({ icon: 'success', title: 'Updated!', text: data.message }).then(() => {
-                            window.location.reload();
-                        });
+                    if (data.status === 'success') {
+                        document.getElementById(`imgWrap_${imgId}`).remove();
+                        Swal.fire({ icon: 'success', title: 'Deleted', timer: 1200, showConfirmButton: false });
                     } else {
-                        Swal.fire({ icon: 'error', title: 'Execution Failed', text: data.message });
-                        submitBtn.innerHTML = 'Save Ledger Updates <i class="fas fa-check-double ml-2"></i>';
-                        submitBtn.disabled = false;
+                        Swal.fire({ icon: 'error', title: 'Failed', text: data.message });
                     }
-                }).catch(() => {
-                    Swal.fire({ icon: 'error', title: 'Server Error', text: 'Error communication channel broker broken.' });
-                    submitBtn.innerHTML = 'Save Ledger Updates <i class="fas fa-check-double ml-2"></i>';
-                    submitBtn.disabled = false;
                 });
             }
         });
-    });
+    }
 
-    // Run preview update during initialization step
-    window.onload = updateLivePreviews;
+    // ✅ Submit with confirmation alert
+    document.getElementById('plotEditForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (!validateStepSequence(4)) return;
+
+        Swal.fire({
+            title: 'Confirm Update?',
+            text: "Are you sure you want to save these changes to this listing?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#f5576c',
+            cancelButtonColor: '#adb5bd',
+            confirmButtonText: 'Yes, Update!'
+        }).then(result => {
+            if (result.isConfirmed) {
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving Changes...';
+                submitBtn.disabled = true;
+
+                fetch(this.getAttribute('action'), { method: 'POST', body: new FormData(this) })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire({ icon: 'success', title: 'Updated!', text: data.message })
+                                .then(() => window.location.reload());
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Error', text: data.message });
+                            submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Update Property Listing';
+                            submitBtn.disabled = false;
+                        }
+                    })
+                    .catch(() => {
+                        Swal.fire({ icon: 'error', title: 'Server Error', text: 'Could not reach the server.' });
+                        submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Update Property Listing';
+                        submitBtn.disabled = false;
+                    });
+            }
+        });
+    });
 </script>

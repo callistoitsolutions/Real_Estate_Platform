@@ -339,145 +339,137 @@
     <div class="properties-section">
 
         <!-- ═══ SEARCH FORM ═══ -->
-        <form method="GET" action="" class="advanced-search-bar" id="liveSearchForm">
+      <form method="GET" action="" class="advanced-search-bar" id="liveSearchForm">
 
-            <!-- Text search -->
-            <div class="search-group wide">
-                <label><i class="fas fa-search"></i> Search Properties</label>
-                <input type="text" name="search" id="searchInput" value="{{ search_query }}"
-                       class="filter-input" placeholder="Title, city, locality, owner name…">
+    <div class="search-group wide">
+        <label><i class="fas fa-search"></i> Search Properties</label>
+        <input type="text" name="search" id="searchInput" value="{{ search_query }}"
+               class="filter-input" placeholder="Title, city, locality, owner name…">
+    </div>
+
+    <div class="search-group">
+        <label>Property Type</label>
+        <select name="property_type" class="filter-input auto-submit-select">
+            <option value="All Types">All Types</option>
+            {% for pt in unique_property_types %}
+                <option value="{{ pt }}" {% if prop_type_query == pt %}selected{% endif %}>{{ pt }}</option>
+            {% endfor %}
+            {% if prop_type_query and prop_type_query != 'All Types' and prop_type_query not in unique_property_types %}
+                <option value="{{ prop_type_query }}" selected>{{ prop_type_query }}</option>
+            {% endif %}
+        </select>
+    </div>
+
+    <div class="search-group">
+        <label>City</label>
+        <select name="city" class="filter-input auto-submit-select">
+            <option value="All Cities">All Cities</option>
+            {% for city in unique_cities %}
+                <option value="{{ city }}" {% if city_query == city %}selected{% endif %}>{{ city }}</option>
+            {% endfor %}
+            {% if city_query and city_query != 'All Cities' and city_query not in unique_cities %}
+                <option value="{{ city_query }}" selected>{{ city_query }}</option>
+            {% endif %}
+        </select>
+    </div>
+
+    <div class="search-group">
+        <label>Zone Type</label>
+        <select name="zone_type" class="filter-input auto-submit-select">
+            <option value="All Zones">All Zones</option>
+            {% for zone in unique_zones %}
+                <option value="{{ zone }}" {% if zone_query == zone %}selected{% endif %}>{{ zone }}</option>
+            {% endfor %}
+            {% if zone_query and zone_query != 'All Zones' and zone_query not in unique_zones %}
+                <option value="{{ zone_query }}" selected>{{ zone_query }}</option>
+            {% endif %}
+        </select>
+    </div>
+
+    <div class="search-group">
+        <label>Possession</label>
+        <select name="possession" class="filter-input auto-submit-select">
+            <option value="All Status">All Status</option>
+            {% for p in unique_possession %}
+                <option value="{{ p }}" {% if possession_query == p %}selected{% endif %}>{{ p }}</option>
+            {% endfor %}
+            {% if possession_query and possession_query != 'All Status' and possession_query not in unique_possession %}
+                <option value="{{ possession_query }}" selected>{{ possession_query }}</option>
+            {% endif %}
+        </select>
+    </div>
+
+    <div class="search-group">
+        <label>Listed By</label>
+        <select name="listed_by" class="filter-input auto-submit-select">
+            <option value="All Roles">All Roles</option>
+            {% for role in unique_roles %}
+                <option value="{{ role }}" {% if listed_by_query == role %}selected{% endif %}>{{ role }}</option>
+            {% endfor %}
+            {% if listed_by_query and listed_by_query != 'All Roles' and listed_by_query not in unique_roles %}
+                <option value="{{ listed_by_query }}" selected>{{ listed_by_query }}</option>
+            {% endif %}
+        </select>
+    </div>
+
+    <div class="search-group">
+        <label>Budget</label>
+        <select name="budget" class="filter-input auto-submit-select">
+            <option value="All Budgets">All Budgets</option>
+            {% for bucket in dynamic_budgets %}
+                <option value="{{ bucket.value }}" {% if budget_query == bucket.value %}selected{% endif %}>
+                    {{ bucket.label }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div style="width:100%; border-top:1px dashed #e5e7eb; padding-top:14px; margin-top:4px;">
+        <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">
+            <i class="fas fa-calendar-alt"></i> Date Range Filter (Created At)
+        </div>
+        
+        <div id="dateValidationError" style="display:none; color:#ef4444; font-size:12px; font-weight:600; margin-bottom:8px;">
+            <i class="fas fa-exclamation-circle"></i> "To Date" cannot be earlier than "From Date".
+        </div>
+
+        <div class="date-filter-row" style="display:flex; gap:15px; align-items:flex-end; flex-wrap:wrap;">
+            <div class="date-filter-group">
+                <label>From Date</label>
+                <input type="date" name="from_date" value="{{ from_date }}" class="date-input" id="fromDateFilter">
             </div>
-
-            <!-- Property Type -->
-            <div class="search-group">
-                <label>Property Type</label>
-                <select name="property_type" class="filter-input s2-dropdown" data-default="All Types" data-placeholder="All Types">
-                    <option value="All Types">All Types</option>
-                    {% for pt in unique_property_types %}
-                        <option value="{{ pt }}" {% if prop_type_query == pt %}selected{% endif %}>{{ pt }}</option>
-                    {% endfor %}
-                    {% if prop_type_query and prop_type_query != 'All Types' and prop_type_query not in unique_property_types %}
-                        <option value="{{ prop_type_query }}" selected>{{ prop_type_query }}</option>
-                    {% endif %}
-                </select>
+            <div class="date-filter-group">
+                <label>To Date</label>
+                <input type="date" name="to_date" value="{{ to_date }}" class="date-input" id="toDateFilter">
             </div>
-
-            <!-- City -->
-            <div class="search-group">
-                <label>City</label>
-                <select name="city" class="filter-input s2-dropdown" data-default="All Cities" data-placeholder="All Cities">
-                    <option value="All Cities">All Cities</option>
-                    {% for city in unique_cities %}
-                        <option value="{{ city }}" {% if city_query == city %}selected{% endif %}>{{ city }}</option>
-                    {% endfor %}
-                    {% if city_query and city_query != 'All Cities' and city_query not in unique_cities %}
-                        <option value="{{ city_query }}" selected>{{ city_query }}</option>
-                    {% endif %}
-                </select>
-            </div>
-
-            <!-- Zone Type -->
-            <div class="search-group">
-                <label>Zone Type</label>
-                <select name="zone_type" class="filter-input s2-dropdown" data-default="All Zones" data-placeholder="All Zones">
-                    <option value="All Zones">All Zones</option>
-                    {% for zone in unique_zones %}
-                        <option value="{{ zone }}" {% if zone_query == zone %}selected{% endif %}>{{ zone }}</option>
-                    {% endfor %}
-                    {% if zone_query and zone_query != 'All Zones' and zone_query not in unique_zones %}
-                        <option value="{{ zone_query }}" selected>{{ zone_query }}</option>
-                    {% endif %}
-                </select>
-            </div>
-
-            <!-- Possession -->
-            <div class="search-group">
-                <label>Possession</label>
-                <select name="possession" class="filter-input s2-dropdown" data-default="All Status" data-placeholder="All Status">
-                    <option value="All Status">All Status</option>
-                    {% for p in unique_possession %}
-                        <option value="{{ p }}" {% if possession_query == p %}selected{% endif %}>{{ p }}</option>
-                    {% endfor %}
-                    {% if possession_query and possession_query != 'All Status' and possession_query not in unique_possession %}
-                        <option value="{{ possession_query }}" selected>{{ possession_query }}</option>
-                    {% endif %}
-                </select>
-            </div>
-
-            <!-- Listed By -->
-            <div class="search-group">
-                <label>Listed By</label>
-                <select name="listed_by" class="filter-input s2-dropdown" data-default="All Roles" data-placeholder="All Roles">
-                    <option value="All Roles">All Roles</option>
-                    {% for role in unique_roles %}
-                        <option value="{{ role }}" {% if listed_by_query == role %}selected{% endif %}>{{ role }}</option>
-                    {% endfor %}
-                    {% if listed_by_query and listed_by_query != 'All Roles' and listed_by_query not in unique_roles %}
-                        <option value="{{ listed_by_query }}" selected>{{ listed_by_query }}</option>
-                    {% endif %}
-                </select>
-            </div>
-
-            <!-- Budget -->
-            <div class="search-group">
-                <label>Budget</label>
-                <select name="budget" class="filter-input s2-dropdown" data-default="All Budgets" data-placeholder="All Budgets">
-                    <option value="All Budgets">All Budgets</option>
-                    <option value="under_25k"  {% if budget_query == 'under_25k'  %}selected{% endif %}>Under ₹25,000</option>
-                    <option value="25k_1L"     {% if budget_query == '25k_1L'     %}selected{% endif %}>₹25,000 – ₹1 Lakh</option>
-                    <option value="1L_5L"      {% if budget_query == '1L_5L'      %}selected{% endif %}>₹1 Lakh – ₹5 Lakhs</option>
-                    <option value="above_5L"   {% if budget_query == 'above_5L'   %}selected{% endif %}>Above ₹5 Lakhs</option>
-                </select>
-            </div>
-
-            <!-- ── DATE RANGE FILTER ── -->
-            <div style="width:100%; border-top:1px dashed #e5e7eb; padding-top:14px; margin-top:4px;">
-                <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">
-                    <i class="fas fa-calendar-alt"></i> Date Range Filter (Created At)
-                </div>
-                <div class="date-filter-row">
-                    <div class="date-filter-group">
-                        <label>From Date</label>
-                        <input type="date" name="from_date" value="{{ from_date }}" class="date-input" id="fromDateFilter">
-                    </div>
-                    <div class="date-filter-group">
-                        <label>To Date</label>
-                        <input type="date" name="to_date" value="{{ to_date }}" class="date-input" id="toDateFilter">
-                    </div>
-                    <div class="date-filter-group" style="flex:0;min-width:auto;justify-content:flex-end;">
-                        <label>&nbsp;</label>
-                        {% if from_date or to_date %}
-                        <button type="button" onclick="clearDates()" class="btn-reset" style="white-space:nowrap">
-                            <i class="fas fa-times"></i> Clear Dates
-                        </button>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Actions row -->
-            <div style="width:100%; display:flex; flex-direction:column; gap:12px; margin-top:10px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:10px;">
-                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                        <div class="results-badge">
-                            <i class="fas fa-filter"></i> Showing
-                            <strong style="margin:0 4px;font-size:15px;color:#1d4ed8;">{{ filtered_count }}</strong>
-                            of {{ total_count }} properties
-                        </div>
-                        <a href="{% url 'commercial_list' %}" class="btn-reset"><i class="fas fa-times"></i> Reset All</a>
-                    </div>
-                    
-                    
-
-                </div>
-
             
+            <div class="date-filter-group" style="display:flex; gap:8px; width:50px;">
+                <button type="button" onclick="validateAndSubmitDates()" class="btn-submit-dates" style="white-space:nowrap; background-color:#1d4ed8; color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:600; cursor:pointer;">
+                    <i class="fas fa-search"></i> Apply Date Filter
+                </button>
+                
+                {% if from_date or to_date %}
+                <button type="button" onclick="clearDates()" class="btn-reset" style="white-space:nowrap">
+                    <i class="fas fa-times"></i> Clear Dates
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
-
-
-
- 
-        </form>
+    <div style="width:100%; display:flex; flex-direction:column; gap:12px; margin-top:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <div class="results-badge">
+                    <i class="fas fa-filter"></i> Showing
+                    <strong style="margin:0 4px;font-size:15px;color:#1d4ed8;">{{ filtered_count }}</strong>
+                    of {{ total_count }} properties
+                </div>
+                <a href="{% url 'commercial_list' %}" class="btn-reset"><i class="fas fa-times"></i> Reset All</a>
+            </div>
+        </div>
+    </div>
+</form>
 
         <!-- ═══ TABLE ═══ -->
        <div class="table-responsive">
@@ -891,102 +883,83 @@
 
     <script>
     // ─────────────────────────────────────────────────
-    // 1. SELECT2 — self-executing retry, fires the moment
-    //    both jQuery AND select2 plugin are available.
-    //    No DOMContentLoaded race condition.
+    var form = document.getElementById('liveSearchForm');
+    var searchInput = document.getElementById('searchInput');
+
     // ─────────────────────────────────────────────────
-    (function waitForSelect2() {
-        if (typeof window.jQuery === 'undefined' || typeof window.jQuery.fn.select2 === 'undefined') {
-            setTimeout(waitForSelect2, 30);   // retry every 30ms
-            return;
-        }
-        var $ = window.jQuery;
-        var form = document.getElementById('liveSearchForm');
-
-        $('.s2-dropdown').each(function () {
-            // destroy existing instance first (prevents double-init errors)
-            if ($(this).hasClass('select2-hidden-accessible')) {
-                $(this).select2('destroy');
-            }
-            $(this).select2({
-                tags:                    true,    // allows typing a value not in list
-                width:                   '100%',
-                placeholder:             $(this).data('placeholder') || 'Select or type…',
-                allowClear:              true,
-                minimumResultsForSearch: 0,      // search box always visible
-            });
-        });
-
-        // Submit form instantly on any selection / clear
-        $(document).on('select2:select select2:unselect select2:clear', '.s2-dropdown', function () {
+    // 1. DYNAMIC AUTO-SEARCH ON SELECTION CHANGES
+    // ─────────────────────────────────────────────────
+    document.querySelectorAll('.auto-submit-select').forEach(function(selectElement) {
+        selectElement.addEventListener('change', function() {
             form.submit();
         });
-    })();
+    });
 
     // ─────────────────────────────────────────────────
-    // 2. LIVE SEARCH — fires 250ms after user stops typing.
-    //    Works on every keystroke; no Enter key needed.
+    // 2. LIVE TEXT FIELD SEARCH (DEBOUNCED AT 250ms)
     // ─────────────────────────────────────────────────
     var typingTimer;
-    var searchInput = document.getElementById('searchInput');
-    var form        = document.getElementById('liveSearchForm');
-
     if (searchInput) {
-        // 'input' fires on every character (paste, cut, voice, etc.)
         searchInput.addEventListener('input', function () {
             clearTimeout(typingTimer);
             typingTimer = setTimeout(function () { form.submit(); }, 250);
         });
-        // Prevent Enter from double-submitting
+
         searchInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') { e.preventDefault(); clearTimeout(typingTimer); form.submit(); }
+            if (e.key === 'Enter') { 
+                e.preventDefault(); 
+                clearTimeout(typingTimer); 
+                form.submit(); 
+            }
             else { clearTimeout(typingTimer); }
         });
-        // Keep cursor at end on page reload with prefilled value
+
         var len = searchInput.value.length;
         if (len) { searchInput.focus(); searchInput.setSelectionRange(len, len); }
     }
 
     // ─────────────────────────────────────────────────
-    // DATE INPUTS — submit instantly when a date is picked
+    // 3. DATE RANGE SUBMIT VALIDATION CHECK ENGINE
     // ─────────────────────────────────────────────────
-    ['fromDateFilter', 'toDateFilter'].forEach(function(id) {
-        var el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('change', function () { form.submit(); });
-            // 'input' catches keyboard edits in some browsers
-            el.addEventListener('input',  function () { form.submit(); });
+    function validateAndSubmitDates() {
+        var fromDateVal = document.getElementById('fromDateFilter').value;
+        var toDateVal = document.getElementById('toDateFilter').value;
+        var errorBanner = document.getElementById('dateValidationError');
+
+        // Hide old error alerts
+        errorBanner.style.display = 'none';
+
+        if (fromDateVal && toDateVal) {
+            var d1 = new Date(fromDateVal);
+            var d2 = new Date(toDateVal);
+
+            // Validation logic: block submission if chronological sequence is inverted
+            if (d1 > d2) {
+                errorBanner.style.display = 'block';
+                return false;
+            }
         }
-    });
-    // ─────────────────────────────────────────────────
+        form.submit();
+    }
+
+    function clearDates() {
+        var f = document.getElementById('fromDateFilter');
+        var t = document.getElementById('toDateFilter');
+        if (f) f.value = '';
+        if (t) t.value = '';
+        form.submit();
+    }
+
     function clearFilterSelect(selectName, defaultVal) {
         var sel = document.querySelector('select[name="' + selectName + '"]');
         if (!sel) return;
-        if (typeof window.jQuery !== 'undefined' && window.jQuery(sel).hasClass('select2-hidden-accessible')) {
-            window.jQuery(sel).val(defaultVal).trigger('change');
-        } else {
-            sel.value = defaultVal;
-        }
+        sel.value = defaultVal;
         form.submit();
     }
 
     function clearFilterText() {
         if (searchInput) { searchInput.value = ''; form.submit(); }
     }
-
-    function clearDate(fieldName) {
-        var inp = document.querySelector('input[name="' + fieldName + '"]');
-        if (inp) { inp.value = ''; form.submit(); }
-    }
-
-    function clearDates() {
-        var f = document.querySelector('input[name="from_date"]');
-        var t = document.querySelector('input[name="to_date"]');
-        if (f) f.value = '';
-        if (t) t.value = '';
-        form.submit();
-    }
-
     // ─────────────────────────────────────────────────
     // 4.  CHARTS  — real data from Django context (Fortified)
     // ─────────────────────────────────────────────────

@@ -1,724 +1,402 @@
-{% include "admin_user/admin_header.html" %}
 {% load static %}
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-
-<style>
-    :root {
-        --primary: #16a34a;
-        --primary-light: #dcfce7;
-        --primary-dark: #15803d;
-        --dark: #111827;
-        --mid: #374151;
-        --muted: #6b7280;
-        --border: #e5e7eb;
-        --surface: #f9fafb;
-        --white: #ffffff;
-        --success: #10b981;
-        --danger: #ef4444;
-        --radius-sm: 8px;
-        --radius-md: 12px;
-        --radius-lg: 16px;
-        --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-    }
-    * { box-sizing: border-box; }
-    body, .main-content { font-family: 'DM Sans', sans-serif; background: #f3f4f8; color: var(--dark); }
-
-    /* TOPBAR */
-    .prop-topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 0.8rem; color: var(--muted); }
-    .prop-topbar a { color: var(--primary); text-decoration: none; }
-    .prop-id-badge { background: #dcfce7; color: var(--primary-dark); font-weight: 700; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; border: 1px solid #bbf7d0; font-family: monospace; }
-    .prop-cert-ok   { background: #ecfdf5; color: #065f46; font-weight: 600; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; border: 1px solid #a7f3d0; }
-    .prop-cert-warn { background: #fef2f2; color: #991b1b; font-weight: 600; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; border: 1px solid #fca5a5; }
-
-    /* HERO */
-    .prop-hero-header { background: var(--white); padding: 20px 0 0; border-bottom: 1px solid var(--border); }
-    .prop-hero-header h1 { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--dark); margin: 0 0 6px; line-height: 1.3; }
-    .prop-hero-location { color: var(--muted); font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
-    .prop-hero-location i { color: var(--primary); }
-    .prop-hero-price-tag { font-size: 2rem; font-weight: 700; color: var(--dark); line-height: 1; }
-    .prop-hero-price-tag span { font-size: 0.9rem; color: var(--muted); font-weight: 400; }
-
-    .prop-quick-stats { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 0; }
-    .quick-stat-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); padding: 5px 11px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; color: var(--mid); }
-    .quick-stat-chip i { color: var(--primary); font-size: 0.72rem; }
-
-    /* GALLERY */
-    .prop-gallery-grid { display: grid; grid-template-columns: 1.65fr 1fr; grid-template-rows: 1fr 1fr; gap: 6px; height: 420px; overflow: hidden; background: var(--dark); }
-    .prop-gallery-main { grid-row: 1 / 3; position: relative; overflow: hidden; background: #0d1117; cursor: pointer; }
-    .prop-gallery-thumb { position: relative; overflow: hidden; background: #1e2733; cursor: pointer; }
-    .prop-gallery-thumb img, .prop-gallery-main .walkthrough-slide img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
-    .prop-gallery-thumb:hover img { transform: scale(1.05); }
-
-    .walkthrough-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; display: none; }
-    .walkthrough-slide.active { display: block; opacity: 1; }
-
-    .gallery-hud { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px 16px 12px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 10; }
-    .btn-play-pause { width: 34px; height: 34px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.75rem; backdrop-filter: blur(4px); }
-    .gallery-timer { color: rgba(255,255,255,0.7); font-size: 0.72rem; font-family: monospace; }
-    .gallery-badge { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.8px; padding: 4px 9px; border-radius: 4px; text-transform: uppercase; backdrop-filter: blur(4px); }
-
-    .gallery-no-image-bg { position: absolute; inset: 0; background: linear-gradient(135deg, #14532d, #16a34a, #166534); filter: blur(12px); transform: scale(1.2); }
-    .gallery-no-image-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.38); }
-    .gallery-no-image-icon { width: 140px; height: 140px; border-radius: 50%; background: rgba(255,255,255,0.12); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; margin: auto; }
-
-    .thumb-more-overlay { position: absolute; inset: 0; background: rgba(17,24,39,0.7); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .thumb-more-overlay span { color: white; font-size: 1.2rem; font-weight: 700; }
-    .thumb-more-overlay small { display: block; color: rgba(255,255,255,0.6); font-size: 0.7rem; margin-top: 2px; }
-
-    .prop-image-strip { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: thin; padding-bottom: 2px; }
-    .strip-thumb { flex-shrink: 0; width: 64px; height: 46px; border-radius: 4px; overflow: hidden; cursor: pointer; border: 2px solid transparent; opacity: 0.65; transition: all 0.2s; }
-    .strip-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .strip-thumb.active-thumb { border-color: var(--primary); opacity: 1; }
-
-    /* STICKY NAV */
-    .prop-sticky-nav { position: sticky; top: 68px; background: var(--white); border-bottom: 2px solid var(--border); z-index: 990; }
-    .prop-sticky-nav-inner { display: flex; gap: 0; overflow-x: auto; scrollbar-width: none; }
-    .prop-sticky-nav-inner::-webkit-scrollbar { display: none; }
-    .prop-nav-link { color: var(--muted); font-size: 0.8rem; font-weight: 600; text-decoration: none; padding: 14px 18px; border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
-    .prop-nav-link i { font-size: 0.75rem; }
-    .prop-nav-link:hover { color: var(--primary); background: var(--primary-light); }
-    .prop-nav-link.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
-
-    /* LAYOUT */
-    .prop-page-body { padding: 28px 0 60px; }
-    .prop-layout-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
-    @media (max-width: 1100px) {
-        .prop-layout-grid { grid-template-columns: 1fr; }
-        .prop-gallery-grid { grid-template-columns: 1fr; height: 260px; }
-        .prop-gallery-thumb { display: none; }
-        .prop-gallery-main { grid-row: 1; }
-    }
-
-    /* SECTION CARDS */
-    .prop-section { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 20px; scroll-margin-top: 130px; box-shadow: var(--shadow-sm); }
-    .prop-section-title { font-size: 1rem; font-weight: 700; color: var(--dark); margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-    .prop-section-title .section-icon { width: 32px; height: 32px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 0.8rem; flex-shrink: 0; }
-
-    .sub-section-heading { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 7px 12px; margin: 20px 0 12px; display: flex; align-items: center; gap: 7px; }
-    .sub-section-heading:first-child { margin-top: 0; }
-    .sub-section-heading i { color: var(--primary); }
-
-    /* SPEC GRID */
-    .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
-    .spec-item { padding: 11px 12px; border-bottom: 1px solid #f3f4f6; display: flex; flex-direction: column; gap: 3px; }
-    .spec-item:nth-child(odd) { border-right: 1px solid #f3f4f6; }
-    .spec-item:last-child, .spec-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
-    .spec-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
-    .spec-value { font-size: 0.88rem; font-weight: 600; color: var(--dark); }
-    .spec-full { grid-column: 1 / -1; border-right: none !important; }
-    .spec-item.highlight-price { background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 8px; border: 1px solid #bbf7d0 !important; padding: 14px; }
-    .spec-item.highlight-price .spec-label { color: var(--primary-dark); }
-    .spec-item.highlight-price .spec-value { font-size: 1.1rem; color: var(--primary-dark); }
-
-    .status-ok  { color: var(--success); font-weight: 600; }
-    .status-no  { color: var(--danger); font-weight: 600; }
-    .badge-dispute { background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:12px; font-size:0.72rem; font-weight:700; }
-    .badge-clear   { background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:12px; font-size:0.72rem; font-weight:700; }
-
-    .address-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; font-size: 0.85rem; color: var(--mid); line-height: 1.6; border-left: 3px solid var(--primary); }
-
-    .doc-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: #fee2e2; color: #991b1b; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: background 0.2s; }
-    .doc-link:hover { background: #fca5a5; color: #7f1d1d; }
-    .vid-link { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: #eff6ff; color: #1d4ed8; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.85rem; }
-
-    /* FAQ */
-    .prop-faq .accordion-item { border: 1px solid var(--border); border-radius: var(--radius-sm) !important; margin-bottom: 10px; overflow: hidden; }
-    .prop-faq .accordion-button { font-weight: 600; font-size: 0.88rem; color: var(--dark); background: var(--white); padding: 14px 16px; box-shadow: none; }
-    .prop-faq .accordion-button:not(.collapsed) { background: var(--primary-light); color: var(--primary-dark); border-bottom: 1px solid #bbf7d0; }
-    .prop-faq .accordion-body { font-size: 0.85rem; line-height: 1.75; color: var(--mid); background: var(--white); padding: 14px 16px; }
-
-    /* AUDIT */
-    .audit-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 20px; scroll-margin-top: 130px; }
-
-    /* SIDEBAR */
-    .prop-sidebar { position: sticky; top: 130px; display: flex; flex-direction: column; gap: 16px; }
-    .sidebar-price-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
-    .sidebar-price-header { background: linear-gradient(135deg, #15803d, #16a34a); padding: 20px 20px 16px; color: white; }
-    .sidebar-price-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.8; font-weight: 600; }
-    .sidebar-price-amount { font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin: 4px 0 0; }
-    .sidebar-price-amount span { font-size: 0.85rem; opacity: 0.7; font-weight: 400; }
-    .sidebar-price-body { padding: 16px 20px; }
-    .sidebar-mini-stat { text-align: center; padding: 10px 0; }
-    .sidebar-mini-stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; }
-    .sidebar-mini-stat-val { font-size: 0.95rem; font-weight: 700; color: var(--dark); margin-top: 3px; }
-
-    .sidebar-owner-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); }
-    .owner-card-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-    .owner-avatar { width: 46px; height: 46px; background: linear-gradient(135deg, var(--primary), #4ade80); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; font-weight: 700; flex-shrink: 0; }
-    .owner-name { font-size: 0.95rem; font-weight: 700; color: var(--dark); }
-    .owner-email { font-size: 0.75rem; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .owner-info-row { display: flex; align-items: flex-start; gap: 10px; font-size: 0.82rem; color: var(--mid); padding: 10px 0; border-bottom: 1px solid #f3f4f6; }
-    .owner-info-row:last-of-type { border-bottom: none; }
-    .owner-info-row > i { color: var(--primary); font-size: 0.75rem; margin-top: 3px; flex-shrink: 0; }
-    .owner-phone-masked { font-weight: 600; color: var(--dark); font-family: monospace; letter-spacing: 1px; }
-    .btn-reveal-phone { background: var(--primary-light); color: var(--primary-dark); border: 1px solid #bbf7d0; border-radius: 4px; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; cursor: pointer; }
-    .btn-call-primary { display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #15803d, #16a34a); color: white; border: none; padding: 11px 16px; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.85rem; width: 100%; margin-top: 14px; text-decoration: none; transition: opacity 0.2s; }
-    .btn-call-primary:hover { opacity: 0.9; color: white; }
-
-    .sidebar-status-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; box-shadow: var(--shadow-sm); }
-    .status-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 0.82rem; }
-    .status-row:last-child { border-bottom: none; }
-    .status-row-label { color: var(--muted); font-weight: 500; }
-    .status-pill-ok  { background:#d1fae5; color:#065f46; padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; }
-    .status-pill-bad { background:#fee2e2; color:#991b1b; padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; }
-    .status-pill-neu { background:#f3f4f6; color:#374151; padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; }
-</style>
-
-<!-- TOPBAR -->
-<div class="prop-topbar">
-    <div class="container-fluid px-4">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <a href="{% url 'plot_resale_list' %}"><i class="fas fa-home me-1"></i>Dashboard</a>
-                <i class="fas fa-chevron-right" style="font-size:0.65rem;"></i>
-                <a href="{% url 'plot_resale_list' %}">Plot Properties</a>
-                <i class="fas fa-chevron-right" style="font-size:0.65rem;"></i>
-                <span>{{ prop.plot_title|truncatechars:40 }}</span>
-                <span class="prop-id-badge">{{ prop.plot_property_id }}</span>
-                {% if prop.encumbrance_cert %}
-                    <span class="prop-cert-ok"><i class="fas fa-circle-check"></i> Encumbrance Cert Available</span>
-                {% else %}
-                    <span class="prop-cert-warn"><i class="fas fa-triangle-exclamation"></i> No Encumbrance Cert</span>
-                {% endif %}
-            </div>
-            <a href="{% url 'plot_resale_list' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600;">
-                <i class="fas fa-arrow-left"></i> Back to Listing
-            </a>
-        </div>
-    </div>
-</div>
-
-<!-- HERO -->
-<div class="prop-hero-header">
-    <div class="container-fluid px-4">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
-            <div style="flex:1; min-width:260px;">
-                <h1>{{ prop.plot_title|default:"Plot Property" }}</h1>
-                <div class="prop-hero-location">
-                    <i class="fas fa-location-dot"></i>
-                    {{ prop.plot_locality }}, {{ prop.plot_city }}
-                </div>
-            </div>
-            <div class="text-end">
-                <div class="prop-hero-price-tag">₹{{ prop.plot_price|floatformat:"0"|default:"—" }} <span>Expected Price</span></div>
-                <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">
-                    {{ prop.plot_area|default:"—" }} Sqft &bull; {{ prop.resale_plot_type|default:"Plot"|title }}
-                    {% if prop.price_per_sqft %}&bull; ₹{{ prop.price_per_sqft|floatformat:"0" }}/Sqft{% endif %}
-                </div>
-            </div>
-        </div>
-        <div class="prop-quick-stats">
-            <div class="quick-stat-chip"><i class="fas fa-layer-group"></i> {{ prop.resale_plot_type|default:"Plot"|title }}</div>
-            <div class="quick-stat-chip"><i class="fas fa-ruler-combined"></i> {{ prop.plot_area|default:"—" }} Sqft</div>
-            <div class="quick-stat-chip"><i class="fas fa-calendar-check"></i> {{ prop.available_from|date:"d M Y"|default:"Immediate" }}</div>
-            {% if prop.plot_corner == 'yes' %}<div class="quick-stat-chip"><i class="fas fa-vector-square"></i> Corner Plot</div>{% endif %}
-            {% if prop.plot_fencing == 'yes' %}<div class="quick-stat-chip"><i class="fas fa-border-all"></i> Fencing Done</div>{% endif %}
-            <div class="quick-stat-chip"><i class="fas fa-road"></i> {{ prop.plot_road_facing|default:"—"|title }} Facing</div>
-            {% if prop.plot_authority %}<div class="quick-stat-chip"><i class="fas fa-building-columns"></i> {{ prop.plot_authority }}</div>{% endif %}
-            <div class="quick-stat-chip"><i class="fas fa-file-shield"></i> {{ prop.plot_ownership|default:"—"|title }}</div>
-        </div>
-    </div>
-</div>
-
-<!-- GALLERY -->
-<div style="background:#111827;">
-    <div class="container-fluid px-0">
-        <div class="prop-gallery-grid">
-
-            <div class="prop-gallery-main" id="galMain">
-                {% if prop.images.all %}
-                    {% for img in prop.images.all %}
-                    <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
-                        <img src="{{ img.image.url }}" alt="Plot view {{ forloop.counter }}">
-                    </div>
-                    {% endfor %}
-                    <div class="gallery-hud">
-                        <div class="d-flex align-items-center gap-2">
-                            <button class="btn-play-pause" id="playPauseBtn"><i class="fas fa-pause"></i></button>
-                            <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
-                        </div>
-                        <span class="gallery-badge"><i class="fas fa-play-circle"></i> Plot Walkthrough</span>
-                    </div>
-                {% else %}
-                    <div class="w-100 h-100 position-relative overflow-hidden">
-                        <div class="gallery-no-image-bg"></div>
-                        <div class="gallery-no-image-overlay"></div>
-                        <div class="w-100 h-100 d-flex align-items-center justify-content-center position-relative">
-                            <div class="text-center text-white">
-                                <div class="gallery-no-image-icon"><i class="fas fa-map" style="font-size:60px;"></i></div>
-                                <h2 style="margin-top:20px; font-weight:700;">Plot Property</h2>
-                                <p style="color:rgba(255,255,255,0.8); margin:0;">Property Images Not Available</p>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="prop-gallery-thumb" onclick="setSlide(1)">
-                {% if prop.images.count > 1 %}
-                    <img src="{{ prop.images.all.1.image.url }}" alt="Thumb 2">
-                {% else %}
-                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:linear-gradient(135deg,#14532d,#16a34a);color:white;">
-                        <i class="fas fa-map mb-1"></i><span style="font-size:10px;font-weight:600;">Plot</span>
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="prop-gallery-thumb" onclick="setSlide(2)">
-                {% if prop.images.count > 2 %}
-                    <img src="{{ prop.images.all.2.image.url }}" alt="Thumb 3">
-                    {% if prop.images.count > 3 %}
-                    <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoModal">
-                        <div class="text-center">
-                            <span>+{{ prop.images.count|add:"-3" }}</span>
-                            <small>More Photos</small>
-                        </div>
-                    </div>
-                    {% endif %}
-                {% else %}
-                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:linear-gradient(135deg,#14532d,#16a34a);color:white;">
-                        <i class="fas fa-map mb-1"></i><span style="font-size:10px;font-weight:600;">Plot</span>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    {% if prop.images.all %}
-    <div style="background:#0d1117;padding:8px 16px 12px;">
-        <div class="prop-image-strip" id="imageStrip">
-            {% for img in prop.images.all %}
-            <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}" data-slide="{{ forloop.counter0 }}" onclick="setSlide({{ forloop.counter0 }})">
-                <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-</div>
-
-<!-- STICKY NAV -->
-<div class="prop-sticky-nav">
-    <div class="container-fluid px-4">
-        <div class="prop-sticky-nav-inner">
-            <a class="prop-nav-link active" data-target="overview"       href="#overview"><i class="fas fa-info-circle"></i> Overview</a>
-            <a class="prop-nav-link"        data-target="specifications" href="#specifications"><i class="fas fa-ruler-combined"></i> Plot Specs</a>
-            <a class="prop-nav-link"        data-target="financials"     href="#financials"><i class="fas fa-file-invoice-dollar"></i> Pricing</a>
-            <a class="prop-nav-link"        data-target="media"          href="#media"><i class="fas fa-paperclip"></i> Documents</a>
-            <a class="prop-nav-link"        data-target="location"       href="#location"><i class="fas fa-map-marker-alt"></i> Location</a>
-            <a class="prop-nav-link"        data-target="faqs"           href="#faqs"><i class="fas fa-circle-question"></i> FAQs</a>
-            <a class="prop-nav-link"        data-target="audit"          href="#audit"><i class="fas fa-database"></i> Audit</a>
-        </div>
-    </div>
-</div>
-
-<!-- BODY -->
-<div class="prop-page-body">
-    <div class="container-fluid px-4">
-        <div class="prop-layout-grid">
-
-            <!-- LEFT -->
-            <div>
-
-                <!-- OVERVIEW -->
-                <div class="prop-section" id="overview">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-info-circle"></i></span>
-                        Plot Overview
-                    </div>
-                    <p style="font-size:0.88rem; line-height:1.8; color:#4b5563; white-space:pre-wrap;">{{ prop.property_title|default:"No description available for this plot property." }}</p>
-                </div>
-
-                <!-- PLOT SPECS -->
-                <div class="prop-section" id="specifications">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-ruler-combined"></i></span>
-                        Plot Specifications
-                    </div>
-
-                    <div class="sub-section-heading"><i class="fas fa-layer-group"></i> Core Details</div>
-                    <div class="spec-grid">
-                        <div class="spec-item">
-                            <span class="spec-label">Plot Type</span>
-                            <span class="spec-value">{{ prop.resale_plot_type|default:"—"|title }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Plot Area</span>
-                            <span class="spec-value">{{ prop.plot_area|default:"—" }} Sqft</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Road Facing</span>
-                            <span class="spec-value">{{ prop.plot_road_facing|default:"—"|title }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Available From</span>
-                            <span class="spec-value">{{ prop.available_from|date:"d M Y"|default:"Immediate" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Corner Plot</span>
-                            <span class="spec-value">
-                                {% if prop.plot_corner == 'yes' %}<span class="status-ok"><i class="fas fa-check-circle me-1"></i>Yes</span>{% else %}<span class="status-no"><i class="fas fa-times-circle me-1"></i>No</span>{% endif %}
-                            </span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Fencing Done</span>
-                            <span class="spec-value">
-                                {% if prop.plot_fencing == 'yes' %}<span class="status-ok"><i class="fas fa-check-circle me-1"></i>Yes</span>{% else %}<span class="status-no"><i class="fas fa-times-circle me-1"></i>No</span>{% endif %}
-                            </span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Sanctioning Authority</span>
-                            <span class="spec-value">{{ prop.plot_authority|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Price Per Sqft</span>
-                            <span class="spec-value">{% if prop.price_per_sqft %}₹{{ prop.price_per_sqft|floatformat:"0" }}{% else %}—{% endif %}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PRICING & LEGAL -->
-                <div class="prop-section" id="financials">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-file-invoice-dollar"></i></span>
-                        Pricing & Legal
-                    </div>
-                    <div class="spec-grid">
-                        <div class="spec-item highlight-price spec-full">
-                            <span class="spec-label">Expected Sale Price</span>
-                            <span class="spec-value">₹{{ prop.plot_price|floatformat:"0"|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Ownership Type</span>
-                            <span class="spec-value">{{ prop.plot_ownership|default:"—"|title }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Brokerage</span>
-                            <span class="spec-value">{{ prop.brokerage|default:"No" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Brokerage %</span>
-                            <span class="spec-value">{{ prop.brokerage_percentage|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Loan on Property</span>
-                            <span class="spec-value">
-                                {% if prop.plot_loan == 'yes' %}<span class="status-no fw-bold">Yes</span>{% else %}No{% endif %}
-                            </span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Loan Amount</span>
-                            <span class="spec-value">{% if prop.plot_loan == 'yes' %}₹{{ prop.plot_loan_amount|floatformat:"0" }}{% else %}—{% endif %}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- DOCUMENTS -->
-                <div class="prop-section" id="media">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-paperclip"></i></span>
-                        Documents & Media
-                    </div>
-                    <div class="d-flex gap-3 flex-wrap">
-                        {% if prop.encumbrance_cert %}
-                            <a href="{{ prop.encumbrance_cert.url }}" target="_blank" class="doc-link">
-                                <i class="fas fa-file-pdf"></i> View Encumbrance Certificate
-                            </a>
-                        {% else %}
-                            <span class="text-muted fst-italic" style="font-size:0.85rem;"><i class="fas fa-info-circle me-1"></i>No encumbrance certificate uploaded.</span>
-                        {% endif %}
-                        {% if prop.social_video %}
-                            <a href="{{ prop.social_video.url }}" target="_blank" class="vid-link">
-                                <i class="fas fa-video"></i> Watch Plot Video
-                            </a>
-                        {% else %}
-                            <span class="text-muted fst-italic" style="font-size:0.85rem;"><i class="fas fa-info-circle me-1"></i>No video uploaded.</span>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- LOCATION -->
-                <div class="prop-section" id="location">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-map-marker-alt"></i></span>
-                        Location Details
-                    </div>
-                    <div class="spec-grid">
-                        <div class="spec-item">
-                            <span class="spec-label">City</span>
-                            <span class="spec-value">{{ prop.plot_city|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Locality</span>
-                            <span class="spec-value">{{ prop.plot_locality|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item spec-full">
-                            <span class="spec-label">Complete Address</span>
-                            <span class="spec-value">
-                                <div class="address-box mt-1">{{ prop.plot_address|default:"Address not provided." }}</div>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- FAQs -->
-                <div class="prop-section prop-faq" id="faqs">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-circle-question"></i></span>
-                        Auto-Generated FAQs
-                    </div>
-                    <p style="font-size:0.82rem; color:var(--muted); margin-bottom:16px; margin-top:-8px;">
-                        Dynamically generated based on this plot's specific attributes.
-                    </p>
-                    <div class="accordion" id="faqAccordion">
-                        {% for faq in faqs %}
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#faqC{{ forloop.counter }}" aria-expanded="false">
-                                    {{ faq.question }}
-                                </button>
-                            </h2>
-                            <div id="faqC{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                                <div class="accordion-body">{{ faq.answer }}</div>
-                            </div>
-                        </div>
-                        {% empty %}
-                        <div class="alert alert-light border text-muted" style="font-size:0.85rem;">
-                            <i class="fas fa-info-circle me-2"></i>Not enough property data to generate FAQs.
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- AUDIT -->
-                <div class="audit-section" id="audit">
-                    <div class="prop-section-title" style="border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:16px;">
-                        <span class="section-icon" style="background:#f3f4f6;"><i class="fas fa-database" style="color:var(--muted);"></i></span>
-                        <span style="color:var(--muted);">System Audit Record</span>
-                    </div>
-                    <div class="spec-grid">
-                        <div class="spec-item">
-                            <span class="spec-label">Uploaded By</span>
-                            <span class="spec-value">{{ prop.uploaded_by_name|default:"System" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Uploader Role</span>
-                            <span class="spec-value">{{ prop.uploaded_by_role|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Uploader Email</span>
-                            <span class="spec-value">{{ prop.uploaded_by_email|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Uploader Contact</span>
-                            <span class="spec-value">{{ prop.uploaded_by_contact|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Source File</span>
-                            <span class="spec-value">{{ prop.upload_file_name|default:"Web UI" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Created At</span>
-                            <span class="spec-value">{{ prop.created_at|date:"d M Y, H:i" }}</span>
-                        </div>
-                        <div class="spec-item spec-full">
-                            <span class="spec-label">Last Updated</span>
-                            <span class="spec-value">{{ prop.updated_at|date:"d M Y, H:i" }}</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- SIDEBAR -->
-            <div class="prop-sidebar">
-
-                <!-- Price Card -->
-                <div class="sidebar-price-card">
-                    <div class="sidebar-price-header">
-                        <div class="sidebar-price-label">Expected Sale Price</div>
-                        <div class="sidebar-price-amount">₹{{ prop.plot_price|floatformat:"0"|default:"—" }}</div>
-                    </div>
-                    <div class="sidebar-price-body">
-                        <div class="row g-0" style="border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
-                            <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border);">
-                                <div class="sidebar-mini-stat-label">Area</div>
-                                <div class="sidebar-mini-stat-val">{{ prop.plot_area|default:"—" }} Sqft</div>
-                            </div>
-                            <div class="col-6 sidebar-mini-stat">
-                                <div class="sidebar-mini-stat-label">Per Sqft</div>
-                                <div class="sidebar-mini-stat-val">{% if prop.price_per_sqft %}₹{{ prop.price_per_sqft|floatformat:"0" }}{% else %}—{% endif %}</div>
-                            </div>
-                        </div>
-                        <div class="mt-3 row g-0" style="border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
-                            <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border);">
-                                <div class="sidebar-mini-stat-label">Brokerage</div>
-                                <div class="sidebar-mini-stat-val">{{ prop.brokerage|default:"No" }}</div>
-                            </div>
-                            <div class="col-6 sidebar-mini-stat">
-                                <div class="sidebar-mini-stat-label">Available</div>
-                                <div class="sidebar-mini-stat-val">{{ prop.available_from|date:"M Y"|default:"Now" }}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Status Card -->
-                <div class="sidebar-status-card">
-                    <div class="owner-card-title"><i class="fas fa-shield-halved me-1"></i> Plot Status Overview</div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-vector-square me-1" style="color:var(--primary);"></i> Corner Plot</span>
-                        {% if prop.plot_corner == 'yes' %}<span class="status-pill-ok">Yes</span>{% else %}<span class="status-pill-neu">No</span>{% endif %}
-                    </div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-border-all me-1" style="color:var(--primary);"></i> Fencing Done</span>
-                        {% if prop.plot_fencing == 'yes' %}<span class="status-pill-ok">Yes</span>{% else %}<span class="status-pill-neu">No</span>{% endif %}
-                    </div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-file-contract me-1" style="color:var(--primary);"></i> Encumbrance Cert</span>
-                        {% if prop.encumbrance_cert %}<span class="status-pill-ok">Available</span>{% else %}<span class="status-pill-bad">Missing</span>{% endif %}
-                    </div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-bank me-1" style="color:var(--primary);"></i> Active Loan</span>
-                        {% if prop.plot_loan == 'yes' %}<span class="status-pill-bad">Yes</span>{% else %}<span class="status-pill-ok">No</span>{% endif %}
-                    </div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-road me-1" style="color:var(--primary);"></i> Road Facing</span>
-                        <span class="status-pill-neu">{{ prop.plot_road_facing|default:"—"|title }}</span>
-                    </div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-file-shield me-1" style="color:var(--primary);"></i> Ownership</span>
-                        <span class="status-pill-neu">{{ prop.plot_ownership|default:"—"|title }}</span>
-                    </div>
-                </div>
-
-                <!-- Owner Card -->
-                <div class="sidebar-owner-card">
-                    <div class="owner-card-title"><i class="fas fa-user-tie me-1"></i> Owner / Contact</div>
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <div class="owner-avatar">{{ prop.plot_owner_name|slice:":1"|upper|default:"O" }}</div>
-                        <div style="min-width:0;">
-                            <div class="owner-name">{{ prop.plot_owner_name|default:"Undisclosed" }}</div>
-                            <div class="owner-email"><i class="fas fa-envelope me-1"></i>{{ prop.plot_owner_email|default:"No email" }}</div>
-                        </div>
-                    </div>
-                    <div class="owner-info-row">
-                        <i class="fas fa-phone"></i>
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <span class="owner-phone-masked" id="sidebarPhone" data-phone="{{ prop.plot_owner_contact|default:'' }}">
-                                {% if prop.plot_owner_contact %}
-                                    {{ prop.plot_owner_contact|slice:":2" }}XXXXXX{{ prop.plot_owner_contact|slice:"-2:" }}
-                                {% else %}Not available{% endif %}
-                            </span>
-                            {% if prop.plot_owner_contact %}
-                                <button class="btn-reveal-phone" onclick="revealPhone('sidebarPhone','{{ prop.plot_owner_contact }}')">View Number</button>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <a href="tel:{{ prop.plot_owner_contact }}" class="btn-call-primary">
-                        <i class="fas fa-phone-volume"></i> Call Owner
-                    </a>
-                </div>
-
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- LIGHTBOX MODAL -->
-<div class="modal fade" id="photoModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content" style="background:#0d1117; color:white; border:1px solid #1e2733;">
-            <div class="modal-header border-0" style="border-bottom:1px solid #1e2733 !important;">
-                <h5 class="modal-title fw-bold" style="font-size:0.95rem;">
-                    <i class="fas fa-images me-2 text-success"></i> Plot Photo Gallery — {{ prop.images.count }} Views
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="row g-3">
-                    {% for img in prop.images.all %}
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <div style="height:140px; border-radius:8px; overflow:hidden; background:#1e2733; border:1px solid #374151;">
-                            <img src="{{ img.image.url }}" style="width:100%;height:100%;object-fit:cover;">
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const slides      = document.querySelectorAll('.walkthrough-slide');
-    const stripThumbs = document.querySelectorAll('.strip-thumb');
-    const playPauseBtn = document.getElementById('playPauseBtn');
-    const galTimer    = document.getElementById('galTimer');
-    const INTERVAL    = 4000;
-    let currentSlide  = 0, isPlaying = true, ticker = null, startTime = Date.now();
-    const totalDuration = slides.length * INTERVAL;
-
-    function fmt(ms) { const s=Math.floor(ms/1000),m=Math.floor(s/60); return `${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
-
-    window.setSlide = function(idx) {
-        slides.forEach(s=>s.classList.remove('active'));
-        stripThumbs.forEach(t=>t.classList.remove('active-thumb'));
-        currentSlide = (idx + slides.length) % slides.length;
-        if (slides[currentSlide]) slides[currentSlide].classList.add('active');
-        const at = document.querySelector(`.strip-thumb[data-slide="${currentSlide}"]`);
-        if (at) { at.classList.add('active-thumb'); at.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
-        startTime = Date.now();
-    };
-
-    function tickTimer() {
-        if (!isPlaying || !galTimer) return;
-        const elapsed = (currentSlide * INTERVAL) + ((Date.now() - startTime) % INTERVAL);
-        galTimer.textContent = `${fmt(Math.min(elapsed, totalDuration))} / ${fmt(totalDuration)}`;
-        requestAnimationFrame(tickTimer);
-    }
-
-    if (slides.length > 0) {
-        stripThumbs.forEach(t => t.addEventListener('click', function(){ setSlide(parseInt(this.dataset.slide)); }));
-        if (playPauseBtn) {
-            playPauseBtn.addEventListener('click', function() {
-                if (isPlaying) { clearInterval(ticker); isPlaying=false; this.innerHTML='<i class="fas fa-play"></i>'; }
-                else { ticker=setInterval(()=>setSlide(currentSlide+1),INTERVAL); isPlaying=true; this.innerHTML='<i class="fas fa-pause"></i>'; requestAnimationFrame(tickTimer); }
-            });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Property - {{ property.plot_property_id }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #334155;
         }
-        setSlide(0);
-        ticker = setInterval(() => setSlide(currentSlide + 1), INTERVAL);
-        requestAnimationFrame(tickTimer);
-    }
+        
+        .page-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 1rem 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
 
-    // Scroll spy
-    const navLinks = document.querySelectorAll('.prop-nav-link');
-    const sections = document.querySelectorAll('.prop-section[id], .audit-section[id]');
-    function updateNav() {
-        let activeId = null;
-        sections.forEach(sec => { if (window.scrollY >= sec.getBoundingClientRect().top + window.scrollY - 160) activeId = sec.id; });
-        if (activeId) navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('data-target') === activeId));
-    }
-    window.addEventListener('scroll', updateNav, { passive: true });
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const t = document.getElementById(this.getAttribute('data-target'));
-            if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 130, behavior: 'smooth' });
-        });
-    });
-    updateNav();
-});
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
 
-function revealPhone(elementId, phone) {
-    const el = document.getElementById(elementId);
-    if (el && phone) { el.textContent = phone; el.style.color = 'var(--primary-dark)'; el.style.fontWeight = '700'; const btn = el.nextElementSibling; if (btn) btn.remove(); }
-}
-</script>
+        .header-subtitle {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-top: 0.5rem;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-title {
+            color: #0f172a;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        /* FIXED LAYOUT BREAK HERE: Strict 2-column grid instead of auto-fit */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .detail-grid {
+                grid-template-columns: 1fr; /* Stacks cleanly on mobile */
+            }
+        }
+
+        /* Utility to make full-width rows inside the grid (like addresses) */
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .detail-item {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #f1f5f9;
+        }
+
+        .detail-item label {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+            display: block;
+            font-weight: 600;
+        }
+
+        .detail-item p {
+            font-size: 0.95rem;
+            color: #1e293b;
+            font-weight: 500;
+            margin: 0;
+            word-break: break-word;
+        }
+
+        .badge-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .gallery-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .gallery-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .gallery-img:hover {
+            transform: scale(1.05);
+        }
+
+        .file-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: #eff6ff;
+            color: #2563eb;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            border: 1px solid #bfdbfe;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-link:hover {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .faq-item {
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .faq-q {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .faq-a {
+            color: #475569;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .btn-custom {
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-header">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <span class="badge bg-primary mb-2">ID: {{ property.plot_property_id }}</span>
+                    <h1 class="header-title">{{ property.property_title|default:"Untitled Property" }}</h1>
+                    <div class="header-subtitle">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{ property.plot_locality|default:"Locality Not Set" }}, {{ property.plot_city|default:"City Not Set" }}
+                        <span class="mx-2">•</span>
+                        <i class="fas fa-calendar-alt me-2"></i>Added: {{ property.created_at|date:"d M Y, h:i A" }}
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge-status"><i class="fas fa-circle me-1" style="font-size: 8px;"></i> Active Listing</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid px-4 mb-5">
+        
+        <div class="mb-4">
+            <a href="{% url 'plot_resale_list' %}" class="btn btn-outline-secondary btn-custom">
+                <i class="fas fa-arrow-left me-2"></i>Back to Directory
+            </a>
+          
+        <a href="{% url 'plot_sale_edit' property.plot_property_id %}" class="btn btn-primary btn-custom ms-2">
+    <i class="fas fa-edit me-2"></i>Edit Property
+</a>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                
+                <div class="content-card">
+                    <h5 class="card-title"><i class="fas fa-images me-2"></i>Property Media & Documents</h5>
+                    
+                    <h6 class="mb-3 mt-2 text-muted" style="font-size:0.9rem;">Images</h6>
+                    {% if property.images.all %}
+                        <div class="gallery-container mb-4">
+                            {% for img in property.images.all %}
+                                <a href="{{ img.image.url }}" target="_blank">
+                                    <img src="{{ img.image.url }}" alt="Plot Image" class="gallery-img">
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted fst-italic mb-4">No images uploaded for this property.</p>
+                    {% endif %}
+
+                    <h6 class="mb-3 text-muted" style="font-size:0.9rem;">Documents & Video</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if property.encumbrance_cert %}
+                            <a href="{{ property.encumbrance_cert.url }}" target="_blank" class="file-link">
+                                <i class="fas fa-file-pdf me-2"></i> Encumbrance Certificate
+                            </a>
+                        {% endif %}
+                        {% if property.social_video %}
+                            <a href="{{ property.social_video.url }}" target="_blank" class="file-link" style="color: #ea4335; background: #fce8e6; border-color: #f8c1b6;">
+                                <i class="fas fa-video me-2"></i> Property Video
+                            </a>
+                        {% endif %}
+                        {% if not property.encumbrance_cert and not property.social_video %}
+                            <span class="text-muted fst-italic">No additional documents available.</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h5 class="card-title"><i class="fas fa-ruler-combined me-2"></i>Step 1: Plot Specifications</h5>
+                    <div class="detail-grid">
+                        <div class="detail-item full-width">
+                            <label>Internal Plot Title</label>
+                            <p>{{ property.plot_title|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Plot Area</label>
+                            <p>{{ property.plot_area|default:"-" }} sq.ft</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Resale Plot Type</label>
+                            <p>{{ property.resale_plot_type|title|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Plot Road Facing</label>
+                            <p>{{ property.plot_road_facing|title|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Corner Plot</label>
+                            <p>{{ property.corner_plot|title|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Sanctioning Authority</label>
+                            <p>{{ property.sanctioning_authority|upper|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Plot Fencing</label>
+                            <p>{{ property.plot_fencing|title|default:"-" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h5 class="card-title"><i class="fas fa-money-bill-wave me-2"></i>Step 2: Pricing & Legal</h5>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>Total Plot Price</label>
+                            <p class="text-success fw-bold">₹{{ property.plot_price|floatformat:2|default:"0.00" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Price Per Sq.Ft</label>
+                            <p>₹{{ property.price_per_sqft|default:"0.00" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Brokerage Applicable</label>
+                            <p>{{ property.brokerage|title|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Brokerage Percentage</label>
+                            <p>{{ property.brokerage_percentage|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Ownership Type</label>
+                            <p>{{ property.ownership_type|title|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Loan On Property</label>
+                            <p>{{ property.loan_on_property|title|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item full-width">
+                            <label>Existing Loan Amount</label>
+                            <p>{% if property.plot_loan_amount %}₹{{ property.plot_loan_amount|floatformat:2 }}{% else %}-{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h5 class="card-title"><i class="fas fa-map-marked-alt me-2"></i>Step 4a: Location</h5>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label>City</label>
+                            <p>{{ property.plot_city|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Locality</label>
+                            <p>{{ property.plot_locality|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item full-width">
+                            <label>Full Address</label>
+                            <p>{{ property.plot_address|default:"-" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% if property.faqs.all %}
+                <div class="content-card">
+                    <h5 class="card-title"><i class="fas fa-robot me-2"></i>Smart Pitch (Auto-FAQs)</h5>
+                    {% for faq in property.faqs.all %}
+                        <div class="faq-item">
+                            <div class="faq-q"><i class="fas fa-question-circle text-primary me-2"></i>{{ faq.question }}</div>
+                            <div class="faq-a"><i class="fas fa-check text-success me-2"></i>{{ faq.answer }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+            </div> <div class="col-lg-4">
+                
+                <div class="content-card border-primary" style="border-width: 2px;">
+                    <h5 class="card-title text-primary"><i class="fas fa-user-tie me-2"></i>Owner Details</h5>
+                    <div class="detail-grid" style="grid-template-columns: 1fr;">
+                        <div class="detail-item">
+                            <label>Owner Name</label>
+                            <p>{{ property.plot_owner_name|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Owner Contact</label>
+                            <p><i class="fas fa-phone-alt me-2 text-muted" style="font-size:0.8rem;"></i>{{ property.plot_owner_contact|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Owner Email</label>
+                            <p><i class="fas fa-envelope me-2 text-muted" style="font-size:0.8rem;"></i>{{ property.plot_owner_email|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Owner Role</label>
+                            <p>{{ property.plot_owner_role|title|default:"-" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h5 class="card-title"><i class="fas fa-clipboard-check me-2"></i>Audit Trail</h5>
+                    <div class="detail-grid" style="grid-template-columns: 1fr;">
+                        <div class="detail-item">
+                            <label>Uploaded By</label>
+                            <p>{{ property.uploaded_by_name|default:"Admin System" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Uploader Role</label>
+                            <p>{{ property.uploaded_by_role|default:"-" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Upload Source / File</label>
+                            <p style="font-size:0.8rem; word-break: break-all;">{{ property.upload_file_name|default:"Web UI" }}</p>
+                        </div>
+                        <div class="detail-item">
+                            <label>Last Updated</label>
+                            <p>{{ property.updated_at|date:"d M Y, h:i A" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div> </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

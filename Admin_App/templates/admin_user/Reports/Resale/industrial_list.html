@@ -238,155 +238,159 @@
     </a>
 </div>
 
-        <div class="table-responsive">
-            <table class="properties-table">
-                <thead>
-                    <tr>
-                        <th>Sr.No</th>
-                        <th>Industrial ID</th>
-                        <th>Property Title</th>
-                        <th>Images</th>
-                        
-                        <th>Property Type</th>
-                        <th>Land Area (Sqft)</th>
-                        <th>Available From</th>
-                        <th>Power Supply</th>
-                        <th>KVA Capacity</th>
-                        <th>Water Supply</th>
-                        <th>Crane/Heavy Mach.</th>
-                        <th>Road Connectivity</th>
-                        <th>Worker Housing Nearby</th>
+       <div class="table-responsive">
+    <table class="properties-table">
+        <thead>
+            <tr>
+                <th>Sr.No</th>
+                <th>Industrial ID</th>
+                <th>Property Title</th>
+                <th>Images</th>
+                
+                <th>Property Type</th>
+                <th>Land Area (Sqft)</th>
+               
+                <th>Power Supply</th>
+                <th>KVA Capacity</th>
+                <th>Water Supply</th>
+                <th>Crane/Heavy Mach.</th>
+                <th>Road Connectivity</th>
+                <th>Worker Housing Nearby</th>
 
-                        <th>Expected Price (₹)</th>
-                        <th>Brokerage</th>
-                        <th>Brokerage %</th>
-                        <th>Manual Brokerage</th>
-                        <th>Sanctioning Authority</th>
-                        <th>Ownership Type</th>
-                        <th>Has Loan</th>
-                        <th>Loan Amount</th>
-                        <th>Existing Tenants</th>
-                        <th>Tenant Details</th>
-                        <th>Legal Dispute</th>
-                        <th>Dispute Details</th>
-                        <th>Tax Due</th>
-                        <th>Tax Amount</th>
-                        <th>Tax Clearance Cert</th>
-                        <th>Property Description</th>
+                <th>Expected Price (₹)</th>
+                <th>Price Per Sqft (₹)</th>
+                <th>Brokerage</th>
+                <th>Brokerage %</th>
+                <th>Manual Brokerage</th>
+                <th>Sanctioning Authority</th>
+                <th>Ownership Type</th>
+                <th>Loan on Property</th>
+                <th>Loan Amount</th>
+                <th>Existing Tenants</th>
+                <th>Tenant Details</th>
+                <th>Legal Dispute</th>
+                <th>Dispute Details</th>
+                <th>Govt Tax Dues</th>
+                <th>Tax Amount</th>
+                <th>Tax Clearance Cert</th>
+                <th>Property Description</th>
 
-                        <th>Compliance Docs</th>
-                        <th>Social Video</th>
+                <th>Compliance Docs</th>
+                <th>Social Video</th>
 
-                        <th>City</th>
-                        <th>Locality</th>
-                        <th>Complete Address</th>
-                        <th>Owner Name</th>
-                        <th>Owner Contact</th>
-                        <th>Owner Email</th>
-                        <th>Residency Status</th>
+                <th>City</th>
+                <th>Locality Area</th>
+                <th>Property Address</th>
+                <th>Owner Name</th>
+                <th>Owner Contact</th>
+                <th>Owner Email</th>
+                <th>Owner Role</th>
+                <th>Residency Status</th>
 
-                        <th>Uploaded By Name</th>
-                        <th>Uploaded By Role</th>
-                        <th>Uploaded By Email</th>
-                        <th>Uploaded By Contact</th>
-                        <th>Upload File Name</th>
-                        <th>Created At</th>
-                        <th style="position:sticky; right:0; background:#f8fafc; z-index:2;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for prop in properties %}
-                    <tr id="row-{{ prop.id }}">
-                        <td>{{ forloop.counter }}</td>
-                        <td><strong>{{ prop.industrial_id|default:"-" }}</strong></td>
-                        <td style="font-weight: 700; color: #1e293b;">{{ prop.property_title|truncatechars:30|default:"-" }}</td>
-                        
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;" onclick="openImageModal('modal-{{ prop.id }}')">
-                                {% if prop.images.all %}
-                                    <div style="position: relative; width: 45px; height: 45px;" title="Click to view all images">
-                                        {% with first_img=prop.images.all|first %}
-                                            <img src="{{ first_img.image.url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                        {% endwith %}
-                                        {% if prop.images.count > 1 %}
-                                            <div style="position: absolute; bottom: -4px; right: -4px; background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; padding: 2px 5px; border-radius: 10px; border: 1px solid white; font-weight: bold; line-height: 1;">
-                                                +{{ prop.images.count|add:"-1" }}
-                                            </div>
-                                        {% endif %}
-                                    </div>
-                                {% else %}
-                                    <div style="width: 45px; height: 45px; border-radius: 6px; background: linear-gradient(135deg, #2563eb, #1e40af); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;">
-                                        <i class="fas fa-industry" style="font-size: 14px;"></i>
-                                        <span style="font-size: 6px; font-weight: 700; margin-top: 2px;">EstateFlow</span>
+                <th>Uploaded By Name</th>
+                <th>Uploaded By Role</th>
+                <th>Uploaded By Email</th>
+                <th>Uploaded By Contact</th>
+                <th>Upload File Name</th>
+                <th>Created At</th>
+                <th style="position:sticky; right:0; background:#f8fafc; z-index:2;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prop in properties %}
+            <tr id="row-{{ prop.id }}">
+                <td>{{ forloop.counter }}</td>
+                <td><strong>{{ prop.id|default:"-" }}</strong></td>
+                <td style="font-weight: 700; color: #1e293b;">{{ prop.property_title|truncatechars:30|default:"-" }}</td>
+                
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;" onclick="openImageModal('modal-{{ prop.id }}')">
+                        {% if prop.images.all %}
+                            <div style="position: relative; width: 45px; height: 45px;" title="Click to view all images">
+                                {% with first_img=prop.images.all|first %}
+                                    <img src="{{ first_img.image.url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                {% endwith %}
+                                {% if prop.images.count > 1 %}
+                                    <div style="position: absolute; bottom: -4px; right: -4px; background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; padding: 2px 5px; border-radius: 10px; border: 1px solid white; font-weight: bold; line-height: 1;">
+                                        +{{ prop.images.count|add:"-1" }}
                                     </div>
                                 {% endif %}
                             </div>
-                        </td>
-
-                        <td style="text-transform:capitalize;">{{ prop.property_type|default:"-" }}</td>
-                        <td>{{ prop.land_area|floatformat:2|default:"-" }}</td>
-                        <td>{{ prop.available_from|date:"d M Y"|default:"-" }}</td>
-                        <td><span class="badge-status {% if prop.power_supply %}yes{% else %}no{% endif %}">{% if prop.power_supply %}Yes{% else %}No{% endif %}</span></td>
-                        <td>{{ prop.kva_capacity|default:"-" }}</td>
-                        <td>{{ prop.water_supply|default:"-" }}</td>
-                        <td><span class="badge-status {% if prop.crane_heavy_machinery %}yes{% else %}no{% endif %}">{% if prop.crane_heavy_machinery %}Yes{% else %}No{% endif %}</span></td>
-                        <td>{{ prop.road_connectivity|default:"-" }}</td>
-                        <td><span class="badge-status {% if prop.worker_housing_nearby %}yes{% else %}no{% endif %}">{% if prop.worker_housing_nearby %}Yes{% else %}No{% endif %}</span></td>
-
-                        <td style="font-weight:700; color:#4f46e5;">₹{{ prop.expected_price|floatformat:0|default:"-" }}</td>
-                        <td>{{ prop.brokerage|default:"-" }}</td>
-                        <td>{{ prop.brokerage_percentage|default:"-" }}</td>
-                        <td>{{ prop.manual_brokerage|default:"-" }}</td>
-                        <td>{{ prop.sanctioning_authority|default:"-" }}</td>
-                        <td style="text-transform:capitalize;">{{ prop.ownership_type|default:"-" }}</td>
-                        <td><span class="badge-status {% if prop.has_loan %}yes{% else %}no{% endif %}">{% if prop.has_loan %}Yes{% else %}No{% endif %}</span></td>
-                        <td>{% if prop.has_loan %}₹{{ prop.loan_amount|floatformat:0 }}{% else %}-{% endif %}</td>
-                        <td><span class="badge-status {% if prop.existing_tenants %}yes{% else %}no{% endif %}">{% if prop.existing_tenants %}Yes{% else %}No{% endif %}</span></td>
-                        <td>{{ prop.tenant_details|truncatechars:20|default:"-" }}</td>
-                        <td><span class="badge-status {% if prop.legal_dispute %}no{% else %}yes{% endif %}">{% if prop.legal_dispute %}Litigation{% else %}Clear{% endif %}</span></td>
-                        <td>{{ prop.dispute_details|truncatechars:20|default:"-" }}</td>
-                        <td><span class="badge-status {% if prop.tax_due %}no{% else %}yes{% endif %}">{% if prop.tax_due %}Due{% else %}Clear{% endif %}</span></td>
-                        <td>{% if prop.tax_due %}₹{{ prop.tax_amount|floatformat:0 }}{% else %}-{% endif %}</td>
-                        <td><span class="badge-status {% if prop.tax_clearance_cert %}yes{% else %}no{% endif %}">{% if prop.tax_clearance_cert %}Passed{% else %}No Cert{% endif %}</span></td>
-                        <td>{{ prop.property_description|striptags|truncatechars:20|default:"-" }}</td>
-
-                        <td>{% if prop.compliance_docs %}<a href="{{ prop.compliance_docs.url }}" target="_blank" style="color:#ef4444;"><i class="fas fa-file-pdf"></i> PDF</a>{% else %}-{% endif %}</td>
-                        <td>{% if prop.social_video %}<a href="{{ prop.social_video.url }}" target="_blank" style="color:#3b82f6;"><i class="fas fa-video"></i> Video</a>{% else %}-{% endif %}</td>
-
-                        <td>{{ prop.city|default:"-" }}</td>
-                        <td>{{ prop.locality|default:"-" }}</td>
-                        <td>{{ prop.complete_address|truncatechars:20|default:"-" }}</td>
-                        <td>{{ prop.owner_name|default:"-" }}</td>
-                        <td>{{ prop.owner_contact|default:"-" }}</td>
-                        <td>{{ prop.owner_email|default:"-" }}</td>
-                        <td>{{ prop.residency_status|default:"-" }}</td>
-
-                        <td>{{ prop.uploaded_by_name|default:"-" }}</td>
-                        <td><span style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:10px;">{{ prop.uploaded_by_role|default:"-" }}</span></td>
-                        <td>{{ prop.uploaded_by_email|default:"-" }}</td>
-                        <td>{{ prop.uploaded_by_contact|default:"-" }}</td>
-                        <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI" }}</small></td>
-                        <td>{{ prop.created_at|date:"d M Y H:i" }}</td>
-                        
-                        <td style="position:sticky; right:0; background:white; z-index:1; border-left: 1px solid #e2e8f0;">
-                            <div class="action-buttons">
-                                <a href="{% url 'industrial_resale_view' prop.id %}" class="btn-action btn-view"><i class="fas fa-eye"></i></a>
-                                <a href="{% url 'industrial_resale_edit' prop.id %}" class="btn-action btn-edit"><i class="fas fa-edit"></i></a>
-                                <button class="btn-action btn-delete" onclick="deleteIndustrial({{ prop.id }}, '{% url 'industrial_resale_delete' prop.id %}')"><i class="fas fa-trash-alt"></i></button>
+                        {% else %}
+                            <div style="width: 45px; height: 45px; border-radius: 6px; background: linear-gradient(135deg, #2563eb, #1e40af); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;">
+                                <i class="fas fa-industry" style="font-size: 14px;"></i>
+                                <span style="font-size: 6px; font-weight: 700; margin-top: 2px;">EstateFlow</span>
                             </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="45" style="text-align: center; padding: 40px; color: #94a3b8;">
-                            <i class="fas fa-industry" style="font-size: 3rem; opacity: 0.5; display: block; margin-bottom: 10px;"></i>
-                            No properties match your criteria.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                        {% endif %}
+                    </div>
+                </td>
+
+                <td style="text-transform:capitalize;">{{ prop.property_type|default:"-" }}</td>
+                <td>{{ prop.land_area|floatformat:2|default:"-" }}</td>
+                
+                <td><span class="badge-status {% if prop.power_supply %}yes{% else %}no{% endif %}">{% if prop.power_supply %}Yes{% else %}No{% endif %}</span></td>
+                <td>{{ prop.kva_capacity|default:"-" }}</td>
+                <td>{{ prop.water_supply|default:"-" }}</td>
+                <td><span class="badge-status {% if prop.crane_heavy_machinery %}yes{% else %}no{% endif %}">{% if prop.crane_heavy_machinery %}Yes{% else %}No{% endif %}</span></td>
+                <td>{{ prop.road_connectivity|default:"-" }}</td>
+                <td><span class="badge-status {% if prop.worker_housing_nearby %}yes{% else %}no{% endif %}">{% if prop.worker_housing_nearby %}Yes{% else %}No{% endif %}</span></td>
+
+                <td style="font-weight:700; color:#4f46e5;">₹{{ prop.expected_price|floatformat:0|default:"-" }}</td>
+                <td style="font-weight:600; color:#10b981;">₹{{ prop.price_per_sqft|floatformat:2|default:"-" }}</td>
+                <td>{{ prop.brokerage|default:"-" }}</td>
+                <td>{{ prop.brokerage_percentage|default:"-" }}</td>
+                <td>{{ prop.manual_brokerage|default:"-" }}</td>
+                <td>{{ prop.sanctioning_authority|default:"-" }}</td>
+                <td style="text-transform:capitalize;">{{ prop.ownership_type|default:"-" }}</td>
+                <td><span class="badge-status {% if prop.loan_on_property %}yes{% else %}no{% endif %}">{% if prop.loan_on_property %}Yes{% else %}No{% endif %}</span></td>
+                <td>{% if prop.loan_on_property %}₹{{ prop.loan_amount|floatformat:0 }}{% else %}-{% endif %}</td>
+                <td><span class="badge-status {% if prop.existing_tenants %}yes{% else %}no{% endif %}">{% if prop.existing_tenants %}Yes{% else %}No{% endif %}</span></td>
+                <td>{{ prop.tenant_details|truncatechars:20|default:"-" }}</td>
+                <td><span class="badge-status {% if prop.legal_dispute %}no{% else %}yes{% endif %}">{% if prop.legal_dispute %}Litigation{% else %}Clear{% endif %}</span></td>
+                <td>{{ prop.dispute_details|truncatechars:20|default:"-" }}</td>
+                <td><span class="badge-status {% if prop.government_tax_dues %}no{% else %}yes{% endif %}">{% if prop.government_tax_dues %}Due{% else %}Clear{% endif %}</span></td>
+                <td>{% if prop.government_tax_dues %}₹{{ prop.tax_amount|floatformat:0 }}{% else %}-{% endif %}</td>
+                <td><span class="badge-status {% if prop.tax_clearance_cert %}yes{% else %}no{% endif %}">{% if prop.tax_clearance_cert %}Passed{% else %}No Cert{% endif %}</span></td>
+                <td>{{ prop.property_description|striptags|truncatechars:20|default:"-" }}</td>
+
+                <td>{% if prop.compliance_docs %}<a href="{{ prop.compliance_docs.url }}" target="_blank" style="color:#ef4444;"><i class="fas fa-file-pdf"></i> PDF</a>{% else %}-{% endif %}</td>
+                <td>{% if prop.social_video %}<a href="{{ prop.social_video.url }}" target="_blank" style="color:#3b82f6;"><i class="fas fa-video"></i> Video</a>{% else %}-{% endif %}</td>
+
+                <td>{{ prop.city|default:"-" }}</td>
+                <td>{{ prop.locality_area|default:"-" }}</td>
+                <td>{{ prop.Property_address|truncatechars:20|default:"-" }}</td>
+                <td>{{ prop.owner_name|default:"-" }}</td>
+                <td>{{ prop.owner_contact|default:"-" }}</td>
+                <td>{{ prop.owner_email|default:"-" }}</td>
+                <td>{{ prop.owner_role|default:"-" }}</td>
+                <td>{{ prop.residency_status|default:"-" }}</td>
+
+                <td>{{ prop.uploaded_by_name|default:"-" }}</td>
+                <td><span style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:10px;">{{ prop.uploaded_by_role|default:"-" }}</span></td>
+                <td>{{ prop.uploaded_by_email|default:"-" }}</td>
+                <td>{{ prop.uploaded_by_contact|default:"-" }}</td>
+                <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI" }}</small></td>
+                <td>{{ prop.created_at|date:"d M Y H:i" }}</td>
+                
+                <td style="position:sticky; right:0; background:white; z-index:1; border-left: 1px solid #e2e8f0;">
+                    <div class="action-buttons">
+                        <a href="{% url 'industrial_resale_view' prop.id %}" class="btn-action btn-view"><i class="fas fa-eye"></i></a>
+                        <a href="{% url 'industrial_resale_edit' prop.id %}" class="btn-action btn-edit"><i class="fas fa-edit"></i></a>
+                        <button class="btn-action btn-delete" onclick="deleteIndustrial({{ prop.id }}, '{% url 'industrial_resale_delete' prop.id %}')"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="47" style="text-align: center; padding: 40px; color: #94a3b8;">
+                    <i class="fas fa-industry" style="font-size: 3rem; opacity: 0.5; display: block; margin-bottom: 10px;"></i>
+                    No properties match your criteria.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
         {% if properties.paginator.num_pages > 1 %}
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
@@ -691,9 +695,15 @@
     }
 
    
-    function submitImport() {
+   
+
+function submitImport() {
     const fileInput = document.getElementById('industrial_file');
-    if (!fileInput.files || !fileInput.files[0]) { Swal.fire('No File', 'Please select an Excel file to upload.', 'warning'); return; }
+    if (!fileInput.files || !fileInput.files[0]) { 
+        Swal.fire('No File', 'Please select an Excel file to upload.', 'warning'); 
+        return; 
+    }
+    
     const formData = new FormData();
     formData.append('industrial_file', fileInput.files[0]);
     
@@ -723,11 +733,11 @@
             document.getElementById('upload-btn').disabled = false;
             document.getElementById('upload-btn').innerHTML = '<i class="fas fa-upload"></i> Import Data';
             
-            // ── Exact Duplicate Alert from provided Screenshot ──
+            // ── Exact File Duplicate Block ──
             if (data.status === 'duplicate_filename_and_data') {
                 Swal.fire({
                     icon: 'info',
-                    title: 'Duplicate File Action blocked',
+                    title: 'Duplicate File Blocked',
                     text: data.message,
                     confirmButtonColor: '#3b82f6',
                     confirmButtonText: 'OK'
@@ -735,6 +745,8 @@
                 clearFile();
                 return;
             }
+            
+            // ── Hidden Matrix Duplicate Block ──
             if (data.status === 'duplicate_data_different_filename') {
                 Swal.fire({
                     icon: 'warning',
@@ -746,12 +758,14 @@
                 clearFile();
                 return;
             }
+            
+            // ── General / Required Field Server Error Block ──
             if (data.status === 'error') {
-                Swal.fire('Error', data.message, 'error');
+                Swal.fire('Validation Error', data.message, 'error');
                 return;
             }
 
-            // Success Display Logic
+            // ── Success Display Logic ──
             let statsHtml = `<div style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap: wrap;">`;
             if (data.created > 0) statsHtml += `<span style="background:#10b981; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-plus-circle"></i> ${data.created} Created</span>`;
             if (data.updated > 0) statsHtml += `<span style="background:#3b82f6; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-edit"></i> ${data.updated} Updated</span>`;
@@ -763,7 +777,10 @@
                 title: data.error_count > 0 ? 'Import Complete with Warnings' : 'Import Complete!',
                 html: `<p style="font-size:14px; color:#4b5563; margin-bottom:0;">${data.message}</p>` + statsHtml,
                 confirmButtonColor: '#4f46e5'
-            }).then(() => { location.reload(); });
+            }).then(() => { 
+                location.reload(); 
+            });
+            
         }, 400);
     })
     .catch(err => {
@@ -771,9 +788,10 @@
         document.getElementById('import-progress').style.display = 'none';
         document.getElementById('upload-btn').disabled = false;
         document.getElementById('upload-btn').innerHTML = '<i class="fas fa-upload"></i> Import Data';
-        Swal.fire('Error', `Upload failed: ${err.message}`, 'error');
+        Swal.fire('System Error', `Upload failed: ${err.message}`, 'error');
     });
 }
+
 
     // ── CHART.JS INIT ──
     Chart.defaults.color = '#94a3b8';
