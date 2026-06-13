@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>{% if seo %}{{ seo.meta_title }}{% else %}{{ p.title }} | EstateFusion{% endif %}</title>
+<title>{% if seo %}{{ seo.meta_title }}{% else %}{{ p.title }} | EstateFlow{% endif %}</title>
 <meta name="description" content="{% if seo %}{{ seo.meta_description }}{% else %}{{ p.title }} in {{ p.city }}{% endif %}">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -547,7 +547,7 @@ a { text-decoration: none; color: inherit; }
             <div class="content">
               <div class="inner">
                 <div class="icon-circle"><i class="fas fa-home" style="font-size:50px;"></i></div>
-                <h3>EstateFusion</h3>
+                <h3>EstateFlow</h3>
                 <p>Property Images Not Available</p>
               </div>
             </div>
@@ -1299,81 +1299,84 @@ a { text-decoration: none; color: inherit; }
               <div class="masked-num">{{ masked_phone }}</div>
               <div class="masked-hint">Subscribe to view full contact details</div>
             </div>
+            {% comment %} <button class="btn-call-primary" data-bs-toggle="modal" data-bs-target="#authModal">
+              <i class="fas fa-unlock-alt"></i> Login to View Contact
+            </button> {% endcomment %}
           {% endif %}
 
           <!-- Enquiry Form -->
-          <div class="fw-bold small mb-2">Get Contact Details</div>
-        <form method="POST" id="enquiryForm" action="{% url 'save_property_enquiry' %}">
-            {% csrf_token %}
-            <input type="hidden" name="property_id" value="{{ original.id }}">
-            <input type="hidden" name="property_title" value="{{ p.title }}">
-            <input type="hidden" name="property_type" value="{{ listing_type }}">
-            <input type="hidden" name="property_location" value="{{ p.location }}">
-            <input type="hidden" name="lead_source" value="property_detail_page">
-            <input type="hidden" name="seo_slug" value="{{ seo.slug }}">
+          <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">
+            <form method="POST" id="enquiryForm" action="{% url 'save_property_enquiry' %}">
+                {% csrf_token %}
+                <input type="hidden" name="property_id" value="{{ original.id }}">
+                <input type="hidden" name="property_title" value="{{ p.title }}">
+                <input type="hidden" name="property_type" value="{{ listing_type }}">
+                <input type="hidden" name="property_location" value="{{ p.location }}">
+                <input type="hidden" name="lead_source" value="property_detail_page">
+                <input type="hidden" name="seo_slug" value="{{ seo.slug }}">
 
-            <!--  ADD THESE HIDDEN UTM FIELDS -->
+                <!--  ADD THESE HIDDEN UTM FIELDS -->
 
-            <!-- Add these hidden fields inside your enquiry form -->
-            <input type="hidden" name="utm_source" id="enquiry_utm_source" value="">
-            <input type="hidden" name="utm_medium" id="enquiry_utm_medium" value="">
-            <input type="hidden" name="utm_campaign" id="enquiry_utm_campaign" value="">
-            <input type="hidden" name="utm_term" id="enquiry_utm_term" value="">
-            <input type="hidden" name="utm_content" id="enquiry_utm_content" value="">
-            <input type="hidden" name="utm_path" id="enquiry_utm_path" value="">
-            <input type="hidden" name="utm_params" id="enquiry_utm_params" value="">
-            <input type="hidden" name="page_url" id="enquiry_page_url" value="">
-            <input type="hidden" name="property_id" id="enquiry_property_id" value="{{ p.id }}">
-            <input type="hidden" name="property_type" id="enquiry_property_type" value="{{ property_type }}">
+                <!-- Add these hidden fields inside your enquiry form -->
+                <input type="hidden" name="utm_source" id="enquiry_utm_source" value="">
+                <input type="hidden" name="utm_medium" id="enquiry_utm_medium" value="">
+                <input type="hidden" name="utm_campaign" id="enquiry_utm_campaign" value="">
+                <input type="hidden" name="utm_term" id="enquiry_utm_term" value="">
+                <input type="hidden" name="utm_content" id="enquiry_utm_content" value="">
+                <input type="hidden" name="utm_path" id="enquiry_utm_path" value="">
+                <input type="hidden" name="utm_params" id="enquiry_utm_params" value="">
+                <input type="hidden" name="page_url" id="enquiry_page_url" value="">
+                <input type="hidden" name="property_id" id="enquiry_property_id" value="{{ p.id }}">
+                <input type="hidden" name="property_type" id="enquiry_property_type" value="{{ property_type }}">
 
-            <input type="text" name="enquiry_name" id="enquiry_name" class="form-select mb-2" placeholder="Your Name" required value="{{ user_obj.user_name }}">
+                <input type="text" name="enquiry_name" id="enquiry_name" class="form-select mb-2" placeholder="Your Name" required value="{{ user_obj.user_name }}">
 
-            <div class="input-group mb-3">
-                <select name="country_code" id="country_code" class="form-select" style="max-width: 110px; border-radius: 12px 0 0 12px; height: 46px; font-size: 0.9rem; border: 1.5px solid #e2e8f0; background-color: #fff;">
-                    <option value="+91" selected>🇮🇳 +91</option>
-                    <option value="+1">🇺🇸 +1</option>
-                    <option value="+44">🇬🇧 +44</option>
-                    <option value="+971">🇦🇪 +971</option>
-                    <option value="+65">🇸🇬 +65</option>
-                    <option value="+61">🇦🇺 +61</option>
-                    <option value="+1">🇨🇦 +1</option>
-                </select>
-                <input type="tel" name="enquiry_phone" id="enquiry_phone" class="form-control" placeholder="Phone Number" required value="{{ user_obj.user_phone }}" style="border-radius: 0 12px 12px 0; height: 46px; font-size: 0.9rem; border: 1.5px solid #e2e8f0; border-left: none;">
-            </div>
+                <div class="input-group mb-3">
+                    <select name="country_code" id="country_code" class="form-select" style="max-width: 110px; border-radius: 12px 0 0 12px; height: 46px; font-size: 0.9rem; border: 1.5px solid #e2e8f0; background-color: #fff;">
+                        <option value="+91" selected>🇮🇳 +91</option>
+                        <option value="+1">🇺🇸 +1</option>
+                        <option value="+44">🇬🇧 +44</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+65">🇸🇬 +65</option>
+                        <option value="+61">🇦🇺 +61</option>
+                        <option value="+1">🇨🇦 +1</option>
+                    </select>
+                    <input type="tel" name="enquiry_phone" id="enquiry_phone" class="form-control" placeholder="Phone Number" required value="{{ user_obj.user_phone }}" style="border-radius: 0 12px 12px 0; height: 46px; font-size: 0.9rem; border: 1.5px solid #e2e8f0; border-left: none;">
+                </div>
 
-            <div class="form-check mb-3 text-start">
-                <input class="form-check-input" type="checkbox" id="whatsappConsent" name="whatsapp_consent" checked style="cursor: pointer; accent-color: #006ce4;">
-                <label class="form-check-label text-muted" for="whatsappConsent" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
-                    I consent to receive property alerts and owner details directly on WhatsApp/SMS. 
-                </label>
-            </div>
+                <div class="form-check mb-3 text-start">
+                    <input class="form-check-input" type="checkbox" id="whatsappConsent" name="whatsapp_consent" checked style="cursor: pointer; accent-color: #006ce4;">
+                    <label class="form-check-label text-muted" for="whatsappConsent" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
+                        I consent to receive property alerts and owner details directly on WhatsApp/SMS. 
+                    </label>
+                </div>
 
-            <div class="form-check mb-2 text-start">
-                <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required style="cursor: pointer; accent-color: #006ce4;">
-                {% if p.listing_type == "rent" %}
+                <div class="form-check mb-2 text-start">
+                    <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required style="cursor: pointer; accent-color: #006ce4;">
+                    {% if p.listing_type == "rent" %}
 
-                  <label class="form-check-label text-muted" for="agreeTerms" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
-                    I am interested in vendor services</span>
-                  </label>
+                      <label class="form-check-label text-muted" for="agreeTerms" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
+                        I am interested in vendor services</span>
+                      </label>
 
+                    {% else %}
+
+                      <label class="form-check-label text-muted" for="agreeTerms" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
+                          I am interested in home loan services
+                      </label>
+
+                    {% endif %}
+                </div>
+
+                
+
+                {% if user_obj %}
+                  <button type="button" name="send_enquiry" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" onclick="Send_Enquiry(this)">Get Contact Details</button>
                 {% else %}
-
-                  <label class="form-check-label text-muted" for="agreeTerms" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
-                      I am interested in home loan services
-                  </label>
-
+                  <!-- 🟢 FIXED: Changed data-bs-target to #authEnModal -->
+                  <button type="button" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#authEnModal">Get Contact Details</button>
                 {% endif %}
-            </div>
-
-            
-
-            {% if user_obj %}
-              <button type="button" name="send_enquiry" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" onclick="Send_Enquiry(this)">Get Contact Details</button>
-            {% else %}
-              <!-- 🟢 FIXED: Changed data-bs-target to #authEnModal -->
-              <button type="button" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#authEnModal">Get Contact Details</button>
-            {% endif %}
-        </form>
+            </form>
 
           <!-- Trust badges -->
           <div class="trust-badges">
@@ -1395,6 +1398,32 @@ a { text-decoration: none; color: inherit; }
       </div>
       <!-- ════════ END SIDEBAR ════════ -->
 
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PHOTO LIGHTBOX MODAL ═══ -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content" style="background:#0d1117;color:white;border:1px solid #1e2733;">
+      <div class="modal-header border-0" style="border-bottom:1px solid #1e2733 !important;">
+        <h5 class="modal-title fw-bold" style="font-size:.95rem;">
+          <i class="fas fa-images me-2" style="color:var(--pr);"></i>
+          All Property Photos — {{ property_images|length }} Images
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          {% for img in property_images %}
+          <div class="col-6 col-md-4 col-lg-3">
+            <div style="height:140px;border-radius:8px;overflow:hidden;background:#1e2733;border:1px solid #374151;cursor:pointer;">
+              <img src="{{ img.image.url }}" alt="Photo {{ forloop.counter }}" style="width:100%;height:100%;object-fit:cover;transition:transform .3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1427,8 +1456,18 @@ a { text-decoration: none; color: inherit; }
           <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Welcome back! Please enter your password to continue.</p>
           
           <div class="mb-3">
-            <label style="font-size: 0.8rem; font-weight: 700;">Password <span class="text-danger">*</span></label>
-            <input type="password" id="flow_password" class="form-control" placeholder="Enter your password" style="border-radius: 10px; padding: 12px; background: #f8fafc;">
+            <label style="font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; display: block;">
+                Password <span class="text-danger">*</span>
+            </label>
+            <div class="input-group" style="position: relative;">
+                <input type="password" id="flow_password" class="form-control" placeholder="Enter your password" 
+                      style="border-radius: 10px; padding: 12px; padding-right: 45px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                <button type="button" id="togglePassword" 
+                        style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); 
+                              background: none; border: none; color: #94a3b8; z-index: 10; cursor: pointer; padding: 0;">
+                    <i class="fas fa-eye" id="eyeIcon" style="font-size: 1.1rem;"></i>
+                </button>
+            </div>
           </div>
           
           <button type="button" class="btn w-100 mt-2" onclick="processProgLogin(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
@@ -1508,6 +1547,32 @@ a { text-decoration: none; color: inherit; }
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const passwordInput = document.getElementById("flow_password");
+    const toggleButton = document.getElementById("togglePassword");
+    const eyeIcon = document.getElementById("eyeIcon");
+
+    if (toggleButton && passwordInput) {
+        toggleButton.addEventListener("click", function () {
+            // Check the current type attribute of the input
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+            passwordInput.setAttribute("type", type);
+            
+            // Toggle the Font Awesome icon classes and the color for active state
+            if (type === "text") {
+                eyeIcon.classList.remove("fa-eye");
+                eyeIcon.classList.add("fa-eye-slash");
+                eyeIcon.style.color = "#0d9488"; // Subtle color change when visible (Deep Teal)
+            } else {
+                eyeIcon.classList.remove("fa-eye-slash");
+                eyeIcon.classList.add("fa-eye");
+                eyeIcon.style.color = "#94a3b8"; // Resets to original muted grey
+            }
+        });
+    }
+});
 
 // ═══════════════════════════════════════════════
 // MEDIA VIEWER — FIXED VIDEO PLAYBACK
@@ -1657,7 +1722,7 @@ function downloadMedia() {
 // ═══════════════════════════════════════════════
 // EMI CALCULATOR
 // ═══════════════════════════════════════════════
-function calculateInteractiveEMI() {
+function calcEMI() {
   const principal = parseFloat(document.getElementById('emiPrincipal').value) * 0.80;
   const r = parseFloat(document.getElementById('emiRate').value) / 12 / 100;
   const n = parseFloat(document.getElementById('emiYears').value) * 12;
@@ -1843,7 +1908,7 @@ function Send_Enquiry(_this) {
   var utm_params = $("#enquiry_utm_params").val() || "";
   var page_url = $("#enquiry_page_url").val() || window.location.href;
 
-  console.log("📊 Sending Enquiry with UTM:", {
+  console.log("Sending Enquiry with UTM:", {
     utm_source: utm_source,
     utm_medium: utm_medium,
     utm_campaign: utm_campaign
@@ -2081,7 +2146,3 @@ function Send_Enquiry(_this) {
 
 </body>
 </html>
-
-
-
-

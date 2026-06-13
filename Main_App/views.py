@@ -2871,12 +2871,27 @@ def listings_view(request):
 
         # ── BHK ───────────────────────────────────────────────
         if bhk_filter:
+            # Extract just the number from "2BHK" -> 2
+            import re
+            match = re.search(r'\d+', str(bhk_filter))
+            bhk_num = int(match.group()) if match else None
+            
+            print(f"Filtering by BHK: {bhk_filter} -> extracted number: {bhk_num}")
+            
             bhk_q = Q()
-            for f in ('bhk_type', 'bhk'):
+            
+            for f in ['bhk_type', 'bhk', 'bedrooms', 'no_of_bedrooms']:
                 if hasattr(db_model, f):
+                    # For numeric fields, match by number
+                    bhk_q |= Q(**{f: bhk_num})
+                    # For string fields, match by contains
+                    bhk_q |= Q(**{f'{f}__icontains': str(bhk_num)})
                     bhk_q |= Q(**{f'{f}__icontains': bhk_filter})
+            
             if bhk_q:
                 obj_q = obj_q.filter(bhk_q)
+
+
 
         # ── budget min ────────────────────────────────────────
         if budget_min:
