@@ -225,6 +225,31 @@ def property_enquiry_crm(request):
 ############# Views end for property enquiry section ###########################
 
 
+############## Views start for view property details ########################
+
+def view_property_details_rm(request,pid):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        # utm_obj = UTMLink.objects.all().order_by('-id')
+        # utm_obj_count = UTMLink.objects.all().count()
+
+        # rendered = render_to_string("crm/render_to_string/R_Utm/r_t_s_utm.html",{'utm_obj':utm_obj,'utm_obj_count':utm_obj_count})
+
+        ################ Notifications Section ######################
+
+        enquiry_obj_today = PropertyEnquiry.objects.filter(enquiry_date=datetime.today()).count()
+
+        context = {'admin_obj':admin_obj,'enquiry_obj_today':enquiry_obj_today}
+        
+        return render(request,"crm/Property_Enquiry/rental_detail.html",context) 
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############## Views end for view property details ###########################
+
+
 ############ Views start for delete property enquiry ########################
 
 @csrf_exempt

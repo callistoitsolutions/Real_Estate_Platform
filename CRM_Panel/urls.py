@@ -35,6 +35,10 @@ urlpatterns = [
 
     path('property_enquiry_crm',views.property_enquiry_crm,name="property_enquiry_crm"),
 
+    ########### urls for view property details ##############################
+
+    path('view_property_details_rm/<int:pid>',views.view_property_details_rm,name="view_property_details_rm"),
+
     ############## urls for delete property enquiry ########################
 
     path('delete_property_enquiry',views.delete_property_enquiry,name="delete_property_enquiry"),
