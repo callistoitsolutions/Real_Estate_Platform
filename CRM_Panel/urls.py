@@ -10,6 +10,14 @@ urlpatterns = [
  
      path('crm_dashboard',views.crm_dashboard,name="crm_dashboard"),
 
+     ############## urls for today's property enquiry #######################
+
+     path('today_property_enquiry',views.today_property_enquiry,name="today_property_enquiry"),
+
+     ############ urls for property enquiry status ##########################
+
+    path('property_enquiry_status',views.property_enquiry_status,name="property_enquiry_status"),
+
      ############## urls for display utm links #######################
 
      path('utm_links_crm',views.utm_links_crm,name="utm_links_crm"),
@@ -34,6 +42,8 @@ urlpatterns = [
     ############# urls for update property enquiry #####################
 
     path('update_property_enquiry/<int:id>',views.update_property_enquiry,name="update_property_enquiry"),
+
+    
 
     ############ urls for ajax for update property enquiry ####################
 

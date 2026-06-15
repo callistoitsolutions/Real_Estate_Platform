@@ -94,10 +94,13 @@ def rm_dashboard(request):
 
     # 4. Data Fetching
     user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_obj.user_role 
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/rm_dashboard.html", context)
@@ -141,10 +144,13 @@ def Update_Profile_Rm(request):
 
     # 4. Data Fetching
     user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_obj.user_role
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Profile/rm_profile.html", context)
@@ -177,6 +183,8 @@ def Assign_Enquiry_Rm(request):
     # 4. Data Fetching
     user_obj = User_Details.objects.get(id=dashboard_user_id)
 
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+
 
     enquiry_obj = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).order_by('-id')
     enquiry_obj_count = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
@@ -205,7 +213,8 @@ def Assign_Enquiry_Rm(request):
     context = {
         'user_obj': user_obj,
         'user_role': user_obj.user_role,
-        'property_enquiry_list':rendered
+        'property_enquiry_list':rendered,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Enquiry/assign_enquiry.html", context)
@@ -353,12 +362,15 @@ def update_enquiry_rm(request,id):
     # 4. Data Fetching
     user_obj = User_Details.objects.get(id=dashboard_user_id)
 
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+
     enquiry = PropertyEnquiry.objects.get(id=id)
     
     context = {
         'user_obj': user_obj,
         'user_role': user_obj.user_role,
-        'enquiry':enquiry
+        'enquiry':enquiry,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Enquiry/update_enquiry.html", context)
@@ -379,10 +391,13 @@ def residential_rm_list(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Reports/Rental/residential_list.html", context)
@@ -403,10 +418,13 @@ def residential_rm(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Forms/Rental/residential.html", context)
@@ -427,10 +445,13 @@ def commercial_rm_list(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Reports/Rental/commercial_list.html", context)
@@ -451,10 +472,13 @@ def commercial_rm(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Forms/Rental/commercial.html", context)
@@ -475,10 +499,13 @@ def pg_rm_list(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Reports/Rental/pg_list.html", context)
@@ -499,10 +526,13 @@ def pg_rm(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Forms/Rental/pg_coliving.html", context)
@@ -523,10 +553,13 @@ def residential_resale_rm_list(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Reports/Resale/residential_resale_list.html", context)
@@ -545,10 +578,13 @@ def residential_resale_rm(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Forms/Resale/residential_resale.html", context)
@@ -569,10 +605,13 @@ def commercial_resale_rm_list(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Reports/Resale/commercial_list.html", context)
@@ -593,10 +632,13 @@ def commercial_resale_rm(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Forms/Resale/commercial_resale.html", context)
@@ -617,10 +659,13 @@ def plot_resale_rm_list(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Reports/Resale/plot_list.html", context)
@@ -641,10 +686,13 @@ def plot_resale_rm(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Forms/Resale/plot_resale.html", context)
@@ -665,10 +713,13 @@ def industry_resale_rm_list(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Reports/Resale/industrial_list.html", context)
@@ -689,10 +740,13 @@ def industry_resale_rm(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Forms/Resale/industrial_resale.html", context)
@@ -713,10 +767,13 @@ def agriculture_resale_rm_list(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Reports/Resale/agricultural_list.html", context)
@@ -737,10 +794,13 @@ def agriculture_resale_rm(request):
 
     # 3. Data Fetching: Get the full user object for the template
     user_obj = User_Details.objects.get(id=user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role
+        'user_role': user_role,
+        'enquiry_obj_rm':enquiry_obj_rm
     }
     
     return render(request, "rm_panel/Forms/Resale/agricultural_resale.html", context)

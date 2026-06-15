@@ -134,7 +134,7 @@
                 </div>
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Water Source Infrastructure</label>
-                  <select class="form-select" name="water_source">
+                  <select class="form-select" name="water_source_infrastructure">
                     <option value="none">None</option>
                     <option value="well">Well</option>
                     <option value="borewell">Borewell</option>
@@ -169,29 +169,35 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
-                  <input type="number" class="form-control" id="expected_price" name="expected_price" placeholder="Valuation Amount" required>
+                  <input type="number" class="form-control" id="expected_price" name="expected_price" placeholder="Enter Price" required>
                 </div>
+
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Brokerage Agreement Commission</label>
+                  <label class="form-label"><span class="required"> price_per_acre (Auto Generated)</span></label>
+                  <input type="number" class="form-control" id=" price_per_acre " name="price_per_acre">
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Brokerage</label>
                   <select class="form-select" name="brokerage" id="brokerageSelect">
                     <option value="No">No Brokerage</option>
                     <option value="Yes">Yes</option>
                   </select>
                 </div>
                 <div class="col-md-6 mb-3 conditional-field" id="brokerageSection" style="display:none;">
-                  <label class="form-label">Brokerage Scale Percent</label>
+                  <label class="form-label">Brokerage Percent</label>
                   <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
                     <option value="1%">1% Rate</option>
                     <option value="2%">2% Rate</option>
-                    <option value="Manual">Enter Custom Value Manually</option>
+                    <option value="Manual">Enter Manually</option>
                   </select>
                 </div>
                 <div class="col-md-6 mb-3 conditional-field" id="manualBrokerage" style="display:none;">
-                  <label class="form-label">Specify Custom Commission Rules</label>
+                  <label class="form-label">Manual Brokerage</label>
                   <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. Fixed ₹1.5 Lakh">
                 </div>
                 <div class="col-md-12 mb-3">
-                  <label class="form-label">Title Deeds Ownership Class <span class="required">*</span></label>
+                  <label class="form-label"> Ownership Type <span class="required">*</span></label>
                   <select class="form-select" name="ownership_type" required>
                     <option value="freehold">Freehold Clear Title</option>
                     <option value="leasehold">Leasehold Agreement Assignment</option>
@@ -203,47 +209,47 @@
                 <div class="col-md-6 mb-3">
                   <label class="form-label"> Loan On Property? <span class="required">*</span></label>
                   <div class="radio-group">
-                     <label class="radio-option"><input type="radio" name="agri_loan" value="no" checked> No</label>
-                     <label class="radio-option"><input type="radio" name="agri_loan" value="yes"> Yes</label>
+                     <label class="radio-option"><input type="radio" name="loan_on_property" value="no" checked> No</label>
+                     <label class="radio-option"><input type="radio" name="loan_on_property" value="yes"> Yes</label>
                   </div>
                   <div id="loan_amt_section" style="display:none;" class="mt-2">
-                     <input type="number" class="form-control" name="loan_amount" placeholder="Outstanding Debt Principal (₹)">
+                     <input type="number" class="form-control" name="loan_amount" placeholder="Loan Amount (₹)">
                   </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Existing Sharecroppers / Tenants On-Site? <span class="required">*</span></label>
+                  <label class="form-label">Existing  Tenants  <span class="required">*</span></label>
                   <div class="radio-group">
-                     <label class="radio-option"><input type="radio" name="agri_tenants" value="no" checked> No</label>
-                     <label class="radio-option"><input type="radio" name="agri_tenants" value="yes"> Yes</label>
+                     <label class="radio-option"><input type="radio" name="existing_tenants" value="no" checked> No</label>
+                     <label class="radio-option"><input type="radio" name="existing_tenants" value="yes"> Yes</label>
                   </div>
                   <div id="tenant_section" style="display:none;" class="mt-2">
-                     <textarea class="form-control" name="tenant_details" placeholder="Detail sharecropping agreements contexts..."></textarea>
+                     <textarea class="form-control" name="tenant_details" placeholder="Detail Of Tenants..."></textarea>
                   </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Boundary or Title Dispute Litigation? <span class="required">*</span></label>
+                  <label class="form-label">   agri_dispute ? <span class="required">*</span></label>
                   <div class="radio-group">
                      <label class="radio-option"><input type="radio" name="agri_dispute" value="no" checked> No</label>
                      <label class="radio-option"><input type="radio" name="agri_dispute" value="yes"> Yes</label>
                   </div>
                   <div id="dispute_section" style="display:none;" class="mt-2">
-                     <textarea class="form-control" name="dispute_details" placeholder="Describe pending family court or land boundary litigation..."></textarea>
+                     <textarea class="form-control" name="dispute_details" placeholder="dispute details..."></textarea>
                   </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Pending Land Revenue Tax Arrears? <span class="required">*</span></label>
+                  <label class="form-label">Pending Tax Due? <span class="required">*</span></label>
                   <div class="radio-group">
-                     <label class="radio-option"><input type="radio" name="agri_tax_due" value="no" checked> No</label>
-                     <label class="radio-option"><input type="radio" name="agri_tax_due" value="yes"> Yes</label>
+                     <label class="radio-option"><input type="radio" name="pending_tax_due" value="no" checked> No</label>
+                     <label class="radio-option"><input type="radio" name="pending_tax_due" value="yes"> Yes</label>
                   </div>
                   <div id="tax_section" style="display:none;" class="mt-2">
-                     <input type="number" class="form-control" name="pending_tax_amount" placeholder="Arrears Balance (₹)">
+                     <input type="number" class="form-control" name="pending_tax_amount" placeholder="tax amount (₹)">
                   </div>
                 </div>
               </div>
 
               <div class="form-group mt-2">
-                <label class="form-label">Detailed Presentation Copy Description <span class="required">*</span></label>
+                <label class="form-label"> Property Description <span class="required">*</span></label>
                 <textarea class="form-control" id="resale_agricultural_desc" name="resale_agricultural_desc" required></textarea>
               </div>
             </div>
@@ -261,14 +267,18 @@
               <div class="row">
                 <div class="col-md-4 mb-3"><label class="form-label">City <span class="required">*</span></label><input type="text" class="form-control" id="city" name="city" placeholder="e.g. Nagpur" required></div>
                 <div class="col-md-4 mb-3"><label class="form-label">State <span class="required">*</span></label><input type="text" class="form-control" name="state" placeholder="e.g. Maharashtra" required></div>
-                <div class="col-md-4 mb-3"><label class="form-label">Locality Area <span class="required">*</span></label><input type="text" class="form-control" id="locality" name="locality" placeholder="e.g. Umred Area" required></div>
-                <div class="col-md-12 mb-3"><label class="form-label">Complete Physical Plot Address <span class="required">*</span></label><textarea class="form-control" name="address" rows="3" placeholder="Enter complete route directions or land address records..." required></textarea></div>
+                <div class="col-md-4 mb-3"><label class="form-label">Locality Area <span class="required">*</span></label><input type="text" class="form-control" id="locality_area" name="locality_area" placeholder="e.g. Umred Area" required></div>
+                <div class="col-md-12 mb-3"><label class="form-label">Property Address <span class="required">*</span></label><textarea class="form-control" name="property_address" rows="3" placeholder="Enter complete route directions or land address records..." required></textarea></div>
               </div>
               <div class="row pt-3 border-top">
-                <div class="col-md-4 mb-3"><label class="form-label">Primary Owner Name <span class="required">*</span></label><input type="text" class="form-control" name="owner_name" placeholder="Full Registered Name" required></div>
-                <div class="col-md-4 mb-3"><label class="form-label">Direct Contact Number <span class="required">*</span></label><input type="tel" class="form-control" name="owner_contact" placeholder="10-digit smartphone mobile" pattern="[0-9]{10}" required></div>
-                <div class="col-md-4 mb-3"><label class="form-label">Owner Email Profile</label><input type="email" class="form-control" name="owner_email" placeholder="name@email.com"></div>
-                <div class="col-md-12"><label class="form-label">Residency Status <span class="required">*</span></label>
+                <div class="col-md-4 mb-3"><label class="form-label"> Owner Name <span class="required">*</span></label><input type="text" class="form-control" name="owner_name" placeholder="Full Registered Name" required></div>
+                <div class="col-md-4 mb-3"><label class="form-label">Owner Contact <span class="required">*</span></label><input type="tel" class="form-control" name="owner_contact" placeholder="10-digit smartphone mobile" pattern="[0-9]{10}" required></div>
+                <div class="col-md-4 mb-3"><label class="form-label">Owner Email </label><input type="email" class="form-control" name="owner_email" placeholder="name@email.com"></div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Owner Role</label>
+                  <input type="text" class="form-control" name="owner_role" placeholder="e.g. Direct Owner, Broker">
+                </div>
+                <div class="col-md-6 mb-3"><label class="form-label">Residency Status <span class="required">*</span></label>
                   <select class="form-select" name="residency_status">
                     <option value="resident">Domestic Resident Citizen</option>
                     <option value="nri">Non-Resident Indian (NRI)</option>
@@ -359,7 +369,7 @@
 
 <script>
   let currentStep = 1;
-  let selectedFiles = []; // Master unified dynamic array storage matching image changes
+  let selectedFiles = [];
 
   window.onload = function() {
     if (typeof CKEDITOR !== 'undefined' && document.getElementById('resale_agricultural_desc')) {
@@ -368,7 +378,6 @@
     initializeSortableDragMechanics();
   };
 
-  // INITIALIZE MANUALLY SORTABLE DRAG/DROP DRAG EVENTS ON THUMBNAILS
   function initializeSortableDragMechanics() {
     const previewContainer = document.getElementById('imagePreview');
     if (!previewContainer) return;
@@ -377,7 +386,6 @@
       animation: 250,
       ghostClass: 'sortable-ghost',
       onEnd: function() {
-        // Re-align master lookup data variables sequential arrays matching drag adjustments
         let visualListNames = Array.from(document.querySelectorAll('.preview-item')).map(el => el.dataset.fileName);
         let newlySortedQueue = [];
 
@@ -453,7 +461,8 @@
     const area = document.getElementById('land_area').value;
     const price = document.getElementById('expected_price').value;
     const city = document.getElementById('city').value;
-    const loc = document.getElementById('locality').value;
+    // UPDATED ID REFERENCE
+    const loc = document.getElementById('locality_area').value;
 
     const dynamicTitle = generateAssetTitle();
     const titleInput = document.getElementById('agri_title');
@@ -487,8 +496,8 @@
     el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
   }
 
-  // Hook change event loops for updates on previews
-  ['land_area', 'village', 'taluka', 'city', 'locality', 'expected_price'].forEach(id => {
+  // UPDATED HOOK EVENT LOOPS
+  ['land_area', 'village', 'taluka', 'city', 'locality_area', 'expected_price'].forEach(id => {
     const element = document.getElementById(id);
     if (element) element.addEventListener('input', updatePreview);
   });
@@ -496,14 +505,14 @@
   const typeDropdown = document.getElementById('agriculture_property_type');
   if (typeDropdown) typeDropdown.addEventListener('change', updatePreview);
 
-  // Conditional field visibilities triggers loops
-  document.querySelectorAll('input[name="agri_loan"]').forEach(r => r.onchange = (e) => 
+  // UPDATED CONDITIONAL FIELD VISIBILITIES
+  document.querySelectorAll('input[name="loan_on_property"]').forEach(r => r.onchange = (e) => 
     document.getElementById('loan_amt_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
-  document.querySelectorAll('input[name="agri_tenants"]').forEach(r => r.onchange = (e) => 
+  document.querySelectorAll('input[name="existing_tenants"]').forEach(r => r.onchange = (e) => 
     document.getElementById('tenant_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
   document.querySelectorAll('input[name="agri_dispute"]').forEach(r => r.onchange = (e) => 
     document.getElementById('dispute_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
-  document.querySelectorAll('input[name="agri_tax_due"]').forEach(r => r.onchange = (e) => 
+  document.querySelectorAll('input[name="pending_tax_due"]').forEach(r => r.onchange = (e) => 
     document.getElementById('tax_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
 
   const brokerageSelect = document.getElementById("brokerageSelect");
@@ -519,7 +528,6 @@
     };
   }
 
-  // Dynamic Multi-Image queue handlers
   const uploadArea = document.getElementById('uploadArea');
   const imageInput = document.getElementById('imageInput');
   const imagePreview = document.getElementById('imagePreview');
@@ -544,7 +552,7 @@
         reader.onload = (ev) => {
             const div = document.createElement('div');
             div.className = 'preview-item';
-            div.setAttribute('data-file-name', file.name); // Data label tracking sort changes
+            div.setAttribute('data-file-name', file.name);
             div.innerHTML = `
                 <img src="${ev.target.result}">
                 <button type="button" class="remove-image" onclick="removeImage('${file.name}')"><i class="fas fa-times"></i></button>
@@ -561,9 +569,8 @@
     renderThumbnails();
   }
 
-  // DOUBLE-CHECK CONFIRMATION POPUP SYSTEM IMPLEMENTATION BEFORE DISPATCH
   document.getElementById('agriculturalForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // Stop default immediate submission
+    e.preventDefault();
 
     if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.resale_agricultural_desc) {
         CKEDITOR.instances.resale_agricultural_desc.updateElement();
@@ -577,7 +584,6 @@
         return;
     }
 
-    // Fire SweetAlert confirmation block
     Swal.fire({
         title: 'Confirm Submission?',
         text: 'Are you sure you want to publish this agricultural property resale listing?',
@@ -594,7 +600,6 @@
     });
   });
 
-  // COMMITS DYNAMIC REORDERED ARRAYS TO CENTRAL AJAX HANDLERS
   function executeFormAjaxSubmit(formElement) {
     const submitBtn = document.getElementById('submitBtn');
     const originalText = submitBtn.innerHTML;
@@ -603,7 +608,6 @@
 
     let finalFormData = new FormData(formElement);
     
-    // Clear field references, append sequentially according to the sorted list
     finalFormData.delete('property_images[]');
     selectedFiles.forEach(file => finalFormData.append('property_images[]', file));
 

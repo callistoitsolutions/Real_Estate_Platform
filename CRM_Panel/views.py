@@ -32,10 +32,78 @@ def crm_dashboard(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
-        context = {'admin_obj':admin_obj}
+
+        ################ Notifications Section ######################
+
+        enquiry_obj_today = PropertyEnquiry.objects.filter(enquiry_date=datetime.today()).count()
+
+        context = {'admin_obj':admin_obj,'enquiry_obj_today':enquiry_obj_today}
         return render(request,"crm/crm_dashboard.html",context) 
     else:
         return render(request,'home_page/Adminlogin.html')
+    
+
+############# Views start for today's property enquiry ######################
+
+def today_property_enquiry(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        enquiry_obj = PropertyEnquiry.objects.filter(enquiry_date=datetime.today()).order_by('-id')
+        enquiry_obj_count = PropertyEnquiry.objects.filter(enquiry_date=datetime.today()).count()
+
+        ############## Enquiries Stats By Source ##############################
+
+        fb_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="facebook",enquiry_date=datetime.today()).count()
+        insta_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="instagram",enquiry_date=datetime.today()).count()
+        whatsapp_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="whatsapp",enquiry_date=datetime.today()).count()
+        google_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="google",enquiry_date=datetime.today()).count()
+        linkedin_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="linkedin",enquiry_date=datetime.today()).count()
+        twitter_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="twitter",enquiry_date=datetime.today()).count()
+        youtube_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="youtube",enquiry_date=datetime.today()).count()
+        referral_obj_count = PropertyEnquiry.objects.filter(utm_link__utm_source="referral",enquiry_date=datetime.today()).count()
+
+        ########### Enquiry Stats by lead source ################################
+
+        pending_obj_count = PropertyEnquiry.objects.filter(lead_status="Pending",enquiry_date=datetime.today()).count()
+        progress_obj_count = PropertyEnquiry.objects.filter(lead_status="In Progress",enquiry_date=datetime.today()).count()
+        hold_obj_count = PropertyEnquiry.objects.filter(lead_status="Hold",enquiry_date=datetime.today()).count()
+        closed_obj_count = PropertyEnquiry.objects.filter(lead_status="Closed",enquiry_date=datetime.today()).count()
+        cancelled_obj_count = PropertyEnquiry.objects.filter(lead_status="Cancelled",enquiry_date=datetime.today()).count()
+
+        rendered = render_to_string("crm/render_to_string/R_Enquiry/r_t_s_enquiry.html",{'enquiry_obj':enquiry_obj,'enquiry_obj_count':enquiry_obj_count,'fb_obj_count':fb_obj_count,'insta_obj_count':insta_obj_count,'whatsapp_obj_count':whatsapp_obj_count,'google_obj_count':google_obj_count,'linkedin_obj_count':linkedin_obj_count,'twitter_obj_count':twitter_obj_count,'youtube_obj_count':youtube_obj_count,'referral_obj_count':referral_obj_count,'pending_obj_count':pending_obj_count,'progress_obj_count':progress_obj_count,'hold_obj_count':hold_obj_count,'closed_obj_count':closed_obj_count,'cancelled_obj_count':cancelled_obj_count})
+
+        ################ Notifications Section ######################
+
+        enquiry_obj_today = PropertyEnquiry.objects.filter(enquiry_date=datetime.today()).count()
+
+        context = {'admin_obj':admin_obj,'property_enquiry_list':rendered,'enquiry_obj_today':enquiry_obj_today}
+        
+        return render(request,"crm/Property_Enquiry/today_enquiry.html",context) 
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############### Views end for today's property enquiry ########################
+
+
+############## Views start for property enquiry status ########################
+
+def property_enquiry_status(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        ################ Notifications Section ######################
+
+        enquiry_obj_today = PropertyEnquiry.objects.filter(enquiry_date=datetime.today()).count()
+
+        context = {'admin_obj':admin_obj,'enquiry_obj_today':enquiry_obj_today}
+        return render(request,"crm/Property_Enquiry/property_enquiry_status.html",context) 
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############ Views end for property enquiry status ############################
     
 
 
@@ -51,8 +119,11 @@ def utm_links_crm(request):
 
         rendered = render_to_string("crm/render_to_string/R_Utm/r_t_s_utm.html",{'utm_obj':utm_obj,'utm_obj_count':utm_obj_count})
 
+        ################ Notifications Section ######################
 
-        context = {'admin_obj':admin_obj,'utm_lists':rendered}
+        enquiry_obj_today = PropertyEnquiry.objects.filter(enquiry_date=datetime.today()).count()
+
+        context = {'admin_obj':admin_obj,'utm_lists':rendered,'enquiry_obj_today':enquiry_obj_today}
         
         return render(request,"crm/UTM/utm_links.html",context) 
     else:
@@ -79,7 +150,12 @@ def create_utm_crm(request):
                     # 'type': prop.listing_type
                 })
 
-        context = {'admin_obj':admin_obj,'properties':properties}
+        ################ Notifications Section ######################
+
+        enquiry_obj_today = PropertyEnquiry.objects.filter(enquiry_date=datetime.today()).count()
+
+        context = {'admin_obj':admin_obj,'properties':properties,'enquiry_obj_today':enquiry_obj_today}
+
         return render(request,"crm/UTM/create_utm_link.html",context) 
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -136,8 +212,11 @@ def property_enquiry_crm(request):
 
         rendered = render_to_string("crm/render_to_string/R_Enquiry/r_t_s_enquiry.html",{'enquiry_obj':enquiry_obj,'enquiry_obj_count':enquiry_obj_count,'fb_obj_count':fb_obj_count,'insta_obj_count':insta_obj_count,'whatsapp_obj_count':whatsapp_obj_count,'google_obj_count':google_obj_count,'linkedin_obj_count':linkedin_obj_count,'twitter_obj_count':twitter_obj_count,'youtube_obj_count':youtube_obj_count,'referral_obj_count':referral_obj_count,'pending_obj_count':pending_obj_count,'progress_obj_count':progress_obj_count,'hold_obj_count':hold_obj_count,'closed_obj_count':closed_obj_count,'cancelled_obj_count':cancelled_obj_count})
 
+        ################ Notifications Section ######################
 
-        context = {'admin_obj':admin_obj,'property_enquiry_list':rendered}
+        enquiry_obj_today = PropertyEnquiry.objects.filter(enquiry_date=datetime.today()).count()
+
+        context = {'admin_obj':admin_obj,'property_enquiry_list':rendered,'enquiry_obj_today':enquiry_obj_today}
 
         return render(request,"crm/Property_Enquiry/property_enquiry.html",context) 
     else:
@@ -207,13 +286,57 @@ def update_property_enquiry(request,id):
             )
         ).order_by('sort_order', '-id','user_role')
 
-        context = {'admin_obj':admin_obj,'enquiry':enquiry,'user_obj':user_obj}
+        ################ Notifications Section ######################
+
+        enquiry_obj_today = PropertyEnquiry.objects.filter(enquiry_date=datetime.today()).count()
+
+        context = {'admin_obj':admin_obj,'enquiry':enquiry,'user_obj':user_obj,'enquiry_obj_today':enquiry_obj_today}
 
         return render(request,"crm/Property_Enquiry/update_enquiry.html",context) 
     else:
         return render(request,'home_page/Adminlogin.html')
 
 ############# Views end for update property enquiry ############################
+
+
+############## Views start Helper function to check validity to assign rm ################
+
+def can_assign_lead_to_rm(rm_user, exclude_enquiry_id=None, max_leads=4):
+    """
+    Check if an RM can be assigned a new lead.
+    
+    Args:
+        rm_user: User_Details object of the RM
+        exclude_enquiry_id: ID of the current enquiry to exclude from count (for updates)
+        max_leads: Maximum allowed leads (default: 4)
+    
+    Returns:
+        tuple: (can_assign, current_count, message)
+    """
+    
+    # Base queryset
+    queryset = PropertyEnquiry.objects.filter(
+        assigned_to=rm_user,
+        lead_status__in=['Pending', 'In Progress', 'Hold']
+    )
+    
+    # Exclude current enquiry if provided (for update operations)
+    if exclude_enquiry_id:
+        queryset = queryset.exclude(id=exclude_enquiry_id)
+    
+    current_count = queryset.count()
+    can_assign = current_count < max_leads
+    
+    if can_assign:
+        message = f"{rm_user.user_name} can be assigned. Current active leads: {current_count}/{max_leads}"
+    else:
+        message = f"{rm_user.user_name} already has {current_count} active leads. Maximum allowed is {max_leads}."
+    
+    return can_assign, current_count, message
+
+
+############# Views end for helper function to assign rm validation #####################
+
 
 
 ############ Views start for ajax for update property enquiry ######################3
@@ -225,20 +348,58 @@ def property_enquiry_ajax(request):
     try:
         enquiry = PropertyEnquiry.objects.get(id=data['id'])
     except PropertyEnquiry.DoesNotExist:
-        return JsonResponse({'status': '0', 'msg': 'Propertyy Enquiry Details not found'})
+        return JsonResponse({'status': '0', 'msg': 'Property Enquiry Details not found'})
 
+    try:
+        assigned_user = User_Details.objects.get(id=data['user'])
+    except User_Details.DoesNotExist:
+        return JsonResponse({'status': '0', 'msg': 'User not found'})
 
-    user = User_Details.objects.get(id=data['user'])
-
- 
-    if data['lead_status'] == "Closed" or data['lead_status'] == "Cancelled":
+    MAX_LEADS = 4
+    
+    # Check if assignment is changing (different RM)
+    if str(enquiry.assigned_to_id) != str(data['user']):
+        can_assign, current_count, message = can_assign_lead_to_rm(
+            assigned_user, 
+            exclude_enquiry_id=enquiry.id, 
+            max_leads=MAX_LEADS
+        )
+        
+        if not can_assign:
+            return JsonResponse({
+                'status': '0',
+                'msg': message,
+                'current_count': current_count,
+                'max_allowed': MAX_LEADS
+            })
+    
+    # Set closed date
+    if data['lead_status'] in ["Closed", "Cancelled"]:
         closed_date = datetime.today()
     else:
-        closed_date=None
-
-    PropertyEnquiry.objects.filter(id=data['id']).update(lead_status=data['lead_status'],assigned_to=user,closed_date=closed_date,followup_notes=data['followup_notes'])
-
-    return JsonResponse({"status":"1", "msg" : f"Property Enquiry Details updated successfully"})
+        closed_date = None
+    
+    # Update enquiry
+    PropertyEnquiry.objects.filter(id=data['id']).update(
+        lead_status=data['lead_status'],
+        assigned_to=assigned_user,
+        closed_date=closed_date,
+        followup_notes=data['followup_notes']
+    )
+    
+    # Get final count for response
+    final_count = PropertyEnquiry.objects.filter(
+        assigned_to=assigned_user,
+        lead_status__in=['Pending', 'In Progress', 'Hold']
+    ).count()
+    
+    return JsonResponse({
+        "status": "1",
+        "msg": f"Enquiry updated successfully!\n\n{assigned_user.user_name} now has {final_count}/{MAX_LEADS} active leads.",
+        "active_leads_count": final_count,
+        "max_allowed": MAX_LEADS,
+        "remaining_slots": MAX_LEADS - final_count
+    })
 
 ############# Views end for ajax for update property enquiry ####################
 
@@ -430,11 +591,7 @@ def lead_report(request):
     
     lead = PropertyEnquiry.objects.all()
 
-   
-    
 
-   
- 
     context = {
         'admin_obj': admin_obj,
         'lead': lead,

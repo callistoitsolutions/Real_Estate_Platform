@@ -395,6 +395,49 @@
     color: #0e7490 !important;
 }
 
+/* Charts Section */
+.charts-section {
+    margin-bottom: 30px;
+}
+
+.chart-container {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chart-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.chart-header h5 {
+    margin: 0;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.chart-header h5 i {
+    color: #0d9488;
+    margin-right: 8px;
+}
+
+.chart-container canvas {
+    max-height: 280px;
+    width: 100%;
+}
+
 /* Age Badge Styles */
 .age-badge {
     display: inline-block;
@@ -654,6 +697,44 @@
     </div>
 </div>
 
+<!-- Charts Section -->
+<div class="charts-section">
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h5><i class="fas fa-chart-pie"></i> Enquiries by Source</h5>
+                </div>
+                <canvas id="sourceChart" style="height: 280px; width: 100%;"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h5><i class="fas fa-chart-simple"></i> Enquiries by Status</h5>
+                </div>
+                <canvas id="statusChart" style="height: 280px; width: 100%;"></canvas>
+            </div>
+        </div>
+        <div class="col-md-12 mb-4">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h5><i class="fas fa-chart-bar"></i> Enquiries by Lead Age</h5>
+                </div>
+                <canvas id="ageChart" style="height: 280px; width: 100%;"></canvas>
+            </div>
+        </div>
+        <div class="col-md-12 mb-4">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h5><i class="fas fa-chart-line"></i> Daily Enquiry Trend (Last 30 Days)</h5>
+                </div>
+                <canvas id="trendChart" style="height: 280px; width: 100%;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Source Analytics Cards -->
 <div class="source-cards-section">
     <div class="section-header" style="margin-bottom: 15px;">
@@ -851,7 +932,7 @@
                 <td>{{ enquiry.enquiry_name }}</td>
                 <td>{{ enquiry.country_code }}-{{ enquiry.enquiry_phone }}</td>
                 <td>{{ enquiry.utm_link.property_title|default:'N/A' }}</td>
-                <td>{{ enquiry.enquiry_date|date:'d-m-Y' }}</td>
+                <td>{{ enquiry.enquiry_date|date:'M d, Y' }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -859,187 +940,318 @@
 </div>
 
 <script>
-// Function to calculate lead age
-function calculateLeadAge(enquiryDateStr, status) {
-    if (!enquiryDateStr) return { days: 0, display: 'N/A', badgeClass: 'new' };
-    
+// Calculate lead age
+function calculateLeadAge(enquiryDateStr) {
+    if (!enquiryDateStr || enquiryDateStr === 'None') return 'N/A';
     const enquiryDate = new Date(enquiryDateStr);
     const today = new Date();
-    
-    const endDate = today;
-    const diffTime = Math.abs(endDate - enquiryDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    let badgeClass = '';
-    let displayText = '';
-    
-    if (status === 'Closed') {
-        displayText = `Closed (${diffDays}d)`;
-        badgeClass = 'closed';
-    } else if (status === 'Cancelled') {
-        displayText = `Cancelled (${diffDays}d)`;
-        badgeClass = 'cancelled';
-    } else {
-        displayText = `${diffDays} days`;
-        if (diffDays <= 3) {
-            badgeClass = 'new';
-        } else if (diffDays <= 7) {
-            badgeClass = 'medium';
-        } else {
-            badgeClass = 'old';
-        }
-    }
-    
-    return {
-        days: diffDays,
-        display: displayText,
-        badgeClass: badgeClass
-    };
+    const diffDays = Math.ceil(Math.abs(today - enquiryDate) / (1000 * 60 * 60 * 24));
+    return `${diffDays} days`;
 }
 
-// Function to update all lead ages
+// Update lead ages in table
 function updateAllLeadAges() {
     let totalDays = 0;
     let count = 0;
     
     $('.lead-age-cell').each(function() {
-        const $cell = $(this);
-        const enquiryDate = $cell.data('enquiry-date');
-        const status = $cell.closest('tr').data('status') || 'Pending';
-        
-        if (enquiryDate) {
-            const age = calculateLeadAge(enquiryDate, status);
-            $cell.html(`<span class="age-badge ${age.badgeClass}">${age.display}</span>`);
-            totalDays += age.days;
+        const enquiryDate = $(this).data('enquiry-date');
+        if (enquiryDate && enquiryDate !== 'None') {
+            const ageDisplay = calculateLeadAge(enquiryDate);
+            $(this).html(`<span class="age-badge">${ageDisplay}</span>`);
+            const age = parseInt(ageDisplay);
+            totalDays += age;
             count++;
-        } else {
-            $cell.html('<span class="age-badge new">N/A</span>');
         }
     });
     
     if (count > 0) {
         const avgDays = Math.round(totalDays / count);
-        let avgDisplay = '';
-        if (avgDays <= 3) {
-            avgDisplay = `${avgDays} days (New)`;
-        } else if (avgDays <= 7) {
-            avgDisplay = `${avgDays} days (Medium)`;
-        } else {
-            avgDisplay = `${avgDays} days (Old)`;
-        }
-        $('#avgLeadAge').html(avgDisplay);
+        $('#avgLeadAge').html(`${avgDays} days`);
     }
 }
 
-// Filter by Source
+// Initialize Source Pie Chart
+function initSourceChart() {
+    const ctx = document.getElementById('sourceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Facebook', 'Instagram', 'WhatsApp', 'Google', 'LinkedIn', 'Twitter', 'YouTube', 'Referral', 'Direct'],
+            datasets: [{
+                data: [
+                    parseInt($('#facebookCount').text()) || 0,
+                    parseInt($('#instagramCount').text()) || 0,
+                    parseInt($('#whatsappCount').text()) || 0,
+                    parseInt($('#googleCount').text()) || 0,
+                    parseInt($('#linkedinCount').text()) || 0,
+                    parseInt($('#twitterCount').text()) || 0,
+                    parseInt($('#youtubeCount').text()) || 0,
+                    parseInt($('#referralCount').text()) || 0,
+                    parseInt($('#directCount').text()) || 0
+                ],
+                backgroundColor: ['#1877f2', '#e4405f', '#25d366', '#ea4335', '#0077b5', '#000000', '#dc1a1a', '#fd7e14', '#6c757d']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
+    });
+}
+
+// Initialize Status Doughnut Chart
+function initStatusChart() {
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'In Progress', 'Hold', 'Closed', 'Cancelled'],
+            datasets: [{
+                data: [
+                    parseInt($('#pendingCount').text()) || 0,
+                    parseInt($('#inProgressCount').text()) || 0,
+                    parseInt($('#holdCount').text()) || 0,
+                    parseInt($('#closedCount').text()) || 0,
+                    parseInt($('#cancelledCount').text()) || 0
+                ],
+                backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#ef4444']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
+    });
+}
+
+// Initialize Age Bar Chart
+function initAgeChart() {
+    function getAgeGroups() {
+        const groups = [0, 0, 0, 0, 0];
+        $('#enquiryTable tbody tr').each(function() {
+            const enquiryDate = $(this).find('.lead-age-cell').data('enquiry-date');
+            if (enquiryDate && enquiryDate !== 'None') {
+                const age = Math.ceil(Math.abs(new Date() - new Date(enquiryDate)) / (1000 * 60 * 60 * 24));
+                if (age <= 3) groups[0]++;
+                else if (age <= 7) groups[1]++;
+                else if (age <= 15) groups[2]++;
+                else if (age <= 30) groups[3]++;
+                else groups[4]++;
+            }
+        });
+        return groups;
+    }
+    
+    const ctx = document.getElementById('ageChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['0-3 days', '4-7 days', '8-15 days', '16-30 days', '30+ days'],
+            datasets: [{
+                label: 'Number of Enquiries',
+                data: getAgeGroups(),
+                backgroundColor: 'rgba(13, 148, 136, 0.7)',
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'Number of Enquiries' } } }
+        }
+    });
+}
+
+// Initialize Trend Line Chart
+// Initialize Trend Line Chart - WITH YEAR included
+function initTrendChart() {
+    // Get last 30 days labels (format: "Jun 11, 2026" with year)
+    const dates = [];
+    const counts = [];
+    const today = new Date();
+    
+    for (let i = 29; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        // Format as "Jun 11, 2026" with year
+        dates.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
+        counts.push(0);
+    }
+    
+    // Count enquiries from table - match exact format
+    $('#enquiryTable tbody tr').each(function() {
+        let dateStr = $(this).find('td:last').text().trim();
+        
+        if (dateStr && dateStr !== '') {
+            // Find matching index (exact match including year)
+            const idx = dates.findIndex(d => d === dateStr);
+            if (idx !== -1) {
+                counts[idx]++;
+            }
+        }
+    });
+    
+    console.log('Chart labels (with year):', dates.slice(0, 5));
+    console.log('Chart counts:', counts.slice(0, 10));
+    console.log('Total enquiries:', counts.reduce((a,b) => a + b, 0));
+    
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    
+    // Destroy existing chart if any
+    if (window.trendChartInstance) {
+        window.trendChartInstance.destroy();
+    }
+    
+    window.trendChartInstance = new Chart(ctx, {
+        type: 'line',  // Changed back to line chart
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Enquiries',
+                data: counts,
+                borderColor: '#0d9488',
+                backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+                pointRadius: 4,
+                pointBackgroundColor: '#0d9488',
+                pointBorderColor: 'white',
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { 
+                    callbacks: { 
+                        label: (ctx) => `Enquiries: ${ctx.raw}` 
+                    } 
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Number of Enquiries' },
+                    ticks: { stepSize: 1 }
+                },
+                x: {
+                    title: { display: true, text: 'Date' },
+                    ticks: { 
+                        maxRotation: 45,
+                        autoSkip: true,
+                        maxTicksLimit: 15
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Filter functions
 function filterBySource(source) {
     $('.source-card').removeClass('active');
     $(`.source-card[data-source="${source}"]`).addClass('active');
-    
     $('#enquiryTable tbody tr').each(function() {
-        var sourceText = $(this).find('td:eq(6)').text().trim().toLowerCase();
-        var showRow = sourceText.includes(source);
-        $(this).toggle(showRow);
+        const sourceText = $(this).find('td:eq(6)').text().trim().toLowerCase();
+        $(this).toggle(source === 'all' || sourceText.includes(source.toLowerCase()));
     });
-    
     updateVisibleCount();
-    updateAllLeadAges();
 }
 
-// Filter by Status
 function filterByStatus(status) {
     $('.status-card').removeClass('active');
-    $(`.status-card[data-status="${status}"]`).addClass('active');
+    if (status !== 'all') $(`.status-card[data-status="${status}"]`).addClass('active');
+    else $('.status-card[data-status="all"]').addClass('active');
     
     $('#enquiryTable tbody tr').each(function() {
-        var statusText = $(this).find('td:eq(4)').text().trim();
-        var showRow = (status === 'all') || statusText.includes(status);
-        $(this).toggle(showRow);
+        const statusText = $(this).find('td:eq(4)').text().trim();
+        $(this).toggle(status === 'all' || statusText.includes(status));
     });
-    
     updateVisibleCount();
-    updateAllLeadAges();
 }
 
-// Reset all filters
-function resetAllFilters() {
-    $('.source-card').removeClass('active');
-    $('.status-card').removeClass('active');
-    $('#enquiryTable tbody tr').show();
-    updateVisibleCount();
-    updateAllLeadAges();
-}
-
-// Update visible record count
 function updateVisibleCount() {
-    var visibleCount = $('#enquiryTable tbody tr:visible').length;
+    const visibleCount = $('#enquiryTable tbody tr:visible').length;
     $('.records-counter').text(visibleCount + ' found');
 }
 
+
+
+// Document Ready
 $(document).ready(function () {
     var table = $('#enquiryTable').DataTable({
-        dom: '<"table-header"Bf>lrt<"table-footer"ip>',
-        buttons: ['excel', 'csv'],
+        dom: 'lrt<"table-footer"ip>',
         paging: true,
-        ordering: true,
-        info: true,
-        lengthChange: true,
         pageLength: 10,
         lengthMenu: [5, 10, 25, 50, 100],
-        language: {
-            search: "",
-            searchPlaceholder: "Search Enquiries...",
-            info: "Showing _START_ to _END_ of _TOTAL_ entries",
-            infoEmpty: "Showing 0 to 0 of 0 entries",
-            infoFiltered: "(filtered from _MAX_ total entries)",
-            paginate: {
-                previous: "<i class='fas fa-chevron-left'></i>",
-                next: "<i class='fas fa-chevron-right'></i>"
-            }
-        },
-        autoWidth: false,
-        columnDefs: [
-            { orderable: false, targets: [0, 3, 4] },
-            { type: 'date', targets: 10 }
-        ],
+        scrollX: false,
+        language: { search: "", searchPlaceholder: "Search...", paginate: { previous: "<i class='fas fa-chevron-left'></i>", next: "<i class='fas fa-chevron-right'></i>" } },
+        columnDefs: [{ orderable: false, targets: [0, 3, 4] }],
         order: [[10, 'desc']]
     });
     
-    var searchHtml = '<div class="search-container">' +
-                        '<i class="fas fa-search"></i>' +
-                        '<div class="dataTables_filter"></div>' +
-                        '<span class="records-counter">0 records</span>' +
-                     '</div>';
-    
-    $('.table-header').append(searchHtml);
+    // Search container
+    $('.table-header').append('<div class="search-container"><i class="fas fa-search"></i><div class="dataTables_filter"></div><span class="records-counter">0 records</span></div>');
     $('.dataTables_filter').appendTo('.search-container');
-    $('.dataTables_filter input').attr("placeholder", "Search by name, property, source...");
+    $('.dataTables_filter input').attr("placeholder", "Search...");
     
     function updateRecordCounter() {
-        var totalRecords = table.rows().count();
-        var filteredRecords = table.rows({search: 'applied'}).count();
-        
-        if (filteredRecords === totalRecords) {
-            $('.records-counter').text(totalRecords + ' total');
-        } else {
-            $('.records-counter').text(filteredRecords + ' found');
-        }
+        var total = table.rows().count();
+        var filtered = table.rows({search: 'applied'}).count();
+        $('.records-counter').text(filtered === total ? total + ' total' : filtered + ' found');
     }
     
-    $('.dataTables_filter input').on('keyup search', function() {
-        setTimeout(updateRecordCounter, 50);
-    });
+    table.on('draw', function() { updateRecordCounter(); });
+    $('.dataTables_filter input').on('keyup', function() { setTimeout(updateRecordCounter, 50); });
     
-    table.on('draw', function() {
-        updateRecordCounter();
+    // Initialize everything
+    setTimeout(function() {
         updateAllLeadAges();
-    });
-    
-    setTimeout(() => {
-        updateAllLeadAges();
+        initSourceChart();
+        initStatusChart();
+        initAgeChart();
+        initTrendChart();
         updateRecordCounter();
-    }, 200);
+    }, 500);
 });
 
 setInterval(updateAllLeadAges, 60000);
-</script>
+
+// Update charts with filtered data
+function updateChartsWithFilteredData(data) {
+    // Update Source Chart
+    if (sourceChart) {
+        sourceChart.data.datasets[0].data = [
+            data.fb_count, data.insta_count, data.whatsapp_count,
+            data.google_count, data.linkedin_count, data.twitter_count,
+            data.youtube_count, data.referral_count, data.direct_count
+        ];
+        sourceChart.update();
+    }
+    
+    // Update Status Chart
+    if (statusChart) {
+        statusChart.data.datasets[0].data = [
+            data.pending_count, data.progress_count, data.hold_count,
+            data.closed_count, data.cancelled_count
+        ];
+        statusChart.update();
+    }
+    
+    // Update Age Chart
+    if (ageChart) {
+        ageChart.data.datasets[0].data = [
+            data.age_0_3, data.age_4_7, data.age_8_15,
+            data.age_16_30, data.age_30_plus
+        ];
+        ageChart.update();
+    }
+    
+    // Update Trend Chart
+    if (trendChart) {
+        trendChart.data.labels = data.trend_dates;
+        trendChart.data.datasets[0].data = data.trend_counts;
+        trendChart.update();
+    }
+}
+
+</script> 

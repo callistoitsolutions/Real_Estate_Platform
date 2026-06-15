@@ -51,6 +51,7 @@
             <th>Max Listings</th>
             <th>Offer Start Date</th>
             <th>Offer End Date</th>
+            <th>Plan Description</th>
             <th>Plan Upload Date</th>
         </tr>
     </thead>
@@ -98,6 +99,7 @@
             <td>{{ subscription.plan_max_listings }}</td>
             <td>{{ subscription.plan_offer_start_date }}</td>
             <td>{{ subscription.plan_offer_end_date }}</td>
+            <td>{{ subscription.plan_desc }}</td>
 
             <td>{{ subscription.plan_upload_date }}</td>
 
@@ -116,7 +118,21 @@
 
     var table = $('#subscriptionsTable').DataTable({
         dom: '<"table-header"Blf>rt<"table-footer"ip>',
-        buttons: ['excel','csv'],
+        buttons: [
+            {
+                extend: 'excel',
+                text: '<i class="fas fa-building"></i> Export to Excel',
+                className: 'btn-excel',
+                filename: 'Subscriptions_List_' + new Date().toISOString().slice(0,19).replace(/:/g, '-'),
+                title: 'Subscriptions Report',
+                exportOptions: {
+                    columns: ':visible',
+                    modifier: {
+                        page: 'all'
+                    }
+                }
+            }
+        ],
         paging: true,
         ordering: true,
         info: true,

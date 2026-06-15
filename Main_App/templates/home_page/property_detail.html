@@ -1,9 +1,17 @@
+
+code.txt
+
+Page
+1
+/
+1
+100%
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>{% if seo %}{{ seo.meta_title }}{% else %}{{ p.title }} | EstateFusion{% endif %}</title>
+<title>{% if seo %}{{ seo.meta_title }}{% else %}{{ p.title }} | EstateFlow{% endif %}</title>
 <meta name="description" content="{% if seo %}{{ seo.meta_description }}{% else %}{{ p.title }} in {{ p.city }}{% endif %}">
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -439,6 +447,18 @@ a { text-decoration: none; color: inherit; }
   .spec-grid { grid-template-columns: 1fr 1fr; }
   .prop-hero-header h1 { font-size: 1.3rem; }
 }
+
+.auth-step { display: none; animation: fadeInSlideUp 0.4s ease forwards; }
+.auth-step.active-step { display: block; }
+@keyframes fadeInSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+}
+.otp-container { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+.otp-input { width: 50px; height: 55px; text-align: center; font-size: 1.5rem; font-weight: 700; border-radius: 8px; border: 2px solid #e2e8f0; background: white;}
+.otp-input:focus { border-color: #006ce4; outline: none; box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.1); }
+
+
 </style>
 </head>
 <body>
@@ -535,7 +555,7 @@ a { text-decoration: none; color: inherit; }
             <div class="content">
               <div class="inner">
                 <div class="icon-circle"><i class="fas fa-home" style="font-size:50px;"></i></div>
-                <h3>EstateFusion</h3>
+                <h3>EstateFlow</h3>
                 <p>Property Images Not Available</p>
               </div>
             </div>
@@ -1287,36 +1307,84 @@ a { text-decoration: none; color: inherit; }
               <div class="masked-num">{{ masked_phone }}</div>
               <div class="masked-hint">Subscribe to view full contact details</div>
             </div>
-            <button class="btn-call-primary" data-bs-toggle="modal" data-bs-target="#authModal">
+            {% comment %} <button class="btn-call-primary" data-bs-toggle="modal" data-bs-target="#authModal">
               <i class="fas fa-unlock-alt"></i> Login to View Contact
-            </button>
+            </button> {% endcomment %}
           {% endif %}
 
           <!-- Enquiry Form -->
           <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">
-            <div style="font-size:.84rem;font-weight:800;color:var(--dark);margin-bottom:12px;display:flex;align-items:center;gap:7px;">
-              <i class="fas fa-paper-plane" style="color:var(--pr);"></i> Send Enquiry
-            </div>
-            <input type="text" id="enq_name" class="enq-input" placeholder="Your Full Name *"
-              value="{% if user_obj %}{{ user_obj.user_name }}{% endif %}">
-            <input type="tel" id="enq_phone" class="enq-input" placeholder="Phone Number *"
-              value="{% if user_obj %}{{ user_obj.user_phone }}{% endif %}">
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" id="whatsappConsent" checked style="accent-color:var(--pr);">
-              <label class="form-check-label" for="whatsappConsent" style="font-size:.74rem;color:var(--muted);cursor:pointer;">
-                I consent to receive property alerts on WhatsApp/SMS
-              </label>
-            </div>
-            {% if user_obj %}
-              <button class="enq-submit" onclick="sendEnquiry(this)">
-                <i class="fas fa-paper-plane"></i> Get Owner Contact
-              </button>
-            {% else %}
-              <button class="enq-submit" data-bs-toggle="modal" data-bs-target="#authModal">
-                <i class="fas fa-sign-in-alt"></i> Login to Enquire
-              </button>
-            {% endif %}
-          </div>
+            <form method="POST" id="enquiryForm" action="{% url 'save_property_enquiry' %}">
+                {% csrf_token %}
+                <input type="hidden" name="property_id" value="{{ original.id }}">
+                <input type="hidden" name="property_title" value="{{ p.title }}">
+                <input type="hidden" name="property_type" value="{{ listing_type }}">
+                <input type="hidden" name="property_location" value="{{ p.location }}">
+                <input type="hidden" name="lead_source" value="property_detail_page">
+                <input type="hidden" name="seo_slug" value="{{ seo.slug }}">
+
+                <!--  ADD THESE HIDDEN UTM FIELDS -->
+
+                <!-- Add these hidden fields inside your enquiry form -->
+                <input type="hidden" name="utm_source" id="enquiry_utm_source" value="">
+                <input type="hidden" name="utm_medium" id="enquiry_utm_medium" value="">
+                <input type="hidden" name="utm_campaign" id="enquiry_utm_campaign" value="">
+                <input type="hidden" name="utm_term" id="enquiry_utm_term" value="">
+                <input type="hidden" name="utm_content" id="enquiry_utm_content" value="">
+                <input type="hidden" name="utm_path" id="enquiry_utm_path" value="">
+                <input type="hidden" name="utm_params" id="enquiry_utm_params" value="">
+                <input type="hidden" name="page_url" id="enquiry_page_url" value="">
+                <input type="hidden" name="property_id" id="enquiry_property_id" value="{{ p.id }}">
+                <input type="hidden" name="property_type" id="enquiry_property_type" value="{{ property_type }}">
+
+                <input type="text" name="enquiry_name" id="enquiry_name" class="form-select mb-2" placeholder="Your Name" required value="{{ user_obj.user_name }}">
+
+                <div class="input-group mb-3">
+                    <select name="country_code" id="country_code" class="form-select" style="max-width: 110px; border-radius: 12px 0 0 12px; height: 46px; font-size: 0.9rem; border: 1.5px solid #e2e8f0; background-color: #fff;">
+                        <option value="+91" selected>🇮🇳 +91</option>
+                        <option value="+1">🇺🇸 +1</option>
+                        <option value="+44">🇬🇧 +44</option>
+                        <option value="+971">🇦🇪 +971</option>
+                        <option value="+65">🇸🇬 +65</option>
+                        <option value="+61">🇦🇺 +61</option>
+                        <option value="+1">🇨🇦 +1</option>
+                    </select>
+                    <input type="tel" name="enquiry_phone" id="enquiry_phone" class="form-control" placeholder="Phone Number" required value="{{ user_obj.user_phone }}" style="border-radius: 0 12px 12px 0; height: 46px; font-size: 0.9rem; border: 1.5px solid #e2e8f0; border-left: none;">
+                </div>
+
+                <div class="form-check mb-3 text-start">
+                    <input class="form-check-input" type="checkbox" id="whatsappConsent" name="whatsapp_consent" checked style="cursor: pointer; accent-color: #006ce4;">
+                    <label class="form-check-label text-muted" for="whatsappConsent" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
+                        I consent to receive property alerts and owner details directly on WhatsApp/SMS. 
+                    </label>
+                </div>
+
+                <div class="form-check mb-2 text-start">
+                    <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required style="cursor: pointer; accent-color: #006ce4;">
+                    {% if p.listing_type == "rent" %}
+
+                      <label class="form-check-label text-muted" for="agreeTerms" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
+                        I am interested in vendor services</span>
+                      </label>
+
+                    {% else %}
+
+                      <label class="form-check-label text-muted" for="agreeTerms" style="font-size: 0.78rem; cursor: pointer; user-select: none; line-height: 1.4;">
+                          I am interested in home loan services
+                      </label>
+
+                    {% endif %}
+                </div>
+
+                
+
+                {% if user_obj %}
+                  <button type="button" name="send_enquiry" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" onclick="Send_Enquiry(this)">Get Contact Details</button>
+                {% else %}
+                  <!-- 🟢 FIXED: Changed data-bs-target to #authEnModal -->
+                  <button type="button" class="btn btn-dark w-100 btn-sm py-2" style="border-radius: 12px; height: 44px; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#authEnModal">Get Contact Details</button>
+                {% endif %}
+            </form>
 
           <!-- Trust badges -->
           <div class="trust-badges">
@@ -1368,45 +1436,98 @@ a { text-decoration: none; color: inherit; }
   </div>
 </div>
 
-<!-- ═══ AUTH MODAL ═══ -->
-<div class="modal fade" id="authModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+<!-- AUTH MODAL -->
+<div class="modal fade" id="authEnModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius:18px;border:none;box-shadow:0 20px 50px rgba(0,0,0,.2);">
-      <div class="modal-header border-0 pb-0 px-4 pt-4" style="position:relative;">
-        <h5 class="modal-title" style="font-weight:800;font-size:1.15rem;">Login / Register</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" style="position:absolute;right:20px;top:20px;"></button>
+    <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+      
+      <div class="modal-header border-0 pb-0" style="position: relative;">
+        <h5 class="modal-title" style="font-weight: 800; color: #1e293b;">Continue to PropCRM</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 20px;"></button>
       </div>
-      <div class="modal-body p-4">
-        <ul class="nav nav-pills mb-3 justify-content-center" id="authTabs" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#loginPanel" type="button" style="border-radius:8px;font-weight:700;font-size:.85rem;">Login</button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#registerPanel" type="button" style="border-radius:8px;font-weight:700;font-size:.85rem;">Register</button>
-          </li>
-        </ul>
-        <div class="tab-content">
-          <div class="tab-pane fade show active" id="loginPanel">
-            <select id="modal_login_role" class="enq-input">
-              <option value="">Select Role</option>
-              <option>Buyer</option><option>Tenant</option><option>Agent</option><option>Owner</option><option>Builder</option>
-            </select>
-            <input type="text" id="modal_login_email" class="enq-input" placeholder="Email or Mobile">
-            <input type="password" id="modal_login_password" class="enq-input" placeholder="Password">
-            <button class="enq-submit" onclick="processLogin(this)"><i class="fas fa-sign-in-alt"></i> Login</button>
+
+      <div class="modal-body pt-3 pb-4 px-4">
+        
+        <div id="step-1-email" class="auth-step active-step">
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Enter your email address to login or create a new account.</p>
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Email Address <span class="text-danger">*</span></label>
+            <input type="email" id="flow_email" class="form-control" placeholder="name@example.com" style="border-radius: 10px; padding: 12px; background: #f8fafc;">
           </div>
-          <div class="tab-pane fade" id="registerPanel">
-            <select id="modal_reg_role" class="enq-input">
-              <option value="">Select Role</option>
-              <option>Buyer</option><option>Tenant</option><option>Agent</option><option>Owner</option><option>Builder</option>
-            </select>
-            <input type="text" id="modal_reg_name" class="enq-input" placeholder="Full Name">
-            <input type="email" id="modal_reg_email" class="enq-input" placeholder="Email">
-            <input type="tel" id="modal_reg_mobile" class="enq-input" placeholder="Mobile Number">
-            <input type="password" id="modal_reg_password" class="enq-input" placeholder="Create Password">
-            <button class="enq-submit" onclick="processRegister(this)"><i class="fas fa-user-plus"></i> Create Account</button>
-          </div>
+          <button type="button" class="btn w-100 mt-2" onclick="checkEmailExists(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Continue <i class="fas fa-arrow-right ms-1"></i>
+          </button>
         </div>
+
+        <div id="step-2-login" class="auth-step">
+          <button onclick="goToStepAuth('step-1-email')" style="background:none; border:none; color:#64748b; font-size:0.9rem; font-weight:600; margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">Welcome back! Please enter your password to continue.</p>
+          
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700; margin-bottom: 6px; display: block;">
+                Password <span class="text-danger">*</span>
+            </label>
+            <div class="input-group" style="position: relative;">
+                <input type="password" id="flow_password" class="form-control" placeholder="Enter your password" 
+                      style="border-radius: 10px; padding: 12px; padding-right: 45px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                <button type="button" id="togglePassword" 
+                        style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); 
+                              background: none; border: none; color: #94a3b8; z-index: 10; cursor: pointer; padding: 0;">
+                    <i class="fas fa-eye" id="eyeIcon" style="font-size: 1.1rem;"></i>
+                </button>
+            </div>
+          </div>
+          
+          <button type="button" class="btn w-100 mt-2" onclick="processProgLogin(this)" style="background: #006ce4; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Secure Login
+          </button>
+        </div>
+
+        <div id="step-2-otp" class="auth-step">
+          <button onclick="goToStepAuth('step-1-email')" style="background:none; border:none; color:#64748b; font-size:0.9rem; font-weight:600; margin-bottom:15px;"><i class="fas fa-arrow-left"></i> Change Email</button>
+          <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">We've sent a 4-digit code to <strong id="display_otp_email" class="text-dark"></strong>.</p>
+          
+          <div class="otp-container">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+            <input type="text" class="otp-input" maxlength="1" onkeyup="moveToNext(this, event)">
+          </div>
+          
+          <button type="button" class="btn w-100 mt-2" onclick="verifyOTP(this)" style="background: #f97316; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Verify OTP
+          </button>
+        </div>
+
+        <div id="step-3-details" class="auth-step">
+          <p style="font-size: 0.9rem; color: #10b981; font-weight: 600; margin-bottom: 20px;"><i class="fas fa-check-circle"></i> Email Verified! Just a few details.</p>
+          
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Full Name <span class="text-danger">*</span></label>
+            <input type="text" id="flow_reg_name" class="form-control" placeholder="John Doe" style="border-radius: 10px; padding: 10px; background: #f8fafc;">
+          </div>
+          
+          <div class="mb-3">
+            <label style="font-size: 0.8rem; font-weight: 700;">Mobile Number <span class="text-danger">*</span></label>
+            <input type="tel" id="flow_reg_mobile" class="form-control" placeholder="10 Digits" style="border-radius: 10px; padding: 10px; background: #f8fafc;" maxlength="10">
+          </div>
+          
+          <div class="mb-3">
+             <label style="font-size: 0.8rem; font-weight: 700;">I am a <span class="text-danger">*</span></label>
+             <select id="flow_reg_role" class="form-select" style="border-radius: 10px; padding: 10px; background: #f8fafc;" required>
+               <option value="SelectRole" selected disabled>Choose a role...</option>
+               <option value="Landlord">Landlord</option>
+               <option value="Agent">Agent</option>
+               <option value="Agency/Builder">Agencies / Builder</option>
+               <option value="Vendor">Vendor</option>
+             </select>
+          </div>
+
+          <button type="button" class="btn w-100 mt-3" onclick="processProgRegistration(this)" style="background: #10b981; color: white; font-weight: 700; padding: 12px; border-radius: 10px;">
+            Create Account & Continue
+          </button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -1430,182 +1551,606 @@ a { text-decoration: none; color: inherit; }
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// ═══ GALLERY WALKTHROUGH ═══
-const slides       = document.querySelectorAll('.walkthrough-slide');
-const stripThumbs  = document.querySelectorAll('.strip-thumb');
-const playPauseBtn = document.getElementById('playPauseBtn');
-const galTimer     = document.getElementById('galTimer');
-const INTERVAL     = 4000;
-let currentSlide = 0, isPlaying = true, ticker = null, startTime = Date.now();
-const totalDuration = slides.length * INTERVAL;
 
-function fmt(ms) {
-  const s = Math.floor(ms/1000), m = Math.floor(s/60);
-  return `${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-}
 
-window.setSlide = function(idx) {
-  slides.forEach(s => s.classList.remove('active'));
-  stripThumbs.forEach(t => t.classList.remove('active-thumb'));
-  currentSlide = (idx + slides.length) % slides.length;
-  if (slides[currentSlide]) slides[currentSlide].classList.add('active');
-  const activeThumb = document.querySelector(`.strip-thumb[data-slide="${currentSlide}"]`);
-  if (activeThumb) { activeThumb.classList.add('active-thumb'); activeThumb.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
-  startTime = Date.now();
-};
+document.addEventListener("DOMContentLoaded", function () {
+    const passwordInput = document.getElementById("flow_password");
+    const toggleButton = document.getElementById("togglePassword");
+    const eyeIcon = document.getElementById("eyeIcon");
 
-function tickTimer() {
-  if (!isPlaying || !galTimer) return;
-  const elapsed = (currentSlide * INTERVAL) + ((Date.now() - startTime) % INTERVAL);
-  galTimer.textContent = `${fmt(Math.min(elapsed, totalDuration))} / ${fmt(totalDuration)}`;
-  requestAnimationFrame(tickTimer);
-}
-
-function autoAdvance() { ticker = setInterval(() => setSlide(currentSlide + 1), INTERVAL); }
-
-if (slides.length > 0) {
-  if (playPauseBtn) {
-    playPauseBtn.addEventListener('click', function() {
-      if (isPlaying) {
-        clearInterval(ticker); isPlaying = false;
-        this.innerHTML = '<i class="fas fa-play"></i>';
-      } else {
-        autoAdvance(); isPlaying = true;
-        this.innerHTML = '<i class="fas fa-pause"></i>';
-        requestAnimationFrame(tickTimer);
-      }
-    });
-  }
-  setSlide(0); autoAdvance(); requestAnimationFrame(tickTimer);
-}
-
-// ═══ STICKY NAV SCROLL SPY ═══
-const navLinks = document.querySelectorAll('.prop-nav-link');
-const sections = document.querySelectorAll('.prop-section[id]');
-
-function updateActiveNav() {
-  let activeId = null;
-  sections.forEach(sec => {
-    if (window.scrollY >= sec.getBoundingClientRect().top + window.scrollY - 160) activeId = sec.id;
-  });
-  if (activeId) navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('data-target') === activeId));
-}
-window.addEventListener('scroll', updateActiveNav, {passive:true});
-navLinks.forEach(link => {
-  link.addEventListener('click', function(e) {
-    e.preventDefault();
-    const target = document.getElementById(this.getAttribute('data-target'));
-    if (target) window.scrollTo({top: target.getBoundingClientRect().top + window.scrollY - 130, behavior:'smooth'});
-  });
+    if (toggleButton && passwordInput) {
+        toggleButton.addEventListener("click", function () {
+            // Check the current type attribute of the input
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+            passwordInput.setAttribute("type", type);
+            
+            // Toggle the Font Awesome icon classes and the color for active state
+            if (type === "text") {
+                eyeIcon.classList.remove("fa-eye");
+                eyeIcon.classList.add("fa-eye-slash");
+                eyeIcon.style.color = "#0d9488"; // Subtle color change when visible (Deep Teal)
+            } else {
+                eyeIcon.classList.remove("fa-eye-slash");
+                eyeIcon.classList.add("fa-eye");
+                eyeIcon.style.color = "#94a3b8"; // Resets to original muted grey
+            }
+        });
+    }
 });
-updateActiveNav();
 
-// ═══ PHONE REVEAL ═══
-function revealPhone(elementId, phone) {
-  const el = document.getElementById(elementId);
-  if (el && phone) {
-    el.textContent = phone;
-    el.style.color = 'var(--pr)';
-    el.style.fontWeight = '700';
-    const btn = el.nextElementSibling;
-    if (btn && btn.classList.contains('btn-reveal-phone')) btn.remove();
+// ═══════════════════════════════════════════════
+// MEDIA VIEWER — FIXED VIDEO PLAYBACK
+// ═══════════════════════════════════════════════
+
+// Track active thumb
+let currentThumb = null;
+let isVideoMode = {% if p.video %}true{% else %}false{% endif %};
+let currentStep = 1;
+
+// --- MODAL TAB SWITCHERS ---
+function goToStepAuth(stepId) {
+    $('.auth-step').removeClass('active-step').hide(); 
+    $('#' + stepId).addClass('active-step').fadeIn(250);
+}
+function moveToNext(current, event) {
+    if (current.value.length >= current.maxLength) {
+        let next = $(current).next('.otp-input');
+        if (next.length) next.focus();
+    }
+    if (event.key === "Backspace" && current.value.length === 0) {
+        let prev = $(current).prev('.otp-input');
+        if (prev.length) prev.focus();
+    }
+}
+
+/* ── FORM STEPPER (WITH LOGIN INTERCEPTION) ── */
+// ═══════════════════════════════════════════════
+// SAFE STEPPER FUNCTION - No UI element manipulation
+// ═══════════════════════════════════════════════
+function goToStep(n) {
+  let userStatus = (typeof isLoggedIn !== 'undefined') ? isLoggedIn : false;
+  
+  if (n === 2 && userStatus === false) {
+      pendingAction = function() { goToStep(2); }; 
+      goToStepAuth('step-1-email');
+      const modal = document.getElementById('authEnModal');
+      if (modal && typeof bootstrap !== 'undefined') {
+        bootstrap.Modal.getOrCreateInstance(modal).show();
+      }
+      return; 
   }
+  
+  // Simple step tracking - only update currentStep variable
+  // No DOM manipulation that could cause errors
+  currentStep = n;
+  
+  // Only attempt smooth scroll if window exists
+  if (typeof window !== 'undefined') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  
+  // Only call updateReview if it exists
+  if (typeof updateReview === 'function') updateReview();
 }
 
-function requireSubscription() {
-  Swal.fire({
-    icon: 'info', title: 'Subscription Required',
-    text: 'Subscribe to a plan to view owner contact details.',
-    confirmButtonText: 'View Plans', confirmButtonColor: '#1a56db',
-    showCancelButton: true, cancelButtonText: 'Cancel'
-  }).then(r => { if (r.isConfirmed) window.location.href = '/subscription/'; });
+// On page load: wire up the initial video element (if any)
+document.addEventListener('DOMContentLoaded', function () {
+  const v = document.getElementById('mainVideo');
+  if (v) {
+    wireVideoEvents(v);
+    // Show play icon (video is paused initially — autoplay blocked by browser)
+    setPlayIcon(true);
+  }
+});
+
+function wireVideoEvents(videoEl) {
+  videoEl.addEventListener('play',  () => setPlayIcon(false));
+  videoEl.addEventListener('pause', () => setPlayIcon(true));
+  videoEl.addEventListener('ended', () => setPlayIcon(true));
+  videoEl.addEventListener('error', function () {
+    document.getElementById('activeDisplay').innerHTML =
+      '<div class="no-media-placeholder"><span style="font-size:2rem;">⚠️</span><span>Video could not be loaded</span></div>';
+  });
 }
 
-// ═══ EMI CALC ═══
+function setPlayIcon(isPaused) {
+  const icon = document.getElementById('playPauseIcon');
+  if (icon) icon.className = isPaused ? 'fas fa-play' : 'fas fa-pause';
+}
+
+// Called by the video thumbnail button
+function activateVideo(url) {
+  isVideoMode = true;
+  deactivateAllThumbs();
+  const videoThumb = document.getElementById('videoThumb');
+  if (videoThumb) videoThumb.style.borderColor = '#f97316';
+
+  const container = document.getElementById('activeDisplay');
+  container.innerHTML =
+    '<video id="mainVideo" src="' + url + '" controls preload="metadata" playsinline ' +
+    'style="width:100%;height:100%;object-fit:contain;">' +
+    '<source src="' + url + '" type="video/mp4">' +
+    '<source src="' + url + '" type="video/webm">' +
+    '</video>';
+
+  const v = document.getElementById('mainVideo');
+  wireVideoEvents(v);
+  setPlayIcon(true);
+
+  // Attempt play (may be blocked; user can click play manually)
+  v.play().then(() => setPlayIcon(false)).catch(() => setPlayIcon(true));
+
+  // Show play/pause button
+  const ppBtn = document.getElementById('playPauseBtn');
+  if (ppBtn) ppBtn.style.display = '';
+}
+
+// Called by image thumbnails
+function activateImage(url, thumbEl) {
+  isVideoMode = false;
+  deactivateAllThumbs();
+  if (thumbEl) thumbEl.classList.add('active');
+  currentThumb = thumbEl;
+
+  document.getElementById('activeDisplay').innerHTML =
+    '<img id="mainImage" src="' + url + '" alt="Property" style="width:100%;height:100%;object-fit:contain;">';
+
+  // Hide play/pause button (not applicable for images)
+  const ppBtn = document.getElementById('playPauseBtn');
+  if (ppBtn) ppBtn.style.display = 'none';
+}
+
+function deactivateAllThumbs() {
+  document.querySelectorAll('.media-thumb').forEach(t => t.classList.remove('active'));
+}
+
+// Play/Pause toggle
+function togglePlayPause() {
+  const v = document.getElementById('mainVideo');
+  if (!v) return;
+  if (v.paused) { v.play(); }
+  else          { v.pause(); }
+}
+
+// Download current media
+function downloadMedia() {
+  const v = document.getElementById('mainVideo');
+  const img = document.getElementById('mainImage');
+  const url = v ? v.src : (img ? img.src : null);
+  if (!url) return;
+  const a = document.createElement('a');
+  a.href = url; a.download = 'Property_Media';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// ═══════════════════════════════════════════════
+// EMI CALCULATOR
+// ═══════════════════════════════════════════════
 function calcEMI() {
-  const p = parseFloat(document.getElementById('emiPrincipal').value) * 0.80;
+  const principal = parseFloat(document.getElementById('emiPrincipal').value) * 0.80;
   const r = parseFloat(document.getElementById('emiRate').value) / 12 / 100;
   const n = parseFloat(document.getElementById('emiYears').value) * 12;
-  if (p > 0 && r > 0 && n > 0) {
-    const emi = (p * r * Math.pow(1+r,n)) / (Math.pow(1+r,n) - 1);
-    const el = document.getElementById('emiResult');
-    if (el) el.innerText = Math.round(emi).toLocaleString('en-IN');
+  if (principal > 0 && r > 0 && n > 0) {
+    const emi = (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+    document.getElementById('emiResult').innerText = Math.round(emi).toLocaleString('en-IN');
   }
 }
 
-// ═══ SEND ENQUIRY ═══
-function sendEnquiry(btn) {
-  const name  = document.getElementById('enq_name').value.trim();
-  const phone = document.getElementById('enq_phone').value.trim();
-  const whatsapp = document.getElementById('whatsappConsent').checked;
-  if (!name || !phone) { Swal.fire({icon:'warning',title:'Missing Fields',text:'Please fill your name and phone.'}); return; }
-  const orig = btn.innerHTML;
-  btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+
+// --- PROGRESSIVE AUTHENTICATION API CALLS ---
+function checkEmailExists(_this) {
+    let email = $('#flow_email').val().trim();
+    if (!email) return Swal.fire("Wait", "Please enter a valid email address.", "info");
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Checking...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Check_Email_Api' %}", 
+        data: { 'email': email},
+        success: function(response) {
+            $(_this).prop("disabled", false).html(btnText);
+            if(response.exists) goToStepAuth('step-2-login');
+            else sendOTP(email);
+        },
+        error: function() { $(_this).prop("disabled", false).html(btnText); Swal.fire("Error", "Server error.", "error"); }
+    });
+}
+
+function sendOTP(email) {
+    $('#display_otp_email').text(email);
+    goToStepAuth('step-2-otp'); 
+    $.ajax({ 
+        type: "POST", 
+        url: "{% url 'Send_Otp_Api' %}", 
+        data: { 'email': email } 
+    });
+}
+
+function processProgLogin(_this) {
+    let email = $('#flow_email').val();
+    let password = $('#flow_password').val();
+    if (!password) return Swal.fire("Wait", "Please enter your password.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Logging in...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Prop_Login_Api' %}", 
+        data: { 'email': email, 'password': password },
+        success: function(response) {
+            if(response.status == '1') {
+                isLoggedIn = true; 
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
+                
+                // NO-RELOAD: Update Header UI instantly
+                location.reload();
+                
+                // RESUME PAUSED ACTION
+                if (typeof pendingAction === 'function') {
+                    let action = pendingAction; pendingAction = null; action(); 
+                } else {
+                    Swal.fire("Success", "Logged in successfully!", "success");
+                }
+            } else {
+                $(_this).prop("disabled", false).html(btnText);
+                Swal.fire("Error", response.msg || "Incorrect password", "error");
+            }
+        }
+    });
+}
+
+function verifyOTP(_this) {
+    let otp = "";
+    $('.otp-input').each(function() { otp += $(this).val(); });
+    if(otp.length < 4) return Swal.fire("Wait", "Please enter the 4-digit OTP.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Verifying...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Verify_Otp_Api' %}", 
+        data: { 'email': $('#flow_email').val(), 'otp': otp },
+        success: function(response) {
+            $(_this).prop("disabled", false).html(btnText);
+            if(response.valid) goToStepAuth('step-3-details');
+            else Swal.fire("Error", "Invalid OTP. Try again.", "error");
+        }
+    });
+}
+
+function processProgRegistration(_this) {
+    let email = $('#flow_email').val();
+    let name = $('#flow_reg_name').val();
+    let mobile = $('#flow_reg_mobile').val();
+    let role = $('#flow_reg_role').val();
+
+    if(!name || !mobile || role === "SelectRole") return Swal.fire("Wait", "Please fill in all details.", "info");
+
+    let btnText = _this.innerHTML;
+    $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Creating Account...`);
+
+    $.ajax({
+        type: "POST", url: "{% url 'Prop_Register_Api' %}", 
+        data: { 'email': email, 'name': name, 'mobile': mobile, 'role': role},
+        success: function(response) {
+            if(response.status == '1') {
+                isLoggedIn = true; 
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('authEnModal')).hide();
+                
+                // NO-RELOAD: Update Header UI instantly
+                location.reload();
+                
+                // RESUME PAUSED ACTION
+                if (typeof pendingAction === 'function') {
+                    let action = pendingAction; pendingAction = null; action(); 
+                } else {
+                    Swal.fire("Success", "Account created!", "success");
+                }
+            } else {
+                $(_this).prop("disabled", false).html(btnText);
+                Swal.fire("Error", response.msg || "Registration failed.", "error");
+            }
+        }
+    });
+}
+
+// ═══════════════════════════════════════════════
+// CALL OWNER
+// ═══════════════════════════════════════════════
+function callOwner(phone) {
+  Swal.fire({
+    title:'Owner Contact',
+    html:`<div style="padding:10px;text-align:center;">
+      <div style="font-size:26px;font-weight:800;color:#e84118;margin-bottom:15px;">📞 ${phone}</div>
+      <a href="tel:${phone}" class="btn btn-danger" style="background:#e84118;border:none;padding:10px 28px;border-radius:10px;font-weight:800;">Call Now</a>
+    </div>`,
+    showConfirmButton:false, showCloseButton:true
+  });
+}
+
+// ═══════════════════════════════════════════════
+// SEND ENQUIRY
+// ═══════════════════════════════════════════════
+
+function Send_Enquiry(_this) {
+  var enquiry_name = $("#enquiry_name").val().trim();
+  var enquiry_phone = $("#enquiry_phone").val().trim();
+  
+  // Optional field tracks
+  var enquiry_email = $("#enquiry_email").length ? $("#enquiry_email").val().trim() : "";
+  var enquiry_message = $("#enquiry_message").length ? $("#enquiry_message").val().trim() : "";
+
+  // 1. Read Country Code and Checkbox states
+  var country_code = $("#country_code").val();
+  var agree_terms = $("#agreeTerms").is(":checked");
+  var whatsapp_consent = $("#whatsappConsent").is(":checked");
+
+  // 2. Validate standard fields
+  if (enquiry_name === "" || enquiry_phone === "") {
+    Swal.fire({title: 'Error', text: 'Please fill the required fields.', icon: 'error'});
+    return;
+  }
+
+  // 3. Validate mandatory Terms & Conditions checkbox
+  if (!whatsapp_consent) {
+    Swal.fire({
+      title: 'Consenment Required', 
+      text: 'You must agree to the Consenment to proceed.', 
+      icon: 'warning',
+      confirmButtonColor: '#1e293b'
+    });
+    return;
+  }
+
+  // 4. Get UTM values from hidden fields
+  var utm_source = $("#enquiry_utm_source").val() || "";
+  var utm_medium = $("#enquiry_utm_medium").val() || "";
+  var utm_campaign = $("#enquiry_utm_campaign").val() || "";
+  var utm_term = $("#enquiry_utm_term").val() || "";
+  var utm_content = $("#enquiry_utm_content").val() || "";
+  var utm_path = $("#enquiry_utm_path").val() || "";
+  var utm_params = $("#enquiry_utm_params").val() || "";
+  var page_url = $("#enquiry_page_url").val() || window.location.href;
+
+  console.log("Sending Enquiry with UTM:", {
+    utm_source: utm_source,
+    utm_medium: utm_medium,
+    utm_campaign: utm_campaign
+  });
+
+  // 5. Build the Form Data Object
+  var fd = new FormData();
+  fd.append('enquiry_name', enquiry_name);
+  fd.append('country_code', country_code); 
+  fd.append('enquiry_phone', enquiry_phone);
+  fd.append('enquiry_email', enquiry_email);
+  fd.append('enquiry_message', enquiry_message);
+  fd.append('whatsapp_consent', whatsapp_consent ? 'yes' : 'no'); 
+  
+  //  Append UTM fields to FormData
+  fd.append('utm_source', utm_source);
+  fd.append('utm_medium', utm_medium);
+  fd.append('utm_campaign', utm_campaign);
+  fd.append('utm_term', utm_term);
+  fd.append('utm_content', utm_content);
+  fd.append('utm_path', utm_path);
+  fd.append('utm_params', utm_params);
+  fd.append('page_url', page_url);
+  
+  // Django Context variables
+  fd.append('listing_type', '{{ listing_type }}');
+  fd.append('category', '{{ category }}');
+  fd.append('property_id', '{{ p.id }}');
+  fd.append('user_id', '{{ user_obj.id }}');
+
+  // Change button state to loading spinner
+  $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Processing...`);
+
+  // 6. Execute AJAX Request
   $.ajax({
-    method:'POST', url:'{% url "Send_Property_Enquiry" %}',
-    data: new URLSearchParams({
-      csrfmiddlewaretoken: '{{ csrf_token }}',
-      enquiry_name: name, enquiry_phone: phone,
-      whatsapp_consent: whatsapp ? 'yes' : 'no',
-      listing_type: '{{ listing_type }}', category: '{{ category }}',
-      property_id: '{{ original.pk }}', user_id: '{{ user_obj.id|default:"" }}'
-    }),
-    success: function(res) {
-      btn.disabled = false; btn.innerHTML = orig;
-      if (res.status == '1') Swal.fire({icon:'success',title:'Sent!',text:res.msg}).then(r => { if(r.isConfirmed) location.reload(); });
-      else Swal.fire({icon:'error',title:'Failed',text:res.msg});
+    method: "POST",
+    url: "{% url 'Send_Property_Enquiry' %}",
+    data: fd,
+    processData: false,
+    contentType: false,
+    success: function (response) {
+      // Restore original button layout
+      $(_this).prop("disabled", false).html(`Get Contact Details`);
+      
+      if (response.status == '1') {
+        Swal.fire({title: 'Success!', text: response.msg, icon: 'success'}).then((result) => {
+          if (result.isConfirmed) { location.reload(); }
+        });
+      } else {
+        Swal.fire({title: 'Error', text: response.msg, icon: 'error'});
+      }
     },
     error: function() {
-      btn.disabled = false; btn.innerHTML = orig;
-      Swal.fire({icon:'error',title:'Network Error',text:'Something went wrong.'});
+      $(_this).prop("disabled", false).html(`Get Contact Details`);
+      Swal.fire({title: 'Network Error', text: 'Something went wrong. Please try again.', icon: 'error'});
     }
   });
 }
 
-// ═══ AUTH ═══
-function processLogin(btn) {
-  const id = document.getElementById('modal_login_email').value;
-  const pw = document.getElementById('modal_login_password').value;
-  const role = document.getElementById('modal_login_role').value;
-  if (!id||!pw||!role) { Swal.fire({icon:'warning',title:'Missing Fields',text:'Please fill all fields.'}); return; }
-  const orig = btn.innerHTML; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verifying...'; btn.disabled=true;
-  $.ajax({
-    method:'POST', url:'{% url "login" %}', contentType:'application/json',
-    data: JSON.stringify({user_identifier:id,user_password:pw,user_role:role}),
-    success: function(res) {
-      btn.innerHTML=orig; btn.disabled=false;
-      if (res.status=='1'||res.status=='success') location.reload();
-      else Swal.fire({icon:'error',title:'Login Failed',text:res.msg});
-    },
-    error: function() { btn.innerHTML=orig; btn.disabled=false; Swal.fire({icon:'error',title:'Error'}); }
-  });
-}
-
-function processRegister(btn) {
-  const name=document.getElementById('modal_reg_name').value;
-  const email=document.getElementById('modal_reg_email').value;
-  const mobile=document.getElementById('modal_reg_mobile').value;
-  const pw=document.getElementById('modal_reg_password').value;
-  const role=document.getElementById('modal_reg_role').value;
-  if (!name||!email||!mobile||!pw||!role) { Swal.fire({icon:'warning',title:'Missing Fields',text:'Please fill all fields.'}); return; }
-  const orig=btn.innerHTML; btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Creating...'; btn.disabled=true;
-  const fd = new FormData();
-  fd.append('role',role); fd.append('full_name',name); fd.append('email',email);
-  fd.append('mobile_number',mobile); fd.append('password',pw);
-  fd.append('csrfmiddlewaretoken','{{ csrf_token }}');
-  $.ajax({
-    method:'POST', url:'{% url "signup" %}', data:fd, processData:false, contentType:false,
-    success: function(res) {
-      btn.innerHTML=orig; btn.disabled=false;
-      if (res.status=='1'||res.status=='success') location.reload();
-      else Swal.fire({icon:'error',title:'Failed',text:res.msg});
-    },
-    error: function() { btn.innerHTML=orig; btn.disabled=false; Swal.fire({icon:'error',title:'Error'}); }
-  });
-}
 </script>
+
+<script>
+  
+  console.log("===== PAGE VIEW TRACKING WITH CATEGORY =====");
+
+  document.addEventListener('DOMContentLoaded', function() {
+      console.log("===== DOM LOADED =====");
+      
+      // Get UTM parameters from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      let utm_source = urlParams.get('utm_source') || '';
+      let utm_medium = urlParams.get('utm_medium') || '';
+      let utm_campaign = urlParams.get('utm_campaign') || '';
+      let utm_term = urlParams.get('utm_term') || '';
+      let utm_content = urlParams.get('utm_content') || '';
+      
+      // Get property and category information from template
+      const propertyId = '{{ p.id }}';
+      const propertyTitle = '{{ p.title|escapejs }}';
+      const listingType = '{{ listing_type|default:"rent" }}';
+      
+      // Get category from URL path (e.g., /rent/commercial/ or /rent/residential/)
+      let category = '';
+      const pathMatch = window.location.pathname.match(/\/rent\/([^\/]+)\//);
+      if (pathMatch && pathMatch[1]) {
+          category = pathMatch[1];
+      }
+      
+      // Fallback to template category
+      const templateCategory = '{{ category|default:"" }}';
+      if (templateCategory) {
+          category = templateCategory;
+      }
+      
+      // Fallback to data attribute
+      if (!category) {
+          const categoryAttr = document.body.getAttribute('data-category');
+          if (categoryAttr) category = categoryAttr;
+      }
+      
+      console.log("Property ID:", propertyId);
+      console.log("Property Title:", propertyTitle);
+      console.log("Listing Type:", listingType);
+      console.log("Category:", category);
+      console.log("UTM Source:", utm_source || 'none (will track as direct)');
+      
+      // Get referrer for source detection
+      const referrer = document.referrer;
+      
+      // Auto-detect source if no UTM parameters
+      if (!utm_source) {
+          if (referrer.includes('google.com')) {
+              utm_source = 'google';
+              utm_medium = 'organic';
+              utm_campaign = 'organic_search';
+              console.log("Source detected: Google Search");
+          } 
+          else if (referrer.includes('facebook.com')) {
+              utm_source = 'facebook';
+              utm_medium = 'social';
+              utm_campaign = 'facebook_referral';
+              console.log("Source detected: Facebook");
+          }
+          else if (referrer.includes('whatsapp.com')) {
+              utm_source = 'whatsapp';
+              utm_medium = 'messaging';
+              utm_campaign = 'whatsapp_share';
+              console.log("Source detected: WhatsApp");
+          }
+          else if (referrer === '') {
+              utm_source = 'direct';
+              utm_medium = 'none';
+              utm_campaign = 'direct_visit';
+              console.log("Source detected: Direct Visit");
+          }
+          else {
+              utm_source = 'referral';
+              utm_medium = 'other';
+              utm_campaign = 'external_referral';
+              console.log("Source detected: Referral from", referrer);
+          }
+      } else {
+          console.log("UTM Source from URL:", utm_source);
+      }
+      
+      //  STORE UTM DATA IN SESSION STORAGE (for enquiry form)
+      const utmDataForSession = {
+          utm_source: utm_source,
+          utm_medium: utm_medium,
+          utm_campaign: utm_campaign,
+          utm_term: utm_term,
+          utm_content: utm_content,
+          utm_path: window.location.pathname,
+          utm_params: window.location.search.substring(1),
+          page_url: window.location.href,
+          timestamp: new Date().toISOString()
+      };
+      sessionStorage.setItem('utm_tracking_data', JSON.stringify(utmDataForSession));
+      console.log("UTM data stored in session storage");
+      
+      // Set hidden form fields for enquiry form (if they exist on page)
+      if (document.getElementById('enquiry_utm_source')) {
+          document.getElementById('enquiry_utm_source').value = utm_source;
+          document.getElementById('enquiry_utm_medium').value = utm_medium;
+          document.getElementById('enquiry_utm_campaign').value = utm_campaign;
+          document.getElementById('enquiry_utm_term').value = utm_term;
+          document.getElementById('enquiry_utm_content').value = utm_content;
+          document.getElementById('enquiry_utm_path').value = window.location.pathname;
+          document.getElementById('enquiry_utm_params').value = window.location.search.substring(1);
+          document.getElementById('enquiry_page_url').value = window.location.href;
+          console.log("Enquiry form UTM fields populated");
+      }
+      
+      // Only track if we have property ID
+      if (propertyId && propertyId !== '') {
+          
+          console.log("Sending tracking data to server...");
+          
+          
+          
+          fetch("{% url 'Track_utm_link' %}", {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  // UTM parameters
+                  utm_source: utm_source,
+                  utm_medium: utm_medium,
+                  utm_campaign: utm_campaign,
+                  utm_term: utm_term,
+                  utm_content: utm_content,
+                  
+                  // Property information
+                  property_id: propertyId,
+                  property_title: propertyTitle,
+                  listing_type: listingType,
+                  category: category,
+                  
+                  // URL components
+                  utm_path: window.location.pathname,
+                  utm_params: window.location.search.substring(1),
+                  page_url: window.location.href,
+                  
+                  // Additional tracking
+                  referrer: referrer,
+                  user_agent: navigator.userAgent
+              })
+          })
+          .then(response => {
+              console.log("Response status:", response.status);
+              return response.json();
+          })
+          .then(data => {
+              if (data.success) {
+                  console.log("Page view tracked successfully!");
+                  console.log("Category:", category);
+                  console.log("Source:", utm_source);
+                  console.log("Total views:", data.total_views || data.total_clicks);
+              } else {
+                  console.log("Tracking failed:", data.error);
+              }
+          })
+          .catch(error => {
+              console.log("Fetch error:", error);
+          });
+          
+      } else {
+          console.warn("No property ID found - cannot track");
+      }
+  });
+
+</script>
+
+
 </body>
 </html>

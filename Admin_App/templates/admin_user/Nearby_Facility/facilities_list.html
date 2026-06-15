@@ -116,9 +116,9 @@
                             <label class="form-label">Upload Facilities Data Excel File <span class="required"
                                     style="color:red;">*</span>
                                 
-                                <a href="{% static 'excel_templates/Facilities_Excel.xlsx' %}" download class="btn btn-sm btn-outline-success">
+                                {% comment %} <a href="{% static 'excel_templates/Facilities_Excel.xlsx' %}" download class="btn btn-sm btn-outline-success">
                                     <i class="fas fa-file-excel"></i> Download Template
-                                </a>
+                                </a> {% endcomment %}
                                 
                             </label>
                             <input type="file" class="form-control" id="facilities_file" name="facilities_file"

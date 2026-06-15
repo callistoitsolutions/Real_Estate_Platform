@@ -72,8 +72,8 @@
               <div class="row">
                 <div class="col-md-12 mb-3">
                   <div class="form-group">
-                    <label class="form-label">Property Title (Auto-Generated on Save)</label>
-                    <input type="text" class="form-control" id="agri_title" placeholder="Generates automatically based on Acres, Type, and Village Area Context..." value="{{ property.title }}" readonly>
+                    <label class="form-label">Property Title (Auto-Generated)</label>
+                    <input type="text" class="form-control" id="agri_title" name="property_title" placeholder="Generates automatically based on Acres, Type, and Village Area Context..." value="{{ property.property_title }}" readonly>
                   </div>
                 </div>
                 <div class="col-md-6 mb-3">
@@ -115,23 +115,23 @@
                 </div>
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Irrigation Facility Active?</label>
-                  <select class="form-select" name="irrigation_facility">
-                    <option value="no" {% if property.irrigation_facility == "no" %}selected{% endif %}>No</option>
-                    <option value="yes" {% if property.irrigation_facility == "yes" %}selected{% endif %}>Yes</option>
+                  <select class="form-select" name="irrigation_facility_active">
+                    <option value="no" {% if property.irrigation_facility_active == "no" %}selected{% endif %}>No</option>
+                    <option value="yes" {% if property.irrigation_facility_active == "yes" %}selected{% endif %}>Yes</option>
                   </select>
                 </div>
                 <div class="col-md-4 mb-3">
                   <label class="form-label">Water Source Infrastructure</label>
-                  <select class="form-select" name="water_source">
-                    <option value="none" {% if property.water_source == "none" %}selected{% endif %}>None</option>
-                    <option value="well" {% if property.water_source == "well" %}selected{% endif %}>Well</option>
-                    <option value="borewell" {% if property.water_source == "borewell" %}selected{% endif %}>Borewell</option>
-                    <option value="canal" {% if property.water_source == "canal" %}selected{% endif %}>Canal</option>
-                    <option value="river" {% if property.water_source == "river" %}selected{% endif %}>River Touch</option>
+                  <select class="form-select" name="water_source_infrastructure">
+                    <option value="none" {% if property.water_source_infrastructure == "none" %}selected{% endif %}>None</option>
+                    <option value="well" {% if property.water_source_infrastructure == "well" %}selected{% endif %}>Well</option>
+                    <option value="borewell" {% if property.water_source_infrastructure == "borewell" %}selected{% endif %}>Borewell</option>
+                    <option value="canal" {% if property.water_source_infrastructure == "canal" %}selected{% endif %}>Canal</option>
+                    <option value="river" {% if property.water_source_infrastructure == "river" %}selected{% endif %}>River Touch</option>
                   </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Soil Fertility Level</label>
+                  <label class="form-label"> Fertility Status</label>
                   <select class="form-select" name="fertility_status">
                     <option value="medium" {% if property.fertility_status == "medium" %}selected{% endif %}>Medium Yield</option>
                     <option value="high" {% if property.fertility_status == "high" %}selected{% endif %}>High Yield</option>
@@ -139,7 +139,7 @@
                   </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Previously Cultivated Crops</label>
+                  <label class="form-label">Previously Crops</label>
                   <input type="text" class="form-control" name="previous_crops" placeholder="e.g. Cotton, Sugar Cane, Rice" value="{{ property.previous_crops|default:'' }}">
                 </div>
               </div>
@@ -191,20 +191,20 @@
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Outstanding Agricultural Loan? <span class="required">*</span></label>
                   <div class="radio-group">
-                     <label class="radio-option"><input type="radio" name="agri_loan" value="no" {% if property.agri_loan != "yes" %}checked{% endif %}> No</label>
-                     <label class="radio-option"><input type="radio" name="agri_loan" value="yes" {% if property.agri_loan == "yes" %}checked{% endif %}> Yes</label>
+                     <label class="radio-option"><input type="radio" name="loan_on_property" value="no" {% if property.loan_on_property != "yes" %}checked{% endif %}> No</label>
+                     <label class="radio-option"><input type="radio" name="loan_on_property" value="yes" {% if property.loan_on_property == "yes" %}checked{% endif %}> Yes</label>
                   </div>
-                  <div id="loan_amt_section" style="{% if property.agri_loan == 'yes' %}display:block;{% else %}display:none;{% endif %}" class="mt-2">
+                  <div id="loan_amt_section" style="{% if property.loan_on_property == 'yes' %}display:block;{% else %}display:none;{% endif %}" class="mt-2">
                      <input type="number" class="form-control" name="loan_amount" placeholder="Outstanding Debt Principal (₹)" value="{{ property.loan_amount|floatformat:0 }}">
                   </div>
                 </div>
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Existing Sharecroppers / Tenants On-Site? <span class="required">*</span></label>
                   <div class="radio-group">
-                     <label class="radio-option"><input type="radio" name="agri_tenants" value="no" {% if property.agri_tenants != "yes" %}checked{% endif %}> No</label>
-                     <label class="radio-option"><input type="radio" name="agri_tenants" value="yes" {% if property.agri_tenants == "yes" %}checked{% endif %}> Yes</label>
+                     <label class="radio-option"><input type="radio" name="existing_tenants" value="no" {% if property.existing_tenants != "yes" %}checked{% endif %}> No</label>
+                     <label class="radio-option"><input type="radio" name="existing_tenants" value="yes" {% if property.existing_tenants == "yes" %}checked{% endif %}> Yes</label>
                   </div>
-                  <div id="tenant_section" style="{% if property.agri_tenants == 'yes' %}display:block;{% else %}display:none;{% endif %}" class="mt-2">
+                  <div id="tenant_section" style="{% if property.existing_tenants == 'yes' %}display:block;{% else %}display:none;{% endif %}" class="mt-2">
                      <textarea class="form-control" name="tenant_details" placeholder="Detail sharecropping agreements contexts...">{{ property.tenant_details }}</textarea>
                   </div>
                 </div>
@@ -221,10 +221,10 @@
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Pending Land Revenue Tax Arrears? <span class="required">*</span></label>
                   <div class="radio-group">
-                     <label class="radio-option"><input type="radio" name="agri_tax_due" value="no" {% if property.agri_tax_due != "yes" %}checked{% endif %}> No</label>
-                     <label class="radio-option"><input type="radio" name="agri_tax_due" value="yes" {% if property.agri_tax_due == "yes" %}checked{% endif %}> Yes</label>
+                     <label class="radio-option"><input type="radio" name="pending_tax_due" value="no" {% if property.pending_tax_due != "yes" %}checked{% endif %}> No</label>
+                     <label class="radio-option"><input type="radio" name="pending_tax_due" value="yes" {% if property.pending_tax_due == "yes" %}checked{% endif %}> Yes</label>
                   </div>
-                  <div id="tax_section" style="{% if property.agri_tax_due == 'yes' %}display:block;{% else %}display:none;{% endif %}" class="mt-2">
+                  <div id="tax_section" style="{% if property.pending_tax_due == 'yes' %}display:block;{% else %}display:none;{% endif %}" class="mt-2">
                      <input type="number" class="form-control" name="pending_tax_amount" placeholder="Arrears Balance (₹)" value="{{ property.pending_tax_amount|floatformat:0 }}">
                   </div>
                 </div>
@@ -249,18 +249,22 @@
               <div class="row">
                 <div class="col-md-4 mb-3"><label class="form-label">City <span class="required">*</span></label><input type="text" class="form-control" id="city" name="city" placeholder="e.g. Nagpur" value="{{ property.city }}" required></div>
                 <div class="col-md-4 mb-3"><label class="form-label">State <span class="required">*</span></label><input type="text" class="form-control" name="state" placeholder="e.g. Maharashtra" value="{{ property.state }}" required></div>
-                <div class="col-md-4 mb-3"><label class="form-label">Locality Area <span class="required">*</span></label><input type="text" class="form-control" id="locality" name="locality" placeholder="e.g. Umred Area" value="{{ property.locality }}" required></div>
-                <div class="col-md-12 mb-3"><label class="form-label">Complete Physical Plot Address <span class="required">*</span></label><textarea class="form-control" name="address" rows="3" placeholder="Enter complete route directions or land address records..." required>{{ property.address }}</textarea></div>
+                <div class="col-md-4 mb-3"><label class="form-label">Locality Area <span class="required">*</span></label><input type="text" class="form-control" id="locality_area" name="locality_area" placeholder="e.g. Umred Area" value="{{ property.locality_area }}" required></div>
+                <div class="col-md-12 mb-3"><label class="form-label">Complete Physical Plot Address <span class="required">*</span></label><textarea class="form-control" name="property_address" rows="3" placeholder="Enter complete route directions or land address records..." required>{{ property.property_address }}</textarea></div>
               </div>
               <div class="row pt-3 border-top">
                 <div class="col-md-4 mb-3"><label class="form-label">Primary Owner Name <span class="required">*</span></label><input type="text" class="form-control" name="owner_name" placeholder="Full Registered Name" value="{{ property.owner_name }}" required></div>
                 <div class="col-md-4 mb-3"><label class="form-label">Direct Contact Number <span class="required">*</span></label><input type="tel" class="form-control" name="owner_contact" placeholder="10-digit smartphone mobile" pattern="[0-9]{10}" value="{{ property.owner_contact }}" required></div>
                 <div class="col-md-4 mb-3"><label class="form-label">Owner Email Profile</label><input type="email" class="form-control" name="owner_email" placeholder="name@email.com" value="{{ property.owner_email }}"></div>
-                <div class="col-md-12"><label class="form-label">Residency Status <span class="required">*</span></label>
-                  <select class="form-select" name="comm_residency">
-                    <option value="resident" {% if property.comm_residency == "resident" %}selected{% endif %}>Domestic Resident Citizen</option>
-                    <option value="nri" {% if property.comm_residency == "nri" %}selected{% endif %}>Non-Resident Indian (NRI)</option>
-                    <option value="pio" {% if property.comm_residency == "pio" %}selected{% endif %}>Person of Indian Origin (PIO)</option>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Owner Role</label>
+                  <input type="text" class="form-control" name="owner_role" placeholder="e.g. Direct Owner, Broker" value="{{ property.owner_role|default:'' }}">
+                </div>
+                <div class="col-md-6 mb-3"><label class="form-label">Residency Status <span class="required">*</span></label>
+                  <select class="form-select" name="residency_status">
+                    <option value="resident" {% if property.residency_status == "resident" %}selected{% endif %}>Domestic Resident Citizen</option>
+                    <option value="nri" {% if property.residency_status == "nri" %}selected{% endif %}>Non-Resident Indian (NRI)</option>
+                    <option value="pio" {% if property.residency_status == "pio" %}selected{% endif %}>Person of Indian Origin (PIO)</option>
                   </select>
                 </div>
               </div>
@@ -334,8 +338,8 @@
             <div class="preview-price" id="p_price">₹ {{ property.expected_price|floatformat:0 }}</div>
           </div>
           <div class="p-3">
-            <div id="p_title" style="font-weight:800; font-size:0.95rem; color:#1a252f; margin-bottom:5px;">{{ property.title }}</div>
-            <div style="font-size:0.75rem; color:#64748b; margin-top:5px;"><i class="fas fa-map-marker-alt" style="color:#667eea;"></i> <span id="p_loc">{{ property.locality }}, {{ property.city }}</span></div>
+            <div id="p_title" style="font-weight:800; font-size:0.95rem; color:#1a252f; margin-bottom:5px;">{{ property.property_title }}</div>
+            <div style="font-size:0.75rem; color:#64748b; margin-top:5px;"><i class="fas fa-map-marker-alt" style="color:#667eea;"></i> <span id="p_loc">{{ property.locality_area }}, {{ property.city }}</span></div>
             <div class="mt-2" style="font-weight:700; font-size:0.85rem; color:#2d3748;" id="p_area">{{ property.land_area }} Acres Tracked</div>
           </div>
         </div>
@@ -436,7 +440,7 @@
     const area = document.getElementById('land_area').value;
     const price = document.getElementById('expected_price').value;
     const city = document.getElementById('city').value;
-    const loc = document.getElementById('locality').value;
+    const loc = document.getElementById('locality_area').value;
 
     const dynamicTitle = generateAssetTitle();
     const titleInput = document.getElementById('agri_title');
@@ -467,7 +471,7 @@
     el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
   }
 
-  ['land_area', 'village', 'taluka', 'city', 'locality', 'expected_price'].forEach(id => {
+  ['land_area', 'village', 'taluka', 'city', 'locality_area', 'expected_price'].forEach(id => {
     const element = document.getElementById(id);
     if (element) element.addEventListener('input', updatePreview);
   });
@@ -475,14 +479,14 @@
     typeDropdown.addEventListener('change', updatePreview);
   }
 
-  // Conditional displays loops
-  document.querySelectorAll('input[name="agri_loan"]').forEach(r => r.onchange = (e) => 
+  // Conditional displays loops mapped precisely to new field names
+  document.querySelectorAll('input[name="loan_on_property"]').forEach(r => r.onchange = (e) => 
     document.getElementById('loan_amt_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
-  document.querySelectorAll('input[name="agri_tenants"]').forEach(r => r.onchange = (e) => 
+  document.querySelectorAll('input[name="existing_tenants"]').forEach(r => r.onchange = (e) => 
     document.getElementById('tenant_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
   document.querySelectorAll('input[name="agri_dispute"]').forEach(r => r.onchange = (e) => 
     document.getElementById('dispute_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
-  document.querySelectorAll('input[name="agri_tax_due"]').forEach(r => r.onchange = (e) => 
+  document.querySelectorAll('input[name="pending_tax_due"]').forEach(r => r.onchange = (e) => 
     document.getElementById('tax_section').style.display = e.target.value === 'yes' ? 'block' : 'none');
 
   const brokerageSelect = document.getElementById("brokerageSelect");

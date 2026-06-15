@@ -58,3 +58,15 @@ admin.site.register(ResaleResidentialProperty)
 ########### Register CommercialResaleProperty Table/Modal ###############
 
 admin.site.register(CommercialResaleProperty)
+
+############# Register Plot Resale Property Table/Modal ###############
+
+admin.site.register(PlotSaleProperty)
+
+############### Register Industrial Resale Property Table/Modal #################
+
+admin.site.register(IndustrialResaleProperty)
+
+############ Register Agicultural Resale Property Table/Modal ##################3
+
+admin.site.register(AgriculturalResaleProperty)
