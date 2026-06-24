@@ -859,7 +859,7 @@ document.addEventListener("DOMContentLoaded", function() {
         <tbody>
             {% for prop in page_obj %}
             {% with rooms=prop.rooms.all %}
-            <tr id="row-{{ prop.pg_property_id }}">
+            <tr id="row-{{ prop.id }}">
 
                 <!-- Meta -->
                 <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
@@ -980,19 +980,19 @@ document.addEventListener("DOMContentLoaded", function() {
                 <td style="position: sticky; right: 0; background: white; z-index: 2; box-shadow: -2px 0 5px rgba(0,0,0,0.05);">
                     <div class="action-buttons">
 
-                        <a href="{% url 'pg_coliving_view' prop.pg_property_id %}" 
+                        <a href="{% url 'pg_coliving_view' prop.id %}" 
    class="btn-action btn-view" 
    title="View Property">
     <i class="fas fa-eye"></i>
 </a>
       
                         <button class="btn-action btn-edit"
-                            onclick="window.location.href='{% url 'pg_edit_page' property_id=prop.pg_property_id %}'"
+                            onclick="window.location.href='{% url 'pg_edit_page' property_id=prop.id %}'"
                             title="Modify Record Parameters">
                             <i class="fas fa-edit"></i>
                         </button>
                         <button class="btn-action btn-delete"
-    onclick="deletePG('{{ prop.pg_property_id }}')"
+    onclick="deletePG('{{ prop.id }}')"
     title="Delete Property">
     <i class="fas fa-trash"></i>
 </button>

@@ -347,6 +347,7 @@ class Service_Type_Details(models.Model):
 
 class User_Details(models.Model):
    
+    user_id = models.CharField(max_length=200,blank=True,null=True)
     user_name = models.CharField(max_length=200,blank=True,null=True)
     user_email = models.CharField(max_length=200,blank=True,null=True)
     user_phone = models.CharField(max_length=200,blank=True,null=True)
@@ -375,7 +376,32 @@ class User_Details(models.Model):
     user_register_time = models.TimeField(blank=True,null=True)
 
     def __str__(self):
-        return str(self.user_name)+"-"+self.user_role
+        return str(self.user_id)+"-"+self.user_name+"-"+self.user_role
+
+
+############## Modal starts for subscription package details ###################
+
+class Package_Details(models.Model):
+   
+    package_id = models.CharField(max_length=200,blank=True,null=True)
+    package_name = models.CharField(max_length=200,blank=True,null=True)
+    package_upload_date = models.DateField(blank=True,null=True)
+    package_upload_time = models.TimeField(blank=True,null=True)
+
+    def __str__(self):
+        return str(self.package_id)+"-"+self.package_name
+
+############# Modal starts for subscription plan type details ################
+
+class Plan_Details(models.Model):
+   
+    plan_id = models.CharField(max_length=200,blank=True,null=True)
+    plan_name = models.CharField(max_length=200,blank=True,null=True)
+    plan_upload_date = models.DateField(blank=True,null=True)
+    plan_upload_time = models.TimeField(blank=True,null=True)
+
+    def __str__(self):
+        return str(self.plan_id)+"-"+self.plan_name
     
 
 ########### Modal starts for subscription details model #########################
@@ -417,7 +443,7 @@ class RentalResidentialProperty(models.Model):
     # BASIC INFORMATION
     # =====================================================
 
-    rental_residential_id = models.CharField(
+    id = models.CharField(
         max_length=20,
         primary_key=True,
         default=generate_unique_rental_residential_id,
@@ -591,24 +617,24 @@ class RentalResidentialProperty(models.Model):
 
 
 
-    # def save(self, *args, **kwargs):
-    #     # title_parts = []
-    #     # if self.furnishing_status: title_parts.append(self.furnishing_status)
-    #     # if self.bhk_type: title_parts.append(self.bhk_type)
-    #     # title_parts.append(self.property_type if self.property_type else "Property")
-    #     # title_parts.append("for Rent")
+    def save(self, *args, **kwargs):
+        title_parts = []
+        if self.furnishing_status: title_parts.append(self.furnishing_status)
+        if self.bhk_type: title_parts.append(self.bhk_type)
+        title_parts.append(self.property_type if self.property_type else "Property")
+        title_parts.append("for Rent")
         
-    #     # location = f"in {self.building_name}" if self.building_name else ""
-    #     # if self.locality: location += f", {self.locality}" if location else f"in {self.locality}"
-    #     # if self.city: location += f", {self.city}" if location else f"in {self.city}"
-    #     # if location: title_parts.append(location)
+        location = f"in {self.building_name}" if self.building_name else ""
+        if self.locality: location += f", {self.locality}" if location else f"in {self.locality}"
+        if self.city: location += f", {self.city}" if location else f"in {self.city}"
+        if location: title_parts.append(location)
         
-    #     # if self.built_up_area:
-    #     #     title_parts.append(f"({str(self.built_up_area).rstrip('0').rstrip('.')} sq.ft.)")
+        if self.built_up_area:
+            title_parts.append(f"({str(self.built_up_area).rstrip('0').rstrip('.')} sq.ft.)")
             
-    #     # self.property_title = " ".join(title_parts).strip()[:255]
-    #     super(RentalResidentialProperty, self).save(*args, **kwargs)
-    #     self.generate_auto_faqs()
+        self.property_title = " ".join(title_parts).strip()[:255]
+        super(RentalResidentialProperty, self).save(*args, **kwargs)
+        self.generate_auto_faqs()
     
 
 
@@ -681,7 +707,7 @@ class RentalResidentialProperty(models.Model):
             RentalResidentialFAQ.objects.create(property=self, question=item["q"], answer=item["a"])
 
     def __str__(self):
-        return str(self.id) if self.property_title else f"Property #{self.rental_residential_id}"
+        return str(self.id) if self.property_title else f"Property #{self.id}"
 
 
 # ==========================================
@@ -967,7 +993,7 @@ def generate_unique_pg_property_id():
     return f"EFPG-{uuid.uuid4().hex[:8].upper()}"
 
 class PGColivingProperty(models.Model):
-    pg_property_id = models.CharField(max_length=20, primary_key=True, default=generate_unique_pg_property_id, editable=False, unique=True)
+    id = models.CharField(max_length=20, primary_key=True, default=generate_unique_pg_property_id, editable=False, unique=True)
     property_title = models.CharField(max_length=200, blank=True, null=True, help_text="Auto-generated based on project context if empty")
     city = models.CharField(max_length=100)
     building_name = models.CharField(max_length=200, blank=True, null=True)
@@ -1087,7 +1113,7 @@ class PGColivingProperty(models.Model):
         ])
 
     def __str__(self):
-        return f"{self.property_title} ({self.pg_property_id})"
+        return f"{self.property_title} ({self.id})"
 
 
 class PGColivingFAQ(models.Model):
@@ -1096,7 +1122,7 @@ class PGColivingFAQ(models.Model):
     answer = models.TextField()
 
     def __str__(self):
-        return f"FAQ for {self.property.pg_property_id}"
+        return f"FAQ for {self.property.id}"
 
 
 
@@ -1116,7 +1142,7 @@ class PGRoomDetail(models.Model):
     room_facilities = models.TextField(blank=True, null=True) # Comma-separated facilities list
 
     def __str__(self):
-        return f"{self.room_type.capitalize()} Room - Property: {self.property.pg_property_id}"
+        return f"{self.room_type.capitalize()} Room - Property: {self.property.id}"
 
 
 class PGPropertyImage(models.Model):
@@ -1649,7 +1675,7 @@ def generate_resale_unique_property_id():
     return f"EFPLT-{uuid.uuid4().hex[:8].upper()}"
 
 class PlotSaleProperty(models.Model):
-    plot_property_id = models.CharField(
+    id = models.CharField(
         max_length=20,
         primary_key=True,
         default=generate_resale_unique_property_id,

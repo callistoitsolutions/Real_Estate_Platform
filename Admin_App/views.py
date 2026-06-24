@@ -21,7 +21,7 @@ from django.core.paginator import Paginator  # ← ADD THIS
 import csv
 import csv
 import json
-from django.db.models import Count, Avg, Max, Min, Q
+from django.db.models import Count, Avg, Max, Min, Q,Case,When,IntegerField,Value
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -340,7 +340,7 @@ def global_search(request):
             {'model': AgriculturalResaleProperty, 'label': 'Agricultural', 'url_name': 'agricultural_detail'},
         ]
 
-        # 🟢 1. SEARCH PROPERTIES (By Title, Location, Price, City, Status, etc.)
+        # 1. SEARCH PROPERTIES (By Title, Location, Price, City, Status, etc.)
         for table in property_tables:
             ModelClass = table['model']
             
@@ -359,7 +359,7 @@ def global_search(request):
                     'url': reverse(table['url_name'], args=[match.id]) 
                 })
         
-        # 🟢 2. SEARCH USERS (By Name, Email, Phone, Role, etc.)
+        #  2. SEARCH USERS (By Name, Email, Phone, Role, etc.)
         users = User_Details.objects.filter(
             Q(user_name__icontains=query) | 
             Q(user_email__icontains=query) |
@@ -369,7 +369,7 @@ def global_search(request):
             Q(user_role__icontains=query)         # Search by Role (e.g., "Tenant")
         )[:5]
         
-       # 🟢 Create a map that connects the exact database role to its URLs.py name
+       #  Create a map that connects the exact database role to its URLs.py name
         role_url_map = {
             'Tenant': 'Update_Tenant',     # Replace 'tenant_detail' with actual url name
             'Landlord': 'Update_Landlord', # Replace 'landlord_detail' with actual url name
@@ -381,7 +381,7 @@ def global_search(request):
         }
 
         for user in users:
-            # 🟢 Look up the correct URL name based on the user's role
+            #  Look up the correct URL name based on the user's role
             url_name = role_url_map.get(user.user_role)
             
             # If the role exists in our map, generate the real link. 
@@ -515,7 +515,19 @@ def residential(request):
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
 
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+        user_obj = User_Details.objects.filter(
+                user_role__in=['Relationship Manager', 'Agent', 'Agency/Builder','Landlord']
+        ).annotate(
+            sort_order=Case(
+                When(user_role='Relationship Manager', then=Value(1)),         
+                default=Value(2),   
+                output_field=IntegerField(),
+            )
+        ).order_by('sort_order', '-id','user_role')
+        
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+
         return render(request,"admin_user/residential.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -529,7 +541,18 @@ def commercial(request):
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
 
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+        user_obj = User_Details.objects.filter(
+                user_role__in=['Relationship Manager', 'Agent', 'Agency/Builder','Landlord']
+        ).annotate(
+            sort_order=Case(
+                When(user_role='Relationship Manager', then=Value(1)),         
+                default=Value(2),   
+                output_field=IntegerField(),
+            )
+        ).order_by('sort_order', '-id','user_role')
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+
         return render(request,"admin_user/commercial.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -543,7 +566,18 @@ def pg_coliving(request):
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
 
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+        user_obj = User_Details.objects.filter(
+                user_role__in=['Relationship Manager', 'Agent', 'Agency/Builder','Landlord']
+        ).annotate(
+            sort_order=Case(
+                When(user_role='Relationship Manager', then=Value(1)),         
+                default=Value(2),   
+                output_field=IntegerField(),
+            )
+        ).order_by('sort_order', '-id','user_role')
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+
         return render(request,"admin_user/pg_coliving.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -1527,6 +1561,184 @@ def Update_Faqs(request,id):
 ############## Views end for update faqs ############################
 
 
+############ Views start for subscription packages list ###################
+
+def Subscriptions_Packages_List(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        packages_obj = Package_Details.objects.all().order_by('-package_upload_date')
+        packages_obj_count = Package_Details.objects.all().count()
+
+        rendered = render_to_string("admin_user/render_to_string/R_Subscription/r_t_s_packages.html",{'packages_obj':packages_obj,'packages_obj_count':packages_obj_count})
+
+        context = {'admin_obj':admin_obj,'packages_list':rendered}
+
+        return render(request,"admin_user/Subscription/packages_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+########## Views end for subscription packages list ########################
+
+
+########### Views start for ajax for add/edit packages #####################
+
+@csrf_exempt
+def Packages_Ajax(request):
+    data = request.POST.dict()
+
+    if data.get('id') == "":
+        data.pop("id", None)        
+        data['package_upload_date'] = datetime.today()
+        data['package_upload_time'] = datetime.now()
+        Package_Details.objects.create(**data)
+        return JsonResponse({"status":"1", "msg" : f"Package Details added successfully"})
+
+    # UPDATE MODE
+    else:
+        try:
+            packages = Package_Details.objects.get(id=data['id'])
+        except Package_Details.DoesNotExist:
+            return JsonResponse({'status': '0', 'msg': 'Packages Details not found'})
+
+
+        # Update withdraw fields (unchanged)
+        for key, value in data.items():
+            setattr(packages, key, value)
+
+        packages.save()
+        return JsonResponse({"status":"1", "msg" : f"Packages Details updated successfully"})
+
+############ Views end for ajax for add/edit packages ##########################
+
+
+########### Views start for delete packages ########################
+
+@csrf_exempt
+def Delete_Packages(request):
+    try:
+        try:
+            package_id = request.POST.get('package_id')
+            Package_Details.objects.filter(id=package_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Packages details deleted successfully...'})
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    
+
+########### Views end for delete packages ########################
+
+
+############# Views start for update packages #######################
+
+def Update_Packages(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        package = Package_Details.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'package':package}
+
+        return render(request,"admin_user/Subscription/update_packages.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############ Views end foor update packages ##########################
+
+############ Views start for subscription plan types list ########################
+
+def Subscriptions_Plans_List(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        plans_obj = Plan_Details.objects.all().order_by('-plan_upload_date')
+        plans_obj_count = Plan_Details.objects.all().count()
+
+        rendered = render_to_string("admin_user/render_to_string/R_Subscription/r_t_s_plans.html",{'plans_obj':plans_obj,'plans_obj_count':plans_obj_count})
+
+        context = {'admin_obj':admin_obj,'plans_list':rendered}
+
+        return render(request,"admin_user/Subscription/plans_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for subscription plan types list #####################
+
+
+########## Views start for ajax for add/edit plans  #######################
+
+@csrf_exempt
+def Plans_Ajax(request):
+    data = request.POST.dict()
+
+    if data.get('id') == "":
+        data.pop("id", None)        
+        data['plan_upload_date'] = datetime.today()
+        data['plan_upload_time'] = datetime.now()
+        Plan_Details.objects.create(**data)
+        return JsonResponse({"status":"1", "msg" : f"Plan Details added successfully"})
+
+    # UPDATE MODE
+    else:
+        try:
+            plans = Plan_Details.objects.get(id=data['id'])
+        except Plan_Details.DoesNotExist:
+            return JsonResponse({'status': '0', 'msg': 'Plans Details not found'})
+
+
+        # Update withdraw fields (unchanged)
+        for key, value in data.items():
+            setattr(plans, key, value)
+
+        plans.save()
+        return JsonResponse({"status":"1", "msg" : f"Plans Details updated successfully"})
+
+############ Views end for ajax for add/edit plans #######################
+
+
+############ Views start for delete plans ########################
+
+@csrf_exempt
+def Delete_Plans(request):
+    try:
+        try:
+            plan_id = request.POST.get('plan_id')
+            Plan_Details.objects.filter(id=plan_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Plan details deleted successfully...'})
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+
+
+########### Views end for delete plans ################################
+
+
+############## Views start for update plans ########################
+
+def Update_Plans(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        plan = Plan_Details.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'plan':plan}
+
+        return render(request,"admin_user/Subscription/update_plans.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+########## Views end for update plans #########################
+
 ############## Views start for subscriptions list ##########################
 
 def Subscriptions_List(request):
@@ -1555,7 +1767,11 @@ def Add_Subscriptions(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        context = {'admin_obj':admin_obj}
+        packages_obj = Package_Details.objects.all()
+        plans_obj = Plan_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'packages_obj':packages_obj,'plans_obj':plans_obj}
+
         return render(request,"admin_user/Subscription/add_subscription.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -1620,9 +1836,13 @@ def Update_Subscriptions(request,id):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
+        packages_obj = Package_Details.objects.all()
+        plans_obj = Plan_Details.objects.all()
+
         subscription = Subscription_Details.objects.get(id=id)
 
-        context = {'admin_obj':admin_obj,'subscription':subscription}
+        context = {'admin_obj':admin_obj,'subscription':subscription,'packages_obj':packages_obj,'plans_obj':plans_obj}
+        
         return render(request,"admin_user/Subscription/update_subscription.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -2980,22 +3200,44 @@ def Rm_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Relationship Manager"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    user_state = row[8] if len(row) > 8 else None
-                    user_city = row[9] if len(row) > 9 else None
-                    user_address = row[10] if len(row) > 10 else None
-                    register_date_value = row[11] if len(row) > 11 else None
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
+                    
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
+                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3004,13 +3246,13 @@ def Rm_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    #  Register date: Today's date as default
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3023,13 +3265,35 @@ def Rm_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass  # Keep today's date if parsing fails
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
+                    
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3038,10 +3302,13 @@ def Rm_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3051,17 +3318,29 @@ def Rm_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                    
-                    success_count += 1
+                        
+                        # Generate USER_ID: EF-{ID}-{YY}
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Relationship Managers. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Relationship Managers. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
@@ -3132,13 +3411,33 @@ def User_Ajax(request):
         data['user_profile'] = request.FILES.get('user_profile')        
         data['user_register_date'] = datetime.today()
         data['user_register_time'] = datetime.now()
+        
+        # --- CHECK FOR DUPLICATES ---
         if User_Details.objects.filter(user_phone=data['user_phone']).exists():
             return JsonResponse({"status":"0", "msg" : f"User with this phone number already exists"})
         elif User_Details.objects.filter(user_email=data['user_email']).exists():
             return JsonResponse({"status":"0", "msg" : f"User with this email address already exists"})
         else:
-            User_Details.objects.create(**data)
-            return JsonResponse({"status":"1", "msg" : f"User Details added successfully"})
+            # --- CREATE THE USER FIRST TO GET THE ID ---
+            # Create the user without user_id first
+            user = User_Details.objects.create(**data)
+            
+            # --- NOW GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
+            current_year = datetime.now().year
+            year_suffix = str(current_year)[-2:]
+            
+            # Format the user_id as EF-{user.id}-{YY}
+            # Example: EF-1-26, EF-2-26, EF-3-26
+            user_id = f"EF-{user.id}-{year_suffix}"
+            
+            # Update the user with the generated user_id
+            user.user_id = user_id
+            user.save()
+            
+            return JsonResponse({
+                "status": "1", 
+                "msg": f"User Details added successfully with ID: {user_id}"
+            })
 
     # UPDATE MODE
     else:
@@ -3154,8 +3453,11 @@ def User_Ajax(request):
         else:
             data.pop('user_profile', None)
 
+        # --- DO NOT UPDATE user_id ---
+        # Remove user_id from data if present to prevent updating it
+        data.pop('user_id', None)
 
-        # Update withdraw fields (unchanged)
+        # Update other fields
         for key, value in data.items():
             setattr(rm, key, value)
 
@@ -3299,22 +3601,44 @@ def Landlord_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Landlord"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    user_state = row[8] if len(row) > 8 else None
-                    user_city = row[9] if len(row) > 9 else None
-                    user_address = row[10] if len(row) > 10 else None
-                    register_date_value = row[11] if len(row) > 11 else None
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
+                
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
+                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3323,13 +3647,13 @@ def Landlord_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    #  Register date: Today's date as default
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3342,13 +3666,35 @@ def Landlord_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass  # Keep today's date if parsing fails
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
+                    
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3357,10 +3703,13 @@ def Landlord_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3370,17 +3719,29 @@ def Landlord_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                    
-                    success_count += 1
+                        
+                        # Generate USER_ID: EF-{ID}-{YY}
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Landlords. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Landlords. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
@@ -3495,22 +3856,44 @@ def Tenant_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Tenant"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    user_state = row[8] if len(row) > 8 else None
-                    user_city = row[9] if len(row) > 9 else None
-                    user_address = row[10] if len(row) > 10 else None
-                    register_date_value = row[11] if len(row) > 11 else None
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
+                
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
+                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3519,13 +3902,13 @@ def Tenant_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    #  Register date: Today's date as default
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3538,13 +3921,35 @@ def Tenant_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass  # Keep today's date if parsing fails
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
+                    
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3553,10 +3958,13 @@ def Tenant_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3566,17 +3974,29 @@ def Tenant_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                    
-                    success_count += 1
+                        
+                        # Generate USER_ID: EF-{ID}-{YY}
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Tenants. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Tenants. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
@@ -3687,22 +4107,44 @@ def Buyer_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Buyer"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    user_state = row[8] if len(row) > 8 else None
-                    user_city = row[9] if len(row) > 9 else None
-                    user_address = row[10] if len(row) > 10 else None
-                    register_date_value = row[11] if len(row) > 11 else None
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
+                
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
+                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3711,13 +4153,13 @@ def Buyer_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    #  Register date: Today's date as default
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3730,13 +4172,35 @@ def Buyer_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass  # Keep today's date if parsing fails
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
+                    
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3745,10 +4209,13 @@ def Buyer_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3758,17 +4225,29 @@ def Buyer_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                    
-                    success_count += 1
+                        
+                        # Generate USER_ID: EF-{ID}-{YY}
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Buyers. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Buyers. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
@@ -3881,54 +4360,74 @@ def Agent_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Agent"
             
-            # Data starts from row 3 (row 1 = title, row 2 = headers)
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
                     
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    agency_name = row[8] if len(row) > 8 else None
-                    license_number = row[9] if len(row) > 9 else None
-                    user_state = row[10] if len(row) > 10 else None
-                    user_city = row[11] if len(row) > 11 else None
-                    user_address = row[12] if len(row) > 12 else None
-                    register_date_value = row[13] if len(row) > 13 else None
+                    # ================================================================
+                    # COLUMN MAPPING (Based on your Agents Report structure)
+                    # ================================================================
+                    # Column 0: Actions (empty)
+                    # Column 1: Sr. No.
+                    # Column 2: Profile
+                    # Column 3: User Id
+                    # Column 4: Role (contains "Agent")
+                    # Column 5: Name (contains "Anita Chacko")
+                    # Column 6: Email Address (contains "anita.chacko@example.com")
+                    # Column 7: Phone Number
+                    # Column 8: Password
+                    # Column 9: Agency Name
+                    # Column 10: License Number
+                    # Column 11: State
+                    # Column 12: City
+                    # Column 13: Address
+                    # Column 14: Register Date
+                    # ================================================================
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    agency_name = row[9] if len(row) > 9 else None  # Column 9: Agency Name
+                    license_number = row[10] if len(row) > 10 else None  # Column 10: License Number
+                    user_state = row[11] if len(row) > 11 else None  # Column 11: State
+                    user_city = row[12] if len(row) > 12 else None  # Column 12: City
+                    user_address = row[13] if len(row) > 13 else None  # Column 13: Address
+                    register_date_value = row[14] if len(row) > 14 else None  # Column 14: Register Date
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
-                    if isinstance(user_phone, (int, float)):
-                        user_phone = str(int(user_phone))
-                    else:
-                        user_phone = str(user_phone).replace('-', '').replace(' ', '').strip()
+                    user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
                     
-                    # Clean name
+                    # Clean other fields
                     user_name = str(user_name).strip()
-                    
-                    # Clean password
-                    if user_password:
-                        if isinstance(user_password, (int, float)):
-                            user_password = str(int(user_password))
-                        else:
-                            user_password = str(user_password).split('.')[0].strip()
-                    else:
-                        user_password = 'default123'
-                    
-                    # Clean email
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
-                    
-                    # Clean agency fields
+                    user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
                     agency_name = str(agency_name).strip() if agency_name and str(agency_name) != '---' else None
                     license_number = str(license_number).strip() if license_number and str(license_number) != '---' else None
-                    
-                    # Clean address fields
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
@@ -3937,7 +4436,7 @@ def Agent_Data(request):
                     register_date = datetime.now().date()
                     
                     # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-', 'None']:
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
                         try:
                             if isinstance(register_date_value, (date, datetime)):
                                 register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
@@ -3948,16 +4447,15 @@ def Agent_Data(request):
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                                 elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%d/%m/%Y').date()
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
                             pass  # Keep today's date if parsing fails
                     
-                    print(f"Row {row_idx}: Importing Agent - {user_name} ({user_phone}) - Agency: {agency_name or 'N/A'}")
-                    
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3970,9 +4468,11 @@ def Agent_Data(request):
                         existing_user.user_register_date = register_date
                         existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        print(f"Row {row_idx}: Updated existing Agent")
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3986,17 +4486,31 @@ def Agent_Data(request):
                             user_register_date=register_date,
                             user_register_time=datetime.now().time()
                         )
-                        print(f"Row {row_idx}: Created new Agent")
-                    
-                    success_count += 1
+                        
+                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
+                        
+                        # Format: EF-{user.id}-{YY}
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        
+                        # Update the user with the generated user_id
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    print(f"Row {row_idx} error: {e}")
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Agents. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Agents. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]  # Limit to first 10 errors for response
             })
             
         except Exception as e:
@@ -4110,54 +4624,74 @@ def Agency_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Agency/Builder"
             
-            # Data starts from row 3 (row 1 = title, row 2 = headers)
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
                     
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    agency_name = row[8] if len(row) > 8 else None
-                    license_number = row[9] if len(row) > 9 else None
-                    user_state = row[10] if len(row) > 10 else None
-                    user_city = row[11] if len(row) > 11 else None
-                    user_address = row[12] if len(row) > 12 else None
-                    register_date_value = row[13] if len(row) > 13 else None
+                    # ================================================================
+                    # COLUMN MAPPING (Based on your Agents Report structure)
+                    # ================================================================
+                    # Column 0: Actions (empty)
+                    # Column 1: Sr. No.
+                    # Column 2: Profile
+                    # Column 3: User Id
+                    # Column 4: Role (contains "Agent")
+                    # Column 5: Name (contains "Anita Chacko")
+                    # Column 6: Email Address (contains "anita.chacko@example.com")
+                    # Column 7: Phone Number
+                    # Column 8: Password
+                    # Column 9: Agency Name
+                    # Column 10: License Number
+                    # Column 11: State
+                    # Column 12: City
+                    # Column 13: Address
+                    # Column 14: Register Date
+                    # ================================================================
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    agency_name = row[9] if len(row) > 9 else None  # Column 9: Agency Name
+                    license_number = row[10] if len(row) > 10 else None  # Column 10: License Number
+                    user_state = row[11] if len(row) > 11 else None  # Column 11: State
+                    user_city = row[12] if len(row) > 12 else None  # Column 12: City
+                    user_address = row[13] if len(row) > 13 else None  # Column 13: Address
+                    register_date_value = row[14] if len(row) > 14 else None  # Column 14: Register Date
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
-                    if isinstance(user_phone, (int, float)):
-                        user_phone = str(int(user_phone))
-                    else:
-                        user_phone = str(user_phone).replace('-', '').replace(' ', '').strip()
+                    user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
                     
-                    # Clean name
+                    # Clean other fields
                     user_name = str(user_name).strip()
-                    
-                    # Clean password
-                    if user_password:
-                        if isinstance(user_password, (int, float)):
-                            user_password = str(int(user_password))
-                        else:
-                            user_password = str(user_password).split('.')[0].strip()
-                    else:
-                        user_password = 'default123'
-                    
-                    # Clean email
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
-                    
-                    # Clean agency fields
+                    user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
                     agency_name = str(agency_name).strip() if agency_name and str(agency_name) != '---' else None
                     license_number = str(license_number).strip() if license_number and str(license_number) != '---' else None
-                    
-                    # Clean address fields
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
@@ -4166,7 +4700,7 @@ def Agency_Data(request):
                     register_date = datetime.now().date()
                     
                     # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-', 'None']:
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
                         try:
                             if isinstance(register_date_value, (date, datetime)):
                                 register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
@@ -4177,16 +4711,15 @@ def Agency_Data(request):
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                                 elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%d/%m/%Y').date()
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
                             pass  # Keep today's date if parsing fails
                     
-                    print(f"Row {row_idx}: Importing Agent - {user_name} ({user_phone}) - Agency: {agency_name or 'N/A'}")
-                    
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -4199,9 +4732,11 @@ def Agency_Data(request):
                         existing_user.user_register_date = register_date
                         existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        print(f"Row {row_idx}: Updated existing Agent")
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -4215,17 +4750,31 @@ def Agency_Data(request):
                             user_register_date=register_date,
                             user_register_time=datetime.now().time()
                         )
-                        print(f"Row {row_idx}: Created new Agent")
-                    
-                    success_count += 1
+                        
+                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
+                        
+                        # Format: EF-{user.id}-{YY}
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        
+                        # Update the user with the generated user_id
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    print(f"Row {row_idx} error: {e}")
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Agency/Builder. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Agencies/Builders. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]  # Limit to first 10 errors for response
             })
             
         except Exception as e:
@@ -4348,6 +4897,9 @@ def Vendor_Data(request):
             success_count = 0
             error_count = 0
             skipped_count = 0
+            error_details = []
+            
+            FIXED_ROLE = "Vendor"
             
             # Data starts from row 3
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
@@ -4355,32 +4907,34 @@ def Vendor_Data(request):
                     if not any(row) or len(row) < 18:
                         skipped_count += 1
                         continue
+                   
                     
-                    user_service_type = row[4] if len(row) > 4 else None
-                    user_name = row[5] if len(row) > 5 else None
-                    user_email = row[6] if len(row) > 6 else None
-                    user_phone = row[7] if len(row) > 7 else None
-                    user_password = row[8] if len(row) > 8 else None
-                    user_state = row[9] if len(row) > 9 else None
-                    user_city = row[10] if len(row) > 10 else None
-                    user_address = row[11] if len(row) > 11 else None
-                    user_company_name = row[12] if len(row) > 12 else None
-                    user_pan_number = row[13] if len(row) > 13 else None
-                    user_gstin_number = row[14] if len(row) > 14 else None
-                    operational_scope = row[15] if len(row) > 15 else None
-                    selected_regions = row[16] if len(row) > 16 else None  
-                    register_date_value = row[17] if len(row) > 17 else None
+                    user_service_type = row[4] if len(row) > 4 else None  # Column 4: Service Type
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    user_company_name = row[12] if len(row) > 12 else None  # Column 12: Company Name
+                    user_pan_number = row[13] if len(row) > 13 else None  # Column 13: PAN
+                    user_gstin_number = row[14] if len(row) > 14 else None  # Column 14: GSTIN
+                    operational_scope = row[15] if len(row) > 15 else None  # Column 15: Operational Scope
+                    selected_regions = row[16] if len(row) > 16 else None  # Column 16: Selected Regions
+                    register_date_value = row[17] if len(row) > 17 else None  # Column 17: Register Date
+                    register_time_value = row[18] if len(row) > 18 else None  # Column 18: Register Time
                     
                     # Skip if no name or phone
                     if not user_name or not user_phone:
                         skipped_count += 1
-                        print(f"Row {row_idx}: Missing name or phone, skipping")
+                        error_details.append(f"Row {row_idx}: Missing name or phone")
                         continue
                     
                     # Skip if name is "View Profile" (Profile column value)
                     user_name_str = str(user_name).strip()
                     if user_name_str == 'View Profile' or user_name_str == 'None' or user_name_str.isdigit():
-                        print(f"Row {row_idx}: Invalid name '{user_name_str}', skipping")
+                        error_details.append(f"Row {row_idx}: Invalid name '{user_name_str}'")
                         skipped_count += 1
                         continue
                     
@@ -4403,6 +4957,7 @@ def Vendor_Data(request):
                     user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     
                     # Clean address fields
+                    user_name = str(user_name).strip()
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
@@ -4414,14 +4969,17 @@ def Vendor_Data(request):
                     user_gstin_number = str(user_gstin_number).strip().upper() if user_gstin_number and str(user_gstin_number) != '---' else None
                     operational_scope = str(operational_scope).strip() if operational_scope and str(operational_scope) != '---' else None
                     
-                    #  Clean selected_regions (this is the correct field name)
+                    # Clean selected_regions
                     if selected_regions and str(selected_regions) != '---':
                         selected_regions = str(selected_regions).strip()
                     else:
                         selected_regions = None
                     
-                    # Register date
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
+                    
+                    # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
                         try:
                             if isinstance(register_date_value, (date, datetime)):
@@ -4432,18 +4990,38 @@ def Vendor_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
                             pass
                     
-                    print(f"Row {row_idx}: Importing Vendor - Name: {user_name}, Phone: {user_phone}, Company: {user_company_name}")
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
-                        existing_user.user_role = "Vendor"
+                        existing_user.user_role = FIXED_ROLE
                         existing_user.user_service_type = user_service_type
                         existing_user.user_company_name = user_company_name
                         existing_user.user_pan_number = user_pan_number
@@ -4455,15 +5033,17 @@ def Vendor_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
-                        print(f"Row {row_idx}: Updated existing Vendor")
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
-                            user_role="Vendor",
+                            user_role=FIXED_ROLE,
                             user_service_type=user_service_type,
                             user_company_name=user_company_name,
                             user_pan_number=user_pan_number,
@@ -4475,14 +5055,25 @@ def Vendor_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                        print(f"Row {row_idx}: Created new Vendor")
-                    
-                    success_count += 1
+                        
+                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
+                        
+                        # Format: EF-{user.id}-{YY}
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        
+                        # Update the user with the generated user_id
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
                     print(f"Row {row_idx} error: {e}")
             
             msg = f"Successfully imported {success_count} Vendors."
@@ -4493,7 +5084,11 @@ def Vendor_Data(request):
             
             return JsonResponse({
                 "status": "1",
-                "msg": msg
+                "msg": msg,
+                "success_count": success_count,
+                "error_count": error_count,
+                "skipped_count": skipped_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
@@ -5070,7 +5665,7 @@ def rental_residential_logs_view(request):
         property_pool = property_pool.filter(monthly_rent__lte=int(max_budget))
         has_property_filter = True
 
-    matched_property_ids = list(property_pool.values_list('rental_residential_id', flat=True))
+    matched_property_ids = list(property_pool.values_list('id', flat=True))
 
     # 2. Apply Filters Across the Audit Logs Queryset
     log_conditions = Q()
@@ -5129,7 +5724,7 @@ def rental_residential_logs_view(request):
     logs_property_ids = filtered_logs.exclude(property_id="Multiple / Sheet Records").values_list('property_id', flat=True).distinct()
     
     final_properties_queryset = RentalResidentialProperty.objects.filter(
-        Q(rental_residential_id__in=logs_property_ids) | Q(rental_residential_id__in=matched_property_ids),
+        Q(id__in=logs_property_ids) | Q(id__in=matched_property_ids),
         is_deleted=False
     ).prefetch_related('images').distinct()
 
@@ -5163,7 +5758,7 @@ def rental_residential_logs_view(request):
             writer = csv.writer(response, delimiter='\t')
             writer.writerow(['Property ID', 'Property Title', 'Property Type', 'BHK Config Type', 'Monthly Rent', 'Security Deposit', 'City', 'Locality', 'Uploaded By', 'Source File Name'])
             for item in final_properties_queryset:
-                writer.writerow([item.rental_residential_id, item.property_title, item.property_type, item.bhk_type, item.monthly_rent, item.security_deposit, item.city, item.locality, item.uploaded_by_name, item.upload_file_name])
+                writer.writerow([item.id, item.property_title, item.property_type, item.bhk_type, item.monthly_rent, item.security_deposit, item.city, item.locality, item.uploaded_by_name, item.upload_file_name])
             return response
 
     # 6. Pagination System Engine Layout Slices
@@ -5420,7 +6015,7 @@ def rental_list(request):
 
     properties = RentalResidentialProperty.objects.filter(
         is_deleted=False
-    ).order_by('-rental_residential_id')
+    ).order_by('-id')
 
     # ═══════════════════════════════════════
     # SEARCH FILTER
@@ -5489,7 +6084,7 @@ def rental_list(request):
         # ALL fields including ID and Uploader tracking
         sections = {
             "Basic Info": [
-                "rental_residential_id", "property_title", "property_type", "bhk_type", 
+                "id", "property_title", "property_type", "bhk_type", 
                 "renting_option", "built_up_area", "bathrooms", "balconies", 
                 "floor_number", "total_floors", "facing", "furnishing_status", "available_for"
             ],
@@ -5520,7 +6115,7 @@ def rental_list(request):
         }
 
         HINTS = {
-            "rental_residential_id": "Auto-Generated ID",
+            "id": "Auto-Generated ID",
             "property_title": "Auto_Generated Title", "property_type": "Apartment",
             "bhk_type": "1 BHK/2 BHK", "renting_option": "Full Property", "built_up_area": "sq.ft",
             "bathrooms": "Number", "balconies": "Number", "floor_number": "e.g. 5th Floor",
@@ -5786,7 +6381,7 @@ def rental_list(request):
     ).values(
         'bhk_type'
     ).annotate(
-        count=Count('rental_residential_id')
+        count=Count('id')
     ).order_by('-count')
 
     bhk_labels = json.dumps([
@@ -5826,7 +6421,7 @@ def rental_list(request):
     ).values(
         'furnishing_status'
     ).annotate(
-        count=Count('rental_residential_id')
+        count=Count('id')
     ).order_by('-count')
 
     furnishing_labels = json.dumps([
@@ -5844,7 +6439,7 @@ def rental_list(request):
     ).values(
         'property_type'
     ).annotate(
-        count=Count('rental_residential_id')
+        count=Count('id')
     ).order_by('-count')
 
     prop_type_labels = json.dumps([
@@ -6024,7 +6619,7 @@ def rental_bulk_delete(request):
             
         elif delete_type == 'current_page':
             page_ids = data.get('page_ids', [])
-            target_props = properties.filter(rental_residential_id__in=page_ids)
+            target_props = properties.filter(id__in=page_ids)
             count = target_props.count()
             target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
             return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from current page to Recycle Bin.'})
@@ -6094,7 +6689,7 @@ def rental_residential_delete(request, pk):
             except Admin_Login.DoesNotExist:
                 pass
 
-        prop = RentalResidentialProperty.objects.get(rental_residential_id=pk)
+        prop = RentalResidentialProperty.objects.get(id=pk)
 
         # Snapshot file source metadata before deletion mapping executions
         associated_origin_file = prop.upload_file_name or "Web UI Form"
@@ -6221,7 +6816,7 @@ def system_audit_logs(request):
     def get_display_id(obj):
         # Look for custom model unique IDs before falling back to PK
         id_fields = [
-            'rental_residential_id', 'commercial_rental_id', 'pg_property_id', 
+            'id', 'commercial_rental_id', 'id', 
             'property_id', 'commercial_id', 'plot_property_id', 
             'industrial_id', 'agri_property_id'
         ]
@@ -6435,7 +7030,7 @@ def rental_restore(request, pk):
 
     try:
         prop = RentalResidentialProperty.objects.get(
-            rental_residential_id=pk,
+            id=pk,
             is_deleted=True
         )
 
@@ -6471,11 +7066,11 @@ def rental_hard_delete(request, pk):
 
     try:
         prop = RentalResidentialProperty.objects.get(
-            rental_residential_id=pk,
+            id=pk,
             is_deleted=True
         )
 
-        print("FOUND PROPERTY:", prop.rental_residential_id)
+        print("FOUND PROPERTY:", prop.id)
 
         prop.delete()
 
@@ -6686,7 +7281,7 @@ def import_residential_excel(request):
         return JsonResponse({"status": "error", "message": "Only .xlsx files allowed."}, status=400)
 
     # =========================================================
-    # 1. ESTABLISH UPLOADER IDENTITY (Copied from manual add)
+    # 1. ESTABLISH DEFAULT UPLOADER IDENTITY (Fallback)
     # =========================================================
     admin_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
@@ -6700,24 +7295,24 @@ def import_residential_excel(request):
         user_obj = User_Details.objects.filter(id=user_id).first()
 
     # Default fallbacks
-    uploader_name = ""
-    uploader_email = ""
-    uploader_contact = ""
-    uploader_role = "Automated Engine"
+    default_uploader_name = ""
+    default_uploader_email = ""
+    default_uploader_contact = ""
+    default_uploader_role = "Automated Engine"
     user_identity = "Automated Engine"
 
     if admin_obj:
-        uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
-        uploader_email = getattr(admin_obj, 'email', '')
-        uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
-        uploader_role = "Admin"
-        user_identity = uploader_email or uploader_name
+        default_uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
+        default_uploader_email = getattr(admin_obj, 'email', '')
+        default_uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
+        default_uploader_role = "Admin"
+        user_identity = default_uploader_email or default_uploader_name
     elif user_obj:
-        uploader_name = user_obj.user_name
-        uploader_email = user_obj.user_email
-        uploader_contact = user_obj.user_phone
-        uploader_role = "User"
-        user_identity = uploader_email or uploader_name
+        default_uploader_name = user_obj.user_name
+        default_uploader_email = user_obj.user_email
+        default_uploader_contact = user_obj.user_phone
+        default_uploader_role = "User"
+        user_identity = default_uploader_email or default_uploader_name
 
     # =========================================================
     # 2. PARSE EXCEL FILE
@@ -6731,6 +7326,7 @@ def import_residential_excel(request):
     row1_vals = [str(cell.value or "").strip().replace(" *", "") for cell in ws[1]]
     row2_vals = [str(cell.value or "").strip().replace(" *", "") for cell in ws[2]] if ws.max_row >= 2 else []
 
+    # Determine header structure
     if "property_purpose" in row2_vals or "property_title" in row2_vals:
         headers = [val if val else None for val in row2_vals]
         data_start_row = 4
@@ -6738,46 +7334,137 @@ def import_residential_excel(request):
         headers = [val if val else None for val in row1_vals]
         data_start_row = 2
 
+    # =========================================================
+    # 3. PARSE ROWS AND EXTRACT UPLOADER DETAILS FROM EACH ROW
+    # =========================================================
     parsed_rows = []
+    uploader_details_from_excel = {
+        "name": "",
+        "email": "",
+        "contact": "",
+        "role": ""
+    }
+    
     for row_idx, row in enumerate(ws.iter_rows(min_row=data_start_row, values_only=True), start=data_start_row):
-        if all(v is None or str(v).strip() == "" for v in row): continue  
+        if all(v is None or str(v).strip() == "" for v in row):
+            continue
         
         obj_data = {}
         row_id = None
+        row_uploader_name = ""
+        row_uploader_email = ""
+        row_uploader_contact = ""
+        row_uploader_role = ""
+        
         for col_idx, col_name in enumerate(headers):
             if col_name:
-                val = row[col_idx]
-                if col_name == 'rental_residential_id': row_id = str(val).strip() if val else None
+                val = row[col_idx] if col_idx < len(row) else None
+                
+                # Check if this is an uploader-related column
+                if col_name == 'uploaded_by_name':
+                    row_uploader_name = str(val).strip() if val else ""
+                    continue
+                elif col_name == 'uploaded_by_email':
+                    row_uploader_email = str(val).strip() if val else ""
+                    continue
+                elif col_name == 'uploaded_by_contact':
+                    row_uploader_contact = str(val).strip() if val else ""
+                    continue
+                elif col_name == 'uploaded_by_role':
+                    row_uploader_role = str(val).strip() if val else ""
+                    continue
+                elif col_name == 'id':
+                    row_id = str(val).strip() if val else None
                 elif col_name not in ['created_at', 'deleted_at', 'is_deleted']:
-                    if val is not None and str(val).strip() != "": obj_data[col_name] = val
+                    if val is not None and str(val).strip() != "":
+                        obj_data[col_name] = val
 
+        # If this row has uploader details, use them
+        if row_uploader_name:
+            uploader_details_from_excel["name"] = row_uploader_name
+        if row_uploader_email:
+            uploader_details_from_excel["email"] = row_uploader_email
+        if row_uploader_contact:
+            uploader_details_from_excel["contact"] = row_uploader_contact
+        if row_uploader_role:
+            uploader_details_from_excel["role"] = row_uploader_role
+
+        # Process date fields
         if 'available_from' in obj_data and obj_data['available_from']:
             d_val = obj_data['available_from']
             if isinstance(d_val, str):
                 c_str = d_val.strip().split(" ")[0]
-                try: obj_data['available_from'] = datetime.strptime(c_str, "%Y-%m-%d").date()
+                try:
+                    obj_data['available_from'] = datetime.strptime(c_str, "%Y-%m-%d").date()
                 except:
-                    try: obj_data['available_from'] = datetime.strptime(c_str, "%d-%m-%Y").date()
-                    except: obj_data['available_from'] = None
+                    try:
+                        obj_data['available_from'] = datetime.strptime(c_str, "%d-%m-%Y").date()
+                    except:
+                        obj_data['available_from'] = None
             elif isinstance(d_val, datetime):
                 obj_data['available_from'] = d_val.date()
 
+        # Process numeric fields
         for f in ['monthly_rent', 'security_deposit', 'maintenance_amount', 'bathrooms', 'balconies', 'total_floors']:
             if f in obj_data and obj_data[f] is not None:
-                try: obj_data[f] = int(float(str(obj_data[f]).replace(",", "").strip()))
-                except: obj_data[f] = None
+                try:
+                    obj_data[f] = int(float(str(obj_data[f]).replace(",", "").strip()))
+                except:
+                    obj_data[f] = None
 
         for f in ['built_up_area', 'carpet_area', 'plot_area']:
             if f in obj_data and obj_data[f] is not None:
-                try: obj_data[f] = Decimal(str(obj_data[f]).replace(",", "").strip())
-                except: obj_data[f] = None
+                try:
+                    obj_data[f] = Decimal(str(obj_data[f]).replace(",", "").strip())
+                except:
+                    obj_data[f] = None
 
-        parsed_rows.append({'row_idx': row_idx, 'row_id': row_id, 'data': obj_data})
+        parsed_rows.append({
+            'row_idx': row_idx, 
+            'row_id': row_id, 
+            'data': obj_data,
+            'uploader_name': row_uploader_name,
+            'uploader_email': row_uploader_email,
+            'uploader_contact': row_uploader_contact,
+            'uploader_role': row_uploader_role
+        })
 
     wb.close()
 
     # =========================================================
-    # 3. DUPLICATE & OVERLAP CHECKS
+    # 4. DETERMINE FINAL UPLOADER DETAILS
+    #    Priority: Excel row data > Session fallback
+    # =========================================================
+    # Check if any row had uploader data
+    has_excel_uploader = any(
+        row['uploader_name'] or row['uploader_email'] or row['uploader_contact'] 
+        for row in parsed_rows
+    )
+    
+    if has_excel_uploader:
+        # Use the first non-empty uploader details found
+        for row in parsed_rows:
+            if row['uploader_name'] or row['uploader_email'] or row['uploader_contact']:
+                uploader_name = row['uploader_name'] or uploader_details_from_excel["name"] or default_uploader_name
+                uploader_email = row['uploader_email'] or uploader_details_from_excel["email"] or default_uploader_email
+                uploader_contact = row['uploader_contact'] or uploader_details_from_excel["contact"] or default_uploader_contact
+                uploader_role = row['uploader_role'] or uploader_details_from_excel["role"] or default_uploader_role
+                break
+        else:
+            # Fallback to session if no row had uploader data
+            uploader_name = default_uploader_name
+            uploader_email = default_uploader_email
+            uploader_contact = default_uploader_contact
+            uploader_role = default_uploader_role
+    else:
+        # No uploader data in Excel, use session fallback
+        uploader_name = default_uploader_name
+        uploader_email = default_uploader_email
+        uploader_contact = default_uploader_contact
+        uploader_role = default_uploader_role
+
+    # =========================================================
+    # 5. DUPLICATE & OVERLAP CHECKS
     # =========================================================
     file_name_exists = RentalResidentialProperty.objects.filter(upload_file_name=excel_file.name).exists()
     total_scanned_rows = len(parsed_rows)
@@ -6799,14 +7486,15 @@ def import_residential_excel(request):
             duplicate_data_different_name_count += 1
 
         if r_id and r_id != "None":
-            existing = RentalResidentialProperty.objects.filter(rental_residential_id=r_id).first()
+            existing = RentalResidentialProperty.objects.filter(id=r_id).first()
             if existing:
                 has_changed = False
                 for k, v in o_data.items():
                     if str(getattr(existing, k, None)).strip() != str(v).strip():
                         has_changed = True
                         break
-                if has_changed: different_file_rows += 1
+                if has_changed:
+                    different_file_rows += 1
 
     if file_name_exists and different_file_rows == 0 and total_scanned_rows > 0:
         return JsonResponse({
@@ -6821,26 +7509,34 @@ def import_residential_excel(request):
         })
 
     # =========================================================
-    # 4. DATABASE WRITE & UPLOADER INJECTION
+    # 6. DATABASE WRITE WITH UPLOADER DETAILS
     # =========================================================
     created, updated, skipped, errors = 0, 0, 0, []
+    
     for item in parsed_rows:
         o_data = item['data']
         r_id = item['row_id']
         
-        # ---> INJECT UPLOADER DETAILS INTO THE DICTIONARY HERE <---
+        # Determine uploader for this specific row (row-level override)
+        row_uploader_name = item['uploader_name'] or uploader_name
+        row_uploader_email = item['uploader_email'] or uploader_email
+        row_uploader_contact = item['uploader_contact'] or uploader_contact
+        row_uploader_role = item['uploader_role'] or uploader_role
+        
+        # ---> INJECT UPLOADER DETAILS INTO THE DICTIONARY <---
         o_data["upload_file_name"] = excel_file.name
-        o_data["uploaded_by_name"] = uploader_name
-        o_data["uploaded_by_email"] = uploader_email
-        o_data["uploaded_by_contact"] = uploader_contact
-        o_data["uploaded_by_role"] = uploader_role
+        o_data["uploaded_by_name"] = row_uploader_name
+        o_data["uploaded_by_email"] = row_uploader_email
+        o_data["uploaded_by_contact"] = row_uploader_contact
+        o_data["uploaded_by_role"] = row_uploader_role
 
         try:
             # Update Existing
             if r_id and r_id != "None":
-                prop = RentalResidentialProperty.objects.filter(rental_residential_id=r_id).first()
+                prop = RentalResidentialProperty.objects.filter(id=r_id).first()
                 if prop:
-                    for key, val in o_data.items(): setattr(prop, key, val)
+                    for key, val in o_data.items():
+                        setattr(prop, key, val)
                     prop.save()
                     updated += 1
                     continue
@@ -6862,11 +7558,13 @@ def import_residential_excel(request):
             errors.append(f"Row {item['row_idx']} processing failure: {str(e)}")
 
     # =====================================================
-    # 5. AUDIT LOGIC: File-wise Workbook Log Creation Entry
+    # 7. AUDIT LOGIC: File-wise Workbook Log Creation Entry
     # =====================================================
+    audit_identity = uploader_email or uploader_name or "Excel Import"
+    
     RentalActivityLog.objects.create(
-        user_identity=user_identity,
-        user_role=uploader_role, # Updated to use the resolved role!
+        user_identity=audit_identity,
+        user_role=uploader_role,
         action_type='EXCEL_IMPORT',
         property_id="Multiple / Sheet Records",
         targeted_fields="bulk_action",
@@ -6876,7 +7574,12 @@ def import_residential_excel(request):
             "records_created": created,
             "records_updated": updated,
             "records_skipped": skipped,
-            "errors_encountered": len(errors)
+            "errors_encountered": len(errors),
+            "uploader_name": uploader_name,
+            "uploader_email": uploader_email,
+            "uploader_contact": uploader_contact,
+            "uploader_role": uploader_role,
+            "source": "excel_row_data" if has_excel_uploader else "session_fallback"
         }),
         ip_address=_get_client_ip(request),
         status='SUCCESS' if not errors else 'PARTIAL'
@@ -6885,7 +7588,18 @@ def import_residential_excel(request):
     return JsonResponse({
         "status": "success" if not errors else "partial_error",
         "message": f"{created} Created | {updated} Updated | {skipped} Skipped due to system rules.",
-        "created": created, "updated": updated, "skipped": skipped, "error_count": len(errors), "errors": errors
+        "created": created,
+        "updated": updated,
+        "skipped": skipped,
+        "error_count": len(errors),
+        "errors": errors,
+        "uploader_details": {
+            "name": uploader_name,
+            "email": uploader_email,
+            "contact": uploader_contact,
+            "role": uploader_role,
+            "source": "excel_row_data" if has_excel_uploader else "session_fallback"
+        }
     })
 
  
@@ -7049,7 +7763,7 @@ def rental_residential_view(request, pk):
     latest_properties = RentalResidentialProperty.objects.filter(
         is_deleted=False
     ).exclude(
-        rental_residential_id=prop.rental_residential_id
+        id=prop.id
     ).prefetch_related('faqs').order_by('-created_at')[:4]
 
     # Convert comma-separated string arrays smoothly
@@ -7079,13 +7793,24 @@ def _get_client_ip(request):
 
 def rental_residential_edit(request, pk):
     # Retrieve the property using the custom primary key
-    prop = get_object_or_404(RentalResidentialProperty, rental_residential_id=pk)
+    prop = get_object_or_404(RentalResidentialProperty, id=pk)
     
     session_id = request.session.get('Admin_id')
     if not session_id:
         return render(request, 'home_page/Adminlogin.html')
 
     admin_obj = Admin_Login.objects.get(id=session_id)
+
+    user_obj = User_Details.objects.filter(
+                    user_role__in=['Relationship Manager', 'Agent', 'Agency/Builder','Landlord']
+            ).annotate(
+                sort_order=Case(
+                    When(user_role='Relationship Manager', then=Value(1)),         
+                    default=Value(2),   
+                    output_field=IntegerField(),
+                )
+            ).order_by('sort_order', '-id','user_role')
+
     
     if request.method == 'POST':
         try:
@@ -7241,7 +7966,7 @@ def rental_residential_edit(request, pk):
                     user_identity=admin_obj.email or admin_obj.username,
                     user_role="Admin",
                     action_type='UPDATE',
-                    property_id=prop.rental_residential_id,
+                    property_id=prop.id,
                     targeted_fields=", ".join(modified_fields_summary[:4]) + ("..." if len(modified_fields_summary) > 4 else ""),
                     associated_file=prop.upload_file_name or "Web UI Form",
                     action_payload=json.dumps(modifications_diff),
@@ -7272,16 +7997,63 @@ def rental_residential_edit(request, pk):
                 'message': f"Failed to save data: {str(e)}"
             }, status=400)
 
+        
+
     # ---------- GET METHOD: RENDER FORM ----------
     return render(request, 'admin_user/rental_residential_edit.html', {
         'property': prop,
         'admin_obj': admin_obj,
         'ameneties_obj': Ameneties_Details.objects.all(),
-        'facilities_obj': Facilities_Details.objects.all()
+        'facilities_obj': Facilities_Details.objects.all(),
+        'user_obj':user_obj
     })
 
 
 
+############### Views start for get user details according to listed by ########
+
+@csrf_exempt
+def get_user_data(request):
+    assigned_to = request.POST.get('assigned_to')
+    
+    if not assigned_to:
+        return JsonResponse({'error': 'No user selected'}, status=400)
+    
+    # Check if it's a self selection (just an ID without role)
+    if '-' not in assigned_to:
+        try:
+            user_obj = User_Details.objects.get(id=assigned_to)
+            data = {
+                'user_id': user_obj.user_id,
+                'name': getattr(user_obj, 'user_name', ''), # Fallback if naming differs
+                'email': getattr(user_obj, 'user_email', ''),
+                'contact': getattr(user_obj, 'user_phone', ''),
+                'role': getattr(user_obj, 'user_role', '')
+            }
+            return JsonResponse(data)
+        except User_Details.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+    
+    # For other users (format: user_id-role)
+    split = assigned_to.split("-")
+    user_id = split[0]
+    user_role = split[1]
+
+    try:
+        user_obj = User_Details.objects.get(id=user_id, user_role=user_role)
+        data = {
+            'user_id': user_obj.user_id,
+            'name': getattr(user_obj, 'user_name', ''),
+            'email': getattr(user_obj, 'user_email', ''),
+            'contact': getattr(user_obj, 'user_phone', ''),
+            'role': getattr(user_obj, 'user_role', '')
+        }
+        return JsonResponse(data)
+    except User_Details.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
+    
+
+############## Views end for get user details according to listed by ##########
 
 
 ##################################RESIDENTIAL RENTAL LISTING VEIW SECTION END##############################
@@ -7297,6 +8069,8 @@ def commercial_rental_add(request):
 
     admin_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
+
+    
 
     if not admin_id and not user_id:
         return redirect('login')
@@ -8386,7 +9160,7 @@ def export_pg_coliving(request):
 
     # ── EXACT MATCH TO IMPORT SEQUENCE + SYSTEM META FOR AUDIT ──
     EXPORT_COLS = [
-        ("⚙️ System Meta", "pg_property_id", False, "Auto Generated Property pg ID"),
+        ("⚙️ System Meta", "id", False, "Auto Generated Property pg ID"),
         ("📋 Basic Info", "property_title", False, "Property Title/Auto Generated"),
         ("📋 Basic Info", "city", True, "city *"),
         ("📋 Basic Info", "building_name", False, "building / project name"),
@@ -8625,7 +9399,7 @@ def pg_list(request):
             Q(property_title__icontains=search_query) | Q(city__icontains=search_query) |
             Q(locality__icontains=search_query) | Q(building_name__icontains=search_query) |
             Q(owner_name__icontains=search_query) | Q(contact_number__icontains=search_query) |
-            Q(pg_property_id__icontains=search_query)
+            Q(id__icontains=search_query)
         )
     if pg_for_filter:
         properties = properties.filter(pg_for__iexact=pg_for_filter)
@@ -8648,7 +9422,7 @@ def pg_list(request):
     # EXPORT HELPERS  (shared by both Excel & CSV)
     # ══════════════════════════════════════════════════════════════
     EXPORT_HEADERS = [
-        "pg_property_id", "property_title", "city", "building_name",
+        "id", "property_title", "city", "building_name",
         "locality", "property_address", "total_beds", "pg_for",
         "furnishing_type", "sharing_type", "best_suited_for",
         # Room 1
@@ -8703,7 +9477,7 @@ def pg_list(request):
         for prop in qs.prefetch_related('rooms'):
             rooms_list = list(prop.rooms.all())
             row = {
-                "pg_property_id":       prop.pg_property_id,
+                "id":       prop.id,
                 "property_title":       prop.property_title or "",
                 "city":                 prop.city,
                 "building_name":        prop.building_name or "",
@@ -8879,7 +9653,7 @@ def pg_list(request):
     ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct().order_by('upload_file_name')
 
     # ── CHARTS ──
-    pg_for_qs     = properties.values('pg_for').annotate(c=Count('pg_property_id')).order_by('-c')
+    pg_for_qs     = properties.values('pg_for').annotate(c=Count('id')).order_by('-c')
     pg_for_labels = json.dumps([i['pg_for'] for i in pg_for_qs])
     pg_for_data   = json.dumps([i['c']      for i in pg_for_qs])
 
@@ -8887,11 +9661,11 @@ def pg_list(request):
     rent_range_labels = json.dumps([b[0] for b in rent_buckets])
     rent_range_data   = json.dumps([properties.filter(rooms__room_rent__gte=lo, rooms__room_rent__lt=hi).distinct().count() for _, lo, hi in rent_buckets])
 
-    furnish_qs       = properties.values('furnishing_type').annotate(c=Count('pg_property_id')).order_by('-c')
+    furnish_qs       = properties.values('furnishing_type').annotate(c=Count('id')).order_by('-c')
     furnishing_labels= json.dumps([i['furnishing_type'] for i in furnish_qs])
     furnishing_data  = json.dumps([i['c']               for i in furnish_qs])
 
-    city_qs     = properties.values('city').annotate(c=Count('pg_property_id')).order_by('-c')[:5]
+    city_qs     = properties.values('city').annotate(c=Count('id')).order_by('-c')[:5]
     city_labels = json.dumps([i['city'] for i in city_qs])
     city_data   = json.dumps([i['c']    for i in city_qs])
 
@@ -9088,7 +9862,7 @@ def pg_bulk_delete(request):
 
         elif delete_type == 'current_page':
             page_ids = data.get('page_ids', [])
-            target_props = properties.filter(pg_property_id__in=page_ids)
+            target_props = properties.filter(id__in=page_ids)
 
         elif delete_type == 'date_range':
             from_date = data.get('from_date')
@@ -9808,7 +10582,7 @@ def pg_edit_page(request, property_id):
     # =====================================================
     pg = get_object_or_404(
         PGColivingProperty,
-        pg_property_id=property_id
+        id=property_id
     )
 
     # =====================================================
@@ -9925,7 +10699,7 @@ def pg_edit(request, property_id):
         # =====================================================
         pg = get_object_or_404(
             PGColivingProperty,
-            pg_property_id=property_id
+            id=property_id
         )
 
         # =================================================
@@ -10250,7 +11024,7 @@ def pg_coliving_delete(request, pk):
         # ✅ USING NEW PRIMARY KEY FIELD
         pg = get_object_or_404(
             PGColivingProperty,
-            pg_property_id=pk
+            id=pk
         )
 
         pg.is_deleted = True
@@ -10278,7 +11052,7 @@ def pg_restore(request, id):
     if not admin_id:
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 
-    PGColivingProperty.objects.filter(pg_property_id=id).update(
+    PGColivingProperty.objects.filter(id=id).update(
         is_deleted=False,
         deleted_at=None,
         deleted_by=None
@@ -10296,7 +11070,7 @@ def pg_hard_delete(request, id):
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 
     try:
-        pg = get_object_or_404(PGColivingProperty, pg_property_id=id)
+        pg = get_object_or_404(PGColivingProperty, id=id)
 
         # Clean up related asset files safely
         for img in pg.images.all():

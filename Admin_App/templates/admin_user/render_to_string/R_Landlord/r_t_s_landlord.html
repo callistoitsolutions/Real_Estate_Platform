@@ -42,6 +42,7 @@
             <th>Actions</th>
             <th>Sr. No.</th>
             <th>Profile</th>
+            <th>User Id</th>
             <th>Role</th>
             <th>Name</th>
             <th>Email Address</th>
@@ -91,8 +92,14 @@
             </td>
 
             <td>
+                {{ landlord.user_id }}
+            </td>
+
+            <td>
                 {{ landlord.user_role }}
             </td>
+
+           
 
             <td>{{ landlord.user_name }}</td>
 

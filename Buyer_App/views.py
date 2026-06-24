@@ -1,6 +1,7 @@
 from django.shortcuts import render,HttpResponse,redirect
 from Admin_App.models import *
 from Landlord_Panel.views import calculate_profile_strength
+from django.template.loader import render_to_string
 
 # Create your views here.
 

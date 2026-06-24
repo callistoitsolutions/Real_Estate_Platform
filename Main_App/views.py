@@ -1994,7 +1994,7 @@ def Track_utm_link(request):
                 real_property = PGColivingProperty.objects.get(id=property_id)
                 property_content_type = ContentType.objects.get_for_model(PGColivingProperty)
             elif listing_type == "rent" and category == "commercial-data":
-                real_property = CommercialRentalProperty.objects.get(id=property_id)
+                real_property = CommercialRentalProperty.objects.get(id= property_id)
                 property_content_type = ContentType.objects.get_for_model(CommercialRentalProperty)
             elif listing_type == "sale" and category == "resale-residential":
                 real_property = ResaleResidentialProperty.objects.get(id=property_id)

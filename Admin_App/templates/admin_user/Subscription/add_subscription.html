@@ -118,15 +118,20 @@
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Package Name <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="package_name" name="package_name" placeholder="Enter Package Name" required>
+                <select class="form-control" id="package_name" name="package_name" required>
+                  <option value="" selected disabled>Select a package</option>
+                  {% for package in packages_obj %}
+                    <option value="{{package.package_name}}">{{package.package_name}}</option>
+                  {% endfor %}
+                </select>
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Plan Type <span style="color:red;">*</span></label>
                 <select class="form-control" id="plan_type" name="plan_type" required>
-                  <option value="" selected disabled>Select a plan.</option>
-                  <option value="Basic Plan">Basic Plan</option>
-                  <option value="Standard Plan">Standard Plan</option>
-                  <option value="Premium Plan">Premium Plan</option>
+                  <option value="" selected disabled>Select plan type</option>
+                  {% for plan in plans_obj %}
+                    <option value="{{plan.plan_name}}">{{plan.plan_name}}</option>
+                  {% endfor %}
                 </select>
               </div>
               <div class="col-md-4 mt-2">
@@ -198,7 +203,7 @@
               <div class="col-md-12 mt-4">
                 <label class="form-label">Plan Description <span style="color:red;">*</span></label>
                 <!-- Removed required attribute here if using CKEditor as it can conflict with standard validation -->
-                <textarea class="form-control" placeholder="Enter Plan Description" id="plan_desc" name="plan_desc"></textarea>
+                <textarea class="form-control" placeholder="Enter Plan Description" id="plan_desc" name="plan_desc" required></textarea>
               </div>
             </div>
           </div>
@@ -373,5 +378,6 @@
     });
   }
 </script>
+
 </body>
 </html>

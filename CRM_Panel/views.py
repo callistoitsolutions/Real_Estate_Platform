@@ -18,8 +18,9 @@ from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import traceback
-from django.db.models import Case, When, Value, IntegerField
+from django.db.models import Case, When, Value, IntegerField,Min,Max
 from datetime import datetime
+from django.core.exceptions import ObjectDoesNotExist
 
 # Create your views here.
 
@@ -232,18 +233,82 @@ def view_property_details_rm(request,pid):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        # utm_obj = UTMLink.objects.all().order_by('-id')
-        # utm_obj_count = UTMLink.objects.all().count()
-
-        # rendered = render_to_string("crm/render_to_string/R_Utm/r_t_s_utm.html",{'utm_obj':utm_obj,'utm_obj_count':utm_obj_count})
+        # 2. Parse Comma-Separated Strings into Lists for HTML "Chips"
+        def split_to_list(db_string):
+            return [x.strip() for x in db_string.split(',') if x.strip()] if db_string else []
+        
+        utm_id = UTMLink.objects.get(id=pid)
 
         ################ Notifications Section ######################
 
         enquiry_obj_today = PropertyEnquiry.objects.filter(enquiry_date=datetime.today()).count()
 
-        context = {'admin_obj':admin_obj,'enquiry_obj_today':enquiry_obj_today}
-        
-        return render(request,"crm/Property_Enquiry/rental_detail.html",context) 
+        property = None
+
+        context = {'admin_obj':admin_obj,'enquiry_obj_today':enquiry_obj_today,'property':property}
+
+        try:
+            if utm_id.listing_type == "rent" and utm_id.category == "residential-data":
+                
+                property = RentalResidentialProperty.objects.get(id=utm_id.object_id)
+                context['property'] = property
+                return render(request,"crm/Property_Enquiry/rental_detail.html",context) 
+            
+            elif utm_id.listing_type == "rent" and utm_id.category == "pg-data":
+                property = PGColivingProperty.objects.get(id=utm_id.object_id)
+
+                parsed_rooms = property.rooms.all()
+    
+                # Calculate sidebar pricing metrics dynamically
+                rent_stats = parsed_rooms.aggregate(min_rent=Min('room_rent'), max_rent=Max('room_rent'))
+                starting_rent = rent_stats['min_rent'] or 0
+
+                
+
+                context['property'] = property
+                context['parsed_rooms'] = parsed_rooms
+                context['starting_rent'] = starting_rent
+                context['pg_for_list'] = split_to_list(property.pg_for)
+                context['sharing_type_list'] = split_to_list(property.sharing_type)
+                context['best_suited_list'] = split_to_list(property.best_suited_for)
+                context['amenities_list'] = split_to_list(property.amenities)
+                context['facilities_list'] = split_to_list(property.nearby_facilities)
+                context['meal_offerings_list'] = split_to_list(property.meal_offerings)
+                context['meal_speciality_list'] = split_to_list(property.meal_speciality)
+                
+                return render(request,"crm/Property_Enquiry/pg_detail.html",context)
+
+            elif utm_id.listing_type == "rent" and utm_id.category == "commercial-data":
+
+                property = CommercialRentalProperty.objects.get(id= utm_id.object_id)
+                context['property'] = property
+                return render(request,"crm/Property_Enquiry/commercial_detail.html",context)
+            
+            elif utm_id.listing_type == "sale" and utm_id.category == "resale-residential":
+
+                property = ResaleResidentialProperty.objects.get(id=utm_id.object_id)
+                context['property'] = property
+                context['amenities_list'] = split_to_list(property.amenities)
+                context['facilities_list'] = split_to_list(property.nearby_facilities)
+
+                return render(request,"crm/Property_Enquiry/res_rental_detail.html",context)
+            
+            elif utm_id.listing_type == "sale" and utm_id.category == "commercial-resale":
+                property = CommercialResaleProperty.objects.get(id=utm_id.object_id)
+            elif utm_id.listing_type == "sale" and utm_id.category == "plot-resale":
+                property = PlotSaleProperty.objects.get(id=utm_id.object_id)
+
+            elif utm_id.listing_type == "sale" and utm_id.category == "industrial-resale":
+                property = IndustrialResaleProperty.objects.get(id=utm_id.object_id)
+                context ['property'] = property
+                return render(request,"crm/Property_Enquiry/res_industry_detail.html",context)
+            
+            elif utm_id.listing_type == "sale" and utm_id.category == "agricultural-data":
+                property = AgriculturalResaleProperty.objects.get(id=utm_id.object_id)
+
+        except ObjectDoesNotExist as e:
+            print(f"Property not found: {e}")
+            return JsonResponse({'success': False, 'error': 'Property not found'})
     else:
         return render(request,'home_page/Adminlogin.html')
 

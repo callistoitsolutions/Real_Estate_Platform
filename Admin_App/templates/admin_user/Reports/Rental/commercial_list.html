@@ -559,7 +559,7 @@
         {% for prop in page_obj %}
             <tr id="row-{{ prop.id }}">
                 <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
-                <td><strong>{{ prop.commercial_rental_id|default:"—" }}</strong></td>
+                <td><strong>{{ prop.id|default:"—" }}</strong></td>
                 <td>{{ prop.property_title|truncatechars:35|default:"—" }}</td>
                 
         <td>
