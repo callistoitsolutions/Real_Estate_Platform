@@ -230,7 +230,7 @@ function Add_Wishlist(propertyId, category, listingType, userId, btnElement) {
                 },
                 success: function(response) {
                     if (response.status === "1") {
-                        // 🟢 Smoothly animate and remove card from screen
+                        //  Smoothly animate and remove card from screen
                         const card = document.getElementById(`property-card-${propertyId}`);
                         if (card) {
                             card.classList.add('fade-out');

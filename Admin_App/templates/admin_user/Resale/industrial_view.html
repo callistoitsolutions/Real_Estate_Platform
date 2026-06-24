@@ -35,6 +35,21 @@
         color: var(--dark);
     }
 
+    /* ============ LAYOUT FIX FOR SIDEBAR OVERLAP ============ */
+    .content-layout-wrapper {
+        margin-left: 260px; /* Adjust this value if your sidebar is wider/narrower */
+        width: calc(100% - 260px);
+        min-height: 100vh;
+        overflow-x: hidden;
+    }
+
+    @media (max-width: 991px) {
+        .content-layout-wrapper {
+            margin-left: 0;
+            width: 100%;
+        }
+    }
+
     /* ============ TOP BREADCRUMB BAR ============ */
     .prop-topbar {
         background: var(--white);
@@ -595,593 +610,598 @@
     .status-pill-neu { background:#f3f4f6; color:#374151; padding:2px 9px; border-radius:20px; font-size:0.7rem; font-weight:700; }
 </style>
 
-<!-- ============ TOP BREADCRUMB BAR ============ -->
-<div class="prop-topbar">
-    <div class="container-fluid px-4">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <a href="{% url 'industrial_resale_list' %}"><i class="fas fa-home me-1"></i>Dashboard</a>
-                <i class="fas fa-chevron-right" style="font-size:0.65rem;"></i>
-                <a href="{% url 'industrial_resale_list' %}">Industrial Properties</a>
-                <i class="fas fa-chevron-right" style="font-size:0.65rem;"></i>
-                <span>{{ prop.property_title|truncatechars:40 }}</span>
-                <span class="prop-id-badge">{{ prop.industrial_id }}</span>
-                {% if prop.tax_clearance_cert %}
-                    <span class="prop-tax-badge-ok"><i class="fas fa-circle-check"></i> Tax Cleared</span>
-                {% else %}
-                    <span class="prop-tax-badge-warn"><i class="fas fa-triangle-exclamation"></i> Tax Unverified</span>
-                {% endif %}
-            </div>
-            <a href="{% url 'industrial_resale_list' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600;">
-                <i class="fas fa-arrow-left"></i> Back to Listing
-            </a>
-        </div>
-    </div>
-</div>
+<!-- ============ WRAPPER FIX ============ -->
+<div class="content-layout-wrapper">
 
-<!-- ============ HERO TITLE SECTION ============ -->
-<div class="prop-hero-header">
-    <div class="container-fluid px-4">
-        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
-            <div style="flex:1; min-width:260px;">
-                <h1>{{ prop.property_title|default:"Industrial Property" }}</h1>
-                <div class="prop-hero-location">
-                    <i class="fas fa-location-dot"></i>
-                    {{ prop.locality }}, {{ prop.city }}
-                </div>
-            </div>
-            <div class="text-end">
-                <div class="prop-hero-price-tag">₹{{ prop.expected_price|floatformat:"0"|default:"—" }} <span>Expected Price</span></div>
-                <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">
-                    {{ prop.land_area|default:"—" }} Sqft &bull; {{ prop.property_type|default:"Industrial"|title }}
-                </div>
-            </div>
-        </div>
-        <!-- Quick stat chips -->
-        <div class="prop-quick-stats">
-            <div class="quick-stat-chip"><i class="fas fa-industry"></i> {{ prop.property_type|default:"Industrial"|title }}</div>
-            <div class="quick-stat-chip"><i class="fas fa-ruler-combined"></i> {{ prop.land_area|default:"—" }} Sqft</div>
-            <div class="quick-stat-chip"><i class="fas fa-calendar-check"></i> {{ prop.available_from|date:"d M Y"|default:"Immediate" }}</div>
-            {% if prop.power_supply %}<div class="quick-stat-chip"><i class="fas fa-bolt"></i> {{ prop.kva_capacity|default:"—" }} KVA Power</div>{% endif %}
-            {% if prop.crane_heavy_machinery %}<div class="quick-stat-chip"><i class="fas fa-truck-moving"></i> Crane Support</div>{% endif %}
-            <div class="quick-stat-chip"><i class="fas fa-road"></i> {{ prop.road_connectivity|default:"—" }}</div>
-            {% if prop.worker_housing_nearby %}<div class="quick-stat-chip"><i class="fas fa-house-user"></i> Worker Housing Nearby</div>{% endif %}
-            <div class="quick-stat-chip"><i class="fas fa-file-shield"></i> {{ prop.ownership_type|default:"—"|title }}</div>
-        </div>
-    </div>
-</div>
-
-<!-- ============ GALLERY ============ -->
-<div style="background:#111827;">
-    <div class="container-fluid px-0">
-        <div class="prop-gallery-grid">
-
-            <!-- Main Gallery Walkthrough -->
-            <div class="prop-gallery-main" id="galMain">
-                {% if prop.images.all %}
-                    {% for img in prop.images.all %}
-                    <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
-                        <img src="{{ img.image.url }}" alt="Industrial facility view {{ forloop.counter }}">
-                    </div>
-                    {% endfor %}
-                    <div class="gallery-hud">
-                        <div class="gallery-hud-left">
-                            <button class="btn-play-pause" id="playPauseBtn"><i class="fas fa-pause"></i></button>
-                            <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
-                        </div>
-                        <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> Industrial Walkthrough</span>
-                    </div>
-                {% else %}
-                    <div class="w-100 h-100 position-relative overflow-hidden">
-                        <div class="gallery-no-image-bg"></div>
-                        <div class="gallery-no-image-overlay"></div>
-                        <div class="w-100 h-100 d-flex align-items-center justify-content-center position-relative">
-                            <div class="text-center text-white">
-                                <div class="gallery-no-image-icon">
-                                    <i class="fas fa-industry" style="font-size:60px;"></i>
-                                </div>
-                                <h2 style="margin-top:20px; font-weight:700; letter-spacing:1px;">Industrial Asset</h2>
-                                <p style="color:rgba(255,255,255,0.8); margin-bottom:0;">Property Images Not Available</p>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-
-            <!-- Thumbnail 1 -->
-            <div class="prop-gallery-thumb" style="background:#0d1117;" onclick="setSlide(1)">
-                {% if prop.images.count > 1 %}
-                    <img src="{{ prop.images.all.1.image.url }}" alt="Facility thumbnail 2">
-                {% else %}
-                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:linear-gradient(135deg,#78350f,#d97706);color:white;">
-                        <i class="fas fa-industry mb-1"></i>
-                        <span style="font-size:10px;font-weight:600;">Industrial</span>
-                    </div>
-                {% endif %}
-            </div>
-
-            <!-- Thumbnail 2 -->
-            <div class="prop-gallery-thumb" style="background:#0d1117;" onclick="setSlide(2)">
-                {% if prop.images.count > 2 %}
-                    <img src="{{ prop.images.all.2.image.url }}" alt="Facility thumbnail 3">
-                    {% if prop.images.count > 3 %}
-                    <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoLightboxStrip">
-                        <div class="text-center">
-                            <span>+{{ prop.images.count|add:"-3" }}</span>
-                            <small>More Photos</small>
-                        </div>
-                    </div>
+    <!-- ============ TOP BREADCRUMB BAR ============ -->
+    <div class="prop-topbar">
+        <div class="container-fluid px-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="{% url 'industrial_resale_list' %}"><i class="fas fa-home me-1"></i>Dashboard</a>
+                    <i class="fas fa-chevron-right" style="font-size:0.65rem;"></i>
+                    <a href="{% url 'industrial_resale_list' %}">Industrial Properties</a>
+                    <i class="fas fa-chevron-right" style="font-size:0.65rem;"></i>
+                    <span>{{ prop.property_title|truncatechars:40 }}</span>
+                    <span class="prop-id-badge">{{ prop.industrial_id }}</span>
+                    {% if prop.tax_clearance_cert %}
+                        <span class="prop-tax-badge-ok"><i class="fas fa-circle-check"></i> Tax Cleared</span>
+                    {% else %}
+                        <span class="prop-tax-badge-warn"><i class="fas fa-triangle-exclamation"></i> Tax Unverified</span>
                     {% endif %}
-                {% else %}
-                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:linear-gradient(135deg,#78350f,#d97706);color:white;">
-                        <i class="fas fa-industry mb-1"></i>
-                        <span style="font-size:10px;font-weight:600;">Industrial</span>
-                    </div>
-                {% endif %}
+                </div>
+                <a href="{% url 'industrial_resale_list' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600;">
+                    <i class="fas fa-arrow-left"></i> Back to Listing
+                </a>
             </div>
-
         </div>
     </div>
 
-    {% if prop.images.all %}
-    <div style="background:#0d1117;padding:8px 16px 12px;">
-        <div class="prop-image-strip" id="imageStrip">
-            {% for img in prop.images.all %}
-            <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}"
-                 data-slide="{{ forloop.counter0 }}"
-                 onclick="setSlide({{ forloop.counter0 }})">
-                <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
+    <!-- ============ HERO TITLE SECTION ============ -->
+    <div class="prop-hero-header">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
+                <div style="flex:1; min-width:260px;">
+                    <h1>{{ prop.property_title|default:"Industrial Property" }}</h1>
+                    <div class="prop-hero-location">
+                        <i class="fas fa-location-dot"></i>
+                        {{ prop.locality }}, {{ prop.city }}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="prop-hero-price-tag">₹{{ prop.expected_price|floatformat:"0"|default:"—" }} <span>Expected Price</span></div>
+                    <div style="font-size:0.78rem; color:var(--muted); margin-top:4px;">
+                        {{ prop.land_area|default:"—" }} Sqft &bull; {{ prop.property_type|default:"Industrial"|title }}
+                    </div>
+                </div>
             </div>
-            {% endfor %}
+            <!-- Quick stat chips -->
+            <div class="prop-quick-stats">
+                <div class="quick-stat-chip"><i class="fas fa-industry"></i> {{ prop.property_type|default:"Industrial"|title }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-ruler-combined"></i> {{ prop.land_area|default:"—" }} Sqft</div>
+                <div class="quick-stat-chip"><i class="fas fa-calendar-check"></i> {{ prop.available_from|date:"d M Y"|default:"Immediate" }}</div>
+                {% if prop.power_supply %}<div class="quick-stat-chip"><i class="fas fa-bolt"></i> {{ prop.kva_capacity|default:"—" }} KVA Power</div>{% endif %}
+                {% if prop.crane_heavy_machinery %}<div class="quick-stat-chip"><i class="fas fa-truck-moving"></i> Crane Support</div>{% endif %}
+                <div class="quick-stat-chip"><i class="fas fa-road"></i> {{ prop.road_connectivity|default:"—" }}</div>
+                {% if prop.worker_housing_nearby %}<div class="quick-stat-chip"><i class="fas fa-house-user"></i> Worker Housing Nearby</div>{% endif %}
+                <div class="quick-stat-chip"><i class="fas fa-file-shield"></i> {{ prop.ownership_type|default:"—"|title }}</div>
+            </div>
         </div>
     </div>
-    {% endif %}
-</div>
 
-<!-- ============ STICKY NAV ============ -->
-<div class="prop-sticky-nav">
-    <div class="container-fluid px-4">
-        <div class="prop-sticky-nav-inner" id="propNavTabs">
-            <a class="prop-nav-link active" data-target="overview" href="#overview"><i class="fas fa-info-circle"></i> Overview</a>
-            <a class="prop-nav-link" data-target="specifications" href="#specifications"><i class="fas fa-tools"></i> Specifications</a>
-            <a class="prop-nav-link" data-target="financials" href="#financials"><i class="fas fa-file-invoice-dollar"></i> Financials</a>
-            <a class="prop-nav-link" data-target="legal" href="#legal"><i class="fas fa-gavel"></i> Legal & Tax</a>
-            <a class="prop-nav-link" data-target="media" href="#media"><i class="fas fa-paperclip"></i> Documents</a>
-            <a class="prop-nav-link" data-target="location" href="#location"><i class="fas fa-map-marker-alt"></i> Location</a>
-            <a class="prop-nav-link" data-target="faqs" href="#faqs"><i class="fas fa-circle-question"></i> FAQs</a>
-            <a class="prop-nav-link" data-target="audit" href="#audit"><i class="fas fa-database"></i> Audit</a>
-        </div>
-    </div>
-</div>
+    <!-- ============ GALLERY ============ -->
+    <div style="background:#111827;">
+        <div class="container-fluid px-0">
+            <div class="prop-gallery-grid">
 
-<!-- ============ MAIN PAGE BODY ============ -->
-<div class="prop-page-body">
-    <div class="container-fluid px-4">
-        <div class="prop-layout-grid">
-
-            <!-- LEFT COLUMN -->
-            <div>
-
-                <!-- SECTION: OVERVIEW / DESCRIPTION -->
-                <div class="prop-section" id="overview">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-info-circle"></i></span>
-                        Description & Overview
-                    </div>
-                    <p class="desc-body" style="white-space:pre-wrap;">{{ prop.property_description|default:"No description has been provided for this industrial property." }}</p>
-                </div>
-
-                <!-- SECTION: STEP 1 — PROPERTY SPECIFICATIONS -->
-                <div class="prop-section" id="specifications">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-tools"></i></span>
-                        Physical Specifications & Infrastructure
-                    </div>
-
-                    <div class="sub-section-heading"><i class="fas fa-warehouse"></i> Core Property Details</div>
-                    <div class="spec-grid">
-                        <div class="spec-item">
-                            <span class="spec-label">Property Type</span>
-                            <span class="spec-value">{{ prop.property_type|default:"—"|title }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Land Area</span>
-                            <span class="spec-value">{{ prop.land_area|default:"—" }} Sqft</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Available From</span>
-                            <span class="spec-value">{{ prop.available_from|date:"d M Y"|default:"Immediate" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Water Supply</span>
-                            <span class="spec-value">{{ prop.water_supply|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Road Connectivity</span>
-                            <span class="spec-value">{{ prop.road_connectivity|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Worker Housing Nearby</span>
-                            <span class="spec-value">
-                                {% if prop.worker_housing_nearby %}<span class="status-ok"><i class="fas fa-check-circle me-1"></i>Yes</span>{% else %}<span class="status-no"><i class="fas fa-times-circle me-1"></i>No</span>{% endif %}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div class="sub-section-heading"><i class="fas fa-bolt"></i> Power & Machinery</div>
-                    <div class="spec-grid">
-                        <div class="spec-item">
-                            <span class="spec-label">Power Supply Available</span>
-                            <span class="spec-value">
-                                {% if prop.power_supply %}<span class="status-ok"><i class="fas fa-check-circle me-1"></i>Yes</span>{% else %}<span class="status-no"><i class="fas fa-times-circle me-1"></i>No</span>{% endif %}
-                            </span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">KVA Capacity</span>
-                            <span class="spec-value">{% if prop.kva_capacity %}{{ prop.kva_capacity }} KVA{% else %}—{% endif %}</span>
-                        </div>
-                        <div class="spec-item spec-full">
-                            <span class="spec-label">Crane / Heavy Machinery Support</span>
-                            <span class="spec-value">
-                                {% if prop.crane_heavy_machinery %}<span class="status-ok"><i class="fas fa-check-circle me-1"></i>Available</span>{% else %}<span class="status-no"><i class="fas fa-times-circle me-1"></i>Not Available</span>{% endif %}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION: STEP 2a — PRICING & BROKERAGE -->
-                <div class="prop-section" id="financials">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-file-invoice-dollar"></i></span>
-                        Pricing & Brokerage
-                    </div>
-                    <div class="spec-grid">
-                        <div class="spec-item highlight-price spec-full">
-                            <span class="spec-label">Expected Sale Price</span>
-                            <span class="spec-value">₹{{ prop.expected_price|floatformat:"0"|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Brokerage Required</span>
-                            <span class="spec-value">{{ prop.brokerage|default:"No" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Brokerage %</span>
-                            <span class="spec-value">{{ prop.brokerage_percentage|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item spec-full">
-                            <span class="spec-label">Manual Brokerage Amount</span>
-                            <span class="spec-value">{{ prop.manual_brokerage|default:"—" }}</span>
-                        </div>
-                    </div>
-
-                    <div class="sub-section-heading mt-4"><i class="fas fa-landmark"></i> Ownership & Loan</div>
-                    <div class="spec-grid">
-                        <div class="spec-item">
-                            <span class="spec-label">Ownership Type</span>
-                            <span class="spec-value">{{ prop.ownership_type|default:"—"|title }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Sanctioning Authority</span>
-                            <span class="spec-value">{{ prop.sanctioning_authority|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Active Loan on Property</span>
-                            <span class="spec-value">
-                                {% if prop.has_loan %}<span class="status-no fw-bold">Yes</span>{% else %}No{% endif %}
-                            </span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Loan Amount</span>
-                            <span class="spec-value">{% if prop.has_loan %}₹{{ prop.loan_amount|floatformat:"0" }}{% else %}—{% endif %}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Existing Tenants</span>
-                            <span class="spec-value">{% if prop.existing_tenants %}Yes{% else %}No{% endif %}</span>
-                        </div>
-                        <div class="spec-item spec-full">
-                            <span class="spec-label">Tenant Details</span>
-                            <span class="spec-value">{{ prop.tenant_details|default:"—" }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION: STEP 2b — LEGAL & TAX -->
-                <div class="prop-section" id="legal">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-gavel"></i></span>
-                        Legal & Tax Status
-                    </div>
-                    <div class="spec-grid">
-                        <div class="spec-item">
-                            <span class="spec-label">Legal Dispute</span>
-                            <span class="spec-value">
-                                {% if prop.legal_dispute %}<span class="badge-dispute">Under Dispute</span>{% else %}<span class="badge-clear">Clear</span>{% endif %}
-                            </span>
-                        </div>
-                        <div class="spec-item spec-full">
-                            <span class="spec-label">Dispute Details</span>
-                            <span class="spec-value">{{ prop.dispute_details|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Tax Dues Pending</span>
-                            <span class="spec-value">{% if prop.tax_due %}<span class="status-no fw-bold">Yes</span>{% else %}No{% endif %}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Tax Due Amount</span>
-                            <span class="spec-value">{% if prop.tax_due %}₹{{ prop.tax_amount|floatformat:"0" }}{% else %}—{% endif %}</span>
-                        </div>
-                        <div class="spec-item spec-full">
-                            <span class="spec-label">Tax Clearance Certificate</span>
-                            <span class="spec-value">
-                                {% if prop.tax_clearance_cert %}
-                                    <span class="status-ok"><i class="fas fa-check-circle me-1"></i>Certificate Available</span>
-                                {% else %}
-                                    <span class="status-no"><i class="fas fa-times-circle me-1"></i>Certificate Missing</span>
-                                {% endif %}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION: STEP 3 — DOCUMENTS & MEDIA -->
-                <div class="prop-section" id="media">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-paperclip"></i></span>
-                        Documents & Media
-                    </div>
-                    <div class="d-flex gap-3 flex-wrap">
-                        {% if prop.compliance_docs %}
-                            <a href="{{ prop.compliance_docs.url }}" target="_blank" class="doc-link">
-                                <i class="fas fa-file-pdf"></i> View Compliance Docs
-                            </a>
-                        {% else %}
-                            <span class="text-muted fst-italic" style="font-size:0.85rem;"><i class="fas fa-info-circle me-1"></i>No compliance documents uploaded.</span>
-                        {% endif %}
-                        {% if prop.social_video %}
-                            <a href="{{ prop.social_video.url }}" target="_blank" class="vid-link">
-                                <i class="fas fa-video"></i> Watch Property Video
-                            </a>
-                        {% else %}
-                            <span class="text-muted fst-italic" style="font-size:0.85rem;"><i class="fas fa-info-circle me-1"></i>No video reel uploaded.</span>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- SECTION: STEP 4 — LOCATION -->
-                <div class="prop-section" id="location">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-map-marker-alt"></i></span>
-                        Location Details
-                    </div>
-                    <div class="spec-grid">
-                        <div class="spec-item">
-                            <span class="spec-label">City</span>
-                            <span class="spec-value">{{ prop.city|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Locality / MIDC Area</span>
-                            <span class="spec-value">{{ prop.locality|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item spec-full">
-                            <span class="spec-label">Complete Address</span>
-                            <span class="spec-value">
-                                <div class="address-box mt-1">{{ prop.complete_address|default:"Address not provided." }}</div>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SECTION: FAQs -->
-                <div class="prop-section prop-faq" id="faqs">
-                    <div class="prop-section-title">
-                        <span class="section-icon"><i class="fas fa-circle-question"></i></span>
-                        Auto-Generated FAQs
-                    </div>
-                    <p style="font-size:0.82rem; color:var(--muted); margin-bottom:16px; margin-top:-8px;">
-                        Dynamically generated based on this property's specific attributes and conditions.
-                    </p>
-                    <div class="accordion" id="faqAccordion">
-                        {% for faq in faqs %}
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="faqH{{ forloop.counter }}">
-                                <button class="accordion-button collapsed" type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#faqC{{ forloop.counter }}"
-                                    aria-expanded="false">
-                                    {{ faq.question }}
-                                </button>
-                            </h2>
-                            <div id="faqC{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                                <div class="accordion-body">{{ faq.answer }}</div>
-                            </div>
-                        </div>
-                        {% empty %}
-                        <div class="alert alert-light border text-muted" style="font-size:0.85rem;">
-                            <i class="fas fa-info-circle me-2"></i>Not enough property data to generate dynamic FAQs.
+                <!-- Main Gallery Walkthrough -->
+                <div class="prop-gallery-main" id="galMain">
+                    {% if prop.images.all %}
+                        {% for img in prop.images.all %}
+                        <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
+                            <img src="{{ img.image.url }}" alt="Industrial facility view {{ forloop.counter }}">
                         </div>
                         {% endfor %}
-                    </div>
+                        <div class="gallery-hud">
+                            <div class="gallery-hud-left">
+                                <button class="btn-play-pause" id="playPauseBtn"><i class="fas fa-pause"></i></button>
+                                <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
+                            </div>
+                            <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> Industrial Walkthrough</span>
+                        </div>
+                    {% else %}
+                        <div class="w-100 h-100 position-relative overflow-hidden">
+                            <div class="gallery-no-image-bg"></div>
+                            <div class="gallery-no-image-overlay"></div>
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center position-relative">
+                                <div class="text-center text-white">
+                                    <div class="gallery-no-image-icon">
+                                        <i class="fas fa-industry" style="font-size:60px;"></i>
+                                    </div>
+                                    <h2 style="margin-top:20px; font-weight:700; letter-spacing:1px;">Industrial Asset</h2>
+                                    <p style="color:rgba(255,255,255,0.8); margin-bottom:0;">Property Images Not Available</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
 
-                <!-- SECTION: AUDIT -->
-                <div class="audit-section" id="audit">
-                    <div class="prop-section-title" style="border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:16px;">
-                        <span class="section-icon" style="background:#f3f4f6;"><i class="fas fa-database" style="color:var(--muted);"></i></span>
-                        <span style="color:var(--muted);">System Audit Record</span>
-                    </div>
-                    <div class="spec-grid">
-                        <div class="spec-item">
-                            <span class="spec-label">Uploaded By</span>
-                            <span class="spec-value">{{ prop.uploaded_by_name|default:"System" }}</span>
+                <!-- Thumbnail 1 -->
+                <div class="prop-gallery-thumb" style="background:#0d1117;" onclick="setSlide(1)">
+                    {% if prop.images.count > 1 %}
+                        <img src="{{ prop.images.all.1.image.url }}" alt="Facility thumbnail 2">
+                    {% else %}
+                        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:linear-gradient(135deg,#78350f,#d97706);color:white;">
+                            <i class="fas fa-industry mb-1"></i>
+                            <span style="font-size:10px;font-weight:600;">Industrial</span>
                         </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Uploader Role</span>
-                            <span class="spec-value">{{ prop.uploaded_by_role|default:"—" }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Thumbnail 2 -->
+                <div class="prop-gallery-thumb" style="background:#0d1117;" onclick="setSlide(2)">
+                    {% if prop.images.count > 2 %}
+                        <img src="{{ prop.images.all.2.image.url }}" alt="Facility thumbnail 3">
+                        {% if prop.images.count > 3 %}
+                        <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoLightboxStrip">
+                            <div class="text-center">
+                                <span>+{{ prop.images.count|add:"-3" }}</span>
+                                <small>More Photos</small>
+                            </div>
                         </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Uploader Email</span>
-                            <span class="spec-value">{{ prop.uploaded_by_email|default:"—" }}</span>
+                        {% endif %}
+                    {% else %}
+                        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:linear-gradient(135deg,#78350f,#d97706);color:white;">
+                            <i class="fas fa-industry mb-1"></i>
+                            <span style="font-size:10px;font-weight:600;">Industrial</span>
                         </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Uploader Contact</span>
-                            <span class="spec-value">{{ prop.uploaded_by_contact|default:"—" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Source File</span>
-                            <span class="spec-value">{{ prop.upload_file_name|default:"Web UI" }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Created At</span>
-                            <span class="spec-value">{{ prop.created_at|date:"d M Y, H:i" }}</span>
-                        </div>
-                        <div class="spec-item spec-full">
-                            <span class="spec-label">Last Updated</span>
-                            <span class="spec-value">{{ prop.updated_at|date:"d M Y, H:i" }}</span>
-                        </div>
-                    </div>
+                    {% endif %}
                 </div>
 
             </div>
+        </div>
 
-            <!-- RIGHT SIDEBAR -->
-            <div class="prop-sidebar">
-
-                <!-- Price Card -->
-                <div class="sidebar-price-card">
-                    <div class="sidebar-price-header">
-                        <div class="sidebar-price-label">Expected Sale Price</div>
-                        <div class="sidebar-price-amount">₹{{ prop.expected_price|floatformat:"0"|default:"—" }} <span></span></div>
-                    </div>
-                    <div class="sidebar-price-body">
-                        <div class="row g-0" style="border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
-                            <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border);">
-                                <div class="sidebar-mini-stat-label">Land Area</div>
-                                <div class="sidebar-mini-stat-val">{{ prop.land_area|default:"—" }} Sqft</div>
-                            </div>
-                            <div class="col-6 sidebar-mini-stat">
-                                <div class="sidebar-mini-stat-label">Type</div>
-                                <div class="sidebar-mini-stat-val">{{ prop.property_type|default:"—"|title }}</div>
-                            </div>
-                        </div>
-                        <div class="mt-3 row g-0" style="border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
-                            <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border);">
-                                <div class="sidebar-mini-stat-label">Brokerage</div>
-                                <div class="sidebar-mini-stat-val">{{ prop.brokerage|default:"No" }}</div>
-                            </div>
-                            <div class="col-6 sidebar-mini-stat">
-                                <div class="sidebar-mini-stat-label">Available</div>
-                                <div class="sidebar-mini-stat-val">{{ prop.available_from|date:"M Y"|default:"Now" }}</div>
-                            </div>
-                        </div>
-                    </div>
+        {% if prop.images.all %}
+        <div style="background:#0d1117;padding:8px 16px 12px;">
+            <div class="prop-image-strip" id="imageStrip">
+                {% for img in prop.images.all %}
+                <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}"
+                     data-slide="{{ forloop.counter0 }}"
+                     onclick="setSlide({{ forloop.counter0 }})">
+                    <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
                 </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
 
-                <!-- Quick Status Card -->
-                <div class="sidebar-status-card">
-                    <div class="owner-card-title"><i class="fas fa-shield-halved me-1"></i> Property Status Overview</div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-bolt me-1" style="color:var(--primary);"></i> Power Supply</span>
-                        {% if prop.power_supply %}<span class="status-pill-ok">Available</span>{% else %}<span class="status-pill-bad">Not Available</span>{% endif %}
-                    </div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-truck-moving me-1" style="color:var(--primary);"></i> Crane / Heavy Mach.</span>
-                        {% if prop.crane_heavy_machinery %}<span class="status-pill-ok">Yes</span>{% else %}<span class="status-pill-neu">No</span>{% endif %}
-                    </div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-gavel me-1" style="color:var(--primary);"></i> Legal Dispute</span>
-                        {% if prop.legal_dispute %}<span class="status-pill-bad">Under Dispute</span>{% else %}<span class="status-pill-ok">Clear</span>{% endif %}
-                    </div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-receipt me-1" style="color:var(--primary);"></i> Tax Dues</span>
-                        {% if prop.tax_due %}<span class="status-pill-bad">Pending</span>{% else %}<span class="status-pill-ok">Clear</span>{% endif %}
-                    </div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-file-shield me-1" style="color:var(--primary);"></i> Tax Clearance Cert</span>
-                        {% if prop.tax_clearance_cert %}<span class="status-pill-ok">Available</span>{% else %}<span class="status-pill-bad">Missing</span>{% endif %}
-                    </div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-bank me-1" style="color:var(--primary);"></i> Active Loan</span>
-                        {% if prop.has_loan %}<span class="status-pill-bad">Yes</span>{% else %}<span class="status-pill-ok">No</span>{% endif %}
-                    </div>
-                    <div class="status-row">
-                        <span class="status-row-label"><i class="fas fa-users me-1" style="color:var(--primary);"></i> Existing Tenants</span>
-                        {% if prop.existing_tenants %}<span class="status-pill-neu">Yes</span>{% else %}<span class="status-pill-ok">None</span>{% endif %}
-                    </div>
-                </div>
+    <!-- ============ STICKY NAV ============ -->
+    <div class="prop-sticky-nav">
+        <div class="container-fluid px-4">
+            <div class="prop-sticky-nav-inner" id="propNavTabs">
+                <a class="prop-nav-link active" data-target="overview" href="#overview"><i class="fas fa-info-circle"></i> Overview</a>
+                <a class="prop-nav-link" data-target="specifications" href="#specifications"><i class="fas fa-tools"></i> Specifications</a>
+                <a class="prop-nav-link" data-target="financials" href="#financials"><i class="fas fa-file-invoice-dollar"></i> Financials</a>
+                <a class="prop-nav-link" data-target="legal" href="#legal"><i class="fas fa-gavel"></i> Legal & Tax</a>
+                <a class="prop-nav-link" data-target="media" href="#media"><i class="fas fa-paperclip"></i> Documents</a>
+                <a class="prop-nav-link" data-target="location" href="#location"><i class="fas fa-map-marker-alt"></i> Location</a>
+                <a class="prop-nav-link" data-target="faqs" href="#faqs"><i class="fas fa-circle-question"></i> FAQs</a>
+                <a class="prop-nav-link" data-target="audit" href="#audit"><i class="fas fa-database"></i> Audit</a>
+            </div>
+        </div>
+    </div>
 
-                <!-- Owner Card -->
-                <div class="sidebar-owner-card">
-                    <div class="owner-card-title"><i class="fas fa-user-tie me-1"></i> Owner / Contact</div>
+    <!-- ============ MAIN PAGE BODY ============ -->
+    <div class="prop-page-body">
+        <div class="container-fluid px-4">
+            <div class="prop-layout-grid">
 
-                    <div class="d-flex align-items-center gap-3 mb-14" style="margin-bottom:14px;">
-                        <div class="owner-avatar">{{ prop.owner_name|slice:":1"|upper|default:"O" }}</div>
-                        <div style="min-width:0;">
-                            <div class="owner-name">{{ prop.owner_name|default:"Undisclosed Identity" }}</div>
-                            <div class="owner-email"><i class="fas fa-envelope me-1"></i>{{ prop.owner_email|default:"No email logged" }}</div>
+                <!-- LEFT COLUMN -->
+                <div>
+
+                    <!-- SECTION: OVERVIEW / DESCRIPTION -->
+                    <div class="prop-section" id="overview">
+                        <div class="prop-section-title">
+                            <span class="section-icon"><i class="fas fa-info-circle"></i></span>
+                            Description & Overview
+                        </div>
+                        <p class="desc-body" style="white-space:pre-wrap;">{{ prop.property_description|default:"No description has been provided for this industrial property." }}</p>
+                    </div>
+
+                    <!-- SECTION: STEP 1 — PROPERTY SPECIFICATIONS -->
+                    <div class="prop-section" id="specifications">
+                        <div class="prop-section-title">
+                            <span class="section-icon"><i class="fas fa-tools"></i></span>
+                            Physical Specifications & Infrastructure
+                        </div>
+
+                        <div class="sub-section-heading"><i class="fas fa-warehouse"></i> Core Property Details</div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <span class="spec-label">Property Type</span>
+                                <span class="spec-value">{{ prop.property_type|default:"—"|title }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Land Area</span>
+                                <span class="spec-value">{{ prop.land_area|default:"—" }} Sqft</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Available From</span>
+                                <span class="spec-value">{{ prop.available_from|date:"d M Y"|default:"Immediate" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Water Supply</span>
+                                <span class="spec-value">{{ prop.water_supply|default:"—" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Road Connectivity</span>
+                                <span class="spec-value">{{ prop.road_connectivity|default:"—" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Worker Housing Nearby</span>
+                                <span class="spec-value">
+                                    {% if prop.worker_housing_nearby %}<span class="status-ok"><i class="fas fa-check-circle me-1"></i>Yes</span>{% else %}<span class="status-no"><i class="fas fa-times-circle me-1"></i>No</span>{% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="sub-section-heading"><i class="fas fa-bolt"></i> Power & Machinery</div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <span class="spec-label">Power Supply Available</span>
+                                <span class="spec-value">
+                                    {% if prop.power_supply %}<span class="status-ok"><i class="fas fa-check-circle me-1"></i>Yes</span>{% else %}<span class="status-no"><i class="fas fa-times-circle me-1"></i>No</span>{% endif %}
+                                </span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">KVA Capacity</span>
+                                <span class="spec-value">{% if prop.kva_capacity %}{{ prop.kva_capacity }} KVA{% else %}—{% endif %}</span>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <span class="spec-label">Crane / Heavy Machinery Support</span>
+                                <span class="spec-value">
+                                    {% if prop.crane_heavy_machinery %}<span class="status-ok"><i class="fas fa-check-circle me-1"></i>Available</span>{% else %}<span class="status-no"><i class="fas fa-times-circle me-1"></i>Not Available</span>{% endif %}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="owner-info-row">
-                        <i class="fas fa-id-badge"></i>
-                        <div>
-                            <div style="font-size:0.7rem; color:var(--muted); font-weight:600; text-transform:uppercase;">Residency Status</div>
-                            <div style="font-weight:600;">{{ prop.residency_status|default:"—"|title }}</div>
+                    <!-- SECTION: STEP 2a — PRICING & BROKERAGE -->
+                    <div class="prop-section" id="financials">
+                        <div class="prop-section-title">
+                            <span class="section-icon"><i class="fas fa-file-invoice-dollar"></i></span>
+                            Pricing & Brokerage
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item highlight-price spec-full">
+                                <span class="spec-label">Expected Sale Price</span>
+                                <span class="spec-value">₹{{ prop.expected_price|floatformat:"0"|default:"—" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Brokerage Required</span>
+                                <span class="spec-value">{{ prop.brokerage|default:"No" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Brokerage %</span>
+                                <span class="spec-value">{{ prop.brokerage_percentage|default:"—" }}</span>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <span class="spec-label">Manual Brokerage Amount</span>
+                                <span class="spec-value">{{ prop.manual_brokerage|default:"—" }}</span>
+                            </div>
+                        </div>
+
+                        <div class="sub-section-heading mt-4"><i class="fas fa-landmark"></i> Ownership & Loan</div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <span class="spec-label">Ownership Type</span>
+                                <span class="spec-value">{{ prop.ownership_type|default:"—"|title }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Sanctioning Authority</span>
+                                <span class="spec-value">{{ prop.sanctioning_authority|default:"—" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Active Loan on Property</span>
+                                <span class="spec-value">
+                                    {% if prop.has_loan %}<span class="status-no fw-bold">Yes</span>{% else %}No{% endif %}
+                                </span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Loan Amount</span>
+                                <span class="spec-value">{% if prop.has_loan %}₹{{ prop.loan_amount|floatformat:"0" }}{% else %}—{% endif %}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Existing Tenants</span>
+                                <span class="spec-value">{% if prop.existing_tenants %}Yes{% else %}No{% endif %}</span>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <span class="spec-label">Tenant Details</span>
+                                <span class="spec-value">{{ prop.tenant_details|default:"—" }}</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="owner-info-row">
-                        <i class="fas fa-phone"></i>
-                        <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <span class="owner-phone-masked" id="sidebarPhone" data-phone="{{ prop.owner_contact|default:'' }}">
-                                {% if prop.owner_contact %}
-                                    {{ prop.owner_contact|slice:":2" }}XXXXXX{{ prop.owner_contact|slice:"-2:" }}
-                                {% else %}Not available{% endif %}
-                            </span>
-                            {% if prop.owner_contact %}
-                                <button class="btn-reveal-phone" onclick="revealPhone('sidebarPhone','{{ prop.owner_contact }}')">View Number</button>
+                    <!-- SECTION: STEP 2b — LEGAL & TAX -->
+                    <div class="prop-section" id="legal">
+                        <div class="prop-section-title">
+                            <span class="section-icon"><i class="fas fa-gavel"></i></span>
+                            Legal & Tax Status
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <span class="spec-label">Legal Dispute</span>
+                                <span class="spec-value">
+                                    {% if prop.legal_dispute %}<span class="badge-dispute">Under Dispute</span>{% else %}<span class="badge-clear">Clear</span>{% endif %}
+                                </span>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <span class="spec-label">Dispute Details</span>
+                                <span class="spec-value">{{ prop.dispute_details|default:"—" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Tax Dues Pending</span>
+                                <span class="spec-value">{% if prop.tax_due %}<span class="status-no fw-bold">Yes</span>{% else %}No{% endif %}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Tax Due Amount</span>
+                                <span class="spec-value">{% if prop.tax_due %}₹{{ prop.tax_amount|floatformat:"0" }}{% else %}—{% endif %}</span>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <span class="spec-label">Tax Clearance Certificate</span>
+                                <span class="spec-value">
+                                    {% if prop.tax_clearance_cert %}
+                                        <span class="status-ok"><i class="fas fa-check-circle me-1"></i>Certificate Available</span>
+                                    {% else %}
+                                        <span class="status-no"><i class="fas fa-times-circle me-1"></i>Certificate Missing</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION: STEP 3 — DOCUMENTS & MEDIA -->
+                    <div class="prop-section" id="media">
+                        <div class="prop-section-title">
+                            <span class="section-icon"><i class="fas fa-paperclip"></i></span>
+                            Documents & Media
+                        </div>
+                        <div class="d-flex gap-3 flex-wrap">
+                            {% if prop.compliance_docs %}
+                                <a href="{{ prop.compliance_docs.url }}" target="_blank" class="doc-link">
+                                    <i class="fas fa-file-pdf"></i> View Compliance Docs
+                                </a>
+                            {% else %}
+                                <span class="text-muted fst-italic" style="font-size:0.85rem;"><i class="fas fa-info-circle me-1"></i>No compliance documents uploaded.</span>
+                            {% endif %}
+                            {% if prop.social_video %}
+                                <a href="{{ prop.social_video.url }}" target="_blank" class="vid-link">
+                                    <i class="fas fa-video"></i> Watch Property Video
+                                </a>
+                            {% else %}
+                                <span class="text-muted fst-italic" style="font-size:0.85rem;"><i class="fas fa-info-circle me-1"></i>No video reel uploaded.</span>
                             {% endif %}
                         </div>
                     </div>
 
-                    <a href="tel:{{ prop.owner_contact }}" class="btn-call-primary">
-                        <i class="fas fa-phone-volume"></i> Call Owner
-                    </a>
-                </div>
-
-            </div>
-            <!-- END SIDEBAR -->
-
-        </div>
-    </div>
-</div>
-
-<!-- LIGHTBOX MODAL -->
-<div class="modal fade" id="photoLightboxStrip" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content" style="background:#0d1117; color:white; border:1px solid #1e2733;">
-            <div class="modal-header border-0" style="border-bottom:1px solid #1e2733 !important;">
-                <h5 class="modal-title fw-bold" style="font-size:0.95rem;">
-                    <i class="fas fa-images me-2 text-warning"></i>
-                    Industrial Property Photo Gallery — {{ prop.images.count }} Views
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="row g-3">
-                    {% for img in prop.images.all %}
-                    <div class="col-6 col-md-4 col-lg-3">
-                        <div style="height:140px; border-radius:8px; overflow:hidden; background:#1e2733; border:1px solid #374151; cursor:pointer;">
-                            <img src="{{ img.image.url }}" alt="Gallery view {{ forloop.counter }}"
-                                 style="width:100%; height:100%; object-fit:cover; transition:transform 0.3s;"
-                                 onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <!-- SECTION: STEP 4 — LOCATION -->
+                    <div class="prop-section" id="location">
+                        <div class="prop-section-title">
+                            <span class="section-icon"><i class="fas fa-map-marker-alt"></i></span>
+                            Location Details
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <span class="spec-label">City</span>
+                                <span class="spec-value">{{ prop.city|default:"—" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Locality / MIDC Area</span>
+                                <span class="spec-value">{{ prop.locality|default:"—" }}</span>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <span class="spec-label">Complete Address</span>
+                                <span class="spec-value">
+                                    <div class="address-box mt-1">{{ prop.complete_address|default:"Address not provided." }}</div>
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    {% endfor %}
+
+                    <!-- SECTION: FAQs -->
+                    <div class="prop-section prop-faq" id="faqs">
+                        <div class="prop-section-title">
+                            <span class="section-icon"><i class="fas fa-circle-question"></i></span>
+                            Auto-Generated FAQs
+                        </div>
+                        <p style="font-size:0.82rem; color:var(--muted); margin-bottom:16px; margin-top:-8px;">
+                            Dynamically generated based on this property's specific attributes and conditions.
+                        </p>
+                        <div class="accordion" id="faqAccordion">
+                            {% for faq in faqs %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faqH{{ forloop.counter }}">
+                                    <button class="accordion-button collapsed" type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#faqC{{ forloop.counter }}"
+                                        aria-expanded="false">
+                                        {{ faq.question }}
+                                    </button>
+                                </h2>
+                                <div id="faqC{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">{{ faq.answer }}</div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="alert alert-light border text-muted" style="font-size:0.85rem;">
+                                <i class="fas fa-info-circle me-2"></i>Not enough property data to generate dynamic FAQs.
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- SECTION: AUDIT -->
+                    <div class="audit-section" id="audit">
+                        <div class="prop-section-title" style="border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:16px;">
+                            <span class="section-icon" style="background:#f3f4f6;"><i class="fas fa-database" style="color:var(--muted);"></i></span>
+                            <span style="color:var(--muted);">System Audit Record</span>
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <span class="spec-label">Uploaded By</span>
+                                <span class="spec-value">{{ prop.uploaded_by_name|default:"System" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Uploader Role</span>
+                                <span class="spec-value">{{ prop.uploaded_by_role|default:"—" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Uploader Email</span>
+                                <span class="spec-value">{{ prop.uploaded_by_email|default:"—" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Uploader Contact</span>
+                                <span class="spec-value">{{ prop.uploaded_by_contact|default:"—" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Source File</span>
+                                <span class="spec-value">{{ prop.upload_file_name|default:"Web UI" }}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Created At</span>
+                                <span class="spec-value">{{ prop.created_at|date:"d M Y, H:i" }}</span>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <span class="spec-label">Last Updated</span>
+                                <span class="spec-value">{{ prop.updated_at|date:"d M Y, H:i" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT SIDEBAR -->
+                <div class="prop-sidebar">
+
+                    <!-- Price Card -->
+                    <div class="sidebar-price-card">
+                        <div class="sidebar-price-header">
+                            <div class="sidebar-price-label">Expected Sale Price</div>
+                            <div class="sidebar-price-amount">₹{{ prop.expected_price|floatformat:"0"|default:"—" }} <span></span></div>
+                        </div>
+                        <div class="sidebar-price-body">
+                            <div class="row g-0" style="border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
+                                <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border);">
+                                    <div class="sidebar-mini-stat-label">Land Area</div>
+                                    <div class="sidebar-mini-stat-val">{{ prop.land_area|default:"—" }} Sqft</div>
+                                </div>
+                                <div class="col-6 sidebar-mini-stat">
+                                    <div class="sidebar-mini-stat-label">Type</div>
+                                    <div class="sidebar-mini-stat-val">{{ prop.property_type|default:"—"|title }}</div>
+                                </div>
+                            </div>
+                            <div class="mt-3 row g-0" style="border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden;">
+                                <div class="col-6 sidebar-mini-stat" style="border-right:1px solid var(--border);">
+                                    <div class="sidebar-mini-stat-label">Brokerage</div>
+                                    <div class="sidebar-mini-stat-val">{{ prop.brokerage|default:"No" }}</div>
+                                </div>
+                                <div class="col-6 sidebar-mini-stat">
+                                    <div class="sidebar-mini-stat-label">Available</div>
+                                    <div class="sidebar-mini-stat-val">{{ prop.available_from|date:"M Y"|default:"Now" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Status Card -->
+                    <div class="sidebar-status-card">
+                        <div class="owner-card-title"><i class="fas fa-shield-halved me-1"></i> Property Status Overview</div>
+                        <div class="status-row">
+                            <span class="status-row-label"><i class="fas fa-bolt me-1" style="color:var(--primary);"></i> Power Supply</span>
+                            {% if prop.power_supply %}<span class="status-pill-ok">Available</span>{% else %}<span class="status-pill-bad">Not Available</span>{% endif %}
+                        </div>
+                        <div class="status-row">
+                            <span class="status-row-label"><i class="fas fa-truck-moving me-1" style="color:var(--primary);"></i> Crane / Heavy Mach.</span>
+                            {% if prop.crane_heavy_machinery %}<span class="status-pill-ok">Yes</span>{% else %}<span class="status-pill-neu">No</span>{% endif %}
+                        </div>
+                        <div class="status-row">
+                            <span class="status-row-label"><i class="fas fa-gavel me-1" style="color:var(--primary);"></i> Legal Dispute</span>
+                            {% if prop.legal_dispute %}<span class="status-pill-bad">Under Dispute</span>{% else %}<span class="status-pill-ok">Clear</span>{% endif %}
+                        </div>
+                        <div class="status-row">
+                            <span class="status-row-label"><i class="fas fa-receipt me-1" style="color:var(--primary);"></i> Tax Dues</span>
+                            {% if prop.tax_due %}<span class="status-pill-bad">Pending</span>{% else %}<span class="status-pill-ok">Clear</span>{% endif %}
+                        </div>
+                        <div class="status-row">
+                            <span class="status-row-label"><i class="fas fa-file-shield me-1" style="color:var(--primary);"></i> Tax Clearance Cert</span>
+                            {% if prop.tax_clearance_cert %}<span class="status-pill-ok">Available</span>{% else %}<span class="status-pill-bad">Missing</span>{% endif %}
+                        </div>
+                        <div class="status-row">
+                            <span class="status-row-label"><i class="fas fa-bank me-1" style="color:var(--primary);"></i> Active Loan</span>
+                            {% if prop.has_loan %}<span class="status-pill-bad">Yes</span>{% else %}<span class="status-pill-ok">No</span>{% endif %}
+                        </div>
+                        <div class="status-row">
+                            <span class="status-row-label"><i class="fas fa-users me-1" style="color:var(--primary);"></i> Existing Tenants</span>
+                            {% if prop.existing_tenants %}<span class="status-pill-neu">Yes</span>{% else %}<span class="status-pill-ok">None</span>{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Owner Card -->
+                    <div class="sidebar-owner-card">
+                        <div class="owner-card-title"><i class="fas fa-user-tie me-1"></i> Owner / Contact</div>
+
+                        <div class="d-flex align-items-center gap-3 mb-14" style="margin-bottom:14px;">
+                            <div class="owner-avatar">{{ prop.owner_name|slice:":1"|upper|default:"O" }}</div>
+                            <div style="min-width:0;">
+                                <div class="owner-name">{{ prop.owner_name|default:"Undisclosed Identity" }}</div>
+                                <div class="owner-email"><i class="fas fa-envelope me-1"></i>{{ prop.owner_email|default:"No email logged" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="owner-info-row">
+                            <i class="fas fa-id-badge"></i>
+                            <div>
+                                <div style="font-size:0.7rem; color:var(--muted); font-weight:600; text-transform:uppercase;">Residency Status</div>
+                                <div style="font-weight:600;">{{ prop.residency_status|default:"—"|title }}</div>
+                            </div>
+                        </div>
+
+                        <div class="owner-info-row">
+                            <i class="fas fa-phone"></i>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="owner-phone-masked" id="sidebarPhone" data-phone="{{ prop.owner_contact|default:'' }}">
+                                    {% if prop.owner_contact %}
+                                        {{ prop.owner_contact|slice:":2" }}XXXXXX{{ prop.owner_contact|slice:"-2:" }}
+                                    {% else %}Not available{% endif %}
+                                </span>
+                                {% if prop.owner_contact %}
+                                    <button class="btn-reveal-phone" onclick="revealPhone('sidebarPhone','{{ prop.owner_contact }}')">View Number</button>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <a href="tel:{{ prop.owner_contact }}" class="btn-call-primary">
+                            <i class="fas fa-phone-volume"></i> Call Owner
+                        </a>
+                    </div>
+
+                </div>
+                <!-- END SIDEBAR -->
+
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX MODAL -->
+    <div class="modal fade" id="photoLightboxStrip" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content" style="background:#0d1117; color:white; border:1px solid #1e2733;">
+                <div class="modal-header border-0" style="border-bottom:1px solid #1e2733 !important;">
+                    <h5 class="modal-title fw-bold" style="font-size:0.95rem;">
+                        <i class="fas fa-images me-2 text-warning"></i>
+                        Industrial Property Photo Gallery — {{ prop.images.count }} Views
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        {% for img in prop.images.all %}
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div style="height:140px; border-radius:8px; overflow:hidden; background:#1e2733; border:1px solid #374151; cursor:pointer;">
+                                <img src="{{ img.image.url }}" alt="Gallery view {{ forloop.counter }}"
+                                     style="width:100%; height:100%; object-fit:cover; transition:transform 0.3s;"
+                                     onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+</div> <!-- END WRAPPER FIX -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 

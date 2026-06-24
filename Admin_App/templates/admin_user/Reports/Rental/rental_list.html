@@ -749,122 +749,139 @@
         .btn-run-search { display: none; } 
     </style>
 
-    <form method="GET" action="" class="advanced-search-bar" id="liveSearchForm">
+  <form method="GET" action="" class="advanced-search-bar" id="liveSearchForm">
         
-        <div class="search-group wide">
-            <label><i class="fas fa-search"></i> SEARCH PROPERTIES</label>
-            <input type="text" name="search" id="searchInput" value="{{ search_query }}" class="filter-input" placeholder="Type title, city, locality, owner name...">
+    <div class="search-group wide">
+        <label><i class="fas fa-search"></i> SEARCH PROPERTIES</label>
+        <input type="text" name="search" id="searchInput" value="{{ search_query }}" class="filter-input" placeholder="Type ID, title, city, listed by, owner name...">
+    </div>
+    
+    <div class="search-group">
+        <label>BHK TYPE</label>
+        <select name="bhk_type" class="filter-input" onchange="this.form.submit()">
+            <option value="All BHK">All BHK</option>
+            {% for bhk in unique_bhk %}
+                <option value="{{ bhk }}" {% if bhk_query == bhk %}selected{% endif %}>{{ bhk }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="search-group">
+        <label>CITY</label>
+        <select name="city" class="filter-input" onchange="this.form.submit()">
+            <option value="All Cities">All Cities</option>
+            {% for city in unique_cities %}
+                <option value="{{ city }}" {% if city_query == city %}selected{% endif %}>{{ city }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="search-group">
+        <label>FURNISHING</label>
+        <select name="furnishing" class="filter-input" onchange="this.form.submit()">
+            <option value="All">All</option>
+            {% for f in unique_furnish %}
+                <option value="{{ f }}" {% if furnish_query == f %}selected{% endif %}>{{ f }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="search-group">
+        <label>POSSESSION</label>
+        <select name="possession" class="filter-input" onchange="this.form.submit()">
+            <option value="All Status">All Status</option>
+            {% for p in unique_possession %}
+                <option value="{{ p }}" {% if possession_query == p %}selected{% endif %}>{{ p }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="search-group">
+        <label>PROPERTY TYPE</label>
+        <select name="property_type" class="filter-input" onchange="this.form.submit()">
+            <option value="All Types">All Types</option>
+            {% for pt in unique_property_types %}
+                <option value="{{ pt }}" {% if prop_type_query == pt %}selected{% endif %}>{{ pt }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="search-group">
+        <label>LISTED BY ROLE</label>
+        <select name="listed_by" class="filter-input" onchange="this.form.submit()">
+            <option value="All Roles">All Roles</option>
+            {% for role in unique_listed_roles %}
+                <option value="{{ role }}" {% if listed_by_query == role %}selected{% endif %}>{{ role }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="search-group">
+        <label>UPLOADED BY ROLE</label>
+        <select name="uploaded_by" class="filter-input" onchange="this.form.submit()">
+            <option value="All Roles">All Roles</option>
+            {% for role in unique_uploaded_roles %}
+                <option value="{{ role }}" {% if uploaded_by_query == role %}selected{% endif %}>{{ role }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="search-group">
+        <label>BUDGET</label>
+        <select name="budget" class="filter-input" onchange="this.form.submit()">
+            <option value="All Budgets">All Budgets</option>
+            <option value="under_10k" {% if budget_query == 'under_10k' %}selected{% endif %}>Under ₹10,000</option>
+            <option value="10k_25k" {% if budget_query == '10k_25k' %}selected{% endif %}>₹10,000 - ₹25,000</option>
+            <option value="25k_50k" {% if budget_query == '25k_50k' %}selected{% endif %}>₹25,000 - ₹50,000</option>
+            <option value="above_50k" {% if budget_query == 'above_50k' %}selected{% endif %}>Above ₹50,000</option>
+        </select>
+    </div>
+
+    <div class="search-actions" style="margin-top:auto; padding-bottom:2px;">
+        <button type="submit" style="display:none;"></button>
+        <a href="{% url 'residential_list' %}" class="btn-reset"><i class="fas fa-times"></i> Reset</a>
+    </div>
+    
+    <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+        <div class="results-badge" style="width: fit-content;">
+            <i class="fas fa-filter"></i> Showing <strong style="margin: 0 4px; font-size: 15px; color: #1d4ed8;">{{ filtered_count }}</strong> of {{ total_count }} properties
         </div>
         
-        <div class="search-group">
-            <label>BHK TYPE</label>
-            <select name="bhk_type" class="filter-input" onchange="this.form.submit()">
-                <option value="All BHK">All BHK</option>
-                {% for bhk in unique_bhk %}
-                    <option value="{{ bhk }}" {% if bhk_query == bhk %}selected{% endif %}>{{ bhk }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="search-group">
-            <label>CITY</label>
-            <select name="city" class="filter-input" onchange="this.form.submit()">
-                <option value="All Cities">All Cities</option>
-                {% for city in unique_cities %}
-                    <option value="{{ city }}" {% if city_query == city %}selected{% endif %}>{{ city }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="search-group">
-            <label>FURNISHING</label>
-            <select name="furnishing" class="filter-input" onchange="this.form.submit()">
-                <option value="All">All</option>
-                {% for f in unique_furnish %}
-                    <option value="{{ f }}" {% if furnish_query == f %}selected{% endif %}>{{ f }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="search-group">
-            <label>POSSESSION</label>
-            <select name="possession" class="filter-input" onchange="this.form.submit()">
-                <option value="All Status">All Status</option>
-                {% for p in unique_possession %}
-                    <option value="{{ p }}" {% if possession_query == p %}selected{% endif %}>{{ p }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="search-group">
-            <label>PROPERTY TYPE</label>
-            <select name="property_type" class="filter-input" onchange="this.form.submit()">
-                <option value="All Types">All Types</option>
-                {% for pt in unique_property_types %}
-                    <option value="{{ pt }}" {% if prop_type_query == pt %}selected{% endif %}>{{ pt }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="search-group">
-            <label>LISTED BY</label>
-            <select name="listed_by" class="filter-input" onchange="this.form.submit()">
-                <option value="All Roles">All Roles</option>
-                {% for role in unique_roles %}
-                    <option value="{{ role }}" {% if listed_by_query == role %}selected{% endif %}>{{ role }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="search-group">
-            <label>BUDGET</label>
-            <select name="budget" class="filter-input" onchange="this.form.submit()">
-                <option value="All Budgets">All Budgets</option>
-                <option value="under_10k" {% if budget_query == 'under_10k' %}selected{% endif %}>Under ₹10,000</option>
-                <option value="10k_25k" {% if budget_query == '10k_25k' %}selected{% endif %}>₹10,000 - ₹25,000</option>
-                <option value="25k_50k" {% if budget_query == '25k_50k' %}selected{% endif %}>₹25,000 - ₹50,000</option>
-                <option value="above_50k" {% if budget_query == 'above_50k' %}selected{% endif %}>Above ₹50,000</option>
-            </select>
-        </div>
-
-        <div class="search-actions" style="margin-top:auto; padding-bottom:2px;">
-            <button type="submit" style="display:none;"></button>
-            <a href="{% url 'residential_list' %}" class="btn-reset"><i class="fas fa-times"></i> Reset</a>
-        </div>
-        
-        <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
-            <div class="results-badge" style="width: fit-content;">
-                <i class="fas fa-filter"></i> Showing <strong style="margin: 0 4px; font-size: 15px; color: #1d4ed8;">{{ filtered_count }}</strong> of {{ total_count }} properties
-            </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            {% if search_query %}
+                <span class="active-tag">Search: {{ search_query }} <i class="fas fa-times" onclick="clearFilterText()"></i></span>
+            {% endif %}
+            {% if bhk_query and bhk_query != 'All BHK' %}
+                <span class="active-tag">BHK: {{ bhk_query }} <i class="fas fa-times" onclick="clearFilterSelect('bhk_type')"></i></span>
+            {% endif %}
+            {% if city_query and city_query != 'All Cities' %}
+                <span class="active-tag">City: {{ city_query }} <i class="fas fa-times" onclick="clearFilterSelect('city')"></i></span>
+            {% endif %}
+            {% if furnish_query and furnish_query != 'All' %}
+                <span class="active-tag">Furnishing: {{ furnish_query }} <i class="fas fa-times" onclick="clearFilterSelect('furnishing')"></i></span>
+            {% endif %}
+            {% if possession_query and possession_query != 'All Status' %}
+                <span class="active-tag">Possession: {{ possession_query }} <i class="fas fa-times" onclick="clearFilterSelect('possession')"></i></span>
+            {% endif %}
+            {% if prop_type_query and prop_type_query != 'All Types' %}
+                <span class="active-tag">Type: {{ prop_type_query }} <i class="fas fa-times" onclick="clearFilterSelect('property_type')"></i></span>
+            {% endif %}
             
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                {% if search_query %}
-                    <span class="active-tag">Search: {{ search_query }} <i class="fas fa-times" onclick="clearFilterText()"></i></span>
-                {% endif %}
-                {% if bhk_query and bhk_query != 'All BHK' %}
-                    <span class="active-tag">BHK: {{ bhk_query }} <i class="fas fa-times" onclick="clearFilterSelect('bhk_type')"></i></span>
-                {% endif %}
-                {% if city_query and city_query != 'All Cities' %}
-                    <span class="active-tag">City: {{ city_query }} <i class="fas fa-times" onclick="clearFilterSelect('city')"></i></span>
-                {% endif %}
-                {% if furnish_query and furnish_query != 'All' %}
-                    <span class="active-tag">Furnishing: {{ furnish_query }} <i class="fas fa-times" onclick="clearFilterSelect('furnishing')"></i></span>
-                {% endif %}
-                {% if possession_query and possession_query != 'All Status' %}
-                    <span class="active-tag">Possession: {{ possession_query }} <i class="fas fa-times" onclick="clearFilterSelect('possession')"></i></span>
-                {% endif %}
-                {% if prop_type_query and prop_type_query != 'All Types' %}
-                    <span class="active-tag">Type: {{ prop_type_query }} <i class="fas fa-times" onclick="clearFilterSelect('property_type')"></i></span>
-                {% endif %}
-                {% if listed_by_query and listed_by_query != 'All Roles' %}
-                    <span class="active-tag">Listed By: {{ listed_by_query }} <i class="fas fa-times" onclick="clearFilterSelect('listed_by')"></i></span>
-                {% endif %}
-                {% if budget_query and budget_query != 'All Budgets' %}
-                    <span class="active-tag">Budget: {{ budget_query }} <i class="fas fa-times" onclick="clearFilterSelect('budget')"></i></span>
-                {% endif %}
-            </div>
+            {% if listed_by_query and listed_by_query != 'All Roles' %}
+                <span class="active-tag">Listed By: {{ listed_by_query }} <i class="fas fa-times" onclick="clearFilterSelect('listed_by')"></i></span>
+            {% endif %}
+            {% if uploaded_by_query and uploaded_by_query != 'All Roles' %}
+                <span class="active-tag">Uploaded By: {{ uploaded_by_query }} <i class="fas fa-times" onclick="clearFilterSelect('uploaded_by')"></i></span>
+            {% endif %}
+
+            {% if budget_query and budget_query != 'All Budgets' %}
+                <span class="active-tag">Budget: {{ budget_query }} <i class="fas fa-times" onclick="clearFilterSelect('budget')"></i></span>
+            {% endif %}
         </div>
-    </form>
+    </div>
+</form>
+
+
 
     <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
     <form id="dateSearchForm" method="GET" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
@@ -962,10 +979,19 @@
                 <th>Facilities</th>
                 <th>Description</th>
                 <th>Rent Desc</th>
+                  <th>User Description</th>
                 <th>Owner Name</th>
                 <th>Contact</th>
                 <th>Email</th>
                 <th>Alt. Contact</th>
+              
+
+                <th>Listed By Id</th>
+                <th>Listed By  Name</th>
+                <th>Listed By Email</th>
+                <th>Listed By Contact</th>
+                <th>Listed By Role</th>
+
                 <th>Uploaded By</th>
                 <th>UB Email</th>
                 <th>UB Contact</th>
@@ -979,8 +1005,8 @@
         <tbody>
             {% for prop in page_obj %}
             <tr id="row-{{ prop.rental_residential_id }}">
-                <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
-                <td>{{ prop.rental_residential_id|default:"—" }}</td>
+           <td style="font-weight: 700; color: #1e293b;">{{ prop.original_sr_no }}</td>
+                <td>{{ prop.id|default:"—" }}</td>
      <td>
     <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;" onclick="openImageModal('modal-{{ prop.id }}')">
 
@@ -1077,26 +1103,35 @@
                 <td>{{ prop.facilities|default:"—" }}</td>
                 <td>{{ prop.description|striptags|truncatechars:50|default:"—" }}</td>
                 <td>{{ prop.rent_residential_desc|striptags|truncatechars:50|default:"—" }}</td>
+                <td>{{ prop.user_description|striptags|truncatechars:50|default:"—" }}</td>
                 <td>{{ prop.owner_name|default:"—" }}</td>
                 <td>{{ prop.contact_number|default:"—" }}</td>
                 <td>{{ prop.email|default:"—" }}</td>
                 <td>{{ prop.alternate_contact|default:"—" }}</td>
-                <td>{{ prop.uploaded_by_name|default:"—" }}</td>
+                
+
+                <td>{{ prop.listed_by_id|default:"—" }}</td>
+                <td>{{ prop.listed_by_name|default:"—" }}</td>
+                <td>{{ prop.listed_by_email|default:"—" }}</td>
+                <td>{{ prop.listed_by_contact|default:"—" }}</td>
+                      <td>{{ prop.listed_by_role|default:"—" }}</td>
+                      <td>{{ prop.uploaded_by_name|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_email|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_role|default:"—" }}</td>
+                
               <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI Listing Form" }}</small></td>
                
                 <td>{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
                 <td style="position:sticky;right:0;background:white;z-index:1;">
                     <div style="display:flex;gap:8px;">
-                        <button class="btn-action btn-view" onclick="window.location.href='{% url 'rental_residential_view' prop.rental_residential_id %}'">
+                        <button class="btn-action btn-view" onclick="window.location.href='{% url 'rental_residential_view' prop.id %}'">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="btn-action btn-edit" onclick="window.location.href='{% url 'rental_residential_edit' prop.rental_residential_id %}'">
+                        <button class="btn-action btn-edit" onclick="window.location.href='{% url 'rental_residential_edit' prop.id %}'">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn-action btn-delete" onclick="deleteProperty('{{ prop.rental_residential_id }}')">
+                        <button class="btn-action btn-delete" onclick="deleteProperty('{{ prop.id }}')">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>

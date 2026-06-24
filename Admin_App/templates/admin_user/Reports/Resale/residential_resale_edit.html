@@ -554,11 +554,39 @@
                                 </div>
                             </div>
                             <div class="form-group mt-2">
-                                <label class="form-label">Property Description <span class="required">*</span></label>
-                                <textarea class="form-control" id="resale_residential_desc" name="property_description" required>{{ prop.property_description }}</textarea>
+                                <label class="form-label">User Description </label>
+                                <textarea class="form-control"  name="user_description" required>{{ prop.user_description }}</textarea>
                             </div>
                         </div>
                     </div>
+
+
+                    <div class="form-section">
+    <div class="section-header"><i class="fas fa-align-left"></i> System-Generated Property Descriptions</div>
+    <div class="section-body">
+        
+        <div class="alert alert-info d-flex align-items-center mb-4" style="background-color: #f8fafc; border-left: 4px solid #667eea; border-radius: 4px; padding: 12px 16px; border-top: none; border-right: none; border-bottom: none;">
+            <i class="fas fa-info-circle me-2" style="color: #667eea;"></i>
+            <span style="font-size: 0.9rem; color: #4a5568;">
+                <strong>Smart Generation:</strong> These fields are read-only. The system will automatically update the descriptions based on any changes you make to the property details upon saving.
+            </span>
+        </div>
+
+        <div class="form-group mb-4">
+            <label class="form-label mb-2"><i class="fas fa-file-alt"></i> Property Summary</label>
+            <textarea class="form-control bg-light" name="property_summary" rows="3" readonly>{{ prop.property_summary|default:'' }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label mb-2"><i class="fas fa-file-alt"></i> Property Description (Rich Text)</label>
+            <div class="form-control bg-light" style="height: auto; min-height: 150px; max-height: 250px; overflow-y: auto; cursor: not-allowed; color: #4a5568;">
+                {{ prop.property_description|default:''|safe }}
+            </div>
+            <input type="hidden" name="property_description" value="{{ prop.property_description|default:'' }}">
+        </div>
+        
+    </div>
+</div>
 
                     <div class="step-nav">
                         <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>

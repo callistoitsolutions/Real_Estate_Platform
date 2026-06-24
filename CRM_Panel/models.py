@@ -11,8 +11,15 @@ class UTMLink(models.Model):
       
     # Basic info
     link_id = models.CharField(max_length=50, unique=True)
-    property_id = models.IntegerField()
-    property_title = models.CharField(max_length=500)
+    
+    #  Generic Foreign Key to property (links to any of your 8 property types)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE,blank=True,null=True)
+
+    object_id = models.PositiveIntegerField(blank=True, null=True)
+    property_obj = GenericForeignKey('content_type', 'object_id')
+    
+    # Denormalized fields for quick access (optional - keep for performance)
+    property_title = models.CharField(max_length=500, blank=True, null=True)
     listing_type = models.CharField(max_length=50, default='rent')
     category = models.CharField(max_length=100, blank=True, null=True, db_index=True)
     
@@ -38,10 +45,11 @@ class UTMLink(models.Model):
         indexes = [
             models.Index(fields=['category', 'utm_source']),
             models.Index(fields=['listing_type', 'category']),
+            models.Index(fields=['content_type', 'object_id']),
         ]
     
     def __str__(self):
-        return f"{self.utm_source} - {self.property_title}"
+        return f"{self.utm_source} - {self.property_title or self.property_obj}"
     
 
 ############### UTM Link Modal Ends Here ########################

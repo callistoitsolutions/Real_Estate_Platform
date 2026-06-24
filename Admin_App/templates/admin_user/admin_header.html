@@ -1536,7 +1536,11 @@
                 </a>
                 <ul class="submenu">
                     <li><a href="{% url 'residential_list' %}" class="submenu-link" style="color:white;" id="Rent_Resident">Residential</a></li>
+                                        <li><a href="{% url 'rental_reports' %}" class="submenu-link" style="color:white;" id="Rent_Resident"> Rental Residential Reports</a></li>
+
                     <li><a href="{% url 'commercial_list' %}" class="submenu-link" style="color:white;">Commercial</a></li>
+                    
+                    <li><a href="{% url 'commercial_reports' %}" class="submenu-link" style="color:white;">Rental Commercial Reports</a></li>
                     <li><a href="{% url 'pg_list' %}" class="submenu-link" style="color:white;">PG/Co-living</a></li>
                 </ul>
             </li>
@@ -1704,10 +1708,10 @@
                     </div>
                 </div>
 
-                <div class="topbar-icon">
+                {% comment %} <div class="topbar-icon">
                     <i class="fas fa-envelope"></i>
                     <span class="notification-badge">3</span>
-                </div>
+                </div> {% endcomment %}
 
                 <div class="user-profile" onclick="toggleUserDropdown(event)">
                     <div class="user-avatar">RS</div>

@@ -100,7 +100,21 @@
 
     var table = $('#faqsTable').DataTable({
         dom: '<"table-header"Blf>rt<"table-footer"ip>',
-        buttons: ['excel','csv'],
+        buttons: [
+            {
+                extend: 'excel',
+                text: '<i class="fas fa-building"></i> Export to Excel',
+                className: 'btn-excel',
+                filename: 'Faqs_List_' + new Date().toISOString().slice(0,19).replace(/:/g, '-'),
+                title: 'FAQ Report',
+                exportOptions: {
+                    columns: ':visible',
+                    modifier: {
+                        page: 'all'
+                    }
+                }
+            }
+        ],
         paging: true,
         ordering: true,
         info: true,
@@ -109,7 +123,7 @@
         lengthMenu: [5,10,25,50],
         language:{
             search: "",
-            searchPlaceholder: "Search FAQS...",
+            searchPlaceholder: "Search Faqs...",
             paginate:{
                 previous:"<i class='fas fa-chevron-left'></i>",
                 next:"<i class='fas fa-chevron-right'></i>"
@@ -118,6 +132,6 @@
     });
 
     // Force placeholder
-    $('.dataTables_filter input').attr("placeholder","Search FAQS...");
+    $('.dataTables_filter input').attr("placeholder","Search Faqs...");
 });
 </script>

@@ -14,6 +14,11 @@ urlpatterns = [
      ############# urls for update landlord profile page #####################
 
      path('Update_Profile_Landlord',views.Update_Profile_Landlord,name='Update_Profile_Landlord'),
+
+
+      ############# urls for update landlord profile page #####################
+
+   
      
   
 

@@ -590,7 +590,7 @@
                     <a href="{% url 'residential_list' %}"><i class="fas fa-home"></i> Rental Listings</a>
                     <span class="text-muted">/</span>
                     <span>{{ property.property_title|truncatechars:40 }}</span>
-                    <span class="prop-id-badge">ID: {{ property.rental_residential_id }}</span>
+                    <span class="prop-id-badge">ID: {{ property.id }}</span>
                     <span class="prop-verified-badge"><i class="fas fa-circle-check"></i> System Verified</span>
                 </div>
                 <a href="{% url 'residential_list' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600;">
@@ -1056,10 +1056,14 @@
                             {% if property.rent_residential_desc %}
                                 <div class="desc-highlight">{{ property.rent_residential_desc|safe }}</div>
                             {% endif %}
+                             {% if property.user_description %}
+                                <div class="desc-highlight">{{ property.user_description|safe }}</div>
+                            {% endif %}
                             {% if property.description %}
                                 <div class="sub-section-label">Executive Summary Note</div>
                                 <p class="mb-0">{{ property.description }}</p>
                             {% endif %}
+                            
                             {% if not property.rent_residential_desc and not property.description %}
                                 <div class="empty-state">
                                     <i class="fas fa-file-alt"></i>
@@ -1114,7 +1118,9 @@
                             </div>
                         </div>
 
-                        <div class="sub-section-label">Listing Uploaded By</div>
+
+                        
+                        <div class="sub-section-label">Property Uploaded By</div>
                         <div class="spec-grid">
                             <div class="spec-item">
                                 <div class="spec-label">Uploader Name</div>

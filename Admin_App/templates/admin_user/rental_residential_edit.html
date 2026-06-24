@@ -99,7 +99,7 @@
                 <a href="#" onclick="history.back()" class="btn-back"><i class="fas fa-arrow-left"></i> Back to List</a>
             </div>
 
-            <form method="POST" enctype="multipart/form-data" id="rentalEditForm" action="{% url 'rental_residential_edit' property.rental_residential_id %}" novalidate>
+            <form method="POST" enctype="multipart/form-data" id="rentalEditForm" action="{% url 'rental_residential_edit' property.id %}" novalidate>
                 {% csrf_token %}
 
                 <div class="step-content active" id="step1">
@@ -228,7 +228,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-user-tie"></i> Available For <span class="required-star">*</span></label>
-                                        <select class="form-select form-control" name="available_for" required>
+                                        <select class="form-select form-control" name="available_for">
                                             <option value="">Select Option</option>
                                             <option value="Family" {% if property.available_for == 'Family' %}selected{% endif %}>Family</option>
                                             <option value="Bachelor" {% if property.available_for == 'Bachelor' %}selected{% endif %}>Bachelor</option>
@@ -571,32 +571,41 @@
                         </div>
                     </div>
 
-                    <div class="form-section">
-                        <div class="section-header"><i class="fas fa-align-left"></i> Property Summary</div>
-                        <div class="section-body">
-                            <div class="form-group">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Detailed Summary</label>
-                                    <button type="button" class="btn-back btn-sm" style="padding: 5px 12px; font-size: 0.85rem;" onclick="generateAIDetails(true)">
-                                        <i class="fas fa-magic" style="color: #667eea;"></i> Auto-Generate
-                                    </button>
-                                </div>
-                                <textarea class="form-control" name="description" rows="6">{{ property.description|default:'' }}</textarea>
-                            </div>
-                        </div>
-                    </div>
+                   
+                    <div class="form-section" hidden>
+    <div class="section-header"><i class="fas fa-align-left"></i> System-Generated Property Descriptions</div>
+    <div class="section-body">
+        
+        <div class="alert alert-info d-flex align-items-center mb-4" style="background-color: #f8fafc; border-left: 4px solid #667eea; border-radius: 4px; padding: 12px 16px; border-top: none; border-right: none; border-bottom: none;">
+            <i class="fas fa-info-circle me-2" style="color: #667eea;"></i>
+            <span style="font-size: 0.9rem; color: #4a5568;">
+                <strong>Smart Generation:</strong> These fields are read-only. The system will automatically update the descriptions based on any changes you make to the property details upon saving.
+            </span>
+        </div>
 
-                    <div class="form-section">
-                        <div class="section-header"><i class="fas fa-file-text"></i> Property Description</div>
+        <div class="form-group mb-4">
+            <label class="form-label mb-2"><i class="fas fa-file-alt"></i> Detailed Summary</label>
+            <textarea class="form-control bg-light" name="description" rows="4" readonly>{{ property.description|default:'' }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label mb-2"><i class="fas fa-file-alt"></i> Full Description (Rich Text)</label>
+            <textarea class="form-control bg-light" name="rent_residential_desc" id="rent_residential_desc" rows="6" readonly>{{ property.rent_residential_desc|default:'' }}</textarea>
+        </div>
+        
+    </div>
+</div>
+
+
+                      <div class="form-section">
+                        <div class="section-header"><i class="fas fa-file-text"></i> Detail User Property Description</div>
                         <div class="section-body">
                             <div class="form-group">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Detailed Description</label>
-                                    <button type="button" class="btn-back btn-sm" style="padding: 5px 12px; font-size: 0.85rem;" onclick="generateAIDetails(true)">
-                                        <i class="fas fa-magic" style="color: #667eea;"></i> Auto-Generate
-                                    </button>
+                                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i> User  Description</label>
+                                    
                                 </div>
-                                <textarea class="form-control" name="rent_residential_desc" id="rent_residential_desc" rows="6">{{ property.rent_residential_desc|default:'' }}</textarea>
+                                <textarea class="form-control" name="user_description" id="user_desc" rows="6">{{ property.user_description|default:'' }}</textarea>
                             </div>
                         </div>
                     </div>

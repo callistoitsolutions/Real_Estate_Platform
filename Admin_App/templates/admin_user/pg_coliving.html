@@ -1495,12 +1495,8 @@
                       
                     </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">City <span class="required">*</span></label>
-                      <input type="text" class="form-control" id="cityInput" name="city" placeholder="Enter City" required>
-                    </div>
-                  </div>
+           
+                  
 
                   <div class="col-md-6">
                     <div class="form-group">
@@ -1508,18 +1504,54 @@
                       <input type="text" class="form-control" id="buildingNameInput" name="building_name" placeholder="Enter Building/Project Name">
                     </div>
                   </div>
+
+
+
+
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Property No/Unit No</label>
+                      <input type="text" class="form-control" id="property_no" name="property_no" placeholder="A-4834">
+                    </div>
+                  </div>
+                    
+<div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Add Tower/Wing</label>
+                      <input type="text" class="form-control" id="tower_no" name="tower_no" placeholder="A Wing">
+                    </div>
+                  </div>
+
+
                 </div>
 
-                <div class="row mt-2">
+              
+  <div class="row mt-2">
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Property Registration No</label>
+                      <input type="text" class="form-control" id="regi_no" name="registration_no" placeholder="Enter Registration No">
+                    </div>
+                  </div>
+
                   <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">City <span class="required">*</span></label>
+                      <input type="text" class="form-control" id="cityInput" name="city" placeholder="Enter City" required>
+                    </div>
+                  </div>
+
+
+                  </div>
+
+
+                 <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Locality <span class="required">*</span></label>
                       <input type="text" class="form-control" id="locality" name="locality" placeholder="Enter locality" required>
                     </div>
                   </div>
-                
-                </div>
-
                 <div class="form-group mt-2">
                   <label class="form-label">Property Address <span class="required">*</span></label>
                   <textarea class="form-control" name="property_address" rows="3" placeholder="Enter complete property address" required></textarea>
@@ -1528,8 +1560,8 @@
                 <div class="row mt-2">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label class="form-label">Total Beds <span class="required">*</span></label>
-                      <input type="number" class="form-control" id="totalBeds" name="total_beds" min="1" placeholder="Enter total beds" required>
+                      <label class="form-label">Property Landmark</label>
+                      <input type="text" class="form-control" id="property_landmark" name="property_landmark"  placeholder="Enter Property Landmark">
                     </div>
                   </div>
 
@@ -1560,16 +1592,7 @@
                   </div>
 
                   <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">Sharing Type</label>
-                      <div class="pill-group" id="sharingTypeGroup">
-                        <button type="button" class="pill-btn" data-field="sharing_type" data-value="Single">Single</button>
-                        <button type="button" class="pill-btn" data-field="sharing_type" data-value="Double">Double</button>
-                        <button type="button" class="pill-btn" data-field="sharing_type" data-value="Triple">Triple</button>
-                        <button type="button" class="pill-btn" data-field="sharing_type" data-value="4+">4+</button>
-                      </div>
-                      <input type="hidden" name="sharing_type" id="sharingType">
-                    </div>
+                  
                   </div>
                 </div>
 
@@ -1694,7 +1717,7 @@
                 <div id="rooms-container">
                   <div class="room-card" data-room-index="1">
                     <div class="room-card-header">
-                      <div class="room-card-title">Room Specification #1</div>
+                      <div class="room-card-title">Room Specification</div>
                       <button type="button" class="btn-remove-room" onclick="removeRoom(this)" style="display:none;">
                         <i class="fas fa-minus-circle"></i> Remove Room
                       </button>
@@ -1716,8 +1739,8 @@
 
                       <div class="col-md-6">
                         <div class="form-group">
-                          <label class="form-label">Total Beds in Room <span class="required">*</span></label>
-                          <input type="number" class="form-control pg-room-beds" name="room_beds[]" min="1" required>
+                          <label class="form-label">Total Beds In Room</label>
+                          <input type="number" class="form-control pg-room-beds" name="room_beds[]" min="1">
                         </div>
                       </div>
                     </div>
@@ -1725,14 +1748,23 @@
                     <div class="row mt-2">
                       <div class="col-md-6">
                         <div class="form-group">
-                          <label class="form-label">Room Rent (₹/month) <span class="required">*</span></label>
+                          <label class="form-label">Rent Per Occupant (₹/Bed/Month/Person) <span class="required">*</span></label>
                           <input type="number" class="form-control room-rent" id="roomRent1" name="room_rent[]" min="0" placeholder="Amount" required>
                         </div>
                       </div>
 
+
                       <div class="col-md-6">
                         <div class="form-group">
-                          <label class="form-label">Room Deposit /Security_Deposite (₹) <span class="required">*</span></label>
+                          <label class="form-label">Advance Rent </label>
+                          <input type="number" class="form-control room-rent" min="0" placeholder="Amount">
+                        </div>
+                      </div>
+                      
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label class="form-label">Refundable Room Security_Deposite (₹/Person) <span class="required">*</span></label>
                           <input type="number" class="form-control" name="room_deposit[]" min="0" placeholder="Amount" required>
                         </div>
                       </div>
@@ -1752,7 +1784,7 @@
 
                       <div class="col-md-6 brokerageSection" style="display:none;">
                         <div class="form-group">
-                          <label class="form-label"><i class="fas fa-percent"></i> Brokerage Percentage</label>
+                          <label class="form-label"><i class="fas fa-percent"></i> Brokerage Type</label>
                           <select class="form-select brokeragePercentage" name="room_brokerage_percent[]">
                             <option value="">Select Brokerage</option>
                             <option value="1%">1%</option>
@@ -1768,40 +1800,29 @@
                     <div class="row mt-2 manualBrokerage" style="display:none;">
                       <div class="col-md-6">
                         <div class="form-group">
-                          <label class="form-label"><i class="fas fa-edit"></i> Enter Brokerage</label>
+                          <label class="form-label"><i class="fas fa-edit"></i> Brokerage Amount (₹)</label>
                           <input type="text" class="form-control" name="room_manual_brokerage[]" placeholder="e.g. 2.5%">
                         </div>
                       </div>
                     </div>
 
                     <div class="form-group mt-2">
-                      <label class="form-label">Room Facilities</label>
-                      <div class="amenities-grid">
-                        <label class="amenity-checkbox">
-                          <input type="checkbox" class="form-check-input" name="room_facilities_1[]" value="Attached Bathroom">
-                          <label class="form-check-label">Attached Bathroom</label>
-                        </label>
-                        <label class="amenity-checkbox">
-                          <input type="checkbox" class="form-check-input" name="room_facilities_1[]" value="Balcony">
-                          <label class="form-check-label">Balcony</label>
-                        </label>
-                        <label class="amenity-checkbox">
-                          <input type="checkbox" class="form-check-input" name="room_facilities_1[]" value="AC">
-                          <label class="form-check-label">AC</label>
-                        </label>
-                        <label class="amenity-checkbox">
-                          <input type="checkbox" class="form-check-input" name="room_facilities_1[]" value="Wardrobe">
-                          <label class="form-check-label">Wardrobe</label>
-                        </label>
-                        <label class="amenity-checkbox">
-                          <input type="checkbox" class="form-check-input" name="room_facilities_1[]" value="Study Table">
-                          <label class="form-check-label">Study Table</label>
-                        </label>
-                        <label class="amenity-checkbox">
-                          <input type="checkbox" class="form-check-input" name="room_facilities_1[]" value="Wi-Fi">
-                          <label class="form-check-label">Wi-Fi</label>
-                        </label>
+                     
+
+                       <div class="col-md-6">
+                        <div class="form-group">
+                          <label class="form-label"> Monthly Maintainance Amount </label>
+                          <input type="number" class="form-control" name="monthly_maintainance  min="0" placeholder="73433">
+                        </div>
                       </div>
+
+                        <div class="col-md-6">
+                        <div class="form-group">
+                          <label class="form-label"> Estimated Move-In Cost (Per Occupant) </label>
+                          <input type="number" class="form-control"  min="0" placeholder="Amount">
+                        </div>
+                      </div>
+
                     </div>
                   </div>
                 </div>
@@ -1901,17 +1922,42 @@
               </div>
             </div>
 
-            <div class="form-section">
-              <div class="section-header"><i class="fas fa-align-left"></i>  Property Description </div>
+        <div class="form-section">
+    <div class="section-header"><i class="fas fa-align-left"></i> System-Generated Property Descriptions</div>
+    <div class="section-body">
+        
+        <div class="alert alert-info d-flex align-items-center mb-4" style="background-color: #f8fafc; border-left: 4px solid #667eea; border-radius: 4px; padding: 12px 16px; border-top: none; border-right: none; border-bottom: none;">
+            <i class="fas fa-info-circle me-2" style="color: #667eea;"></i>
+            <span style="font-size: 0.9rem; color: #4a5568;">
+                <strong>Smart Generation:</strong> These fields are read-only. The system will automatically update the summary and detailed descriptions based on any changes you make to the PG details upon saving.
+            </span>
+        </div>
+
+        <div class="form-group mb-4">
+            <label class="form-label mb-2"><i class="fas fa-file-alt"></i> Property Summary</label>
+            <textarea class="form-control bg-light" name="property_summary" rows="3" placeholder="This summary will be auto-generated by the system upon saving..." readonly>{{ prop.property_summary|default:'' }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label mb-2"><i class="fas fa-file-alt"></i> Property Description (Rich Text)</label>
+            <div class="form-control bg-light" style="height: auto; min-height: 150px; max-height: 250px; overflow-y: auto; cursor: not-allowed; color: #4a5568;">
+                {{ prop.property_description|default:''|safe }}
+            </div>
+            <input type="hidden" name="property_description" value="{{ prop.property_description|default:'' }}">
+        </div>
+        
+    </div>
+</div>
+
+              <div class="form-section">
+              <div class="section-header"><i class="fas fa-align-left"></i>Detailed User Property Description </div>
               <div class="section-body">
                 <div class="form-group">
                   <div class="d-flex justify-content-between align-items-center mb-2">
-                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Property Description</label>
-                    <button type="button" class="btn-back btn-sm" style="padding: 5px 12px; font-size: 0.85rem;" onclick="generateAIDetails(true)">
-                      <i class="fas fa-magic" style="color: #667eea;"></i> Auto-Generate Description
-                    </button>
+                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i>User Property Description</label>
+                   
                   </div>
-                  <textarea class="form-control" name="property_description" id="property_description" rows="6" placeholder="Write or auto-generate description details..."></textarea>
+                  <textarea class="form-control" name="user_description" id="user_description" rows="6" placeholder="Add Property description details..."></textarea>
                 </div>
               </div>
             </div>
@@ -2005,11 +2051,11 @@
               <div class="section-body">
                 <div class="form-group">
                   <label class="form-label">
-                    <i class="fa-solid fa-camera"></i> Upload Property Images <span class="required">*</span>
+                    <i class="fa-solid fa-camera"></i> Upload Property Images
                   </label>
                   <p class="text-muted small">Listings with high-res property images convert at a 5x faster baseline rate. Add at least 3 photos.</p>
                   <div class="image-upload-area" id="uploadArea">
-                    <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
+                    <input type="file" id="imageInput" name="property_images[]" multiple accept="image/" style="display:none;">
                     <div class="upload-icon" style="font-size:2.5rem;margin-bottom:10px;">📷</div>
                     <div class="upload-text">Click or Drag/Drop Images Directly Here</div>
                     <div class="upload-subtext">Upload standard asset sets between 3 and 10 dynamic images (JPG, PNG)</div>
@@ -2032,7 +2078,7 @@
               </div>
             </div>
 
-            <div class="form-section">
+            <div class="form-section" hidden>
               <div class="section-header">
                 <i class="fas fa-address-book"></i>
                  Contact Information
@@ -2042,17 +2088,17 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">
-                        <i class="fas fa-user"></i>  Owner Name <span class="required-star">*</span>
+                        <i class="fas fa-user"></i>  Owner Name 
                       </label>
-                      <input type="text" class="form-control" id="ownerName" name="owner_name" placeholder="Enter full primary name" required>
+                      <input type="text" class="form-control" id="ownerName" name="owner_name" placeholder="Enter full primary name">
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">
-                        <i class="fas fa-phone"></i>  Contact Number <span class="required-star">*</span>
+                        <i class="fas fa-phone"></i>  Contact Number
                       </label>
-                      <input type="tel" class="form-control" name="contact_number" placeholder="e.g., +91 9876543210" required>
+                      <input type="tel" class="form-control" name="contact_number" placeholder="e.g., +91 9876543210">
                     </div>
                   </div>
                 </div>
@@ -2061,9 +2107,9 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">
-                        <i class="fas fa-envelope"></i>  Email  <span class="required-star">*</span>
+                        <i class="fas fa-envelope"></i>  Email 
                       </label>
-                      <input type="email" class="form-control" name="email" placeholder="owner.email@example.com" required>
+                      <input type="email" class="form-control" name="email" placeholder="owner.email@example.com">
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -2078,10 +2124,66 @@
               </div>
             </div>
 
+
+               <div class="form-section">
+              <div class="section-header">
+                <i class="fas fa-address-book"></i>
+                 Property Listed By
+              </div>
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="fas fa-user"></i>  Listed By ID
+                      </label>
+                      <input type="text" class="form-control" id="listedbyid" name="listed_by_id">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="fas fa-phone"></i> Listed By Name
+                      </label>
+                      <input type="text" class="form-control" name="listed_by_name">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="fas fa-envelope"></i> Listed By  Email 
+                      </label>
+                      <input type="email" class="form-control" name="listed_by_email">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="fas fa-phone-alt"></i>  Listed By Contact
+                      </label>
+                      <input type="tel" class="form-control" name="listed_by_contact">
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="fas fa-phone-alt"></i>  Listed By Role
+                      </label>
+                      <input type="text" class="form-control" name="listed_by_role">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="form-section">
               <div class="section-header">
                 <i class="fas fa-upload"></i>
-                Listing Uploaded By
+                Property Uploaded By
               </div>
               <div class="section-body">
                 <div class="row">
@@ -2220,92 +2322,85 @@
   let roomCount = 1;
   let selectedFiles = [];
 
-  // PROGRESSION AND WORKFLOW MANAGER VIA STEPPERS
+  // ── STEPPER ──────────────────────────────────────────────────────────────
   function goToStep(n) {
-    if (n > currentStep && !validateStep(currentStep)) {
-      return;
-    }
+    if (n > currentStep && !validateStep(currentStep)) return;
 
     document.getElementById('step' + currentStep).classList.remove('active');
     document.getElementById('step' + n).classList.add('active');
-    
+
     for (let i = 1; i <= 4; i++) {
-      const sc = document.getElementById('sc' + i);
-      const sl = document.getElementById('sl' + i);
+      const sc   = document.getElementById('sc' + i);
+      const sl   = document.getElementById('sl' + i);
       const line = document.getElementById('line' + i);
-      
-      if(sc) sc.className = 'step-circle';
-      if(sl) sl.className = 'step-label';
+
+      if (sc)   sc.className   = 'step-circle';
+      if (sl)   sl.className   = 'step-label';
       if (line) line.className = 'step-line';
-      
+
       if (i < n) {
-        if(sc) {
-          sc.classList.add('done');
-          sc.innerHTML = '<i class="fas fa-check" style="font-size:.65rem;"></i>';
-        }
-        if(sl) sl.classList.add('done');
+        if (sc)   { sc.classList.add('done'); sc.innerHTML = '<i class="fas fa-check" style="font-size:.65rem;"></i>'; }
+        if (sl)   sl.classList.add('done');
         if (line) line.classList.add('done');
       } else if (i === n) {
-        if(sc) {
-          sc.classList.add('active');
-          sc.textContent = i;
-        }
-        if(sl) sl.classList.add('active');
+        if (sc)   { sc.classList.add('active'); sc.textContent = i; }
+        if (sl)   sl.classList.add('active');
       } else {
-        if(sc) sc.textContent = i;
+        if (sc) sc.textContent = i;
       }
     }
-    
+
     currentStep = n;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     updateReview();
   }
 
-  // STEP BY STEP FIELD INTEGRITY VALIDATORS
+  // ── VALIDATORS ───────────────────────────────────────────────────────────
   function validateStep(step) {
-    if (step === 1) {
-      const city = document.getElementById('cityInput').value.trim();
-      const locality = document.getElementById('locality').value.trim();
-      const totalBeds = document.getElementById('totalBeds').value;
-      const furnishingType = document.querySelector('select[name="furnishing_type"]').value;
-      const minStay = document.querySelector('input[name="minimum_stay"]').value;
-      const availableFrom = document.querySelector('input[name="available_from"]').value;
-      const pgFor = document.getElementById('pgFor').value;
 
-      if (!city || !locality || !totalBeds || !furnishingType || !minStay || !availableFrom) {
+    if (step === 1) {
+      const city          = document.getElementById('cityInput').value.trim();
+      const locality      = document.getElementById('locality').value.trim();
+      const furnishingType = document.querySelector('select[name="furnishing_type"]').value;
+      const minStay       = document.querySelector('input[name="minimum_stay"]').value;
+      const availableFrom = document.querySelector('input[name="available_from"]').value;
+      const pgFor         = document.getElementById('pgFor').value;
+
+      // BUG FIX 1: removed non-existent `totalBeds` from Step 1 check
+      if (!city || !locality || !furnishingType || !minStay || !availableFrom) {
         Swal.fire({
           icon: 'error',
           title: 'Fields Missing!',
-          html: 'Please fill out all primary mandatory variables marked with a red asterisk (<span style="color:red;">*</span>).',
+          html: 'Please fill all required fields marked <span style="color:red;">*</span>.',
           confirmButtonColor: '#667eea'
         });
         return false;
       }
 
-      if (!pgFor || pgFor.trim() === '') {
+      if (!pgFor) {
         Swal.fire({
           icon: 'error',
-          title: 'Target Intended Profile Required!',
-          text: 'Select at least one operational selection group for target tenant rules (Boys/Girls/Co-living).',
+          title: 'PG For Required!',
+          text: 'Select Boys / Girls / Co-living.',
           confirmButtonColor: '#667eea'
         });
         return false;
       }
       return true;
     }
-    
+
     if (step === 2) {
-      const roomTypes = document.querySelectorAll('select[name="room_type[]"]');
-      const roomBeds = document.querySelectorAll('input[name="room_beds[]"]');
-      const roomRents = document.querySelectorAll('input[name="room_rent[]"]');
+      const roomTypes    = document.querySelectorAll('select[name="room_type[]"]');
+      const roomBeds     = document.querySelectorAll('input[name="room_beds[]"]');
+      const roomRents    = document.querySelectorAll('input[name="room_rent[]"]');
       const roomDeposits = document.querySelectorAll('input[name="room_deposit[]"]');
 
       for (let i = 0; i < roomTypes.length; i++) {
         if (!roomTypes[i].value || !roomBeds[i].value || !roomRents[i].value || !roomDeposits[i].value) {
           Swal.fire({
             icon: 'error',
-            title: 'Child Data Grid Incomplete!',
-            text: `Please verify that all internal parameter parameters for Room Variant Segment #${i + 1} are complete.`,
+            title: 'Room Data Incomplete!',
+            text: `Fill all required fields for Room #${i + 1}.`,
             confirmButtonColor: '#667eea'
           });
           return false;
@@ -2314,111 +2409,106 @@
       setCheck('cl-rooms', true);
       return true;
     }
-    
+
     if (step === 3) {
-      const amenitiesChecked = document.querySelectorAll('input[name="amenities[]"]:checked').length;
+      const amenitiesChecked  = document.querySelectorAll('input[name="amenities[]"]:checked').length;
       const facilitiesChecked = document.querySelectorAll('input[name="facilities[]"]:checked').length;
 
       if (amenitiesChecked === 0 || facilitiesChecked === 0) {
         Swal.fire({
           icon: 'error',
-          title: 'Attributes Assignment Required!',
-          text: 'You must check at least one systematic functional amenity and one localized environmental infrastructure factor.',
+          title: 'Selection Required!',
+          text: 'Select at least one amenity and one nearby facility.',
           confirmButtonColor: '#667eea'
         });
         return false;
       }
       return true;
     }
+
     return true;
   }
 
-  // DYNAMIC COMPOSITE SUB-PILL METRIC HANDLERS
+  // ── PILL BUTTONS ─────────────────────────────────────────────────────────
   document.querySelectorAll('.pill-btn').forEach(btn => {
     btn.addEventListener('click', function (e) {
       e.preventDefault();
-      const targetFieldName = this.dataset.field;
-      
-      if (targetFieldName === 'pg_for') {
-        // Enforce single-select rule variant parameters for standard logic models
+      const field = this.dataset.field;
+
+      if (field === 'pg_for') {
         this.parentElement.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
       } else {
-        // Allow multi-select rules operations on arrays context
         this.classList.toggle('active');
       }
-      
+
       syncPillInputsValue();
       updatePreview();
     });
   });
 
   function syncPillInputsValue() {
-    // Process single string mapping extraction sequence
     const activePgFor = document.querySelector('.pill-btn[data-field="pg_for"].active');
     document.getElementById('pgFor').value = activePgFor ? activePgFor.dataset.value : '';
 
-    // Process dynamic list elements arrays concatenation logic rules
-    ['sharing_type', 'best_suited_for', 'meal_offerings', 'meal_speciality'].forEach(fieldName => {
-      const selectedValues = Array.from(document.querySelectorAll(`.pill-btn[data-field="${fieldName}"].active`))
-                                  .map(btn => btn.dataset.value);
-      
-      const hiddenInputId = fieldName === 'meal_offerings' ? 'mealOfferingsHidden' : 
-                            fieldName === 'meal_speciality' ? 'mealSpecialityHidden' : fieldName;
-      
-      const el = document.getElementById(hiddenInputId);
-      if(el) el.value = selectedValues.join(',');
+    ['best_suited_for', 'meal_offerings', 'meal_speciality'].forEach(fieldName => {
+      const vals = Array.from(document.querySelectorAll(`.pill-btn[data-field="${fieldName}"].active`))
+                        .map(b => b.dataset.value);
+
+      const idMap = {
+        meal_offerings:  'mealOfferingsHidden',
+        meal_speciality: 'mealSpecialityHidden',
+        best_suited_for: 'bestSuitedFor'
+      };
+
+      const el = document.getElementById(idMap[fieldName]);
+      if (el) el.value = vals.join(',');
     });
   }
 
-  // MEALS COMPONENT VISIBILITY INTERACTIVITY TOGGLE RULE
-  document.getElementById('mealsToggle').addEventListener('change', function() {
-    const isChecked = this.checked;
-    document.getElementById('mealOfferings').style.display = isChecked ? 'block' : 'none';
-    document.getElementById('mealSpeciality').style.display = isChecked ? 'block' : 'none';
+  // ── MEALS TOGGLE ─────────────────────────────────────────────────────────
+  document.getElementById('mealsToggle').addEventListener('change', function () {
+    const show = this.checked;
+    document.getElementById('mealOfferings').style.display  = show ? 'block' : 'none';
+    document.getElementById('mealSpeciality').style.display = show ? 'block' : 'none';
   });
 
-  // DYNAMICALLY DISPATCH BROKERAGE ENTRY ROW FORMS
-  document.addEventListener('change', function(e) {
+  // ── BROKERAGE DYNAMIC ROWS ────────────────────────────────────────────────
+  document.addEventListener('change', function (e) {
     if (e.target.classList.contains('brokerageSelect')) {
-      const parentCard = e.target.closest('.room-card');
-      const bSection = parentCard.querySelector('.brokerageSection');
-      const mSection = parentCard.querySelector('.manualBrokerage');
-      
+      const card     = e.target.closest('.room-card');
+      const bSection = card.querySelector('.brokerageSection');
+      const mSection = card.querySelector('.manualBrokerage');
+
       if (e.target.value === 'Yes') {
         bSection.style.display = 'block';
       } else {
         bSection.style.display = 'none';
         mSection.style.display = 'none';
-        parentCard.querySelector('.brokeragePercentage').value = '';
+        card.querySelector('.brokeragePercentage').value = '';
       }
     }
-    
+
     if (e.target.classList.contains('brokeragePercentage')) {
-      const parentCard = e.target.closest('.room-card');
-      const mSection = parentCard.querySelector('.manualBrokerage');
-      
-      if (e.target.value === 'Manual') {
-        mSection.style.display = 'block';
-      } else {
-        mSection.style.display = 'none';
-      }
+      const card     = e.target.closest('.room-card');
+      const mSection = card.querySelector('.manualBrokerage');
+      mSection.style.display = e.target.value === 'Manual' ? 'block' : 'none';
     }
   });
 
-  // ADD DYNAMIC CHILD ROOM ROW BLOCK (INCREMENT LOOP SYSTEM)
+  // ── ADD ROOM ──────────────────────────────────────────────────────────────
   function addRoom() {
     roomCount++;
-    const targetWrapper = document.getElementById('rooms-container');
-    const dynamicCardBlock = document.createElement('div');
-    dynamicCardBlock.className = 'room-card';
-    dynamicCardBlock.setAttribute('data-room-index', roomCount);
-    
-    dynamicCardBlock.innerHTML = `
+    const wrapper = document.getElementById('rooms-container');
+    const card    = document.createElement('div');
+    card.className = 'room-card';
+    card.setAttribute('data-room-index', roomCount);
+
+    card.innerHTML = `
       <div class="room-card-header">
         <div class="room-card-title">Room Specification #${roomCount}</div>
         <button type="button" class="btn-remove-room" onclick="removeRoom(this)">
-          <i class="fas fa-minus-circle"></i> Remove Variant Rows
+          <i class="fas fa-minus-circle"></i> Remove
         </button>
       </div>
 
@@ -2435,10 +2525,9 @@
             </select>
           </div>
         </div>
-
         <div class="col-md-6">
           <div class="form-group">
-            <label class="form-label">Total Beds in Room <span class="required">*</span></label>
+            <label class="form-label">Total Beds <span class="required">*</span></label>
             <input type="number" class="form-control pg-room-beds" name="room_beds[]" min="1" required>
           </div>
         </div>
@@ -2447,14 +2536,19 @@
       <div class="row mt-2">
         <div class="col-md-6">
           <div class="form-group">
-            <label class="form-label">Room Rent (₹/month) <span class="required">*</span></label>
+            <label class="form-label">Rent (₹/month) <span class="required">*</span></label>
             <input type="number" class="form-control room-rent" name="room_rent[]" min="0" placeholder="Amount" required>
           </div>
         </div>
-
         <div class="col-md-6">
           <div class="form-group">
-            <label class="form-label">Room Deposite/Security Deposit (₹) <span class="required">*</span></label>
+            <label class="form-label">Advance Rent</label>
+            <input type="number" class="form-control" min="0" placeholder="Amount">
+          </div>
+        </div>
+        <div class="col-md-6 mt-2">
+          <div class="form-group">
+            <label class="form-label">Security Deposit (₹) <span class="required">*</span></label>
             <input type="number" class="form-control" name="room_deposit[]" min="0" placeholder="Amount" required>
           </div>
         </div>
@@ -2463,20 +2557,19 @@
       <div class="row mt-2">
         <div class="col-md-6">
           <div class="form-group">
-            <label class="form-label"><i class="fas fa-handshake"></i> Brokerage</label>
+            <label class="form-label">Brokerage</label>
             <select class="form-select brokerageSelect" name="room_brokerage[]">
-              <option value="">Select Option</option>
+              <option value="">Select</option>
               <option value="Yes">Yes</option>
               <option value="No">No</option>
             </select>
           </div>
         </div>
-
         <div class="col-md-6 brokerageSection" style="display:none;">
           <div class="form-group">
-            <label class="form-label"><i class="fas fa-percent"></i> Brokerage Percentage</label>
+            <label class="form-label">Brokerage Type</label>
             <select class="form-select brokeragePercentage" name="room_brokerage_percent[]">
-              <option value="">Select Brokerage</option>
+              <option value="">Select</option>
               <option value="1%">1%</option>
               <option value="1.5%">1.5%</option>
               <option value="2%">2%</option>
@@ -2490,74 +2583,35 @@
       <div class="row mt-2 manualBrokerage" style="display:none;">
         <div class="col-md-6">
           <div class="form-group">
-            <label class="form-label"><i class="fas fa-edit"></i> Enter Brokerage</label>
+            <label class="form-label">Brokerage Amount</label>
             <input type="text" class="form-control" name="room_manual_brokerage[]" placeholder="e.g. 2.5%">
           </div>
         </div>
       </div>
-
-      <div class="form-group mt-2">
-        <label class="form-label">Facilities Offered</label>
-        <div class="amenities-grid">
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input" name="room_facilities_${roomCount}[]" value="Attached Bathroom">
-            <label class="form-check-label">Attached Bathroom</label>
-          </label>
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input" name="room_facilities_${roomCount}[]" value="Balcony">
-            <label class="form-check-label">Balcony</label>
-          </label>
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input" name="room_facilities_${roomCount}[]" value="AC">
-            <label class="form-check-label">AC</label>
-          </label>
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input" name="room_facilities_${roomCount}[]" value="Wardrobe">
-            <label class="form-check-label">Wardrobe</label>
-          </label>
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input" name="room_facilities_${roomCount}[]" value="Study Table">
-            <label class="form-check-label">Study Table</label>
-          </label>
-          <label class="amenity-checkbox">
-            <input type="checkbox" class="form-check-input" name="room_facilities_${roomCount}[]" value="Wi-Fi">
-            <label class="form-check-label">Wi-Fi</label>
-          </label>
-        </div>
-      </div>
     `;
-    targetWrapper.appendChild(dynamicCardBlock);
+
+    wrapper.appendChild(card);
     toggleGlobalRemoveButtonsState();
     updatePreview();
   }
 
-  // DYNAMIC REMOVE MINUS CONTROL CONTEXT HANDLERS
-  function removeRoom(buttonElement) {
-    const targetCard = buttonElement.closest('.room-card');
-    
-    // Prevent removing the last remaining variant line to satisfy DB constraint parameters
-    const totalCurrentCards = document.querySelectorAll('#rooms-container .room-card').length;
-    if (totalCurrentCards <= 1) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Action Aborted!',
-        text: 'A minimum configuration framework of at least one setup room row block parameter remains mandatory.',
-        confirmButtonColor: '#667eea'
-      });
+  // ── REMOVE ROOM ───────────────────────────────────────────────────────────
+  function removeRoom(btn) {
+    if (document.querySelectorAll('#rooms-container .room-card').length <= 1) {
+      Swal.fire({ icon: 'warning', title: 'Cannot Remove!', text: 'At least one room is required.', confirmButtonColor: '#667eea' });
       return;
     }
 
     Swal.fire({
-      title: 'Are you sure?',
-      text: "This specific room profile block and its pricing data will be removed.",
+      title: 'Remove this room?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#64748b',
-      confirmButtonText: 'Yes, remove it'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        targetCard.remove();
+      confirmButtonText: 'Yes, remove'
+    }).then(r => {
+      if (r.isConfirmed) {
+        btn.closest('.room-card').remove();
         reindexRoomCardTitles();
         toggleGlobalRemoveButtonsState();
         updatePreview();
@@ -2565,115 +2619,111 @@
     });
   }
 
-  // RE-INDEX TITLES SEQUENTIALLY AFTER REMOVING A ROOM CARD
   function reindexRoomCardTitles() {
-    const structuralCardsList = document.querySelectorAll('#rooms-container .room-card');
-    roomCount = 0; // Reset system count metric loop track index variable parameters cleanly
-    
-    structuralCardsList.forEach((card, loopIdx) => {
+    roomCount = 0;
+    document.querySelectorAll('#rooms-container .room-card').forEach(card => {
       roomCount++;
       card.setAttribute('data-room-index', roomCount);
-      
-      const headerTitle = card.querySelector('.room-card-title');
-      if(headerTitle) headerTitle.textContent = `Room Specification #${roomCount}`;
-      
-      // Sync names of internal arrays fields properties to prevent validation errors downstream
-      const roomCheckboxes = card.querySelectorAll('.amenities-grid input[type="checkbox"]');
-      roomCheckboxes.forEach(box => {
-        const valueStr = box.value;
-        box.setAttribute('name', `room_facilities_${roomCount}[]`);
-      });
+      const t = card.querySelector('.room-card-title');
+      if (t) t.textContent = `Room Specification #${roomCount}`;
     });
   }
 
-  // MANAGE VISIBILITY LOOPS FOR THE SINGLE CARD INSTANCE MINUS SYMBOLS
   function toggleGlobalRemoveButtonsState() {
-    const structuralCardsList = document.querySelectorAll('#rooms-container .room-card');
-    if (structuralCardsList.length <= 1) {
-      const remBtn = structuralCardsList[0].querySelector('.btn-remove-room');
-      if (remBtn) remBtn.style.display = 'none';
-    } else {
-      structuralCardsList.forEach(card => {
-        const remBtn = card.querySelector('.btn-remove-room');
-        if (remBtn) remBtn.style.display = 'block';
-      });
-    }
+    const cards = document.querySelectorAll('#rooms-container .room-card');
+    cards.forEach((card, idx) => {
+      const btn = card.querySelector('.btn-remove-room');
+      if (btn) btn.style.display = cards.length <= 1 ? 'none' : 'block';
+    });
   }
 
-  // CALCULATE AUTOMATED PROPERTY TITLE COMPOSITE OR STRING ASSIGNMENT VALUE
+  // ── AUTO TITLE ────────────────────────────────────────────────────────────
   function calculateAutoTitle() {
-    const userDefinedName = document.getElementById('pgName').value.trim();
-    if (userDefinedName !== "") {
-      return userDefinedName;
-    }
-    const targetGender = document.getElementById('pgFor').value || "Co-Living Accommodations";
-    const localArea = document.getElementById('locality').value.trim() || "[Locality Area]";
-    const cityArea = document.getElementById('cityInput').value.trim() || "";
-    const bName = document.getElementById('buildingNameInput').value.trim();
-    
-    const projectSubString = bName ? bName + " " : "";
-    const citySubString = cityArea ? ", " + cityArea : "";
-    
-    return `Premium ${targetGender} PG at ${projectSubString}${localArea}${citySubString}`;
+    const manual = document.getElementById('pgName').value.trim();
+    if (manual) return manual;
+
+    const gender   = document.getElementById('pgFor').value || 'Co-Living';
+    const locality = document.getElementById('locality').value.trim() || '[Locality]';
+    const city     = document.getElementById('cityInput').value.trim();
+    const building = document.getElementById('buildingNameInput').value.trim();
+
+    return `Premium ${gender} PG at ${building ? building + ' ' : ''}${locality}${city ? ', ' + city : ''}`;
   }
 
-  // REALTIME PORTAL CARD PREVIEW RENDER MATRICES UPDATE PIPELINE
+  // ── PREVIEW (sidebar card) ────────────────────────────────────────────────
+  // BUG FIX 2: replaced non-existent `totalBeds` with sum of room_beds[] inputs
   function updatePreview() {
-    const city = document.getElementById('cityInput').value.trim() || 'City';
-    const loc = document.getElementById('locality').value.trim() || 'Area';
-    const totalBeds = document.getElementById('totalBeds').value;
-    const baseFirstRent = document.getElementById('roomRent1').value;
-    
-    const computationalTitle = calculateAutoTitle();
+    const city  = document.getElementById('cityInput').value.trim() || 'City';
+    const loc   = document.getElementById('locality').value.trim()  || 'Area';
 
-    document.getElementById('previewTitle').textContent = computationalTitle;
-    document.getElementById('previewLoc').innerHTML = '<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ' + loc + (city ? ', ' + city : '');
-    document.getElementById('previewPrice').textContent = baseFirstRent ? '₹' + parseInt(baseFirstRent).toLocaleString('en-IN') + '/mo' : '₹ — /mo';
-    document.getElementById('prevBeds').textContent = totalBeds ? totalBeds + ' beds registered' : '— capacity tracks';
+    // Sum all room bed inputs dynamically
+    const totalBeds = Array.from(document.querySelectorAll('input[name="room_beds[]"]'))
+                           .reduce((sum, el) => sum + (parseInt(el.value) || 0), 0);
 
-    setCheck('cl-pgname', !!computationalTitle && computationalTitle.indexOf('[Locality Area]') === -1);
-    setCheck('cl-location', !!loc && loc !== 'Area');
-    setCheck('cl-beds', !!totalBeds);
+    // Always read first room's rent field by ID
+    const baseRentEl  = document.getElementById('roomRent1');
+    const baseRentVal = baseRentEl ? baseRentEl.value : '';
+
+    const title = calculateAutoTitle();
+
+    document.getElementById('previewTitle').textContent = title;
+    document.getElementById('previewLoc').innerHTML =
+      `<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ${loc}${city !== 'City' ? ', ' + city : ''}`;
+    document.getElementById('previewPrice').textContent =
+      baseRentVal ? '₹' + parseInt(baseRentVal).toLocaleString('en-IN') + '/mo' : '₹ — /mo';
+    document.getElementById('prevBeds').textContent =
+      totalBeds > 0 ? totalBeds + ' beds registered' : '— capacity tracks';
+
+    setCheck('cl-pgname',   !!title && !title.includes('[Locality]'));
+    setCheck('cl-location', loc !== 'Area');
+    setCheck('cl-beds',     totalBeds > 0);
   }
 
-  function setCheck(elementId, isConditionValid) {
-    const nodeTarget = document.getElementById(elementId);
-    if (!nodeTarget) return;
-    nodeTarget.className = 'cl-item' + (isConditionValid ? ' done' : '');
-    nodeTarget.querySelector('i').className = 'fas ' + (isConditionValid ? 'fa-check-circle' : 'fa-circle');
+  function setCheck(id, valid) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'cl-item' + (valid ? ' done' : '');
+    el.querySelector('i').className = 'fas ' + (valid ? 'fa-check-circle' : 'fa-circle');
   }
 
+  // ── REVIEW BOX (step 4 summary) ───────────────────────────────────────────
+  // BUG FIX 3: same totalBeds fix applied here too
   function updateReview() {
     const city = document.getElementById('cityInput').value || '—';
-    const loc = document.getElementById('locality').value || '—';
-    const totalBeds = document.getElementById('totalBeds').value || '—';
-    const baseFirstRent = document.getElementById('roomRent1').value;
-    
-    document.getElementById('rv-pgname').textContent = calculateAutoTitle();
-    document.getElementById('rv-location').textContent = loc + ', ' + city;
-    document.getElementById('rv-beds').textContent = totalBeds + ' structural inventory beds registered';
-    document.getElementById('rv-rent').textContent = baseFirstRent ? '₹' + parseInt(baseFirstRent).toLocaleString('en-IN') + '/month starting rate' : '—';
+    const loc  = document.getElementById('locality').value  || '—';
+
+    const totalBeds = Array.from(document.querySelectorAll('input[name="room_beds[]"]'))
+                           .reduce((sum, el) => sum + (parseInt(el.value) || 0), 0);
+
+    const baseRentEl  = document.getElementById('roomRent1');
+    const baseRentVal = baseRentEl ? baseRentEl.value : '';
+
+    document.getElementById('rv-pgname').textContent   = calculateAutoTitle();
+    document.getElementById('rv-location').textContent = `${loc}, ${city}`;
+    document.getElementById('rv-beds').textContent     = totalBeds > 0 ? `${totalBeds} beds` : '—';
+    document.getElementById('rv-rent').textContent     = baseRentVal
+      ? '₹' + parseInt(baseRentVal).toLocaleString('en-IN') + '/month'
+      : '—';
   }
 
-  // MEDIA ATTACHMENTS PORTFOLIO DRAG/DROP FILE HANDLERS
-  const uploadArea = document.getElementById('uploadArea');
-  const imageInput = document.getElementById('imageInput');
+  // ── IMAGE UPLOAD ──────────────────────────────────────────────────────────
+  const uploadArea   = document.getElementById('uploadArea');
+  const imageInput   = document.getElementById('imageInput');
   const imagePreview = document.getElementById('imagePreview');
 
-  uploadArea.addEventListener('click', () => imageInput.click());
-  uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-  uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
-  uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-  imageInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+  uploadArea.addEventListener('click',     ()  => imageInput.click());
+  uploadArea.addEventListener('dragover',  (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+  uploadArea.addEventListener('dragleave', ()  => uploadArea.classList.remove('dragover'));
+  uploadArea.addEventListener('drop',      (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+  imageInput.addEventListener('change',    (e) => handleFiles(e.target.files));
 
   function handleFiles(files) {
-    const fileArray = Array.from(files);
-    if (selectedFiles.length + fileArray.length > 10) {
-      Swal.fire({ icon: 'warning', title: 'Asset Matrix Limit Exceeded!', text: 'Maximum 10 clean system imagery captures allowed per listing record.', confirmButtonColor: '#667eea' });
+    const arr = Array.from(files);
+    if (selectedFiles.length + arr.length > 10) {
+      Swal.fire({ icon: 'warning', title: 'Limit Exceeded!', text: 'Maximum 10 images allowed.', confirmButtonColor: '#667eea' });
       return;
     }
-
-    fileArray.forEach(file => {
+    arr.forEach(file => {
       if (file.type.startsWith('image/')) {
         selectedFiles.push(file);
         displayImagePreviewElement(file);
@@ -2683,117 +2733,96 @@
   }
 
   function displayImagePreviewElement(file) {
-    const systemReader = new FileReader();
-    systemReader.onload = (e) => {
-      const containerItem = document.createElement('div');
-      containerItem.className = 'preview-item';
-      containerItem.innerHTML = `
-        <img src="${e.target.result}" alt="Listing Portfolio capture matrix context">
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const item = document.createElement('div');
+      item.className = 'preview-item';
+      item.innerHTML = `
+        <img src="${e.target.result}" alt="preview">
         <button type="button" class="remove-image" onclick="removeImageFromQueue(this, '${file.name}')">
           <i class="fas fa-times"></i>
-        </button>
-      `;
-      imagePreview.appendChild(containerItem);
+        </button>`;
+      imagePreview.appendChild(item);
       imagePreview.style.display = 'grid';
     };
-    systemReader.readAsDataURL(file);
+    reader.readAsDataURL(file);
   }
 
-  function removeImageFromQueue(btnNode, lookupName) {
-    selectedFiles = selectedFiles.filter(f => f.name !== lookupName);
-    btnNode.parentElement.remove();
+  function removeImageFromQueue(btn, name) {
+    selectedFiles = selectedFiles.filter(f => f.name !== name);
+    btn.parentElement.remove();
     if (selectedFiles.length === 0) imagePreview.style.display = 'none';
     setCheck('cl-photos', selectedFiles.length >= 3);
   }
 
-  // GENERATE COMPREHENSIVE PRESENTATION COPY USING INPUT PARAMETERS
-  function generateAIDetails(forceOverride = false) {
-    const city = document.querySelector('input[name="city"]').value || '';
-    const local = document.querySelector('input[name="locality"]').value || '';
-    const beds = document.querySelector('input[name="total_beds"]').value || '';
-    const furnishOption = document.querySelector('select[name="furnishing_type"]').value || 'furnished';
-    const computedHeading = calculateAutoTitle();
-    
-    let checklistArray = [];
-    document.querySelectorAll('input[name="amenities[]"]:checked').forEach(box => checklistArray.push(box.value));
+  // ── LIVE INPUT LISTENERS ──────────────────────────────────────────────────
+  // BUG FIX 4: removed 'totalBeds' from this array — that ID doesn't exist
+  ['cityInput', 'locality', 'pgName', 'roomRent1', 'buildingNameInput'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updatePreview);
+  });
 
-    let compositeBodyCopy = `Experience verified, premium rental standards inside ${computedHeading}.\n\n`;
-    compositeBodyCopy += `This micro-living asset block features a total capacity structure of ${beds} beds, providing completely ${furnishOption} living infrastructure configurations context optimized for long-term residential satisfaction parameters.\n\n`;
-    
-    if (checklistArray.length > 0) {
-      compositeBodyCopy += `Premium Facility Track Utilities Include: ${checklistArray.join(', ')}.\n\n`;
-    }
-    compositeBodyCopy += `Conveniently positioned close to localized hubs, transit links, and educational tracks. Schedule your site survey pipeline immediately via portal metrics verification options layout!`;
-
-    const txtBoxNode = document.getElementById('property_description');
-    if (txtBoxNode && (forceOverride || txtBoxNode.value.trim() === '')) {
-      txtBoxNode.value = compositeBodyCopy;
-    }
-  }
-
-  // DEPLOY AUTOMATIC CHANGE NOTIFICATION MATRIX RUNTIME LOOPS
-  ['cityInput', 'locality', 'pgName', 'totalBeds', 'roomRent1', 'buildingNameInput'].forEach(id => {
-    const node = document.getElementById(id);
-    if(node) node.addEventListener('input', updatePreview);
+  // Also update preview when any room_beds[] input changes (for bed count)
+  document.addEventListener('input', function (e) {
+    if (e.target.name === 'room_beds[]') updatePreview();
   });
 
   document.querySelector('select[name="furnishing_type"]').addEventListener('change', updatePreview);
 
-  document.getElementById('ownerName').addEventListener('input', function() {
-    setCheck('cl-owner', !!this.value.trim());
-  });
+  // BUG FIX 5: `ownerName` input is inside a hidden section — guard with null check
+  const ownerNameEl = document.getElementById('ownerName');
+  if (ownerNameEl) {
+    ownerNameEl.addEventListener('input', function () {
+      setCheck('cl-owner', !!this.value.trim());
+    });
+  }
 
-  // REALTIME ON-CHANGE CHECKBOX METRIC COUNT BALANCERS
-  $(document).ready(function() {
+  // ── JQUERY CHECKBOX COUNTERS ──────────────────────────────────────────────
+  $(document).ready(function () {
     function updateAmenityCount() {
-      var activeCount = $('input[name="amenities[]"]:checked').length;
-      $('#amenityCounter').val(activeCount);
-      setCheck('cl-amenities', activeCount > 0);
+      const n = $('input[name="amenities[]"]:checked').length;
+      $('#amenityCounter').val(n);
+      setCheck('cl-amenities', n > 0);
     }
     function updateFacilityCount() {
-      var activeCount = $('input[name="facilities[]"]:checked').length;
-      $('#facilityCounter').val(activeCount);
-      setCheck('cl-facilities', activeCount > 0);
+      const n = $('input[name="facilities[]"]:checked').length;
+      $('#facilityCounter').val(n);
+      setCheck('cl-facilities', n > 0);
     }
 
-    $(document).on('change', 'input[name="amenities[]"]', updateAmenityCount);
+    $(document).on('change', 'input[name="amenities[]"]',  updateAmenityCount);
     $(document).on('change', 'input[name="facilities[]"]', updateFacilityCount);
 
     updateAmenityCount();
     updateFacilityCount();
     toggleGlobalRemoveButtonsState();
+    updatePreview();   // render sidebar card on page load
   });
 
-  // SUBMIT HANDLER AND INTERCEPT VERIFIER PIPELINES
-  document.getElementById('pgForm').addEventListener('submit', function(e) {
+  // ── SUBMIT ────────────────────────────────────────────────────────────────
+  document.getElementById('pgForm').addEventListener('submit', function (e) {
     e.preventDefault();
-    
-    if (!validateStep(4)) return;
 
     if (selectedFiles.length < 3) {
-      Swal.fire({ icon: 'error', title: 'Asset Requirements Check Aborted!', text: 'A minimum index asset upload load of 3 structural image files remains mandatory to finalize publishing routing lines.', confirmButtonColor: '#667eea' });
+      Swal.fire({ icon: 'error', title: 'Images Required!', text: 'Upload at least 3 property images.', confirmButtonColor: '#667eea' });
       return;
     }
 
     if (!document.getElementById('agreeTerms').checked) {
-      Swal.fire({ icon: 'warning', title: 'Policy Sign-off Required', text: 'Please check the authorization declaration acknowledgment checkbox field parameter sequence before deploying infrastructure pipeline parameters data.', confirmButtonColor: '#667eea' });
+      Swal.fire({ icon: 'warning', title: 'Agreement Required!', text: 'Check the terms checkbox before submitting.', confirmButtonColor: '#667eea' });
       return;
     }
 
     Swal.fire({
       icon: 'success',
-      title: '🎉 System Validation Verified!',
-      html: `<div style="text-align:center;">
-        <div style="font-size:.95rem;font-weight:700;margin-bottom:10px;">Your co-living accommodation property listing parameters are being synchronized to DB records live index pipelines.</div>
-      </div>`,
+      title: '🎉 Ready to Submit!',
+      html: `<div style="text-align:center;font-size:.95rem;font-weight:700;">Listing is being saved...</div>`,
       confirmButtonColor: '#667eea',
-      confirmButtonText: 'Commit File Records'
+      confirmButtonText: 'Confirm & Submit'
     }).then(() => {
-      // Create a real programmatic FileList matching user drag/drop variables onto final request context payload pipelines
-      const dataTransferPipeline = new DataTransfer();
-      selectedFiles.forEach(file => dataTransferPipeline.items.add(file));
-      document.getElementById('imageInput').files = dataTransferPipeline.files;
-
+      const dt = new DataTransfer();
+      selectedFiles.forEach(f => dt.items.add(f));
+      document.getElementById('imageInput').files = dt.files;
       this.submit();
     });
   });

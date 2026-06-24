@@ -125,7 +125,21 @@
 
     var table = $('#agentTable').DataTable({
         dom: '<"table-header"Blf>rt<"table-footer"ip>',
-        buttons: ['excel','csv'],
+        buttons: [
+            {
+                extend: 'excel',
+                text: '<i class="fas fa-file-excel"></i> Export to Excel',
+                className: 'btn-excel',
+                filename: 'Agents_List_' + new Date().toISOString().slice(0,19).replace(/:/g, '-'),
+                title: 'Agents Report',
+                exportOptions: {
+                    columns: ':visible',
+                    modifier: {
+                        page: 'all'
+                    }
+                }
+            }
+        ],
         paging: true,
         ordering: true,
         info: true,

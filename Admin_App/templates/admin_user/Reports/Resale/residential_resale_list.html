@@ -506,7 +506,7 @@
                 </div>
                 {% else %}—{% endif %}
             </td>
-            <td>{{ prop.property_id|default:"—" }}</td>
+            <td>{{ prop.id|default:"—" }}</td>
             <td>{{ prop.property_title|default:"—" }}</td>
 
             <td>{{ prop.property_type }}</td>
@@ -600,7 +600,7 @@
                     <a href="{% url 'resale_residential_view' prop.pk %}" class="btn-action btn-view" title="View">
                         <i class="fas fa-eye"></i>
                     </a>
-                   <a href="{% url 'resale_residential_edit' prop.property_id %}" 
+                 <a href="{% url 'resale_residential_edit' prop.id %}" 
    class="btn-action btn-edit" 
    title="Edit">
     <i class="fas fa-edit"></i>

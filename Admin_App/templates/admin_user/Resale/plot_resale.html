@@ -3,565 +3,1374 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-    :root {
-        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        --topbar-height: 70px;
-    }
-    body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; }
-    .main-content { padding: 30px; margin-top: var(--topbar-height); }
-    .page-wrapper { display: grid; grid-template-columns: 1fr 350px; gap: 30px; max-width: 1600px; margin: 0 auto; }
-    .page-header { background: var(--primary-gradient); border-radius: 20px; padding: 30px; color: white; grid-column: 1 / -1; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-    .stepper-container { grid-column: 1 / -1; background: white; border-radius: 20px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-    .stepper { display: flex; align-items: center; justify-content: space-between; position: relative; }
-    .step-item { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; z-index: 2; }
-    .step-circle { width: 50px; height: 50px; border-radius: 50%; background: #e9ecef; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: all 0.3s ease; border: 3px solid #fff; }
-    .step-circle.active { background: var(--primary-gradient); color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.3); }
-    .step-circle.done { background: var(--success-gradient); color: white; }
-    .step-line { position: absolute; top: 25px; left: 50%; right: -50%; height: 3px; background: #e9ecef; z-index: 1; }
-    .step-line.done { background: var(--success-gradient); }
-    .form-container { background: white; border-radius: 20px; padding: 35px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
-    .step-content { display: none; }
-    .step-content.active { display: block; animation: fadeIn 0.4s ease; }
-    .section-header { background: var(--primary-gradient); color: white; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-    .section-body { background: #f8f9fa; padding: 25px; border-radius: 0 0 12px 12px; border: 2px solid #e9ecef; border-top: none; margin-bottom: 30px; }
-    .form-label { font-weight: 600; color: #2d3748; margin-bottom: 8px; font-size: 0.85rem; display: block; }
-    .required { color: #e74c3c; }
-    .radio-group { display: flex; gap: 20px; padding: 10px 0; }
-    .radio-option { cursor: pointer; display: flex; align-items: center; gap: 8px; background: #fff; padding: 10px 15px; border: 1px solid #ddd; border-radius: 10px; transition: 0.3s; }
-    .preview-sidebar { position: sticky; top: 100px; display: flex; flex-direction: column; gap: 20px; }
-    .preview-card { background: #2c3e50; border-radius: 16px; padding: 20px; color: white; }
-    .preview-mock { background: white; border-radius: 12px; overflow: hidden; color: #333; margin-top: 15px; }
-    .preview-image { height: 140px; background: #f0fdf4; display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
-    .preview-price { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.85); color: white; padding: 5px 12px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; }
-    .checklist-card, .tips-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-    .checklist-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 10px; color: #718096; }
-    .checklist-item.done { color: #11998e; font-weight: 600; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } }
+  :root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    --success: #10b981;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --bg-light: #f8f9fa;
+    --text-dark: #2d3748;
+    --sidebar-width: 280px;
+    --topbar-height: 70px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.07);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; }
+
+  .main-content { margin-left: var(--sidebar-width); margin-top: var(--topbar-height); padding: 28px; }
+
+  .page-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: auto auto 1fr;
+    gap: 22px;
+    align-items: start;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    grid-column: 1 / -1; grid-row: 1;
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl); padding: 28px 35px;
+    color: white; box-shadow: 0 8px 32px rgba(102,126,234,0.35);
+    position: relative; overflow: hidden;
+  }
+  .page-header::after {
+    content:''; position:absolute; right:-40px; top:-40px;
+    width:200px; height:200px; background:rgba(255,255,255,0.08); border-radius:50%;
+  }
+  .page-title { font-size: 1.8rem; font-weight: 700; margin: 0 0 6px; }
+  .page-subtitle { font-size: 0.95rem; opacity: 0.85; margin: 0; }
+
+  .stepper-container {
+    grid-column: 1 / -1; grid-row: 2;
+    background: #fff; border-radius: var(--radius-xl);
+    padding: 22px 30px; box-shadow: var(--shadow-card);
+  }
+
+  .form-container {
+    grid-column: 1 / 2; grid-row: 3;
+    background: #fff; border-radius: var(--radius-xl);
+    padding: 32px; box-shadow: var(--shadow-card); min-width: 0;
+  }
+
+  .preview-sidebar {
+    grid-column: 2 / 3; grid-row: 3;
+    display: flex; flex-direction: column; gap: 18px;
+    position: sticky; top: calc(var(--topbar-height) + 20px);
+    align-self: start;
+  }
+
+  /* STEPPER */
+  .stepper { display: flex; align-items: center; overflow-x: auto; }
+  .step-item { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .step-circle {
+    width: 46px; height: 46px; min-width: 46px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; font-weight: 700; border: 3px solid var(--border);
+    background: #fff; color: var(--muted); transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .step-circle.active { background: var(--primary-gradient); color: white; border-color: transparent; transform: scale(1.1); box-shadow: 0 4px 16px rgba(102,126,234,0.45); }
+  .step-circle.done   { background: var(--success-gradient); color: white; border-color: transparent; }
+  .step-label { font-size: 0.82rem; font-weight: 600; color: var(--muted); white-space: nowrap; transition: color 0.3s; }
+  .step-label.active { color: #667eea; }
+  .step-label.done   { color: var(--success); }
+  .step-line { flex: 1; height: 3px; background: var(--border); margin: 0 14px; border-radius: 2px; min-width: 24px; transition: background 0.4s; }
+  .step-line.done { background: var(--success-gradient); }
+
+  /* STEP CONTENT */
+  .step-content { display: none; }
+  .step-content.active { display: block; animation: fadeInUp 0.35s ease; }
+  @keyframes fadeInUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  /* FORM SECTIONS */
+  .form-section { margin-bottom: 26px; border-radius: var(--radius-md); overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+  .section-header { background: var(--primary-gradient); color: white; padding: 13px 20px; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; }
+  .section-header.info-theme { background: var(--info-gradient); }
+  .section-header.dark-theme { background: var(--dark-gradient); }
+  .section-body { background: var(--bg-light); padding: 22px 24px; border: 2px solid #e9ecef; border-top: none; border-radius: 0 0 var(--radius-md) var(--radius-md); }
+
+  /* FORM CONTROLS */
+  .form-label { font-weight: 600; color: var(--text-dark); margin-bottom: 7px; font-size: 0.88rem; display: flex; align-items: center; gap: 5px; }
+  .required { color: #e74c3c; font-size: 1rem; }
+  .form-control, .form-select {
+    border: 2px solid #e9ecef; border-radius: var(--radius-md);
+    padding: 10px 14px; font-size: 0.92rem; width: 100%;
+    transition: border-color 0.25s, box-shadow 0.25s;
+    background-color: #fff; color: var(--text-dark); font-family: inherit;
+  }
+  .form-control:focus, .form-select:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.15); outline: none; }
+  .form-control[readonly] { background-color: #edf2f7; border-color: #cbd5e0; color: #4a5568; font-weight: 600; cursor: not-allowed; }
+  select.form-control, .form-select {
+    appearance: none; -webkit-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; padding-right: 36px;
+  }
+  textarea.form-control { min-height: 100px; resize: vertical; line-height: 1.6; }
+
+  /* RADIO OPTIONS */
+  .radio-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+  .radio-option {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 16px; background: #fff; border: 2px solid #e9ecef;
+    border-radius: var(--radius-md); cursor: pointer; font-weight: 600;
+    font-size: 0.85rem; color: var(--text-dark); transition: all 0.2s;
+  }
+  .radio-option:hover { border-color: #667eea; background: #f0f3ff; }
+  .radio-option input[type="radio"] { accent-color: #667eea; width: 16px; height: 16px; }
+
+  /* FACING PILL GRID */
+  .facing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+  .facing-option {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    padding: 12px 8px; background: #fff; border: 2px solid #e9ecef;
+    border-radius: var(--radius-md); cursor: pointer; font-size: 0.8rem;
+    font-weight: 600; color: var(--text-dark); transition: all 0.2s; text-align: center;
+  }
+  .facing-option:hover { border-color: #667eea; background: #f0f3ff; }
+  .facing-option input[type="radio"] { display: none; }
+  .facing-option.selected { border-color: #667eea; background: var(--primary-gradient); color: white; }
+  .facing-option .facing-icon { font-size: 1.3rem; }
+
+  /* CHECKBOXES */
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; }
+  .checkbox-item { flex: 1; min-width: 145px; }
+  .form-check { padding: 12px 14px; background: #fff; border-radius: var(--radius-md); border: 2px solid #e9ecef; transition: border-color 0.2s; height: 100%; }
+  .form-check:hover { border-color: #667eea; }
+  .form-check-input { width: 17px; height: 17px; border: 2px solid #cbd5e0; border-radius: 5px; cursor: pointer; accent-color: #667eea; vertical-align: middle; }
+  .form-check-label { font-weight: 600; color: var(--text-dark); margin-left: 8px; cursor: pointer; font-size: 0.85rem; }
+
+  /* STEP NAV */
+  .step-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 26px; gap: 12px; padding-top: 20px; border-top: 2px solid #f0f0f0;
+  }
+  .btn-step { padding: 12px 28px; border-radius: var(--radius-md); font-weight: 700; cursor: pointer; font-size: 0.92rem; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; transition: all 0.3s ease; border: none; }
+  .btn-next, .btn-submit { background: var(--primary-gradient); color: white; box-shadow: 0 4px 14px rgba(102,126,234,0.35); }
+  .btn-next:hover, .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.5); }
+  .btn-prev { background: var(--bg-light); color: var(--text-dark); border: 2px solid var(--border) !important; }
+  .btn-prev:hover { background: #e9ecef; }
+
+  /* IMAGE UPLOAD */
+  .image-upload-area {
+    border: 3px dashed #cbd5e0; border-radius: var(--radius-lg);
+    padding: 40px 20px; text-align: center; background: var(--bg-light);
+    cursor: pointer; transition: all 0.3s ease;
+  }
+  .image-upload-area:hover, .image-upload-area.dragover { border-color: #667eea; background: #f0f3ff; }
+  .image-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 14px; margin-top: 18px; }
+  .preview-item { position: relative; border-radius: var(--radius-md); overflow: hidden; aspect-ratio: 1; border: 2px solid var(--border); }
+  .preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .remove-image {
+    position: absolute; top: 7px; right: 7px; width: 26px; height: 26px;
+    background: #e74c3c; color: white; border: none; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.7rem; z-index: 10;
+  }
+  .remove-image:hover { background: #c0392b; }
+
+  /* COUNTER BOX */
+  .counter-box { width: 50px; text-align: center; border-radius: 8px; border: 1px solid var(--border); font-weight: 700; background: #f8faff; color: var(--text-dark); padding: 4px 0; font-size: 0.85rem; }
+  .counter-box.blue-theme { border-color: #bae6fd; background: #f0f9ff; color: #0369a1; }
+
+  /* PREVIEW CARD */
+  .preview-card { background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); border-radius: var(--radius-lg); padding: 18px; color: white; box-shadow: 0 6px 24px rgba(0,0,0,0.2); }
+  .preview-mock { background: white; border-radius: var(--radius-md); overflow: hidden; margin-top: 14px; }
+  .preview-image { height: 130px; background: linear-gradient(135deg, #fef3c7, #fde68a); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
+  .preview-badges { position: absolute; top: 9px; left: 9px; display: flex; gap: 5px; }
+  .preview-badge { font-size: 0.62rem; font-weight: 800; padding: 3px 9px; border-radius: 6px; background: rgba(255,255,255,0.95); color: #0f172a; }
+  .preview-price { position: absolute; bottom: 9px; left: 9px; background: rgba(15,23,42,0.88); color: white; font-size: 0.88rem; font-weight: 800; padding: 5px 12px; border-radius: 8px; }
+  .preview-body { background: white; padding: 14px; color: #0f172a; }
+  .preview-title { font-size: 0.88rem; font-weight: 800; margin-bottom: 5px; line-height: 1.4; }
+  .preview-location { font-size: 0.75rem; color: var(--muted); margin-bottom: 8px; }
+  .preview-specs { display: flex; gap: 12px; font-size: 0.75rem; color: #475569; font-weight: 600; }
+
+  /* CHECKLIST CARD */
+  .checklist-card { background: white; border-radius: var(--radius-lg); border: 2px solid var(--border); padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+  .checklist-title { font-size: 0.88rem; font-weight: 800; color: var(--text-dark); margin-bottom: 14px; }
+  .checklist-item { display: flex; align-items: center; gap: 9px; padding: 7px 0; font-size: 0.82rem; color: var(--muted); border-bottom: 1px solid #f0f4f8; transition: color 0.3s; }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item i { font-size: 0.75rem; width: 14px; flex-shrink: 0; color: #cbd5e0; transition: color 0.3s; }
+  .checklist-item.done { color: var(--success); }
+  .checklist-item.done i { color: var(--success); }
+
+  /* INLINE STATUS */
+  .inline-status { padding: 12px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+  .is-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+
+  @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } .form-container { grid-column: 1 / -1; } }
+  @media (max-width: 992px) { .main-content { margin-left: 0; } }
+  @media (max-width: 768px) { .main-content { padding: 16px; } .form-container { padding: 20px; } .step-label { display: none; } }
 </style>
 
 <div class="main-content">
-    <div class="page-wrapper">
+  <div class="page-wrapper">
 
-        <div class="page-header">
-            <h1 class="page-title">🗺️ Plot & Land Resale Listing</h1>
-            <p class="page-subtitle">Add your listing to the directory marketplace</p>
-        </div>
+    <!-- ── PAGE HEADER ── -->
+    <div class="page-header">
+     
 
-        <div class="stepper-container">
-            <div class="stepper">
-                <div class="step-item">
-                    <div class="step-circle active" id="sc1">1</div>
-                    <span class="mt-2" style="font-size:0.75rem;font-weight:600;">Plot Specs</span>
-                    <div class="step-line" id="line1"></div>
-                </div>
-                <div class="step-item">
-                    <div class="step-circle" id="sc2">2</div>
-                    <span class="mt-2" style="font-size:0.75rem;font-weight:600;">Pricing & Legal</span>
-                    <div class="step-line" id="line2"></div>
-                </div>
-                <div class="step-item">
-                    <div class="step-circle" id="sc3">3</div>
-                    <span class="mt-2" style="font-size:0.75rem;font-weight:600;">Media</span>
-                    <div class="step-line" id="line3"></div>
-                </div>
-                <div class="step-item">
-                    <div class="step-circle" id="sc4">4</div>
-                    <span class="mt-2" style="font-size:0.75rem;font-weight:600;">Location</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-container">
-            <form action="{% url 'plot_sale_add' %}" method="POST" enctype="multipart/form-data" id="plotForm">
-                {% csrf_token %}
-
-                <!-- ═══════════════ STEP 1 ═══════════════ -->
-                <div class="step-content active" id="step1">
-                    <div class="section-header"><i class="fas fa-info-circle"></i> Step 1: Plot/Land Basic Details</div>
-                    <div class="section-body">
-                        <div class="row">
-                            <div class="col-md-12 mt-2">
-                                <label class="form-label">Property Title <span class="text-muted">(Auto-Generated, Read Only)</span></label>
-                                <input type="text" class="form-control" id="property_title"
-                                       placeholder="System generated dynamic name preview..." readonly
-                                       style="background-color:#e9ecef;font-weight:600;">
-                            </div>
-                            <div class="col-md-12 mt-3">
-                                <label class="form-label">Plot Title <span class="required">*</span></label>
-                                <input type="text" class="form-control step-validate" data-step="1"
-                                       name="plot_title" id="plot_title"
-                                       placeholder="e.g., Prime Residential Plot" required>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Plot Area (sq.ft) <span class="required">*</span></label>
-                                <input type="number" class="form-control step-validate" data-step="1"
-                                       name="plot_area" id="plot_area"
-                                       placeholder="e.g., 2000" required>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Resale Plot Type <span class="required">*</span></label>
-                                <select class="form-select form-control step-validate" data-step="1"
-                                        name="resale_plot_type" id="resale_plot_type" required>
-                                    <option value="">Select</option>
-                                    <option value="open_plot">Open Plot</option>
-                                    <option value="residential_plot">Residential Plot</option>
-                                    <option value="commercial_plot">Commercial Plot</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Plot Road Facing <span class="required">*</span></label>
-                                <select class="form-select form-control step-validate" data-step="1"
-                                        name="plot_road_facing" id="plot_road_facing" required>
-                                    <option value="">Select</option>
-                                    <option value="main">Main Road</option>
-                                    <option value="internal">Internal Road</option>
-                                    <option value="corner">Corner Plot</option>
-                                </select>
-                            </div>
-
-                            <!-- ✅ FIX: name="corner_plot" matches model -->
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Corner Plot?</label>
-                                <select class="form-select form-control" name="corner_plot" id="corner_plot">
-                                    <option value="no">No</option>
-                                    <option value="yes">Yes</option>
-                                </select>
-                            </div>
-
-                            <!-- ✅ FIX: name="sanctioning_authority" matches model -->
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Sanctioning Authority</label>
-                                <input type="text" class="form-control"
-                                       name="sanctioning_authority" id="sanctioning_authority"
-                                       placeholder="e.g., MHADA, CIDCO">
-                            </div>
-                        </div>
-
-                        <div class="form-group mt-3">
-                            <label class="form-label">Plot Fencing?</label>
-                            <div class="radio-group">
-                                <label class="radio-option"><input type="radio" name="plot_fencing" value="no" checked> No</label>
-                                <label class="radio-option"><input type="radio" name="plot_fencing" value="yes"> Yes</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-end">
-                        <button type="button" class="btn btn-primary px-5 py-2" onclick="goToStep(2)">
-                            Next: Pricing & Legal <i class="fas fa-arrow-right ml-2"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ═══════════════ STEP 2 ═══════════════ -->
-                <div class="step-content" id="step2">
-                    <div class="section-header"><i class="fas fa-hand-holding-usd"></i> Step 2: Pricing & Legal Verification</div>
-                    <div class="section-body">
-                        <div class="row">
-                            <div class="col-md-6 mt-2">
-                                <label class="form-label">Plot Price (₹) <span class="required">*</span></label>
-                                <input type="number" class="form-control step-validate" data-step="2"
-                                       name="plot_price" id="plot_price"
-                                       placeholder="e.g., 3000000" required>
-                            </div>
-                            <div class="col-md-6 mt-2">
-                                <label class="form-label">Price per Sq.ft (₹)</label>
-                                <input type="number" class="form-control" id="plot_price_per_sqft"
-                                       placeholder="Auto-calculated" readonly>
-                            </div>
-                            <div class="col-md-6 mt-3">
-                                <label class="form-label">Brokerage</label>
-                                <select class="form-select form-control" name="brokerage" id="brokerageSelect">
-                                    <option value="No">No</option>
-                                    <option value="Yes">Yes</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mt-3" id="brokerageSection" style="display:none;">
-                                <label class="form-label">Brokerage Percent</label>
-                                <select class="form-select form-control" name="brokerage_percentage">
-                                    <option value="1%">1%</option>
-                                    <option value="2%">2%</option>
-                                    <option value="3%">3%</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row mt-3">
-                            <!-- ✅ FIX: name="ownership_type" matches model -->
-                            <div class="col-md-6">
-                                <label class="form-label">Ownership Type <span class="required">*</span></label>
-                                <select class="form-select form-control step-validate" data-step="2"
-                                        name="ownership_type" id="ownership_type" required>
-                                    <option value="freehold">Freehold</option>
-                                    <option value="leasehold">Leasehold</option>
-                                </select>
-                            </div>
-
-                            <!-- ✅ FIX: name="loan_on_property" matches model -->
-                            <div class="col-md-6">
-                                <label class="form-label">Loan on Property? <span class="required">*</span></label>
-                                <div class="radio-group">
-                                    <label class="radio-option">
-                                        <input type="radio" name="loan_on_property" value="no" checked> No
-                                    </label>
-                                    <label class="radio-option">
-                                        <input type="radio" name="loan_on_property" value="yes"> Yes
-                                    </label>
-                                </div>
-                                <div id="plot_loan_amount_section" style="display:none;" class="mt-2">
-                                    <label class="form-label">Plot Loan Amount</label>
-                                    <input type="number" class="form-control"
-                                           name="plot_loan_amount" id="plot_loan_amount"
-                                           placeholder="Enter Loan Amount">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <button type="button" class="btn btn-secondary px-4" onclick="goToStep(1)">Back</button>
-                        <button type="button" class="btn btn-primary px-5" onclick="goToStep(3)">
-                            Next: Media Files <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ═══════════════ STEP 3 ═══════════════ -->
-                <div class="step-content" id="step3">
-                    <div class="section-header"><i class="fas fa-images"></i> Step 3: Media & Verified Certifications</div>
-                    <div class="section-body">
-                        <div class="image-upload-area p-5 text-center" id="uploadArea"
-                             style="border:2px dashed #cbd5e0;cursor:pointer;background:#fff;border-radius:10px;">
-                            <input type="file" id="imageInput" name="property_images[]"
-                                   multiple accept="image/*" style="display:none;">
-                            <i class="fas fa-cloud-upload-alt fa-3x mb-2" style="color:#667eea;"></i>
-                            <h5 class="mb-1">Click or Drag Gallery Plot Images</h5>
-                            <p class="text-muted small">Minimum: 1 Image | Maximum: 10 Images Allowed</p>
-                            <span class="badge bg-primary p-2 mt-2" id="imageCounter">Uploaded: 0 / 10 Images</span>
-                        </div>
-                        <div class="image-preview mt-3 d-flex flex-wrap gap-2" id="imagePreview"></div>
-
-                        <div class="row mt-4">
-                            <div class="col-md-6">
-                                <label class="form-label">Encumbrance Certificate <span class="text-muted">(Optional PDF/Image)</span></label>
-                                <input type="file" class="form-control" name="encumbrance_cert">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Upload Video <span class="text-muted">(Optional MP4)</span></label>
-                                <input type="file" class="form-control" name="social_video" accept="video/*">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <button type="button" class="btn btn-secondary px-4" onclick="goToStep(2)">Back</button>
-                        <button type="button" class="btn btn-primary px-5" onclick="goToStep(4)">
-                            Next: Location Details <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ═══════════════ STEP 4 ═══════════════ -->
-                <div class="step-content" id="step4">
-                    <div class="section-header"><i class="fas fa-map-marker-alt"></i> Step 4: Geographic Location & Owner Info</div>
-                    <div class="section-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label">Plot City <span class="required">*</span></label>
-                                <input type="text" class="form-control step-validate" data-step="4"
-                                       name="plot_city" id="plot_city"
-                                       placeholder="e.g., Nagpur" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Plot Locality/Area <span class="required">*</span></label>
-                                <input type="text" class="form-control step-validate" data-step="4"
-                                       name="plot_locality" id="plot_locality"
-                                       placeholder="e.g., Panvel" required>
-                            </div>
-                            <div class="col-md-12 mt-3">
-                                <label class="form-label">Plot Address <span class="required">*</span></label>
-                                <textarea class="form-control step-validate" data-step="4"
-                                          name="plot_address" id="plot_address" rows="3" required></textarea>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Plot Owner Name <span class="required">*</span></label>
-                                <input type="text" class="form-control step-validate" data-step="4"
-                                       name="plot_owner_name" id="plot_owner_name" required>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Plot Owner Contact <span class="required">*</span></label>
-                                <input type="tel" class="form-control step-validate" data-step="4"
-                                       name="plot_owner_contact" id="plot_owner_contact"
-                                       pattern="[0-9]{10}" placeholder="10 Digit Number" required>
-                            </div>
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Plot Owner Email <span class="required">*</span></label>
-                                <input type="email" class="form-control step-validate" data-step="4"
-                                       name="plot_owner_email" id="plot_owner_email" required>
-                            </div>
-                            <!-- ✅ FIX: plot_owner_role was missing from original -->
-                            <div class="col-md-4 mt-3">
-                                <label class="form-label">Plot Owner Role <span class="required">*</span></label>
-                                <input type="text" class="form-control step-validate" data-step="4"
-                                       name="plot_owner_role" id="plot_owner_role" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <button type="button" class="btn btn-secondary px-4" onclick="goToStep(3)">Back</button>
-                        <button type="submit" class="btn btn-success px-5" id="submitBtn">
-                            Publish New Property Listing <i class="fas fa-save ml-2"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ═══════════════ UPLOADER INFO (single, not duplicated) ═══════════════ -->
-                <div class="form-section mt-4">
-                    <div class="section-header"><i class="fas fa-upload"></i> Listing Uploaded By</div>
-                    <div class="section-body">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Name</label>
-                                <input type="text" class="form-control" name="uploaded_by_name"
-                                       value="{{ admin_obj.name }}" readonly>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" name="uploaded_by_email"
-                                       value="{{ admin_obj.email }}" readonly>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Contact</label>
-                                <input type="text" class="form-control" name="uploaded_by_contact"
-                                       value="{{ admin_obj.phone }}" readonly>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Role</label>
-                                <input type="text" class="form-control" name="uploaded_by_role"
-                                       value="{{ admin_obj.role }}" readonly>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </form>
-        </div>
-
-        <!-- ═══════════════ SIDEBAR ═══════════════ -->
-        <div class="preview-sidebar">
-            <div class="preview-card">
-                <div class="preview-header" style="font-size:0.8rem;opacity:0.7;font-weight:700;text-transform:uppercase;">
-                    Portal Card Live Preview
-                </div>
-                <div class="preview-mock">
-                    <div class="preview-image">🗺️
-                        <div class="preview-price" id="p_price">₹ 0</div>
-                    </div>
-                    <div class="p-3">
-                        <div style="font-weight:800;font-size:0.95rem;color:#2d3748;" id="p_title">Your Project Name</div>
-                        <div style="font-size:0.75rem;color:#718096;margin-top:5px;">
-                            <i class="fas fa-map-marker-alt" style="color:#667eea;"></i>
-                            <span id="p_loc">City, Locality</span>
-                        </div>
-                        <div class="mt-2" style="font-weight:700;font-size:0.8rem;color:#4a5568;">
-                            <span id="p_area">0</span> sq.ft • <span id="p_type">Plot Type</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="checklist-card">
-                <h6 style="font-weight:800;font-size:0.9rem;margin-bottom:15px;">📋 Listing Task Progress Check</h6>
-                <div class="checklist-item" id="cl-title"><i class="fas fa-circle"></i> Project Name added</div>
-                <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i> Area details filled</div>
-                <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Pricing set</div>
-                <div class="checklist-item" id="cl-images"><i class="fas fa-circle"></i> Images uploaded (0/10)</div>
-                <div class="checklist-item" id="cl-loc"><i class="fas fa-circle"></i> Location verified</div>
-            </div>
-        </div>
-
+        <h1 class="page-title">🗺️ Add Plot Resale Property Listing</h1>
+      <p class="page-subtitle">Complete 4 simple steps to list your property</p>
     </div>
+
+    <!-- ── STEPPER ── -->
+    <div class="stepper-container">
+      <div class="stepper" id="stepper">
+        <div class="step-item">
+          <div class="step-circle active" id="sc1">1</div>
+          <div class="step-label active" id="sl1">Plot Specs</div>
+          <div class="step-line" id="line1"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" id="sc2">2</div>
+          <div class="step-label" id="sl2">Pricing & Legal</div>
+          <div class="step-line" id="line2"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" id="sc3">3</div>
+          <div class="step-label" id="sl3">Amenities & Facilities</div>
+          <div class="step-line" id="line3"></div>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" id="sc4">4</div>
+          <div class="step-label" id="sl4">Photos & Publish</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FORM CONTAINER ── -->
+    <div class="form-container">
+      <form action="{% url 'plot_sale_add' %}" method="POST" enctype="multipart/form-data" id="plotForm">
+        {% csrf_token %}
+
+        <!-- ════════════ STEP 1 — PLOT SPECS ════════════ -->
+        <div class="step-content active" id="step1">
+
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-info-circle"></i> Basic Plot Details</div>
+            <div class="section-body">
+              <div class="row">
+
+                <div class="col-md-12 mb-3">
+                  <label class="form-label"><i class="fas fa-wand-magic-sparkles" style="color:#667eea;"></i> Property Title <span class="text-muted" style="font-weight:400;">(Auto-Generated)</span></label>
+                  <input type="text" class="form-control" id="property_title" readonly
+                    placeholder="Auto-generated title will appear here..."
+                    style="background-color:#e9ecef; font-weight:600; color:#495057;">
+                </div>
+
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">Plot Title <span class="required">*</span></label>
+                  <input type="text" class="form-control" name="plot_title" id="plot_title"
+                    placeholder="e.g., Prime Residential Plot" required>
+                </div>
+
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">Plot No</label>
+                  <input type="text" class="form-control" name="property_no" id="property_no"
+                    placeholder="Enter Plot No">
+                </div>
+
+
+                 <div class="col-md-4 mt-3">
+                  <label class="form-label">Property Registration No </label>
+                  <input type="text" class="form-control" name="property_regi_no" 
+                    placeholder="Enter Property Registeration No">
+                </div>
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Plot Area (sq.ft) <span class="required">*</span></label>
+                  <input type="number" class="form-control" name="plot_area" id="plot_area"
+                    placeholder="e.g., 2000" required>
+                </div>
+
+               <div class="col-md-4 mt-3">
+    <label class="form-label">Plot Category <span class="required">*</span></label>
+    <select class="form-select form-control" name="plot_category" id="plot_category" required>
+        <option value="">Select Plot Category</option>
+        <option value="open_plot">Open Plot</option>
+        <option value="gated_community_plot">Gated Community Plot</option>
+        <option value="corner_plot">Corner Plot</option>
+        <option value="farm_plot">Farm Plot</option>
+    </select>
 </div>
+
+               
+
+                <div class="col-md-4 mt-3">
+    <label class="form-label">Land Use Classification <span class="required">*</span></label>
+    <select class="form-select form-control" name="land_use" id="land_use" required>
+        <option value="">Select Land Use</option>
+        <option value="Residential">Residential</option>
+        <option value="Commercial">Commercial</option>
+        <option value="Industrial">Industrial</option>
+        <option value="Mixed Use">Mixed Use</option>
+        <option value="Agricultural">Agricultural</option>
+    </select>
+</div>
+
+
+                <div class="col-md-4 mt-3">
+    <label class="form-label">NA Status <span class="required">*</span></label>
+    <select class="form-select form-control" name="na_status" required>
+        <option value="">Select NA Status</option>
+        <option value="NA Converted">NA Converted</option>
+        <option value="NA Applied">NA Applied</option>
+        <option value="Non-NA">Non-NA</option>
+        <option value="Not Applicable">Not Applicable</option>
+    </select>
+</div>
+
+
+  <div class="col-md-4 mt-3">
+    <label class="form-label">Layout Approval Status</label>
+    <select class="form-select form-control" name="layout_approval_status">
+        <option value="">Select Approval Status</option>
+        <option value="Approved Layout">Approved Layout</option>
+        <option value="Sanctioned Layout">Sanctioned Layout</option>
+        <option value="Layout Pending">Layout Pending</option>
+        <option value="Not Applicable">Not Applicable</option>
+    </select>
+</div>
+              </div><!-- /row -->
+
+           
+              <!-- PLOT DIMENSIONS -->
+              <div class="row mt-3">
+                
+                
+               
+               
+              </div>
+
+              <!-- BOUNDARY WALL -->
+             
+            </div><!-- /section-body -->
+          </div><!-- /form-section -->
+
+
+
+          
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-info-circle"></i>  Plot Specifications</div>
+            <div class="section-body">
+              <div class="row">
+
+              
+
+               
+
+
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Road Connectivity <span class="required">*</span></label>
+                  <select class="form-select form-control" name="plot_road_facing" id="plot_road_facing" required>
+                    <option value="">Select</option>
+                    <option value="main">Main Road</option>
+                    <option value="internal">Internal Road</option>
+                    <option value="corner">Corner Plot</option>
+                  </select>
+                </div>
+
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Corner Plot?</label>
+                  <select class="form-select form-control" name="corner_plot" id="corner_plot">
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+
+              
+
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Road Width (Feet)</label>
+                  <select class="form-select form-control" name="road_width">
+                    <option value="">Select Width</option>
+                    <option value="20">20 Ft</option>
+                    <option value="30">30 Ft</option>
+                    <option value="40">40 Ft</option>
+                    <option value="60">60 Ft</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+              </div><!-- /row -->
+
+              <!-- PLOT FACING -->
+              <div class="form-group mt-4">
+                <label class="form-label">Plot Facing</label>
+                <div class="facing-grid" id="facingGrid">
+                  <label class="facing-option" onclick="selectFacing(this, 'North')">
+                    <input type="radio" name="plot_facing" value="North">
+                    <span class="facing-icon">⬆️</span><span>North</span>
+                  </label>
+                  <label class="facing-option" onclick="selectFacing(this, 'South')">
+                    <input type="radio" name="plot_facing" value="South">
+                    <span class="facing-icon">⬇️</span><span>South</span>
+                  </label>
+                  <label class="facing-option" onclick="selectFacing(this, 'East')">
+                    <input type="radio" name="plot_facing" value="East">
+                    <span class="facing-icon">➡️</span><span>East</span>
+                  </label>
+                  <label class="facing-option" onclick="selectFacing(this, 'West')">
+                    <input type="radio" name="plot_facing" value="West">
+                    <span class="facing-icon">⬅️</span><span>West</span>
+                  </label>
+                  <label class="facing-option" onclick="selectFacing(this, 'North-East')">
+                    <input type="radio" name="plot_facing" value="North-East">
+                    <span class="facing-icon">↗️</span><span>North-East</span>
+                  </label>
+                  <label class="facing-option" onclick="selectFacing(this, 'North-West')">
+                    <input type="radio" name="plot_facing" value="North-West">
+                    <span class="facing-icon">↖️</span><span>North-West</span>
+                  </label>
+                  <label class="facing-option" onclick="selectFacing(this, 'South-East')">
+                    <input type="radio" name="plot_facing" value="South-East">
+                    <span class="facing-icon">↘️</span><span>South-East</span>
+                  </label>
+                  <label class="facing-option" onclick="selectFacing(this, 'South-West')">
+                    <input type="radio" name="plot_facing" value="South-West">
+                    <span class="facing-icon">↙️</span><span>South-West</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- PLOT DIMENSIONS -->
+              <div class="row mt-3">
+                <div class="col-md-4">
+                  <label class="form-label">Frontage (Feet)</label>
+                  <input type="number" class="form-control" name="plot_frontage"
+                    placeholder="e.g., 40">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Depth (Feet)</label>
+                  <input type="number" class="form-control" name="plot_depth"
+                    placeholder="e.g., 50">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Plot Shape</label>
+                  <select class="form-select form-control" name="plot_shape">
+                    <option value="">Select Shape</option>
+                    <option value="Rectangular">Rectangular</option>
+                    <option value="Square">Square</option>
+                    <option value="Irregular">Irregular</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- BOUNDARY WALL -->
+              <div class="form-group mt-3">
+                <label class="form-label">Boundary Wall Available?</label>
+                <div class="radio-group">
+                  <label class="radio-option"><input type="radio" name="plot_fencing" value="no" checked> No</label>
+                  <label class="radio-option"><input type="radio" name="plot_fencing" value="yes"> Yes</label>
+                </div>
+              </div>
+
+
+              <div class="col-md-6 mt-3">
+    <label class="form-label">
+        Current Possession Status
+    </label>
+
+    <select class="form-select form-control" name="current_possession_status">
+        <option value="">Select Possession Status</option>
+
+        <option value="Self Occupied">Self Occupied</option>
+        <option value="Tenant Occupied">Tenant Occupied</option>
+        <option value="Vacant">Vacant</option>
+        <option value="Under Construction">Under Construction</option>
+        <option value="Caretaker Occupied">Caretaker Occupied</option>
+    </select>
+</div>
+            </div><!-- /section-body -->
+          </div><!-- /form-section -->
+
+
+          <div class="step-nav">
+            <div></div>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(2)">
+              Next: Pricing & Legal <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+
+        </div><!-- /step1 -->
+
+        <!-- ════════════ STEP 2 — PRICING & LEGAL ════════════ -->
+        <div class="step-content" id="step2">
+
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-hand-holding-usd"></i> Pricing Details</div>
+            <div class="section-body">
+              <div class="row">
+
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">Selling Price <span class="required">*</span></label>
+                  <input type="number" class="form-control" name="plot_price" id="plot_price"
+                    placeholder="e.g., 3000000" required>
+                </div>
+
+                <div class="col-md-6 mt-2">
+                  <label class="form-label"><i class="fas fa-calculator" style="color:#11998e;"></i> Price per Sq.ft (Auto)</label>
+                  <input type="number" class="form-control" id="plot_price_per_sqft"
+                    placeholder="Auto-calculated" readonly
+                    style="background:#edf2f7; font-weight:700; color:#0369a1;">
+                </div>
+
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Price Negotiable?</label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="price_negotiable" value="yes"> Yes</label>
+                    <label class="radio-option"><input type="radio" name="price_negotiable" value="no" checked> No</label>
+                  </div>
+                </div>
+
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Brokerage</label>
+                  <select class="form-select form-control" name="brokerage" id="brokerageSelect">
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 mt-3" id="brokerageSection" style="display:none;">
+                  <label class="form-label">Brokerage Percent</label>
+                  <select class="form-select form-control" name="brokerage_percentage">
+                    <option value="1%">1%</option>
+                    <option value="2%">2%</option>
+                    <option value="3%">3%</option>
+                    <option value="Negotiable">Negotiable</option>
+                  </select>
+                </div>
+
+              </div><!-- /row -->
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-shield-halved"></i> Legal & Approvals Info</div>
+            <div class="section-body">
+              <div class="row">
+
+               <div class="col-md-6 mt-2">
+    <label class="form-label">
+        Ownership Type 
+    </label>
+    <select class="form-select form-control" name="ownership_type" id="ownership_type">
+        <option value="">Select Ownership Type</option>
+        <option value="freehold">Freehold</option>
+        <option value="leasehold">Leasehold</option>
+        <option value="co-operative_society">Co-operative Society</option>
+        <option value="power_of_attorney_holder">Power of Attorney Holder</option>
+        <option value="joint_ownership">Joint Ownership</option>
+    </select>
+</div>
+
+<div class="col-md-6 mt-3">
+    <label class="form-label">
+        Ownership Document Type 
+    </label>
+
+    <select class="form-select form-control" name="ownership_document_type">
+        <option value="">Select Ownership Document Type</option>
+
+        <option value="Registered Sale Deed">Registered Sale Deed</option>
+        <option value="Registered Agreement to Sale">Registered Agreement to Sale</option>
+        <option value="Conveyance Deed">Conveyance Deed</option>
+        <option value="Gift Deed">Gift Deed</option>
+        <option value="Irrevocable Power of Attorney (POA)">Irrevocable Power of Attorney (POA)</option>
+        <option value="Lease Deed">Lease Deed</option>
+        <option value="Allotment Letter">Allotment Letter</option>
+        <option value="Possession Letter / Kabja Patra">Possession Letter / Kabja Patra</option>
+        <option value="Inheritance / Partition Deed">Inheritance / Partition Deed</option>
+        <option value="Other">Other</option>
+    </select>
+</div>
+
+
+<div class="col-md-6 mt-3" id="other_document_type_div" style="display:none;">
+    <label class="form-label">Specify Document Type</label>
+    <input type="text" class="form-control"
+           name="other_document_type"
+           placeholder="Enter Document Type">
+</div>
+
+
+
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">RERA Status</label>
+                  <select class="form-select form-control" name="rera_status">
+                    <option value="">Select</option>
+                    <option value="Registered">Registered</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Not Applicable">Not Applicable</option>
+                  </select>
+                </div>
+
+               <div class="col-md-6 mt-3">
+    <label class="form-label">Title Clearance</label>
+    <select class="form-select form-control" name="title_clearance">
+        <option value="">Select</option>
+        <option value="Clear & Marketable Title">Clear & Marketable Title</option>
+        <option value="Under Verification">Under Verification</option>
+        <option value="Legal Dispute">Legal Dispute</option>
+        <option value="Encumbrance Exists">Encumbrance Exists</option>
+    </select>
+</div>
+
+
+
+<div class="col-md-6 mt-3">
+    <label class="form-label">
+        Property Encumbrance Status 
+    </label>
+
+    <select class="form-select form-control" name="property_encumbrance_status">
+        <option value="">Select Encumbrance Status</option>
+        <option value="No Encumbrance">No Encumbrance</option>
+        <option value="Mortgaged">Mortgaged</option>
+        <option value="Under Litigation">Under Litigation</option>
+        <option value="Government Acquisition Notice">Government Acquisition Notice</option>
+        <option value="Other Claim Exists">Other Claim Exists</option>
+    </select>
+</div>
+
+<div class="col-md-6 mt-3">
+    <label class="form-label">
+        Property Tax Status
+    </label>
+
+    <select class="form-select form-control" name="property_tax_status" id="property_tax_status">
+        <option value="">Select Tax Status</option>
+        <option value="Fully Paid">Fully Paid</option>
+        <option value="Partially Due">Partially Due</option>
+        <option value="Pending">Pending</option>
+        <option value="Not Applicable">Not Applicable</option>
+    </select>
+</div>
+
+<!-- Tax Due Details -->
+<div id="tax_due_section" style="display:none;">
+
+    <div class="col-md-6 mt-3">
+        <label class="form-label">Outstanding Tax Amount (₹)</label>
+        <input type="number"
+               class="form-control"
+               name="outstanding_tax_amount"
+               placeholder="Enter Outstanding Tax Amount">
+    </div>
+
+    <div class="col-md-6 mt-3" id="pending_since_div" style="display:none;">
+        <label class="form-label">Pending Since</label>
+        <input type="date"
+               class="form-control"
+               name="pending_since">
+    </div>
+
+</div>
+
+
+              <div class="col-md-6 mt-3">
+    <label class="form-label">Property Loan Status </label>
+
+    <select class="form-select form-control" name="property_loan_status" id="property_loan_status">
+        <option value="">Select Loan Status</option>
+        <option value="No Active Loan">No Active Loan</option>
+        <option value="Loan Running">Loan Running</option>
+        <option value="Loan Closed">Loan Closed</option>
+        <option value="Loan Status Not Available">Loan Status Not Available</option>
+    </select>
+</div>
+
+<div id="loan_running_section" style="display:none;">
+
+    <div class="col-md-6 mt-3">
+        <label class="form-label">Financing Bank / NBFC </label>
+        <input type="text" class="form-control"
+               name="financing_bank"
+               placeholder="e.g. HDFC Bank, SBI, ICICI Bank, Bajaj Finance">
+    </div>
+
+    <div class="col-md-6 mt-3">
+        <label class="form-label">Outstanding Loan Amount (₹) </label>
+        <input type="number" class="form-control"
+               name="outstanding_loan_amount"
+               placeholder="Enter Outstanding Loan Amount">
+    </div>
+
+</div>
+
+
+
+              </div><!-- /row -->
+
+              
+
+               <div class="form-group mt-3">
+                <label class="form-label">Sanctioning Authority</label>
+                <textarea class="form-control"
+          name="sanctioning_authority"
+          rows="3"
+          placeholder="e.g., Municipal Corporation, NIT, CIDCO, MIDC, MHADA, Development Authority, Town Planning Authority, Gram Panchayat"></textarea>
+              </div>
+                
+
+             
+
+            </div>
+          </div>
+
+
+           <div class="form-section">
+            <div class="section-header"> User Description Details</div>
+            <div class="section-body">
+              <div class="row">
+
+              
+
+                
+
+               
+              
+
+              </div><!-- /row -->
+
+              
+
+               
+                
+
+              <div class="form-group mt-3">
+                <label class="form-label">User Description</label>
+                <textarea class="form-control" name="user_description" rows="3"
+                  placeholder="Describe the plot in detail..."></textarea>
+              </div>
+
+            </div>
+          </div>
+
+
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next: Amenities & Facilities <i class="fas fa-arrow-right"></i></button>
+          </div>
+
+        </div><!-- /step2 -->
+
+        <!-- ════════════ STEP 3 — AMENITIES & LOCATION ════════════ -->
+        <div class="step-content" id="step3">
+
+          <!-- AMENITIES -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-star"></i> Amenities & Features</div>
+            <div class="section-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0">Select Amenities <span class="required">*</span></label>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="text-muted small fw-bold">Total Selected:</span>
+                  <input type="text" id="amenityCounter" value="0" readonly class="counter-box">
+                </div>
+              </div>
+              <div class="checkbox-group">
+                {% for amenities in ameneties_obj %}
+                  <div class="checkbox-item">
+                    <div class="form-check">
+                      <input class="form-check-input amenity-checkbox" type="checkbox"
+                        name="amenities[]" value="{{ amenities.amenties_name }}"
+                        id="amenity_{{ forloop.counter }}">
+                      <label class="form-check-label" for="amenity_{{ forloop.counter }}">
+                        <i class="{{ amenities.amenties_icon }}"></i> {{ amenities.amenties_name }}
+                      </label>
+                    </div>
+                  </div>
+                {% empty %}
+                  <p class="text-muted small">No amenities configured.</p>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- NEARBY FACILITIES -->
+          <div class="form-section">
+            <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
+            <div class="section-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0">Select Nearby Facilities <span class="required">*</span></label>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="text-muted small fw-bold">Total Selected:</span>
+                  <input type="text" id="facilityCounter" value="0" readonly class="counter-box blue-theme">
+                </div>
+              </div>
+              <div class="checkbox-group">
+                {% for facilities in facilities_obj %}
+                  <div class="checkbox-item">
+                    <div class="form-check">
+                      <input class="form-check-input facility-checkbox" type="checkbox"
+                        name="facilities[]" value="{{ facilities.facilities_name }}"
+                        id="facility_{{ forloop.counter }}">
+                      <label class="form-check-label" for="facility_{{ forloop.counter }}">
+                        <i class="{{ facilities.facilities_icon }}"></i> {{ facilities.facilities_name }}
+                      </label>
+                    </div>
+                  </div>
+                {% empty %}
+                  <p class="text-muted small">No facilities configured.</p>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- LOCATION -->
+          <div class="form-section">
+            <div class="section-header dark-theme"><i class="fas fa-location-dot"></i> Location Details</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">City <span class="required">*</span></label>
+                  <input type="text" class="form-control" name="plot_city" id="plot_city"
+                    placeholder="e.g., Nagpur" required>
+                </div>
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">Locality / Area <span class="required">*</span></label>
+                  <input type="text" class="form-control" name="plot_locality" id="plot_locality"
+                    placeholder="e.g., Panvel" required>
+                </div>
+                <div class="col-md-12 mt-3">
+                  <label class="form-label">Property  Landmark</label>
+                  <input type="text" class="form-control" name="property_landmark"
+                    placeholder="e.g., Near Metro Station, Near Airport, Near Highway">
+                </div>
+                <div class="col-md-12 mt-3">
+                  <label class="form-label">Plot Address <span class="required">*</span></label>
+                  <textarea class="form-control" name="plot_address" id="plot_address" rows="3" required></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Next: Photos & Publish <i class="fas fa-arrow-right"></i></button>
+          </div>
+
+        </div><!-- /step3 -->
+
+        <!-- ════════════ STEP 4 — PHOTOS & PUBLISH ════════════ -->
+        <div class="step-content" id="step4">
+
+          <!-- MEDIA -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-images"></i> Photos & Media</div>
+            <div class="section-body">
+              <div class="image-upload-area" id="uploadArea">
+                <input type="file" id="imageInput" name="property_images[]"
+                  multiple accept="image/" style="display:none;">
+                <i class="fas fa-cloud-upload-alt fa-3x mb-2" style="color:#667eea;"></i>
+                <div style="font-weight:700; font-size:1.05rem; color:#2d3748; margin-top:8px;">Click or Drag Images Here</div>
+                <div style="font-size:0.88rem; color:#718096; margin-top:6px;">
+                  <span class="badge bg-primary p-2 mt-2" id="imageCounter">Uploaded: 0 / 10 Images</span>
+                </div>
+              </div>
+              <div class="image-preview-grid" id="imagePreview"></div>
+
+              <div class="row mt-4">
+                <div class="col-md-6">
+                  <label class="form-label">Encumbrance Certificate <span class="text-muted" style="font-weight:400;">(Optional PDF/Image)</span></label>
+                  <input type="file" class="form-control" name="encumbrance_cert">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Upload Video <span class="text-muted" style="font-weight:400;">(Optional MP4)</span></label>
+                  <input type="file" class="form-control" name="social_video" accept="video/*">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- OWNER CONTACT -->
+          <div class="form-section" hidden>
+            <div class="section-header"><i class="fas fa-user"></i> Plot Owner Contact</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Owner Name </label>
+                  <input type="text" class="form-control" name="plot_owner_name" id="plot_owner_name">
+                </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Owner Contact</label>
+                  <input type="tel" class="form-control" name="plot_owner_contact" id="plot_owner_contact"
+                    pattern="[0-9]{10}" placeholder="10 Digit Number">
+                </div>
+                <div class="col-md-4 mt-2">
+                  <label class="form-label">Owner Email </label>
+                  <input type="email" class="form-control" name="plot_owner_email" id="plot_owner_email">
+                </div>
+                <div class="col-md-4 mt-3">
+                  <label class="form-label">Owner Role </label>
+                  <input type="text" class="form-control" name="plot_owner_role" id="plot_owner_role">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LISTED BY -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-id-badge"></i> Property Listed By</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-3 mt-2">
+                  <label class="form-label">Listed By ID</label>
+                  <input type="text" class="form-control" name="listed_by_id">
+                </div>
+                <div class="col-md-3 mt-2">
+                  <label class="form-label">Listed By Name</label>
+                  <input type="text" class="form-control" name="listed_by_name">
+                </div>
+                <div class="col-md-3 mt-2">
+                  <label class="form-label">Listed By Email</label>
+                  <input type="email" class="form-control" name="listed_by_email">
+                </div>
+                <div class="col-md-3 mt-2">
+                  <label class="form-label">Listed By Contact</label>
+                  <input type="tel" class="form-control" name="listed_by_contact">
+                </div>
+                <div class="col-md-3 mt-3">
+                  <label class="form-label">Listed By Role</label>
+                  <input type="text" class="form-control" name="listed_by_role">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- UPLOADED BY -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-upload"></i> Listing Uploaded By</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-3 mt-2">
+                  <label class="form-label">Name</label>
+                  <input type="text" class="form-control" name="uploaded_by_name"
+                    value="{{ admin_obj.name }}" readonly>
+                </div>
+                <div class="col-md-3 mt-2">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" name="uploaded_by_email"
+                    value="{{ admin_obj.email }}" readonly>
+                </div>
+                <div class="col-md-3 mt-2">
+                  <label class="form-label">Contact</label>
+                  <input type="text" class="form-control" name="uploaded_by_contact"
+                    value="{{ admin_obj.phone }}" readonly>
+                </div>
+                <div class="col-md-3 mt-2">
+                  <label class="form-label">Role</label>
+                  <input type="text" class="form-control" name="uploaded_by_role"
+                    value="{{ admin_obj.role }}" readonly>
+                </div>
+              </div>
+              <div class="inline-status is-info mt-3">
+                <i class="fas fa-info-circle"></i>
+                <span style="font-size:0.8rem;">This upload is logged to your admin session.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="submit" class="btn-step btn-submit" id="submitBtn">
+              <i class="fas fa-rocket"></i> Publish Plot Listing
+            </button>
+          </div>
+
+        </div><!-- /step4 -->
+
+      </form>
+    </div><!-- /form-container -->
+
+    <!-- ── PREVIEW SIDEBAR ── -->
+    <div class="preview-sidebar">
+      <div class="preview-card">
+        <div style="font-size:0.82rem; font-weight:600; opacity:0.8; margin-bottom:4px; display:flex; align-items:center; gap:7px;">
+          <i class="fas fa-eye"></i> Live Preview
+        </div>
+        <div class="preview-mock">
+          <div class="preview-image">
+            🗺️
+            <div class="preview-badges">
+              <span class="preview-badge">FOR SALE</span>
+              <span class="preview-badge" style="background:#7c3aed; color:white;">PLOT</span>
+            </div>
+            <div class="preview-price" id="p_price">₹ 0</div>
+          </div>
+          <div class="preview-body">
+            <div class="preview-title" id="p_title">Your Plot Name</div>
+            <div class="preview-location">
+              <i class="fas fa-map-marker-alt" style="color:#667eea;"></i>
+              <span id="p_loc">City, Locality</span>
+            </div>
+            <div class="preview-specs">
+              <span id="p_area">0 sq.ft</span>
+              <span id="p_type">Plot Type</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card">
+        <div class="checklist-title">📋 Listing Checklist</div>
+        <div class="checklist-item" id="cl-title"><i class="fas fa-circle"></i> Plot title added</div>
+        <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i> Plot area filled</div>
+        <div class="checklist-item" id="cl-facing"><i class="fas fa-circle"></i> Plot facing selected</div>
+        <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Selling price set</div>
+        <div class="checklist-item" id="cl-amenities"><i class="fas fa-circle"></i> Amenities selected</div>
+        <div class="checklist-item" id="cl-facilities"><i class="fas fa-circle"></i> Nearby facilities selected</div>
+        <div class="checklist-item" id="cl-loc"><i class="fas fa-circle"></i> Location verified</div>
+        <div class="checklist-item" id="cl-images"><i class="fas fa-circle"></i> Images uploaded</div>
+        <div class="checklist-item" id="cl-owner"><i class="fas fa-circle"></i> Owner details filled</div>
+      </div>
+    </div>
+
+  </div><!-- /page-wrapper -->
+</div><!-- /main-content -->
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    let currentStep = 1;
+  let currentStep = 1;
+  let selectedFiles = [];
 
-    function goToStep(n) {
-        if (n > currentStep && !validateStepSequence(currentStep)) return;
-        document.getElementById('step' + currentStep).classList.remove('active');
-        document.getElementById('step' + n).classList.add('active');
-        for (let i = 1; i <= 4; i++) {
-            const sc   = document.getElementById('sc' + i);
-            const line = document.getElementById('line' + i);
-            if (i < n) {
-                sc.className = 'step-circle done'; sc.innerHTML = '✓';
-                if (line) line.classList.add('done');
-            } else if (i === n) {
-                sc.className = 'step-circle active'; sc.innerHTML = i;
-                if (line) line.classList.remove('done');
-            } else {
-                sc.className = 'step-circle'; sc.innerHTML = i;
-                if (line) line.classList.remove('done');
-            }
-        }
-        currentStep = n;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+  // ── STEPPER ──────────────────────────────────────────────
+  function goToStep(n) {
+    if (n > currentStep && !validateStep(currentStep)) return;
+    document.getElementById('step' + currentStep).classList.remove('active');
+    document.getElementById('step' + n).classList.add('active');
+    for (let i = 1; i <= 4; i++) {
+      const sc = document.getElementById('sc' + i);
+      const sl = document.getElementById('sl' + i);
+      const ln = document.getElementById('line' + i);
+      if (!sc) continue;
+      sc.className = 'step-circle'; sl.className = 'step-label';
+      if (ln) ln.className = 'step-line';
+      if (i < n) {
+        sc.classList.add('done'); sl.classList.add('done');
+        sc.innerHTML = '<i class="fas fa-check" style="font-size:.65rem;"></i>';
+        if (ln) ln.classList.add('done');
+      } else if (i === n) {
+        sc.classList.add('active'); sl.classList.add('active'); sc.textContent = i;
+      } else {
+        sc.textContent = i;
+      }
+    }
+    currentStep = n;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    updatePreview();
+  }
+
+  // ── VALIDATORS ───────────────────────────────────────────
+  function validateStep(step) {
+    const stepEl = document.getElementById('step' + step);
+    const required = stepEl.querySelectorAll('[required]');
+    let missing = [];
+    required.forEach(f => {
+      f.style.borderColor = '';
+      if (!f.value.trim()) {
+        missing.push(f.closest('.form-group, .col-md-4, .col-md-6, .col-md-12')
+          ?.querySelector('.form-label')?.textContent.replace('*','').trim() || 'Required field');
+        f.style.borderColor = '#e74c3c';
+      }
+    });
+    if (step === 3) {
+      const am = document.querySelectorAll('input[name="amenities[]"]:checked').length;
+      const fa = document.querySelectorAll('input[name="facilities[]"]:checked').length;
+      if (am === 0) missing.push('At least one Amenity');
+      if (fa === 0) missing.push('At least one Nearby Facility');
+    }
+    if (missing.length > 0) {
+      Swal.fire({
+        icon: 'warning', title: 'Required Fields Missing',
+        html: `<ul style="text-align:left;display:inline-block;color:#e74c3c;font-weight:600;">${missing.map(f=>`<li>${f}</li>`).join('')}</ul>`,
+        confirmButtonColor: '#667eea'
+      });
+      return false;
+    }
+    return true;
+  }
+
+  // ── FACING SELECTOR ──────────────────────────────────────
+  function selectFacing(el, val) {
+    document.querySelectorAll('.facing-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    el.querySelector('input[type="radio"]').checked = true;
+    setCheck('cl-facing', true);
+    updatePreview();
+  }
+
+  // ── LIVE PREVIEW UPDATE ──────────────────────────────────
+  function updatePreview() {
+    const title   = document.getElementById('plot_title')?.value || '';
+    const area    = document.getElementById('plot_area')?.value || '';
+    const typeEl  = document.getElementById('resale_plot_type');
+    const typeTxt = typeEl?.value ? typeEl.options[typeEl.selectedIndex].text : 'Plot Type';
+    const price   = document.getElementById('plot_price')?.value || '';
+    const city    = document.getElementById('plot_city')?.value || '';
+    const loc     = document.getElementById('plot_locality')?.value || '';
+
+    // Auto title
+    let autoTitle = 'Premium ';
+    if (area)    autoTitle += Number(area).toLocaleString('en-IN') + ' Sqft ';
+    if (typeEl?.value) autoTitle += typeTxt + ' ';
+    if (title)   autoTitle += '(' + title + ') ';
+    if (loc || city) autoTitle += 'at ' + [loc, city].filter(Boolean).join(', ');
+    document.getElementById('property_title').value = autoTitle.trim();
+
+    document.getElementById('p_title').textContent = title || 'Your Plot Name';
+    document.getElementById('p_price').textContent = price ? '₹' + parseInt(price).toLocaleString('en-IN') : '₹ 0';
+    document.getElementById('p_area').textContent  = area ? area + ' sq.ft' : '0 sq.ft';
+    document.getElementById('p_type').textContent  = typeEl?.value ? typeTxt : 'Plot Type';
+    document.getElementById('p_loc').textContent   = (city || loc) ? [city, loc].filter(Boolean).join(', ') : 'City, Locality';
+
+    // Auto price per sqft
+    const psf = document.getElementById('plot_price_per_sqft');
+    if (price && area && parseFloat(area) > 0) {
+      psf.value = Math.round(parseFloat(price) / parseFloat(area));
+    } else {
+      psf.value = '';
     }
 
-    function validateStepSequence(step) {
-        const fields = document.querySelectorAll(`.step-validate[data-step="${step}"]`);
-        let missing = [];
-        fields.forEach(field => {
-            if (!field.value.trim()) {
-                let label = field.previousElementSibling?.innerText || field.placeholder || "Required Field";
-                missing.push(label.replace('*', '').trim());
-            }
-        });
-        if (step === 3) {
-            if (document.getElementById('imageInput').files.length === 0) {
-                missing.push("At least one plot image is mandatory");
-            }
+    // Checklist
+    setCheck('cl-title',  !!title);
+    setCheck('cl-area',   !!area);
+    setCheck('cl-price',  !!price);
+    setCheck('cl-loc',    !!city && !!loc);
+    setCheck('cl-owner',  !!(document.getElementById('plot_owner_name')?.value));
+  }
+
+  function setCheck(id, done) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'checklist-item' + (done ? ' done' : '');
+    el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+  }
+
+  // ── BROKERAGE TOGGLE ─────────────────────────────────────
+  document.getElementById('brokerageSelect').addEventListener('change', function () {
+    document.getElementById('brokerageSection').style.display = this.value === 'Yes' ? 'block' : 'none';
+  });
+
+  // ── LOAN TOGGLE ──────────────────────────────────────────
+  document.querySelectorAll('input[name="loan_on_property"]').forEach(r => {
+    r.addEventListener('change', function () {
+      document.getElementById('plot_loan_amount_section').style.display =
+        this.value === 'yes' ? 'block' : 'none';
+      if (this.value === 'no') document.getElementById('plot_loan_amount').value = '';
+    });
+  });
+
+  // ── IMAGE UPLOAD ─────────────────────────────────────────
+  const uploadArea   = document.getElementById('uploadArea');
+  const imageInput   = document.getElementById('imageInput');
+  const imagePreview = document.getElementById('imagePreview');
+
+  uploadArea.addEventListener('click',     ()  => imageInput.click());
+  uploadArea.addEventListener('dragover',  (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+  uploadArea.addEventListener('dragleave', ()  => uploadArea.classList.remove('dragover'));
+  uploadArea.addEventListener('drop',      (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+  imageInput.addEventListener('change',    (e) => handleFiles(e.target.files));
+
+  function handleFiles(files) {
+    const arr = Array.from(files);
+    if (selectedFiles.length + arr.length > 10) {
+      Swal.fire({ icon: 'warning', title: 'Limit Exceeded', text: 'Maximum 10 images allowed.', confirmButtonColor: '#667eea' });
+      return;
+    }
+    arr.forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      selectedFiles.push(file);
+      const reader = new FileReader();
+      reader.onload = e => {
+        const div = document.createElement('div');
+        div.className = 'preview-item';
+        div.setAttribute('data-filename', file.name);
+        div.innerHTML = `
+          <img src="${e.target.result}" alt="preview">
+          <button type="button" class="remove-image" onclick="removeImg(this,'${file.name}')">
+            <i class="fas fa-times"></i>
+          </button>`;
+        imagePreview.appendChild(div);
+        updateImageCounter();
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function removeImg(btn, name) {
+    selectedFiles = selectedFiles.filter(f => f.name !== name);
+    btn.closest('.preview-item').remove();
+    updateImageCounter();
+  }
+
+  function updateImageCounter() {
+    const n = selectedFiles.length;
+    document.getElementById('imageCounter').textContent = `Uploaded: ${n} / 10 Images`;
+    setCheck('cl-images', n >= 1);
+  }
+
+  // ── AMENITY / FACILITY COUNTERS ───────────────────────────
+  document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('amenity-checkbox')) {
+      const n = document.querySelectorAll('input[name="amenities[]"]:checked').length;
+      document.getElementById('amenityCounter').value = n;
+      setCheck('cl-amenities', n > 0);
+    }
+    if (e.target.classList.contains('facility-checkbox')) {
+      const n = document.querySelectorAll('input[name="facilities[]"]:checked').length;
+      document.getElementById('facilityCounter').value = n;
+      setCheck('cl-facilities', n > 0);
+    }
+  });
+
+  // ── LIVE INPUT LISTENERS ──────────────────────────────────
+  ['plot_title','plot_area','plot_price','plot_city','plot_locality','plot_owner_name'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updatePreview);
+  });
+  document.getElementById('resale_plot_type')?.addEventListener('change', updatePreview);
+
+  // ── SUBMIT ────────────────────────────────────────────────
+  document.getElementById('plotForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    // Validate all steps in order
+    for (let i = 1; i <= 4; i++) {
+      if (i !== currentStep) {
+        const stepEl = document.getElementById('step' + i);
+        const required = stepEl.querySelectorAll('[required]');
+        for (const f of required) {
+          if (!f.value.trim()) { goToStep(i); return; }
         }
-        if (missing.length > 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Incomplete Fields',
-                html: 'Please fill these before continuing:<br><ul class="text-start mt-2"><li>' + missing.join('</li><li>') + '</li></ul>',
-                confirmButtonColor: '#667eea'
-            });
-            return false;
-        }
-        return true;
+      }
     }
 
-    function updateLivePreviews() {
-        const title  = document.getElementById('plot_title').value;
-        const area   = document.getElementById('plot_area').value;
-        const typeEl = document.getElementById('resale_plot_type');
-        const typeTxt = typeEl.options[typeEl.selectedIndex]?.text || "";
-        const price  = document.getElementById('plot_price').value;
-        const city   = document.getElementById('plot_city') ? document.getElementById('plot_city').value : '';
-        const loc    = document.getElementById('plot_locality') ? document.getElementById('plot_locality').value : '';
+    Swal.fire({
+      title: 'Confirm Submission?',
+      text: 'Are you sure you want to publish this plot listing?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#11998e',
+      cancelButtonColor: '#cbd5e0',
+      confirmButtonText: 'Yes, Submit!'
+    }).then(result => {
+      if (!result.isConfirmed) return;
 
-        let autoName = "Premium ";
-        if (area)       autoName += Number(area).toLocaleString('en-IN') + " Sqft ";
-        if (typeEl.value) autoName += typeTxt + " ";
-        if (title)      autoName += "(" + title + ") ";
-        if (loc || city) autoName += "at " + [loc, city].filter(Boolean).join(', ');
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+      submitBtn.disabled = true;
 
-        document.getElementById('property_title').value = autoName.trim();
-        document.getElementById('p_title').innerText    = title || "Your Project Name";
-        document.getElementById('p_price').innerText    = price ? '₹ ' + parseInt(price).toLocaleString('en-IN') : '₹ 0';
-        document.getElementById('p_area').innerText     = area || "0";
-        document.getElementById('p_type').innerText     = typeEl.value ? typeTxt : "Plot Type";
-        document.getElementById('p_loc').innerText      = (city || loc) ? `${city}, ${loc}` : "City, Locality";
+      const formData = new FormData(this);
+      formData.delete('property_images[]');
+      selectedFiles.forEach(f => formData.append('property_images[]', f));
 
-        if (price && area && area > 0) {
-            document.getElementById('plot_price_per_sqft').value = Math.round(price / area);
+      fetch(this.getAttribute('action'), {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'success') {
+          Swal.fire({ icon: 'success', title: 'Plot Listed!', text: data.message })
+            .then(() => window.location.reload());
         } else {
-            document.getElementById('plot_price_per_sqft').value = "";
+          Swal.fire({ icon: 'error', title: 'Error', text: data.message });
+          submitBtn.innerHTML = '<i class="fas fa-rocket"></i> Publish Plot Listing';
+          submitBtn.disabled = false;
         }
+      })
+      .catch(() => {
+        Swal.fire({ icon: 'error', title: 'Server Error', text: 'Could not reach server.' });
+        submitBtn.innerHTML = '<i class="fas fa-rocket"></i> Publish Plot Listing';
+        submitBtn.disabled = false;
+      });
+    });
+  });
 
-        updateCheckItem('cl-title',  !!title);
-        updateCheckItem('cl-area',   !!area);
-        updateCheckItem('cl-price',  !!price);
-        updateCheckItem('cl-loc',    !!city && !!loc);
+  // Init
+  updatePreview();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const docType = document.querySelector(
+        'select[name="ownership_document_type"]'
+    );
+    const otherDiv = document.getElementById("other_document_type_div");
+
+    function toggleOtherField() {
+        otherDiv.style.display =
+            docType.value === "Other" ? "block" : "none";
     }
 
-    function updateCheckItem(id, done) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.className = 'checklist-item' + (done ? ' done' : '');
-        el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+    docType.addEventListener("change", toggleOtherField);
+    toggleOtherField();
+});
+</script>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const taxStatus = document.getElementById("property_tax_status");
+    const taxDueSection = document.getElementById("tax_due_section");
+    const pendingSinceDiv = document.getElementById("pending_since_div");
+
+    function toggleTaxFields() {
+
+        if (
+            taxStatus.value === "Partially Due" ||
+            taxStatus.value === "Pending"
+        ) {
+            taxDueSection.style.display = "block";
+        } else {
+            taxDueSection.style.display = "none";
+        }
+
+        if (taxStatus.value === "Pending") {
+            pendingSinceDiv.style.display = "block";
+        } else {
+            pendingSinceDiv.style.display = "none";
+        }
     }
 
-    document.querySelectorAll('input, select, textarea').forEach(el => {
-        el.addEventListener('input', updateLivePreviews);
-    });
+    taxStatus.addEventListener("change", toggleTaxFields);
+    toggleTaxFields();
 
-    // ✅ FIX: was input[name="plot_loan"] — now matches model name
-    document.querySelectorAll('input[name="loan_on_property"]').forEach(r => {
-        r.onchange = (e) => {
-            document.getElementById('plot_loan_amount_section').style.display =
-                e.target.value === 'yes' ? 'block' : 'none';
-            if (e.target.value === 'no') document.getElementById('plot_loan_amount').value = "";
-        };
-    });
+});
+</script>
 
-    document.getElementById('brokerageSelect').onchange = function () {
-        document.getElementById('brokerageSection').style.display =
-            this.value === 'Yes' ? 'block' : 'none';
-    };
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
-    // Image upload handler
-    const uploadArea   = document.getElementById('uploadArea');
-    const imageInput   = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
+    const loanStatus = document.getElementById("property_loan_status");
+    const loanSection = document.getElementById("loan_running_section");
 
-    uploadArea.onclick = () => imageInput.click();
-    imageInput.onchange = () => {
-        imagePreview.innerHTML = '';
-        const files = Array.from(imageInput.files);
-        if (files.length > 10) {
-            Swal.fire({ icon: 'error', title: 'Limit Exceeded', text: 'Maximum 10 images allowed.' });
-            imageInput.value = "";
-            document.getElementById('imageCounter').innerText = "Uploaded: 0 / 10 Images";
-            updateCheckItem('cl-images', false);
-            return;
+    function toggleLoanFields() {
+        if (loanStatus.value === "Loan Running") {
+            loanSection.style.display = "block";
+        } else {
+            loanSection.style.display = "none";
         }
-        document.getElementById('imageCounter').innerText = `Uploaded: ${files.length} / 10 Images`;
-        updateCheckItem('cl-images', files.length > 0);
-        files.forEach(file => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const div = document.createElement('div');
-                div.style = "width:85px;height:85px;border-radius:8px;overflow:hidden;border:1px solid #ddd;";
-                div.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
-                imagePreview.appendChild(div);
-            };
-            reader.readAsDataURL(file);
-        });
-    };
+    }
 
-    // Form submit with confirmation
-    document.getElementById('plotForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        if (!validateStepSequence(4)) return;
+    loanStatus.addEventListener("change", toggleLoanFields);
+    toggleLoanFields();
 
-        Swal.fire({
-            title: 'Confirm Submission?',
-            text: "Are you sure you want to publish this plot listing?",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#11998e',
-            cancelButtonColor: '#cbd5e0',
-            confirmButtonText: 'Yes, Submit Plot!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const submitBtn = document.getElementById('submitBtn');
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-                submitBtn.disabled = true;
-
-                fetch(this.getAttribute('action'), { method: 'POST', body: new FormData(this) })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            Swal.fire({ icon: 'success', title: 'Saved!', text: data.message })
-                                .then(() => window.location.reload());
-                        } else {
-                            Swal.fire({ icon: 'error', title: 'Error', text: data.message });
-                            submitBtn.innerHTML = 'Publish New Property Listing <i class="fas fa-save ml-2"></i>';
-                            submitBtn.disabled = false;
-                        }
-                    })
-                    .catch(() => {
-                        Swal.fire({ icon: 'error', title: 'Server Error', text: 'Could not reach the server.' });
-                        submitBtn.innerHTML = 'Publish New Property Listing <i class="fas fa-save ml-2"></i>';
-                        submitBtn.disabled = false;
-                    });
-            }
-        });
-    });
+});
 </script>

@@ -45,6 +45,10 @@ urlpatterns = [
 
      path('View_Contact_Enquiry/<int:id>',views.View_Contact_Enquiry,name="View_Contact_Enquiry"),
 
+     ######## urls for upload contact enquiries data via excel ###############
+
+     path('Contacts_Data',views.Contacts_Data,name="Contacts_Data"),
+
      ############# urls for ameneties list ############################
 
      path('Ameneties_List',views.Ameneties_List,name="Ameneties_List"),
@@ -116,6 +120,10 @@ urlpatterns = [
     ############## urls for ajax for normal faqs ####################
 
     path('Faq_Ajax',views.Faq_Ajax,name="Faq_Ajax"),
+
+    ############# urls for upload faqs data via excel #####################
+
+    path('Faq_Data',views.Faq_Data,name="Faq_Data"),
 
     ############## urls for delete faqs ############################
 
@@ -421,6 +429,8 @@ urlpatterns = [
 
     path('residential_list/', views.rental_list, name='residential_list'),
 
+    path('rental_reports', views.rental_reports, name='rental_reports'),
+
     path('rental_residential_add', views.rental_residential_add, name='rental_residential_add'),
 
     path('rental/residential/edit/<str:pk>/', views.rental_residential_edit, name='rental_residential_edit'),
@@ -463,6 +473,8 @@ urlpatterns = [
     path('residential_import_excel/', views.import_residential_excel, name='import_residential_excel'),
 
     path('residential_download_template/', views.download_residential_template, name='download_residential_template'),
+
+    path('get_user_data',views.get_user_data,name='get_user_data'),
    
    ################## END URL SECTION OF RENTAL RESIDENTIAL LISTING ###############################
 
@@ -473,13 +485,14 @@ urlpatterns = [
     path('Admin_App/commercial/download-template/', views.download_commercial_rental12__template, name='download_commercial_rental12__template'),
     
     path('commercial/list/',           views.commercial_list,   name='commercial_list'),
+    path('commercial_reports',           views.commercial_reports,   name='commercial_reports'),
   
     path('commercial/bulk-delete/', views.commercial_bulk_delete, name='commercial_bulk_delete'),
-    path('commercial/restore/<int:id>/', views.commercial_restore, name='commercial_restore'),
-    path('commercial/hard-delete/<int:id>/', views.commercial_hard_delete, name='commercial_hard_delete'),
-    path('commercial/view/<int:pk>/',  views.commercial_view,   name='commercial_view'),
-    path('commercial/edit/<int:pk>/',  views.commercial_edit,   name='commercial_edit'),
-    path('commercial/delete/<int:pk>/', views.commercial_delete, name='commercial_delete'),
+    path('commercial/restore/<str:id>/', views.commercial_restore, name='commercial_restore'),
+    path('commercial/hard-delete/<str:id>/', views.commercial_hard_delete, name='commercial_hard_delete'),
+    path('commercial/view/<str:pk>/',  views.commercial_view,   name='commercial_view'),
+    path('commercial/edit/<str:pk>/',  views.commercial_edit,   name='commercial_edit'),
+    path('commercial/delete/<str:pk>/', views.commercial_delete, name='commercial_delete'),
     path('commercial_rental_add', views.commercial_rental_add, name='commercial_rental_add'),
     
 
@@ -530,15 +543,15 @@ urlpatterns = [
    
     path('resale_residential_add',  views.resale_residential_add,    name='resale_residential_add'),
   #  path('resale_residential_list',            views.resale_residential_list,   name='resale_residential_list'),
-    path('resale_residential_view/<int:pk>/',   views.resale_residential_view,   name='resale_residential_view'),
-    path('resale_residential_delete/<int:pk>/', views.resale_residential_delete, name='resale_residential_delete'),
+    path('resale_residential_view/<str:pk>/',   views.resale_residential_view,   name='resale_residential_view'),
+    path('resale_residential_delete/<str:pk>/', views.resale_residential_delete, name='resale_residential_delete'),
     path(
     'resale-residential/edit/<str:id>/',
     views.resale_residential_edit,
     name='resale_residential_edit'
     ),
-    path('resale-residential/restore/<int:id>/', views.resale_restore, name='resale_restore'),
-    path('resale-residential/hard-delete/<int:id>/', views.resale_hard_delete, name='resale_hard_delete'),
+    path('resale-residential/restore/<str:id>/', views.resale_restore, name='resale_restore'),
+    path('resale-residential/hard-delete/<str:id>/', views.resale_hard_delete, name='resale_hard_delete'),
     
     # Excel Import & Sample Download
     path('resale/import-excel/',     views.resale_residential_import_excel,  name='resale_residential_import_excel'),
@@ -588,8 +601,20 @@ urlpatterns = [
     
 
     path('plot-sale/bulk-delete/', views.plot_sale_bulk_delete, name='plot_sale_bulk_delete'),
-    path('plot-resale/download-template/', views.download_plot_resale_template, name='download_plot_resale_template'),
-    path('plot-resale/import/', views.import_plot_resale_excel, name='import_plot_resale_excel'),
+       path('plots/template/download/',
+         views.download_plot_resale_template,
+         name='download_plot_resale_template'),
+ 
+    path('plots/import/',
+         views.import_plot_resale_excel,
+         name='import_plot_resale_excel'),
+ 
+    # ── NEW ──────────────────────────────────────────────────
+    path('plots/export/',
+         views.export_plot_resale_excel,
+         name='export_plot_resale_excel'),
+
+ 
     path('plot-sale/restore/<str:id>/', views.plot_sale_restore, name='plot_sale_restore'),
     path('plot-sale/hard-delete/<str:id>/', views.plot_sale_hard_delete, name='plot_sale_hard_delete'),
 
@@ -620,8 +645,8 @@ urlpatterns = [
     
     path('industrial-resale/view/<str:id>/', views.industrial_resale_view, name='industrial_resale_view'),
 
-    path('industrial-resale/restore/<int:id>/', views.industrial_resale_restore, name='industrial_resale_restore'),
-    path('industrial-resale/hard-delete/<int:id>/', views.industrial_resale_hard_delete, name='industrial_resale_hard_delete'),
+    path('industrial-resale/restore/<str:id>/', views.industrial_resale_restore, name='industrial_resale_restore'),
+    path('industrial-resale/hard-delete/<str:id>/', views.industrial_resale_hard_delete, name='industrial_resale_hard_delete'),
 
     path('industrial-resale/delete/<str:id>/', views.industrial_resale_delete, name='industrial_resale_delete'),
 
@@ -639,11 +664,11 @@ urlpatterns = [
   
     path('admin/add-agricultural-property/', views.add_agricultural_property, name='add_agricultural_property'),
   
-    path('admin/edit-agricultural/<int:pk>/', views.edit_agricultural_property, name='edit_agricultural_property'),
+    path('admin/edit-agricultural/<str:pk>/', views.edit_agricultural_property, name='edit_agricultural_property'),
 
    
     path('agricultural-resale/bulk-delete/', views.agricultural_bulk_delete, name='agricultural_bulk_delete'),
-    path('delete-agricultural/<int:pk>/', views.delete_agricultural_property, name='delete_agricultural_property'),
+    path('delete-agricultural/<str:pk>/', views.delete_agricultural_property, name='delete_agricultural_property'),
 
     path('admin/view-agricultural/<str:pk>/', views.view_agricultural_property, name='view_agricultural_property'),
     
@@ -659,8 +684,8 @@ urlpatterns = [
     
 
 
-    path('agricultural-resale/restore/<int:id>/', views.agricultural_resale_restore, name='agricultural_resale_restore'),
-    path('agricultural-resale/hard-delete/<int:id>/', views.agricultural_resale_hard_delete, name='agricultural_resale_hard_delete'),
+    path('agricultural-resale/restore/<str:id>/', views.agricultural_resale_restore, name='agricultural_resale_restore'),
+    path('agricultural-resale/hard-delete/<str:id>/', views.agricultural_resale_hard_delete, name='agricultural_resale_hard_delete'),
     ################END URL SECTION RESALE AGRICULTURAL LISTING######################################################
 
 

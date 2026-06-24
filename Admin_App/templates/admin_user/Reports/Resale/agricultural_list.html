@@ -61,8 +61,8 @@
       <div class="page-actions">
         <a href="{% url 'agricultural_resale' %}" class="btn-primary-custom"><i class="fas fa-plus-circle"></i> Add Property</a>
 
-        <a href="#" id="btnExportExcel" class="btn-primary-custom" style="background:#1e293b"><i class="fas fa-file-excel"></i> Export Excel</a>
-        <a href="#" id="btnExportCSV" class="btn-primary-custom" style="background:#475569"><i class="fas fa-file-csv"></i> Export CSV</a>
+      
+
         <button class="btn-primary-custom" style="background:#0ea5e9" data-toggle="modal" data-target="#importModal"><i class="fas fa-file-import"></i> Import Excel</button>
         <button class="btn-primary-custom" style="background:#ef4444" data-toggle="modal" data-target="#bulkDeleteModal"><i class="fas fa-trash-alt"></i> Bulk Delete</button>
       </div>
@@ -108,58 +108,58 @@
     </div>
   </div>
 
-  <div class="filter-bar">
-    <div class="filter-title"><i class="fas fa-filter" style="color:var(--primary);margin-right:6px"></i>Search & Filter Listings</div>
-    <form method="GET" action="" id="backendFilterForm">
-      <div class="filter-grid">
-        <div class="filter-group">
-          <label>Global Search Text</label>
-          <input type="text" name="search" id="f_backend_search" value="{{ search_query }}" placeholder="Village, Owner, City, Type...">
-        </div>
-        <div class="filter-group"><label>Village / District</label><input type="text" id="f_village" placeholder="e.g. Warud"></div>
-        <div class="filter-group"><label>City</label><input type="text" id="f_city" placeholder="e.g. Nagpur"></div>
-        <div class="filter-group"><label>Taluka</label><input type="text" id="f_taluka" placeholder="e.g. Warud"></div>
-        <div class="filter-group"><label>Property Type</label>
-          <select id="f_type">
-            <option value="">All Types</option>
-            <option value="agriculture_land">Agriculture Land</option>
-            <option value="farm_land">Farm Land</option>
-            <option value="orchard_land">Orchard Land</option>
-          </select>
-        </div>
-        <div class="filter-group"><label>Ownership</label>
-          <select id="f_ownership">
-            <option value="">All</option>
-            <option value="freehold">Freehold</option>
-            <option value="leasehold">Leasehold</option>
-          </select>
-        </div>
-        <div class="filter-group"><label>Irrigation</label>
-          <select id="f_irrigation">
-            <option value="">All</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-        </div>
-        <div class="filter-group"><label>Loan Available</label>
-          <select id="f_loan">
-            <option value="">All</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-        </div>
-        <div class="filter-group"><label>Min Price (₹)</label><input type="number" id="f_price_min" placeholder="0"></div>
-        <div class="filter-group"><label>Max Price (₹)</label><input type="number" id="f_price_max" placeholder="Any"></div>
-        <div class="filter-group"><label>Date Added – From</label><input type="date" id="f_date_from"></div>
-        <div class="filter-group"><label>Date Added – To</label><input type="date" id="f_date_to"></div>
-        <div class="filter-actions">
-          <button type="submit" class="btn-filter apply" style="background:var(--success)"><i class="fas fa-database"></i> Search</button>
-          <button type="button" class="btn-filter apply" onclick="applyDateFilter()"><i class="fas fa-filter"></i> Apply Date</button>
-          <button type="button" class="btn-filter reset" onclick="resetAllFilters()"><i class="fas fa-undo"></i> Reset All</button>
-        </div>
+<div class="filter-bar">
+  <div class="filter-title"><i class="fas fa-filter" style="color:var(--primary);margin-right:6px"></i>Search & Filter Listings</div>
+  <form method="GET" action="" id="backendFilterForm">
+    <div class="filter-grid">
+      <div class="filter-group">
+        <label>Global Search Text</label>
+        <input type="text" name="search" id="f_backend_search" value="{{ search_query }}" placeholder="Village, Owner, City, Type...">
       </div>
-    </form>
-  </div>
+      <div class="filter-group"><label>Village / District</label><input type="text" id="f_village" placeholder="e.g. Warud"></div>
+      <div class="filter-group"><label>City</label><input type="text" id="f_city" placeholder="e.g. Nagpur"></div>
+      <div class="filter-group"><label>Taluka</label><input type="text" id="f_taluka" placeholder="e.g. Warud"></div>
+      <div class="filter-group"><label>Property Type</label>
+        <select id="f_type">
+          <option value="">All Types</option>
+          <option value="agriculture_land">Agriculture Land</option>
+          <option value="farm_land">Farm Land</option>
+          <option value="orchard_land">Orchard Land</option>
+        </select>
+      </div>
+      <div class="filter-group"><label>Ownership</label>
+        <select id="f_ownership">
+          <option value="">All</option>
+          <option value="freehold">Freehold</option>
+          <option value="leasehold">Leasehold</option>
+        </select>
+      </div>
+      <div class="filter-group"><label>Irrigation</label>
+        <select id="f_irrigation">
+          <option value="">All</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+      <div class="filter-group"><label>Loan Available</label>
+        <select id="f_loan">
+          <option value="">All</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+      <div class="filter-group"><label>Min Price (₹)</label><input type="number" id="f_price_min" placeholder="0"></div>
+      <div class="filter-group"><label>Max Price (₹)</label><input type="number" id="f_price_max" placeholder="Any"></div>
+      <div class="filter-group"><label>Date Added – From</label><input type="date" id="f_date_from"></div>
+      <div class="filter-group"><label>Date Added – To</label><input type="date" id="f_date_to"></div>
+      <div class="filter-actions">
+        <button type="submit" class="btn-filter apply" style="background:var(--success)"><i class="fas fa-database"></i> Search</button>
+        <button type="button" class="btn-filter apply" onclick="applyDateFilter()"><i class="fas fa-filter"></i> Apply Date</button>
+        <button type="button" class="btn-filter reset" onclick="resetAllFilters()"><i class="fas fa-undo"></i> Reset All</button>
+      </div>
+    </div>
+  </form>
+</div>
 
   <div class="properties-section">
     <div class="section-header">
@@ -167,6 +167,7 @@
       <span style="font-size:12px;color:var(--text-muted)">{{ stats.total }} record(s)</span>
     </div>
    
+     <a href="#" id="btnExportExcel" class="btn-primary-custom" style="background:#1e293b"><i class="fas fa-file-excel"></i> Export Excel</a>
 
     <div class="table-wrap">
   <div class="table-responsive">
@@ -178,47 +179,50 @@
           <th>Property Title</th>
           <th>Image</th>
 
-          <th>Property Type</th>
+          <th>Agriculture Property Type</th>
+          <th>Land Area (Acres)</th>
           <th>Village</th>
           <th>Taluka</th>
           <th>District</th>
-          <th>Area (Acres)</th>
           <th>Soil Type</th>
-          <th>Irrigation</th>
-          <th>Water Source</th>
+          <th>Irrigation Facility Active</th>
+          <th> water_source_infrastructure/th>
+          <th>Fertility Status</th>
           <th>Previous Crops</th>
-          <th>Fertility</th>
 
-          <th>Price (₹)</th>
+          <th>Expected Price (₹)</th>
+          <th>Price Per Acre (₹)</th>
           <th>Brokerage</th>
           <th>Brokerage %</th>
           <th>Manual Brokerage</th>
-          <th>Ownership</th>
-          <th>Loan?</th>
+          <th>Ownership Type</th>
+          <th>Loan on Property?</th>
           <th>Loan Amount</th>
-          <th>Tenants?</th>
+          <th>Existing Tenants?</th>
           <th>Tenant Details</th>
-          <th>Dispute?</th>
+          <th>Agri Dispute?</th>
           <th>Dispute Details</th>
-          <th>Tax Due?</th>
-          <th>Pending Tax</th>
-          <th>Description</th>
+          <th>Pending Tax Due?</th>
+          <th>Pending Tax Amount</th>
+          <th>Property Description</th>
 
           <th>City</th>
           <th>State</th>
-          <th>Locality</th>
-          <th>Address</th>
+          <th>Locality Area</th>
+          <th>Property Address</th>
           <th>Owner Name</th>
           <th>Owner Contact</th>
           <th>Owner Email</th>
-          <th>Residency</th>
+          <th>Owner Role</th>
+          <th>Residency Status</th>
 
-          <th>Encumbrance</th>
+          <th>Encumbrance Cert</th>
           <th>Video</th>
-          <th>Uploader</th>
+          <th>Uploaded By</th>
           <th>Uploader Email</th>
           <th>Uploader Contact</th>
-          <th>Role</th>
+          <th>Uploader Role</th>
+             <th>Uploader File Name</th>
           <th>Date Added</th>
           <th>Actions</th>
         </tr>
@@ -226,20 +230,20 @@
       <tbody>
         {% for p in page_obj %}
         <tr id="row-{{ p.id }}"
-            data-id="{{ p.agri_property_id }}"
+            data-id="{{ p.id }}"
             data-type="{{ p.agriculture_property_type|lower }}"
             data-village="{{ p.village|lower }}"
             data-taluka="{{ p.taluka|lower }}"
             data-ownership="{{ p.ownership_type|lower }}"
-            data-irrigation="{{ p.irrigation_facility|lower }}"
-            data-loan="{{ p.agri_loan|lower }}"
-            data-price="{{ p.expected_price }}"
+            data-irrigation="{{ p.irrigation_facility_active|lower }}"
+            data-loan="{{ p.loan_on_property|lower }}"
+            data-price="{{ p.expected_price|default:0 }}"
             data-city="{{ p.city|lower }}"
             data-date="{{ p.created_at|date:'Y-m-d' }}">
             
           <td>{{ forloop.counter }}</td>
-          <td><strong>{{ p.agri_property_id|default:"-" }}</strong></td>
-          <td><span title="{{ p.title }}">{{ p.title|truncatechars:25|default:"-" }}</span></td>
+          <td><strong>{{ p.id }}</strong></td>
+          <td><span title="{{ p.property_title }}">{{ p.property_title|truncatechars:25|default:"-" }}</span></td>
           <td>
             {% if p.images.first %}
               <img src="{{ p.images.first.image.url }}" class="thumb" alt="img"
@@ -252,44 +256,45 @@
             {% endif %}
           </td>
 
-          <td style="text-transform:capitalize">{{ p.get_agriculture_property_type_display|default:p.agriculture_property_type }}</td>
+          <td style="text-transform:capitalize">{{ p.get_agriculture_property_type_display|default:p.agriculture_property_type|default:"-" }}</td>
+          <td>{{ p.land_area|default:"0.00" }}</td>
           <td>{{ p.village|default:"-" }}</td>
           <td>{{ p.taluka|default:"-" }}</td>
           <td>{{ p.district|default:"-" }}</td>
-          <td>{{ p.land_area|default:"0.00" }}</td>
           <td style="text-transform:capitalize">{{ p.get_soil_type_display|default:p.soil_type|default:"-" }}</td>
           <td>
-            {% if p.irrigation_facility == 'yes' %}
+            {% if p.irrigation_facility_active == 'yes' %}
               <span class="badge-yes">Yes</span>
             {% else %}
               <span class="badge-no">No</span>
             {% endif %}
           </td>
-          <td>{{ p.get_water_source_display|default:p.water_source|default:"-" }}</td>
-          <td>{{ p.previous_crops|default:"-" }}</td>
+          <td>{{ p.get_water_source_infrastructure_display|default:p.water_source_infrastructure|default:"-" }}</td>
           <td style="text-transform:capitalize">{{ p.get_fertility_status_display|default:p.fertility_status|default:"-" }}</td>
+          <td>{{ p.previous_crops|default:"-" }}</td>
 
           <td><span class="price-tag">₹{{ p.expected_price|floatformat:0 }}</span></td>
+          <td><span class="price-tag">₹{{ p.price_per_acre|floatformat:0|default:"0" }}</span></td>
           <td>{{ p.brokerage|default:"-" }}</td>
           <td>{{ p.brokerage_percentage|default:"-" }}</td>
           <td>{{ p.manual_brokerage|default:"-" }}</td>
           <td style="text-transform:capitalize">{{ p.get_ownership_type_display|default:p.ownership_type|default:"-" }}</td>
           <td>
-            {% if p.agri_loan == 'yes' %}
+            {% if p.loan_on_property == 'yes' %}
               <span class="badge-yes">Yes</span>
             {% else %}
               <span class="badge-no">No</span>
             {% endif %}
           </td>
-          <td>{% if p.agri_loan == 'yes' %}₹{{ p.loan_amount|default:"0" }}{% else %}-{% endif %}</td>
+          <td>{% if p.loan_on_property == 'yes' %}₹{{ p.loan_amount|default:"0" }}{% else %}-{% endif %}</td>
           <td>
-            {% if p.agri_tenants == 'yes' %}
+            {% if p.existing_tenants == 'yes' %}
               <span class="badge-yes">Yes</span>
             {% else %}
               <span class="badge-no">No</span>
             {% endif %}
           </td>
-          <td>{% if p.agri_tenants == 'yes' %}{{ p.tenant_details|default:"-" }}{% else %}-{% endif %}</td>
+          <td>{% if p.existing_tenants == 'yes' %}{{ p.tenant_details|default:"-" }}{% else %}-{% endif %}</td>
           <td>
             {% if p.agri_dispute == 'yes' %}
               <span class="badge-yes" style="background:#fee2e2;color:#991b1b">Yes</span>
@@ -299,23 +304,24 @@
           </td>
           <td>{% if p.agri_dispute == 'yes' %}{{ p.dispute_details|default:"-" }}{% else %}-{% endif %}</td>
           <td>
-            {% if p.agri_tax_due == 'yes' %}
+            {% if p.pending_tax_due == 'yes' %}
               <span class="badge-yes" style="background:#fef3c7;color:#92400e">Yes</span>
             {% else %}
               <span class="badge-no">No</span>
             {% endif %}
           </td>
-          <td>{% if p.agri_tax_due == 'yes' %}₹{{ p.pending_tax_amount|default:"0" }}{% else %}-{% endif %}</td>
+          <td>{% if p.pending_tax_due == 'yes' %}₹{{ p.pending_tax_amount|default:"0" }}{% else %}-{% endif %}</td>
           <td><span title="{{ p.resale_agricultural_desc }}">{{ p.resale_agricultural_desc|truncatechars:30|default:"-" }}</span></td>
 
           <td>{{ p.city|default:"-" }}</td>
           <td>{{ p.state|default:"-" }}</td>
-          <td>{{ p.locality|default:"-" }}</td>
-          <td><span title="{{ p.address }}">{{ p.address|truncatechars:22|default:"-" }}</span></td>
+          <td>{{ p.locality_area|default:"-" }}</td>
+          <td><span title="{{ p.property_address }}">{{ p.property_address|truncatechars:22|default:"-" }}</span></td>
           <td>{{ p.owner_name|default:"-" }}</td>
           <td>{{ p.owner_contact|default:"-" }}</td>
           <td>{{ p.owner_email|default:"-" }}</td>
-          <td style="text-transform:capitalize">{{ p.get_comm_residency_display|default:p.comm_residency|default:"-" }}</td>
+          <td>{{ p.owner_role|default:"-" }}</td>
+          <td style="text-transform:capitalize">{{ p.get_residency_status_display|default:p.residency_status|default:"-" }}</td>
 
           <td>
             {% if p.encumbrance_cert %}
@@ -331,18 +337,19 @@
           <td>{{ p.uploaded_by_email|default:"-" }}</td>
           <td>{{ p.uploaded_by_contact|default:"-" }}</td>
           <td>{{ p.uploaded_by_role|default:"-" }}</td>
+            <td>{{ p.upload_file_name|default:"web_listing_ui_form" }}</td>
           <td>{{ p.created_at|date:"Y-m-d H:i" }}</td>
           <td>
             <div style="display:flex;gap:5px">
               <a href="{% url 'view_agricultural_property' p.id %}" class="action-btn view"><i class="fas fa-eye"></i></a>
               <a href="{% url 'edit_agricultural_property' p.id %}" class="action-btn edit"><i class="fas fa-edit"></i></a>
-              <button class="action-btn del" onclick="confirmDelete({{ p.id }})"><i class="fas fa-trash"></i></button>
+              <button class="action-btn del" onclick="confirmDelete('{{ p.id }}')"><i class="fas fa-trash"></i></button>
             </div>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="44" style="text-align:center;padding:40px;color:#94a3b8">
+          <td colspan="46" style="text-align:center;padding:40px;color:#94a3b8">
             <i class="fas fa-inbox" style="font-size:32px;margin-bottom:8px;display:block"></i>No agricultural listings found.
           </td>
         </tr>
@@ -407,7 +414,8 @@
         <h5 class="modal-title" style="color:#fff;font-weight:700"><i class="fas fa-file-import" style="margin-right:8px"></i>Import Agricultural Data</h5>
         <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:1">&times;</button>
       </div>
-      <form action="{% url 'import_agricultural_resale_excel' %}" method="POST" enctype="multipart/form-data">
+      
+      <form id="importExcelForm" action="{% url 'import_agricultural_resale_excel' %}" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="modal-body" style="padding:24px">
           <div class="text-center mb-4 pb-3" style="border-bottom:1px solid #e2e8f0">
@@ -449,7 +457,7 @@ $(document).ready(function(){
     pageLength: 25,
     order: [[40, 'desc']], // Orders by Date Added column
     buttons: [], // DOM built-in buttons cleared to use custom top actions bar matching layout requirements
-    language: {search: 'Table View Filter:', paginate: {previous: '‹ Prev', next: 'Next ›'}}
+    language: {search: 'Search By All:', paginate: {previous: '‹ Prev', next: 'Next ›'}}
   });
 
   // Bind live processing filters to fields
@@ -609,6 +617,51 @@ function viewImages(arr){
   if(arr.length>1) html+='<p style="color:#64748b;font-size:12px;margin-top:8px"><i class="fas fa-arrows-alt-h"></i> Scroll to see more</p>';
   Swal.fire({title:'Property Images',html,width:'80%',showCloseButton:true,showConfirmButton:false,padding:'1.5em'});
 }
+
+// --- AJAX EXCEL IMPORT HANDLER ---
+document.getElementById('importExcelForm').addEventListener('submit', function(e) {
+  e.preventDefault(); // Stops the white JSON screen from loading
+  
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+  submitBtn.disabled = true;
+
+  let formData = new FormData(this);
+
+  fetch(this.getAttribute('action'), {
+      method: 'POST',
+      body: formData,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' } // Tells Django it's an AJAX request
+  })
+  .then(res => res.json())
+  .then(data => {
+      if (data.status === 'success') {
+          // Close modal and show success alert
+          $('#importModal').modal('hide');
+          Swal.fire({ 
+              icon: 'success', 
+              title: 'Import Successful!', 
+              text: data.message, 
+              confirmButtonColor: '#10b981' 
+          }).then(() => window.location.reload());
+      } else {
+          // Show error alert
+          Swal.fire({ 
+              icon: 'error', 
+              title: 'Import Failed', 
+              text: data.message 
+          });
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+      }
+  })
+  .catch(err => {
+      Swal.fire('Error', 'Server connection failure.', 'error');
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+  });
+});
 </script>
 </body>
 </html>
