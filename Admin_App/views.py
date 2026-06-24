@@ -1572,6 +1572,184 @@ def Update_Faqs(request,id):
 ############## Views end for update faqs ############################
 
 
+############ Views start for subscription packages list ###################
+
+def Subscriptions_Packages_List(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        packages_obj = Package_Details.objects.all().order_by('-package_upload_date')
+        packages_obj_count = Package_Details.objects.all().count()
+
+        rendered = render_to_string("admin_user/render_to_string/R_Subscription/r_t_s_packages.html",{'packages_obj':packages_obj,'packages_obj_count':packages_obj_count})
+
+        context = {'admin_obj':admin_obj,'packages_list':rendered}
+
+        return render(request,"admin_user/Subscription/packages_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+########## Views end for subscription packages list ########################
+
+
+########### Views start for ajax for add/edit packages #####################
+
+@csrf_exempt
+def Packages_Ajax(request):
+    data = request.POST.dict()
+
+    if data.get('id') == "":
+        data.pop("id", None)        
+        data['package_upload_date'] = datetime.today()
+        data['package_upload_time'] = datetime.now()
+        Package_Details.objects.create(**data)
+        return JsonResponse({"status":"1", "msg" : f"Package Details added successfully"})
+
+    # UPDATE MODE
+    else:
+        try:
+            packages = Package_Details.objects.get(id=data['id'])
+        except Package_Details.DoesNotExist:
+            return JsonResponse({'status': '0', 'msg': 'Packages Details not found'})
+
+
+        # Update withdraw fields (unchanged)
+        for key, value in data.items():
+            setattr(packages, key, value)
+
+        packages.save()
+        return JsonResponse({"status":"1", "msg" : f"Packages Details updated successfully"})
+
+############ Views end for ajax for add/edit packages ##########################
+
+########### Views start for delete packages ########################
+
+@csrf_exempt
+def Delete_Packages(request):
+    try:
+        try:
+            package_id = request.POST.get('package_id')
+            Package_Details.objects.filter(id=package_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Packages details deleted successfully...'})
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    
+
+########### Views end for delete packages ########################
+
+
+############# Views start for update packages #######################
+
+def Update_Packages(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        package = Package_Details.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'package':package}
+
+        return render(request,"admin_user/Subscription/update_packages.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############ Views end foor update packages ##########################
+
+############ Views start for subscription plan types list ########################
+
+def Subscriptions_Plans_List(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        plans_obj = Plan_Details.objects.all().order_by('-plan_upload_date')
+        plans_obj_count = Plan_Details.objects.all().count()
+
+        rendered = render_to_string("admin_user/render_to_string/R_Subscription/r_t_s_plans.html",{'plans_obj':plans_obj,'plans_obj_count':plans_obj_count})
+
+        context = {'admin_obj':admin_obj,'plans_list':rendered}
+
+        return render(request,"admin_user/Subscription/plans_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for subscription plan types list #####################
+
+
+########## Views start for ajax for add/edit plans  #######################
+
+@csrf_exempt
+def Plans_Ajax(request):
+    data = request.POST.dict()
+
+    if data.get('id') == "":
+        data.pop("id", None)        
+        data['plan_upload_date'] = datetime.today()
+        data['plan_upload_time'] = datetime.now()
+        Plan_Details.objects.create(**data)
+        return JsonResponse({"status":"1", "msg" : f"Plan Details added successfully"})
+
+    # UPDATE MODE
+    else:
+        try:
+            plans = Plan_Details.objects.get(id=data['id'])
+        except Plan_Details.DoesNotExist:
+            return JsonResponse({'status': '0', 'msg': 'Plans Details not found'})
+
+
+        # Update withdraw fields (unchanged)
+        for key, value in data.items():
+            setattr(plans, key, value)
+
+        plans.save()
+        return JsonResponse({"status":"1", "msg" : f"Plans Details updated successfully"})
+
+############ Views end for ajax for add/edit plans #######################
+
+
+############ Views start for delete plans ########################
+
+@csrf_exempt
+def Delete_Plans(request):
+    try:
+        try:
+            plan_id = request.POST.get('plan_id')
+            Plan_Details.objects.filter(id=plan_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Plan details deleted successfully...'})
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+
+
+########### Views end for delete plans ################################
+
+
+############## Views start for update plans ########################
+
+def Update_Plans(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        plan = Plan_Details.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'plan':plan}
+
+        return render(request,"admin_user/Subscription/update_plans.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+########## Views end for update plans #########################
+
+
 ############## Views start for subscriptions list ##########################
 
 def Subscriptions_List(request):

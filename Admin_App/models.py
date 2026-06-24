@@ -379,6 +379,31 @@ class User_Details(models.Model):
 
     def __str__(self):
         return str(self.user_id)+"-"+self.user_name+"-"+self.user_role
+
+
+############## Modal starts for subscription package details ###################
+
+class Package_Details(models.Model):
+   
+    package_id = models.CharField(max_length=200,blank=True,null=True)
+    package_name = models.CharField(max_length=200,blank=True,null=True)
+    package_upload_date = models.DateField(blank=True,null=True)
+    package_upload_time = models.TimeField(blank=True,null=True)
+
+    def __str__(self):
+        return str(self.package_id)+"-"+self.package_name
+
+############# Modal starts for subscription plan type details ################
+
+class Plan_Details(models.Model):
+   
+    plan_id = models.CharField(max_length=200,blank=True,null=True)
+    plan_name = models.CharField(max_length=200,blank=True,null=True)
+    plan_upload_date = models.DateField(blank=True,null=True)
+    plan_upload_time = models.TimeField(blank=True,null=True)
+
+    def __str__(self):
+        return str(self.plan_id)+"-"+self.plan_name
     
 
 ########### Modal starts for subscription details model #########################
