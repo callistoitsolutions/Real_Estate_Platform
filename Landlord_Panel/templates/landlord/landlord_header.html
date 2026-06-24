@@ -1483,9 +1483,9 @@
                     <i class="fas fa-chevron-down dropdown-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#" class="submenu-link" style="color:white;" id="Rent_Resident">Residential</a></li>
-                    <li><a href="#" class="submenu-link" style="color:white;">Commercial</a></li>
-                    <li><a href="#" class="submenu-link" style="color:white;">PG/Co-living</a></li>
+                    <li><a href="{% url "landlord_rental_list" %}" class="submenu-link" style="color:white;" id="Rent_Resident">Residential</a></li>
+                    <li><a href="{% url "commercial_list" %}" class="submenu-link" style="color:white;">Commercial</a></li>
+                    <li><a href="{% url "pg_list" %}" class="submenu-link" style="color:white;">PG/Co-living</a></li>
                 </ul>
             </li>
 
@@ -1496,11 +1496,11 @@
                     <i class="fas fa-chevron-down dropdown-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#" class="submenu-link" style="color:white;">Residential</a></li>
-                    <li><a href="#" class="submenu-link" style="color:white;">Commercial</a></li>
-                    <li><a href="#" class="submenu-link" style="color:white;">Plot/Land</a></li>
-                    <li><a href="#" class="submenu-link" style="color:white;">Industrial</a></li>
-                    <li><a href="#" class="submenu-link" style="color:white;">Agricultural</a></li>
+                    <li><a href="{% url "residential_resale_list" %}" class="submenu-link" style="color:white;">Residential</a></li>
+                    <li><a href="{% url "commercial_resale_list" %}" class="submenu-link" style="color:white;">Commercial</a></li>
+                    <li><a href="{% url "plot_resale_list" %}" class="submenu-link" style="color:white;">Plot/Land</a></li>
+                    <li><a href="{% url "industrial_resale_list" %}" class="submenu-link" style="color:white;">Industrial</a></li>
+                    <li><a href="{% url "agricultural_resale_list" %}" class="submenu-link" style="color:white;">Agricultural</a></li>
                 </ul>
             </li>
 

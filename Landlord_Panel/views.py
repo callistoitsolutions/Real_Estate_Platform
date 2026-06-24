@@ -16,6 +16,85 @@ from Admin_App.models import *
 
 # Create your views here.
 
+from django.shortcuts import render,HttpResponse
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+# Create your views here.
+from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import render,redirect,get_object_or_404
+from Admin_App .models import *
+from Main_App .models import *
+from seo .models import *
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from datetime import datetime
+from openpyxl import load_workbook
+from django.template.loader import render_to_string
+import traceback
+import json
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.db.models import Q
+from django.core.paginator import Paginator  # ← ADD THIS
+import csv
+import csv
+import json
+from django.db.models import Count, Avg, Max, Min, Q
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from datetime import datetime
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from datetime import datetime
+from datetime import datetime
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.db import transaction  
+from django.utils import timezone
+import csv
+from datetime import datetime, date
+import io
+from collections import OrderedDict
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+from django.http import HttpResponse
+
+import openpyxl
+from django.contrib import messages
+from django.http import HttpResponse, JsonResponse
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_POST
+from openpyxl import Workbook
+from django.db import transaction
+import pandas as pd
+import io
+from django.urls import reverse,NoReverseMatch
+
+from openpyxl.styles import Font, PatternFill
+from datetime import timedelta
+from django.utils import timezone
+
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+import csv
+import json
+# I added 'Sum' to the end of this line:
+from django.db.models import Q, Count, Avg, Max, Min, Sum
+from django.core.paginator import Paginator
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_protect
 
 ############## Views start for calculate profile strength ##########################
 
@@ -156,5 +235,12 @@ def Update_Profile_Landlord(request):
     return render(request, "landlord/Profile/landlord_profile.html", context) 
 
 ########### Views end for update landlord profile page ##########################
+
+
+
+
+
+
+
 
 

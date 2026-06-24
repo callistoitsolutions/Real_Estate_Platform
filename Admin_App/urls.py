@@ -461,6 +461,8 @@ urlpatterns = [
 
     path('residential_list/', views.rental_list, name='residential_list'),
 
+    path('rental_reports', views.rental_reports, name='rental_reports'),
+
     path('rental_residential_add', views.rental_residential_add, name='rental_residential_add'),
 
     path('rental/residential/edit/<str:pk>/', views.rental_residential_edit, name='rental_residential_edit'),
@@ -507,6 +509,8 @@ urlpatterns = [
     path('residential_import_excel/', views.import_residential_excel, name='import_residential_excel'),
 
     path('residential_download_template/', views.download_residential_template, name='download_residential_template'),
+
+    path('get_user_data',views.get_user_data,name='get_user_data'),
    
    ################## END URL SECTION OF RENTAL RESIDENTIAL LISTING ###############################
 
@@ -517,6 +521,7 @@ urlpatterns = [
     path('Admin_App/commercial/download-template/', views.download_commercial_rental12__template, name='download_commercial_rental12__template'),
     
     path('commercial/list/',           views.commercial_list,   name='commercial_list'),
+    path('commercial_reports',           views.commercial_reports,   name='commercial_reports'),
   
     path('commercial/bulk-delete/', views.commercial_bulk_delete, name='commercial_bulk_delete'),
     path('commercial/restore/<str:id>/', views.commercial_restore, name='commercial_restore'),

@@ -21,7 +21,7 @@ from django.core.paginator import Paginator  # ← ADD THIS
 import csv
 import csv
 import json
-from django.db.models import Count, Avg, Max, Min, Q,Case,When,IntegerField,Value
+from django.db.models import Count, Avg, Max, Min, Q
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -340,7 +340,7 @@ def global_search(request):
             {'model': AgriculturalResaleProperty, 'label': 'Agricultural', 'url_name': 'agricultural_detail'},
         ]
 
-        # 1. SEARCH PROPERTIES (By Title, Location, Price, City, Status, etc.)
+        # 🟢 1. SEARCH PROPERTIES (By Title, Location, Price, City, Status, etc.)
         for table in property_tables:
             ModelClass = table['model']
             
@@ -359,7 +359,7 @@ def global_search(request):
                     'url': reverse(table['url_name'], args=[match.id]) 
                 })
         
-        #  2. SEARCH USERS (By Name, Email, Phone, Role, etc.)
+        # 🟢 2. SEARCH USERS (By Name, Email, Phone, Role, etc.)
         users = User_Details.objects.filter(
             Q(user_name__icontains=query) | 
             Q(user_email__icontains=query) |
@@ -369,7 +369,7 @@ def global_search(request):
             Q(user_role__icontains=query)         # Search by Role (e.g., "Tenant")
         )[:5]
         
-       #  Create a map that connects the exact database role to its URLs.py name
+       # 🟢 Create a map that connects the exact database role to its URLs.py name
         role_url_map = {
             'Tenant': 'Update_Tenant',     # Replace 'tenant_detail' with actual url name
             'Landlord': 'Update_Landlord', # Replace 'landlord_detail' with actual url name
@@ -381,7 +381,7 @@ def global_search(request):
         }
 
         for user in users:
-            #  Look up the correct URL name based on the user's role
+            # 🟢 Look up the correct URL name based on the user's role
             url_name = role_url_map.get(user.user_role)
             
             # If the role exists in our map, generate the real link. 
@@ -514,23 +514,55 @@ def residential(request):
 
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
-
-        user_obj = User_Details.objects.filter(
-                user_role__in=['Relationship Manager', 'Agent', 'Agency/Builder','Landlord']
-        ).annotate(
-            sort_order=Case(
-                When(user_role='Relationship Manager', then=Value(1)),         
-                default=Value(2),   
-                output_field=IntegerField(),
-            )
-        ).order_by('sort_order', '-id','user_role')
-        
+        user_obj = User_Details.objects.all()
 
         context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
-
         return render(request,"admin_user/residential.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
+
+
+
+
+@csrf_exempt
+def get_user_data(request):
+    assigned_to = request.POST.get('assigned_to')
+    
+    if not assigned_to:
+        return JsonResponse({'error': 'No user selected'}, status=400)
+    
+    # Check if it's a self selection (just an ID without role)
+    if '-' not in assigned_to:
+        try:
+            user_obj = User_Details.objects.get(id=assigned_to)
+            data = {
+                'user_id': user_obj.user_id,
+                'name': getattr(user_obj, 'user_name', ''), # Fallback if naming differs
+                'email': getattr(user_obj, 'user_email', ''),
+                'contact': getattr(user_obj, 'user_phone', ''),
+                'role': getattr(user_obj, 'user_role', '')
+            }
+            return JsonResponse(data)
+        except User_Details.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+    
+    # For other users (format: user_id-role)
+    split = assigned_to.split("-")
+    user_id = split[0]
+    user_role = split[1]
+
+    try:
+        user_obj = User_Details.objects.get(id=user_id, user_role=user_role)
+        data = {
+            'user_id': user_obj.user_id,
+            'name': getattr(user_obj, 'user_name', ''),
+            'email': getattr(user_obj, 'user_email', ''),
+            'contact': getattr(user_obj, 'user_phone', ''),
+            'role': getattr(user_obj, 'user_role', '')
+        }
+        return JsonResponse(data)
+    except User_Details.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
 
 
 def commercial(request):
@@ -540,19 +572,9 @@ def commercial(request):
 
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
-
-        user_obj = User_Details.objects.filter(
-                user_role__in=['Relationship Manager', 'Agent', 'Agency/Builder','Landlord']
-        ).annotate(
-            sort_order=Case(
-                When(user_role='Relationship Manager', then=Value(1)),         
-                default=Value(2),   
-                output_field=IntegerField(),
-            )
-        ).order_by('sort_order', '-id','user_role')
+        user_obj = User_Details.objects.all()
 
         context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
-
         return render(request,"admin_user/commercial.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -566,18 +588,7 @@ def pg_coliving(request):
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
 
-        user_obj = User_Details.objects.filter(
-                user_role__in=['Relationship Manager', 'Agent', 'Agency/Builder','Landlord']
-        ).annotate(
-            sort_order=Case(
-                When(user_role='Relationship Manager', then=Value(1)),         
-                default=Value(2),   
-                output_field=IntegerField(),
-            )
-        ).order_by('sort_order', '-id','user_role')
-
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
-
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
         return render(request,"admin_user/pg_coliving.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -1561,184 +1572,6 @@ def Update_Faqs(request,id):
 ############## Views end for update faqs ############################
 
 
-############ Views start for subscription packages list ###################
-
-def Subscriptions_Packages_List(request):
-    session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-
-        packages_obj = Package_Details.objects.all().order_by('-package_upload_date')
-        packages_obj_count = Package_Details.objects.all().count()
-
-        rendered = render_to_string("admin_user/render_to_string/R_Subscription/r_t_s_packages.html",{'packages_obj':packages_obj,'packages_obj_count':packages_obj_count})
-
-        context = {'admin_obj':admin_obj,'packages_list':rendered}
-
-        return render(request,"admin_user/Subscription/packages_list.html",context)
-    else:
-        return render(request,'home_page/Adminlogin.html')
-
-########## Views end for subscription packages list ########################
-
-
-########### Views start for ajax for add/edit packages #####################
-
-@csrf_exempt
-def Packages_Ajax(request):
-    data = request.POST.dict()
-
-    if data.get('id') == "":
-        data.pop("id", None)        
-        data['package_upload_date'] = datetime.today()
-        data['package_upload_time'] = datetime.now()
-        Package_Details.objects.create(**data)
-        return JsonResponse({"status":"1", "msg" : f"Package Details added successfully"})
-
-    # UPDATE MODE
-    else:
-        try:
-            packages = Package_Details.objects.get(id=data['id'])
-        except Package_Details.DoesNotExist:
-            return JsonResponse({'status': '0', 'msg': 'Packages Details not found'})
-
-
-        # Update withdraw fields (unchanged)
-        for key, value in data.items():
-            setattr(packages, key, value)
-
-        packages.save()
-        return JsonResponse({"status":"1", "msg" : f"Packages Details updated successfully"})
-
-############ Views end for ajax for add/edit packages ##########################
-
-
-########### Views start for delete packages ########################
-
-@csrf_exempt
-def Delete_Packages(request):
-    try:
-        try:
-            package_id = request.POST.get('package_id')
-            Package_Details.objects.filter(id=package_id).delete()
-            return JsonResponse({'status':'1', 'msg':'Packages details deleted successfully...'})
-        except:
-            traceback.print_exc()
-            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
-    except:
-        traceback.print_exc()
-        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
-    
-
-########### Views end for delete packages ########################
-
-
-############# Views start for update packages #######################
-
-def Update_Packages(request,id):
-    session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-
-        package = Package_Details.objects.get(id=id)
-
-        context = {'admin_obj':admin_obj,'package':package}
-
-        return render(request,"admin_user/Subscription/update_packages.html",context)
-    else:
-        return render(request,'home_page/Adminlogin.html')
-
-############ Views end foor update packages ##########################
-
-############ Views start for subscription plan types list ########################
-
-def Subscriptions_Plans_List(request):
-    session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-
-        plans_obj = Plan_Details.objects.all().order_by('-plan_upload_date')
-        plans_obj_count = Plan_Details.objects.all().count()
-
-        rendered = render_to_string("admin_user/render_to_string/R_Subscription/r_t_s_plans.html",{'plans_obj':plans_obj,'plans_obj_count':plans_obj_count})
-
-        context = {'admin_obj':admin_obj,'plans_list':rendered}
-
-        return render(request,"admin_user/Subscription/plans_list.html",context)
-    else:
-        return render(request,'home_page/Adminlogin.html')
-
-############# Views end for subscription plan types list #####################
-
-
-########## Views start for ajax for add/edit plans  #######################
-
-@csrf_exempt
-def Plans_Ajax(request):
-    data = request.POST.dict()
-
-    if data.get('id') == "":
-        data.pop("id", None)        
-        data['plan_upload_date'] = datetime.today()
-        data['plan_upload_time'] = datetime.now()
-        Plan_Details.objects.create(**data)
-        return JsonResponse({"status":"1", "msg" : f"Plan Details added successfully"})
-
-    # UPDATE MODE
-    else:
-        try:
-            plans = Plan_Details.objects.get(id=data['id'])
-        except Plan_Details.DoesNotExist:
-            return JsonResponse({'status': '0', 'msg': 'Plans Details not found'})
-
-
-        # Update withdraw fields (unchanged)
-        for key, value in data.items():
-            setattr(plans, key, value)
-
-        plans.save()
-        return JsonResponse({"status":"1", "msg" : f"Plans Details updated successfully"})
-
-############ Views end for ajax for add/edit plans #######################
-
-
-############ Views start for delete plans ########################
-
-@csrf_exempt
-def Delete_Plans(request):
-    try:
-        try:
-            plan_id = request.POST.get('plan_id')
-            Plan_Details.objects.filter(id=plan_id).delete()
-            return JsonResponse({'status':'1', 'msg':'Plan details deleted successfully...'})
-        except:
-            traceback.print_exc()
-            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
-    except:
-        traceback.print_exc()
-        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
-
-
-########### Views end for delete plans ################################
-
-
-############## Views start for update plans ########################
-
-def Update_Plans(request,id):
-    session_id = request.session.get('Admin_id')
-    if session_id:
-        admin_obj = Admin_Login.objects.get(id=session_id)
-
-        plan = Plan_Details.objects.get(id=id)
-
-        context = {'admin_obj':admin_obj,'plan':plan}
-
-        return render(request,"admin_user/Subscription/update_plans.html",context)
-    else:
-        return render(request,'home_page/Adminlogin.html')
-
-########## Views end for update plans #########################
-
 ############## Views start for subscriptions list ##########################
 
 def Subscriptions_List(request):
@@ -1767,11 +1600,7 @@ def Add_Subscriptions(request):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        packages_obj = Package_Details.objects.all()
-        plans_obj = Plan_Details.objects.all()
-
-        context = {'admin_obj':admin_obj,'packages_obj':packages_obj,'plans_obj':plans_obj}
-
+        context = {'admin_obj':admin_obj}
         return render(request,"admin_user/Subscription/add_subscription.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -1836,13 +1665,9 @@ def Update_Subscriptions(request,id):
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
 
-        packages_obj = Package_Details.objects.all()
-        plans_obj = Plan_Details.objects.all()
-
         subscription = Subscription_Details.objects.get(id=id)
 
-        context = {'admin_obj':admin_obj,'subscription':subscription,'packages_obj':packages_obj,'plans_obj':plans_obj}
-        
+        context = {'admin_obj':admin_obj,'subscription':subscription}
         return render(request,"admin_user/Subscription/update_subscription.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -2147,8 +1972,8 @@ def export_commercial_rent(request):
 
     # ── 2. Exhaustive Field Mapping (Strictly following DB sequence) ──
     EXPORT_COLS = [
-        ("System Data", "id", False, "Database ID"),
-        ("System Data", "commercial_rental_id", False, "System Generated ID"),
+       
+        ("System Data", "id", False, "System Generated Property ID"),
         ("System Data", "property_title", False, "Auto Generated Title"),
         ("Basic Info", "property_type", True, "office-space / shop / warehouse / industrial / land"),
         ("Basic Info", "property_condition", True, "bare-shell / warm-shell / fitted / furnished"),
@@ -2192,8 +2017,9 @@ def export_commercial_rent(request):
         ("Building", "flooring_type", False, "marble / vitrified / granite / wooden / ceramic"),
         ("Amenities", "amenities", True, "Comma-separated"),
         ("Amenities", "nearby_facilities", True, "Comma-separated"),
-        ("Amenities", "property_summary", False, "Short description"),
-        ("Amenities", "property_description", False, "Detailed description"),
+        ("Property Summary", "property_summary", False, "Short description"),
+        ("Property Description", "property_description", False, "Detailed description"),
+        ("Property Description", "user_description", False, "User Added Detailed description"),
         ("Media & Contact", "video", False, "Video file path"),
         ("Media & Contact", "owner_name", True, "Full name"),
         ("Media & Contact", "contact_number", True, "+91 XXXXXXXXXX"),
@@ -2272,7 +2098,7 @@ def export_commercial_rent(request):
         wb.save(buf)
         buf.seek(0)
         response = HttpResponse(buf.getvalue(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        response["Content-Disposition"] = 'attachment; filename="Commercial_Properties.xlsx"'
+        response["Content-Disposition"] = 'attachment; filename="Commercial_Rental_Listing_Properties.xlsx"'
         return response
 
     # ── 4. CSV EXPORT ──
@@ -2429,8 +2255,9 @@ def commercial_list(request):
         
         ("Amenities", "amenities", True, "Comma-separated"),
         ("Amenities", "nearby_facilities", True, "Comma-separated"),
-        ("Amenities", "property_summary", False, "Short description"),
-        ("Amenities", "property_description", False, "Detailed description"),
+        ("Amenities", "property_summary", False, "Short Summary"),
+        ("Amenities", "property_description", False, "Auto Generated Detailed description"),
+        ("Amenities", "property_description", False, "User Added Detailed description"),
         
         ("Media & Contact", "video", False, "Video file path"),
         ("Media & Contact", "owner_name", True, "Full name"),
@@ -2529,7 +2356,7 @@ def commercial_list(request):
                 buf.getvalue(),
                 content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             )
-            response["Content-Disposition"] = 'attachment; filename="Commercial_Rental_Export.xlsx"'
+            response["Content-Disposition"] = 'attachment; filename="Commercial_Rental_Listing_Export.xlsx"'
             return response
 
         except Exception as e:
@@ -2957,9 +2784,9 @@ def download_commercial_template(request):
         ("Building", "public_washroom",  False, "Number (use 0)",                  "2"),
         ("Building", "flooring_type",    False, "marble / vitrified / granite / wooden / ceramic", "vitrified"),
         # ── Amenities ─────────────────────────────────────────────────────────
-        ("Amenities", "amenities",          True,  "Comma-sep e.g. Wi-Fi,AC,CCTV,Generator",  "Wi-Fi,AC,CCTV"),
-        ("Amenities", "nearby_facilities",  True,  "Comma-sep e.g. Metro,Bank,Parking",        "Metro,Bank"),
-        ("Amenities", "property_summary",   False, "Short plain-text description",              "Prime BKC office with fit-out."),
+        ("Amenities/Property Description", "amenities",          True,  "Comma-sep e.g. Wi-Fi,AC,CCTV,Generator",  "Wi-Fi,AC,CCTV"),
+        ("Amenities/Property Description", "nearby_facilities",  True,  "Comma-sep e.g. Metro,Bank,Parking",        "Metro,Bank"),
+        ("Amenities/Property Description", "user_description",   False, "Short plain-text description added By user", "My Property Near ATM...."),
         # ── Contact ───────────────────────────────────────────────────────────
         ("Contact", "owner_name",        True,  "Full name",           "Rahul Mehta"),
         ("Contact", "contact_number",    True,  "+91 XXXXXXXXXX",      "9876543210"),
@@ -3024,7 +2851,7 @@ def download_commercial_template(request):
         buf.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
-    response["Content-Disposition"] = 'attachment; filename="Commercial_Rental_Template.xlsx"'
+    response["Content-Disposition"] = 'attachment; filename="Commercial_Rental_Listing_Template.xlsx"'
     return response
 
 
@@ -3090,7 +2917,9 @@ def plot_resale(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
-        context = {'admin_obj':admin_obj}
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
         return render(request,"admin_user/Resale/plot_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -3100,7 +2929,9 @@ def industrial_resale(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
-        context = {'admin_obj':admin_obj}
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
         return render(request,"admin_user/Resale/industrial_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -3110,7 +2941,9 @@ def agricultural_resale(request):
     session_id = request.session.get('Admin_id')
     if session_id:
         admin_obj = Admin_Login.objects.get(id=session_id)
-        context = {'admin_obj':admin_obj}
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
         return render(request,"admin_user/Resale/agricultural_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -3200,44 +3033,22 @@ def Rm_Data(request):
             
             success_count = 0
             error_count = 0
-            error_details = []
             
             FIXED_ROLE = "Relationship Manager"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    # Skip empty rows
-                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
-                        continue
-                    
-                    
-                    # Extract values with correct column indices
-                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
-                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
-                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
-                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
-                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
-                    
-                    # Clean and validate user_name (from Name column - index 5)
-                    if user_name and str(user_name).strip() not in ['', '---', '-']:
-                        user_name = str(user_name).strip()
-                    else:
-                        user_name = None
-                    
-                    # Clean and validate user_email (from Email column - index 6)
-                    if user_email and str(user_email).strip() not in ['', '---', '-']:
-                        user_email = str(user_email).strip()
-                    else:
-                        user_email = None
+                    user_name = row[4] if len(row) > 4 else None
+                    user_email = row[5] if len(row) > 5 else None
+                    user_phone = row[6] if len(row) > 6 else None
+                    user_password = row[7] if len(row) > 7 else None
+                    user_state = row[8] if len(row) > 8 else None
+                    user_city = row[9] if len(row) > 9 else None
+                    user_address = row[10] if len(row) > 10 else None
+                    register_date_value = row[11] if len(row) > 11 else None
                     
                     if not user_name or not user_phone:
                         error_count += 1
-                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3246,13 +3057,13 @@ def Rm_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    # Register date: Today's date as default
+                    #  Register date: Today's date as default
                     register_date = datetime.now().date()
-                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3265,35 +3076,13 @@ def Rm_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                                elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass
+                            pass  # Keep today's date if parsing fails
                     
-                    # If time provided in Excel, try to parse it
-                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_time_value, time):
-                                register_time = register_time_value
-                            else:
-                                time_str = str(register_time_value).strip()
-                                if ':' in time_str:
-                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
-                                    try:
-                                        register_time = datetime.strptime(time_str, '%I:%M').time()
-                                    except:
-                                        try:
-                                            register_time = datetime.strptime(time_str, '%H:%M').time()
-                                        except:
-                                            pass
-                        except:
-                            pass
-                    
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3302,13 +3091,10 @@ def Rm_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = register_time
+                        existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        
-                        success_count += 1
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
-                        new_user = User_Details.objects.create(
+                        User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3318,29 +3104,17 @@ def Rm_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=register_time
+                            user_register_time=datetime.now().time()
                         )
-                        
-                        # Generate USER_ID: EF-{ID}-{YY}
-                        current_year = datetime.now().year
-                        year_suffix = str(current_year)[-2:]
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        new_user.user_id = user_id
-                        new_user.save()
-                        
-                        success_count += 1
+                    
+                    success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    error_details.append(f"Row {row_idx}: {str(e)}")
-                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Relationship Managers. Failed: {error_count}",
-                "success_count": success_count,
-                "error_count": error_count,
-                "error_details": error_details[:10]
+                "msg": f"Successfully imported {success_count} Relationship Managers. Failed: {error_count}"
             })
             
         except Exception as e:
@@ -3411,33 +3185,13 @@ def User_Ajax(request):
         data['user_profile'] = request.FILES.get('user_profile')        
         data['user_register_date'] = datetime.today()
         data['user_register_time'] = datetime.now()
-        
-        # --- CHECK FOR DUPLICATES ---
         if User_Details.objects.filter(user_phone=data['user_phone']).exists():
             return JsonResponse({"status":"0", "msg" : f"User with this phone number already exists"})
         elif User_Details.objects.filter(user_email=data['user_email']).exists():
             return JsonResponse({"status":"0", "msg" : f"User with this email address already exists"})
         else:
-            # --- CREATE THE USER FIRST TO GET THE ID ---
-            # Create the user without user_id first
-            user = User_Details.objects.create(**data)
-            
-            # --- NOW GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
-            current_year = datetime.now().year
-            year_suffix = str(current_year)[-2:]
-            
-            # Format the user_id as EF-{user.id}-{YY}
-            # Example: EF-1-26, EF-2-26, EF-3-26
-            user_id = f"EF-{user.id}-{year_suffix}"
-            
-            # Update the user with the generated user_id
-            user.user_id = user_id
-            user.save()
-            
-            return JsonResponse({
-                "status": "1", 
-                "msg": f"User Details added successfully with ID: {user_id}"
-            })
+            User_Details.objects.create(**data)
+            return JsonResponse({"status":"1", "msg" : f"User Details added successfully"})
 
     # UPDATE MODE
     else:
@@ -3453,11 +3207,8 @@ def User_Ajax(request):
         else:
             data.pop('user_profile', None)
 
-        # --- DO NOT UPDATE user_id ---
-        # Remove user_id from data if present to prevent updating it
-        data.pop('user_id', None)
 
-        # Update other fields
+        # Update withdraw fields (unchanged)
         for key, value in data.items():
             setattr(rm, key, value)
 
@@ -3601,44 +3352,22 @@ def Landlord_Data(request):
             
             success_count = 0
             error_count = 0
-            error_details = []
             
             FIXED_ROLE = "Landlord"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    # Skip empty rows
-                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
-                        continue
-                
-                    
-                    # Extract values with correct column indices
-                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
-                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
-                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
-                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
-                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
-                    
-                    # Clean and validate user_name (from Name column - index 5)
-                    if user_name and str(user_name).strip() not in ['', '---', '-']:
-                        user_name = str(user_name).strip()
-                    else:
-                        user_name = None
-                    
-                    # Clean and validate user_email (from Email column - index 6)
-                    if user_email and str(user_email).strip() not in ['', '---', '-']:
-                        user_email = str(user_email).strip()
-                    else:
-                        user_email = None
+                    user_name = row[4] if len(row) > 4 else None
+                    user_email = row[5] if len(row) > 5 else None
+                    user_phone = row[6] if len(row) > 6 else None
+                    user_password = row[7] if len(row) > 7 else None
+                    user_state = row[8] if len(row) > 8 else None
+                    user_city = row[9] if len(row) > 9 else None
+                    user_address = row[10] if len(row) > 10 else None
+                    register_date_value = row[11] if len(row) > 11 else None
                     
                     if not user_name or not user_phone:
                         error_count += 1
-                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3647,13 +3376,13 @@ def Landlord_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    # Register date: Today's date as default
+                    #  Register date: Today's date as default
                     register_date = datetime.now().date()
-                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3666,35 +3395,13 @@ def Landlord_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                                elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass
+                            pass  # Keep today's date if parsing fails
                     
-                    # If time provided in Excel, try to parse it
-                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_time_value, time):
-                                register_time = register_time_value
-                            else:
-                                time_str = str(register_time_value).strip()
-                                if ':' in time_str:
-                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
-                                    try:
-                                        register_time = datetime.strptime(time_str, '%I:%M').time()
-                                    except:
-                                        try:
-                                            register_time = datetime.strptime(time_str, '%H:%M').time()
-                                        except:
-                                            pass
-                        except:
-                            pass
-                    
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3703,13 +3410,10 @@ def Landlord_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = register_time
+                        existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        
-                        success_count += 1
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
-                        new_user = User_Details.objects.create(
+                        User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3719,29 +3423,17 @@ def Landlord_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=register_time
+                            user_register_time=datetime.now().time()
                         )
-                        
-                        # Generate USER_ID: EF-{ID}-{YY}
-                        current_year = datetime.now().year
-                        year_suffix = str(current_year)[-2:]
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        new_user.user_id = user_id
-                        new_user.save()
-                        
-                        success_count += 1
+                    
+                    success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    error_details.append(f"Row {row_idx}: {str(e)}")
-                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Landlords. Failed: {error_count}",
-                "success_count": success_count,
-                "error_count": error_count,
-                "error_details": error_details[:10]
+                "msg": f"Successfully imported {success_count} Landlords. Failed: {error_count}"
             })
             
         except Exception as e:
@@ -3856,44 +3548,22 @@ def Tenant_Data(request):
             
             success_count = 0
             error_count = 0
-            error_details = []
             
             FIXED_ROLE = "Tenant"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    # Skip empty rows
-                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
-                        continue
-                
-                    
-                    # Extract values with correct column indices
-                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
-                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
-                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
-                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
-                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
-                    
-                    # Clean and validate user_name (from Name column - index 5)
-                    if user_name and str(user_name).strip() not in ['', '---', '-']:
-                        user_name = str(user_name).strip()
-                    else:
-                        user_name = None
-                    
-                    # Clean and validate user_email (from Email column - index 6)
-                    if user_email and str(user_email).strip() not in ['', '---', '-']:
-                        user_email = str(user_email).strip()
-                    else:
-                        user_email = None
+                    user_name = row[4] if len(row) > 4 else None
+                    user_email = row[5] if len(row) > 5 else None
+                    user_phone = row[6] if len(row) > 6 else None
+                    user_password = row[7] if len(row) > 7 else None
+                    user_state = row[8] if len(row) > 8 else None
+                    user_city = row[9] if len(row) > 9 else None
+                    user_address = row[10] if len(row) > 10 else None
+                    register_date_value = row[11] if len(row) > 11 else None
                     
                     if not user_name or not user_phone:
                         error_count += 1
-                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3902,13 +3572,13 @@ def Tenant_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    # Register date: Today's date as default
+                    #  Register date: Today's date as default
                     register_date = datetime.now().date()
-                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3921,35 +3591,13 @@ def Tenant_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                                elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass
+                            pass  # Keep today's date if parsing fails
                     
-                    # If time provided in Excel, try to parse it
-                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_time_value, time):
-                                register_time = register_time_value
-                            else:
-                                time_str = str(register_time_value).strip()
-                                if ':' in time_str:
-                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
-                                    try:
-                                        register_time = datetime.strptime(time_str, '%I:%M').time()
-                                    except:
-                                        try:
-                                            register_time = datetime.strptime(time_str, '%H:%M').time()
-                                        except:
-                                            pass
-                        except:
-                            pass
-                    
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3958,13 +3606,10 @@ def Tenant_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = register_time
+                        existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        
-                        success_count += 1
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
-                        new_user = User_Details.objects.create(
+                        User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3974,29 +3619,17 @@ def Tenant_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=register_time
+                            user_register_time=datetime.now().time()
                         )
-                        
-                        # Generate USER_ID: EF-{ID}-{YY}
-                        current_year = datetime.now().year
-                        year_suffix = str(current_year)[-2:]
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        new_user.user_id = user_id
-                        new_user.save()
-                        
-                        success_count += 1
+                    
+                    success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    error_details.append(f"Row {row_idx}: {str(e)}")
-                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Tenants. Failed: {error_count}",
-                "success_count": success_count,
-                "error_count": error_count,
-                "error_details": error_details[:10]
+                "msg": f"Successfully imported {success_count} Tenants. Failed: {error_count}"
             })
             
         except Exception as e:
@@ -4107,44 +3740,22 @@ def Buyer_Data(request):
             
             success_count = 0
             error_count = 0
-            error_details = []
             
             FIXED_ROLE = "Buyer"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    # Skip empty rows
-                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
-                        continue
-                
-                    
-                    # Extract values with correct column indices
-                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
-                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
-                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
-                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
-                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
-                    
-                    # Clean and validate user_name (from Name column - index 5)
-                    if user_name and str(user_name).strip() not in ['', '---', '-']:
-                        user_name = str(user_name).strip()
-                    else:
-                        user_name = None
-                    
-                    # Clean and validate user_email (from Email column - index 6)
-                    if user_email and str(user_email).strip() not in ['', '---', '-']:
-                        user_email = str(user_email).strip()
-                    else:
-                        user_email = None
+                    user_name = row[4] if len(row) > 4 else None
+                    user_email = row[5] if len(row) > 5 else None
+                    user_phone = row[6] if len(row) > 6 else None
+                    user_password = row[7] if len(row) > 7 else None
+                    user_state = row[8] if len(row) > 8 else None
+                    user_city = row[9] if len(row) > 9 else None
+                    user_address = row[10] if len(row) > 10 else None
+                    register_date_value = row[11] if len(row) > 11 else None
                     
                     if not user_name or not user_phone:
                         error_count += 1
-                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -4153,13 +3764,13 @@ def Buyer_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    # Register date: Today's date as default
+                    #  Register date: Today's date as default
                     register_date = datetime.now().date()
-                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -4172,35 +3783,13 @@ def Buyer_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                                elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass
+                            pass  # Keep today's date if parsing fails
                     
-                    # If time provided in Excel, try to parse it
-                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_time_value, time):
-                                register_time = register_time_value
-                            else:
-                                time_str = str(register_time_value).strip()
-                                if ':' in time_str:
-                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
-                                    try:
-                                        register_time = datetime.strptime(time_str, '%I:%M').time()
-                                    except:
-                                        try:
-                                            register_time = datetime.strptime(time_str, '%H:%M').time()
-                                        except:
-                                            pass
-                        except:
-                            pass
-                    
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -4209,13 +3798,10 @@ def Buyer_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = register_time
+                        existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        
-                        success_count += 1
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
-                        new_user = User_Details.objects.create(
+                        User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -4225,29 +3811,17 @@ def Buyer_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=register_time
+                            user_register_time=datetime.now().time()
                         )
-                        
-                        # Generate USER_ID: EF-{ID}-{YY}
-                        current_year = datetime.now().year
-                        year_suffix = str(current_year)[-2:]
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        new_user.user_id = user_id
-                        new_user.save()
-                        
-                        success_count += 1
+                    
+                    success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    error_details.append(f"Row {row_idx}: {str(e)}")
-                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Buyers. Failed: {error_count}",
-                "success_count": success_count,
-                "error_count": error_count,
-                "error_details": error_details[:10]
+                "msg": f"Successfully imported {success_count} Buyers. Failed: {error_count}"
             })
             
         except Exception as e:
@@ -4360,74 +3934,54 @@ def Agent_Data(request):
             
             success_count = 0
             error_count = 0
-            error_details = []
             
             FIXED_ROLE = "Agent"
             
+            # Data starts from row 3 (row 1 = title, row 2 = headers)
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    # Skip empty rows
-                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
-                        continue
                     
-                    # ================================================================
-                    # COLUMN MAPPING (Based on your Agents Report structure)
-                    # ================================================================
-                    # Column 0: Actions (empty)
-                    # Column 1: Sr. No.
-                    # Column 2: Profile
-                    # Column 3: User Id
-                    # Column 4: Role (contains "Agent")
-                    # Column 5: Name (contains "Anita Chacko")
-                    # Column 6: Email Address (contains "anita.chacko@example.com")
-                    # Column 7: Phone Number
-                    # Column 8: Password
-                    # Column 9: Agency Name
-                    # Column 10: License Number
-                    # Column 11: State
-                    # Column 12: City
-                    # Column 13: Address
-                    # Column 14: Register Date
-                    # ================================================================
-                    
-                    # Extract values with correct column indices
-                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    agency_name = row[9] if len(row) > 9 else None  # Column 9: Agency Name
-                    license_number = row[10] if len(row) > 10 else None  # Column 10: License Number
-                    user_state = row[11] if len(row) > 11 else None  # Column 11: State
-                    user_city = row[12] if len(row) > 12 else None  # Column 12: City
-                    user_address = row[13] if len(row) > 13 else None  # Column 13: Address
-                    register_date_value = row[14] if len(row) > 14 else None  # Column 14: Register Date
-                    
-                    # Clean and validate user_name (from Name column - index 5)
-                    if user_name and str(user_name).strip() not in ['', '---', '-']:
-                        user_name = str(user_name).strip()
-                    else:
-                        user_name = None
-                    
-                    # Clean and validate user_email (from Email column - index 6)
-                    if user_email and str(user_email).strip() not in ['', '---', '-']:
-                        user_email = str(user_email).strip()
-                    else:
-                        user_email = None
+                    user_name = row[4] if len(row) > 4 else None
+                    user_email = row[5] if len(row) > 5 else None
+                    user_phone = row[6] if len(row) > 6 else None
+                    user_password = row[7] if len(row) > 7 else None
+                    agency_name = row[8] if len(row) > 8 else None
+                    license_number = row[9] if len(row) > 9 else None
+                    user_state = row[10] if len(row) > 10 else None
+                    user_city = row[11] if len(row) > 11 else None
+                    user_address = row[12] if len(row) > 12 else None
+                    register_date_value = row[13] if len(row) > 13 else None
                     
                     if not user_name or not user_phone:
                         error_count += 1
-                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
-                    user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
+                    if isinstance(user_phone, (int, float)):
+                        user_phone = str(int(user_phone))
+                    else:
+                        user_phone = str(user_phone).replace('-', '').replace(' ', '').strip()
                     
-                    # Clean other fields
+                    # Clean name
                     user_name = str(user_name).strip()
-                    user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+                    
+                    # Clean password
+                    if user_password:
+                        if isinstance(user_password, (int, float)):
+                            user_password = str(int(user_password))
+                        else:
+                            user_password = str(user_password).split('.')[0].strip()
+                    else:
+                        user_password = 'default123'
+                    
+                    # Clean email
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
+                    
+                    # Clean agency fields
                     agency_name = str(agency_name).strip() if agency_name and str(agency_name) != '---' else None
                     license_number = str(license_number).strip() if license_number and str(license_number) != '---' else None
+                    
+                    # Clean address fields
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
@@ -4436,7 +3990,7 @@ def Agent_Data(request):
                     register_date = datetime.now().date()
                     
                     # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-', 'None']:
                         try:
                             if isinstance(register_date_value, (date, datetime)):
                                 register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
@@ -4447,15 +4001,16 @@ def Agent_Data(request):
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                                 elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
+                                    register_date = datetime.strptime(date_str, '%d/%m/%Y').date()
                         except:
                             pass  # Keep today's date if parsing fails
                     
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    print(f"Row {row_idx}: Importing Agent - {user_name} ({user_phone}) - Agency: {agency_name or 'N/A'}")
+                    
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -4468,11 +4023,9 @@ def Agent_Data(request):
                         existing_user.user_register_date = register_date
                         existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        
-                        success_count += 1
+                        print(f"Row {row_idx}: Updated existing Agent")
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
-                        new_user = User_Details.objects.create(
+                        User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -4486,31 +4039,17 @@ def Agent_Data(request):
                             user_register_date=register_date,
                             user_register_time=datetime.now().time()
                         )
-                        
-                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
-                        current_year = datetime.now().year
-                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
-                        
-                        # Format: EF-{user.id}-{YY}
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        
-                        # Update the user with the generated user_id
-                        new_user.user_id = user_id
-                        new_user.save()
-                        
-                        success_count += 1
+                        print(f"Row {row_idx}: Created new Agent")
+                    
+                    success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    error_details.append(f"Row {row_idx}: {str(e)}")
-                    print(f"Error at row {row_idx}: {str(e)}")
+                    print(f"Row {row_idx} error: {e}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Agents. Failed: {error_count}",
-                "success_count": success_count,
-                "error_count": error_count,
-                "error_details": error_details[:10]  # Limit to first 10 errors for response
+                "msg": f"Successfully imported {success_count} Agents. Failed: {error_count}"
             })
             
         except Exception as e:
@@ -4624,74 +4163,54 @@ def Agency_Data(request):
             
             success_count = 0
             error_count = 0
-            error_details = []
             
             FIXED_ROLE = "Agency/Builder"
             
+            # Data starts from row 3 (row 1 = title, row 2 = headers)
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    # Skip empty rows
-                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
-                        continue
                     
-                    # ================================================================
-                    # COLUMN MAPPING (Based on your Agents Report structure)
-                    # ================================================================
-                    # Column 0: Actions (empty)
-                    # Column 1: Sr. No.
-                    # Column 2: Profile
-                    # Column 3: User Id
-                    # Column 4: Role (contains "Agent")
-                    # Column 5: Name (contains "Anita Chacko")
-                    # Column 6: Email Address (contains "anita.chacko@example.com")
-                    # Column 7: Phone Number
-                    # Column 8: Password
-                    # Column 9: Agency Name
-                    # Column 10: License Number
-                    # Column 11: State
-                    # Column 12: City
-                    # Column 13: Address
-                    # Column 14: Register Date
-                    # ================================================================
-                    
-                    # Extract values with correct column indices
-                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    agency_name = row[9] if len(row) > 9 else None  # Column 9: Agency Name
-                    license_number = row[10] if len(row) > 10 else None  # Column 10: License Number
-                    user_state = row[11] if len(row) > 11 else None  # Column 11: State
-                    user_city = row[12] if len(row) > 12 else None  # Column 12: City
-                    user_address = row[13] if len(row) > 13 else None  # Column 13: Address
-                    register_date_value = row[14] if len(row) > 14 else None  # Column 14: Register Date
-                    
-                    # Clean and validate user_name (from Name column - index 5)
-                    if user_name and str(user_name).strip() not in ['', '---', '-']:
-                        user_name = str(user_name).strip()
-                    else:
-                        user_name = None
-                    
-                    # Clean and validate user_email (from Email column - index 6)
-                    if user_email and str(user_email).strip() not in ['', '---', '-']:
-                        user_email = str(user_email).strip()
-                    else:
-                        user_email = None
+                    user_name = row[4] if len(row) > 4 else None
+                    user_email = row[5] if len(row) > 5 else None
+                    user_phone = row[6] if len(row) > 6 else None
+                    user_password = row[7] if len(row) > 7 else None
+                    agency_name = row[8] if len(row) > 8 else None
+                    license_number = row[9] if len(row) > 9 else None
+                    user_state = row[10] if len(row) > 10 else None
+                    user_city = row[11] if len(row) > 11 else None
+                    user_address = row[12] if len(row) > 12 else None
+                    register_date_value = row[13] if len(row) > 13 else None
                     
                     if not user_name or not user_phone:
                         error_count += 1
-                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
-                    user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
+                    if isinstance(user_phone, (int, float)):
+                        user_phone = str(int(user_phone))
+                    else:
+                        user_phone = str(user_phone).replace('-', '').replace(' ', '').strip()
                     
-                    # Clean other fields
+                    # Clean name
                     user_name = str(user_name).strip()
-                    user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+                    
+                    # Clean password
+                    if user_password:
+                        if isinstance(user_password, (int, float)):
+                            user_password = str(int(user_password))
+                        else:
+                            user_password = str(user_password).split('.')[0].strip()
+                    else:
+                        user_password = 'default123'
+                    
+                    # Clean email
+                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
+                    
+                    # Clean agency fields
                     agency_name = str(agency_name).strip() if agency_name and str(agency_name) != '---' else None
                     license_number = str(license_number).strip() if license_number and str(license_number) != '---' else None
+                    
+                    # Clean address fields
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
@@ -4700,7 +4219,7 @@ def Agency_Data(request):
                     register_date = datetime.now().date()
                     
                     # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-', 'None']:
                         try:
                             if isinstance(register_date_value, (date, datetime)):
                                 register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
@@ -4711,15 +4230,16 @@ def Agency_Data(request):
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                                 elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
+                                    register_date = datetime.strptime(date_str, '%d/%m/%Y').date()
                         except:
                             pass  # Keep today's date if parsing fails
                     
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    print(f"Row {row_idx}: Importing Agent - {user_name} ({user_phone}) - Agency: {agency_name or 'N/A'}")
+                    
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -4732,11 +4252,9 @@ def Agency_Data(request):
                         existing_user.user_register_date = register_date
                         existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        
-                        success_count += 1
+                        print(f"Row {row_idx}: Updated existing Agent")
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
-                        new_user = User_Details.objects.create(
+                        User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -4750,31 +4268,17 @@ def Agency_Data(request):
                             user_register_date=register_date,
                             user_register_time=datetime.now().time()
                         )
-                        
-                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
-                        current_year = datetime.now().year
-                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
-                        
-                        # Format: EF-{user.id}-{YY}
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        
-                        # Update the user with the generated user_id
-                        new_user.user_id = user_id
-                        new_user.save()
-                        
-                        success_count += 1
+                        print(f"Row {row_idx}: Created new Agent")
+                    
+                    success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    error_details.append(f"Row {row_idx}: {str(e)}")
-                    print(f"Error at row {row_idx}: {str(e)}")
+                    print(f"Row {row_idx} error: {e}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Agencies/Builders. Failed: {error_count}",
-                "success_count": success_count,
-                "error_count": error_count,
-                "error_details": error_details[:10]  # Limit to first 10 errors for response
+                "msg": f"Successfully imported {success_count} Agency/Builder. Failed: {error_count}"
             })
             
         except Exception as e:
@@ -4897,9 +4401,6 @@ def Vendor_Data(request):
             success_count = 0
             error_count = 0
             skipped_count = 0
-            error_details = []
-            
-            FIXED_ROLE = "Vendor"
             
             # Data starts from row 3
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
@@ -4907,34 +4408,32 @@ def Vendor_Data(request):
                     if not any(row) or len(row) < 18:
                         skipped_count += 1
                         continue
-                   
                     
-                    user_service_type = row[4] if len(row) > 4 else None  # Column 4: Service Type
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
-                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
-                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
-                    user_company_name = row[12] if len(row) > 12 else None  # Column 12: Company Name
-                    user_pan_number = row[13] if len(row) > 13 else None  # Column 13: PAN
-                    user_gstin_number = row[14] if len(row) > 14 else None  # Column 14: GSTIN
-                    operational_scope = row[15] if len(row) > 15 else None  # Column 15: Operational Scope
-                    selected_regions = row[16] if len(row) > 16 else None  # Column 16: Selected Regions
-                    register_date_value = row[17] if len(row) > 17 else None  # Column 17: Register Date
-                    register_time_value = row[18] if len(row) > 18 else None  # Column 18: Register Time
+                    user_service_type = row[4] if len(row) > 4 else None
+                    user_name = row[5] if len(row) > 5 else None
+                    user_email = row[6] if len(row) > 6 else None
+                    user_phone = row[7] if len(row) > 7 else None
+                    user_password = row[8] if len(row) > 8 else None
+                    user_state = row[9] if len(row) > 9 else None
+                    user_city = row[10] if len(row) > 10 else None
+                    user_address = row[11] if len(row) > 11 else None
+                    user_company_name = row[12] if len(row) > 12 else None
+                    user_pan_number = row[13] if len(row) > 13 else None
+                    user_gstin_number = row[14] if len(row) > 14 else None
+                    operational_scope = row[15] if len(row) > 15 else None
+                    selected_regions = row[16] if len(row) > 16 else None  
+                    register_date_value = row[17] if len(row) > 17 else None
                     
                     # Skip if no name or phone
                     if not user_name or not user_phone:
                         skipped_count += 1
-                        error_details.append(f"Row {row_idx}: Missing name or phone")
+                        print(f"Row {row_idx}: Missing name or phone, skipping")
                         continue
                     
                     # Skip if name is "View Profile" (Profile column value)
                     user_name_str = str(user_name).strip()
                     if user_name_str == 'View Profile' or user_name_str == 'None' or user_name_str.isdigit():
-                        error_details.append(f"Row {row_idx}: Invalid name '{user_name_str}'")
+                        print(f"Row {row_idx}: Invalid name '{user_name_str}', skipping")
                         skipped_count += 1
                         continue
                     
@@ -4957,7 +4456,6 @@ def Vendor_Data(request):
                     user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     
                     # Clean address fields
-                    user_name = str(user_name).strip()
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
@@ -4969,17 +4467,14 @@ def Vendor_Data(request):
                     user_gstin_number = str(user_gstin_number).strip().upper() if user_gstin_number and str(user_gstin_number) != '---' else None
                     operational_scope = str(operational_scope).strip() if operational_scope and str(operational_scope) != '---' else None
                     
-                    # Clean selected_regions
+                    #  Clean selected_regions (this is the correct field name)
                     if selected_regions and str(selected_regions) != '---':
                         selected_regions = str(selected_regions).strip()
                     else:
                         selected_regions = None
                     
-                    # Register date: Today's date as default
+                    # Register date
                     register_date = datetime.now().date()
-                    register_time = datetime.now().time()
-                    
-                    # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
                         try:
                             if isinstance(register_date_value, (date, datetime)):
@@ -4990,38 +4485,18 @@ def Vendor_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                                elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
                             pass
                     
-                    # If time provided in Excel, try to parse it
-                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_time_value, time):
-                                register_time = register_time_value
-                            else:
-                                time_str = str(register_time_value).strip()
-                                if ':' in time_str:
-                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
-                                    try:
-                                        register_time = datetime.strptime(time_str, '%I:%M').time()
-                                    except:
-                                        try:
-                                            register_time = datetime.strptime(time_str, '%H:%M').time()
-                                        except:
-                                            pass
-                        except:
-                            pass
+                    print(f"Row {row_idx}: Importing Vendor - Name: {user_name}, Phone: {user_phone}, Company: {user_company_name}")
                     
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    # Update or create
+                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
-                        existing_user.user_role = FIXED_ROLE
+                        existing_user.user_role = "Vendor"
                         existing_user.user_service_type = user_service_type
                         existing_user.user_company_name = user_company_name
                         existing_user.user_pan_number = user_pan_number
@@ -5033,17 +4508,15 @@ def Vendor_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = register_time
+                        existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        
-                        success_count += 1
+                        print(f"Row {row_idx}: Updated existing Vendor")
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
-                        new_user = User_Details.objects.create(
+                        User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
-                            user_role=FIXED_ROLE,
+                            user_role="Vendor",
                             user_service_type=user_service_type,
                             user_company_name=user_company_name,
                             user_pan_number=user_pan_number,
@@ -5055,25 +4528,14 @@ def Vendor_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=register_time
+                            user_register_time=datetime.now().time()
                         )
-                        
-                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
-                        current_year = datetime.now().year
-                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
-                        
-                        # Format: EF-{user.id}-{YY}
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        
-                        # Update the user with the generated user_id
-                        new_user.user_id = user_id
-                        new_user.save()
-                        
-                        success_count += 1
+                        print(f"Row {row_idx}: Created new Vendor")
+                    
+                    success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    error_details.append(f"Row {row_idx}: {str(e)}")
                     print(f"Row {row_idx} error: {e}")
             
             msg = f"Successfully imported {success_count} Vendors."
@@ -5084,11 +4546,7 @@ def Vendor_Data(request):
             
             return JsonResponse({
                 "status": "1",
-                "msg": msg,
-                "success_count": success_count,
-                "error_count": error_count,
-                "skipped_count": skipped_count,
-                "error_details": error_details[:10]
+                "msg": msg
             })
             
         except Exception as e:
@@ -5665,7 +5123,7 @@ def rental_residential_logs_view(request):
         property_pool = property_pool.filter(monthly_rent__lte=int(max_budget))
         has_property_filter = True
 
-    matched_property_ids = list(property_pool.values_list('id', flat=True))
+    matched_property_ids = list(property_pool.values_list('rental_residential_id', flat=True))
 
     # 2. Apply Filters Across the Audit Logs Queryset
     log_conditions = Q()
@@ -5724,7 +5182,7 @@ def rental_residential_logs_view(request):
     logs_property_ids = filtered_logs.exclude(property_id="Multiple / Sheet Records").values_list('property_id', flat=True).distinct()
     
     final_properties_queryset = RentalResidentialProperty.objects.filter(
-        Q(id__in=logs_property_ids) | Q(id__in=matched_property_ids),
+        Q(rental_residential_id__in=logs_property_ids) | Q(rental_residential_id__in=matched_property_ids),
         is_deleted=False
     ).prefetch_related('images').distinct()
 
@@ -5758,7 +5216,7 @@ def rental_residential_logs_view(request):
             writer = csv.writer(response, delimiter='\t')
             writer.writerow(['Property ID', 'Property Title', 'Property Type', 'BHK Config Type', 'Monthly Rent', 'Security Deposit', 'City', 'Locality', 'Uploaded By', 'Source File Name'])
             for item in final_properties_queryset:
-                writer.writerow([item.id, item.property_title, item.property_type, item.bhk_type, item.monthly_rent, item.security_deposit, item.city, item.locality, item.uploaded_by_name, item.upload_file_name])
+                writer.writerow([item.rental_residential_id, item.property_title, item.property_type, item.bhk_type, item.monthly_rent, item.security_deposit, item.city, item.locality, item.uploaded_by_name, item.upload_file_name])
             return response
 
     # 6. Pagination System Engine Layout Slices
@@ -5933,6 +5391,7 @@ def rental_residential_add(request):
                 # DESCRIPTION
                 description=request.POST.get('description'),
                 rent_residential_desc=request.POST.get('rent_residential_desc'),
+                user_description=request.POST.get('user_description'),
 
                 # OWNER DETAILS
                 owner_name=request.POST.get('owner_name'),
@@ -5987,8 +5446,10 @@ def rental_residential_add(request):
 from django.utils.dateparse import parse_date
 
 
-def rental_list(request):
 
+
+
+def rental_list(request):
     session_id = request.session.get('Admin_id')
 
     if not session_id:
@@ -5997,65 +5458,110 @@ def rental_list(request):
     admin_obj = Admin_Login.objects.get(id=session_id)
 
     # ═══════════════════════════════════════
-    # SEARCH FILTERS
+    # GET SEARCH & FILTERS
     # ═══════════════════════════════════════
-
     search_query = request.GET.get('search', '').strip()
     bhk_query = request.GET.get('bhk_type', '').strip()
     city_query = request.GET.get('city', '').strip()
     furnish_query = request.GET.get('furnishing', '').strip()
     possession_query = request.GET.get('possession', '').strip()
-
+    prop_type_query = request.GET.get('property_type', '').strip()
+    
+    # Updated to handle distinct Listed By and Uploaded By lookups
+    listed_by_query = request.GET.get('listed_by', '').strip()
+    uploaded_by_query = request.GET.get('uploaded_by', '').strip()
+    
+    budget_query = request.GET.get('budget', '').strip()
     from_date_str = request.GET.get('from_date', '').strip()
     to_date_str = request.GET.get('to_date', '').strip()
 
     # ═══════════════════════════════════════
-    # BASE QUERYSET
+    # BASE QUERYSET & PERSISTENT SR.NO LOGIC
     # ═══════════════════════════════════════
-
     properties = RentalResidentialProperty.objects.filter(
         is_deleted=False
-    ).order_by('-id')
+    ).order_by('-created_at') # Order by latest creation date
+
+    # Capture the absolute order of IDs to calculate persistent Sr.No
+    absolute_ordered_ids = list(properties.values_list('id', flat=True))
 
     # ═══════════════════════════════════════
-    # SEARCH FILTER
+    # GLOBAL SEARCH FILTER (Across ALL Fields + Sr.No)
     # ═══════════════════════════════════════
-
     if search_query:
+        # Logic to handle precise Sr.No searching
+        sr_no_query = Q()
+        if search_query.isdigit():
+            target_index = int(search_query) - 1
+            if 0 <= target_index < len(absolute_ordered_ids):
+                matched_id = absolute_ordered_ids[target_index]
+                sr_no_query = Q(id=matched_id)
+
         properties = properties.filter(
+            sr_no_query |
+            Q(id__icontains=search_query) |
             Q(property_title__icontains=search_query) |
             Q(property_type__icontains=search_query) |
             Q(bhk_type__icontains=search_query) |
             Q(city__icontains=search_query) |
             Q(locality__icontains=search_query) |
+            Q(state__icontains=search_query) |
+            Q(pincode__icontains=search_query) |
+            Q(address__icontains=search_query) |
+            Q(building_name__icontains=search_query) |
             Q(owner_name__icontains=search_query) |
-            Q(possession_status__icontains=search_query)
+            Q(contact_number__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(possession_status__icontains=search_query) |
+            Q(furnishing_status__icontains=search_query) |
+            Q(available_for__icontains=search_query) |
+            # Uploaded By Fields
+            Q(uploaded_by_name__icontains=search_query) |
+            Q(uploaded_by_email__icontains=search_query) |
+            Q(uploaded_by_contact__icontains=search_query) |
+            Q(uploaded_by_role__icontains=search_query) |
+            Q(upload_file_name__icontains=search_query) |
+            # Listed By Fields (NEW Fields Added)
+            Q(listed_by_id__icontains=search_query) |
+            Q(listed_by_name__icontains=search_query) |
+            Q(listed_by_email__icontains=search_query) |
+            Q(listed_by_contact__icontains=search_query) |
+            Q(listed_by_role__icontains=search_query)
         )
 
     # ═══════════════════════════════════════
-    # ADVANCED FILTERS
+    # ADVANCED DROPDOWN FILTERS
     # ═══════════════════════════════════════
-
     if bhk_query and bhk_query != 'All BHK':
-        properties = properties.filter(
-            bhk_type__iexact=bhk_query
-        )
+        properties = properties.filter(bhk_type__iexact=bhk_query)
 
     if city_query and city_query != 'All Cities':
-        properties = properties.filter(
-            city__iexact=city_query
-        )
+        properties = properties.filter(city__iexact=city_query)
 
     if furnish_query and furnish_query != 'All':
-        properties = properties.filter(
-            furnishing_status__iexact=furnish_query
-        )
+        properties = properties.filter(furnishing_status__iexact=furnish_query)
 
     if possession_query and possession_query != 'All Status':
-        properties = properties.filter(
-            possession_status__iexact=possession_query
-        )
+        properties = properties.filter(possession_status__iexact=possession_query)
 
+    if prop_type_query and prop_type_query != 'All Types':
+        properties = properties.filter(property_type__iexact=prop_type_query)
+
+    if listed_by_query and listed_by_query != 'All Roles':
+        properties = properties.filter(listed_by_role__iexact=listed_by_query)
+
+    if uploaded_by_query and uploaded_by_query != 'All Roles':
+        properties = properties.filter(uploaded_by_role__iexact=uploaded_by_query)
+
+    if budget_query and budget_query != 'All Budgets':
+        if budget_query == 'under_10k':
+            properties = properties.filter(monthly_rent__lt=10000)
+        elif budget_query == '10k_25k':
+            properties = properties.filter(monthly_rent__gte=10000, monthly_rent__lte=25000)
+        elif budget_query == '25k_50k':
+            properties = properties.filter(monthly_rent__gte=25000, monthly_rent__lte=50000)
+        elif budget_query == 'above_50k':
+            properties = properties.filter(monthly_rent__gt=50000)
 
     if from_date_str:
         from_date = parse_date(from_date_str)
@@ -6067,12 +5573,8 @@ def rental_list(request):
         if to_date:
             properties = properties.filter(created_at__date__lte=to_date)
     
-
     # ═══════════════════════════════════════
-    # FLAT EXPORT HEADERS
-    # ═══════════════════════════════════════
-    # ═══════════════════════════════════════
-    # EXPORT DOWNLOAD (TEMPLATE STYLE WITH ID & TRACKING)
+    # EXPORT DATA (CSV / EXCEL)
     # ═══════════════════════════════════════
     if request.GET.get('download') in ['excel', 'csv']:
         import openpyxl
@@ -6081,7 +5583,6 @@ def rental_list(request):
         from collections import OrderedDict
         import csv
 
-        # ALL fields including ID and Uploader tracking
         sections = {
             "Basic Info": [
                 "id", "property_title", "property_type", "bhk_type", 
@@ -6103,7 +5604,485 @@ def rental_list(request):
                 "address", "city", "locality", "state", "pincode", "road_connectivity"
             ],
             "Description & Features": [
-                "amenities", "facilities", "description", "rent_residential_desc"
+                "amenities", "facilities", "description", "rent_residential_desc", "user_description"
+            ],
+            "Owner Info": [
+                "owner_name", "contact_number", "email", "alternate_contact"
+            ],
+
+            "Listed By Info": [
+                "listed_by_id", "listed_by_name", "listed_by_email", "listed_by_contact", "listed_by_role"
+            ],
+            "Uploaded By Info": [
+                "uploaded_by_name", "uploaded_by_email", "uploaded_by_contact", "uploaded_by_role", "upload_file_name"
+            ],
+            
+            "System Data": [
+                "created_at"
+            ],
+        }
+
+        HINTS = {
+            "id": "Property ID Auto-Generated", "property_title": "Auto_Generated Title", "property_type": "Apartment",
+            "bhk_type": "1 BHK/2 BHK", "renting_option": "Full Property", "built_up_area": "sq.ft",
+            "bathrooms": "Number", "balconies": "Number", "floor_number": "e.g. 5th Floor",
+            "total_floors": "Number", "facing": "North/East", "furnishing_status": "Semi Furnished",
+            "available_for": "Family/Bachelor", "zone": "North/South", "ownership_type": "Freehold",
+            "construction_status": "Resale", "property_age": "1-3 Years", "carpet_area": "sq.ft",
+            "plot_area": "sq.ft", "building_name": "Text", "possession_status": "Ready to Move",
+            "available_from": "YYYY-MM-DD", "lease_duration": "11 Months", "brokerage": "Yes/No",
+            "brokerage_percentage": "1%/Manual", "manual_brokerage": "e.g. 2.5%", "monthly_rent": "₹",
+            "security_deposit": "₹", "maintenance_type": "Included in Rent/Extra", "maintenance_amount": "₹",
+            "address": "Full Address", "city": "Text", "locality": "Text", "state": "e.g. Maharashtra",
+            "pincode": "6-digit", "road_connectivity": "Optional", "amenities": "Comma-sep", 
+            "facilities": "Comma-sep", "description": "Short Summary", "rent_residential_desc": "Long Rich Text", "user_description": "Added Description by user",
+            "owner_name": "Full Name", "contact_number": "10 Digits", "email": "email@example.com", "alternate_contact": "Optional", 
+            "listed_by_id": "Lister ID", "listed_by_name": "Lister Name", "listed_by_email": "Lister Email", "listed_by_contact": "Lister Contact", "listed_by_role": "Lister Role",
+            "uploaded_by_name": "Admin Name", "uploaded_by_email": "Admin Email", "uploaded_by_contact": "Admin Contact", "uploaded_by_role": "Admin Role", "upload_file_name": "Web Listing Ui Form",
+            "created_at": "YYYY-MM-DD"
+        }
+
+        REQUIRED = {
+            "property_type", "bhk_type", "renting_option", 
+            "built_up_area", "bathrooms", "floor_number", "furnishing_status", 
+            "available_for", "monthly_rent", "security_deposit", "address", 
+            "city", "locality", "state", "pincode", "owner_name", "contact_number", "email"
+        }
+
+        all_cols = []
+        for sec, fields in sections.items():
+            all_cols.extend([(sec, f) for f in fields])
+
+        if request.GET.get('download') == 'excel':
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = "Rental Residential"
+
+            HDR_BG, REQ_BG, OPT_BG = "667EEA", "FEF3C7", "F0FDF4"
+            thin = Side(style="thin", color="CBD5E1")
+            bdr = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+            sec_spans = OrderedDict()
+            for i, (sec, _) in enumerate(all_cols):
+                sec_spans.setdefault(sec, []).append(i + 1)
+
+            for sec, cols in sec_spans.items():
+                c = ws.cell(row=1, column=cols[0], value=f"📋 {sec}")
+                c.font = Font(bold=True, color="FFFFFF", name="Arial", size=11)
+                c.fill = PatternFill("solid", fgColor=HDR_BG)
+                c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                c.border = bdr
+                if len(cols) > 1:
+                    ws.merge_cells(start_row=1, start_column=cols[0], end_row=1, end_column=cols[-1])
+
+            for ci, (sec, field) in enumerate(all_cols, 1):
+                req = field in REQUIRED
+                lc = ws.cell(row=2, column=ci, value=field + (" *" if req else ""))
+                lc.font = Font(bold=True, color="1E293B", name="Arial", size=9)
+                lc.fill = PatternFill("solid", fgColor=REQ_BG if req else OPT_BG)
+                lc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                lc.border = bdr
+
+                hc = ws.cell(row=3, column=ci, value=HINTS.get(field, ""))
+                hc.font = Font(italic=True, color="64748B", name="Arial", size=8)
+                hc.fill = PatternFill("solid", fgColor="FFFFFF")
+                hc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                hc.border = bdr
+                ws.column_dimensions[get_column_letter(ci)].width = max(16, len(field) + 4)
+
+            ws.row_dimensions[1].height = 28
+            ws.row_dimensions[2].height = 36
+            ws.row_dimensions[3].height = 42
+            ws.freeze_panes = "A4"
+
+            for row_idx, p in enumerate(properties, start=4):
+                for col_idx, (sec, field) in enumerate(all_cols, 1):
+                    val = getattr(p, field, "")
+                    if field in ['available_from', 'created_at'] and val:
+                        val = val.strftime('%Y-%m-%d')
+                    
+                    c = ws.cell(row=row_idx, column=col_idx, value=val)
+                    c.alignment = Alignment(horizontal="center", vertical="center")
+                    c.border = bdr
+
+            response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            response["Content-Disposition"] = 'attachment; filename="Rental_Properties_Data.xlsx"'
+            wb.save(response)
+            return response
+
+        elif request.GET.get('download') == 'csv':
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="Rental_Properties_Data.csv"'
+            writer = csv.writer(response)
+
+            row1 = []
+            current_sec = ""
+            for sec, _ in all_cols:
+                if sec != current_sec:
+                    row1.append(f"📋 {sec}")
+                    current_sec = sec
+                else:
+                    row1.append("")
+            writer.writerow(row1)
+
+            writer.writerow([field + (" *" if field in REQUIRED else "") for _, field in all_cols])
+            writer.writerow([HINTS.get(field, "") for _, field in all_cols])
+
+            for p in properties:
+                data_row = []
+                for _, field in all_cols:
+                    val = getattr(p, field, "")
+                    if field in ['available_from', 'created_at'] and val:
+                        val = val.strftime('%Y-%m-%d')
+                    data_row.append(val)
+                writer.writerow(data_row)
+                
+            return response
+
+    # ═══════════════════════════════════════
+    # PAGINATION AND PERSISTENT SR.NO ATTACHMENT
+    # ═══════════════════════════════════════
+    filtered_count = properties.count()
+
+    paginator = Paginator(properties, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Dynamically inject the static Sr.No into each object based on its absolute index
+    for prop in page_obj:
+        prop.original_sr_no = absolute_ordered_ids.index(prop.id) + 1
+
+    # ═══════════════════════════════════════
+    # STATS & UNIQUE DROPDOWN DATA
+    # ═══════════════════════════════════════
+    all_props = RentalResidentialProperty.objects.filter(is_deleted=False)
+    total_count = all_props.count()
+
+    unique_bhk = all_props.exclude(bhk_type__isnull=True).exclude(bhk_type='').values_list('bhk_type', flat=True).distinct()
+    unique_cities = all_props.exclude(city__isnull=True).exclude(city='').values_list('city', flat=True).distinct()
+    unique_furnish = all_props.exclude(furnishing_status__isnull=True).exclude(furnishing_status='').values_list('furnishing_status', flat=True).distinct()
+    unique_possession = all_props.exclude(possession_status__isnull=True).exclude(possession_status='').values_list('possession_status', flat=True).distinct()
+    unique_property_types = all_props.exclude(property_type__isnull=True).exclude(property_type='').values_list('property_type', flat=True).distinct()
+    
+    # Independent Distinct lookups for both configuration tracks
+    unique_listed_roles = all_props.exclude(listed_by_role__isnull=True).exclude(listed_by_role='').values_list('listed_by_role', flat=True).distinct()
+    unique_uploaded_roles = all_props.exclude(uploaded_by_role__isnull=True).exclude(uploaded_by_role='').values_list('uploaded_by_role', flat=True).distinct()
+
+    active_count = all_props.exclude(possession_status__isnull=True).exclude(possession_status='').count()
+    furnished_count = all_props.filter(furnishing_status__iexact='Furnished').count()
+    available_count = all_props.filter(possession_status__iexact='Ready to Move').count()
+    city_count = all_props.exclude(city__isnull=True).exclude(city='').values('city').distinct().count()
+
+    # ═══════════════════════════════════════
+    # RENT STATS
+    # ═══════════════════════════════════════
+    rent_stats = all_props.exclude(monthly_rent__isnull=True).aggregate(
+        avg_rent=Avg('monthly_rent'),
+        max_rent=Max('monthly_rent'),
+        min_rent=Min('monthly_rent'),
+    )
+
+    avg_rent = rent_stats['avg_rent'] or 0
+    max_rent = rent_stats['max_rent'] or 0
+    min_rent = rent_stats['min_rent'] or 0
+
+    deposit_stats = all_props.exclude(security_deposit__isnull=True).aggregate(avg_deposit=Avg('security_deposit'))
+    avg_deposit = deposit_stats['avg_deposit'] or 0
+
+    area_stats = all_props.exclude(built_up_area__isnull=True).aggregate(avg_area=Avg('built_up_area'))
+    avg_area = area_stats['avg_area'] or 0
+
+    with_owner_count = all_props.exclude(owner_name__isnull=True).exclude(owner_name='').count()
+    uploaded_files = all_props.exclude(upload_file_name__isnull=True).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
+
+    # ═══════════════════════════════════════
+    # CHARTS (Serialized JSON Datasets)
+    # ═══════════════════════════════════════
+    bhk_qs = all_props.exclude(bhk_type__isnull=True).exclude(bhk_type='').values('bhk_type').annotate(count=Count('id')).order_by('-count')
+    bhk_labels = json.dumps([item['bhk_type'] for item in bhk_qs])
+    bhk_data = json.dumps([item['count'] for item in bhk_qs])
+
+    rent_buckets = [
+        ('Under ₹5k', 0, 5000), ('₹5k–10k', 5000, 10000), ('₹10k–20k', 10000, 20000),
+        ('₹20k–30k', 20000, 30000), ('₹30k–50k', 30000, 50000), ('₹50k–1L', 50000, 100000),
+        ('Above ₹1L', 100000, 999999999),
+    ]
+    rent_range_labels = json.dumps([b[0] for b in rent_buckets])
+    rent_range_data = json.dumps([all_props.filter(monthly_rent__gte=lo, monthly_rent__lt=hi).count() for _, lo, hi in rent_buckets])
+
+    furnish_qs = all_props.exclude(furnishing_status__isnull=True).exclude(furnishing_status='').values('furnishing_status').annotate(count=Count('id')).order_by('-count')
+    furnishing_labels = json.dumps([item['furnishing_status'] for item in furnish_qs])
+    furnishing_data = json.dumps([item['count'] for item in furnish_qs])
+
+    prop_type_qs = all_props.exclude(property_type__isnull=True).exclude(property_type='').values('property_type').annotate(count=Count('id')).order_by('-count')
+    prop_type_labels = json.dumps([item['property_type'] for item in prop_type_qs])
+    prop_type_data = json.dumps([item['count'] for item in prop_type_qs])
+
+    # ═══════════════════════════════════════
+    # KPI METRICS
+    # ═══════════════════════════════════════
+    occupied_count = all_props.filter(possession_status__iexact='Occupied').count()
+    vacant_count = all_props.filter(possession_status__iexact='Ready to Move').count()
+    occupancy_rate = round((occupied_count / total_count * 100), 1) if total_count > 0 else 0
+    vacancy_rate = round((vacant_count / total_count * 100), 1) if total_count > 0 else 0
+    total_revenue = all_props.aggregate(total=Sum('monthly_rent'))['total'] or 0
+    total_security_deposit = all_props.aggregate(total=Sum('security_deposit'))['total'] or 0
+
+    ready_to_move_count = all_props.filter(possession_status__iexact='Ready to Move').count()
+    short_lease_count = all_props.filter(lease_duration__icontains='6').count()
+    long_lease_count = all_props.filter(lease_duration__icontains='12').count()
+    new_property_count = all_props.filter(property_age__icontains='New').count()
+    old_property_count = all_props.exclude(property_age__icontains='New').count()
+    premium_properties_count = all_props.filter(monthly_rent__gte=50000).count()
+    affordable_properties_count = all_props.filter(monthly_rent__lt=15000).count()
+
+    # ═══════════════════════════════════════
+    # CONTEXT MAP
+    # ═══════════════════════════════════════
+    context = {
+        'admin_obj': admin_obj,
+        'page_obj': page_obj,
+
+        'search_query': search_query,
+        'bhk_query': bhk_query,
+        'city_query': city_query,
+        'furnish_query': furnish_query,
+        'possession_query': possession_query,
+        'prop_type_query': prop_type_query,
+        'listed_by_query': listed_by_query,
+        'uploaded_by_query': uploaded_by_query,
+        'budget_query': budget_query,
+
+        'unique_bhk': unique_bhk,
+        'unique_cities': unique_cities,
+        'unique_furnish': unique_furnish,
+        'unique_possession': unique_possession,
+        'unique_property_types': unique_property_types,
+        'unique_listed_roles': unique_listed_roles,
+        'unique_uploaded_roles': unique_uploaded_roles,
+
+        'filtered_count': filtered_count,
+        'total_count': total_count,
+        'active_count': active_count,
+        'furnished_count': furnished_count,
+        'available_count': available_count,
+        'city_count': city_count,
+
+        'from_date': from_date_str,
+        'to_date': to_date_str,
+
+        'avg_rent': avg_rent,
+        'max_rent': max_rent,
+        'min_rent': min_rent,
+        'avg_deposit': avg_deposit,
+        'avg_area': avg_area,
+
+        'with_owner_count': with_owner_count,
+        'uploaded_files': uploaded_files,
+
+        'bhk_labels': bhk_labels,
+        'bhk_data': bhk_data,
+        'rent_range_labels': rent_range_labels,
+        'rent_range_data': rent_range_data,
+        'furnishing_labels': furnishing_labels,
+        'furnishing_data': furnishing_data,
+        'prop_type_labels': prop_type_labels,
+        'prop_type_data': prop_type_data,
+
+        'occupied_count': occupied_count,
+        'vacant_count': vacant_count,
+        'occupancy_rate': occupancy_rate,
+        'vacancy_rate': vacancy_rate,
+        'total_revenue': total_revenue,
+        'total_security_deposit': total_security_deposit,
+
+        'ready_to_move_count': ready_to_move_count,
+        'short_lease_count': short_lease_count,
+        'long_lease_count': long_lease_count,
+        'new_property_count': new_property_count,
+        'old_property_count': old_property_count,
+        'premium_properties_count': premium_properties_count,
+        'affordable_properties_count': affordable_properties_count,
+    }
+
+    return render(
+        request,
+        'admin_user/Reports/Rental/rental_list.html',
+        context
+    )
+
+
+
+
+
+
+
+
+def rental_reports(request):
+
+    session_id = request.session.get('Admin_id')
+
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    # ═══════════════════════════════════════
+    # GET SEARCH & FILTERS
+    # ═══════════════════════════════════════
+
+    search_query = request.GET.get('search', '').strip()
+    bhk_query = request.GET.get('bhk_type', '').strip()
+    city_query = request.GET.get('city', '').strip()
+    furnish_query = request.GET.get('furnishing', '').strip()
+    possession_query = request.GET.get('possession', '').strip()
+    
+    prop_type_query = request.GET.get('property_type', '').strip()
+    listed_by_query = request.GET.get('listed_by', '').strip()
+    budget_query = request.GET.get('budget', '').strip()
+
+    from_date_str = request.GET.get('from_date', '').strip()
+    to_date_str = request.GET.get('to_date', '').strip()
+
+    # ═══════════════════════════════════════
+    # BASE QUERYSET & PERSISTENT SR.NO MAP
+    # ═══════════════════════════════════════
+
+    # We get the absolute base data first to map the persistent Sr.No
+    base_properties = RentalResidentialProperty.objects.filter(is_deleted=False).order_by('-id')
+    
+    # This creates a permanent list of IDs. Index + 1 = Persistent Sr.No
+    absolute_ordered_ids = list(base_properties.values_list('id', flat=True))
+
+    properties = base_properties
+
+    # ═══════════════════════════════════════
+    # GLOBAL SEARCH FILTER (Across ALL Fields + Sr.No)
+    # ═══════════════════════════════════════
+
+    if search_query:
+        sr_no_query = Q()
+        
+        # If the user types a number, find the exact Sr.No ID
+        if search_query.isdigit():
+            target_index = int(search_query) - 1
+            if 0 <= target_index < len(absolute_ordered_ids):
+                target_id = absolute_ordered_ids[target_index]
+                sr_no_query = Q(id=target_id)
+
+        properties = properties.filter(
+            sr_no_query |
+            Q(id__icontains=search_query) |
+            Q(property_title__icontains=search_query) |
+            Q(property_type__icontains=search_query) |
+            Q(bhk_type__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(locality__icontains=search_query) |
+            Q(state__icontains=search_query) |
+            Q(pincode__icontains=search_query) |
+            Q(address__icontains=search_query) |
+            Q(building_name__icontains=search_query) |
+            Q(owner_name__icontains=search_query) |
+            Q(contact_number__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(possession_status__icontains=search_query) |
+            Q(furnishing_status__icontains=search_query) |
+            Q(available_for__icontains=search_query) |
+            Q(uploaded_by_name__icontains=search_query) |
+            Q(uploaded_by_email__icontains=search_query) |
+            Q(uploaded_by_role__icontains=search_query) |
+            Q(upload_file_name__icontains=search_query)
+        )
+
+    # ═══════════════════════════════════════
+    # ADVANCED DROPDOWN FILTERS
+    # ═══════════════════════════════════════
+
+    if bhk_query and bhk_query != 'All BHK':
+        properties = properties.filter(bhk_type__iexact=bhk_query)
+
+    if city_query and city_query != 'All Cities':
+        properties = properties.filter(city__iexact=city_query)
+
+    if furnish_query and furnish_query != 'All':
+        properties = properties.filter(furnishing_status__iexact=furnish_query)
+
+    if possession_query and possession_query != 'All Status':
+        properties = properties.filter(possession_status__iexact=possession_query)
+
+    if prop_type_query and prop_type_query != 'All Types':
+        properties = properties.filter(property_type__iexact=prop_type_query)
+
+    if listed_by_query and listed_by_query != 'All Roles':
+        properties = properties.filter(uploaded_by_role__iexact=listed_by_query)
+
+    if budget_query and budget_query != 'All Budgets':
+        if budget_query == 'under_10k':
+            properties = properties.filter(monthly_rent__lt=10000)
+        elif budget_query == '10k_25k':
+            properties = properties.filter(monthly_rent__gte=10000, monthly_rent__lte=25000)
+        elif budget_query == '25k_50k':
+            properties = properties.filter(monthly_rent__gte=25000, monthly_rent__lte=50000)
+        elif budget_query == 'above_50k':
+            properties = properties.filter(monthly_rent__gt=50000)
+
+    # Date Filters
+    if from_date_str:
+        from_date = parse_date(from_date_str)
+        if from_date:
+            properties = properties.filter(created_at__date__gte=from_date)
+
+    if to_date_str:
+        to_date = parse_date(to_date_str)
+        if to_date:
+            properties = properties.filter(created_at__date__lte=to_date)
+    
+    # ═══════════════════════════════════════
+    # PAGINATION & INJECT PERSISTENT SR.NO
+    # ═══════════════════════════════════════
+    filtered_count = properties.count()
+
+    paginator = Paginator(properties, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Dynamically inject the static Sr.No into each object before sending to HTML
+    for prop in page_obj:
+        prop.original_sr_no = absolute_ordered_ids.index(prop.id) + 1
+
+
+    # ═══════════════════════════════════════
+    # EXPORT DATA (CSV / EXCEL)
+    # ═══════════════════════════════════════
+    if request.GET.get('download') in ['excel', 'csv']:
+        import openpyxl
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
+        from collections import OrderedDict
+        import csv
+
+        sections = {
+            "Basic Info": [
+                "id", "property_title", "property_type", "bhk_type", 
+                "renting_option", "built_up_area", "bathrooms", "balconies", 
+                "floor_number", "total_floors", "facing", "furnishing_status", "available_for"
+            ],
+            "Property Details": [
+                "zone", "ownership_type", "construction_status", "property_age", 
+                "carpet_area", "plot_area", "building_name"
+            ],
+            "Availability": [
+                "possession_status", "available_from", "lease_duration", 
+                "brokerage", "brokerage_percentage", "manual_brokerage"
+            ],
+            "Pricing": [
+                "monthly_rent", "security_deposit", "maintenance_type", "maintenance_amount"
+            ],
+            "Location": [
+                "address", "city", "locality", "state", "pincode", "road_connectivity"
+            ],
+            "Description & Features": [
+                "amenities", "facilities", "description", "rent_residential_desc", "user_description"
             ],
             "Owner Info": [
                 "owner_name", "contact_number", "email", "alternate_contact"
@@ -6115,7 +6094,7 @@ def rental_list(request):
         }
 
         HINTS = {
-            "id": "Auto-Generated ID",
+            "id": "Property ID Auto-Generated",
             "property_title": "Auto_Generated Title", "property_type": "Apartment",
             "bhk_type": "1 BHK/2 BHK", "renting_option": "Full Property", "built_up_area": "sq.ft",
             "bathrooms": "Number", "balconies": "Number", "floor_number": "e.g. 5th Floor",
@@ -6128,7 +6107,7 @@ def rental_list(request):
             "security_deposit": "₹", "maintenance_type": "Included in Rent/Extra", "maintenance_amount": "₹",
             "address": "Full Address", "city": "Text", "locality": "Text", "state": "e.g. Maharashtra",
             "pincode": "6-digit", "road_connectivity": "Optional", "amenities": "Comma-sep", 
-            "facilities": "Comma-sep", "description": "Short Summary", "rent_residential_desc": "Long Rich Text",
+            "facilities": "Comma-sep", "description": "Short Summary", "rent_residential_desc": "Long Rich Text", "user_description": "Added Description by user",
             "owner_name": "Full Name", "contact_number": "10 Digits", "email": "email@example.com",
             "alternate_contact": "Optional", "uploaded_by_name": "Admin Name", "uploaded_by_email": "Admin Email",
             "uploaded_by_contact": "Admin Contact", "uploaded_by_role": "Admin Role", "upload_file_name": "File Name", "created_at": "YYYY-MM-DD"
@@ -6145,7 +6124,6 @@ def rental_list(request):
         for sec, fields in sections.items():
             all_cols.extend([(sec, f) for f in fields])
 
-        # ------------- EXCEL GENERATION -------------
         if request.GET.get('download') == 'excel':
             wb = openpyxl.Workbook()
             ws = wb.active
@@ -6159,7 +6137,6 @@ def rental_list(request):
             for i, (sec, _) in enumerate(all_cols):
                 sec_spans.setdefault(sec, []).append(i + 1)
 
-            # Row 1: Banners
             for sec, cols in sec_spans.items():
                 c = ws.cell(row=1, column=cols[0], value=f"📋 {sec}")
                 c.font = Font(bold=True, color="FFFFFF", name="Arial", size=11)
@@ -6169,7 +6146,6 @@ def rental_list(request):
                 if len(cols) > 1:
                     ws.merge_cells(start_row=1, start_column=cols[0], end_row=1, end_column=cols[-1])
 
-            # Row 2 & 3: Fields and Hints
             for ci, (sec, field) in enumerate(all_cols, 1):
                 req = field in REQUIRED
                 lc = ws.cell(row=2, column=ci, value=field + (" *" if req else ""))
@@ -6183,7 +6159,6 @@ def rental_list(request):
                 hc.fill = PatternFill("solid", fgColor="FFFFFF")
                 hc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
                 hc.border = bdr
-
                 ws.column_dimensions[get_column_letter(ci)].width = max(16, len(field) + 4)
 
             ws.row_dimensions[1].height = 28
@@ -6191,7 +6166,6 @@ def rental_list(request):
             ws.row_dimensions[3].height = 42
             ws.freeze_panes = "A4"
 
-            # Row 4+: Actual Database Data (Automatically fills ID and Uploader Info)
             for row_idx, p in enumerate(properties, start=4):
                 for col_idx, (sec, field) in enumerate(all_cols, 1):
                     val = getattr(p, field, "")
@@ -6207,13 +6181,11 @@ def rental_list(request):
             wb.save(response)
             return response
 
-        # ------------- CSV GENERATION -------------
         elif request.GET.get('download') == 'csv':
             response = HttpResponse(content_type='text/csv')
             response['Content-Disposition'] = 'attachment; filename="Rental_Properties_Data.csv"'
             writer = csv.writer(response)
 
-            # Build Row 1 (Banners) for CSV
             row1 = []
             current_sec = ""
             for sec, _ in all_cols:
@@ -6221,14 +6193,12 @@ def rental_list(request):
                     row1.append(f"📋 {sec}")
                     current_sec = sec
                 else:
-                    row1.append("") # Empty cell to simulate merge in CSV
+                    row1.append("")
             writer.writerow(row1)
 
-            # Row 2 & 3 (Fields and Hints)
             writer.writerow([field + (" *" if field in REQUIRED else "") for _, field in all_cols])
             writer.writerow([HINTS.get(field, "") for _, field in all_cols])
 
-            # Row 4+: Actual Database Data (Automatically fills ID and Uploader Info)
             for p in properties:
                 data_row = []
                 for _, field in all_cols:
@@ -6239,93 +6209,32 @@ def rental_list(request):
                 writer.writerow(data_row)
                 
             return response
-    # ═══════════════════════════════════════
-    # PAGINATION
-    # ═══════════════════════════════════════
 
-    paginator = Paginator(properties, 10)
-
-    page_number = request.GET.get('page')
-
-    page_obj = paginator.get_page(page_number)
-
-    filtered_count = properties.count()
 
     # ═══════════════════════════════════════
-    # STATS
+    # STATS & UNIQUE DROPDOWN DATA
     # ═══════════════════════════════════════
 
-    all_props = RentalResidentialProperty.objects.filter(
-        is_deleted=False
-    )
-
+    all_props = RentalResidentialProperty.objects.filter(is_deleted=False)
     total_count = all_props.count()
 
-    unique_bhk = all_props.exclude(
-        bhk_type__isnull=True
-    ).exclude(
-        bhk_type=''
-    ).values_list(
-        'bhk_type',
-        flat=True
-    ).distinct()
+    unique_bhk = all_props.exclude(bhk_type__isnull=True).exclude(bhk_type='').values_list('bhk_type', flat=True).distinct()
+    unique_cities = all_props.exclude(city__isnull=True).exclude(city='').values_list('city', flat=True).distinct()
+    unique_furnish = all_props.exclude(furnishing_status__isnull=True).exclude(furnishing_status='').values_list('furnishing_status', flat=True).distinct()
+    unique_possession = all_props.exclude(possession_status__isnull=True).exclude(possession_status='').values_list('possession_status', flat=True).distinct()
+    unique_property_types = all_props.exclude(property_type__isnull=True).exclude(property_type='').values_list('property_type', flat=True).distinct()
+    unique_roles = all_props.exclude(uploaded_by_role__isnull=True).exclude(uploaded_by_role='').values_list('uploaded_by_role', flat=True).distinct()
 
-    unique_cities = all_props.exclude(
-        city__isnull=True
-    ).exclude(
-        city=''
-    ).values_list(
-        'city',
-        flat=True
-    ).distinct()
-
-    unique_furnish = all_props.exclude(
-        furnishing_status__isnull=True
-    ).exclude(
-        furnishing_status=''
-    ).values_list(
-        'furnishing_status',
-        flat=True
-    ).distinct()
-
-    unique_possession = all_props.exclude(
-        possession_status__isnull=True
-    ).exclude(
-        possession_status=''
-    ).values_list(
-        'possession_status',
-        flat=True
-    ).distinct()
-
-    active_count = all_props.exclude(
-        possession_status__isnull=True
-    ).exclude(
-        possession_status=''
-    ).count()
-
-    furnished_count = all_props.filter(
-        furnishing_status__iexact='Furnished'
-    ).count()
-
-    available_count = all_props.filter(
-        possession_status__iexact='Ready to Move'
-    ).count()
-
-    city_count = all_props.exclude(
-        city__isnull=True
-    ).exclude(
-        city=''
-    ).values(
-        'city'
-    ).distinct().count()
+    active_count = all_props.exclude(possession_status__isnull=True).exclude(possession_status='').count()
+    furnished_count = all_props.filter(furnishing_status__iexact='Furnished').count()
+    available_count = all_props.filter(possession_status__iexact='Ready to Move').count()
+    city_count = all_props.exclude(city__isnull=True).exclude(city='').values('city').distinct().count()
 
     # ═══════════════════════════════════════
     # RENT STATS
     # ═══════════════════════════════════════
 
-    rent_stats = all_props.exclude(
-        monthly_rent__isnull=True
-    ).aggregate(
+    rent_stats = all_props.exclude(monthly_rent__isnull=True).aggregate(
         avg_rent=Avg('monthly_rent'),
         max_rent=Max('monthly_rent'),
         min_rent=Min('monthly_rent'),
@@ -6335,183 +6244,66 @@ def rental_list(request):
     max_rent = rent_stats['max_rent']
     min_rent = rent_stats['min_rent']
 
-    deposit_stats = all_props.exclude(
-        security_deposit__isnull=True
-    ).aggregate(
-        avg_deposit=Avg('security_deposit')
-    )
-
+    deposit_stats = all_props.exclude(security_deposit__isnull=True).aggregate(avg_deposit=Avg('security_deposit'))
     avg_deposit = deposit_stats['avg_deposit']
 
-    area_stats = all_props.exclude(
-        built_up_area__isnull=True
-    ).aggregate(
-        avg_area=Avg('built_up_area')
-    )
-
+    area_stats = all_props.exclude(built_up_area__isnull=True).aggregate(avg_area=Avg('built_up_area'))
     avg_area = area_stats['avg_area']
 
-    with_owner_count = all_props.exclude(
-        owner_name__isnull=True
-    ).exclude(
-        owner_name=''
-    ).count()
+    with_owner_count = all_props.exclude(owner_name__isnull=True).exclude(owner_name='').count()
+    with_images_count = all_props.filter(images__isnull=False).distinct().count()
 
-    with_images_count = all_props.filter(
-        images__isnull=False
-    ).distinct().count()
-
-    uploaded_files = all_props.exclude(
-        upload_file_name__isnull=True
-    ).exclude(
-        upload_file_name=''
-    ).values_list(
-        'upload_file_name',
-        flat=True
-    ).distinct()
+    uploaded_files = all_props.exclude(upload_file_name__isnull=True).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
 
     # ═══════════════════════════════════════
     # CHARTS
     # ═══════════════════════════════════════
 
-    bhk_qs = all_props.exclude(
-        bhk_type__isnull=True
-    ).exclude(
-        bhk_type=''
-    ).values(
-        'bhk_type'
-    ).annotate(
-        count=Count('id')
-    ).order_by('-count')
-
-    bhk_labels = json.dumps([
-        item['bhk_type'] for item in bhk_qs
-    ])
-
-    bhk_data = json.dumps([
-        item['count'] for item in bhk_qs
-    ])
+    bhk_qs = all_props.exclude(bhk_type__isnull=True).exclude(bhk_type='').values('bhk_type').annotate(count=Count('id')).order_by('-count')
+    bhk_labels = json.dumps([item['bhk_type'] for item in bhk_qs])
+    bhk_data = json.dumps([item['count'] for item in bhk_qs])
 
     rent_buckets = [
-        ('Under ₹5k', 0, 5000),
-        ('₹5k–10k', 5000, 10000),
-        ('₹10k–20k', 10000, 20000),
-        ('₹20k–30k', 20000, 30000),
-        ('₹30k–50k', 30000, 50000),
-        ('₹50k–1L', 50000, 100000),
+        ('Under ₹5k', 0, 5000), ('₹5k–10k', 5000, 10000), ('₹10k–20k', 10000, 20000),
+        ('₹20k–30k', 20000, 30000), ('₹30k–50k', 30000, 50000), ('₹50k–1L', 50000, 100000),
         ('Above ₹1L', 100000, 999999999),
     ]
 
-    rent_range_labels = json.dumps([
-        b[0] for b in rent_buckets
-    ])
+    rent_range_labels = json.dumps([b[0] for b in rent_buckets])
+    rent_range_data = json.dumps([all_props.filter(monthly_rent__gte=lo, monthly_rent__lt=hi).count() for _, lo, hi in rent_buckets])
 
-    rent_range_data = json.dumps([
-        all_props.filter(
-            monthly_rent__gte=lo,
-            monthly_rent__lt=hi
-        ).count()
-        for _, lo, hi in rent_buckets
-    ])
+    furnish_qs = all_props.exclude(furnishing_status__isnull=True).exclude(furnishing_status='').values('furnishing_status').annotate(count=Count('id')).order_by('-count')
+    furnishing_labels = json.dumps([item['furnishing_status'] for item in furnish_qs])
+    furnishing_data = json.dumps([item['count'] for item in furnish_qs])
 
-    furnish_qs = all_props.exclude(
-        furnishing_status__isnull=True
-    ).exclude(
-        furnishing_status=''
-    ).values(
-        'furnishing_status'
-    ).annotate(
-        count=Count('id')
-    ).order_by('-count')
-
-    furnishing_labels = json.dumps([
-        item['furnishing_status'] for item in furnish_qs
-    ])
-
-    furnishing_data = json.dumps([
-        item['count'] for item in furnish_qs
-    ])
-
-    prop_type_qs = all_props.exclude(
-        property_type__isnull=True
-    ).exclude(
-        property_type=''
-    ).values(
-        'property_type'
-    ).annotate(
-        count=Count('id')
-    ).order_by('-count')
-
-    prop_type_labels = json.dumps([
-        item['property_type'] for item in prop_type_qs
-    ])
-
-    prop_type_data = json.dumps([
-        item['count'] for item in prop_type_qs
-    ])
+    prop_type_qs = all_props.exclude(property_type__isnull=True).exclude(property_type='').values('property_type').annotate(count=Count('id')).order_by('-count')
+    prop_type_labels = json.dumps([item['property_type'] for item in prop_type_qs])
+    prop_type_data = json.dumps([item['count'] for item in prop_type_qs])
 
     # ═══════════════════════════════════════
     # KPI
     # ═══════════════════════════════════════
 
-    occupied_count = all_props.filter(
-        possession_status__iexact='Occupied'
-    ).count()
+    occupied_count = all_props.filter(possession_status__iexact='Occupied').count()
+    vacant_count = all_props.filter(possession_status__iexact='Ready to Move').count()
+    occupancy_rate = round((occupied_count / total_count * 100), 1) if total_count > 0 else 0
+    vacancy_rate = round((vacant_count / total_count * 100), 1) if total_count > 0 else 0
+    total_revenue = all_props.aggregate(total=Sum('monthly_rent'))['total'] or 0
+    total_security_deposit = all_props.aggregate(total=Sum('security_deposit'))['total'] or 0
 
-    vacant_count = all_props.filter(
-        possession_status__iexact='Ready to Move'
-    ).count()
-
-    occupancy_rate = round(
-        (occupied_count / total_count * 100), 1
-    ) if total_count > 0 else 0
-
-    vacancy_rate = round(
-        (vacant_count / total_count * 100), 1
-    ) if total_count > 0 else 0
-
-    total_revenue = all_props.aggregate(
-        total=Sum('monthly_rent')
-    )['total'] or 0
-
-    total_security_deposit = all_props.aggregate(
-        total=Sum('security_deposit')
-    )['total'] or 0
-
-    ready_to_move_count = all_props.filter(
-        possession_status__iexact='Ready to Move'
-    ).count()
-
-    short_lease_count = all_props.filter(
-        lease_duration__icontains='6'
-    ).count()
-
-    long_lease_count = all_props.filter(
-        lease_duration__icontains='12'
-    ).count()
-
-    new_property_count = all_props.filter(
-        property_age__icontains='New'
-    ).count()
-
-    old_property_count = all_props.exclude(
-        property_age__icontains='New'
-    ).count()
-
-    premium_properties_count = all_props.filter(
-        monthly_rent__gte=50000
-    ).count()
-
-    affordable_properties_count = all_props.filter(
-        monthly_rent__lt=15000
-    ).count()
+    ready_to_move_count = all_props.filter(possession_status__iexact='Ready to Move').count()
+    short_lease_count = all_props.filter(lease_duration__icontains='6').count()
+    long_lease_count = all_props.filter(lease_duration__icontains='12').count()
+    new_property_count = all_props.filter(property_age__icontains='New').count()
+    old_property_count = all_props.exclude(property_age__icontains='New').count()
+    premium_properties_count = all_props.filter(monthly_rent__gte=50000).count()
+    affordable_properties_count = all_props.filter(monthly_rent__lt=15000).count()
 
     # ═══════════════════════════════════════
-    # CONTEXT
+    # CONTEXT MAP
     # ═══════════════════════════════════════
 
     context = {
-
         'admin_obj': admin_obj,
         'page_obj': page_obj,
 
@@ -6520,11 +6312,16 @@ def rental_list(request):
         'city_query': city_query,
         'furnish_query': furnish_query,
         'possession_query': possession_query,
+        'prop_type_query': prop_type_query,
+        'listed_by_query': listed_by_query,
+        'budget_query': budget_query,
 
         'unique_bhk': unique_bhk,
         'unique_cities': unique_cities,
         'unique_furnish': unique_furnish,
         'unique_possession': unique_possession,
+        'unique_property_types': unique_property_types,
+        'unique_roles': unique_roles,
 
         'filtered_count': filtered_count,
 
@@ -6583,9 +6380,10 @@ def rental_list(request):
 
     return render(
         request,
-        'admin_user/Reports/Rental/rental_list.html',
+        'admin_user/Reports/Rental/rental_reports.html',
         context
     )
+
 
 
 
@@ -6619,7 +6417,7 @@ def rental_bulk_delete(request):
             
         elif delete_type == 'current_page':
             page_ids = data.get('page_ids', [])
-            target_props = properties.filter(id__in=page_ids)
+            target_props = properties.filter(rental_residential_id__in=page_ids)
             count = target_props.count()
             target_props.update(is_deleted=True, deleted_at=timezone.now(), deleted_by=deleter_name)
             return JsonResponse({'status': 'success', 'message': f'Successfully moved {count} properties from current page to Recycle Bin.'})
@@ -6816,7 +6614,7 @@ def system_audit_logs(request):
     def get_display_id(obj):
         # Look for custom model unique IDs before falling back to PK
         id_fields = [
-            'id', 'commercial_rental_id', 'id', 
+            'rental_residential_id', 'commercial_rental_id', 'pg_property_id', 
             'property_id', 'commercial_id', 'plot_property_id', 
             'industrial_id', 'agri_property_id'
         ]
@@ -7281,7 +7079,7 @@ def import_residential_excel(request):
         return JsonResponse({"status": "error", "message": "Only .xlsx files allowed."}, status=400)
 
     # =========================================================
-    # 1. ESTABLISH DEFAULT UPLOADER IDENTITY (Fallback)
+    # 1. ESTABLISH UPLOADER IDENTITY (Copied from manual add)
     # =========================================================
     admin_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
@@ -7295,24 +7093,24 @@ def import_residential_excel(request):
         user_obj = User_Details.objects.filter(id=user_id).first()
 
     # Default fallbacks
-    default_uploader_name = ""
-    default_uploader_email = ""
-    default_uploader_contact = ""
-    default_uploader_role = "Automated Engine"
+    uploader_name = ""
+    uploader_email = ""
+    uploader_contact = ""
+    uploader_role = "Automated Engine"
     user_identity = "Automated Engine"
 
     if admin_obj:
-        default_uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
-        default_uploader_email = getattr(admin_obj, 'email', '')
-        default_uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
-        default_uploader_role = "Admin"
-        user_identity = default_uploader_email or default_uploader_name
+        uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
+        uploader_email = getattr(admin_obj, 'email', '')
+        uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
+        uploader_role = "Admin"
+        user_identity = uploader_email or uploader_name
     elif user_obj:
-        default_uploader_name = user_obj.user_name
-        default_uploader_email = user_obj.user_email
-        default_uploader_contact = user_obj.user_phone
-        default_uploader_role = "User"
-        user_identity = default_uploader_email or default_uploader_name
+        uploader_name = user_obj.user_name
+        uploader_email = user_obj.user_email
+        uploader_contact = user_obj.user_phone
+        uploader_role = "User"
+        user_identity = uploader_email or uploader_name
 
     # =========================================================
     # 2. PARSE EXCEL FILE
@@ -7326,7 +7124,6 @@ def import_residential_excel(request):
     row1_vals = [str(cell.value or "").strip().replace(" *", "") for cell in ws[1]]
     row2_vals = [str(cell.value or "").strip().replace(" *", "") for cell in ws[2]] if ws.max_row >= 2 else []
 
-    # Determine header structure
     if "property_purpose" in row2_vals or "property_title" in row2_vals:
         headers = [val if val else None for val in row2_vals]
         data_start_row = 4
@@ -7334,137 +7131,46 @@ def import_residential_excel(request):
         headers = [val if val else None for val in row1_vals]
         data_start_row = 2
 
-    # =========================================================
-    # 3. PARSE ROWS AND EXTRACT UPLOADER DETAILS FROM EACH ROW
-    # =========================================================
     parsed_rows = []
-    uploader_details_from_excel = {
-        "name": "",
-        "email": "",
-        "contact": "",
-        "role": ""
-    }
-    
     for row_idx, row in enumerate(ws.iter_rows(min_row=data_start_row, values_only=True), start=data_start_row):
-        if all(v is None or str(v).strip() == "" for v in row):
-            continue
+        if all(v is None or str(v).strip() == "" for v in row): continue  
         
         obj_data = {}
         row_id = None
-        row_uploader_name = ""
-        row_uploader_email = ""
-        row_uploader_contact = ""
-        row_uploader_role = ""
-        
         for col_idx, col_name in enumerate(headers):
             if col_name:
-                val = row[col_idx] if col_idx < len(row) else None
-                
-                # Check if this is an uploader-related column
-                if col_name == 'uploaded_by_name':
-                    row_uploader_name = str(val).strip() if val else ""
-                    continue
-                elif col_name == 'uploaded_by_email':
-                    row_uploader_email = str(val).strip() if val else ""
-                    continue
-                elif col_name == 'uploaded_by_contact':
-                    row_uploader_contact = str(val).strip() if val else ""
-                    continue
-                elif col_name == 'uploaded_by_role':
-                    row_uploader_role = str(val).strip() if val else ""
-                    continue
-                elif col_name == 'id':
-                    row_id = str(val).strip() if val else None
+                val = row[col_idx]
+                if col_name == 'rental_residential_id': row_id = str(val).strip() if val else None
                 elif col_name not in ['created_at', 'deleted_at', 'is_deleted']:
-                    if val is not None and str(val).strip() != "":
-                        obj_data[col_name] = val
+                    if val is not None and str(val).strip() != "": obj_data[col_name] = val
 
-        # If this row has uploader details, use them
-        if row_uploader_name:
-            uploader_details_from_excel["name"] = row_uploader_name
-        if row_uploader_email:
-            uploader_details_from_excel["email"] = row_uploader_email
-        if row_uploader_contact:
-            uploader_details_from_excel["contact"] = row_uploader_contact
-        if row_uploader_role:
-            uploader_details_from_excel["role"] = row_uploader_role
-
-        # Process date fields
         if 'available_from' in obj_data and obj_data['available_from']:
             d_val = obj_data['available_from']
             if isinstance(d_val, str):
                 c_str = d_val.strip().split(" ")[0]
-                try:
-                    obj_data['available_from'] = datetime.strptime(c_str, "%Y-%m-%d").date()
+                try: obj_data['available_from'] = datetime.strptime(c_str, "%Y-%m-%d").date()
                 except:
-                    try:
-                        obj_data['available_from'] = datetime.strptime(c_str, "%d-%m-%Y").date()
-                    except:
-                        obj_data['available_from'] = None
+                    try: obj_data['available_from'] = datetime.strptime(c_str, "%d-%m-%Y").date()
+                    except: obj_data['available_from'] = None
             elif isinstance(d_val, datetime):
                 obj_data['available_from'] = d_val.date()
 
-        # Process numeric fields
         for f in ['monthly_rent', 'security_deposit', 'maintenance_amount', 'bathrooms', 'balconies', 'total_floors']:
             if f in obj_data and obj_data[f] is not None:
-                try:
-                    obj_data[f] = int(float(str(obj_data[f]).replace(",", "").strip()))
-                except:
-                    obj_data[f] = None
+                try: obj_data[f] = int(float(str(obj_data[f]).replace(",", "").strip()))
+                except: obj_data[f] = None
 
         for f in ['built_up_area', 'carpet_area', 'plot_area']:
             if f in obj_data and obj_data[f] is not None:
-                try:
-                    obj_data[f] = Decimal(str(obj_data[f]).replace(",", "").strip())
-                except:
-                    obj_data[f] = None
+                try: obj_data[f] = Decimal(str(obj_data[f]).replace(",", "").strip())
+                except: obj_data[f] = None
 
-        parsed_rows.append({
-            'row_idx': row_idx, 
-            'row_id': row_id, 
-            'data': obj_data,
-            'uploader_name': row_uploader_name,
-            'uploader_email': row_uploader_email,
-            'uploader_contact': row_uploader_contact,
-            'uploader_role': row_uploader_role
-        })
+        parsed_rows.append({'row_idx': row_idx, 'row_id': row_id, 'data': obj_data})
 
     wb.close()
 
     # =========================================================
-    # 4. DETERMINE FINAL UPLOADER DETAILS
-    #    Priority: Excel row data > Session fallback
-    # =========================================================
-    # Check if any row had uploader data
-    has_excel_uploader = any(
-        row['uploader_name'] or row['uploader_email'] or row['uploader_contact'] 
-        for row in parsed_rows
-    )
-    
-    if has_excel_uploader:
-        # Use the first non-empty uploader details found
-        for row in parsed_rows:
-            if row['uploader_name'] or row['uploader_email'] or row['uploader_contact']:
-                uploader_name = row['uploader_name'] or uploader_details_from_excel["name"] or default_uploader_name
-                uploader_email = row['uploader_email'] or uploader_details_from_excel["email"] or default_uploader_email
-                uploader_contact = row['uploader_contact'] or uploader_details_from_excel["contact"] or default_uploader_contact
-                uploader_role = row['uploader_role'] or uploader_details_from_excel["role"] or default_uploader_role
-                break
-        else:
-            # Fallback to session if no row had uploader data
-            uploader_name = default_uploader_name
-            uploader_email = default_uploader_email
-            uploader_contact = default_uploader_contact
-            uploader_role = default_uploader_role
-    else:
-        # No uploader data in Excel, use session fallback
-        uploader_name = default_uploader_name
-        uploader_email = default_uploader_email
-        uploader_contact = default_uploader_contact
-        uploader_role = default_uploader_role
-
-    # =========================================================
-    # 5. DUPLICATE & OVERLAP CHECKS
+    # 3. DUPLICATE & OVERLAP CHECKS
     # =========================================================
     file_name_exists = RentalResidentialProperty.objects.filter(upload_file_name=excel_file.name).exists()
     total_scanned_rows = len(parsed_rows)
@@ -7486,15 +7192,14 @@ def import_residential_excel(request):
             duplicate_data_different_name_count += 1
 
         if r_id and r_id != "None":
-            existing = RentalResidentialProperty.objects.filter(id=r_id).first()
+            existing = RentalResidentialProperty.objects.filter(rental_residential_id=r_id).first()
             if existing:
                 has_changed = False
                 for k, v in o_data.items():
                     if str(getattr(existing, k, None)).strip() != str(v).strip():
                         has_changed = True
                         break
-                if has_changed:
-                    different_file_rows += 1
+                if has_changed: different_file_rows += 1
 
     if file_name_exists and different_file_rows == 0 and total_scanned_rows > 0:
         return JsonResponse({
@@ -7509,34 +7214,26 @@ def import_residential_excel(request):
         })
 
     # =========================================================
-    # 6. DATABASE WRITE WITH UPLOADER DETAILS
+    # 4. DATABASE WRITE & UPLOADER INJECTION
     # =========================================================
     created, updated, skipped, errors = 0, 0, 0, []
-    
     for item in parsed_rows:
         o_data = item['data']
         r_id = item['row_id']
         
-        # Determine uploader for this specific row (row-level override)
-        row_uploader_name = item['uploader_name'] or uploader_name
-        row_uploader_email = item['uploader_email'] or uploader_email
-        row_uploader_contact = item['uploader_contact'] or uploader_contact
-        row_uploader_role = item['uploader_role'] or uploader_role
-        
-        # ---> INJECT UPLOADER DETAILS INTO THE DICTIONARY <---
+        # ---> INJECT UPLOADER DETAILS INTO THE DICTIONARY HERE <---
         o_data["upload_file_name"] = excel_file.name
-        o_data["uploaded_by_name"] = row_uploader_name
-        o_data["uploaded_by_email"] = row_uploader_email
-        o_data["uploaded_by_contact"] = row_uploader_contact
-        o_data["uploaded_by_role"] = row_uploader_role
+        o_data["uploaded_by_name"] = uploader_name
+        o_data["uploaded_by_email"] = uploader_email
+        o_data["uploaded_by_contact"] = uploader_contact
+        o_data["uploaded_by_role"] = uploader_role
 
         try:
             # Update Existing
             if r_id and r_id != "None":
-                prop = RentalResidentialProperty.objects.filter(id=r_id).first()
+                prop = RentalResidentialProperty.objects.filter(rental_residential_id=r_id).first()
                 if prop:
-                    for key, val in o_data.items():
-                        setattr(prop, key, val)
+                    for key, val in o_data.items(): setattr(prop, key, val)
                     prop.save()
                     updated += 1
                     continue
@@ -7558,13 +7255,11 @@ def import_residential_excel(request):
             errors.append(f"Row {item['row_idx']} processing failure: {str(e)}")
 
     # =====================================================
-    # 7. AUDIT LOGIC: File-wise Workbook Log Creation Entry
+    # 5. AUDIT LOGIC: File-wise Workbook Log Creation Entry
     # =====================================================
-    audit_identity = uploader_email or uploader_name or "Excel Import"
-    
     RentalActivityLog.objects.create(
-        user_identity=audit_identity,
-        user_role=uploader_role,
+        user_identity=user_identity,
+        user_role=uploader_role, # Updated to use the resolved role!
         action_type='EXCEL_IMPORT',
         property_id="Multiple / Sheet Records",
         targeted_fields="bulk_action",
@@ -7574,12 +7269,7 @@ def import_residential_excel(request):
             "records_created": created,
             "records_updated": updated,
             "records_skipped": skipped,
-            "errors_encountered": len(errors),
-            "uploader_name": uploader_name,
-            "uploader_email": uploader_email,
-            "uploader_contact": uploader_contact,
-            "uploader_role": uploader_role,
-            "source": "excel_row_data" if has_excel_uploader else "session_fallback"
+            "errors_encountered": len(errors)
         }),
         ip_address=_get_client_ip(request),
         status='SUCCESS' if not errors else 'PARTIAL'
@@ -7588,18 +7278,7 @@ def import_residential_excel(request):
     return JsonResponse({
         "status": "success" if not errors else "partial_error",
         "message": f"{created} Created | {updated} Updated | {skipped} Skipped due to system rules.",
-        "created": created,
-        "updated": updated,
-        "skipped": skipped,
-        "error_count": len(errors),
-        "errors": errors,
-        "uploader_details": {
-            "name": uploader_name,
-            "email": uploader_email,
-            "contact": uploader_contact,
-            "role": uploader_role,
-            "source": "excel_row_data" if has_excel_uploader else "session_fallback"
-        }
+        "created": created, "updated": updated, "skipped": skipped, "error_count": len(errors), "errors": errors
     })
 
  
@@ -7638,15 +7317,26 @@ def download_residential_template(request):
             "address", "city", "locality", "state", "pincode", "road_connectivity"
         ],
         "Description & Features": [
-            "amenities", "facilities", "description", "rent_residential_desc"
+            "amenities", "facilities", "user_description"
         ],
         "Owner Info": [
             "owner_name", "contact_number", "email", "alternate_contact"
         ],
-        "System Data": [
+
+        "Listed By Details": [
+            "listed_by_id", "listed_by_name", "listed_by_email", 
+            "listed_by_contact","listed_by_role"
+        ],
+
+        "Uploaded By Info/System Data": [
             "uploaded_by_name", "uploaded_by_email", "uploaded_by_contact", 
             "uploaded_by_role", "created_at"
         ],
+
+
+        
+
+        
     }
 
     HINTS = {
@@ -7662,9 +7352,12 @@ def download_residential_template(request):
         "security_deposit": "₹", "maintenance_type": "Included in Rent/Extra", "maintenance_amount": "₹",
         "address": "Full Address", "city": "Text", "locality": "Text", "state": "e.g. Maharashtra",
         "pincode": "6-digit", "road_connectivity": "Optional", "amenities": "Comma-sep", 
-        "facilities": "Comma-sep", "description": "Short Summary", "rent_residential_desc": "Long Rich Text",
+        "facilities": "Comma-sep", "user_description": "Property Description Added By User",
         "owner_name": "Full Name", "contact_number": "10 Digits", "email": "email@example.com",
         "alternate_contact": "Optional", "uploaded_by_name": "Auto", "uploaded_by_email": "Auto",
+        "alternate_contact": "Optional", "uploaded_by_name": "Auto", "uploaded_by_email": "Auto",
+        "alternate_contact": "Optional", "listed_by_id": "rm0943", "listed_by_name": "vikas", "listed_by_email": "123@gmail.com", "listed_by_contact": "7878873844", "listed_by_role": "rm",  
+        "uploaded_by_name": "Auto", "uploaded_by_email": "Auto",
         "uploaded_by_contact": "Auto", "uploaded_by_role": "Auto", "created_at": "YYYY-MM-DD (Auto)"
     }
 
@@ -7687,8 +7380,9 @@ def download_residential_template(request):
         "security_deposit": "50000", "maintenance_type": "Included in Rent", "maintenance_amount": "",
         "address": "Flat 402, Green Valley", "city": "Pune", "locality": "Kharadi", "state": "Maharashtra",
         "pincode": "411014", "road_connectivity": "Highway 1km", "amenities": "Wi-Fi, AC",
-        "facilities": "Metro, Hospital", "description": "Great flat", "rent_residential_desc": "Full detailed html description...",
-        "owner_name": "Rahul Sharma", "contact_number": "9876543210", "email": "rahul@test.com"
+        "facilities": "Metro, Hospital","user_description":"Description Added By User",
+        "owner_name": "Rahul Sharma", "contact_number": "9876543210", "email": "rahul@test.com",
+        "listed_by_id_": "rm04343", "listed_by_name": "sunil", "listed_by_email": "sunil@test.com", "listed_by_contact": "948593483439", "listed_by_role": "rm"
     }
 
     all_cols = []
@@ -7800,17 +7494,6 @@ def rental_residential_edit(request, pk):
         return render(request, 'home_page/Adminlogin.html')
 
     admin_obj = Admin_Login.objects.get(id=session_id)
-
-    user_obj = User_Details.objects.filter(
-                    user_role__in=['Relationship Manager', 'Agent', 'Agency/Builder','Landlord']
-            ).annotate(
-                sort_order=Case(
-                    When(user_role='Relationship Manager', then=Value(1)),         
-                    default=Value(2),   
-                    output_field=IntegerField(),
-                )
-            ).order_by('sort_order', '-id','user_role')
-
     
     if request.method == 'POST':
         try:
@@ -7913,6 +7596,7 @@ def rental_residential_edit(request, pk):
             # =====================================================
             prop.description = request.POST.get('description')
             prop.rent_residential_desc = request.POST.get('rent_residential_desc')
+            prop.user_description = request.POST.get('user_description')
 
             # =====================================================
             # 8. OWNER DETAILS
@@ -7997,63 +7681,16 @@ def rental_residential_edit(request, pk):
                 'message': f"Failed to save data: {str(e)}"
             }, status=400)
 
-        
-
     # ---------- GET METHOD: RENDER FORM ----------
     return render(request, 'admin_user/rental_residential_edit.html', {
         'property': prop,
         'admin_obj': admin_obj,
         'ameneties_obj': Ameneties_Details.objects.all(),
-        'facilities_obj': Facilities_Details.objects.all(),
-        'user_obj':user_obj
+        'facilities_obj': Facilities_Details.objects.all()
     })
 
 
 
-############### Views start for get user details according to listed by ########
-
-@csrf_exempt
-def get_user_data(request):
-    assigned_to = request.POST.get('assigned_to')
-    
-    if not assigned_to:
-        return JsonResponse({'error': 'No user selected'}, status=400)
-    
-    # Check if it's a self selection (just an ID without role)
-    if '-' not in assigned_to:
-        try:
-            user_obj = User_Details.objects.get(id=assigned_to)
-            data = {
-                'user_id': user_obj.user_id,
-                'name': getattr(user_obj, 'user_name', ''), # Fallback if naming differs
-                'email': getattr(user_obj, 'user_email', ''),
-                'contact': getattr(user_obj, 'user_phone', ''),
-                'role': getattr(user_obj, 'user_role', '')
-            }
-            return JsonResponse(data)
-        except User_Details.DoesNotExist:
-            return JsonResponse({'error': 'User not found'}, status=404)
-    
-    # For other users (format: user_id-role)
-    split = assigned_to.split("-")
-    user_id = split[0]
-    user_role = split[1]
-
-    try:
-        user_obj = User_Details.objects.get(id=user_id, user_role=user_role)
-        data = {
-            'user_id': user_obj.user_id,
-            'name': getattr(user_obj, 'user_name', ''),
-            'email': getattr(user_obj, 'user_email', ''),
-            'contact': getattr(user_obj, 'user_phone', ''),
-            'role': getattr(user_obj, 'user_role', '')
-        }
-        return JsonResponse(data)
-    except User_Details.DoesNotExist:
-        return JsonResponse({'error': 'User not found'}, status=404)
-    
-
-############## Views end for get user details according to listed by ##########
 
 
 ##################################RESIDENTIAL RENTAL LISTING VEIW SECTION END##############################
@@ -8065,12 +7702,12 @@ def get_user_data(request):
 
 
 
+
+
 def commercial_rental_add(request):
 
     admin_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
-
-    
 
     if not admin_id and not user_id:
         return redirect('login')
@@ -8094,6 +7731,22 @@ def commercial_rental_add(request):
             uploader_role = user.role
 
         # =============================
+        # SAFE NUMERICAL CONVERTERS
+        # Prevents "Cannot specify ',' with 's'" format errors
+        # =============================
+        def to_int(val, default=0):
+            try: return int(str(val).replace(',', '').strip())
+            except: return default
+
+        def to_int_or_none(val):
+            try: return int(str(val).replace(',', '').strip())
+            except: return None
+
+        def to_float_or_none(val):
+            try: return float(str(val).replace(',', '').strip())
+            except: return None
+
+        # =============================
         # HANDLE POST
         # =============================
         if request.method == "POST":
@@ -8102,7 +7755,6 @@ def commercial_rental_add(request):
             facilities_list = request.POST.getlist('nearby_facilities[]')
 
             prop = CommercialRentalProperty.objects.create(
-                # ✅ Added the newly auto-generated property title field
                 property_title=request.POST.get('property_title'), 
                 
                 property_type=request.POST.get('property_type'),
@@ -8122,14 +7774,14 @@ def commercial_rental_add(request):
                 ownership_type=request.POST.get('ownership_type'),
                 construction_status=request.POST.get('construction_status'),
 
-                builtup_area=request.POST.get('builtup_area') or 0,
-                carpet_area=request.POST.get('carpet_area') or None,
-                expected_rent=request.POST.get('expected_rent') or 0,
+                # ✅ FIXED: Numerical fields are safely converted to integers/floats
+                builtup_area=to_int(request.POST.get('builtup_area')),
+                carpet_area=to_int_or_none(request.POST.get('carpet_area')),
+                expected_rent=to_int(request.POST.get('expected_rent')),
 
-                security_deposit=request.POST.get('security_deposit') or None,
-                maintenance_charges=request.POST.get('maintenance_charges') or None,
+                security_deposit=to_int_or_none(request.POST.get('security_deposit')),
+                maintenance_charges=to_int_or_none(request.POST.get('maintenance_charges')),
 
-                # ✅ Fixed: Now saves directly as a string to match the updated CharField model
                 negotiable=request.POST.get('negotiable'),
 
                 brokerage=request.POST.get('brokerage'),
@@ -8140,34 +7792,34 @@ def commercial_rental_add(request):
                 electricity_included=True if request.POST.get('electricity_included') == 'on' else False,
                 water_included=True if request.POST.get('water_included') == 'on' else False,
 
-                lockin_period=request.POST.get('lockin_period') or None,
-                rent_increase=request.POST.get('rent_increase') or None,
+                lockin_period=to_int_or_none(request.POST.get('lockin_period')),
+                rent_increase=to_float_or_none(request.POST.get('rent_increase')),
 
-                total_floors=request.POST.get('total_floors') or None,
-                your_floor=request.POST.get('your_floor') or None,
-                staircases=request.POST.get('staircases') or None,
+                total_floors=to_int_or_none(request.POST.get('total_floors')),
+                your_floor=to_int_or_none(request.POST.get('your_floor')),
+                staircases=to_int_or_none(request.POST.get('staircases')),
 
-                passenger_lifts=request.POST.get('passenger_lifts') or 0,
-                service_lifts=request.POST.get('service_lifts') or 0,
-                private_parking=request.POST.get('private_parking') or 0,
+                passenger_lifts=to_int(request.POST.get('passenger_lifts')),
+                service_lifts=to_int(request.POST.get('service_lifts')),
+                private_parking=to_int(request.POST.get('private_parking')),
 
-                min_seats=request.POST.get('min_seats') or None,
-                max_seats=request.POST.get('max_seats') or None,
-                cabins=request.POST.get('cabins') or None,
-                meeting_rooms=request.POST.get('meeting_rooms') or None,
+                min_seats=to_int_or_none(request.POST.get('min_seats')),
+                max_seats=to_int_or_none(request.POST.get('max_seats')),
+                cabins=to_int_or_none(request.POST.get('cabins')),
+                meeting_rooms=to_int_or_none(request.POST.get('meeting_rooms')),
 
-                private_washroom=request.POST.get('private_washroom') or 0,
-                public_washroom=request.POST.get('public_washroom') or 0,
+                private_washroom=to_int(request.POST.get('private_washroom')),
+                public_washroom=to_int(request.POST.get('public_washroom')),
 
                 flooring_type=request.POST.get('flooring_type'),
 
                 amenities=amenities_list,
                 nearby_facilities=facilities_list,
 
-                property_summary=request.POST.get('property_summary'),
-                property_description=request.POST.get('property_description'),
+                # We omit property_summary and property_description here because 
+                # the Model's save() method automatically generates and applies them.
+                user_description=request.POST.get('user_description'),
 
-               
                 video=request.FILES.get('video'),
 
                 owner_name=request.POST.get('owner_name'),
@@ -8186,14 +7838,12 @@ def commercial_rental_add(request):
             # =============================
             images = request.FILES.getlist('property_images[]')
             
-            # The enumerate(images) loop automatically reads them in the sequence they were dragged/dropped!
             for i, img in enumerate(images):
                 if i >= 10:
                     break
                 CommercialRentalPropertyImage.objects.create(
                     property=prop,
                     image=img
-                    # display_order=i  <-- Uncomment this if you added a display_order field to your image model
                 )
 
             return JsonResponse({
@@ -8210,14 +7860,6 @@ def commercial_rental_add(request):
         })
 
     return render(request, 'admin_user/Reports/Rental/commercial_list.html')
-
-
-
-
-# ─────────────────────────────
-# VIEW PROPERTY
-
-
 
 
 
@@ -8331,6 +7973,7 @@ def commercial_edit(request, pk):
             prop.nearby_facilities = request.POST.getlist('nearby_facilities[]')
             prop.property_summary = p.get('property_summary')
             prop.property_description = p.get('property_description')
+            prop.user_description = p.get('user_description')
 
             # STEP 4: Owner Verification Registry Mapping
             prop.owner_name = p.get('owner_name')
@@ -8715,9 +8358,8 @@ def download_commercial_rental12__template(request):
         # ── Amenities & Facilities ────────────────────────────────────────────
         ("Amenities & Facilities", "amenities",            False,  "Comma-sep e.g. Wi-Fi,AC,CCTV,Generator",  "Wi-Fi,AC,CCTV"),
         ("Amenities & Facilities", "nearby_facilities",    False,  "Comma-sep e.g. Metro,Bank,Parking",       "Metro,Bank"),
-        ("Amenities & Facilities", "property_summary",     False,  "Short plain-text description",            "Prime office space with fit-out."),
-        ("Amenities & Facilities", "property_description", False,  "Full Detailed Description",               "Elevate your business presence..."),
-        
+        ("Property Description",   "user_description",     False,  "Detail Property description added by user",            "My property near by."),
+       
         # ── Contact Info ──────────────────────────────────────────────────────
         ("Contact Info", "owner_name",          True,  "Full name",              "Rahul Mehta"),
         ("Contact Info", "contact_number",      True,  "10 Digits",              "9876543210"),
@@ -8783,7 +8425,7 @@ def download_commercial_rental12__template(request):
         buf.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
-    response["Content-Disposition"] = 'attachment; filename="Commercial_Rental_Template.xlsx"'
+    response["Content-Disposition"] = 'attachment; filename="Commercial_Rental_Listing_Template.xlsx"'
     return response
 
 
@@ -9034,6 +8676,243 @@ def commercial_list(request):
 
 
 
+def commercial_reports(request):
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+
+    admin_obj = Admin_Login.objects.get(id=session_id)
+
+    # ═══════════════════════════════════════
+    # CAPTURE ADVANCED FILTER QUERY PARAMS
+    # ═══════════════════════════════════════
+    search_query = request.GET.get('search', '').strip()
+    prop_type_query = request.GET.get('property_type', '').strip()
+    city_query = request.GET.get('city', '').strip()
+    zone_query = request.GET.get('zone_type', '').strip()
+    possession_query = request.GET.get('possession', '').strip()
+    listed_by_query = request.GET.get('listed_by', '').strip()
+    budget_query = request.GET.get('budget', '').strip()
+    from_date_str = request.GET.get('from_date', '').strip()
+    to_date_str = request.GET.get('to_date', '').strip()
+
+    # ═══════════════════════════════════════
+    # DYNAMIC SEARCH DROPDOWN & BUDGET POPULATORS
+    # ═══════════════════════════════════════
+    unfiltered_base = CommercialRentalProperty.objects.filter(is_deleted=False)
+    
+    unique_property_types = unfiltered_base.values_list('property_type', flat=True).distinct()
+    unique_cities = unfiltered_base.values_list('city', flat=True).distinct()
+    unique_zones = unfiltered_base.exclude(zone_type__isnull=True).exclude(zone_type='').values_list('zone_type', flat=True).distinct()
+    unique_possession = unfiltered_base.values_list('possession_status', flat=True).distinct()
+    unique_roles = unfiltered_base.exclude(uploaded_by_role__isnull=True).exclude(uploaded_by_role='').values_list('uploaded_by_role', flat=True).distinct()
+
+    # Financial Aggregations & Dynamic Budget Tier Generation
+    financials = unfiltered_base.aggregate(
+        avg=Avg('expected_rent'), max_r=Max('expected_rent'), min_r=Min('expected_rent'),
+        total_r=Sum('expected_rent'), deposit_total=Sum('security_deposit'), area_avg=Avg('builtup_area')
+    )
+    
+    max_rent = financials['max_r'] or 0
+    min_rent = financials['min_r'] or 0
+
+    dynamic_budgets = []
+    if max_rent > 0:
+        interval = (max_rent - min_rent) / 4
+        if interval == 0:
+            dynamic_budgets.append({
+                'value': 'tier_1', 
+                'label': f"Up to ₹{int(max_rent):,}", 
+                'min': 0, 'max': max_rent
+            })
+        else:
+            b1 = min_rent + interval
+            b2 = min_rent + (interval * 2)
+            b3 = min_rent + (interval * 3)
+
+            dynamic_budgets = [
+                {'value': 'tier_1', 'label': f"Under ₹{int(b1):,}", 'min': 0, 'max': b1},
+                {'value': 'tier_2', 'label': f"₹{int(b1):,} – ₹{int(b2):,}", 'min': b1, 'max': b2},
+                {'value': 'tier_3', 'label': f"₹{int(b2):,} – ₹{int(b3):,}", 'min': b2, 'max': b3},
+                {'value': 'tier_4', 'label': f"Above ₹{int(b3):,}", 'min': b3, 'max': max_rent * 10}
+            ]
+
+    # Base Active Queryset 
+    properties = CommercialRentalProperty.objects.filter(is_deleted=False)
+
+    # ═══════════════════════════════════════
+    # EXECUTE DYNAMIC ADVANCED FILTERS
+    # ═══════════════════════════════════════
+    if search_query:
+        properties = properties.filter(
+            Q(property_title__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(area_locality__icontains=search_query) |
+            Q(building_name__icontains=search_query) |
+            Q(owner_name__icontains=search_query)
+        )
+
+    if prop_type_query and prop_type_query != "All Types":
+        properties = properties.filter(property_type__iexact=prop_type_query)
+
+    if city_query and city_query != "All Cities":
+        properties = properties.filter(city__iexact=city_query)
+
+    if zone_query and zone_query != "All Zones":
+        properties = properties.filter(zone_type__iexact=zone_query)
+
+    if possession_query and possession_query != "All Status":
+        properties = properties.filter(possession_status__iexact=possession_query)
+
+    if listed_by_query and listed_by_query != "All Roles":
+        properties = properties.filter(uploaded_by_role__iexact=listed_by_query)
+
+    # Dynamic Budget Range Filter Lookup Execution
+    if budget_query and budget_query != "All Budgets":
+        for bucket in dynamic_budgets:
+            if budget_query == bucket['value']:
+                properties = properties.filter(expected_rent__gte=bucket['min'], expected_rent__lte=bucket['max'])
+                break
+
+    # Created At Date Filter Ranges
+    if from_date_str:
+        f_date = parse_date(from_date_str)
+        if f_date:
+            properties = properties.filter(created_at__date__gte=f_date)
+
+    if to_date_str:
+        t_date = parse_date(to_date_str)
+        if t_date:
+            properties = properties.filter(created_at__date__lte=t_date)
+
+    properties = properties.order_by('-id')
+
+    # KPI Dashboards metrics logic
+    total_properties = unfiltered_base.count()
+    active_listings = unfiltered_base.count()
+    occupied_count = unfiltered_base.filter(possession_status__icontains="occupied").count()
+    vacant_count = unfiltered_base.filter(possession_status__icontains="ready").count()
+    occupancy_rate = round((occupied_count / total_properties * 100), 1) if total_properties > 0 else 0
+    vacancy_rate = round((vacant_count / total_properties * 100), 1) if total_properties > 0 else 0
+
+    avg_rent = financials['avg'] or 0
+    max_rent = financials['max_r'] or 0
+    min_rent = financials['min_r'] or 0
+    total_revenue = financials['total_r'] or 0
+    total_security_deposit = financials['deposit_total'] or 0
+    avg_area = financials['area_avg'] or 0
+
+    ready_to_move_count = vacant_count
+    premium_properties_count = unfiltered_base.filter(expected_rent__gte=100000).count()
+    affordable_properties_count = unfiltered_base.filter(expected_rent__lt=25000).count()
+    short_lease_count = unfiltered_base.filter(lockin_period__lte=6).count()
+    long_lease_count = unfiltered_base.filter(lockin_period__gt=11).count()
+    with_images_count = unfiltered_base.filter(images__isnull=False).distinct().count()
+    with_owner_count = unfiltered_base.exclude(owner_name__isnull=True).exclude(owner_name='').count()
+    image_pct = round((with_images_count / total_properties * 100), 1) if total_properties > 0 else 0
+    verified_pct = round((with_owner_count / total_properties * 100), 1) if total_properties > 0 else 0
+
+    total_tenants = occupied_count
+    collection_rate = 98
+    pending_payments = unfiltered_base.filter(possession_status__icontains="dispute").count()
+    maintenance_req = unfiltered_base.filter(maintenance_charges__gt=0).count()
+
+    # Chart Serialization Lookups
+    pt_qs = unfiltered_base.values('property_type').annotate(count=Count('id')).order_by('-count')
+    prop_type_labels_json = json.dumps([item['property_type'].replace('-', ' ').title() for item in pt_qs])
+    prop_type_counts_json = json.dumps([item['count'] for item in pt_qs])
+
+    city_qs = unfiltered_base.values('city').annotate(revenue=Sum('expected_rent')).order_by('-revenue')[:6]
+    monthly_labels_json = json.dumps([item['city'] for item in city_qs])
+    monthly_revenue_json = json.dumps([float(item['revenue'] or 0) for item in city_qs])
+    occupancy_json = json.dumps([occupied_count, vacant_count, total_properties - (occupied_count + vacant_count)])
+
+    rent_buckets = [
+        ('Under 25k', unfiltered_base.filter(expected_rent__lt=25000).count()),
+        ('25k - 1L', unfiltered_base.filter(expected_rent__gte=25000, expected_rent__lte=100000).count()),
+        ('1L - 5L', unfiltered_base.filter(expected_rent__gte=100000, expected_rent__lte=500000).count()),
+        ('Above 5L', unfiltered_base.filter(expected_rent__gt=500000).count()),
+    ]
+    rent_range_labels_json = json.dumps([b[0] for b in rent_buckets])
+    rent_range_counts_json = json.dumps([b[1] for b in rent_buckets])
+
+    try:
+        uploaded_files = unfiltered_base.exclude(upload_file_name__isnull=True).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct()
+    except Exception:
+        uploaded_files = []
+
+    paginator = Paginator(properties, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'admin_user/Reports/Rental/commercial_reports.html', {
+        'admin_obj': admin_obj,
+        'page_obj': page_obj,
+        
+        # Filter Retention Tags State
+        'search_query': search_query,
+        'prop_type_query': prop_type_query,
+        'city_query': city_query,
+        'zone_query': zone_query,
+        'possession_query': possession_query,
+        'listed_by_query': listed_by_query,
+        'budget_query': budget_query,
+        'from_date': from_date_str,
+        'to_date': to_date_str,
+        'filtered_count': properties.count(),
+
+        # Dropdown Lists Populators
+        'unique_property_types': unique_property_types,
+        'unique_cities': unique_cities,
+        'unique_zones': unique_zones,
+        'unique_possession': unique_possession,
+        'unique_roles': unique_roles,
+        'uploaded_files': uploaded_files,
+        'dynamic_budgets': dynamic_budgets,  # Added Context
+
+        # Metrics & KPI Bindings
+        'total_count': total_properties,
+        'active_count': active_listings,
+        'occupied_count': occupied_count,
+        'vacant_count': vacant_count,
+        'occupancy_rate': occupancy_rate,
+        'vacancy_rate': vacancy_rate,
+        'avg_rent': avg_rent,
+        'max_rent': max_rent,
+        'min_rent': min_rent,
+        'total_revenue': total_revenue,
+        'total_security_deposit': total_security_deposit,
+        'avg_area': avg_area,
+        'ready_to_move_count': ready_to_move_count,
+        'premium_properties_count': premium_properties_count,
+        'affordable_properties_count': affordable_properties_count,
+        'short_lease_count': short_lease_count,
+        'long_lease_count': long_lease_count,
+        'with_images_count': with_images_count,
+        'with_owner_count': with_owner_count,
+        'image_pct': image_pct,
+        'verified_pct': verified_pct,
+        'total_tenants': total_tenants,
+        'collection_rate': collection_rate,
+        'pending_payments': pending_payments,
+        'maintenance_req': maintenance_req,
+
+        # Charts Context Variables Serialization
+        'prop_type_labels_json': prop_type_labels_json,
+        'prop_type_counts_json': prop_type_counts_json,
+        'monthly_labels_json': monthly_labels_json,
+        'monthly_revenue_json': monthly_revenue_json,
+        'occupancy_json': occupancy_json,
+        'rent_range_labels_json': rent_range_labels_json,
+        'rent_range_counts_json': rent_range_counts_json,
+    })
+
+
+
+
+
+
+
 def commercial_bulk_delete(request):
     """Handles Advanced Bulk Deletions for Commercial Properties."""
     if request.method != 'POST':
@@ -9160,7 +9039,7 @@ def export_pg_coliving(request):
 
     # ── EXACT MATCH TO IMPORT SEQUENCE + SYSTEM META FOR AUDIT ──
     EXPORT_COLS = [
-        ("⚙️ System Meta", "id", False, "Auto Generated Property pg ID"),
+        ("⚙️ System Meta", "pg_property_id", False, "Auto Generated Property pg ID"),
         ("📋 Basic Info", "property_title", False, "Property Title/Auto Generated"),
         ("📋 Basic Info", "city", True, "city *"),
         ("📋 Basic Info", "building_name", False, "building / project name"),
@@ -9399,7 +9278,7 @@ def pg_list(request):
             Q(property_title__icontains=search_query) | Q(city__icontains=search_query) |
             Q(locality__icontains=search_query) | Q(building_name__icontains=search_query) |
             Q(owner_name__icontains=search_query) | Q(contact_number__icontains=search_query) |
-            Q(id__icontains=search_query)
+            Q(pg_property_id__icontains=search_query)
         )
     if pg_for_filter:
         properties = properties.filter(pg_for__iexact=pg_for_filter)
@@ -9422,7 +9301,7 @@ def pg_list(request):
     # EXPORT HELPERS  (shared by both Excel & CSV)
     # ══════════════════════════════════════════════════════════════
     EXPORT_HEADERS = [
-        "id", "property_title", "city", "building_name",
+        "pg_property_id", "property_title", "city", "building_name",
         "locality", "property_address", "total_beds", "pg_for",
         "furnishing_type", "sharing_type", "best_suited_for",
         # Room 1
@@ -9477,7 +9356,7 @@ def pg_list(request):
         for prop in qs.prefetch_related('rooms'):
             rooms_list = list(prop.rooms.all())
             row = {
-                "id":       prop.id,
+                "id":                   prop.id,
                 "property_title":       prop.property_title or "",
                 "city":                 prop.city,
                 "building_name":        prop.building_name or "",
@@ -9760,6 +9639,8 @@ def add_pg(request):
                 smoking_allowed=bool(request.POST.get("smoking_allowed")),
 
                 property_description=request.POST.get("property_description"),
+                property_summary=request.POST.get("property_summary"),
+                user_description=request.POST.get("user_description"),
 
                 # MEDIA
                 video=request.FILES.get("video"),
@@ -9862,7 +9743,7 @@ def pg_bulk_delete(request):
 
         elif delete_type == 'current_page':
             page_ids = data.get('page_ids', [])
-            target_props = properties.filter(id__in=page_ids)
+            target_props = properties.filter(pg_property_id__in=page_ids)
 
         elif delete_type == 'date_range':
             from_date = data.get('from_date')
@@ -10855,6 +10736,10 @@ def pg_edit(request, property_id):
                 "property_description", ""
             )
 
+            pg.property_summary = request.POST.get(
+                "property_summary", ""
+            )
+
             # =================================================
             # VIDEO
             # =================================================
@@ -11024,7 +10909,7 @@ def pg_coliving_delete(request, pk):
         # ✅ USING NEW PRIMARY KEY FIELD
         pg = get_object_or_404(
             PGColivingProperty,
-            id=pk
+            pg_property_id=pk
         )
 
         pg.is_deleted = True
@@ -11052,7 +10937,7 @@ def pg_restore(request, id):
     if not admin_id:
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 
-    PGColivingProperty.objects.filter(id=id).update(
+    PGColivingProperty.objects.filter(pg_property_id=id).update(
         is_deleted=False,
         deleted_at=None,
         deleted_by=None
@@ -11070,7 +10955,7 @@ def pg_hard_delete(request, id):
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
 
     try:
-        pg = get_object_or_404(PGColivingProperty, id=id)
+        pg = get_object_or_404(PGColivingProperty, pg_property_id=id)
 
         # Clean up related asset files safely
         for img in pg.images.all():
@@ -11173,6 +11058,10 @@ def plot_sale_add(request):
                 encumbrance_cert      = request.FILES.get('encumbrance_cert'),
                 social_video          = request.FILES.get('social_video'),
 
+                property_description  = request.POST.get('property_description'),
+                user_description  = request.POST.get('user_description'),
+                property_summary  = request.POST.get('property_summary'),
+
                 # ── Step 4: Location & Owner ────────────────────────────
                 plot_city             = request.POST.get('plot_city'),
                 plot_locality         = request.POST.get('plot_locality'),
@@ -11246,6 +11135,9 @@ def plot_sale_edit(request, plot_property_id):
             prop.plot_city             = request.POST.get('plot_city')
             prop.plot_locality         = request.POST.get('plot_locality')
             prop.plot_address          = request.POST.get('plot_address')
+            prop.property_description  = request.POST.get('property_description')
+            prop.property_summary      = request.POST.get('property_summary')
+            prop.user_description      = request.POST.get('user_description')
             prop.plot_owner_name       = request.POST.get('plot_owner_name')
             prop.plot_owner_contact    = request.POST.get('plot_owner_contact')
             prop.plot_owner_email      = request.POST.get('plot_owner_email')
@@ -11561,48 +11453,17 @@ from django.views.decorators.csrf import csrf_protect
 
 
 
-"""
-===========================================================
-  PropCRM — Plot Resale  |  views.py  (3 functions)
-  ─────────────────────────────────────────────────────────
-  1. download_plot_resale_template  →  GET  (download blank template)
-  2. import_plot_resale_excel       →  POST (upload & import data)
-  3. export_plot_resale_excel       →  GET  (export existing DB data)
 
-  COLUMN ORDER  (cols 1-22, matches template + import + export)
-  ─────────────────────────────────────────────────────────
-   1  property_title          (AUTO GENERATED)
-   2  plot_title *
-   3  plot_area *
-   4  resale_plot_type *
-   5  plot_road_facing *
-   6  corner_plot
-   7  sanctioning_authority
-   8  plot_fencing
-   9  plot_price *
-  10  price_per_sqft          (AUTO CALCULATED)
-  11  brokerage
-  12  brokerage_percentage
-  13  ownership_type *
-  14  loan_on_property *
-  15  plot_loan_amount
-  16  plot_city *
-  17  plot_locality *
-  18  plot_address *
-  19  plot_owner_name *
-  20  plot_owner_contact *
-  21  plot_owner_email *
-  22  plot_owner_role
-===========================================================
-"""
+
+
 
 
 
 # ════════════════════════════════════════════════════════════
-#  HELPER — shared column definitions (single source of truth)
+#  SHARED COLUMN DEFINITIONS  (single source of truth)
+#  Each tuple: (db_field_name, display_label, hint_text)
 # ════════════════════════════════════════════════════════════
 
-# Each tuple: (db_field_name, display_label, hint_text)
 COLUMNS = [
     # ── Plot Details ──────────────────────────────────────────
     ("property_title",        "Property Title",              "⚠️ AUTO GENERATED - Leave Empty"),
@@ -11632,56 +11493,61 @@ COLUMNS = [
     ("plot_owner_role",       "Plot Owner Role",             "Owner / Agent / Builder"),
 ]
 
-# Section header spans for Row 1
+# Section header spans for Row 1  (0-indexed start, end inclusive)
 SECTIONS = [
-    ("📋 Plot Details",     0,  7),   # cols 1-8   (0-indexed start, end inclusive)
-    ("📋 Pricing & Legal",  8, 14),   # cols 9-15
-    ("📋 Location",        15, 17),   # cols 16-18
-    ("📋 Owner Contact",   18, 21),   # cols 19-22
+    ("📋 Plot Details",     0,  7),
+    ("📋 Pricing & Legal",  8, 14),
+    ("📋 Location",        15, 17),
+    ("📋 Owner Contact",   18, 21),
 ]
 
 SAMPLE_ROW = [
-    "",                                 # property_title  — auto
-    "SAMPLE - Green Valley Plots",      # plot_title
-    1500,                               # plot_area
-    "residential",                      # resale_plot_type
-    "main",                             # plot_road_facing
-    "no",                               # corner_plot
-    "NIT",                              # sanctioning_authority
-    "yes",                              # plot_fencing
-    3500000,                            # plot_price
-    "",                                 # price_per_sqft — auto
-    "No",                               # brokerage
-    "",                                 # brokerage_percentage
-    "freehold",                         # ownership_type
-    "no",                               # loan_on_property
-    0,                                  # plot_loan_amount
-    "Nagpur",                           # plot_city
-    "Besa",                             # plot_locality
-    "SAMPLE - Plot 12, Besa Road",      # plot_address
-    "SAMPLE - Amit Patil",              # plot_owner_name
-    "9999999999",                       # plot_owner_contact
-    "sample@example.com",               # plot_owner_email
-    "Agent",                            # plot_owner_role
+    "",                             # property_title  — auto
+    "SAMPLE - Green Valley Plots",  # plot_title
+    1500,                           # plot_area
+    "residential",                  # resale_plot_type
+    "main",                         # plot_road_facing
+    "no",                           # corner_plot
+    "NIT",                          # sanctioning_authority
+    "yes",                          # plot_fencing
+    3500000,                        # plot_price
+    "",                             # price_per_sqft — auto
+    "No",                           # brokerage
+    "",                             # brokerage_percentage
+    "freehold",                     # ownership_type
+    "no",                           # loan_on_property
+    0,                              # plot_loan_amount
+    "Nagpur",                       # plot_city
+    "Besa",                         # plot_locality
+    "SAMPLE - Plot 12, Besa Road",  # plot_address
+    "SAMPLE - Amit Patil",          # plot_owner_name
+    "9999999999",                   # plot_owner_contact
+    "sample@example.com",           # plot_owner_email
+    "Agent",                        # plot_owner_role
 ]
 
-# Column widths (one per column, 22 total)
+# Column widths (22 total, one per column)
 COL_WIDTHS = [28, 22, 18, 20, 18, 12, 22, 12, 16, 16, 12, 16, 18, 18, 20, 15, 18, 34, 20, 20, 26, 15]
 
 
+# ════════════════════════════════════════════════════════════
+#  HELPER — build styled template sheet
+# ════════════════════════════════════════════════════════════
+
 def _build_template_sheet(wb):
     """
-    Builds the styled header rows (1-7) on the active sheet.
-    Rows 1-4 = section/db/display/hint headers.
-    Row  5   = SAMPLE data (red, clearly marked).
-    Row  6   = First empty data row (blue tint — user fills from here).
-    Row  7   = Instruction banner.
-    Returns the sheet.
+    Row 1 → Section headers
+    Row 2 → DB field names
+    Row 3 → Display labels
+    Row 4 → Hint text
+    Row 5 → SAMPLE row  (red, clearly marked)
+    Row 6 → Instruction banner  (blue)
+    Row 7 → First empty data row  (blue tint) ← user fills from here
     """
     sheet = wb.active
     sheet.title = "Plot Resale"
 
-    # ── colour palette ────────────────────────────────────────
+    # ── Colour palette ────────────────────────────────────────
     DARK_BG      = "1E293B"
     WHITE        = "FFFFFF"
     MID_BLUE     = "3B82F6"
@@ -11691,17 +11557,17 @@ def _build_template_sheet(wb):
     DATA_BG      = "EFF6FF"
     BORDER_COLOR = "CBD5E1"
 
-    thin   = Side(style="thin",   color=BORDER_COLOR)
-    thick  = Side(style="medium", color="94A3B8")
-    cb     = Border(left=thin,  right=thin,  top=thin,  bottom=thin)
-    hb     = Border(left=thick, right=thick, top=thick, bottom=thick)
+    thin  = Side(style="thin",   color=BORDER_COLOR)
+    thick = Side(style="medium", color="94A3B8")
+    cb    = Border(left=thin,  right=thin,  top=thin,  bottom=thin)
+    hb    = Border(left=thick, right=thick, top=thick, bottom=thick)
 
     def hfill(h):
         return PatternFill("solid", fgColor=h)
 
     # ── ROW 1 — Section headers ───────────────────────────────
     for label, col_start_idx, col_end_idx in SECTIONS:
-        sc = col_start_idx + 1          # openpyxl is 1-indexed
+        sc = col_start_idx + 1
         ec = col_end_idx   + 1
         c = sheet.cell(row=1, column=sc, value=label)
         c.font      = Font(name="Arial", bold=True, size=11, color=WHITE)
@@ -11709,8 +11575,7 @@ def _build_template_sheet(wb):
         c.alignment = Alignment(horizontal="center", vertical="center")
         c.border    = hb
         if sc != ec:
-            sheet.merge_cells(start_row=1, start_column=sc,
-                              end_row=1,   end_column=ec)
+            sheet.merge_cells(start_row=1, start_column=sc, end_row=1, end_column=ec)
     sheet.row_dimensions[1].height = 30
 
     # ── ROW 2 — DB field names ────────────────────────────────
@@ -11742,16 +11607,15 @@ def _build_template_sheet(wb):
     sheet.row_dimensions[4].height = 30
 
     # ── ROW 5 — Sample data ───────────────────────────────────
-    sheet.cell(row=5, column=1,
-               value="🔴 DELETE THIS ROW BEFORE IMPORT 🔴"
-               ).font = Font(name="Arial", bold=True, size=10, color="FF0000")
-    sheet.cell(row=5, column=1).fill      = hfill("FFE5E5")
-    sheet.cell(row=5, column=1).alignment = Alignment(horizontal="center", vertical="center")
-    sheet.cell(row=5, column=1).border    = cb
+    c1 = sheet.cell(row=5, column=1, value="🔴 DELETE THIS ROW BEFORE IMPORT 🔴")
+    c1.font      = Font(name="Arial", bold=True, size=10, color="FF0000")
+    c1.fill      = hfill("FFE5E5")
+    c1.alignment = Alignment(horizontal="center", vertical="center")
+    c1.border    = cb
 
     for i, val in enumerate(SAMPLE_ROW, 1):
         if i == 1:
-            continue   # already set above
+            continue
         c = sheet.cell(row=5, column=i, value=val)
         c.font      = Font(name="Arial", size=9, color="999999")
         c.fill      = hfill("FFF3F3")
@@ -11759,27 +11623,27 @@ def _build_template_sheet(wb):
         c.border    = cb
     sheet.row_dimensions[5].height = 25
 
-    # ── ROW 6 — First empty data row ─────────────────────────
-    for i in range(1, len(COLUMNS) + 1):
-        c = sheet.cell(row=6, column=i, value="")
-        c.fill   = hfill(DATA_BG)
-        c.border = cb
-    sheet.row_dimensions[6].height = 22
-
-    # ── ROW 7 — Instruction banner ────────────────────────────
-    instr = sheet.cell(row=7, column=1, value="👇 START YOUR DATA FROM ROW 6 ONWARDS 👇")
+    # ── ROW 6 — Instruction banner ────────────────────────────
+    #    (moved ABOVE the first data row so import reads row 7+)
+    instr = sheet.cell(row=6, column=1, value="👇 START YOUR DATA FROM ROW 7 ONWARDS 👇")
     instr.font      = Font(name="Arial", bold=True, size=11, color="0066CC")
     instr.fill      = hfill("E5F3FF")
     instr.alignment = Alignment(horizontal="center", vertical="center")
-    sheet.merge_cells(start_row=7, start_column=1,
-                      end_row=7,   end_column=len(COLUMNS))
-    sheet.row_dimensions[7].height = 25
+    sheet.merge_cells(start_row=6, start_column=1, end_row=6, end_column=len(COLUMNS))
+    sheet.row_dimensions[6].height = 25
+
+    # ── ROW 7 — First empty data row ─────────────────────────
+    for i in range(1, len(COLUMNS) + 1):
+        c = sheet.cell(row=7, column=i, value="")
+        c.fill   = hfill(DATA_BG)
+        c.border = cb
+    sheet.row_dimensions[7].height = 22
 
     # ── Column widths ─────────────────────────────────────────
     for i, w in enumerate(COL_WIDTHS, 1):
         sheet.column_dimensions[get_column_letter(i)].width = w
 
-    sheet.freeze_panes  = "A6"
+    sheet.freeze_panes        = "A8"   # freeze everything above the first data row
     sheet.sheet_view.zoomScale = 90
     return sheet
 
@@ -11803,7 +11667,7 @@ def download_plot_resale_template(request):
 
 
 # ════════════════════════════════════════════════════════════
-#  2.  IMPORT  (POST — reads from row 6 onwards)
+#  2.  IMPORT  (POST — reads data from row 7 onwards)
 # ════════════════════════════════════════════════════════════
 
 @csrf_protect
@@ -11832,6 +11696,7 @@ def import_plot_resale_excel(request):
         skipped_count = 0
         row_logs      = []
 
+        # ── Helpers ───────────────────────────────────────────────
         def clean_s(v):
             if v is None:
                 return ""
@@ -11848,18 +11713,46 @@ def import_plot_resale_excel(request):
             except Exception:
                 return 0
 
-        # ── Data starts at row 6 (rows 1-5 are headers/sample) ───
-        for row_idx in range(6, sheet.max_row + 1):
-            # Read exactly 22 columns
-            values = [sheet.cell(row=row_idx, column=col).value
-                      for col in range(1, len(COLUMNS) + 1)]
+        # ── SKIP-ROW PATTERNS ─────────────────────────────────────
+        # Rows 1-6 are headers, hints, sample data, and the banner.
+        # We also defend against old templates where the banner lands
+        # on row 7 by checking the cell content.
+        SKIP_KEYWORDS = (
+            "START YOUR DATA",
+            "DELETE THIS ROW",
+            "AUTO GENERATED",
+            "property_title",       # db field name header row
+            "Property Title",       # display label header row
+            "⚠️",
+            "👇",
+            "🔴",
+        )
+
+        def is_header_or_banner(values):
+            first = str(values[0] or "").strip()
+            return any(kw in first for kw in SKIP_KEYWORDS)
+
+        # ── DATA LOOP — starts at row 7 ───────────────────────────
+        #    (Rows 1-6: section headers / db names / labels /
+        #               hints / sample row / instruction banner)
+        for row_idx in range(7, sheet.max_row + 1):
+
+            values = [
+                sheet.cell(row=row_idx, column=col).value
+                for col in range(1, len(COLUMNS) + 1)
+            ]
 
             # Skip fully empty rows
             if not any(v not in (None, "", 0) for v in values):
                 continue
 
-            # ── Map columns by position (matches COLUMNS list) ────
-            # col 1  → index 0
+            # Skip header / banner rows (handles both old & new templates)
+            if is_header_or_banner(values):
+                skipped_count += 1
+                row_logs.append(f"Row {row_idx}: Header/banner row skipped")
+                continue
+
+            # ── Map columns by position ───────────────────────────
             property_title        = clean_s(values[0])
             plot_title            = clean_s(values[1])
             plot_area             = clean_f(values[2])
@@ -11869,7 +11762,7 @@ def import_plot_resale_excel(request):
             sanctioning_authority = clean_s(values[6])
             plot_fencing          = clean_s(values[7])  or "no"
             plot_price            = clean_f(values[8])
-            price_per_sqft        = clean_f(values[9])   # auto-calculated on save
+            # values[9] = price_per_sqft — auto-calculated on model.save(), skip
             brokerage             = clean_s(values[10]) or "No"
             brokerage_percentage  = clean_s(values[11])
             ownership_type        = clean_s(values[12])
@@ -11884,15 +11777,17 @@ def import_plot_resale_excel(request):
             plot_owner_role       = clean_s(values[21])
 
             # ── Skip sample row ───────────────────────────────────
-            if "SAMPLE" in plot_title or plot_owner_contact == "9999999999":
+            if "SAMPLE" in plot_title.upper() or plot_owner_contact == "9999999999":
                 skipped_count += 1
                 row_logs.append(f"Row {row_idx}: Sample row skipped")
                 continue
 
-            # ── Validation ────────────────────────────────────────
+            # ── Validate required fields ──────────────────────────
             missing = []
             if not plot_title:                      missing.append("Plot Title")
             if not plot_area or plot_area <= 0:     missing.append("Plot Area")
+            if not resale_plot_type:                missing.append("Plot Type")
+            if not plot_road_facing:                missing.append("Road Facing")
             if not plot_price or plot_price <= 0:   missing.append("Plot Price")
             if not ownership_type:                  missing.append("Ownership Type")
             if not plot_city:                       missing.append("City")
@@ -11904,7 +11799,7 @@ def import_plot_resale_excel(request):
 
             if missing:
                 skipped_count += 1
-                row_logs.append(f"Row {row_idx}: Missing — {', '.join(missing)}")
+                row_logs.append(f"Row {row_idx}: ⚠️ Skipped — Missing: {', '.join(missing)}")
                 continue
 
             # ── Create record ─────────────────────────────────────
@@ -11939,9 +11834,10 @@ def import_plot_resale_excel(request):
                 )
                 saved_count += 1
                 row_logs.append(f"Row {row_idx}: ✅ Imported — {obj.plot_property_id}")
+
             except Exception as e:
                 skipped_count += 1
-                row_logs.append(f"Row {row_idx}: ❌ Error — {str(e)}")
+                row_logs.append(f"Row {row_idx}: ❌ DB Error — {str(e)}")
 
         # ── Response ──────────────────────────────────────────────
         if saved_count > 0:
@@ -11957,7 +11853,7 @@ def import_plot_resale_excel(request):
                 "status":  "warning",
                 "message": (
                     f"No rows imported. {skipped_count} row(s) skipped. "
-                    "Check that your data starts from Row 6 and required fields are filled."
+                    "Check that your data starts from Row 7 and all required fields are filled."
                 ),
                 "saved":   0,
                 "skipped": skipped_count,
@@ -11978,31 +11874,27 @@ def import_plot_resale_excel(request):
 #  3.  EXPORT  (GET — full data dump, all DB fields)
 # ════════════════════════════════════════════════════════════
 
-# Extra columns appended AFTER the 22 import columns.
-# These are read-only / audit fields — not part of the import template.
+# Extra audit columns appended after the 22 import columns
 EXPORT_EXTRA_HEADERS = [
-    ("plot_property_id",    "Property ID",          "1F2937"),   # dark slate
-    ("uploaded_by_name",    "Uploaded By (Name)",   "1F2937"),
-    ("uploaded_by_role",    "Uploaded By (Role)",   "1F2937"),
-    ("uploaded_by_email",   "Uploaded By (Email)",  "1F2937"),
-    ("uploaded_by_contact", "Uploaded By (Contact)","1F2937"),
-    ("upload_file_name",    "Source File",          "1F2937"),
-    ("created_at",          "Created At",           "1F2937"),
-    ("updated_at",          "Last Updated",         "1F2937"),
+    ("plot_property_id",    "Property ID"),
+    ("uploaded_by_name",    "Uploaded By (Name)"),
+    ("uploaded_by_role",    "Uploaded By (Role)"),
+    ("uploaded_by_email",   "Uploaded By (Email)"),
+    ("uploaded_by_contact", "Uploaded By (Contact)"),
+    ("upload_file_name",    "Source File"),
+    ("created_at",          "Created At"),
+    ("updated_at",          "Last Updated"),
 ]
 
-# Total column count for the export sheet
-EXPORT_TOTAL_COLS = len(COLUMNS) + len(EXPORT_EXTRA_HEADERS)
+EXPORT_TOTAL_COLS = len(COLUMNS) + len(EXPORT_EXTRA_HEADERS)   # 30
 
 
 def export_plot_resale_excel(request):
     """
-    Exports ALL (non-deleted) PlotSaleProperty records to an .xlsx file.
+    Exports all non-deleted PlotSaleProperty records to .xlsx.
 
-    Columns 1-22  →  same as import template (can be re-imported as-is)
-    Columns 23-30 →  audit / system fields:
-                     Property ID, Uploaded By Name/Role/Email/Contact,
-                     Source File, Created At, Last Updated
+    Cols  1-22  →  same as import template  (re-importable)
+    Cols 23-30  →  audit / system fields
     """
     session_id = request.session.get("Admin_id")
     if not session_id:
@@ -12012,14 +11904,16 @@ def export_plot_resale_excel(request):
 
     # ── Colour palette ─────────────────────────────────────────
     DARK_BG      = "1E293B"
-    AUDIT_BG     = "1E3A5F"    # deep navy for audit section header
+    AUDIT_BG     = "1E3A5F"
     WHITE        = "FFFFFF"
     LIGHT_BG     = "F8FAFC"
-    AUDIT_COL_BG = "EFF4FF"    # very light blue tint for audit data cells
-    PRICE_BG     = "F0FFF4"    # light green for price cells
+    AUDIT_COL_BG = "EFF4FF"
+    PRICE_BG     = "F0FFF4"
+    OWNER_BG     = "FEFCE8"
     BORDER_COLOR = "CBD5E1"
     SUMMARY_BG   = "DCFCE7"
     SUMMARY_FG   = "166534"
+    ALT_ROW_BG   = "F8FAFC"
 
     thin  = Side(style="thin",   color=BORDER_COLOR)
     thick = Side(style="medium", color="94A3B8")
@@ -12039,30 +11933,23 @@ def export_plot_resale_excel(request):
             return ""
 
     def fmt_dt(v):
-        """Format a datetime to readable string, handle timezone."""
         if v is None:
             return ""
         try:
-            local = timezone.localtime(v)
-            return local.strftime("%d-%m-%Y  %H:%M")
+            return timezone.localtime(v).strftime("%d-%m-%Y  %H:%M")
         except Exception:
             return str(v)
 
-    # ── Create workbook ────────────────────────────────────────
+    # ── Workbook setup ─────────────────────────────────────────
     wb    = Workbook()
     sheet = wb.active
     sheet.title = "Plot Resale Export"
 
-    # ════════════════════════════════════════════════════════
-    #  ROW 1 — Two section banners side-by-side
-    #  Left  : "📋 Plot Data  (Cols 1-22)"   — same dark bg as template
-    #  Right : "🔒 Audit & System Info"      — navy bg
-    # ════════════════════════════════════════════════════════
-    import_end = len(COLUMNS)          # col 22
-    audit_start = import_end + 1       # col 23
-    audit_end   = EXPORT_TOTAL_COLS    # col 30
+    import_end  = len(COLUMNS)           # col 22
+    audit_start = import_end + 1         # col 23
+    audit_end   = EXPORT_TOTAL_COLS      # col 30
 
-    # Import section banner
+    # ── ROW 1 — Two section banners ────────────────────────────
     c = sheet.cell(row=1, column=1,
                    value="📋 Plot Data  —  Columns 1-22  (Import-Compatible)")
     c.font      = Font(name="Arial", bold=True, size=11, color=WHITE)
@@ -12072,7 +11959,6 @@ def export_plot_resale_excel(request):
     sheet.merge_cells(start_row=1, start_column=1,
                       end_row=1,   end_column=import_end)
 
-    # Audit section banner
     c = sheet.cell(row=1, column=audit_start,
                    value="🔒 Audit & System Info  (Read-Only)")
     c.font      = Font(name="Arial", bold=True, size=11, color=WHITE)
@@ -12083,9 +11969,7 @@ def export_plot_resale_excel(request):
                       end_row=1,   end_column=audit_end)
     sheet.row_dimensions[1].height = 30
 
-    # ════════════════════════════════════════════════════════
-    #  ROW 2 — DB field names (both sections)
-    # ════════════════════════════════════════════════════════
+    # ── ROW 2 — DB field names ─────────────────────────────────
     for i, (db, _, _) in enumerate(COLUMNS, 1):
         c = sheet.cell(row=2, column=i, value=db)
         c.font      = Font(name="Arial", bold=True, size=9, color="475569")
@@ -12093,17 +11977,15 @@ def export_plot_resale_excel(request):
         c.alignment = Alignment(horizontal="center", vertical="center")
         c.border    = cb
 
-    for j, (db, _, _) in enumerate(EXPORT_EXTRA_HEADERS, audit_start):
+    for j, (db, _) in enumerate(EXPORT_EXTRA_HEADERS, audit_start):
         c = sheet.cell(row=2, column=j, value=db)
-        c.font      = Font(name="Arial", bold=True, size=9, color="FFFFFF")
+        c.font      = Font(name="Arial", bold=True, size=9, color=WHITE)
         c.fill      = hfill("334155")
         c.alignment = Alignment(horizontal="center", vertical="center")
         c.border    = cb
     sheet.row_dimensions[2].height = 22
 
-    # ════════════════════════════════════════════════════════
-    #  ROW 3 — Display labels
-    # ════════════════════════════════════════════════════════
+    # ── ROW 3 — Display labels ─────────────────────────────────
     for i, (_, disp, _) in enumerate(COLUMNS, 1):
         colour = "C0392B" if disp.endswith("*") else "3B82F6"
         c = sheet.cell(row=3, column=i, value=disp)
@@ -12112,7 +11994,7 @@ def export_plot_resale_excel(request):
         c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         c.border    = cb
 
-    for j, (_, disp, _) in enumerate(EXPORT_EXTRA_HEADERS, audit_start):
+    for j, (_, disp) in enumerate(EXPORT_EXTRA_HEADERS, audit_start):
         c = sheet.cell(row=3, column=j, value=disp)
         c.font      = Font(name="Arial", bold=True, size=10, color=WHITE)
         c.fill      = hfill("1E40AF")
@@ -12120,44 +12002,39 @@ def export_plot_resale_excel(request):
         c.border    = cb
     sheet.row_dimensions[3].height = 36
 
-    # ════════════════════════════════════════════════════════
-    #  Fetch records
-    # ════════════════════════════════════════════════════════
+    # ── Fetch records ──────────────────────────────────────────
     properties = PlotSaleProperty.objects.filter(is_deleted=False).order_by("-created_at")
 
-    # ════════════════════════════════════════════════════════
-    #  DATA rows — start at row 4 (no sample/hint rows needed)
-    # ════════════════════════════════════════════════════════
+    # ── DATA ROWS — start at row 4 ────────────────────────────
     row_num = 4
     for idx, p in enumerate(properties, 1):
 
-        # Alternate row background for readability
-        row_bg = "FFFFFF" if idx % 2 == 1 else "F8FAFC"
+        row_bg = "FFFFFF" if idx % 2 == 1 else ALT_ROW_BG
 
-        # ── Cols 1-22: import-compatible plot data ─────────
+        # Cols 1-22: import-compatible data
         import_row = [
-            str(p.property_title or ""),            # 1
-            str(p.plot_title or ""),                 # 2
-            fmt_dec(p.plot_area),                    # 3
-            str(p.resale_plot_type or ""),           # 4
-            str(p.plot_road_facing or ""),           # 5
-            str(p.corner_plot or "no"),              # 6
-            str(p.sanctioning_authority or ""),      # 7
-            str(p.plot_fencing or "no"),             # 8
-            fmt_dec(p.plot_price),                   # 9
-            fmt_dec(p.price_per_sqft),               # 10
-            str(p.brokerage or "No"),                # 11
-            str(p.brokerage_percentage or ""),       # 12
-            str(p.ownership_type or ""),             # 13
-            str(p.loan_on_property or "no"),         # 14
-            fmt_dec(p.plot_loan_amount),             # 15
-            str(p.plot_city or ""),                  # 16
-            str(p.plot_locality or ""),              # 17
-            str(p.plot_address or ""),               # 18
-            str(p.plot_owner_name or ""),            # 19
-            str(p.plot_owner_contact or ""),         # 20
-            str(p.plot_owner_email or ""),           # 21
-            str(p.plot_owner_role or ""),            # 22
+            str(p.property_title or ""),
+            str(p.plot_title or ""),
+            fmt_dec(p.plot_area),
+            str(p.resale_plot_type or ""),
+            str(p.plot_road_facing or ""),
+            str(p.corner_plot or "no"),
+            str(p.sanctioning_authority or ""),
+            str(p.plot_fencing or "no"),
+            fmt_dec(p.plot_price),
+            fmt_dec(p.price_per_sqft),
+            str(p.brokerage or "No"),
+            str(p.brokerage_percentage or ""),
+            str(p.ownership_type or ""),
+            str(p.loan_on_property or "no"),
+            fmt_dec(p.plot_loan_amount),
+            str(p.plot_city or ""),
+            str(p.plot_locality or ""),
+            str(p.plot_address or ""),
+            str(p.plot_owner_name or ""),
+            str(p.plot_owner_contact or ""),
+            str(p.plot_owner_email or ""),
+            str(p.plot_owner_role or ""),
         ]
 
         for col_idx, val in enumerate(import_row, 1):
@@ -12165,23 +12042,23 @@ def export_plot_resale_excel(request):
             c.font      = Font(name="Arial", size=10)
             c.alignment = Alignment(horizontal="left", vertical="center")
             c.border    = cb
-            if col_idx in (9, 10, 15):          # price cols — green tint
+            if col_idx in (9, 10, 15):      # price columns — green tint
                 c.fill = hfill(PRICE_BG)
-            elif col_idx in (19, 20, 21):       # owner cols — light yellow
-                c.fill = hfill("FEFCE8")
+            elif col_idx in (19, 20, 21):   # owner columns — yellow tint
+                c.fill = hfill(OWNER_BG)
             else:
                 c.fill = hfill(row_bg)
 
-        # ── Cols 23-30: audit / system fields ──────────────
+        # Cols 23-30: audit / system fields
         audit_row = [
-            str(p.plot_property_id or ""),           # 23 Property ID
-            str(p.uploaded_by_name or ""),           # 24 Uploaded By Name
-            str(p.uploaded_by_role or ""),           # 25 Uploaded By Role
-            str(p.uploaded_by_email or ""),          # 26 Uploaded By Email
-            str(p.uploaded_by_contact or ""),        # 27 Uploaded By Contact
-            str(p.upload_file_name or "Web UI"),     # 28 Source File
-            fmt_dt(p.created_at),                    # 29 Created At
-            fmt_dt(p.updated_at),                    # 30 Last Updated
+            str(p.plot_property_id or ""),
+            str(p.uploaded_by_name or ""),
+            str(p.uploaded_by_role or ""),
+            str(p.uploaded_by_email or ""),
+            str(p.uploaded_by_contact or ""),
+            str(p.upload_file_name or "Web UI"),
+            fmt_dt(p.created_at),
+            fmt_dt(p.updated_at),
         ]
 
         for col_idx, val in enumerate(audit_row, audit_start):
@@ -12194,32 +12071,28 @@ def export_plot_resale_excel(request):
         sheet.row_dimensions[row_num].height = 20
         row_num += 1
 
-    # ════════════════════════════════════════════════════════
-    #  Summary footer row
-    # ════════════════════════════════════════════════════════
-    total = properties.count()
+    # ── Summary footer ─────────────────────────────────────────
+    total       = properties.count()
     export_time = timezone.localtime(timezone.now()).strftime("%d-%m-%Y  %H:%M")
 
-    summary_cell = sheet.cell(
+    sc = sheet.cell(
         row=row_num, column=1,
         value=f"✅  Total Records Exported: {total}   |   Exported On: {export_time}"
     )
-    summary_cell.font      = Font(name="Arial", bold=True, size=10, color=SUMMARY_FG)
-    summary_cell.fill      = hfill(SUMMARY_BG)
-    summary_cell.alignment = Alignment(horizontal="left", vertical="center")
+    sc.font      = Font(name="Arial", bold=True, size=10, color=SUMMARY_FG)
+    sc.fill      = hfill(SUMMARY_BG)
+    sc.alignment = Alignment(horizontal="left", vertical="center")
     sheet.merge_cells(start_row=row_num, start_column=1,
                       end_row=row_num,   end_column=EXPORT_TOTAL_COLS)
     sheet.row_dimensions[row_num].height = 24
 
-    # ════════════════════════════════════════════════════════
-    #  Column widths  (22 import cols + 8 audit cols)
-    # ════════════════════════════════════════════════════════
+    # ── Column widths ──────────────────────────────────────────
     audit_widths = [22, 22, 18, 28, 20, 30, 22, 22]
     all_widths   = COL_WIDTHS + audit_widths
     for i, w in enumerate(all_widths, 1):
         sheet.column_dimensions[get_column_letter(i)].width = w
 
-    sheet.freeze_panes    = "A4"
+    sheet.freeze_panes        = "A4"
     sheet.sheet_view.zoomScale = 85
 
     # ── Deliver ────────────────────────────────────────────────
@@ -12523,6 +12396,8 @@ def industrial_resale_add(request):
                 tax_amount=request.POST.get('tax_amount') or None,
                 tax_clearance_cert=tax_cert_val,
                 property_description=request.POST.get('property_description'),
+                property_summary=request.POST.get('property_summary'),
+                user_description=request.POST.get('user_description'),
 
                 # Step 3: File Document Streams
                 compliance_docs=request.FILES.get('compliance_docs'),
@@ -12621,6 +12496,9 @@ def industrial_resale_edit(request, id):
             prop.tax_clearance_cert = parse_bool(request.POST.get('tax_clearance_cert'))
             
             prop.property_description = request.POST.get('property_description')
+
+            prop.property_summary = request.POST.get('property_summary')
+            prop.user_description = request.POST.get('user_description')
 
             # Update Step 3: Media & Files
             if 'compliance_docs' in request.FILES:
@@ -13474,6 +13352,8 @@ def resale_residential_add(request):
             brokerage_percentage = request.POST.get('brokerage_percentage') or None,
             manual_brokerage     = request.POST.get('manual_brokerage') or None,
             property_description = request.POST.get('property_description'), 
+            property_summary = request.POST.get('property_summary'),
+            user_description = request.POST.get('user_description'), 
 
             # Amenities & Facilities 
             nearby_facilities = ', '.join(request.POST.getlist('facilities[]')),
@@ -13876,6 +13756,8 @@ def resale_residential_edit(request, id):
         prop.brokerage_percentage = request.POST.get('brokerage_percentage') or None
         prop.manual_brokerage     = request.POST.get('manual_brokerage') or None
         prop.property_description = request.POST.get('property_description')
+        prop.property_summary = request.POST.get('property_summary')
+        prop.user_description = request.POST.get('user_description')
 
         # Amenities & Facilities
         prop.nearby_facilities = ', '.join(request.POST.getlist('facilities[]'))
@@ -15231,6 +15113,8 @@ def add_commercial_property(request):
                 manual_brokerage      = request.POST.get('manual_brokerage') or None,
                 expected_price        = request.POST.get('expected_price'),
                 property_description  = request.POST.get('property_description'),
+                property_summary  = request.POST.get('property_summary'),
+                user_description  = request.POST.get('user_description'),
                 sanctioning_authority = request.POST.get('sanctioning_authority'),
 
                 # ── Step 3: Amenities & Location ───────────────────
@@ -15355,6 +15239,8 @@ def commercial_resale_edit(request, id):
         
         prop.fire_safety_noc_available = request.POST.get('fire_safety_noc_available', 'no') # Updated key
         prop.property_description = request.POST.get('property_description')
+        prop.property_summary = request.POST.get('property_summary')
+        prop.user_description = request.POST.get('user_description')
         prop.sanctioning_authority = request.POST.get('sanctioning_authority')
 
         # ── Nearby Facilities & Amenities ──────────────────
@@ -16497,7 +16383,11 @@ def add_agricultural_property(request):
                     pending_tax_due=request.POST.get('agri_tax_due', 'no'),
                     pending_tax_amount=get_decimal(request.POST.get('pending_tax_amount')) if request.POST.get('agri_tax_due') == 'yes' else None,
                     
-                    resale_agricultural_desc=request.POST.get('resale_agricultural_desc', ''),
+                    property_description=request.POST.get('property_description', ''),
+                    property_summary=request.POST.get('property_summary', ''),
+                    user_description=request.POST.get('user_description', ''),
+                    
+
 
                     # ── STEP 3: LOCATION & OWNER
                     city=request.POST.get('city', ''),
@@ -16620,7 +16510,9 @@ def edit_agricultural_property(request, pk):
                     if property_obj.pending_tax_due == 'yes' else None
                 )
                 
-                property_obj.resale_agricultural_desc = request.POST.get('resale_agricultural_desc')
+                property_obj.property_description = request.POST.get('property_description')
+                property_obj.property_summary = request.POST.get('property_summary')
+                property_obj.user_description = request.POST.get('user_description')
 
                 # ── STEP 3: LOCATION & OWNER ─────────────────────────────
                 property_obj.city = request.POST.get('city')

@@ -474,18 +474,16 @@
         <!-- ═══ TABLE ═══ -->
        <div class="table-responsive">
 
-        <div style="display:flex; gap:10px;">
-    <button type="submit" 
-            formaction="{% url 'export_commercial_rent' %}" 
-            name="format" value="csv" 
-            class="btn btn-primary btn-sm" style="height:38px;">
+     <div style="display:flex; gap:10px;">
+    <button type="button" 
+            onclick="forceExport('csv')" 
+            class="btn btn-primary btn-sm" style="height:38px; background-color: #3b82f6; border: none;">
         <i class="fas fa-file-csv"></i> Download CSV
     </button>
     
-    <button type="submit" 
-            formaction="{% url 'export_commercial_rent' %}" 
-            name="format" value="excel" 
-            class="btn btn-success btn-sm" style="height:38px;">
+    <button type="button" 
+            onclick="forceExport('excel')" 
+            class="btn btn-success btn-sm" style="height:38px; background-color: #10b981; border: none;">
         <i class="fas fa-file-excel"></i> Download Excel
     </button>
 </div>
@@ -542,6 +540,7 @@
                 <th>Nearby Facilities</th>
                 <th>Property Summary</th>
                 <th>Property Description</th>
+                  <th>User Property Description</th>
                 <th>Owner Name</th>
                 <th>Contact Number</th>
                 <th>Email Address</th>
@@ -685,6 +684,7 @@
                 <td>{% if prop.nearby_facilities %}{{ prop.nearby_facilities|join:", " }}{% else %}—{% endif %}</td>
                 <td>{{ prop.property_summary|striptags|truncatechars:40|default:"—" }}</td>
                 <td>{{ prop.property_description|striptags|truncatechars:40|default:"—" }}</td>
+                 <td>{{ prop.user_description|striptags|truncatechars:40|default:"—" }}</td>
 
                 <td>{{ prop.owner_name }}</td>
                 <td>{{ prop.contact_number }}</td>
@@ -1303,15 +1303,23 @@
         showGalleryModal(Swal.getTitle().textContent);
     }
 
+    
+
+
     function forceExport(format) {
-    // 1. Grab the current URL (which includes all your active search filters)
-    var currentUrl = new URL(window.location.href);
+    // 1. Grab the actual search form
+    var form = document.getElementById('liveSearchForm');
     
-    // 2. Forcefully add the download parameter to the URL
-    currentUrl.searchParams.set('download', format);
+    // 2. Extract all currently active filters from the form
+    var formData = new FormData(form);
+    var searchParams = new URLSearchParams(formData);
     
-    // 3. Tell the browser to instantly visit this exact URL
-    window.location.href = currentUrl.toString();
+    // 3. Set the 'format' parameter exactly as your Django view expects it
+    searchParams.set('format', format);
+    
+    // 4. Redirect to the dedicated export view with all the filters attached!
+    var exportUrl = "{% url 'export_commercial_rent' %}?" + searchParams.toString();
+    window.location.href = exportUrl;
 }
     </script>
 
