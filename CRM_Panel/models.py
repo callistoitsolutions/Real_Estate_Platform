@@ -15,7 +15,7 @@ class UTMLink(models.Model):
     #  Generic Foreign Key to property (links to any of your 8 property types)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE,blank=True,null=True)
 
-    object_id = models.PositiveIntegerField(blank=True, null=True)
+    object_id = models.CharField(blank=True, null=True)
     property_obj = GenericForeignKey('content_type', 'object_id')
     
     # Denormalized fields for quick access (optional - keep for performance)
@@ -68,7 +68,7 @@ class PropertyEnquiry(models.Model):
     )
     
     # 2. The ID of that specific property
-    object_id = models.PositiveIntegerField(null=True, blank=True)
+    object_id = models.CharField(null=True, blank=True)
 
     # 3.The Generic Foreign Key (Combines the two above)
     property_object = GenericForeignKey('content_type', 'object_id')

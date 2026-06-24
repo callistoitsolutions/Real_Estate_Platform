@@ -43,6 +43,7 @@
             <th>Role</th>
             <th>Sr. No.</th>
             <th>Profile</th>
+            <th>User Id</th>
             <th>Name</th>
             <th>Email Address</th>
             <th>Phone Number</th>
@@ -90,6 +91,10 @@
                 <a href="#" onclick="viewDashboardCleanly(event, '{{ agency.id }}')" style="color: #667eea;font-weight:bold;text-decoration:none;">
                     View Profile
                 </a>
+            </td>
+
+            <td>
+                {{ agency.user_id }}
             </td>
 
             <td>

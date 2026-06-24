@@ -118,15 +118,20 @@
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Package Name <span style="color:red;">*</span></label>
-                <input type="text" class="form-control" id="package_name" name="package_name" placeholder="Enter Package Name" required value="{{subscription.package_name}}">
+               <select class="form-control" id="package_name" name="package_name" required>
+                  <option value="" selected disabled>Select a package</option>
+                  {% for package in packages_obj %}
+                    <option {% if subscription.package_name == package.package_name %} selected {% endif %}value ="{{package.package_name}}">{{package.package_name}}</option>
+                  {% endfor %}
+                </select>
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Plan Type <span style="color:red;">*</span></label>
                 <select class="form-control" id="plan_type" name="plan_type" required>
                   <option value="" selected disabled>Select a plan.</option>
-                    <option {% if subscription.plan_type == "Basic Plan" %} selected {% endif %}value ="Basic Plan">Basic Plan</option>
-                    <option {% if subscription.plan_type == "Standard Plan" %} selected {% endif %}value ="Standard Plan">Standard Plan</option>
-                    <option {% if subscription.plan_type == "Premium Plan" %} selected {% endif %}value ="Premium Plan">Premium Plan</option>
+                    {% for plan in plans_obj %}
+                      <option {% if subscription.plan_type == plan.plan_name %} selected {% endif %}value ="{{plan.plan_name}}">{{plan.plan_name}}</option>
+                    {% endfor %}
                 </select>
               </div>
               <div class="col-md-4 mt-2">

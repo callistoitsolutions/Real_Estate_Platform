@@ -73,6 +73,40 @@
     .existing-image-badge { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: white; font-size: 0.75rem; text-align: center; padding: 4px 0; font-weight: 600;}
     .remove-image { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; background: #e74c3c; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; z-index: 10;}
     .remove-image:hover { background: #c0392b; transform: scale(1.1); }
+    
+    /* Select2 Styles */
+    .select2-container .select2-selection--single {
+        height: 48px !important;
+        border: 2px solid #e9ecef !important;
+        border-radius: 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        background-color: #fff !important;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: #1e293b !important;
+        font-size: 0.9rem !important;
+        font-weight: 500 !important;
+        padding-left: 12px !important;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 46px !important;
+        right: 10px !important;
+    }
+    
+    .select2-search__field {
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 6px 10px !important;
+    }
+
+    .select2-dropdown {
+        border-radius: 12px !important;
+        overflow: hidden !important;
+    }
+
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -650,6 +684,7 @@
                     <div class="form-section">
                         <div class="section-header"><i class="fas fa-address-book"></i> Contact Information</div>
                         <div class="section-body">
+
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -683,7 +718,64 @@
                     </div>
 
                     <div class="form-section">
-                        <div class="section-header"><i class="fas fa-upload"></i> Listing Uploaded By</div>
+                        <div class="section-header"><i class="fas fa-upload"></i> Listed By</div>
+                        <div class="section-body">
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user"></i> Listed By (User) <span class="required-star">*</span></label>
+                                        <select class="form-control select2-lead" id="assigned_to" name="assigned_to" required onchange="get_user_data()">
+                                            <option value="" disabled selected>-- Select Listed By (User) --</option>
+                                            {% for user in user_obj %}
+                                                <option value="{{ user.id }}-{{user.user_role}}">
+                                                    {{user.user_id}} - {{ user.user_name }} - {{ user.user_role }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br>
+                            
+                            <div class="row" id="user_data_div">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user"></i> Id</label>
+                                        <input type="text" class="form-control" name="uploaded_by_name" readonly style="background-color: #e9ecef;">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user"></i> Name</label>
+                                        <input type="text" class="form-control" name="uploaded_by_name"  readonly style="background-color: #e9ecef;">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
+                                        <input type="email" class="form-control" name="uploaded_by_email" readonly style="background-color: #e9ecef;">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-phone"></i> Contact</label>
+                                        <input type="text" class="form-control" name="uploaded_by_contact" readonly style="background-color: #e9ecef;">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
+                                        <input type="text" class="form-control" name="uploaded_by_role" readonly style="background-color: #e9ecef;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-upload"></i> Uploaded By</div>
                         <div class="section-body">
                             <div class="row">
                                 <div class="col-md-3">
@@ -768,10 +860,55 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
 
 <script>
+
+    $(document).ready(function() {
+    updatePreview();
+    updateAmenityCount();
+    updateFacilityCount();
+    initBrokerage();
+
+    if (typeof CKEDITOR !== 'undefined') {
+        if (CKEDITOR.instances.rent_residential_desc) {
+            CKEDITOR.instances.rent_residential_desc.destroy();
+        }
+        CKEDITOR.replace('rent_residential_desc');
+    }
+});
+
+</script>
+
+{% comment %} Javascript to get user details according to listing by {% endcomment %}
+
+<script>
+
+    function get_user_data(){
+        var assigned_to = $("#assigned_to").val();
+        $.ajax({
+            method: "POST",
+            url: "{% url 'get_user_data' %}",
+            data: {
+                'assigned_to':assigned_to,
+            },
+             success : function(response){
+              $("#loading").hide();
+                $('#user_data_div').html("")
+                $('#user_data_div').html(response) 
+              }
+        });
+    }
+</script>
+
+
+<script>
+
+    
     // Global variable tracking database fields that started empty
     let emptyFieldsOnLoad = {};
 
@@ -1008,19 +1145,7 @@
         toggleManual();
     }
 
-    $(document).ready(function() {
-        updatePreview();
-        updateAmenityCount();
-        updateFacilityCount();
-        initBrokerage();
-
-        if (typeof CKEDITOR !== 'undefined') {
-            if (CKEDITOR.instances.rent_residential_desc) {
-                CKEDITOR.instances.rent_residential_desc.destroy();
-            }
-            CKEDITOR.replace('rent_residential_desc');
-        }
-    });
+    
 
     // --- DRAG & DROP IMAGE UPLOAD WITH REORDERING LOGIC ---
     const uploadArea = document.getElementById('uploadArea');

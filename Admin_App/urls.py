@@ -133,6 +133,38 @@ urlpatterns = [
 
     path('Update_Faqs/<int:id>',views.Update_Faqs,name="Update_Faqs"),
 
+    ############# urls for subscription packages list ######################
+
+    path('Subscriptions_Packages_List',views.Subscriptions_Packages_List,name="Subscriptions_Packages_List"),
+
+    ########### urls for ajax for add/edit packages ####################
+
+    path('Packages_Ajax',views.Packages_Ajax,name="Packages_Ajax"),
+
+    ########### urls for delete packages #########################
+
+    path('Delete_Packages',views.Delete_Packages,name="Delete_Packages"),
+
+    ############ urls for update packages ######################
+
+    path('Update_Packages/<int:id>',views.Update_Packages,name="Update_Packages"),
+
+    ############ urls for subscription plan types list ####################
+
+    path('Subscriptions_Plans_List',views.Subscriptions_Plans_List,name="Subscriptions_Plans_List"),
+
+    ########### urls for ajax for add/edit plans ####################
+
+    path('Plans_Ajax',views.Plans_Ajax,name="Plans_Ajax"),
+
+    ############# urls for delete plans #####################
+
+    path('Delete_Plans',views.Delete_Plans,name="Delete_Plans"),
+
+    ########## urls for update plans ##############################
+
+    path('Update_Plans/<int:id>',views.Update_Plans,name="Update_Plans"),
+
      ############# urls for subscriptions list ###########################
 
     path('Subscriptions_List',views.Subscriptions_List,name="Subscriptions_List"),
@@ -434,6 +466,10 @@ urlpatterns = [
     path('rental_residential_add', views.rental_residential_add, name='rental_residential_add'),
 
     path('rental/residential/edit/<str:pk>/', views.rental_residential_edit, name='rental_residential_edit'),
+
+    ############ urls to get user details according to listing by ###############
+
+    path('get_user_data',views.get_user_data,name='get_user_data'),
 
     
 

@@ -1,0 +1,1257 @@
+<style>
+.quick-stats {
+    background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.quick-stats-title {
+    color: white;
+    font-size: 22px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quick-stats-title i {
+    font-size: 26px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.stat-item {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,0.25);
+}
+
+.stat-item-icon i {
+    font-size: 38px;
+    margin-bottom: 10px;
+}
+
+.stat-item-value {
+    font-size: 32px;
+    font-weight: bold;
+    color: white;
+    margin: 10px 0;
+}
+
+.stat-item-label {
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Age Badge Styles */
+.age-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.age-badge.new {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.age-badge.medium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.age-badge.old {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.age-badge.closed {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.age-badge.cancelled {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* Table Responsive */
+.table-responsive {
+    border-radius: 15px;
+    overflow: auto;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    width: 100%;
+    max-height: 550px;
+    position: relative;
+}
+
+#enquiryTable {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1400px;
+}
+
+#enquiryTable thead th {
+    background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%);
+    color: white;
+    padding: 12px;
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#enquiryTable tbody tr {
+    transition: all 0.3s ease;
+}
+
+#enquiryTable tbody tr:hover {
+    background: #f0fdfa;
+}
+
+#enquiryTable tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #e9ecef;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.btn-action {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-edit {
+    background: #10b981;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #059669;
+    transform: translateY(-2px);
+}
+
+.btn-delete {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+}
+
+/* DataTables Controls Styling */
+.dataTables_wrapper {
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 10px 0;
+}
+
+.dt-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.dt-buttons button {
+    background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.dt-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(202, 138, 4, 0.4);
+}
+
+.dataTables_length {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dataTables_length label {
+    margin: 0;
+    color: #333;
+}
+
+.dataTables_length select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 6px;
+    font-size: 14px;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0 15px;
+    transition: all 0.3s ease;
+}
+
+.search-container:focus-within {
+    border-color: #ca8a04;
+    box-shadow: 0 0 0 3px rgba(202, 138, 4, 0.1);
+}
+
+.search-container i {
+    color: #ca8a04;
+    font-size: 14px;
+}
+
+.dataTables_filter {
+    margin: 0;
+}
+
+.dataTables_filter label {
+    margin: 0;
+}
+
+.dataTables_filter input {
+    border: none;
+    padding: 10px 0;
+    width: 250px;
+    font-size: 14px;
+    color: #333;
+    background: transparent;
+    outline: none;
+}
+
+.records-counter {
+    background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 15px 0;
+    border-top: 1px solid #e9ecef;
+}
+
+.dataTables_info {
+    color: #475569;
+    font-size: 14px;
+}
+
+.dataTables_paginate {
+    display: flex;
+    gap: 5px;
+}
+
+.paginate_button {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    background: white;
+    color: #ca8a04;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.paginate_button:hover {
+    background: #fef3c7;
+    transform: translateY(-1px);
+}
+
+.paginate_button.current {
+    background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%);
+    color: white;
+    border-color: #ca8a04;
+}
+
+/* Custom scrollbars */
+.table-responsive::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%);
+    border-radius: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%);
+}
+
+.table-responsive {
+    scrollbar-width: thin;
+    scrollbar-color: #ca8a04 #e2e8f0;
+}
+
+/* Status Badge Styles */
+.badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    min-width: 110px;
+}
+
+.badge-success {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+}
+
+.badge-danger {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+}
+
+.badge-primary {
+    background: #dbeafe !important;
+    color: #1e40af !important;
+}
+
+.badge-secondary {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+}
+
+.badge-warning {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+}
+
+.badge-info {
+    background: #cffafe !important;
+    color: #0e7490 !important;
+}
+
+/* Charts Section */
+.charts-section {
+    margin-bottom: 30px;
+}
+
+.chart-container {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chart-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.chart-header h5 {
+    margin: 0;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.chart-header h5 i {
+    color: #ca8a04;
+    margin-right: 8px;
+}
+
+.chart-container canvas {
+    max-height: 280px;
+    width: 100%;
+}
+
+/* Age Badge Styles */
+.age-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    min-width: 85px;
+}
+
+.age-badge.new {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.age-badge.medium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.age-badge.old {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.age-badge.closed {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.age-badge.cancelled {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* Source Cards Section */
+.source-cards-section {
+    margin-bottom: 25px;
+}
+
+.source-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+}
+
+.source-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    border: 2px solid transparent;
+}
+
+.source-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.source-card.active {
+    border-color: #ca8a04;
+    background: #fef3c7;
+}
+
+.source-card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+}
+
+.source-card-info {
+    flex: 1;
+}
+
+.source-card-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.2;
+}
+
+.source-card-label {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Section Header */
+.section-header {
+    background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-header i {
+    font-size: 18px;
+}
+
+/* Status Cards Section */
+.status-cards-section {
+    margin-bottom: 25px;
+}
+
+.status-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+}
+
+.status-card {
+    background: white;
+    border-radius: 15px;
+    padding: 18px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    border: 2px solid transparent;
+}
+
+.status-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.status-card.active {
+    border-color: #ca8a04;
+    background: #fef3c7;
+}
+
+.status-card-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.status-card-info {
+    flex: 1;
+}
+
+.status-card-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.2;
+}
+
+.status-card-label {
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Reset Filters Button */
+.reset-filters-btn {
+    margin-bottom: 20px;
+    text-align: right;
+}
+
+.btn-reset-filters {
+    background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.btn-reset-filters:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(202, 138, 4, 0.4);
+}
+
+/* Import Button */
+.btn-import {
+    background: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+.btn-import:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(202, 138, 4, 0.4);
+}
+</style>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<div class="quick-stats">
+    <h3 class="quick-stats-title">
+        <i class="fas fa-sticky-note"></i> Property Enquiries Summary and Listings
+    </h3>
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-item-icon" style="color:#ffd700;">
+                <i class="fas fa-sticky-note"></i>
+            </div>
+            <div class="stat-item-value">
+                {{ enquiry_obj_count }}
+            </div>
+            <div class="stat-item-label" style="color:white;font-weight:bold;">
+                Total Property Enquiries
+            </div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-item-icon" style="color:#10b981;">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-item-value" id="avgLeadAge">
+                0 days
+            </div>
+            <div class="stat-item-label" style="color:white;font-weight:bold;">
+                Average Lead Age
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="charts-section">
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h5><i class="fas fa-chart-pie"></i> Enquiries by Source</h5>
+                </div>
+                <canvas id="sourceChart" style="height: 280px; width: 100%;"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h5><i class="fas fa-chart-simple"></i> Enquiries by Status</h5>
+                </div>
+                <canvas id="statusChart" style="height: 280px; width: 100%;"></canvas>
+            </div>
+        </div>
+        <div class="col-md-12 mb-4">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h5><i class="fas fa-chart-bar"></i> Enquiries by Lead Age</h5>
+                </div>
+                <canvas id="ageChart" style="height: 280px; width: 100%;"></canvas>
+            </div>
+        </div>
+        <div class="col-md-12 mb-4">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h5><i class="fas fa-chart-line"></i> Daily Enquiry Trend (Last 30 Days)</h5>
+                </div>
+                <canvas id="trendChart" style="height: 280px; width: 100%;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Source Analytics Cards -->
+<div class="source-cards-section">
+    <div class="section-header" style="margin-bottom: 15px;">
+        <i class="fas fa-chart-pie"></i> Enquiries by UTM Source
+    </div>
+    <div class="source-cards-grid">
+        <div class="source-card" data-source="facebook" >
+            <div class="source-card-icon" style="background: #1877f2;">
+                <i class="fab fa-facebook-f"></i>
+            </div>
+            <div class="source-card-info">
+                <div class="source-card-value" id="facebookCount">{{fb_obj_count}}</div>
+                <div class="source-card-label">Facebook</div>
+            </div>
+        </div>
+        <div class="source-card" data-source="instagram" >
+            <div class="source-card-icon" style="background: #e4405f;">
+                <i class="fab fa-instagram"></i>
+            </div>
+            <div class="source-card-info">
+                <div class="source-card-value" id="instagramCount">{{insta_obj_count}}</div>
+                <div class="source-card-label">Instagram</div>
+            </div>
+        </div>
+        <div class="source-card" data-source="whatsapp" >
+            <div class="source-card-icon" style="background: #25d366;">
+                <i class="fab fa-whatsapp"></i>
+            </div>
+            <div class="source-card-info">
+                <div class="source-card-value" id="whatsappCount">{{whatsapp_obj_count}}</div>
+                <div class="source-card-label">WhatsApp</div>
+            </div>
+        </div>
+        <div class="source-card" data-source="google" >
+            <div class="source-card-icon" style="background: #ea4335;">
+                <i class="fab fa-google"></i>
+            </div>
+            <div class="source-card-info">
+                <div class="source-card-value" id="googleCount">{{google_obj_count}}</div>
+                <div class="source-card-label">Google</div>
+            </div>
+        </div>
+        <div class="source-card" data-source="linkedin" >
+            <div class="source-card-icon" style="background: #0077b5;">
+                <i class="fab fa-linkedin-in"></i>
+            </div>
+            <div class="source-card-info">
+                <div class="source-card-value" id="linkedinCount">{{linkedin_obj_count}}</div>
+                <div class="source-card-label">LinkedIn</div>
+            </div>
+        </div>
+        <div class="source-card" data-source="twitter" >
+            <div class="source-card-icon" style="background: #000000;">
+                <i class="fab fa-twitter"></i>
+            </div>
+            <div class="source-card-info">
+                <div class="source-card-value" id="twitterCount">{{twitter_obj_count}}</div>
+                <div class="source-card-label">Twitter/X</div>
+            </div>
+        </div>
+        <div class="source-card" data-source="youtube" >
+            <div class="source-card-icon" style="background: #dc1a1a;">
+                <i class="fab fa-youtube"></i>
+            </div>
+            <div class="source-card-info">
+                <div class="source-card-value" id="youtubeCount">{{youtube_obj_count}}</div>
+                <div class="source-card-label">YouTube</div>
+            </div>
+        </div>
+        <div class="source-card" data-source="referral" >
+            <div class="source-card-icon" style="background: #fd7e14;">
+                <i class="fas fa-share-alt"></i>
+            </div>
+            <div class="source-card-info">
+                <div class="source-card-value" id="referralCount">{{referral_obj_count}}</div>
+                <div class="source-card-label">Referral</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lead Status Cards -->
+<div class="status-cards-section">
+    <div class="section-header" style="margin-bottom: 15px;">
+        <i class="fas fa-chart-simple"></i> Enquiries by Lead Status
+    </div>
+    <div class="status-cards-grid">
+        <div class="status-card" data-status="all" >
+            <div class="status-card-icon" style="background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="status-card-info">
+                <div class="status-card-value" id="totalStatusCount">{{enquiry_obj_count}}</div>
+                <div class="status-card-label">Total Enquiries</div>
+            </div>
+        </div>
+        <div class="status-card" data-status="Pending" >
+            <div class="status-card-icon" style="background: #f59e0b;">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div class="status-card-info">
+                <div class="status-card-value" id="pendingCount">{{pending_obj_count}}</div>
+                <div class="status-card-label">Pending</div>
+            </div>
+        </div>
+        <div class="status-card" data-status="In Progress" >
+            <div class="status-card-icon" style="background: #3b82f6;">
+                <i class="fas fa-spinner fa-pulse"></i>
+            </div>
+            <div class="status-card-info">
+                <div class="status-card-value" id="inProgressCount">{{progress_obj_count}}</div>
+                <div class="status-card-label">In Progress</div>
+            </div>
+        </div>
+        <div class="status-card" data-status="Hold" >
+            <div class="status-card-icon" style="background: #8b5cf6;">
+                <i class="fas fa-pause-circle"></i>
+            </div>
+            <div class="status-card-info">
+                <div class="status-card-value" id="holdCount">{{hold_obj_count}}</div>
+                <div class="status-card-label">On Hold</div>
+            </div>
+        </div>
+        <div class="status-card" data-status="Closed" >
+            <div class="status-card-icon" style="background: #10b981;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="status-card-info">
+                <div class="status-card-value" id="closedCount">{{closed_obj_count}}</div>
+                <div class="status-card-label">Closed</div>
+            </div>
+        </div>
+        <div class="status-card" data-status="Cancelled">
+            <div class="status-card-icon" style="background: #ef4444;">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="status-card-info">
+                <div class="status-card-value" id="cancelledCount">{{cancelled_obj_count}}</div>
+                <div class="status-card-label">Cancelled</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="properties-table" id="enquiryTable">
+        <thead>
+            <tr>
+                <th>Actions</th>
+                <th>Sr. No.</th>
+                <th>Assigned To</th>
+                <th>Lead Age</th>
+                <th>Status</th>
+                <th>Category & Type</th>
+                <th>UTM Source</th>
+                <th>Name</th>
+                <th>Phone Number</th>
+                <th>Property Name</th>
+                <th>Enquiry Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for enquiry in enquiry_obj %}
+            <tr data-status="{{ enquiry.lead_status|default:'Pending' }}" data-enquiry-date="{{ enquiry.enquiry_date|date:'Y-m-d' }}">
+                <td>
+                    <div class="action-buttons">
+                        <a href="{% url "update_enquiry_agency" enquiry.id %}" class="btn-action btn-edit" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn-action btn-delete" title="Delete" onclick="Delete_Enquiry({{ enquiry.id }})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ enquiry.assigned_to.user_name }}-{{ enquiry.assigned_to.user_role }}</td>
+                <td class="lead-age-cell" data-enquiry-date="{{ enquiry.enquiry_date|date:'Y-m-d' }}" data-status="{{ enquiry.lead_status|default:'Pending' }}">
+                    <span class="age-badge new">Calculating...</span>
+                </td>
+                <td>
+                    {% if enquiry.lead_status == 'Closed' %}
+                        <span class="badge badge-pill badge-success">Deal Closed</span>
+                    {% elif enquiry.lead_status == 'Cancelled' %}
+                        <span class="badge badge-pill badge-danger">Deal Cancelled</span>
+                    {% elif enquiry.lead_status == 'In Progress' %}
+                        <span class="badge badge-pill badge-primary">Deal In Progress</span>
+                    {% elif enquiry.lead_status == 'Hold' %}
+                        <span class="badge badge-pill badge-secondary">Deal On Hold</span>
+                    {% else %}
+                        <span class="badge badge-pill badge-warning">Status is Pending</span>
+                    {% endif %}
+                </td>
+                <td>{{ enquiry.utm_link.category|default:'N/A' }} & {{ enquiry.utm_link.listing_type|default:'N/A' }}</td>
+                <td>{{ enquiry.utm_link.utm_source|default:'Direct' }}</td>
+                <td>{{ enquiry.enquiry_name }}</td>
+                <td>{{ enquiry.country_code }}-{{ enquiry.enquiry_phone }}</td>
+                <td>{{ enquiry.utm_link.property_title|default:'N/A' }}</td>
+                <td>{{ enquiry.enquiry_date|date:'M d, Y' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+// Calculate lead age
+function calculateLeadAge(enquiryDateStr) {
+    if (!enquiryDateStr || enquiryDateStr === 'None') return 'N/A';
+    const enquiryDate = new Date(enquiryDateStr);
+    const today = new Date();
+    const diffDays = Math.ceil(Math.abs(today - enquiryDate) / (1000 * 60 * 60 * 24));
+    return `${diffDays} days`;
+}
+
+// Update lead ages in table
+function updateAllLeadAges() {
+    let totalDays = 0;
+    let count = 0;
+    
+    $('.lead-age-cell').each(function() {
+        const enquiryDate = $(this).data('enquiry-date');
+        if (enquiryDate && enquiryDate !== 'None') {
+            const ageDisplay = calculateLeadAge(enquiryDate);
+            $(this).html(`<span class="age-badge">${ageDisplay}</span>`);
+            const age = parseInt(ageDisplay);
+            totalDays += age;
+            count++;
+        }
+    });
+    
+    if (count > 0) {
+        const avgDays = Math.round(totalDays / count);
+        $('#avgLeadAge').html(`${avgDays} days`);
+    }
+}
+
+// Initialize Source Pie Chart
+function initSourceChart() {
+    const ctx = document.getElementById('sourceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Facebook', 'Instagram', 'WhatsApp', 'Google', 'LinkedIn', 'Twitter', 'YouTube', 'Referral', 'Direct'],
+            datasets: [{
+                data: [
+                    parseInt($('#facebookCount').text()) || 0,
+                    parseInt($('#instagramCount').text()) || 0,
+                    parseInt($('#whatsappCount').text()) || 0,
+                    parseInt($('#googleCount').text()) || 0,
+                    parseInt($('#linkedinCount').text()) || 0,
+                    parseInt($('#twitterCount').text()) || 0,
+                    parseInt($('#youtubeCount').text()) || 0,
+                    parseInt($('#referralCount').text()) || 0,
+                    parseInt($('#directCount').text()) || 0
+                ],
+                backgroundColor: ['#1877f2', '#e4405f', '#25d366', '#ea4335', '#0077b5', '#000000', '#dc1a1a', '#fd7e14', '#6c757d']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
+    });
+}
+
+// Initialize Status Doughnut Chart
+function initStatusChart() {
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Pending', 'In Progress', 'Hold', 'Closed', 'Cancelled'],
+            datasets: [{
+                data: [
+                    parseInt($('#pendingCount').text()) || 0,
+                    parseInt($('#inProgressCount').text()) || 0,
+                    parseInt($('#holdCount').text()) || 0,
+                    parseInt($('#closedCount').text()) || 0,
+                    parseInt($('#cancelledCount').text()) || 0
+                ],
+                backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#ef4444']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
+    });
+}
+
+// Initialize Age Bar Chart
+function initAgeChart() {
+    function getAgeGroups() {
+        const groups = [0, 0, 0, 0, 0];
+        $('#enquiryTable tbody tr').each(function() {
+            const enquiryDate = $(this).find('.lead-age-cell').data('enquiry-date');
+            if (enquiryDate && enquiryDate !== 'None') {
+                const age = Math.ceil(Math.abs(new Date() - new Date(enquiryDate)) / (1000 * 60 * 60 * 24));
+                if (age <= 3) groups[0]++;
+                else if (age <= 7) groups[1]++;
+                else if (age <= 15) groups[2]++;
+                else if (age <= 30) groups[3]++;
+                else groups[4]++;
+            }
+        });
+        return groups;
+    }
+    
+    const ctx = document.getElementById('ageChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['0-3 days', '4-7 days', '8-15 days', '16-30 days', '30+ days'],
+            datasets: [{
+                label: 'Number of Enquiries',
+                data: getAgeGroups(),
+                backgroundColor: 'rgba(13, 148, 136, 0.7)',
+                borderRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'Number of Enquiries' } } }
+        }
+    });
+}
+
+// Initialize Trend Line Chart
+// Initialize Trend Line Chart - WITH YEAR included
+function initTrendChart() {
+    // Get last 30 days labels (format: "Jun 11, 2026" with year)
+    const dates = [];
+    const counts = [];
+    const today = new Date();
+    
+    for (let i = 29; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        // Format as "Jun 11, 2026" with year
+        dates.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
+        counts.push(0);
+    }
+    
+    // Count enquiries from table - match exact format
+    $('#enquiryTable tbody tr').each(function() {
+        let dateStr = $(this).find('td:last').text().trim();
+        
+        if (dateStr && dateStr !== '') {
+            // Find matching index (exact match including year)
+            const idx = dates.findIndex(d => d === dateStr);
+            if (idx !== -1) {
+                counts[idx]++;
+            }
+        }
+    });
+    
+    console.log('Chart labels (with year):', dates.slice(0, 5));
+    console.log('Chart counts:', counts.slice(0, 10));
+    console.log('Total enquiries:', counts.reduce((a,b) => a + b, 0));
+    
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    
+    // Destroy existing chart if any
+    if (window.trendChartInstance) {
+        window.trendChartInstance.destroy();
+    }
+    
+    window.trendChartInstance = new Chart(ctx, {
+        type: 'line',  // Changed back to line chart
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Enquiries',
+                data: counts,
+                borderColor: '#0d9488',
+                backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+                pointRadius: 4,
+                pointBackgroundColor: '#0d9488',
+                pointBorderColor: 'white',
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { 
+                    callbacks: { 
+                        label: (ctx) => `Enquiries: ${ctx.raw}` 
+                    } 
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Number of Enquiries' },
+                    ticks: { stepSize: 1 }
+                },
+                x: {
+                    title: { display: true, text: 'Date' },
+                    ticks: { 
+                        maxRotation: 45,
+                        autoSkip: true,
+                        maxTicksLimit: 15
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Filter functions
+function filterBySource(source) {
+    $('.source-card').removeClass('active');
+    $(`.source-card[data-source="${source}"]`).addClass('active');
+    $('#enquiryTable tbody tr').each(function() {
+        const sourceText = $(this).find('td:eq(6)').text().trim().toLowerCase();
+        $(this).toggle(source === 'all' || sourceText.includes(source.toLowerCase()));
+    });
+    updateVisibleCount();
+}
+
+function filterByStatus(status) {
+    $('.status-card').removeClass('active');
+    if (status !== 'all') $(`.status-card[data-status="${status}"]`).addClass('active');
+    else $('.status-card[data-status="all"]').addClass('active');
+    
+    $('#enquiryTable tbody tr').each(function() {
+        const statusText = $(this).find('td:eq(4)').text().trim();
+        $(this).toggle(status === 'all' || statusText.includes(status));
+    });
+    updateVisibleCount();
+}
+
+function updateVisibleCount() {
+    const visibleCount = $('#enquiryTable tbody tr:visible').length;
+    $('.records-counter').text(visibleCount + ' found');
+}
+
+
+
+// Document Ready
+$(document).ready(function () {
+    var table = $('#enquiryTable').DataTable({
+        dom: 'lrt<"table-footer"ip>',
+        paging: true,
+        pageLength: 10,
+        lengthMenu: [5, 10, 25, 50, 100],
+        scrollX: false,
+        language: { search: "", searchPlaceholder: "Search...", paginate: { previous: "<i class='fas fa-chevron-left'></i>", next: "<i class='fas fa-chevron-right'></i>" } },
+        columnDefs: [{ orderable: false, targets: [0, 3, 4] }],
+        order: [[10, 'desc']]
+    });
+    
+    // Search container
+    $('.table-header').append('<div class="search-container"><i class="fas fa-search"></i><div class="dataTables_filter"></div><span class="records-counter">0 records</span></div>');
+    $('.dataTables_filter').appendTo('.search-container');
+    $('.dataTables_filter input').attr("placeholder", "Search...");
+    
+    function updateRecordCounter() {
+        var total = table.rows().count();
+        var filtered = table.rows({search: 'applied'}).count();
+        $('.records-counter').text(filtered === total ? total + ' total' : filtered + ' found');
+    }
+    
+    table.on('draw', function() { updateRecordCounter(); });
+    $('.dataTables_filter input').on('keyup', function() { setTimeout(updateRecordCounter, 50); });
+    
+    // Initialize everything
+    setTimeout(function() {
+        updateAllLeadAges();
+        initSourceChart();
+        initStatusChart();
+        initAgeChart();
+        initTrendChart();
+        updateRecordCounter();
+    }, 500);
+});
+
+setInterval(updateAllLeadAges, 60000);
+
+// Update charts with filtered data
+function updateChartsWithFilteredData(data) {
+    // Update Source Chart
+    if (sourceChart) {
+        sourceChart.data.datasets[0].data = [
+            data.fb_count, data.insta_count, data.whatsapp_count,
+            data.google_count, data.linkedin_count, data.twitter_count,
+            data.youtube_count, data.referral_count, data.direct_count
+        ];
+        sourceChart.update();
+    }
+    
+    // Update Status Chart
+    if (statusChart) {
+        statusChart.data.datasets[0].data = [
+            data.pending_count, data.progress_count, data.hold_count,
+            data.closed_count, data.cancelled_count
+        ];
+        statusChart.update();
+    }
+    
+    // Update Age Chart
+    if (ageChart) {
+        ageChart.data.datasets[0].data = [
+            data.age_0_3, data.age_4_7, data.age_8_15,
+            data.age_16_30, data.age_30_plus
+        ];
+        ageChart.update();
+    }
+    
+    // Update Trend Chart
+    if (trendChart) {
+        trendChart.data.labels = data.trend_dates;
+        trendChart.data.datasets[0].data = data.trend_counts;
+        trendChart.update();
+    }
+}
+
+</script> 

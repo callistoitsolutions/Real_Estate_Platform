@@ -639,6 +639,7 @@ body {
             <tr>
                 <th>Actions</th>
                 <th>Sr. No.</th>
+                <th>Property Details</th>
                 <th>Assigned To</th>
                 <th>Lead Age</th>
                 <th>Status</th>
@@ -660,6 +661,7 @@ body {
                     </div>
                 </td>
                 <td>{{ forloop.counter }}</td>
+                <td><a href="{% url "view_property_details_rm" enquiry.utm_link.id %}" style="color:#0d9488;text-decoration:none;font-weight:bold; ">View Property Details</a></td>
                 <td>{{ enquiry.assigned_to.user_name }}-{{enquiry.assigned_to.user_role}}</td>
                 <td class="lead-age-cell" data-enquiry-date="{{ enquiry.enquiry_date|date:'Y-m-d' }}">
                     <span class="age-badge">Calculating...</span>
