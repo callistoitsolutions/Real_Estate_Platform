@@ -213,6 +213,206 @@
   @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } .form-container { grid-column: 1 / -1; } }
   @media (max-width: 992px) { .main-content { margin-left: 0; } }
   @media (max-width: 768px) { .main-content { padding: 16px; } .form-container { padding: 20px; } .step-label { display: none; } }
+
+
+  /* ============================================================
+   DROPDOWN PANEL OVERFLOW FIX
+   ============================================================ */
+  /* Fix parent containers that might hide the dropdown panel */
+  .form-group,
+  .col-md-12,
+  .section-body,
+  .step-content,
+  .row,
+  .modal-body {
+    overflow: visible !important;
+  }
+
+  /* Specifically fix Step 4 */
+  #step4 .section-body {
+    overflow: visible !important;
+  }
+
+  /* ============================================================
+   CUSTOM SEARCHABLE DROPDOWN (no jQuery / Select2 dependency)
+   ============================================================ */
+  .search-select {
+    position: relative;
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .search-select-control {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 12px 15px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    min-height: 48px;
+  }
+
+  .search-select-control:hover,
+  .search-select-control:focus {
+    border-color: #667eea;
+    outline: none;
+  }
+
+  .search-select.open .search-select-control {
+    border-color: #667eea;
+  }
+
+  .search-select-value {
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-height: 1.2em;
+    display: inline-block;
+  }
+
+  .search-select-value.ss-placeholder {
+    color: #94a3b8;
+  }
+
+  .search-select-value:empty::before {
+    content: "-- Select Team Member --";
+    color: #94a3b8;
+  }
+
+  .search-select-arrow {
+    color: #64748b;
+    transition: transform 0.2s ease;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+
+  .search-select.open .search-select-arrow {
+    transform: rotate(180deg);
+  }
+
+  .search-select-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .search-select.open .search-select-panel {
+    display: block;
+  }
+
+  .search-select-input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid #e9ecef;
+    padding: 12px 15px;
+    font-size: 0.9rem;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .search-select-input:focus {
+    border-bottom-color: #667eea;
+  }
+
+  .search-select-options {
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .search-select-group-label {
+    padding: 8px 15px 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: #f8f9fa;
+  }
+
+  .search-select-option {
+    padding: 10px 16px;
+    cursor: pointer;
+    color: #2d3748;
+    font-size: 0.9rem;
+  }
+
+  .search-select-option:hover,
+  .search-select-option.highlighted {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .search-select-option:hover .opt-role,
+  .search-select-option.highlighted .opt-role {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .search-select-option.selected {
+    background-color: #eef2ff;
+    font-weight: 600;
+  }
+
+  .opt-role {
+    color: #64748b;
+    font-weight: 400;
+  }
+
+  .search-select-no-results {
+    padding: 16px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+  }
+
+  .search-select.validation-error .search-select-control {
+    border-color: #e74c3c !important;
+    background: #fff5f5 !important;
+  }
+
+  .selected-items-display {
+    padding: 12px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    min-height: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .item-tag {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .item-tag .remove-btn {
+    cursor: pointer;
+    color: #dc3545;
+    margin-left: 4px;
+    font-size: 12px;
+  }
+
+
 </style>
 
 <div class="main-content">
@@ -260,6 +460,98 @@
         <div class="step-content active" id="step1">
 
           <div class="form-section">
+              <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                  <span><i class="fas fa-upload"></i> Listed By</span>
+                            
+              </div>
+
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-12">
+                      <div class="form-group">
+                        <label class="form-label">
+                          <i class="fas fa-user"></i> Listed By <span class="text-danger">*</span>
+                        </label>
+
+                        <div class="listed-by-radio-group" style="display:flex; gap:24px; margin-bottom:14px;">
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
+                          <input type="radio" name="listed_by_type" id="listedBySelf" value="self" checked onchange="Change_Fields()">
+                          Listed by Self
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
+                            <input type="radio" name="listed_by_type" id="listedByOther" value="other" onchange="Change_Fields()">
+                            Listed for Other User
+                        </label>
+                      </div>
+
+                      <input type="hidden" id="selfUserId" value="{{ admin_obj.id }}">
+                      <input type="hidden" id="selfUserRole" value="{{ admin_obj.role }}">
+                      <input type="hidden" id="selfUserName" value="{{ admin_obj.name }}">
+                      <input type="hidden" id="selfUserEmail" value="{{ admin_obj.email }}">
+                      <input type="hidden" id="selfUserPhone" value="{{ admin_obj.phone }}">
+
+                      <div id="listedByOtherWrapper" style="display:none;">
+                        <div class="search-select" id="assignedToSearchSelect">
+                          <div class="search-select-control" id="assignedToControl" tabindex="0">
+                            <span class="search-select-value" id="assignedToValueLabel">-- Select Team Member --</span>
+                            <i class="fas fa-chevron-down search-select-arrow"></i>
+                          </div>
+                          <div class="search-select-panel" id="assignedToPanel">
+                            <input type="text" class="search-select-input" id="searchTeamMember" placeholder="Type to search team members...">
+                            <div class="search-select-options" id="assignedToOptions">
+                                {% regroup user_obj by user_role as grouped_users %}
+                                  {% for group in grouped_users %}
+                                      <div class="search-select-group-label">{{ group.grouper|upper }} ({{ group.list|length }})</div>
+                                          {% for user in group.list %}
+                                            <div class="search-select-option"
+                                              data-value="{{ user.id }}-{{user.user_role}}"
+                                              data-name="{{ user.user_name }}"
+                                              data-role="{{ user.user_role }}"
+                                              data-phone="{{ user.user_phone }}"
+                                              data-uid="{{ user.user_id }}"
+                                              data-search="{{ user.user_name|lower }} {{ user.user_role|lower }} {{ user.user_phone }} {{ user.user_id|lower }}">
+                                              {{ user.user_id }} <span class="opt-role">- {{ user.user_name }}</span> <span class="opt-role">- {{ user.user_role }}</span><span class="opt-role">- {{ user.user_phone }}</span>
+                                            </div>
+                                          {% endfor %}
+                                        {% endfor %}
+                                        <div class="search-select-no-results" id="assignedToNoResults" style="display:none;">No team members found</div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+
+                                <select id="assigned_to" name="assigned_to" required style="display:none;">
+                                    <option value="">-- Select Team Member --</option>
+                                    {% regroup user_obj by user_role as grouped_users %}
+                                    {% for group in grouped_users %}
+                                    <optgroup label="{{ group.grouper|upper }} ({{ group.list|length }})">
+                                    {% for user in group.list %}
+                                    <option value="{{ user.id }}-{{user.user_role}}" data-name="{{ user.user_name }}" data-role="{{ user.user_role }}">
+                                        {{ user.user_name }} - {{ user.user_role }}
+                                    </option>
+                                    {% endfor %}
+                                    </optgroup>
+                                    {% endfor %}
+                                </select>
+
+                                <input type="hidden" id="assigned_to_role" name="assigned_to_role" value="">
+                                </div>
+                            </div>
+                            </div>
+
+                            <br>
+
+                            <div class="row" id="user_data_div">
+                            <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Id</label><input type="text" class="form-control" name="uploaded_by_id" id="uploaded_by_id" readonly style="background-color: #e9ecef;"></div></div>
+                            <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="uploaded_by_name" id="uploaded_by_name" readonly style="background-color: #e9ecef;"></div></div>
+                            <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="uploaded_by_email" id="uploaded_by_email" readonly style="background-color: #e9ecef;"></div></div>
+                            <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="uploaded_by_contact" id="uploaded_by_contact" readonly style="background-color: #e9ecef;"></div></div>
+                            <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="uploaded_by_role" id="uploaded_by_role" readonly style="background-color: #e9ecef;"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+          <div class="form-section">
             <div class="section-header"><i class="fas fa-info-circle"></i> Basic Plot Details</div>
             <div class="section-body">
               <div class="row">
@@ -278,17 +570,19 @@
                 </div>
 
                 <div class="col-md-6 mt-2">
-                  <label class="form-label">Plot No</label>
-                  <input type="text" class="form-control" name="property_no" id="property_no"
-                    placeholder="Enter Plot No">
+                  <label class="form-label">Plot No/Unit No <span style="color:red;">*</span></label>
+                  <input type="text" class="form-control" name="property_no" id="property_no" placeholder="Enter Plot No/Unit No" required>
+                  <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block;font-weight:bold;">
+                    <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
+                  </span>
                 </div>
 
 
-                 <div class="col-md-4 mt-3">
+                 {% comment %} <div class="col-md-4 mt-3">
                   <label class="form-label">Property Registration No </label>
                   <input type="text" class="form-control" name="property_regi_no" 
                     placeholder="Enter Property Registeration No">
-                </div>
+                </div> {% endcomment %}
                 <div class="col-md-4 mt-3">
                   <label class="form-label">Plot Area (sq.ft) <span class="required">*</span></label>
                   <input type="number" class="form-control" name="plot_area" id="plot_area"
@@ -406,47 +700,24 @@
 
               </div><!-- /row -->
 
-              <!-- PLOT FACING -->
-              <div class="form-group mt-4">
-                <label class="form-label">Plot Facing</label>
-                <div class="facing-grid" id="facingGrid">
-                  <label class="facing-option" onclick="selectFacing(this, 'North')">
-                    <input type="radio" name="plot_facing" value="North">
-                    <span class="facing-icon">⬆️</span><span>North</span>
-                  </label>
-                  <label class="facing-option" onclick="selectFacing(this, 'South')">
-                    <input type="radio" name="plot_facing" value="South">
-                    <span class="facing-icon">⬇️</span><span>South</span>
-                  </label>
-                  <label class="facing-option" onclick="selectFacing(this, 'East')">
-                    <input type="radio" name="plot_facing" value="East">
-                    <span class="facing-icon">➡️</span><span>East</span>
-                  </label>
-                  <label class="facing-option" onclick="selectFacing(this, 'West')">
-                    <input type="radio" name="plot_facing" value="West">
-                    <span class="facing-icon">⬅️</span><span>West</span>
-                  </label>
-                  <label class="facing-option" onclick="selectFacing(this, 'North-East')">
-                    <input type="radio" name="plot_facing" value="North-East">
-                    <span class="facing-icon">↗️</span><span>North-East</span>
-                  </label>
-                  <label class="facing-option" onclick="selectFacing(this, 'North-West')">
-                    <input type="radio" name="plot_facing" value="North-West">
-                    <span class="facing-icon">↖️</span><span>North-West</span>
-                  </label>
-                  <label class="facing-option" onclick="selectFacing(this, 'South-East')">
-                    <input type="radio" name="plot_facing" value="South-East">
-                    <span class="facing-icon">↘️</span><span>South-East</span>
-                  </label>
-                  <label class="facing-option" onclick="selectFacing(this, 'South-West')">
-                    <input type="radio" name="plot_facing" value="South-West">
-                    <span class="facing-icon">↙️</span><span>South-West</span>
-                  </label>
-                </div>
-              </div>
+              
 
               <!-- PLOT DIMENSIONS -->
               <div class="row mt-3">
+                <div class="col-md-4">
+                  <label class="form-label">Plot Facing</label>
+                  <select class="form-select form-control" name="plot_facing">
+                    <option value="">Select Plot Facing</option>
+                    <option value="North">North</option>
+                    <option value="South">South</option>
+                    <option value="East">East</option>
+                    <option value="West">West</option>
+                    <option value="North-East">North-East</option>
+                    <option value="North-West">North-West</option>
+                    <option value="South-East">South-East</option>
+                    <option value="South-West">South-West</option>
+                  </select>
+                </div>
                 <div class="col-md-4">
                   <label class="form-label">Frontage (Feet)</label>
                   <input type="number" class="form-control" name="plot_frontage"
@@ -457,6 +728,7 @@
                   <input type="number" class="form-control" name="plot_depth"
                     placeholder="e.g., 50">
                 </div>
+
                 <div class="col-md-4">
                   <label class="form-label">Plot Shape</label>
                   <select class="form-select form-control" name="plot_shape">
@@ -468,31 +740,63 @@
                 </div>
               </div>
 
-              <!-- BOUNDARY WALL -->
-              <div class="form-group mt-3">
-                <label class="form-label">Boundary Wall Available?</label>
-                <div class="radio-group">
-                  <label class="radio-option"><input type="radio" name="plot_fencing" value="no" checked> No</label>
-                  <label class="radio-option"><input type="radio" name="plot_fencing" value="yes"> Yes</label>
+              <div class="row mt-3">
+                <div class="col-md-6">
+                    <div class="form-group mt-3">
+                      <label class="form-label">Boundary Wall Available?</label>
+                      <div class="radio-group">
+                        <label class="radio-option"><input type="radio" name="plot_fencing" value="no" checked> No</label>
+                        <label class="radio-option"><input type="radio" name="plot_fencing" value="yes"> Yes</label>
+                      </div>
+                  </div>
                 </div>
+                <div class="col-md-6">
+                   <label class="form-label">
+                    Current Possession Status
+                </label>
+
+                <select class="form-select form-control" name="current_possession_status">
+                    <option value="">Select Possession Status</option>
+
+                    <option value="Self Occupied">Self Occupied</option>
+                    <option value="Tenant Occupied">Tenant Occupied</option>
+                    <option value="Vacant">Vacant</option>
+                    <option value="Under Construction">Under Construction</option>
+                    <option value="Caretaker Occupied">Caretaker Occupied</option>
+                </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label mt-2" id="brokerageLabel">Brokerage <span class="required">*</span></label>
+                      <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
+                        <option value="">Select</option>
+                        <option value="No Brokerage">No Brokerage</option>
+                        <option value="1% of amount">1% of amount</option>
+                        <option value="1.5% of amount">1.5% of amount</option>
+                        <option value="2% of amount">2% of amount</option>
+                        <option value="Fixed Amount">Fixed Amount</option>
+                        <option value="Negotiable">Negotiable</option>
+                      </select>
+                </div>
+
+                <div class="col-md-6 mb-3" id="manualBrokerage" style="display:none;">
+                  <label class="form-label">Enter Fixed Brokerage</label>
+                  <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. Fixed Amount">
+                </div>
+
+
               </div>
 
+              
 
-              <div class="col-md-6 mt-3">
-    <label class="form-label">
-        Current Possession Status
-    </label>
+              <!-- BOUNDARY WALL -->
+              
 
-    <select class="form-select form-control" name="current_possession_status">
-        <option value="">Select Possession Status</option>
 
-        <option value="Self Occupied">Self Occupied</option>
-        <option value="Tenant Occupied">Tenant Occupied</option>
-        <option value="Vacant">Vacant</option>
-        <option value="Under Construction">Under Construction</option>
-        <option value="Caretaker Occupied">Caretaker Occupied</option>
-    </select>
-</div>
+              
+
+              
+
+
             </div><!-- /section-body -->
           </div><!-- /form-section -->
 
@@ -533,24 +837,6 @@
                     <label class="radio-option"><input type="radio" name="price_negotiable" value="yes"> Yes</label>
                     <label class="radio-option"><input type="radio" name="price_negotiable" value="no" checked> No</label>
                   </div>
-                </div>
-
-                <div class="col-md-6 mt-3">
-                  <label class="form-label">Brokerage</label>
-                  <select class="form-select form-control" name="brokerage" id="brokerageSelect">
-                    <option value="No">No</option>
-                    <option value="Yes">Yes</option>
-                  </select>
-                </div>
-
-                <div class="col-md-6 mt-3" id="brokerageSection" style="display:none;">
-                  <label class="form-label">Brokerage Percent</label>
-                  <select class="form-select form-control" name="brokerage_percentage">
-                    <option value="1%">1%</option>
-                    <option value="2%">2%</option>
-                    <option value="3%">3%</option>
-                    <option value="Negotiable">Negotiable</option>
-                  </select>
                 </div>
 
               </div><!-- /row -->
@@ -731,7 +1017,76 @@
           </div>
 
 
-           <div class="form-section">
+          
+
+
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next: Amenities & Facilities <i class="fas fa-arrow-right"></i></button>
+          </div>
+
+        </div><!-- /step2 -->
+
+        <!-- ════════════ STEP 3 — AMENITIES & LOCATION ════════════ -->
+        <div class="step-content" id="step3">
+
+          <!-- AMENITIES -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-star"></i> Amenities & Features</div>
+            <div class="section-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0"><i class="fas fa-star text-warning"></i> Amenities</label>
+                <span class="badge bg-primary" id="amenitiesCount">0 selected</span>
+              </div>
+
+              <button type="button" class="btn btn-primary w-100 mb-3" onclick="openModal('amenities')">
+                <i class="fas fa-plus-circle me-2"></i> Select Amenities <span class="badge bg-light text-dark ms-2"
+                id="amenitiesBadge">0</span>
+              </button>
+
+              <div id="amenitiesDisplay" class="selected-items-display">
+                <p class="text-muted text-center">No amenities selected</p>
+              </div>
+
+              <!-- Hidden checkboxes for form submission -->
+              <div style="display:none;">
+                {% for am in ameneties_obj %}
+                  <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}" class="amenities-checkbox"
+                  data-icon="{{am.amenties_icon}}">
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- NEARBY FACILITIES -->
+          <div class="form-section">
+            <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
+            <div class="section-body mt-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0"><i class="fas fa-map-marker-alt text-primary"></i> Nearby Facilities</label>
+                <span class="badge bg-primary" id="facilitiesCount">0 selected</span>
+              </div>
+
+              <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')">
+                <i class="fas fa-plus-circle me-2"></i> Select Facilities <span class="badge bg-light text-dark ms-2"
+                    id="facilitiesBadge">0</span>
+              </button>
+
+              <div id="facilitiesDisplay" class="selected-items-display">
+                <p class="text-muted text-center">No facilities selected</p>
+              </div>
+
+              <!-- Hidden checkboxes for form submission -->
+              <div style="display:none;">
+                {% for fa in facilities_obj %}
+                  <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}"
+                  class="facilities-checkbox" data-icon="{{fa.facilities_icon}}">
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
             <div class="section-header"> User Description Details</div>
             <div class="section-body">
               <div class="row">
@@ -756,77 +1111,6 @@
                   placeholder="Describe the plot in detail..."></textarea>
               </div>
 
-            </div>
-          </div>
-
-
-          <div class="step-nav">
-            <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
-            <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next: Amenities & Facilities <i class="fas fa-arrow-right"></i></button>
-          </div>
-
-        </div><!-- /step2 -->
-
-        <!-- ════════════ STEP 3 — AMENITIES & LOCATION ════════════ -->
-        <div class="step-content" id="step3">
-
-          <!-- AMENITIES -->
-          <div class="form-section">
-            <div class="section-header"><i class="fas fa-star"></i> Amenities & Features</div>
-            <div class="section-body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <label class="form-label mb-0">Select Amenities <span class="required">*</span></label>
-                <div class="d-flex align-items-center gap-2">
-                  <span class="text-muted small fw-bold">Total Selected:</span>
-                  <input type="text" id="amenityCounter" value="0" readonly class="counter-box">
-                </div>
-              </div>
-              <div class="checkbox-group">
-                {% for amenities in ameneties_obj %}
-                  <div class="checkbox-item">
-                    <div class="form-check">
-                      <input class="form-check-input amenity-checkbox" type="checkbox"
-                        name="amenities[]" value="{{ amenities.amenties_name }}"
-                        id="amenity_{{ forloop.counter }}">
-                      <label class="form-check-label" for="amenity_{{ forloop.counter }}">
-                        <i class="{{ amenities.amenties_icon }}"></i> {{ amenities.amenties_name }}
-                      </label>
-                    </div>
-                  </div>
-                {% empty %}
-                  <p class="text-muted small">No amenities configured.</p>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-
-          <!-- NEARBY FACILITIES -->
-          <div class="form-section">
-            <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
-            <div class="section-body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <label class="form-label mb-0">Select Nearby Facilities <span class="required">*</span></label>
-                <div class="d-flex align-items-center gap-2">
-                  <span class="text-muted small fw-bold">Total Selected:</span>
-                  <input type="text" id="facilityCounter" value="0" readonly class="counter-box blue-theme">
-                </div>
-              </div>
-              <div class="checkbox-group">
-                {% for facilities in facilities_obj %}
-                  <div class="checkbox-item">
-                    <div class="form-check">
-                      <input class="form-check-input facility-checkbox" type="checkbox"
-                        name="facilities[]" value="{{ facilities.facilities_name }}"
-                        id="facility_{{ forloop.counter }}">
-                      <label class="form-check-label" for="facility_{{ forloop.counter }}">
-                        <i class="{{ facilities.facilities_icon }}"></i> {{ facilities.facilities_name }}
-                      </label>
-                    </div>
-                  </div>
-                {% empty %}
-                  <p class="text-muted small">No facilities configured.</p>
-                {% endfor %}
-              </div>
             </div>
           </div>
 
@@ -896,6 +1180,32 @@
             </div>
           </div>
 
+          <div class="form-section">
+            <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes">
+                        <label class="form-check-label" for="listed_yes">Yes</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" checked>
+                        <label class="form-check-label" for="listed_no">No</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6" id="portalField" style="display:none;">
+                    <div class="form-group">
+                      <label class="form-label">Portal Name</label>
+                        <input type="text" class="form-control" name="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker">
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+
           <!-- OWNER CONTACT -->
           <div class="form-section" hidden>
             <div class="section-header"><i class="fas fa-user"></i> Plot Owner Contact</div>
@@ -923,7 +1233,7 @@
           </div>
 
           <!-- LISTED BY -->
-          <div class="form-section">
+          <div class="form-section" style="display:none;">
             <div class="section-header"><i class="fas fa-id-badge"></i> Property Listed By</div>
             <div class="section-body">
               <div class="row">
@@ -953,7 +1263,7 @@
 
           <!-- UPLOADED BY -->
           <div class="form-section">
-            <div class="section-header"><i class="fas fa-upload"></i> Listing Uploaded By</div>
+            <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
             <div class="section-body">
               <div class="row">
                 <div class="col-md-3 mt-2">
@@ -1042,7 +1352,463 @@
   </div><!-- /page-wrapper -->
 </div><!-- /main-content -->
 
+<!-- Common Modal -->
+<div class="modal fade" id="itemsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-list"></i> <span id="modalTitle">Select Items</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control mb-3" id="modalSearch" placeholder="Search...">
+        <div id="modalItemsList" class="row"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply (<span
+            id="modalSelectedCount">0</span>)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+    $("#Resale").addClass("active");
+
+    document.addEventListener('DOMContentLoaded', function() {
+    // 1. Get the radio buttons and the hidden portal input field
+    var yesRadio = document.getElementById('listed_yes');
+    var noRadio = document.getElementById('listed_no');
+    var portalField = document.getElementById('portalField');
+    
+    // 2. Create a function that checks if "Yes" is selected
+    function togglePortalField() {
+        if (portalField) {
+            // If yes is checked, show it ('block'). If not, hide it ('none').
+            portalField.style.display = yesRadio.checked ? 'block' : 'none';
+        }
+    }
+    
+    // 3. Attach the function to run whenever the user clicks either radio button
+    if (yesRadio) yesRadio.addEventListener('change', togglePortalField);
+    if (noRadio) noRadio.addEventListener('change', togglePortalField);
+    
+    // 4. Run it once immediately when the page loads to set the initial state
+    togglePortalField();
+});
+
+
+</script>
+
+<script>
+
+  function updateBrokerageLabel(role) {
+    var labelElement = document.getElementById('brokerageLabel');
+    if (!labelElement) return;
+
+    // Normalize the string text to lowercase to ensure clean matches
+    var normalizedRole = (role || "").trim().toLowerCase();
+    var labelText = "";
+
+    switch (normalizedRole) {
+      case 'admin':
+        labelText = "EstateFlow Service Fee";
+        break;
+      case 'relationship manager':
+        labelText = "Buyer Service Fee";
+        break;
+      case 'landlord':
+        labelText = "Buyer Service Fee";
+        break;
+      case 'agent':
+        labelText = "Brokerage";
+        break;
+      case 'agency/builder':
+      case 'builder':
+        labelText = "Brokerage/Service Fee";
+        break;
+      default:
+        labelText = "Brokerage"; // Fallback default text
+        break;
+    }
+
+    // Inject the text along with a red styled asterisk span
+    labelElement.innerHTML = labelText + ' <span style="color: red;">*</span>';
+  }
+
+</script>
+
+<script>
+  function Change_Fields(){
+    var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
+    if (!checkedInput) return;
+    
+    var selectedValue = checkedInput.value;
+    
+    var admin_id    = document.getElementById('selfUserId')?.value || "";
+    var admin_name  = document.getElementById('selfUserName')?.value || "";
+    var admin_email = document.getElementById('selfUserEmail')?.value || "";
+    var admin_phone = document.getElementById('selfUserPhone')?.value || "";
+    var admin_role  = document.getElementById('selfUserRole')?.value || "";
+
+    var targetId      = document.getElementById('uploaded_by_id')      || document.querySelector('#user_data_div [id$="id"]');
+    var targetName    = document.getElementById('uploaded_by_name')    || document.querySelector('#user_data_div [id$="name"]');
+    var targetEmail   = document.getElementById('uploaded_by_email')   || document.querySelector('#user_data_div [id$="email"]');
+    var targetContact = document.getElementById('uploaded_by_contact') || document.querySelector('#user_data_div [id$="contact"]');
+    var targetRole    = document.getElementById('uploaded_by_role')    || document.querySelector('#user_data_div [id$="role"]');
+    var hiddenSelect  = document.getElementById('assigned_to');
+
+    if(selectedValue == "self"){
+        var otherWrapper = document.getElementById('listedByOtherWrapper');
+        if (otherWrapper) otherWrapper.style.display = "none";
+        
+        if (hiddenSelect) {
+            hiddenSelect.value = "";
+            hiddenSelect.required = false; 
+            hiddenSelect.classList.remove('is-invalid');
+        }
+        var valueLabel = document.getElementById('assignedToValueLabel');
+        if (valueLabel) valueLabel.textContent = "-- Select Team Member --";
+
+        if (targetId)      targetId.value = admin_id;
+        if (targetName)    targetName.value = admin_name;
+        if (targetEmail)   targetEmail.value = admin_email;
+        if (targetContact) targetContact.value = admin_phone;
+        if (targetRole)    targetRole.value = admin_role;
+
+        updateBrokerageLabel(admin_role);
+    }
+    else {
+        if (hiddenSelect) {
+            hiddenSelect.required = true;
+        }
+        
+        if (targetId)      targetId.value = "";
+        if (targetName)    targetName.value = "";
+        if (targetEmail)   targetEmail.value = "";
+        if (targetContact) targetContact.value = "";
+        if (targetRole)    targetRole.value = "";
+        
+        var otherWrapper = document.getElementById('listedByOtherWrapper');
+        if (otherWrapper) otherWrapper.style.display = "block";
+    }
+}
+</script>
+
+<script>
+
+  // ============================================================
+  // Custom searchable dropdown for "Listed By (User)"
+  // Pure vanilla JS — no Select2 dependency.
+  // ============================================================
+  (function () {
+    var wrapper = document.getElementById('assignedToSearchSelect');
+    var control = document.getElementById('assignedToControl');
+    var panel = document.getElementById('assignedToPanel');
+    var input = document.getElementById('searchTeamMember');
+    var optionsEl = document.getElementById('assignedToOptions');
+    var noResults = document.getElementById('assignedToNoResults');
+    var valueLabel = document.getElementById('assignedToValueLabel');
+    var hiddenSelect = document.getElementById('assigned_to');
+    var hiddenRole = document.getElementById('assigned_to_role');
+
+    if (!wrapper || !hiddenSelect) return;
+
+    var options = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-option'));
+    var groupLabels = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-group-label'));
+    var highlightedIndex = -1;
+
+    function openPanel() {
+      wrapper.classList.add('open');
+      input.value = '';
+      filterOptions('');
+      setTimeout(function () { input.focus(); }, 0);
+    }
+
+    function closePanel() {
+      wrapper.classList.remove('open');
+      highlightedIndex = -1;
+    }
+
+    function togglePanel() {
+      if (wrapper.classList.contains('open')) {
+        closePanel();
+      } else {
+        openPanel();
+      }
+    }
+
+    function selectOption(opt) {
+      var value = opt.getAttribute('data-value');
+      var name = opt.getAttribute('data-name');
+      var role = opt.getAttribute('data-role');
+      var uid = opt.getAttribute('data-uid');
+      var phone = opt.getAttribute('data-phone');
+
+      hiddenSelect.value = value;
+      if (hiddenRole) hiddenRole.value = role;
+      valueLabel.textContent = uid + ' - ' + name + ' - ' + role + ' - ' + phone;
+      valueLabel.classList.remove('ss-placeholder');
+
+      options.forEach(function (o) { o.classList.remove('selected'); });
+      opt.classList.add('selected');
+
+      wrapper.classList.remove('validation-error');
+      closePanel();
+
+      // Fire native change event so existing listeners (get_user_data etc.) still run
+      var evt = new Event('change', { bubbles: true });
+      hiddenSelect.dispatchEvent(evt);
+    }
+
+    function filterOptions(query) {
+      query = query.trim().toLowerCase();
+      var anyVisible = false;
+
+      // Track which groups have at least one visible option
+      var groupHasVisible = {};
+
+      options.forEach(function (opt) {
+        var haystack = opt.getAttribute('data-search') || '';
+        var match = haystack.indexOf(query) !== -1;
+        opt.style.display = match ? '' : 'none';
+        if (match) {
+          anyVisible = true;
+          var group = opt.closest('.search-select-options');
+          // find the preceding group label for this option
+          var prev = opt.previousElementSibling;
+          while (prev && !prev.classList.contains('search-select-group-label')) {
+            prev = prev.previousElementSibling;
+          }
+          if (prev) groupHasVisible[prev.textContent] = true;
+        }
+      });
+
+      groupLabels.forEach(function (label) {
+        label.style.display = groupHasVisible[label.textContent] ? '' : 'none';
+      });
+
+      noResults.style.display = anyVisible ? 'none' : 'block';
+      highlightedIndex = -1;
+      options.forEach(function (o) { o.classList.remove('highlighted'); });
+    }
+
+    function visibleOptions() {
+      return options.filter(function (o) { return o.style.display !== 'none'; });
+    }
+
+    function moveHighlight(step) {
+      var visible = visibleOptions();
+      if (!visible.length) return;
+      visible.forEach(function (o) { o.classList.remove('highlighted'); });
+      highlightedIndex += step;
+      if (highlightedIndex < 0) highlightedIndex = visible.length - 1;
+      if (highlightedIndex >= visible.length) highlightedIndex = 0;
+      var el = visible[highlightedIndex];
+      el.classList.add('highlighted');
+      el.scrollIntoView({ block: 'nearest' });
+    }
+
+    control.addEventListener('click', togglePanel);
+    control.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        togglePanel();
+      }
+    });
+
+    input.addEventListener('input', function () {
+      filterOptions(input.value);
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); moveHighlight(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); moveHighlight(-1); }
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        var visible = visibleOptions();
+        if (highlightedIndex >= 0 && visible[highlightedIndex]) {
+          selectOption(visible[highlightedIndex]);
+        } else if (visible.length === 1) {
+          selectOption(visible[0]);
+        }
+      } else if (e.key === 'Escape') {
+        closePanel();
+      }
+    });
+
+    options.forEach(function (opt) {
+      opt.addEventListener('click', function () { selectOption(opt); });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!wrapper.contains(e.target)) closePanel();
+    });
+
+    // ============================================================
+    // FIXED/ADDED: Trigger get_user_data execution on selection change
+    // ============================================================
+    hiddenSelect.addEventListener('change', function () {
+      if (typeof get_user_data === 'function') {
+        get_user_data(this);
+      }
+    });
+
+    // ============================================================
+    // ADDED HERE: Run your field configuration safely on load
+    // ============================================================
+    if (typeof Change_Fields === 'function') {
+      Change_Fields();
+    }
+
+
+  })();
+
+
+</script>
+
+{% comment %} Javascript to get user details according to listing by {% endcomment %}
+
+<script>
+  function get_user_data() {
+
+    var assigned_to = $("#assigned_to").val();
+
+    if (!assigned_to) {
+      $('#uploaded_by_id, #uploaded_by_name, #uploaded_by_email, #uploaded_by_contact, #uploaded_by_role').val('');
+      return;
+    }
+
+    $.ajax({
+      method: "POST",
+      url: "{% url 'get_user_data' %}",
+      data: {
+        'assigned_to': assigned_to,
+      },
+      dataType: "json", // Tells jQuery to parse incoming data as an object
+      success: function (response) {
+
+        // Map JSON object values directly to permanent textboxes
+        $('#uploaded_by_id').val(response.user_id || '');
+        $('#uploaded_by_name').val(response.name || '');
+        $('#uploaded_by_email').val(response.email || '');
+        $('#uploaded_by_contact').val(response.contact || '');
+        $('#uploaded_by_role').val(response.role || '');
+
+        // Call the update script immediately with the new role
+        updateBrokerageLabel(response.role);
+      },
+      error: function (xhr, status, error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    });
+  }
+</script>
+
+
+<script>
+
+  // jQuery Version
+  $(document).ready(function () {
+    const sections = ['amenities', 'facilities'];
+
+    sections.forEach(section => {
+      updateDisplay(section);
+    });
+
+    window.openModal = function (section) {
+      currentSection = section;
+      $('#modalTitle').text(`Select ${section.charAt(0).toUpperCase() + section.slice(1)}`);
+
+      const container = $('#modalItemsList').empty();
+      $(`.${section}-checkbox`).each(function () {
+        container.append(`
+        <div class="col-md-4 col-sm-6 mb-2">
+          <div class="form-check">
+            <input class="form-check-input modal-item-checkbox" type="checkbox" 
+                   value="${this.value}" data-icon="${$(this).data('icon')}"
+                   ${this.checked ? 'checked' : ''}>
+            <label class="form-check-label"><i class="${$(this).data('icon')}"></i> ${this.value}</label>
+          </div>
+        </div>
+      `);
+      });
+
+      updateModalCount();
+      $('#itemsModal').modal('show');
+    };
+
+    window.removeItem = function (section, name) {
+      const items = $(`.${section}-checkbox`).filter(function () {
+        return this.value === name;
+      });
+      items.prop('checked', false);
+      updateDisplay(section);
+    };
+
+    window.clearAll = function () {
+      if (!currentSection) return;
+      $(`.${currentSection}-checkbox`).prop('checked', false);
+      $('.modal-item-checkbox').prop('checked', false);
+      updateDisplay(currentSection);
+      updateModalCount();
+    };
+
+    function updateDisplay(section) {
+      const checked = $(`.${section}-checkbox:checked`);
+      const count = checked.length;
+
+      $(`#${section}Count`).text(`${count} selected`);
+      $(`#${section}Badge`).text(count);
+
+      const display = $(`#${section}Display`).empty();
+
+      if (count === 0) {
+        display.html(`<p class="text-muted text-center m-0">No ${section} selected</p>`);
+      } else {
+        checked.each(function () {
+          display.append(`
+          <span class="item-tag">
+            <i class="${$(this).data('icon')}"></i>
+            ${this.value}
+            <span class="remove-btn" onclick="removeItem('${section}', '${this.value}')">
+              <i class="fas fa-times-circle"></i>
+            </span>
+          </span>
+        `);
+        });
+      }
+    }
+
+    function updateModalCount() {
+      $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length);
+    }
+
+    $(document).on('change', '.modal-item-checkbox', updateModalCount);
+
+    $('#itemsModal .btn-primary').on('click', function () {
+      if (!currentSection) return;
+
+      const checked = $('.modal-item-checkbox:checked');
+      $(`.${currentSection}-checkbox`).prop('checked', false);
+      checked.each(function () {
+        $(`.${currentSection}-checkbox[value="${this.value}"]`).prop('checked', true);
+      });
+
+      updateDisplay(currentSection);
+    });
+  });
+
+
+</script>
+
+
 <script>
   let currentStep = 1;
   let selectedFiles = [];
@@ -1087,12 +1853,7 @@
         f.style.borderColor = '#e74c3c';
       }
     });
-    if (step === 3) {
-      const am = document.querySelectorAll('input[name="amenities[]"]:checked').length;
-      const fa = document.querySelectorAll('input[name="facilities[]"]:checked').length;
-      if (am === 0) missing.push('At least one Amenity');
-      if (fa === 0) missing.push('At least one Nearby Facility');
-    }
+    
     if (missing.length > 0) {
       Swal.fire({
         icon: 'warning', title: 'Required Fields Missing',
@@ -1160,10 +1921,13 @@
     el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
   }
 
-  // ── BROKERAGE TOGGLE ─────────────────────────────────────
-  document.getElementById('brokerageSelect').addEventListener('change', function () {
-    document.getElementById('brokerageSection').style.display = this.value === 'Yes' ? 'block' : 'none';
-  });
+  document.getElementById('brokerageSelect')?.addEventListener('change', function () {
+      document.getElementById('brokerageSection').style.display = this.value === 'Yes' ? 'block' : 'none';
+      if (this.value !== 'Yes') document.getElementById('manualBrokerage').style.display = 'none';
+    });
+    document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
+      document.getElementById('manualBrokerage').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+    });
 
   // ── LOAN TOGGLE ──────────────────────────────────────────
   document.querySelectorAll('input[name="loan_on_property"]').forEach(r => {

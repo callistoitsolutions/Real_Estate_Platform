@@ -3071,7 +3071,9 @@ def residential_resale(request):
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
 
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+        user_obj = User_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
         return render(request,"admin_user/Resale/residential_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -3085,7 +3087,9 @@ def commercial_resale(request):
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
 
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+        user_obj = User_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
         return render(request,"admin_user/Resale/commercial_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -3097,7 +3101,11 @@ def plot_resale(request):
         admin_obj = Admin_Login.objects.get(id=session_id)
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+        user_obj = User_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        
         return render(request,"admin_user/Resale/plot_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -3109,7 +3117,10 @@ def industrial_resale(request):
         admin_obj = Admin_Login.objects.get(id=session_id)
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+        user_obj = User_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
         return render(request,"admin_user/Resale/industrial_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -3121,7 +3132,11 @@ def agricultural_resale(request):
         admin_obj = Admin_Login.objects.get(id=session_id)
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+        user_obj = User_Details.objects.all()
+
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
         return render(request,"admin_user/Resale/agricultural_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -3211,22 +3226,44 @@ def Rm_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Relationship Manager"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    user_state = row[8] if len(row) > 8 else None
-                    user_city = row[9] if len(row) > 9 else None
-                    user_address = row[10] if len(row) > 10 else None
-                    register_date_value = row[11] if len(row) > 11 else None
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
+                    
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
+                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3235,13 +3272,13 @@ def Rm_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    #  Register date: Today's date as default
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3254,13 +3291,35 @@ def Rm_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass  # Keep today's date if parsing fails
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
+                    
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3269,10 +3328,13 @@ def Rm_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3282,17 +3344,29 @@ def Rm_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                    
-                    success_count += 1
+                        
+                        # Generate USER_ID: EF-{ID}-{YY}
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Relationship Managers. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Relationship Managers. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
@@ -3530,22 +3604,44 @@ def Landlord_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Landlord"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    user_state = row[8] if len(row) > 8 else None
-                    user_city = row[9] if len(row) > 9 else None
-                    user_address = row[10] if len(row) > 10 else None
-                    register_date_value = row[11] if len(row) > 11 else None
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
+                
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
+                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3554,13 +3650,13 @@ def Landlord_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    #  Register date: Today's date as default
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3573,13 +3669,35 @@ def Landlord_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass  # Keep today's date if parsing fails
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
+                    
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3588,10 +3706,13 @@ def Landlord_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3601,17 +3722,29 @@ def Landlord_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                    
-                    success_count += 1
+                        
+                        # Generate USER_ID: EF-{ID}-{YY}
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Landlords. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Landlords. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
@@ -3726,22 +3859,44 @@ def Tenant_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Tenant"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    user_state = row[8] if len(row) > 8 else None
-                    user_city = row[9] if len(row) > 9 else None
-                    user_address = row[10] if len(row) > 10 else None
-                    register_date_value = row[11] if len(row) > 11 else None
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
+                
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
+                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3750,13 +3905,13 @@ def Tenant_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    #  Register date: Today's date as default
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3769,13 +3924,35 @@ def Tenant_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass  # Keep today's date if parsing fails
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
+                    
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3784,10 +3961,13 @@ def Tenant_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3797,17 +3977,29 @@ def Tenant_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                    
-                    success_count += 1
+                        
+                        # Generate USER_ID: EF-{ID}-{YY}
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Tenants. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Tenants. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
@@ -3918,22 +4110,44 @@ def Buyer_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Buyer"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    user_state = row[8] if len(row) > 8 else None
-                    user_city = row[9] if len(row) > 9 else None
-                    user_address = row[10] if len(row) > 10 else None
-                    register_date_value = row[11] if len(row) > 11 else None
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
+                
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
+                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3942,13 +4156,13 @@ def Buyer_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    #  Register date: Today's date as default
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3961,13 +4175,35 @@ def Buyer_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass  # Keep today's date if parsing fails
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
+                    
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3976,10 +4212,13 @@ def Buyer_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3989,23 +4228,36 @@ def Buyer_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                    
-                    success_count += 1
+                        
+                        # Generate USER_ID: EF-{ID}-{YY}
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Buyers. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Buyers. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
             return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
     
     return JsonResponse({"status": "0", "msg": "Invalid request method"})
+
 
 ######### Views end for buyer data functionality via excel ###########################
 
@@ -4112,54 +4364,74 @@ def Agent_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Agent"
             
-            # Data starts from row 3 (row 1 = title, row 2 = headers)
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
                     
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    agency_name = row[8] if len(row) > 8 else None
-                    license_number = row[9] if len(row) > 9 else None
-                    user_state = row[10] if len(row) > 10 else None
-                    user_city = row[11] if len(row) > 11 else None
-                    user_address = row[12] if len(row) > 12 else None
-                    register_date_value = row[13] if len(row) > 13 else None
+                    # ================================================================
+                    # COLUMN MAPPING (Based on your Agents Report structure)
+                    # ================================================================
+                    # Column 0: Actions (empty)
+                    # Column 1: Sr. No.
+                    # Column 2: Profile
+                    # Column 3: User Id
+                    # Column 4: Role (contains "Agent")
+                    # Column 5: Name (contains "Anita Chacko")
+                    # Column 6: Email Address (contains "anita.chacko@example.com")
+                    # Column 7: Phone Number
+                    # Column 8: Password
+                    # Column 9: Agency Name
+                    # Column 10: License Number
+                    # Column 11: State
+                    # Column 12: City
+                    # Column 13: Address
+                    # Column 14: Register Date
+                    # ================================================================
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    agency_name = row[9] if len(row) > 9 else None  # Column 9: Agency Name
+                    license_number = row[10] if len(row) > 10 else None  # Column 10: License Number
+                    user_state = row[11] if len(row) > 11 else None  # Column 11: State
+                    user_city = row[12] if len(row) > 12 else None  # Column 12: City
+                    user_address = row[13] if len(row) > 13 else None  # Column 13: Address
+                    register_date_value = row[14] if len(row) > 14 else None  # Column 14: Register Date
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
-                    if isinstance(user_phone, (int, float)):
-                        user_phone = str(int(user_phone))
-                    else:
-                        user_phone = str(user_phone).replace('-', '').replace(' ', '').strip()
+                    user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
                     
-                    # Clean name
+                    # Clean other fields
                     user_name = str(user_name).strip()
-                    
-                    # Clean password
-                    if user_password:
-                        if isinstance(user_password, (int, float)):
-                            user_password = str(int(user_password))
-                        else:
-                            user_password = str(user_password).split('.')[0].strip()
-                    else:
-                        user_password = 'default123'
-                    
-                    # Clean email
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
-                    
-                    # Clean agency fields
+                    user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
                     agency_name = str(agency_name).strip() if agency_name and str(agency_name) != '---' else None
                     license_number = str(license_number).strip() if license_number and str(license_number) != '---' else None
-                    
-                    # Clean address fields
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
@@ -4168,7 +4440,7 @@ def Agent_Data(request):
                     register_date = datetime.now().date()
                     
                     # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-', 'None']:
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
                         try:
                             if isinstance(register_date_value, (date, datetime)):
                                 register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
@@ -4179,16 +4451,15 @@ def Agent_Data(request):
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                                 elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%d/%m/%Y').date()
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
                             pass  # Keep today's date if parsing fails
                     
-                    print(f"Row {row_idx}: Importing Agent - {user_name} ({user_phone}) - Agency: {agency_name or 'N/A'}")
-                    
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -4201,9 +4472,11 @@ def Agent_Data(request):
                         existing_user.user_register_date = register_date
                         existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        print(f"Row {row_idx}: Updated existing Agent")
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -4217,17 +4490,31 @@ def Agent_Data(request):
                             user_register_date=register_date,
                             user_register_time=datetime.now().time()
                         )
-                        print(f"Row {row_idx}: Created new Agent")
-                    
-                    success_count += 1
+                        
+                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
+                        
+                        # Format: EF-{user.id}-{YY}
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        
+                        # Update the user with the generated user_id
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    print(f"Row {row_idx} error: {e}")
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Agents. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Agents. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]  # Limit to first 10 errors for response
             })
             
         except Exception as e:
@@ -4341,54 +4628,74 @@ def Agency_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Agency/Builder"
             
-            # Data starts from row 3 (row 1 = title, row 2 = headers)
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
                     
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    agency_name = row[8] if len(row) > 8 else None
-                    license_number = row[9] if len(row) > 9 else None
-                    user_state = row[10] if len(row) > 10 else None
-                    user_city = row[11] if len(row) > 11 else None
-                    user_address = row[12] if len(row) > 12 else None
-                    register_date_value = row[13] if len(row) > 13 else None
+                    # ================================================================
+                    # COLUMN MAPPING (Based on your Agents Report structure)
+                    # ================================================================
+                    # Column 0: Actions (empty)
+                    # Column 1: Sr. No.
+                    # Column 2: Profile
+                    # Column 3: User Id
+                    # Column 4: Role (contains "Agent")
+                    # Column 5: Name (contains "Anita Chacko")
+                    # Column 6: Email Address (contains "anita.chacko@example.com")
+                    # Column 7: Phone Number
+                    # Column 8: Password
+                    # Column 9: Agency Name
+                    # Column 10: License Number
+                    # Column 11: State
+                    # Column 12: City
+                    # Column 13: Address
+                    # Column 14: Register Date
+                    # ================================================================
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    agency_name = row[9] if len(row) > 9 else None  # Column 9: Agency Name
+                    license_number = row[10] if len(row) > 10 else None  # Column 10: License Number
+                    user_state = row[11] if len(row) > 11 else None  # Column 11: State
+                    user_city = row[12] if len(row) > 12 else None  # Column 12: City
+                    user_address = row[13] if len(row) > 13 else None  # Column 13: Address
+                    register_date_value = row[14] if len(row) > 14 else None  # Column 14: Register Date
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
-                    if isinstance(user_phone, (int, float)):
-                        user_phone = str(int(user_phone))
-                    else:
-                        user_phone = str(user_phone).replace('-', '').replace(' ', '').strip()
+                    user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
                     
-                    # Clean name
+                    # Clean other fields
                     user_name = str(user_name).strip()
-                    
-                    # Clean password
-                    if user_password:
-                        if isinstance(user_password, (int, float)):
-                            user_password = str(int(user_password))
-                        else:
-                            user_password = str(user_password).split('.')[0].strip()
-                    else:
-                        user_password = 'default123'
-                    
-                    # Clean email
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
-                    
-                    # Clean agency fields
+                    user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
                     agency_name = str(agency_name).strip() if agency_name and str(agency_name) != '---' else None
                     license_number = str(license_number).strip() if license_number and str(license_number) != '---' else None
-                    
-                    # Clean address fields
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
@@ -4397,7 +4704,7 @@ def Agency_Data(request):
                     register_date = datetime.now().date()
                     
                     # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-', 'None']:
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
                         try:
                             if isinstance(register_date_value, (date, datetime)):
                                 register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
@@ -4408,16 +4715,15 @@ def Agency_Data(request):
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                                 elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%d/%m/%Y').date()
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
                             pass  # Keep today's date if parsing fails
                     
-                    print(f"Row {row_idx}: Importing Agent - {user_name} ({user_phone}) - Agency: {agency_name or 'N/A'}")
-                    
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -4430,9 +4736,11 @@ def Agency_Data(request):
                         existing_user.user_register_date = register_date
                         existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        print(f"Row {row_idx}: Updated existing Agent")
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -4446,17 +4754,31 @@ def Agency_Data(request):
                             user_register_date=register_date,
                             user_register_time=datetime.now().time()
                         )
-                        print(f"Row {row_idx}: Created new Agent")
-                    
-                    success_count += 1
+                        
+                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
+                        
+                        # Format: EF-{user.id}-{YY}
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        
+                        # Update the user with the generated user_id
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    print(f"Row {row_idx} error: {e}")
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Agency/Builder. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Agencies/Builders. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]  # Limit to first 10 errors for response
             })
             
         except Exception as e:
@@ -4579,6 +4901,9 @@ def Vendor_Data(request):
             success_count = 0
             error_count = 0
             skipped_count = 0
+            error_details = []
+            
+            FIXED_ROLE = "Vendor"
             
             # Data starts from row 3
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
@@ -4586,32 +4911,34 @@ def Vendor_Data(request):
                     if not any(row) or len(row) < 18:
                         skipped_count += 1
                         continue
+                   
                     
-                    user_service_type = row[4] if len(row) > 4 else None
-                    user_name = row[5] if len(row) > 5 else None
-                    user_email = row[6] if len(row) > 6 else None
-                    user_phone = row[7] if len(row) > 7 else None
-                    user_password = row[8] if len(row) > 8 else None
-                    user_state = row[9] if len(row) > 9 else None
-                    user_city = row[10] if len(row) > 10 else None
-                    user_address = row[11] if len(row) > 11 else None
-                    user_company_name = row[12] if len(row) > 12 else None
-                    user_pan_number = row[13] if len(row) > 13 else None
-                    user_gstin_number = row[14] if len(row) > 14 else None
-                    operational_scope = row[15] if len(row) > 15 else None
-                    selected_regions = row[16] if len(row) > 16 else None  
-                    register_date_value = row[17] if len(row) > 17 else None
+                    user_service_type = row[4] if len(row) > 4 else None  # Column 4: Service Type
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    user_company_name = row[12] if len(row) > 12 else None  # Column 12: Company Name
+                    user_pan_number = row[13] if len(row) > 13 else None  # Column 13: PAN
+                    user_gstin_number = row[14] if len(row) > 14 else None  # Column 14: GSTIN
+                    operational_scope = row[15] if len(row) > 15 else None  # Column 15: Operational Scope
+                    selected_regions = row[16] if len(row) > 16 else None  # Column 16: Selected Regions
+                    register_date_value = row[17] if len(row) > 17 else None  # Column 17: Register Date
+                    register_time_value = row[18] if len(row) > 18 else None  # Column 18: Register Time
                     
                     # Skip if no name or phone
                     if not user_name or not user_phone:
                         skipped_count += 1
-                        print(f"Row {row_idx}: Missing name or phone, skipping")
+                        error_details.append(f"Row {row_idx}: Missing name or phone")
                         continue
                     
                     # Skip if name is "View Profile" (Profile column value)
                     user_name_str = str(user_name).strip()
                     if user_name_str == 'View Profile' or user_name_str == 'None' or user_name_str.isdigit():
-                        print(f"Row {row_idx}: Invalid name '{user_name_str}', skipping")
+                        error_details.append(f"Row {row_idx}: Invalid name '{user_name_str}'")
                         skipped_count += 1
                         continue
                     
@@ -4634,6 +4961,7 @@ def Vendor_Data(request):
                     user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     
                     # Clean address fields
+                    user_name = str(user_name).strip()
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
@@ -4645,14 +4973,17 @@ def Vendor_Data(request):
                     user_gstin_number = str(user_gstin_number).strip().upper() if user_gstin_number and str(user_gstin_number) != '---' else None
                     operational_scope = str(operational_scope).strip() if operational_scope and str(operational_scope) != '---' else None
                     
-                    #  Clean selected_regions (this is the correct field name)
+                    # Clean selected_regions
                     if selected_regions and str(selected_regions) != '---':
                         selected_regions = str(selected_regions).strip()
                     else:
                         selected_regions = None
                     
-                    # Register date
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
+                    
+                    # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
                         try:
                             if isinstance(register_date_value, (date, datetime)):
@@ -4663,18 +4994,38 @@ def Vendor_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
                             pass
                     
-                    print(f"Row {row_idx}: Importing Vendor - Name: {user_name}, Phone: {user_phone}, Company: {user_company_name}")
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
-                        existing_user.user_role = "Vendor"
+                        existing_user.user_role = FIXED_ROLE
                         existing_user.user_service_type = user_service_type
                         existing_user.user_company_name = user_company_name
                         existing_user.user_pan_number = user_pan_number
@@ -4686,15 +5037,17 @@ def Vendor_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
-                        print(f"Row {row_idx}: Updated existing Vendor")
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
-                            user_role="Vendor",
+                            user_role=FIXED_ROLE,
                             user_service_type=user_service_type,
                             user_company_name=user_company_name,
                             user_pan_number=user_pan_number,
@@ -4706,14 +5059,25 @@ def Vendor_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                        print(f"Row {row_idx}: Created new Vendor")
-                    
-                    success_count += 1
+                        
+                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
+                        
+                        # Format: EF-{user.id}-{YY}
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        
+                        # Update the user with the generated user_id
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
                     print(f"Row {row_idx} error: {e}")
             
             msg = f"Successfully imported {success_count} Vendors."
@@ -4724,7 +5088,11 @@ def Vendor_Data(request):
             
             return JsonResponse({
                 "status": "1",
-                "msg": msg
+                "msg": msg,
+                "success_count": success_count,
+                "error_count": error_count,
+                "skipped_count": skipped_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:

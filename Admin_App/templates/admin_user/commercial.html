@@ -777,7 +777,7 @@
           <div class="step-line" id="line1"></div>
           <div class="step-item">
             <div class="step-circle" id="sc2">2</div>
-            <div class="step-label" id="sl2">Area & Pricing</div>
+            <div class="step-label" id="sl2">Property Specifications & Pricing</div>
           </div>
           <div class="step-line" id="line2"></div>
           <div class="step-item">
@@ -893,6 +893,8 @@
 
 
 
+
+            
             <div class="form-section">
               <div class="section-header"><i class="fas fa-info-circle"></i> Basic Information </div>
               <div class="section-body">
@@ -918,11 +920,13 @@
                   </div>
 
                   <div class="col-md-6 mb-3">
-                    <label class="form-label">Shop No/Godown </label>
-                    <input type="text" class="form-control" name="property_no" id="propertyno"
-                      placeholder="Enter Shop No">
-
+                    <label class="form-label">Shop No/Godown/Unit No <span style="color:red;">*</span></label>
+                    <input type="text" class="form-control" name="property_no" id="propertyno" placeholder="Enter Shop No/Godown/Unit No" required>
+                    <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block;font-weight:bold;">
+                        <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
+                    </span>
                   </div>
+
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Property Condition <span class="required">*</span></label>
                     <select class="form-select" name="property_condition" required>
@@ -944,8 +948,10 @@
                   </div>
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Property Landmark </label>
-                    <textarea class="form-control" name="property_landmark" id="property_landmark" rows="2"
-                      placeholder="Enter Property Landmark"></textarea>
+                 
+
+                       <input type="text" class="form-control" name="property_landmark" id="property_landmark"  placeholder="Enter Property Landmark"
+                      >
                   </div>
                   <div class="col-md-12 mb-3">
                     <label class="form-label">Property Address <span class="required">*</span></label>
@@ -962,11 +968,11 @@
                     <input type="number" class="form-control" name="tower_number" id="tower_number"
                       placeholder="Enter Tower/Wing Number">
                   </div>
-                  <div class="col-md-6 mb-3">
+                  {% comment %} <div class="col-md-6 mb-3">
                     <label class="form-label">Property Registration Number </label>
                     <input type="text" class="form-control" name="prop_reg_number" id="prop_reg_number"
                       placeholder="Enter Property Registration Number">
-                  </div>
+                  </div> {% endcomment %}
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Availablity Status <span class="required">*</span></label>
                     <select class="form-select" name="possession_status" required>
@@ -1015,18 +1021,54 @@
                     <label class="form-label">Ownership Type <span class="required">*</span></label>
                     <select class="form-select" name="ownership_type" required>
                       <option value="">Select ownership</option>
-                      <option value="freehold">Freehold</option>
-                      <option value="leasehold">Leasehold</option>
-                      <option value="co-operative">Co-operative Society</option>
+                      <option value="Freehold">
+                          Freehold (You Own the Property & Land)
+                      </option>
+
+                      <option value="Leasehold">
+                          Leasehold (Property on Long-Term Lease)
+                      </option>
+
+                      <option value="Co-operative Society">
+                          Co-operative Society Flat
+                      </option>
+
+                      <option value="Power of Attorney">
+                          Power of Attorney (POA)
+                      </option>
+
+                      <option value="Inherited Property">
+                          Inherited / Family Property
+                      </option>
+
+                      <option value="Other">
+                          Other
+                      </option>
+
                     </select>
                   </div>
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label">Construction Status</label>
-                    <select class="form-select" name="construction_status">
-                      <option value="">Select status</option>
-                      <option value="new">New Construction</option>
-                      <option value="resale">Resale</option>
+                 
+                    <div class="col-md-6 mb-3">
+                    <label class="form-label">Property Condition</label>
+                    <select class="form-select" name="property_condition">
+                        <option value="">Select </option>
+                        <option value="Brand New">Brand New</option>
+                        <option value="Less than 1 Year Old">Less than 1 Year Old</option>
+                        <option value="Well Maintained">Well Maintained</option>
+                        <option value="Recently Renovated">Recently Renovated</option>
+                        <option value="Needs Renovation">Needs Renovation</option>
                     </select>
+                  </div>
+
+
+                   <div class="col-md-6 mb-3">
+                    <label class="form-label">Built-up Area (sq.ft) <span class="required">*</span></label>
+                    <input type="number" class="form-control" name="builtup_area" id="builtArea" placeholder="e.g. 1500"
+                      required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Carpet Area (sq.ft)</label>
+                    <input type="number" class="form-control" name="carpet_area" placeholder="e.g. 1200">
                   </div>
 
                   <div class="col-md-6 mb-3" id="brokerageSection">
@@ -1060,65 +1102,16 @@
 
           <div class="step-content" id="step2">
             <div class="form-section">
-              <div class="section-header"><i class="fa-solid fa-ruler-combined"></i> Area, Pricing & Building</div>
+              <div class="section-header"><i class="fa-solid fa-ruler-combined"></i> Property Specifications</div>
               <div class="section-body">
                 <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label">Built-up Area (sq.ft) <span class="required">*</span></label>
-                    <input type="number" class="form-control" name="builtup_area" id="builtArea" placeholder="e.g. 1500"
-                      required>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label">Carpet Area (sq.ft)</label>
-                    <input type="number" class="form-control" name="carpet_area" placeholder="e.g. 1200">
-                  </div>
-                  <div class="col-md-4 mb-3">
-                    <label class="form-label">Expected Rent (₹/mo) <span class="required">*</span></label>
-                    <input type="number" class="form-control" name="expected_rent" id="monthlyRent"
-                      placeholder="e.g. 75000" required>
-                  </div>
-                  <div class="col-md-4 mb-3">
-                    <label class="form-label">Security Deposit (₹)</label>
-                    <input type="number" class="form-control" name="security_deposit" placeholder="e.g. 250000">
-                  </div>
-                  <div class="col-md-4 mb-3">
-                    <label class="form-label">Advanced Rent (₹)</label>
-                    <select class="form-select" name="advanced_rent" id="advanced_rent">
-                      <option value="">Select option</option>
-                      <option value="No Advance">No Advance</option>
-                      <option value="1 Month rent">1 Month Rent</option>
-                      <option value="2 Months Rent">2 Months Rent</option>
-                      <option value="3 Months Rent">3 Months Rent</option>
-                      <option value="4 Months Rent">4 Months Rent</option>
-                      <option value="5 Months Rent">5 Months Rent</option>
-                      <option value="6 Months Rent">6 Months Rent</option>
-                      <option value="7 Months Rent">7 Months Rent</option>
-                      <option value="8 Months Rent">8 Months Rent</option>
-                      <option value="9 Months Rent">9 Months Rent</option>
-                      <option value="10 Months Rent">10 Months Rent</option>
-                      <option value="11 Months Rent">11 Months Rent</option>
-                      <option value="12 Months Rent">12 Months Rent</option>
-                    </select>
-                  </div>
-                  <div class="col-md-4 mb-3">
-                    <label class="form-label">Maintenance Charges (₹/mo)</label>
-                    <input type="number" class="form-control" name="maintenance_charges" placeholder="e.g. 5000">
-                  </div>
+                 
+                 
+                 
+                 
+               
 
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label">Negotiable</label>
-                    <div class="mt-2">
-                      <div class="form-check form-check-inline" style="display:inline-block; margin-right:15px;">
-                        <input class="form-check-input" type="radio" name="negotiable" value="Yes" id="neg-yes">
-                        <label class="form-check-label" for="neg-yes">Yes</label>
-                      </div>
-                      <div class="form-check form-check-inline" style="display:inline-block;">
-                        <input class="form-check-input" type="radio" name="negotiable" value="No" id="neg-no">
-                        <label class="form-check-label" for="neg-no">No</label>
-                      </div>
-                    </div>
-                  </div>
-
+               
 
 
                   <div class="col-md-4 mb-3">
@@ -1137,18 +1130,11 @@
                         class="toggle-slider"></span></label>
                   </div>
 
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label">Lock-in Period (months)</label>
-                    <input type="number" class="form-control" name="lockin_period" placeholder="e.g. 11">
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label class="form-label">Rent Increase (%/year)</label>
-                    <input type="number" class="form-control" name="rent_increase" step="0.1" placeholder="e.g. 5">
-                  </div>
+                 
 
                   <div class="col-md-4 mb-3"><label class="form-label">Total Floors</label><input type="number"
                       class="form-control" name="total_floors" placeholder="e.g. 10"></div>
-                  <div class="col-md-4 mb-3"><label class="form-label">Your Floor</label><input type="number"
+                  <div class="col-md-4 mb-3"><label class="form-label"> Floor No</label><input type="number"
                       class="form-control" name="your_floor" placeholder="e.g. 4"></div>
                   <div class="col-md-4 mb-3"><label class="form-label">Staircases</label><input type="number"
                       class="form-control" name="staircases" placeholder="e.g. 2"></div>
@@ -1228,6 +1214,127 @@
                 </div>
               </div>
             </div>
+
+
+
+
+              <div class="form-section">
+                <div class="section-header"><i class="fa-solid fa-ruler-combined"></i> Pricing Details </div>
+                <div class="section-body">
+                  <div class="row">
+                    
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Monthly Rent (mo) <span class="required">*</span></label>
+                      <input type="number" class="form-control" name="expected_rent" id="monthlyRent" placeholder="e.g. 75000" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Advanced Rent <span style="color:red;">*</span></label>
+                      <select class="form-select" name="advanced_rent_type" id="advanced_rent" required>
+                        <option value="No Advance">No Advance</option>
+                        <option value="1 Month Rent" selected>1 Month Rent</option>                
+                        <option value="2 Months Rent">2 Months Rent</option>
+                        <option value="3 Months Rent">3 Months Rent</option>
+                        <option value="4 Months Rent">4 Months Rent</option>
+                        <option value="5 Months Rent">5 Months Rent</option>
+                        <option value="6 Months Rent">6 Months Rent</option>
+                        <option value="7 Months Rent">7 Months Rent</option>
+                        <option value="8 Months Rent">8 Months Rent</option>
+                        <option value="9 Months Rent">9 Months Rent</option>
+                        <option value="10 Months Rent">10 Months Rent</option>
+                        <option value="11 Months Rent">11 Months Rent</option>
+                        <option value="Fixed Amount">Fixed Amount</option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3" id="advanced_rent_amount_container" style="display: none;">
+                      <label class="form-label">Advance Rent Amount</label>
+                      <input type="number" class="form-control" name="advanced_rent_fixed" id="advanced_rent_amount" placeholder="e.g. 75000">
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Refundable Security Deposit <span style="color:red;">*</span></label>
+                      <select class="form-select" name="security_deposit_type" id="security_deposit_type" required  >
+                        <option value="No Deposit">No Deposit</option>
+                        <option value="1 Month Rent" selected>1 Month Rent</option>
+                        <option value="2 Months Rent">2 Months Rent</option>
+                        <option value="3 Months Rent">3 Months Rent</option>
+                        <option value="4 Months Rent">4 Months Rent</option>
+                        <option value="5 Months Rent">5 Months Rent</option>
+                        <option value="6 Months Rent">6 Months Rent</option>
+                        <option value="7 Months Rent">7 Months Rent</option>
+                        <option value="8 Months Rent">8 Months Rent</option>
+                        <option value="9 Months Rent">9 Months Rent</option>
+                        <option value="10 Months Rent">10 Months Rent</option>
+                        <option value="11 Months Rent">11 Months Rent</option>
+                        <option value="Fixed Amount">Fixed Amount</option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3" id="security_deposit_amount_container" style="display: none;">
+                      <label class="form-label">Deposit Amount</label>
+                      <input type="number" class="form-control" name="security_deposit" id="security_deposit_amount" placeholder="e.g. 250000">
+                    </div>
+
+                    
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Maintenance Charges</label>
+                      <div class="d-flex align-items-center gap-2 mt-2">
+                        <div class="form-check form-check-inline" style="margin-right: 15px;">
+                          <input class="form-check-input" type="radio" name="maintenance_type" value="Included" id="maint-inc" checked>
+                          <label class="form-check-label" for="maint-inc">Included in rent</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="maintenance_type" value="Excluding" id="maint-exc">
+                          <label class="form-check-label" for="maint-exc">Excluding rent</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div class="col-md-4 mb-3" id="maintenance_amount_container" style="display: none;">
+                      <label class="form-label">Monthly Maintenance</label>
+                      <input type="number" class="form-control" name="maintenance_charges" id="maintenance_charges" placeholder="e.g. 5000">
+                    </div>
+
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div class="col-md-4 mb-3">
+                      <label class="form-label">Total Move In Cost</label>
+                      <input type="number" class="form-control" name="total_move_in_cost" placeholder="e.g. 5000">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Negotiable</label>
+                      <div class="d-flex align-items-center gap-2 mt-2">
+                        <div class="form-check form-check-inline" style="margin-right: 15px;">
+                          <input class="form-check-input" type="radio" name="negotiable" value="Yes" id="neg-yes">
+                          <label class="form-check-label" for="neg-yes">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="negotiable" value="No" id="neg-no">
+                          <label class="form-check-label" for="neg-no">No</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Lock-in Period (months)</label>
+                      <input type="number" class="form-control" name="lockin_period" placeholder="e.g. 11">
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Rent Increase (%/year)</label>
+                      <input type="number" class="form-control" name="rent_increase" step="0.1" placeholder="e.g. 5">
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+
+
+
+
+
             <div class="step-nav">
               <button type="button" class="btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i>
                 Back</button>
@@ -1333,11 +1440,11 @@
 
 
             <div class="form-section">
-              <div class="section-header"><i class="fas fa-align-left"></i>User Property Descriptions Details</div>
+              <div class="section-header"><i class="fas fa-align-left"></i>Add Property Descriptions Details</div>
               <div class="section-body">
                 <div class="form-group mb-4">
                   <div class="d-flex justify-content-between align-items-center mb-2">
-                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i> User Property Description</label>
+                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Property Description</label>
 
                   </div>
                   <textarea class="form-control" name="user_description" rows="3"
@@ -1405,7 +1512,33 @@
             </div> {% endcomment %}
 
             <div class="form-section">
-              <div class="section-header"><i class="fas fa-upload"></i> Listing Uploaded By</div>
+                <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes">
+                                    <label class="form-check-label" for="listed_yes">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" checked>
+                                    <label class="form-check-label" for="listed_no">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="portalField" style="display:none;">
+                            <div class="form-group">
+                                <label class="form-label">Portal Name</label>
+                                <input type="text" class="form-control" name="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
               <div class="section-body">
                 <div class="row">
                   <div class="col-md-3">
@@ -1427,29 +1560,11 @@
                 </div>
               </div>
               <br>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label class="form-label d-block">
-                    Is Property Already Listed Elsewhere?
-                  </label>
-
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes">
-                    <label class="form-check-label" for="listed_yes">
-                      Yes
-                    </label>
-                  </div>
-
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No"
-                      checked>
-                    <label class="form-check-label" for="listed_no">
-                      No
-                    </label>
-                  </div>
-                </div>
-              </div>
+            
             </div>
+
+
+            
 
             <div class="step-nav">
               <button type="button" class="btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i>
@@ -1527,6 +1642,57 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+
+<script>
+
+  document.addEventListener("DOMContentLoaded", function () {
+  
+  // 1. Advanced Rent Toggle
+  const advancedRentSelect = document.getElementById("advanced_rent");
+  const advancedRentContainer = document.getElementById("advanced_rent_amount_container");
+
+  advancedRentSelect.addEventListener("change", function () {
+    if (this.value === "Fixed Amount") {
+      advancedRentContainer.style.display = "block";
+    } else {
+      advancedRentContainer.style.display = "none";
+      document.getElementById("advanced_rent_amount").value = ""; // Clear input if hidden
+    }
+  });
+
+  // 2. Refundable Security Deposit Toggle
+  const securityDepositSelect = document.getElementById("security_deposit_type");
+  const securityDepositContainer = document.getElementById("security_deposit_amount_container");
+
+  securityDepositSelect.addEventListener("change", function () {
+    if (this.value === "Fixed Amount") {
+      securityDepositContainer.style.display = "block";
+    } else {
+      securityDepositContainer.style.display = "none";
+      document.getElementById("security_deposit_amount").value = ""; // Clear input if hidden
+    }
+  });
+
+  // 3. Maintenance Charges Toggle
+  const maintenanceRadios = document.querySelectorAll('input[name="maintenance_type"]');
+  const maintenanceContainer = document.getElementById("maintenance_amount_container");
+
+  maintenanceRadios.forEach(radio => {
+    radio.addEventListener("change", function () {
+      if (this.value === "Excluding") {
+        maintenanceContainer.style.display = "block";
+      } else {
+        maintenanceContainer.style.display = "none";
+        document.getElementById("maintenance_charges").value = ""; // Clear input if hidden
+      }
+    });
+  });
+
+});
+
+
+</script>
+
 <script>
 
   function updateBrokerageLabel(role) {
@@ -1564,6 +1730,8 @@
   }
 
 </script>
+
+
 
 <script>
   function Change_Fields(){
@@ -1621,6 +1789,8 @@
     }
 }
 </script>
+
+
 
 <script>
 
@@ -2154,6 +2324,30 @@
     renderImagePreview();
   }
 
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Get the radio buttons and the hidden portal input field
+    var yesRadio = document.getElementById('listed_yes');
+    var noRadio = document.getElementById('listed_no');
+    var portalField = document.getElementById('portalField');
+    
+    // 2. Create a function that checks if "Yes" is selected
+    function togglePortalField() {
+        if (portalField) {
+            // If yes is checked, show it ('block'). If not, hide it ('none').
+            portalField.style.display = yesRadio.checked ? 'block' : 'none';
+        }
+    }
+    
+    // 3. Attach the function to run whenever the user clicks either radio button
+    if (yesRadio) yesRadio.addEventListener('change', togglePortalField);
+    if (noRadio) noRadio.addEventListener('change', togglePortalField);
+    
+    // 4. Run it once immediately when the page loads to set the initial state
+    togglePortalField();
+});
   // --- NEW: SUBMIT WITH CONFIRMATION ALERT ---
   const form = document.getElementById("commercialForm");
   form.addEventListener("submit", function (e) {
@@ -2182,4 +2376,4 @@
       }
     });
   });
-</script>
+</script>   

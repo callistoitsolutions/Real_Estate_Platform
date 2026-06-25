@@ -1684,97 +1684,97 @@
 
           <div class="step-content active" id="step1">
 
-            <div class="form-section">
-              <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <span><i class="fas fa-upload"></i> Listed By</span>
-                
-              </div>
+              <div class="form-section">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                  <span><i class="fas fa-upload"></i> Listed By</span>
+                  
+                </div>
 
-              <div class="section-body">
-                <div class="row">
-                  <div class="col-md-12">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fas fa-user"></i> Listed By <span class="text-danger">*</span>
-                      </label>
-
-                      <div class="listed-by-radio-group" style="display:flex; gap:24px; margin-bottom:14px;">
-                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
-                          <input type="radio" name="listed_by_type" id="listedBySelf" value="self" checked onchange="Change_Fields()">
-                          Listed by Self
+                <div class="section-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <label class="form-label">
+                          <i class="fas fa-user"></i> Listed By <span class="text-danger">*</span>
                         </label>
-                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
-                          <input type="radio" name="listed_by_type" id="listedByOther" value="other" onchange="Change_Fields()">
-                          Listed for Other User
-                        </label>
-                      </div>
 
-                      <input type="hidden" id="selfUserId" value="{{ admin_obj.id }}">
-                      <input type="hidden" id="selfUserRole" value="{{ admin_obj.role }}">
-                      <input type="hidden" id="selfUserName" value="{{ admin_obj.name }}">
-                      <input type="hidden" id="selfUserEmail" value="{{ admin_obj.email }}">
-                      <input type="hidden" id="selfUserPhone" value="{{ admin_obj.phone }}">
+                        <div class="listed-by-radio-group" style="display:flex; gap:24px; margin-bottom:14px;">
+                          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
+                            <input type="radio" name="listed_by_type" id="listedBySelf" value="self" checked onchange="Change_Fields()">
+                            Listed by Self
+                          </label>
+                          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
+                            <input type="radio" name="listed_by_type" id="listedByOther" value="other" onchange="Change_Fields()">
+                            Listed for Other User
+                          </label>
+                        </div>
 
-                      <div id="listedByOtherWrapper" style="display:none;">
-                        <div class="search-select" id="assignedToSearchSelect">
-                          <div class="search-select-control" id="assignedToControl" tabindex="0">
-                            <span class="search-select-value" id="assignedToValueLabel">-- Select Team Member --</span>
-                            <i class="fas fa-chevron-down search-select-arrow"></i>
-                          </div>
-                          <div class="search-select-panel" id="assignedToPanel">
-                            <input type="text" class="search-select-input" id="searchTeamMember" placeholder="Type to search team members...">
-                            <div class="search-select-options" id="assignedToOptions">
-                              {% regroup user_obj by user_role as grouped_users %}
-                              {% for group in grouped_users %}
-                                <div class="search-select-group-label">{{ group.grouper|upper }} ({{ group.list|length }})</div>
-                                {% for user in group.list %}
-                                  <div class="search-select-option"
-                                    data-value="{{ user.id }}-{{user.user_role}}"
-                                    data-name="{{ user.user_name }}"
-                                    data-role="{{ user.user_role }}"
-                                    data-phone="{{ user.user_phone }}"
-                                    data-uid="{{ user.user_id }}"
-                                    data-search="{{ user.user_name|lower }} {{ user.user_role|lower }} {{ user.user_phone }} {{ user.user_id|lower }}">
-                                    {{ user.user_id }} <span class="opt-role">- {{ user.user_name }}</span> <span class="opt-role">- {{ user.user_role }}</span><span class="opt-role">- {{ user.user_phone }}</span>
-                                  </div>
+                        <input type="hidden" id="selfUserId" value="{{ admin_obj.id }}">
+                        <input type="hidden" id="selfUserRole" value="{{ admin_obj.role }}">
+                        <input type="hidden" id="selfUserName" value="{{ admin_obj.name }}">
+                        <input type="hidden" id="selfUserEmail" value="{{ admin_obj.email }}">
+                        <input type="hidden" id="selfUserPhone" value="{{ admin_obj.phone }}">
+
+                        <div id="listedByOtherWrapper" style="display:none;">
+                          <div class="search-select" id="assignedToSearchSelect">
+                            <div class="search-select-control" id="assignedToControl" tabindex="0">
+                              <span class="search-select-value" id="assignedToValueLabel">-- Select Team Member --</span>
+                              <i class="fas fa-chevron-down search-select-arrow"></i>
+                            </div>
+                            <div class="search-select-panel" id="assignedToPanel">
+                              <input type="text" class="search-select-input" id="searchTeamMember" placeholder="Type to search team members...">
+                              <div class="search-select-options" id="assignedToOptions">
+                                {% regroup user_obj by user_role as grouped_users %}
+                                {% for group in grouped_users %}
+                                  <div class="search-select-group-label">{{ group.grouper|upper }} ({{ group.list|length }})</div>
+                                  {% for user in group.list %}
+                                    <div class="search-select-option"
+                                      data-value="{{ user.id }}-{{user.user_role}}"
+                                      data-name="{{ user.user_name }}"
+                                      data-role="{{ user.user_role }}"
+                                      data-phone="{{ user.user_phone }}"
+                                      data-uid="{{ user.user_id }}"
+                                      data-search="{{ user.user_name|lower }} {{ user.user_role|lower }} {{ user.user_phone }} {{ user.user_id|lower }}">
+                                      {{ user.user_id }} <span class="opt-role">- {{ user.user_name }}</span> <span class="opt-role">- {{ user.user_role }}</span><span class="opt-role">- {{ user.user_phone }}</span>
+                                    </div>
+                                  {% endfor %}
                                 {% endfor %}
-                              {% endfor %}
-                              <div class="search-select-no-results" id="assignedToNoResults" style="display:none;">No team members found</div>
+                                <div class="search-select-no-results" id="assignedToNoResults" style="display:none;">No team members found</div>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
 
-                      <select id="assigned_to" name="assigned_to" required style="display:none;">
-                        <option value="">-- Select Team Member --</option>
-                        {% regroup user_obj by user_role as grouped_users %}
-                        {% for group in grouped_users %}
-                        <optgroup label="{{ group.grouper|upper }} ({{ group.list|length }})">
-                          {% for user in group.list %}
-                          <option value="{{ user.id }}-{{user.user_role}}" data-name="{{ user.user_name }}" data-role="{{ user.user_role }}">
-                            {{ user.user_name }} - {{ user.user_role }}
-                          </option>
+                        <select id="assigned_to" name="assigned_to" required style="display:none;">
+                          <option value="">-- Select Team Member --</option>
+                          {% regroup user_obj by user_role as grouped_users %}
+                          {% for group in grouped_users %}
+                          <optgroup label="{{ group.grouper|upper }} ({{ group.list|length }})">
+                            {% for user in group.list %}
+                            <option value="{{ user.id }}-{{user.user_role}}" data-name="{{ user.user_name }}" data-role="{{ user.user_role }}">
+                              {{ user.user_name }} - {{ user.user_role }}
+                            </option>
+                            {% endfor %}
+                          </optgroup>
                           {% endfor %}
-                        </optgroup>
-                        {% endfor %}
-                      </select>
+                        </select>
 
-                      <input type="hidden" id="assigned_to_role" name="assigned_to_role" value="">
+                        <input type="hidden" id="assigned_to_role" name="assigned_to_role" value="">
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <br>
+                  <br>
 
-                <div class="row" id="user_data_div">
-                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Id</label><input type="text" class="form-control" name="uploaded_by_id" id="uploaded_by_id" readonly style="background-color: #e9ecef;"></div></div>
-                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="uploaded_by_name" id="uploaded_by_name" readonly style="background-color: #e9ecef;"></div></div>
-                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="uploaded_by_email" id="uploaded_by_email" readonly style="background-color: #e9ecef;"></div></div>
-                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="uploaded_by_contact" id="uploaded_by_contact" readonly style="background-color: #e9ecef;"></div></div>
-                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="uploaded_by_role" id="uploaded_by_role" readonly style="background-color: #e9ecef;"></div></div>
+                  <div class="row" id="user_data_div">
+                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Id</label><input type="text" class="form-control" name="uploaded_by_id" id="uploaded_by_id" readonly style="background-color: #e9ecef;"></div></div>
+                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="uploaded_by_name" id="uploaded_by_name" readonly style="background-color: #e9ecef;"></div></div>
+                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="uploaded_by_email" id="uploaded_by_email" readonly style="background-color: #e9ecef;"></div></div>
+                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="uploaded_by_contact" id="uploaded_by_contact" readonly style="background-color: #e9ecef;"></div></div>
+                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="uploaded_by_role" id="uploaded_by_role" readonly style="background-color: #e9ecef;"></div></div>
+                  </div>
                 </div>
               </div>
-            </div>
 
 
             <div class="form-section">
