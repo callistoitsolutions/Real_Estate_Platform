@@ -237,6 +237,891 @@ def Update_Profile_Landlord(request):
 ########### Views end for update landlord profile page ##########################
 
 
+############# Views start for rental forms list for landlord ###################
+
+def residential_landlord_list(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role
+    }
+    
+    return render(request, "landlord/Reports/Rental/residential_list.html", context)
+
+############ Views end for rental forms list for landlord #######################
+
+
+############# Views start for rental forms for landlord #########################
+
+def residential_landlord(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "landlord/Forms/Rental/residential.html", context)
+
+############# Views end for rental forms for landlord #############################
+
+
+########### Views start for commercial rent forms for landlord #######################
+
+def commercial_landlord_list(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role
+    }
+    
+    return render(request, "landlord/Reports/Rental/commercial_list.html", context)
+
+############## Views end for commercial rent form for landlord #########################
+
+
+############ Views start for commercial forms for landlord ############################
+
+def commercial_landlord(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "landlord/Forms/Rental/commercial.html", context)
+
+############### Views end for commercial forms for landlord #############################
+
+
+############ Views start for pg list forms for landlord #############################
+
+def pg_landlord_list(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+    }
+    
+    return render(request, "landlord/Reports/Rental/pg_list.html", context)
+
+############ Views end for pg list forms for landlord ##########################
+
+
+############# Views start for pg forms for landlord ########################
+
+def pg_landlord(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "landlord/Forms/Rental/pg_coliving.html", context)
+
+########### Views end for pg forms for landlord #############################
+
+
+############# Views start for resale property list #########################
+
+def residential_resale_landlord_list(request):
+   # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+    }
+    
+    return render(request, "landlord/Reports/Resale/residential_resale_list.html", context)
+
+############# Views end for resale property list #######################
+
+
+############ Views start for resale residential property ########################
+
+def residential_resale_landlord(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "landlord/Forms/Resale/residential_resale.html", context)
+
+########## Views end for resale residential property ############################
+
+
+######### Views start for resale commercial property list #######################
+
+def commercial_resale_landlord_list(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+    }
+    
+    return render(request, "landlord/Reports/Resale/commercial_list.html", context)
+
+############# Views end for resale commercial property list ######################
+
+
+########### Views start for resale property form commercial #######################
+
+def commercial_resale_landlord(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "landlord/Forms/Resale/commercial_resale.html", context)
+
+########## Views end for resale property form commercial ############################
+
+
+############ Views start for resale plot property list ##########################
+
+def plot_resale_landlord_list(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+    }
+    
+    return render(request, "landlord/Reports/Resale/plot_list.html", context)
+
+############# Views end for resale plot property list ############################
+
+
+############# Views start for residential plot list from landlord ###############
+
+def plot_resale_res_landlord_list(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+    }
+    
+    return render(request, "landlord/Reports/Resale/Plots/res_plots_list.html", context)
+
+########### Views end for resale residnetial plot list from landlord ################
+
+
+############ Views start for residential plot from landlord ###################
+
+def plot_resale_res_landlord(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "landlord/Forms/Resale/Plots/res_plots.html", context)
+
+########### Views end for residential plot from landlord ########################
+
+
+############# Views start for commercial plot list from landlord ##################
+
+def plot_resale_comm_landlord_list(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+    }
+    
+    return render(request, "landlord/Reports/Resale/Plots/comm_plots_list.html", context)
+
+############ Views end for commercial plot list from landlord #########################
+
+
+############### Views start for commercial plot from landlord ##################
+
+def plot_resale_comm_landlord(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "landlord/Forms/Resale/Plots/comm_plots.html", context)
+
+############ Views end for commercial plot from landlord ##########################
+
+
+########### Views start for industrial plot list from landlord ####################
+
+def plot_resale_ind_landlord_list(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+    }
+    
+    return render(request, "landlord/Reports/Resale/Plots/ind_plots_list.html", context)
+
+############# Views end for industrial plot list from landlord #####################
+
+
+############ Views start for industrial plot from landlord #####################
+
+def plot_resale_ind_landlord(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "landlord/Forms/Resale/Plots/ind_plots.html", context)
+
+############# Views end for industrial plot from landlord ########################
+
+
+############ Views start for agricultural property list from landlord ##############
+
+def plot_resale_agri_landlord_list(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+    }
+    
+    return render(request, "landlord/Reports/Resale/Plots/agri_plots_list.html", context)
+
+########## Views end for agricultural property list from landlord ######################
+
+
+############ Views start for agricultural plots from landlord #####################
+
+def plot_resale_agri_landlord(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "landlord/Forms/Resale/Plots/agri_plots.html", context)
+
+############# Views end for agricultural plots from landlord ########################
+
+
+############ Views start for resale industrial property list #####################
+
+def industry_resale_landlord_list(request):
+    # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+    }
+    
+    return render(request, "landlord/Reports/Resale/industrial_list.html", context)
+
+
+############### Views end for resale industrial property list #########################
+
+
+############ Views start for industrial resale property form #######################
+
+def industry_resale_landlord(request):
+     #1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "landlord/Forms/Resale/industrial_resale.html", context)
+
+############### Views end for industry resale property form ############################
+
+
+############# Views start for agricultural resale property form ####################
+
+def agriculture_resale_landlord(request):
+    #1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2. VIP Access Control
+    is_valid_landlord = (user_id and logged_in_role == "Landlord")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Landlord, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_landlord and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Landlord's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Landlord is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "landlord/Forms/Resale/agricultural_resale.html", context)
+
+############# Views end for agricultural resale property form #######################
+
 
 
 

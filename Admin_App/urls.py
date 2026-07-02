@@ -215,6 +215,38 @@ urlpatterns = [
      path('industrial_resale_list',views.industrial_resale_list,name="industrial_resale_list"),
      path('agricultural_resale_list',views.agricultural_resale_list,name="agricultural_resale_list"),
 
+     ############# urls for plot residential list ######################
+
+     path('residential_plot_resale_list',views.residential_plot_resale_list,name="residential_plot_resale_list"),
+
+     ########## urls for plot residdential form #######################
+
+     path('residential_plot_resale',views.residential_plot_resale,name="residential_plot_resale"),
+
+     ############ urls for plot commercial list ########################
+
+     path('commercial_plot_resale_list',views.commercial_plot_resale_list,name="commercial_plot_resale_list"),
+
+     ######### urls for plot commercial form #############################
+
+     path('commercial_plot_resale',views.commercial_plot_resale,name="commercial_plot_resale"),
+
+     ############## urls for plot industrial list ##########################
+
+     path('industrial_plot_resale_list',views.industrial_plot_resale_list,name="industrial_plot_resale_list"),
+
+     ############## urls for plot industrial form #######################
+
+     path('industrial_plot_resale',views.industrial_plot_resale,name="industrial_plot_resale"),
+
+     ########## urls for plot agricultural list  ######################
+     
+     path('agricultural_plot_resale_list',views.agricultural_plot_resale_list,name="agricultural_plot_resale_list"),
+
+     ############## urls for plot agricultural form #######################
+
+     path('agricultural_plot_resale',views.agricultural_plot_resale,name="agricultural_plot_resale"),
+
      ############# urls for display rm list #######################
 
      path('rm_list',views.rm_list,name="rm_list"),

@@ -588,7 +588,10 @@ def pg_coliving(request):
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
 
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+        user_obj = User_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        
         return render(request,"admin_user/pg_coliving.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -13967,254 +13970,254 @@ def residential_resale_list(request):
 
     admin_obj = Admin_Login.objects.get(id=session_id)
 
-    # ── Fetch ALL properties (used for KPI stats & chart data) ───────────────
-    all_properties = (
-        ResaleResidentialProperty.objects
-        .prefetch_related('images')
-        .order_by('-created_at')
-    )
+    # # ── Fetch ALL properties (used for KPI stats & chart data) ───────────────
+    # all_properties = (
+    #     ResaleResidentialProperty.objects
+    #     .prefetch_related('images')
+    #     .order_by('-created_at')
+    # )
 
-    # ── Read query params ────────────────────────────────────────────────────
-    search_query    = request.GET.get('search', '').strip()
-    prop_type       = request.GET.get('prop_type', '').strip()
-    bhk_filter      = request.GET.get('bhk', '').strip()
-    furnish         = request.GET.get('furnish', '').strip()
-    zone_filter     = request.GET.get('zone', '').strip()
-    ownership       = request.GET.get('ownership', '').strip()
-    negotiable      = request.GET.get('negotiable', '').strip()
-    from_date       = request.GET.get('from_date', '').strip()
-    to_date         = request.GET.get('to_date', '').strip()
+    # # ── Read query params ────────────────────────────────────────────────────
+    # search_query    = request.GET.get('search', '').strip()
+    # prop_type       = request.GET.get('prop_type', '').strip()
+    # bhk_filter      = request.GET.get('bhk', '').strip()
+    # furnish         = request.GET.get('furnish', '').strip()
+    # zone_filter     = request.GET.get('zone', '').strip()
+    # ownership       = request.GET.get('ownership', '').strip()
+    # negotiable      = request.GET.get('negotiable', '').strip()
+    # from_date       = request.GET.get('from_date', '').strip()
+    # to_date         = request.GET.get('to_date', '').strip()
 
-    # ── Apply filters ────────────────────────────────────────────────────────
-    properties = all_properties
+    # # ── Apply filters ────────────────────────────────────────────────────────
+    # properties = all_properties
 
-    if search_query:
-        properties = properties.filter(
-            Q(property_title__icontains=search_query)  |
-            Q(city__icontains=search_query)           |
-            Q(locality__icontains=search_query)       |
-            Q(owner_name__icontains=search_query)     |
-            Q(bhk__icontains=search_query)            |
-            Q(building_name__icontains=search_query)
-        )
+    # if search_query:
+    #     properties = properties.filter(
+    #         Q(property_title__icontains=search_query)  |
+    #         Q(city__icontains=search_query)           |
+    #         Q(locality__icontains=search_query)       |
+    #         Q(owner_name__icontains=search_query)     |
+    #         Q(bhk__icontains=search_query)            |
+    #         Q(building_name__icontains=search_query)
+    #     )
 
-    if prop_type:
-        properties = properties.filter(property_type=prop_type)
+    # if prop_type:
+    #     properties = properties.filter(property_type=prop_type)
 
-    if bhk_filter:
-        properties = properties.filter(bhk=bhk_filter)
+    # if bhk_filter:
+    #     properties = properties.filter(bhk=bhk_filter)
 
-    if furnish:
-        properties = properties.filter(furnishing_type=furnish)
+    # if furnish:
+    #     properties = properties.filter(furnishing_type=furnish)
 
-    if zone_filter:
-        properties = properties.filter(zone=zone_filter)
+    # if zone_filter:
+    #     properties = properties.filter(zone=zone_filter)
 
-    if ownership:
-        properties = properties.filter(ownership_type=ownership)
+    # if ownership:
+    #     properties = properties.filter(ownership_type=ownership)
 
-    if negotiable:
-        properties = properties.filter(price_negotiable=negotiable) # Synced field name
+    # if negotiable:
+    #     properties = properties.filter(price_negotiable=negotiable) # Synced field name
 
-    if from_date:
-        properties = properties.filter(created_at__date__gte=from_date)
+    # if from_date:
+    #     properties = properties.filter(created_at__date__gte=from_date)
 
-    if to_date:
-        properties = properties.filter(created_at__date__lte=to_date)
+    # if to_date:
+    #     properties = properties.filter(created_at__date__lte=to_date)
 
-    # ── Thumbnail + helper attributes for each filtered property ─────────────
-    for prop in properties:
-        prop.thumbnail = prop.images.first()
+    # # ── Thumbnail + helper attributes for each filtered property ─────────────
+    # for prop in properties:
+    #     prop.thumbnail = prop.images.first()
 
-        prop.nearby_facilities_list = (
-            [f.strip() for f in prop.nearby_facilities.split(',')]
-            if prop.nearby_facilities else []
-        )
-        prop.amenities_list = (
-            [a.strip() for a in prop.amenities.split(',')]
-            if prop.amenities else []
-        )
-        prop.image_count = prop.images.count()
-        prop.image_urls  = [img.image.url for img in prop.images.all()]
+    #     prop.nearby_facilities_list = (
+    #         [f.strip() for f in prop.nearby_facilities.split(',')]
+    #         if prop.nearby_facilities else []
+    #     )
+    #     prop.amenities_list = (
+    #         [a.strip() for a in prop.amenities.split(',')]
+    #         if prop.amenities else []
+    #     )
+    #     prop.image_count = prop.images.count()
+    #     prop.image_urls  = [img.image.url for img in prop.images.all()]
 
-    # ════════════════════════════════════════════════════════════════════════
-    # KPI STATS (Calculated using correct DB layout keys)
-    # ════════════════════════════════════════════════════════════════════════
-    total_count = all_properties.count()
+    # # ════════════════════════════════════════════════════════════════════════
+    # # KPI STATS (Calculated using correct DB layout keys)
+    # # ════════════════════════════════════════════════════════════════════════
+    # total_count = all_properties.count()
 
-    # ── Row 1 — Inventory ────────────────────────────────────────────────────
-    total_negotiable  = all_properties.filter(price_negotiable='yes').count() # Synced
-    total_furnished   = all_properties.filter(furnishing_type='fully').count()
-    total_freehold    = all_properties.filter(ownership_type='freehold').count()
-    total_with_images = all_properties.filter(images__isnull=False).distinct().count()
+    # # ── Row 1 — Inventory ────────────────────────────────────────────────────
+    # total_negotiable  = all_properties.filter(price_negotiable='yes').count() # Synced
+    # total_furnished   = all_properties.filter(furnishing_type='fully').count()
+    # total_freehold    = all_properties.filter(ownership_type='freehold').count()
+    # total_with_images = all_properties.filter(images__isnull=False).distinct().count()
 
-    def pct(part, whole):
-        return round(part / whole * 100) if whole else 0
+    # def pct(part, whole):
+    #     return round(part / whole * 100) if whole else 0
 
-    negotiable_pct = pct(total_negotiable,  total_count)
-    furnished_pct  = pct(total_furnished,   total_count)
-    freehold_pct   = pct(total_freehold,    total_count)
-    images_pct     = pct(total_with_images, total_count)
+    # negotiable_pct = pct(total_negotiable,  total_count)
+    # furnished_pct  = pct(total_furnished,   total_count)
+    # freehold_pct   = pct(total_freehold,    total_count)
+    # images_pct     = pct(total_with_images, total_count)
 
-    # ── Row 2 — Pricing ──────────────────────────────────────────────────────
-    price_agg = all_properties.aggregate(
-        avg      = Avg('expected_price'),
-        max_val  = Max('expected_price'),
-        min_val  = Min('expected_price'),
-        avg_sqft = Avg('price_per_sqft'),
-        avg_area = Avg('builtup_area'),
-    )
-    avg_price      = price_agg['avg']
-    max_price      = price_agg['max_val']
-    min_price      = price_agg['min_val']
-    avg_price_sqft = price_agg['avg_sqft']
-    avg_builtup    = price_agg['avg_area']
-    total_with_loan = all_properties.filter(loan_on_property='yes').count() # Synced
+    # # ── Row 2 — Pricing ──────────────────────────────────────────────────────
+    # price_agg = all_properties.aggregate(
+    #     avg      = Avg('expected_price'),
+    #     max_val  = Max('expected_price'),
+    #     min_val  = Min('expected_price'),
+    #     avg_sqft = Avg('price_per_sqft'),
+    #     avg_area = Avg('builtup_area'),
+    # )
+    # avg_price      = price_agg['avg']
+    # max_price      = price_agg['max_val']
+    # min_price      = price_agg['min_val']
+    # avg_price_sqft = price_agg['avg_sqft']
+    # avg_builtup    = price_agg['avg_area']
+    # total_with_loan = all_properties.filter(loan_on_property='yes').count() # Synced
 
-    # ── Row 3 — Legal & Status ───────────────────────────────────────────────
-    no_dispute_count  = all_properties.filter(any_legal_dispute='no').count() # Synced
-    dispute_count     = all_properties.filter(any_legal_dispute='yes').count() # Synced
-    tax_pending_count = all_properties.filter(government_tax_dues='yes').count() # Synced
-    tenant_occupied   = all_properties.filter(existing_tenants='yes').count() # Synced
-    premium_count     = all_properties.filter(expected_price__gte=10000000).count()   # >= 1 Cr
+    # # ── Row 3 — Legal & Status ───────────────────────────────────────────────
+    # no_dispute_count  = all_properties.filter(any_legal_dispute='no').count() # Synced
+    # dispute_count     = all_properties.filter(any_legal_dispute='yes').count() # Synced
+    # tax_pending_count = all_properties.filter(government_tax_dues='yes').count() # Synced
+    # tenant_occupied   = all_properties.filter(existing_tenants='yes').count() # Synced
+    # premium_count     = all_properties.filter(expected_price__gte=10000000).count()   # >= 1 Cr
 
-    # ── Row 4 — Listing Quality ──────────────────────────────────────────────
-    with_video_count = (
-        all_properties
-        .exclude(property_video__isnull=True)
-        .exclude(property_video='')
-        .count()
-    )
-    with_floor_plan = (
-        all_properties
-        .exclude(floor_plan__isnull=True)
-        .exclude(floor_plan='')
-        .count()
-    )
-    with_owner_count = (
-        all_properties
-        .exclude(owner_name__isnull=True)
-        .exclude(owner_name='')
-        .count()
-    )
-    budget_count = all_properties.filter(expected_price__lt=3000000).count()          # < 30 L
+    # # ── Row 4 — Listing Quality ──────────────────────────────────────────────
+    # with_video_count = (
+    #     all_properties
+    #     .exclude(property_video__isnull=True)
+    #     .exclude(property_video='')
+    #     .count()
+    # )
+    # with_floor_plan = (
+    #     all_properties
+    #     .exclude(floor_plan__isnull=True)
+    #     .exclude(floor_plan='')
+    #     .count()
+    # )
+    # with_owner_count = (
+    #     all_properties
+    #     .exclude(owner_name__isnull=True)
+    #     .exclude(owner_name='')
+    #     .count()
+    # )
+    # budget_count = all_properties.filter(expected_price__lt=3000000).count()          # < 30 L
 
-    # ── Charts ───────────────────────────────────────────────────────────────
-    property_type_counts = dict(
-        all_properties.values('property_type')
-        .annotate(count=Count('id'))
-        .values_list('property_type', 'count')
-    )
-    bhk_counts = dict(
-        all_properties.values('bhk')
-        .annotate(count=Count('id'))
-        .values_list('bhk', 'count')
-    )
-    fully_furnished = all_properties.filter(furnishing_type='fully').count()
-    semi_furnished  = all_properties.filter(furnishing_type='semi').count()
-    unfurnished     = all_properties.filter(furnishing_type='unfurnished').count()
+    # # ── Charts ───────────────────────────────────────────────────────────────
+    # property_type_counts = dict(
+    #     all_properties.values('property_type')
+    #     .annotate(count=Count('id'))
+    #     .values_list('property_type', 'count')
+    # )
+    # bhk_counts = dict(
+    #     all_properties.values('bhk')
+    #     .annotate(count=Count('id'))
+    #     .values_list('bhk', 'count')
+    # )
+    # fully_furnished = all_properties.filter(furnishing_type='fully').count()
+    # semi_furnished  = all_properties.filter(furnishing_type='semi').count()
+    # unfurnished     = all_properties.filter(furnishing_type='unfurnished').count()
 
-    zone_counts = dict(
-        all_properties.values('zone')
-        .annotate(count=Count('id'))
-        .values_list('zone', 'count')
-    )
+    # zone_counts = dict(
+    #     all_properties.values('zone')
+    #     .annotate(count=Count('id'))
+    #     .values_list('zone', 'count')
+    # )
 
-    # ── Unique values for Select2 searchable dropdowns ───────────────────────
-    unique_prop_types  = list(
-        all_properties.values_list('property_type', flat=True)
-        .distinct().order_by('property_type')
-    )
-    unique_bhk_values  = list(
-        all_properties.values_list('bhk', flat=True)
-        .distinct().order_by('bhk')
-    )
-    unique_zones       = list(
-        all_properties.values_list('zone', flat=True)
-        .distinct().order_by('zone')
-    )
-    unique_cities      = list(
-        all_properties.values_list('city', flat=True)
-        .distinct().order_by('city')
-    )
+    # # ── Unique values for Select2 searchable dropdowns ───────────────────────
+    # unique_prop_types  = list(
+    #     all_properties.values_list('property_type', flat=True)
+    #     .distinct().order_by('property_type')
+    # )
+    # unique_bhk_values  = list(
+    #     all_properties.values_list('bhk', flat=True)
+    #     .distinct().order_by('bhk')
+    # )
+    # unique_zones       = list(
+    #     all_properties.values_list('zone', flat=True)
+    #     .distinct().order_by('zone')
+    # )
+    # unique_cities      = list(
+    #     all_properties.values_list('city', flat=True)
+    #     .distinct().order_by('city')
+    # )
 
-    try:
-        uploaded_files = (
-            all_properties
-            .exclude(upload_file_name__isnull=True)
-            .exclude(upload_file_name='')
-            .values_list('upload_file_name', flat=True)
-            .distinct()
-        )
-    except Exception:
-        uploaded_files = []
+    # try:
+    #     uploaded_files = (
+    #         all_properties
+    #         .exclude(upload_file_name__isnull=True)
+    #         .exclude(upload_file_name='')
+    #         .values_list('upload_file_name', flat=True)
+    #         .distinct()
+    #     )
+    # except Exception:
+    #     uploaded_files = []
 
     # ── Context ──────────────────────────────────────────────────────────────
     context = {
         'admin_obj'  : admin_obj,
-        'properties' : properties,
+        # 'properties' : properties,
 
-        # Counts
-        'filtered_count' : properties.count(),
-        'total_count'    : total_count,
+        # # Counts
+        # 'filtered_count' : properties.count(),
+        # 'total_count'    : total_count,
 
-        # Active search params
-        'search_query'   : search_query,
-        'prop_type_query': prop_type,
-        'bhk_query'      : bhk_filter,
-        'furnish_query'  : furnish,
-        'zone_query'     : zone_filter,
-        'ownership_query': ownership,
-        'negotiable_query': negotiable,
-        'from_date'      : from_date,
-        'to_date'        : to_date,
+        # # Active search params
+        # 'search_query'   : search_query,
+        # 'prop_type_query': prop_type,
+        # 'bhk_query'      : bhk_filter,
+        # 'furnish_query'  : furnish,
+        # 'zone_query'     : zone_filter,
+        # 'ownership_query': ownership,
+        # 'negotiable_query': negotiable,
+        # 'from_date'      : from_date,
+        # 'to_date'        : to_date,
 
-        # Row 1 — Inventory
-        'total_negotiable' : total_negotiable,
-        'total_furnished'  : total_furnished,
-        'total_freehold'   : total_freehold,
-        'total_with_images': total_with_images,
-        'negotiable_pct'   : negotiable_pct,
-        'furnished_pct'    : furnished_pct,
-        'freehold_pct'     : freehold_pct,
-        'images_pct'       : images_pct,
+        # # Row 1 — Inventory
+        # 'total_negotiable' : total_negotiable,
+        # 'total_furnished'  : total_furnished,
+        # 'total_freehold'   : total_freehold,
+        # 'total_with_images': total_with_images,
+        # 'negotiable_pct'   : negotiable_pct,
+        # 'furnished_pct'    : furnished_pct,
+        # 'freehold_pct'     : freehold_pct,
+        # 'images_pct'       : images_pct,
 
-        # Row 2 — Pricing
-        'avg_price'       : avg_price,
-        'max_price'       : max_price,
-        'min_price'       : min_price,
-        'avg_price_sqft'  : avg_price_sqft,
-        'total_with_loan' : total_with_loan,
+        # # Row 2 — Pricing
+        # 'avg_price'       : avg_price,
+        # 'max_price'       : max_price,
+        # 'min_price'       : min_price,
+        # 'avg_price_sqft'  : avg_price_sqft,
+        # 'total_with_loan' : total_with_loan,
 
-        # Row 3 — Legal
-        'no_dispute_count' : no_dispute_count,
-        'dispute_count'    : dispute_count,
-        'tax_pending_count': tax_pending_count,
-        'tenant_occupied'  : tenant_occupied,
-        'avg_builtup'      : avg_builtup,
-        'premium_count'    : premium_count,
+        # # Row 3 — Legal
+        # 'no_dispute_count' : no_dispute_count,
+        # 'dispute_count'    : dispute_count,
+        # 'tax_pending_count': tax_pending_count,
+        # 'tenant_occupied'  : tenant_occupied,
+        # 'avg_builtup'      : avg_builtup,
+        # 'premium_count'    : premium_count,
 
-        # Row 4 — Quality
-        'with_video_count': with_video_count,
-        'with_floor_plan' : with_floor_plan,
-        'with_owner_count': with_owner_count,
-        'budget_count'    : budget_count,
+        # # Row 4 — Quality
+        # 'with_video_count': with_video_count,
+        # 'with_floor_plan' : with_floor_plan,
+        # 'with_owner_count': with_owner_count,
+        # 'budget_count'    : budget_count,
 
-        # Charts
-        'property_type_counts': property_type_counts,
-        'bhk_counts'          : bhk_counts,
-        'fully_furnished'     : fully_furnished,
-        'semi_furnished'      : semi_furnished,
-        'unfurnished'         : unfurnished,
-        'zone_counts'         : zone_counts,
+        # # Charts
+        # 'property_type_counts': property_type_counts,
+        # 'bhk_counts'          : bhk_counts,
+        # 'fully_furnished'     : fully_furnished,
+        # 'semi_furnished'      : semi_furnished,
+        # 'unfurnished'         : unfurnished,
+        # 'zone_counts'         : zone_counts,
 
-        # Select2 unique options
-        'unique_prop_types' : unique_prop_types,
-        'unique_bhk_values' : unique_bhk_values,
-        'unique_zones'      : unique_zones,
-        'unique_cities'     : unique_cities,
+        # # Select2 unique options
+        # 'unique_prop_types' : unique_prop_types,
+        # 'unique_bhk_values' : unique_bhk_values,
+        # 'unique_zones'      : unique_zones,
+        # 'unique_cities'     : unique_cities,
 
-        'uploaded_files': uploaded_files,
+        # 'uploaded_files': uploaded_files,
     }
 
     return render(request, 'admin_user/Reports/Resale/residential_resale_list.html', context)
@@ -15367,187 +15370,150 @@ def commercial_resale_list(request):
         except User_Details.DoesNotExist:
             return render(request, 'home_page/Adminlogin.html')
 
-    # ── Base Queryset ──────────────────────────────────────
-    props = CommercialResaleProperty.objects.filter(is_deleted=False)
+    # # ── Base Queryset ──────────────────────────────────────
+    # props = CommercialResaleProperty.objects.filter(is_deleted=False)
 
-    # ── Advanced Real-Time Extraction Filters ──────────────
-    search_query = request.GET.get('search_query', '').strip()
-    property_type = request.GET.get('property_type', '').strip()
-    zone_type = request.GET.get('zone_type', '').strip()
-    city = request.GET.get('city', '').strip()
-    property_condition = request.GET.get('property_condition', '').strip()
-    ownership_type = request.GET.get('ownership_type', '').strip()
-    status_filter = request.GET.get('status_filter', '').strip()
+    # # ── Advanced Real-Time Extraction Filters ──────────────
+    # search_query = request.GET.get('search_query', '').strip()
+    # property_type = request.GET.get('property_type', '').strip()
+    # zone_type = request.GET.get('zone_type', '').strip()
+    # city = request.GET.get('city', '').strip()
+    # property_condition = request.GET.get('property_condition', '').strip()
+    # ownership_type = request.GET.get('ownership_type', '').strip()
+    # status_filter = request.GET.get('status_filter', '').strip()
     
-    start_date_str = request.GET.get('start_date', '').strip()
-    end_date_str = request.GET.get('end_date', '').strip()
+    # start_date_str = request.GET.get('start_date', '').strip()
+    # end_date_str = request.GET.get('end_date', '').strip()
 
-    # 1. Global text lookup matching primary data vectors
-    if search_query:
-        props = props.filter(
-            Q(property_title__icontains=search_query) |
-            Q(area_locality__icontains=search_query) |
-            Q(building_name__icontains=search_query) |
-            Q(owner_name__icontains=search_query)
-        )
+    # # 1. Global text lookup matching primary data vectors
+    # if search_query:
+    #     props = props.filter(
+    #         Q(property_title__icontains=search_query) |
+    #         Q(area_locality__icontains=search_query) |
+    #         Q(building_name__icontains=search_query) |
+    #         Q(owner_name__icontains=search_query)
+    #     )
 
-    # 2. Dropdown exact match filters
-    if property_type:
-        props = props.filter(property_type=property_type)
-    if zone_type:
-        props = props.filter(zone_type=zone_type)
-    if city:
-        props = props.filter(city__iexact=city)
-    if property_condition:
-        props = props.filter(property_condition=property_condition)
-    if ownership_type:
-        props = props.filter(ownership_type=ownership_type)
+    # # 2. Dropdown exact match filters
+    # if property_type:
+    #     props = props.filter(property_type=property_type)
+    # if zone_type:
+    #     props = props.filter(zone_type=zone_type)
+    # if city:
+    #     props = props.filter(city__iexact=city)
+    # if property_condition:
+    #     props = props.filter(property_condition=property_condition)
+    # if ownership_type:
+    #     props = props.filter(ownership_type=ownership_type)
         
-    # 3. Active/Inactive Status toggle matches
-    if status_filter:
-        if status_filter == 'active':
-            props = props.filter(is_active=True)
-        elif status_filter == 'inactive':
-            props = props.filter(is_active=False)
+    # # 3. Active/Inactive Status toggle matches
+    # if status_filter:
+    #     if status_filter == 'active':
+    #         props = props.filter(is_active=True)
+    #     elif status_filter == 'inactive':
+    #         props = props.filter(is_active=False)
 
-    # 4. Strict Date-Range queries with automated datetime conversions
-    if start_date_str:
-        try:
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-            props = props.filter(created_at__gte=start_date)
-        except ValueError:
-            pass
+    # # 4. Strict Date-Range queries with automated datetime conversions
+    # if start_date_str:
+    #     try:
+    #         start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+    #         props = props.filter(created_at__gte=start_date)
+    #     except ValueError:
+    #         pass
             
-    if end_date_str:
-        try:
-            # Append 23:59:59 to capture the entire final calendar day
-            end_date = datetime.strptime(end_date_str + ' 23:59:59', '%Y-%m-%d %H:%M:%S')
-            props = props.filter(created_at__lte=end_date)
-        except ValueError:
-            pass
+    # if end_date_str:
+    #     try:
+    #         # Append 23:59:59 to capture the entire final calendar day
+    #         end_date = datetime.strptime(end_date_str + ' 23:59:59', '%Y-%m-%d %H:%M:%S')
+    #         props = props.filter(created_at__lte=end_date)
+    #     except ValueError:
+    #         pass
 
-    # ── ORDERING FIX ───────────────────────────────────────
-    # Order results matching historical sequence trends
-    # Changed from '-id' to '-created_at' due to the new UUID string format
-    props = props.order_by('-created_at')
+    # # ── ORDERING FIX ───────────────────────────────────────
+    # # Order results matching historical sequence trends
+    # # Changed from '-id' to '-created_at' due to the new UUID string format
+    # props = props.order_by('-created_at')
 
-    # ── Dynamic Metric Aggregations (Reflects Filtered Querysets) ──
-    # SECTION 1: Portfolio Quantities
-    total_properties = props.count()
-    active_properties = props.filter(is_active=True).count()
-    inactive_properties = props.filter(is_active=False).count()
+    # # ── Dynamic Metric Aggregations (Reflects Filtered Querysets) ──
+    # # SECTION 1: Portfolio Quantities
+    # total_properties = props.count()
+    # active_properties = props.filter(is_active=True).count()
+    # inactive_properties = props.filter(is_active=False).count()
 
-    # SECTION 2: Financial Aggregations & Capital Under Management
-    avg_price = props.aggregate(Avg('expected_price'))['expected_price__avg'] or 0
-    avg_price_per_sqft = props.aggregate(Avg('price_per_sqft'))['price_per_sqft__avg'] or 0
+    # # SECTION 2: Financial Aggregations & Capital Under Management
+    # avg_price = props.aggregate(Avg('expected_price'))['expected_price__avg'] or 0
+    # avg_price_per_sqft = props.aggregate(Avg('price_per_sqft'))['price_per_sqft__avg'] or 0
     
-    raw_portfolio_sum = props.aggregate(Sum('expected_price'))['expected_price__sum'] or 0
+    # raw_portfolio_sum = props.aggregate(Sum('expected_price'))['expected_price__sum'] or 0
     
-    # Elegant short notation scale conversion formatting for large asset valuations (Crores / Lakhs)
-    if raw_portfolio_sum >= 10000000:
-        total_portfolio_value = f"{round(raw_portfolio_sum / 10000000, 2)} Cr"
-    elif raw_portfolio_sum >= 100000:
-        total_portfolio_value = f"{round(raw_portfolio_sum / 100000, 2)} L"
-    else:
-        total_portfolio_value = f"₹{raw_portfolio_sum:,}"
+    # # Elegant short notation scale conversion formatting for large asset valuations (Crores / Lakhs)
+    # if raw_portfolio_sum >= 10000000:
+    #     total_portfolio_value = f"{round(raw_portfolio_sum / 10000000, 2)} Cr"
+    # elif raw_portfolio_sum >= 100000:
+    #     total_portfolio_value = f"{round(raw_portfolio_sum / 100000, 2)} L"
+    # else:
+    #     total_portfolio_value = f"₹{raw_portfolio_sum:,}"
 
-    # Brokerage Performance Metrics tracking
-    brokered_deals_count = props.filter(brokerage__iexact='yes').count()
-    brokerage_with_fees_count = props.filter(brokerage__iexact='yes').exclude(brokerage_percentage='').count()
+    # # Brokerage Performance Metrics tracking
+    # brokered_deals_count = props.filter(brokerage__iexact='yes').count()
+    # brokerage_with_fees_count = props.filter(brokerage__iexact='yes').exclude(brokerage_percentage='').count()
 
-    # SECTION 3: Property Mix Distribution
-    office_count     = props.filter(property_type='office').count()
-    shop_count       = props.filter(property_type='shop').count()
-    warehouse_count  = props.filter(property_type='warehouse').count()
-    industrial_count = props.filter(property_type='industrial').count()
-    land_count       = props.filter(property_type='land').count()
+    # # SECTION 3: Property Mix Distribution
+    # office_count     = props.filter(property_type='office').count()
+    # shop_count       = props.filter(property_type='shop').count()
+    # warehouse_count  = props.filter(property_type='warehouse').count()
+    # industrial_count = props.filter(property_type='industrial').count()
+    # land_count       = props.filter(property_type='land').count()
 
-    # Extract dynamic list arrays for autocomplete filter options lookups
-    distinct_cities = CommercialResaleProperty.objects.filter(is_deleted=False).values_list('city', flat=True).distinct()
+    # # Extract dynamic list arrays for autocomplete filter options lookups
+    # distinct_cities = CommercialResaleProperty.objects.filter(is_deleted=False).values_list('city', flat=True).distinct()
     
-    # Uploaded Excel Files for Bulk Delete Dropdown
-    # ── FIX APPLIED: Changed uploaded_file_name to upload_file_name ──
-    uploaded_files = (
-        CommercialResaleProperty.objects
-        .filter(is_deleted=False)
-        .exclude(upload_file_name__isnull=True)
-        .exclude(upload_file_name='')
-        .values_list('upload_file_name', flat=True)
-        .distinct()
-        .order_by('upload_file_name')
-    )
+    # # Uploaded Excel Files for Bulk Delete Dropdown
+    # # ── FIX APPLIED: Changed uploaded_file_name to upload_file_name ──
+    # uploaded_files = (
+    #     CommercialResaleProperty.objects
+    #     .filter(is_deleted=False)
+    #     .exclude(upload_file_name__isnull=True)
+    #     .exclude(upload_file_name='')
+    #     .values_list('upload_file_name', flat=True)
+    #     .distinct()
+    #     .order_by('upload_file_name')
+    # )
 
-    # ── Chart Data 1: Property Type Pie ────────────────────
-    type_map = {
-        'office': 'Office Space',
-        'shop': 'Shop/Showroom',
-        'warehouse': 'Warehouse',
-        'industrial': 'Industrial',
-        'land': 'Commercial Land',
-    }
-    type_qs = props.values('property_type').annotate(count=Count('id'))
-    type_labels = [type_map.get(x['property_type'], x['property_type'].upper()) for x in type_qs]
-    type_data = [x['count'] for x in type_qs]
+    # # ── Chart Data 1: Property Type Pie ────────────────────
+    # type_map = {
+    #     'office': 'Office Space',
+    #     'shop': 'Shop/Showroom',
+    #     'warehouse': 'Warehouse',
+    #     'industrial': 'Industrial',
+    #     'land': 'Commercial Land',
+    # }
+    # type_qs = props.values('property_type').annotate(count=Count('id'))
+    # type_labels = [type_map.get(x['property_type'], x['property_type'].upper()) for x in type_qs]
+    # type_data = [x['count'] for x in type_qs]
 
-    # ── Chart Data 2: Monthly Timeline (Current Year) ──────
-    current_year = timezone.now().year
-    monthly_data = [0] * 12
-    monthly_qs = props.filter(created_at__year=current_year).values('created_at__month').annotate(count=Count('id'))
-    for x in monthly_qs:
-        monthly_data[x['created_at__month'] - 1] = x['count']
+    # # ── Chart Data 2: Monthly Timeline (Current Year) ──────
+    # current_year = timezone.now().year
+    # monthly_data = [0] * 12
+    # monthly_qs = props.filter(created_at__year=current_year).values('created_at__month').annotate(count=Count('id'))
+    # for x in monthly_qs:
+    #     monthly_data[x['created_at__month'] - 1] = x['count']
 
-    # ── Chart Data 3: Zone Distribution ────────────────────
-    zone_map = {
-        'industrial': 'Industrial',
-        'commercial': 'Commercial',
-        'residential': 'Residential',
-        'sez': 'SEZ',
-    }
-    zone_qs = props.values('zone_type').annotate(count=Count('id'))
-    zone_labels = [zone_map.get(x['zone_type'], x['zone_type'].upper()) for x in zone_qs]
-    zone_data = [x['count'] for x in zone_qs]
+    # # ── Chart Data 3: Zone Distribution ────────────────────
+    # zone_map = {
+    #     'industrial': 'Industrial',
+    #     'commercial': 'Commercial',
+    #     'residential': 'Residential',
+    #     'sez': 'SEZ',
+    # }
+    # zone_qs = props.values('zone_type').annotate(count=Count('id'))
+    # zone_labels = [zone_map.get(x['zone_type'], x['zone_type'].upper()) for x in zone_qs]
+    # zone_data = [x['count'] for x in zone_qs]
 
     context = {
         'admin_obj': admin_obj,
         'user_obj' : user_obj,
-        'commercial_list': props,
-
-        'uploaded_files': uploaded_files,
-        # Metrics values (Reflecting custom grouped updates)
-        'total_properties': total_properties,
-        'active_properties': active_properties,
-        'inactive_properties': inactive_properties,
         
-        'avg_price': avg_price,
-        'avg_price_per_sqft': avg_price_per_sqft,
-        'total_portfolio_value': total_portfolio_value,
-        'brokered_deals_count': brokered_deals_count,
-        'brokerage_with_fees_count': brokerage_with_fees_count,
-        
-        'office_count'    : office_count,
-        'shop_count'      : shop_count,
-        'warehouse_count' : warehouse_count,
-        'industrial_count': industrial_count,
-        'land_count'      : land_count,
-        'distinct_cities': distinct_cities,
-
-        # Retained Filter Form States
-        'search_query': search_query,
-        'property_type': property_type,
-        'zone_type': zone_type,
-        'city_selected': city,
-        'property_condition': property_condition,
-        'ownership_type': ownership_type,
-        'status_filter': status_filter,
-        'start_date': start_date_str,
-        'end_date': end_date_str,
-
-        # Structured Analytics
-        'chart_type_labels' : json.dumps(type_labels),
-        'chart_type_data'   : json.dumps(type_data),
-        'chart_monthly_data': json.dumps(monthly_data),
-        'chart_zone_labels' : json.dumps(zone_labels),
-        'chart_zone_data'   : json.dumps(zone_data),
     }
 
     return render(request, 'admin_user/Reports/Resale/commercial_list.html', context)
@@ -17707,6 +17673,141 @@ def agricultural_resale_list(request):
     }
     return render(request, 'admin_user/Reports/Resale/agricultural_list.html', context)
 
+
+########### Views start for plot residential list ##########################
+
+def residential_plot_resale_list(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Reports/Resale_Plot/residential_plot_resale_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for plot residential list ################################
+
+
+############# Views start for plot residential form #####################
+
+def residential_plot_resale(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Resale_plot/residential_plot_resale.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for plot residential form #################################
+
+
+########### Views start for plot commercial list ###########################
+
+def commercial_plot_resale_list(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Reports/Resale_Plot/commercial_plot_resale_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############## Views end for plot commercial list ###########################
+
+
+########### Views start for plot commercial form ##########################
+
+def commercial_plot_resale(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Resale_plot/commercial_plot_resale.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############## Views end for plot commercial form ###########################
+
+
+############ Views start for plot industrial list #######################
+
+def industrial_plot_resale_list(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Reports/Resale_Plot/industrial_plot_resale_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for plot industrial list ###############################
+
+
+########## Views start for plot industrial form ################################
+
+def industrial_plot_resale(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Resale_plot/industrial_plot_resale.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for plot industrail form ######################
+
+
+############# Views start for plot agricultural list ######################
+
+def agricultural_plot_resale_list(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Reports/Resale_Plot/agricultural_plot_resale_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+########### Views end for plot agricultural list #########################
+
+
+########## Views start for plot agricultural form #######################
+
+def agricultural_plot_resale(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Resale_plot/agricultural_plot_resale.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for plot agricultural form ###########################
 
 
 

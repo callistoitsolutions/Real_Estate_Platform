@@ -1,5 +1,8 @@
 {% include "rm_panel/rm_header.html" %}
 {% load static %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 
 <style>
     :root {
@@ -12,6 +15,9 @@
         --sidebar-width: 280px;
         --sidebar-collapsed-width: 80px;
         --topbar-height: 70px;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --success: #10b981;
     }
 
     * {
@@ -169,6 +175,20 @@
         height: 100%;
         width: 4px;
         background: white;
+    }
+
+
+    /* Validation Error Styles */
+    .input-error {
+        border-color: #e74c3c !important;
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important;
+    }
+
+    .radio-error-group {
+        border: 1px solid #e74c3c !important;
+        border-radius: 12px;
+        padding: 10px;
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important;
     }
 
     .menu-icon {
@@ -647,6 +667,7 @@
             opacity: 0;
             transform: translateY(10px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -659,7 +680,7 @@
     }
 
     .section-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); /* Pink to Violet */
         color: white;
         padding: 15px 20px;
         border-radius: 12px 12px 0 0;
@@ -1225,10 +1246,208 @@
             opacity: 0;
             max-height: 0;
         }
+
         to {
             opacity: 1;
             max-height: 500px;
         }
+    }
+
+    /* ============================================================
+   DROPDOWN PANEL OVERFLOW FIX
+   ============================================================ */
+    /* Fix parent containers that might hide the dropdown panel */
+    .form-group,
+    .col-md-12,
+    .section-body,
+    .step-content,
+    .row,
+    .modal-body {
+        overflow: visible !important;
+    }
+
+    /* Specifically fix Step 4 */
+    #step4 .section-body {
+        overflow: visible !important;
+    }
+
+    /* ============================================================
+   CUSTOM SEARCHABLE DROPDOWN (no jQuery / Select2 dependency)
+   ============================================================ */
+    .search-select {
+        position: relative;
+        width: 100%;
+        font-size: 0.95rem;
+    }
+
+    .search-select-control {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 12px 15px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+        min-height: 48px;
+    }
+
+    .search-select-control:hover,
+    .search-select-control:focus {
+        border-color: #667eea;
+        outline: none;
+    }
+
+    .search-select.open .search-select-control {
+        border-color: #667eea;
+    }
+
+    .search-select-value {
+        color: #1e293b;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-height: 1.2em;
+        display: inline-block;
+    }
+
+    .search-select-value.ss-placeholder {
+        color: #94a3b8;
+    }
+
+    .search-select-value:empty::before {
+        content: "-- Select Team Member --";
+        color: #94a3b8;
+    }
+
+    .search-select-arrow {
+        color: #64748b;
+        transition: transform 0.2s ease;
+        font-size: 0.8rem;
+        flex-shrink: 0;
+        margin-left: 8px;
+    }
+
+    .search-select.open .search-select-arrow {
+        transform: rotate(180deg);
+    }
+
+    .search-select-panel {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ced4da;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        z-index: 9999;
+        overflow: hidden;
+    }
+
+    .search-select.open .search-select-panel {
+        display: block;
+    }
+
+    .search-select-input {
+        width: 100%;
+        border: none;
+        border-bottom: 2px solid #e9ecef;
+        padding: 12px 15px;
+        font-size: 0.9rem;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .search-select-input:focus {
+        border-bottom-color: #667eea;
+    }
+
+    .search-select-options {
+        max-height: 260px;
+        overflow-y: auto;
+    }
+
+    .search-select-group-label {
+        padding: 8px 15px 4px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #94a3b8;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        background: #f8f9fa;
+    }
+
+    .search-select-option {
+        padding: 10px 16px;
+        cursor: pointer;
+        color: #2d3748;
+        font-size: 0.9rem;
+    }
+
+    .search-select-option:hover,
+    .search-select-option.highlighted {
+        background-color: #667eea;
+        color: white;
+    }
+
+    .search-select-option:hover .opt-role,
+    .search-select-option.highlighted .opt-role {
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    .search-select-option.selected {
+        background-color: #eef2ff;
+        font-weight: 600;
+    }
+
+    .opt-role {
+        color: #64748b;
+        font-weight: 400;
+    }
+
+    .search-select-no-results {
+        padding: 16px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+
+    .search-select.validation-error .search-select-control {
+        border-color: #e74c3c !important;
+        background: #fff5f5 !important;
+    }
+
+    .selected-items-display {
+        padding: 12px;
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        min-height: 50px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .item-tag {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        padding: 4px 14px;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .item-tag .remove-btn {
+        cursor: pointer;
+        color: #dc3545;
+        margin-left: 4px;
+        font-size: 12px;
     }
 </style>
 
@@ -1240,8 +1459,8 @@
         <!-- Page Header -->
         <div class="page-header">
             <div class="page-header-content">
-                <h1 class="page-title">📝 Sell Residential Property</h1>
-                <p class="page-subtitle">Complete 4 simple steps to list your property</p>
+                <h1 class="page-title">Sell Your Residential Property</h1>
+                <p class="page-subtitle">List your home in 4 simple steps and connect with genuine buyers instantly.</p>
             </div>
         </div>
 
@@ -1275,7 +1494,7 @@
             <div class="form-header">
                 <div class="form-title">
                     <i class="fas fa-edit"></i>
-                    Sell your residential property
+                    Sell Your Residential Property
                 </div>
                 <button class="btn-back" onclick="history.back();">
                     <i class="fas fa-arrow-left"></i>
@@ -1283,11 +1502,70 @@
                 </button>
             </div>
 
-            <form method="POST" action="{% url 'resale_residential_add' %}" enctype="multipart/form-data" id="propertyForm">
+            <form method="POST" action="{% url 'resale_residential_add' %}" enctype="multipart/form-data"
+                id="propertyForm" novalidate>
                 {% csrf_token %}
 
                 <!-- STEP 1: Basic Information & Configuration -->
                 <div class="step-content active" id="step1">
+
+                    <div class="form-section">
+                        <div class="section-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                            <span><i class="fas fa-upload"></i> Listed By</span>
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-user"></i> Listed By <span
+                                                class="text-danger">*</span></label>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <br>
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group"><label class="form-label"><i class="fas fa-user"></i>
+                                            Id</label><input type="text" class="form-control" name="listed_by_id"
+                                            id="listed_by_id" readonly style="background-color:#e9ecef;"
+                                            value="{{user_obj.user_id}}"></div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group"><label class="form-label"><i class="fas fa-user"></i>
+                                            Name</label><input type="text" class="form-control" name="listed_by_name"
+                                            id="listed_by_name" readonly style="background-color:#e9ecef;"
+                                            value="{{user_obj.user_name}}"></div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i>
+                                            Email</label><input type="email" class="form-control" name="listed_by_email"
+                                            id="listed_by_email" readonly style="background-color:#e9ecef;"
+                                            value="{{user_obj.user_email}}">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group"><label class="form-label"><i class="fas fa-phone"></i>
+                                            Contact</label><input type="text" class="form-control"
+                                            name="listed_by_contact" id="listed_by_contact" readonly
+                                            style="background-color:#e9ecef;" value="{{user_obj.user_phone}}"></div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i>
+                                            Role</label><input type="text" class="form-control" name="listed_by_role"
+                                            id="listed_by_role" readonly style="background-color:#e9ecef;"
+                                            value="{{user_obj.user_role}}"></div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
                     <!-- Section 1: Basic Information -->
                     <div class="form-section">
                         <div class="section-header">
@@ -1296,61 +1574,132 @@
                         </div>
                         <div class="section-body">
                             <div class="row">
-                                <div class="form-group mt-2" hidden>
-                                    <label class="form-label">Property Title <span class="required">*</span></label>
-                                    <input type="text" class="form-control" id="res_title" name="title"
-                                        placeholder="e.g., Spacious 3BHK Apartment in Prime Location">
+                                <div class="form-group mt-2">
+                                    <label class="form-label">Property Title</label>
+                                    <input type="text" class="form-control" id="res_title" readonly
+                                        placeholder="Property Title auto-generated by system"
+                                        style="background-color:#e9ecef; font-weight:600; color:#495057;">
                                 </div>
 
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">Property Type <span class="required">*</span></label>
-                                        <select class="form-select form-control" id="res_property_type" name="property_type" required>
-                                            <option value="">Select property type</option>
+
+                                        <select class="form-select form-control" id="res_property_type"
+                                            name="property_type" required>
+                                            <option value="">Select Property Type</option>
+
+                                            <!-- Flats -->
                                             <option value="apartment">Apartment</option>
-                                            <option value="house">Independent House/Villa</option>
-                                            <option value="floor">Independent Floor</option>
-                                            <option value="plot">Plot/Land</option>
+                                            <option value="studio_apartment">Studio Apartment</option>
+                                            <option value="penthouse">Penthouse</option>
+
+                                            <!-- Houses -->
+                                            <option value="independent_house">Independent House</option>
+                                            <option value="villa">Villa</option>
+                                            <option value="bungalow">Bungalow</option>
+                                            <option value="farmhouse">Farm House</option>
+
+                                            <!-- Floors -->
+                                            <option value="independent_floor">Independent Floor</option>
+                                            <option value="builder_floor">Builder Floor Apartment</option>
+
+                                            <!-- Multi-Level Homes -->
+                                            <option value="duplex">Duplex</option>
+                                            <option value="triplex">Triplex</option>
+                                            <option value="row_house">Row House</option>
+                                            <option value="townhouse">Townhouse</option>
+
+
+                                            <!-- Others -->
+                                            <option value="serviced_apartment">Serviced Apartment</option>
+
                                         </select>
                                     </div>
                                 </div>
 
+
+
+
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Zone <span class="required">*</span></label>
-                                        <select class="form-select form-control" id="res_zone" name="zone" required>
-                                            <option value="">Select zone</option>
-                                            <option value="north">North Zone</option>
-                                            <option value="south">South Zone</option>
-                                            <option value="east">East Zone</option>
-                                            <option value="west">West Zone</option>
-                                            <option value="central">Central Zone</option>
+                                        <label class="form-label">Flat/House No/Unit No<span class="required">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="property_no" name="property_no"
+                                            placeholder="Enter Property No" required>
+                                        <span
+                                            style="font-size: 0.75rem; color: red; margin-top: 4px; display: block;font-weight:bold;">
+                                            <i class="fas fa-info-circle"></i> Note: Required for verification not shown
+                                            publicly.
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                                {% comment %} <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label"> Property Registration No</label>
+                                        <input type="text" class="form-control" id="res_no" name="registration_no"
+                                            placeholder="Enter Property Registration No">
+
+                                    </div>
+                                </div> {% endcomment %}
+
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fas fa-city"></i>
+                                            Society Type
+                                        </label>
+                                        <select class="form-select form-control" name="society_type" id="society_type"
+                                            required>
+                                            <option value="">Select Society Type</option>
+                                            <option value="Gated Community">Gated Community</option>
+                                            <option value="Semi-Gated Community">Semi-Gated Community</option>
+                                            <option value="Open Society">Open Society</option>
+                                            <option value="Co-operative Housing Society">Co-operative Housing Society
+                                            </option>
+                                            <option value="Apartment Complex">Apartment Complex</option>
+                                            <option value="Township">Township</option>
+                                            <option value="Independent Housing Society">Independent Housing Society
+                                            </option>
+                                            <option value="Builder Floor Society">Builder Floor Society</option>
+                                            <option value="Mixed Development Society">Mixed Development Society</option>
                                         </select>
                                     </div>
                                 </div>
+
+
+
                             </div>
 
                             <div class="row">
+
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Society Type <span class="required">*</span></label>
-                                        <select class="form-select form-control" id="res_society_type" name="society_type" required>
-                                            <option value="">Select society type</option>
-                                            <option value="gated">Gated Community</option>
-                                            <option value="open">Open Society</option>
-                                            <option value="cooperative">Co-operative Housing</option>
-                                            <option value="apartment">Apartment Complex</option>
-                                        </select>
+                                        <label class="form-label"> Tower/Wing Number</label>
+                                        <input type="text" class="form-control" id="tower_no" name="tower_no"
+                                            placeholder="A Wing">
+
                                     </div>
                                 </div>
+
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">Water Type <span class="required">*</span></label>
-                                        <select class="form-select form-control" id="res_water_type" name="water_type" required>
+                                        <select class="form-select form-control" id="res_water_type" name="water_type"
+                                            required>
                                             <option value="">Select water type</option>
-                                            <option value="municipal">Municipal Corporation</option>
+
+
+
+                                            <option value="municipal">Municipal Corporation Supply</option>
                                             <option value="borewell">Borewell</option>
-                                            <option value="both">Both</option>
+                                            <option value="both">Municipal + Borewell</option>
+                                            <option value="tankers">Water Tanker Supply</option>
+                                            <option value="well">Open Well</option>
+                                            <option value="rainwater_harvesting">Rainwater Harvesting</option>
+                                            <option value="society_supply">Society Water Supply</option>
                                         </select>
                                     </div>
                                 </div>
@@ -1359,8 +1708,10 @@
                             <div class="row">
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Furnishing Type <span class="required">*</span></label>
-                                        <select class="form-select form-control" id="res_furnishing" name="furnishing_type" required>
+                                        <label class="form-label">Furnishing Type <span
+                                                class="required">*</span></label>
+                                        <select class="form-select form-control" id="res_furnishing"
+                                            name="furnishing_type" required>
                                             <option value="">Select furnishing</option>
                                             <option value="unfurnished">Unfurnished</option>
                                             <option value="semi">Semi-Furnished</option>
@@ -1370,14 +1721,12 @@
                                 </div>
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Age of Property <span class="required">*</span></label>
-                                        <select class="form-select form-control" id="res_age" name="age_of_property" required>
-                                            <option value="">Select age</option>
-                                            <option value="0-1">0-1 Year</option>
-                                            <option value="1-3">1-3 Years</option>
-                                            <option value="3-5">3-5 Years</option>
-                                            <option value="5-10">5-10 Years</option>
-                                            <option value="10+">10+ Years</option>
+                                        <label class="form-label">Age of Property <span
+                                                class="required">*</span></label>
+
+                                        <input type="number" class="form-control" id="res_age" name="age_of_property"
+                                            placeholder="Enter property age in years (e.g., 5)" required>
+
                                         </select>
                                     </div>
                                 </div>
@@ -1388,7 +1737,8 @@
                                             <i class="fas fa-compass"></i>
                                             Facing Direction <span class="required">*</span>
                                         </label>
-                                        <select class="form-select form-control" name="facing" id="res_facing" required>
+                                        <select class="form-select form-control" name="facing_direction" id="res_facing"
+                                            required>
                                             <option value="">Select Direction</option>
                                             <option value="North">North</option>
                                             <option value="South">South</option>
@@ -1404,10 +1754,128 @@
 
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Available From</label>
-                                        <input type="date" class="form-control" name="available_from" id="res_available_from">
+                                        <label class="form-label">
+                                            <i class="fas fa-user-check"></i>
+                                            Occupancy Status
+                                        </label>
+                                        <select class="form-select form-control" name="occupancy_status"
+                                            id="occupancy_status">
+
+
+                                            <option value="">Select Occupancy Status</option>
+
+                                            <option value="Vacant">Vacant (Ready for Possession)</option>
+
+                                            <option value="Owner Occupied">
+                                                Owner Occupied
+                                            </option>
+
+                                            <option value="Tenant Occupied">
+                                                Tenant Occupied
+                                            </option>
+
+                                            <option value="Family Occupied">
+                                                Family Occupied
+                                            </option>
+
+                                            <option value="Caretaker Occupied">
+                                                Caretaker Occupied
+                                            </option>
+
+                                            <option value="Under Renovation">
+                                                Under Renovation
+                                            </option>
+
+                                            <option value="Under Construction">
+                                                Under Construction
+                                            </option>
+
+                                            <option value="Locked Property">
+                                                Locked / Not in Use
+                                            </option>
+                                        </select>
                                     </div>
                                 </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="form-section">
+                        <div class="section-header">
+                            <i class="fas fa-ruler-combined"></i>
+                            Property Measurements
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Built-up Area (sq.ft) <span
+                                                class="required">*</span></label>
+                                        <input type="number" class="form-control" id="res_builtup_area"
+                                            name="builtup_area" placeholder="e.g., 1200" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Carpet Area (sq.ft) <span
+                                                class="required">*</span></label>
+                                        <input type="number" class="form-control" id="res_carpet_area"
+                                            name="carpet_area" placeholder="e.g., 950" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Plot Area (sq.ft)</label>
+                                        <input type="number" class="form-control" id="res_plot_area" name="plot_area"
+                                            placeholder="Optional">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Building Configuration <span class="required">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="res_floor"
+                                            name="building_configuration" placeholder="e.g., G, G+1, G+2, G+3" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Total Floors Constructed <span class="required">*</span>
+                                        </label>
+                                        <input type="number" class="form-control" id="res_total_floors"
+                                            name="total_floors" placeholder="e.g., 3" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3" id="brokerageSection">
+                                    <label class="form-label mt-2" id="brokerageLabel">Buyer Service Fee  <span
+                                            class="required">*</span></label>
+                                    <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
+                                        <option value="">Select</option>
+                                        <option value="No Brokerage">No Brokerage</option>
+                                        <option value="1% of amount">1% of sale value</option>
+                                        <option value="1.5% of amount">1.5% of sale value</option>
+                                        <option value="2% of amount">2% of sale value</option>
+                                        <option value="Fixed Amount">Fixed Amount</option>
+                                        <option value="Negotiable">Negotiable</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3" id="manualBrokerage" style="display:none;">
+                                    <label class="form-label">Enter Fixed Brokerage</label>
+                                    <input type="text" class="form-control" name="manual_brokerage"
+                                        placeholder="e.g. Fixed Amount">
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -1437,13 +1905,15 @@
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">Bathrooms <span class="required">*</span></label>
-                                        <input type="number" class="form-control" id="res_bathrooms" name="bathrooms" min="1" value="1" required>
+                                        <input type="number" class="form-control" id="res_bathrooms" name="bathrooms"
+                                            min="1" value="1" required>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">Balconies</label>
-                                        <input type="number" class="form-control" id="res_balconies" name="balconies" min="0" value="1">
+                                        <input type="number" class="form-control" id="res_balconies" name="balconies"
+                                            min="0" value="1">
                                     </div>
                                 </div>
                             </div>
@@ -1452,13 +1922,31 @@
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">Covered Parking</label>
-                                        <input type="number" class="form-control" id="res_covered_parking" name="covered_parking" min="0" value="0">
+                                        <input type="number" class="form-control" id="res_covered_parking"
+                                            name="covered_parking" min="0" value="0">
                                     </div>
                                 </div>
+
+
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Open Parking</label>
-                                        <input type="number" class="form-control" id="res_open_parking" name="open_parking" min="0" value="0">
+                                        <label class="form-label">Open Parking Available?</label>
+
+                                        <div class="mt-2">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio"
+                                                    name="open_parking_available" id="openParkingYes" value="Yes"
+                                                    onclick="toggleOpenParking(true)">
+                                                <label class="form-check-label" for="openParkingYes">Yes</label>
+                                            </div>
+
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio"
+                                                    name="open_parking_available" id="openParkingNo" value="No" checked
+                                                    onclick="toggleOpenParking(false)">
+                                                <label class="form-check-label" for="openParkingNo">No</label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1466,54 +1954,6 @@
                     </div>
 
                     <!-- Section 3: Property Measurements -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <i class="fas fa-ruler-combined"></i>
-                            Property Measurements
-                        </div>
-                        <div class="section-body">
-                            <div class="row">
-                                <div class="col-md-4 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Built-up Area (sq.ft) <span class="required">*</span></label>
-                                        <input type="number" class="form-control" id="res_builtup_area" name="builtup_area"
-                                            placeholder="e.g., 1200" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Carpet Area (sq.ft) <span class="required">*</span></label>
-                                        <input type="number" class="form-control" id="res_carpet_area" name="carpet_area"
-                                            placeholder="e.g., 950" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Plot Area (sq.ft)</label>
-                                        <input type="number" class="form-control" id="res_plot_area" name="plot_area"
-                                            placeholder="Optional">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Floor No. <span class="required">*</span></label>
-                                        <input type="number" class="form-control" id="res_floor" name="floor_no"
-                                            placeholder="e.g., 3" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Total Floors <span class="required">*</span></label>
-                                        <input type="number" class="form-control" id="res_total_floors" name="total_floors"
-                                            placeholder="e.g., 10" required>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="step-nav">
                         <div></div>
@@ -1532,23 +1972,17 @@
                             Ownership & Legal Details
                         </div>
                         <div class="section-body">
+
+                            <!-- Row 1: Ownership Type + Number of Owners -->
                             <div class="row">
-                                <div class="col-md-6 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">Ownership Type <span class="required">*</span></label>
-                                        <select class="form-select form-control" id="res_ownership" name="ownership_type" required>
-                                            <option value="">Select</option>
-                                            <option value="freehold">Freehold</option>
-                                            <option value="leasehold">Leasehold</option>
-                                            <option value="cooperative">Co-operative</option>
-                                            <option value="poa">Power of Attorney</option>
-                                        </select>
-                                    </div>
-                                </div>
+
+
+
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">No. of Owners <span class="required">*</span></label>
-                                        <select class="form-select form-control" id="res_num_owners" name="num_owners" required>
+                                        <select class="form-select form-control" id="res_num_owners" name="num_owners"
+                                            required>
                                             <option value="">Select</option>
                                             <option value="1">Single Owner</option>
                                             <option value="2">2 Owners</option>
@@ -1557,50 +1991,159 @@
                                         </select>
                                     </div>
                                 </div>
+
+
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fas fa-user-shield"></i>
+                                            Ownership Status
+                                        </label>
+                                        <select class="form-select form-control" name="ownership_status"
+                                            id="ownership_status">
+                                            <option value="">Select Ownership Status</option>
+
+                                            <option value="Self Owned">
+                                                Sole Owner (Owned by One Person)
+                                            </option>
+
+                                            <option value="Joint Ownership">
+                                                Joint Ownership (Owned by Multiple Persons)
+                                            </option>
+
+                                            <option value="Inherited">
+                                                Inherited from Family
+                                            </option>
+
+                                            <option value="Gifted">
+                                                Received as Gift
+                                            </option>
+
+                                            <option value="Company Owned">
+                                                Company / Corporate Owned
+                                            </option>
+
+                                            <option value="Trust Owned">
+                                                Trust Owned Property
+                                            </option>
+
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- Loan on Property -->
+
+
+
+                            <!-- ✅ NEW Row 2: Ownership Status + Ownership Document Type -->
+                            <div class="row">
+
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fas fa-file-contract"></i>
+                                            Ownership Document Type
+                                        </label>
+                                        <select class="form-select form-control" name="ownership_document_type"
+                                            id="ownership_document_type">
+                                            <option value="">Select Document Type</option>
+                                            <option value="Sale Deed">Sale Deed</option>
+                                            <option value="Gift Deed">Gift Deed</option>
+                                            <option value="Will / Probate">Will / Probate</option>
+                                            <option value="Partition Deed">Partition Deed</option>
+                                            <option value="Relinquishment Deed">Relinquishment Deed</option>
+                                            <option value="Power of Attorney">Power of Attorney</option>
+                                            <option value="Builder Allotment Letter">Builder Allotment Letter</option>
+                                            <option value="Court Decree">Court Decree</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ✅ NEW Row 3: Title Clarity Status + Encumbrance Status -->
+                            <div class="row">
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fas fa-certificate"></i>
+                                            Title Clarity Status
+                                        </label>
+                                        <select class="form-select form-control" name="title_clarity_status"
+                                            id="title_clarity_status">
+                                            <option value="">Select Title Status</option>
+                                            <option value="Clear Title">Clear Title</option>
+                                            <option value="Disputed">Disputed</option>
+                                            <option value="Under Litigation">Under Litigation</option>
+                                            <option value="Pending Mutation">Pending Mutation</option>
+                                            <option value="Title Under Verification">Title Under Verification</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fas fa-lock"></i>
+                                            Encumbrance Status
+                                        </label>
+                                        <select class="form-select form-control" name="encumbrance_status"
+                                            id="encumbrance_status">
+                                            <option value="">Select Encumbrance Status</option>
+                                            <option value="Clear / No Encumbrance">Clear / No Encumbrance</option>
+                                            <option value="Mortgaged">Mortgaged</option>
+                                            <option value="Partially Encumbered">Partially Encumbered</option>
+                                            <option value="Lien Marked">Lien Marked</option>
+                                            <option value="Under Bank Loan">Under Bank Loan</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Loan on Property (UNCHANGED) -->
                             <div class="row">
                                 <div class="col-md-12 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Loan on Property? <span class="required">*</span></label>
+                                        <label class="form-label">Loan on Property? <span
+                                                class="required">*</span></label>
                                         <div class="radio-group">
                                             <label class="radio-option">
-                                                <input type="radio" name="has_loan" value="no" required checked> No
+                                                <input type="radio" name="loan_on_property" value="no" required checked>
+                                                No
                                             </label>
                                             <label class="radio-option">
-                                                <input type="radio" name="has_loan" value="yes"> Yes
+                                                <input type="radio" name="loan_on_property" value="yes"> Yes
                                             </label>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="conditional-section mt-2" id="res_loan_amount_section" style="display: none;">
+                                <div class="conditional-section mt-2" id="res_loan_amount_section"
+                                    style="display: none;">
                                     <div class="form-group">
                                         <label class="form-label">Loan Amount (₹)</label>
-                                        <input type="number" class="form-control" id="res_loan_amount" name="loan_amount"
-                                            placeholder="e.g., 2000000">
+                                        <input type="number" class="form-control" id="res_loan_amount"
+                                            name="loan_amount" placeholder="e.g., 2000000">
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Existing Tenants -->
+                            <!-- Existing Tenants (UNCHANGED) -->
                             <div class="row">
                                 <div class="col-md-12 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Existing Tenants? <span class="required">*</span></label>
+                                        <label class="form-label">Existing Tenants? <span
+                                                class="required">*</span></label>
                                         <div class="radio-group">
                                             <label class="radio-option">
-                                                <input type="radio" name="has_tenants" value="no" required checked> No
+                                                <input type="radio" name="existing_tenants" value="no" required checked>
+                                                No
                                             </label>
                                             <label class="radio-option">
-                                                <input type="radio" name="has_tenants" value="yes"> Yes
+                                                <input type="radio" name="existing_tenants" value="yes"> Yes
                                             </label>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="conditional-section mt-2" id="res_tenant_details_section" style="display: none;">
+                                <div class="conditional-section mt-2" id="res_tenant_details_section"
+                                    style="display: none;">
                                     <div class="form-group">
                                         <label class="form-label">Tenant Details</label>
                                         <textarea class="form-control" id="res_tenant_details" name="tenant_details"
@@ -1609,55 +2152,82 @@
                                 </div>
                             </div>
 
-                            <!-- Legal Dispute -->
+                            <!-- Legal Dispute (UNCHANGED) -->
                             <div class="row">
                                 <div class="col-md-12 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Any Legal Dispute? <span class="required">*</span></label>
+                                        <label class="form-label">Any Legal Dispute? <span
+                                                class="required">*</span></label>
                                         <div class="radio-group">
                                             <label class="radio-option">
-                                                <input type="radio" name="has_legal_dispute" value="no" required checked> No
+                                                <input type="radio" name="any_legal_dispute" value="no" required
+                                                    checked> No
                                             </label>
                                             <label class="radio-option">
-                                                <input type="radio" name="has_legal_dispute" value="yes"> Yes
+                                                <input type="radio" name="any_legal_dispute" value="yes"> Yes
                                             </label>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="conditional-section mt-2" id="res_dispute_details_section" style="display: none;">
+                                <div class="conditional-section mt-2" id="res_dispute_details_section"
+                                    style="display: none;">
                                     <div class="form-group">
-                                        <label class="form-label">Dispute Description</label>
+                                        <label class="form-label">Dispute Details</label>
                                         <textarea class="form-control" id="res_dispute_details" name="dispute_details"
                                             placeholder="Describe the legal dispute"></textarea>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Tax Dues -->
+                            <!-- Tax Dues (UNCHANGED) -->
                             <div class="row">
                                 <div class="col-md-12 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Government Tax Dues? <span class="required">*</span></label>
+                                        <label class="form-label">Government Tax Dues? <span
+                                                class="required">*</span></label>
                                         <div class="radio-group">
                                             <label class="radio-option">
-                                                <input type="radio" name="has_tax_due" value="no" required checked> No - Tax Paid
+                                                <input type="radio" name="government_tax_dues" value="no" required
+                                                    checked> No
                                             </label>
                                             <label class="radio-option">
-                                                <input type="radio" name="has_tax_due" value="yes"> Yes - Pending
+                                                <input type="radio" name="government_tax_dues" value="yes"> Yes -
+                                                Pending
                                             </label>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="conditional-section mt-2" id="res_tax_amount_section" style="display: none;">
+                                <div class="conditional-section mt-2" id="res_tax_amount_section"
+                                    style="display: none;">
                                     <div class="form-group">
                                         <label class="form-label">Pending Tax Amount (₹)</label>
-                                        <input type="number" class="form-control" id="res_tax_amount" name="pending_tax_amount"
-                                            placeholder="e.g., 50000">
+                                        <input type="number" class="form-control" id="res_tax_amount"
+                                            name="pending_tax_amount" placeholder="e.g., 50000">
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- ✅ NEW: Sanctioning / Approving Authority -->
+                            <div class="row">
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            <i class="fas fa-landmark"></i>
+                                            Sanctioning / Approving Authority
+                                        </label>
+                                        <textarea class="form-control" name="sanctioning_authority"
+                                            id="sanctioning_authority"
+                                            placeholder="e.g., PMRDA, PCMC, NMMC, BMC, RERA Authority, Gram Panchayat, Collector Office..."
+                                            style="min-height: 90px;"></textarea>
+                                        <small class="form-text">
+                                            <i class="fas fa-info-circle"></i>
+                                            Enter the government body or authority that approved / sanctioned this
+                                            property's construction or layout.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
@@ -1671,22 +2241,27 @@
                             <div class="row">
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Expected Price (₹) <span class="required">*</span></label>
+                                        <label class="form-label">Selling Price <span class="required">*</span></label>
                                         <input type="number" class="form-control" id="res_price" name="expected_price"
                                             placeholder="e.g., 5000000" required>
                                     </div>
                                 </div>
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Price per Sq.ft (₹)</label>
-                                        <input type="number" class="form-control" id="res_price_per_sqft" name="price_per_sqft"
-                                            placeholder="Auto-calculated" readonly>
+                                        <label class="form-label" style="color:#11998e;"><i
+                                                class="fas fa-calculator"></i> Price per Sq.ft (Auto)</label>
+                                        <input type="text" class="form-control" id="res_price_per_sqft_display"
+                                            placeholder="Calculated automatically..." readonly
+                                            style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
+                                        <!-- Hidden field sends the raw number to your database -->
+                                        <input type="hidden" id="res_price_per_sqft" name="price_per_sqft">
                                     </div>
                                 </div>
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Price Negotiable?</label>
-                                        <select class="form-select form-control" id="res_negotiable" name="is_negotiable">
+                                        <label class="form-label">Selling Price Negotiable?</label>
+                                        <select class="form-select form-control" id="price_negotiable"
+                                            name="is_negotiable">
                                             <option value="yes">Yes</option>
                                             <option value="no">No - Fixed</option>
                                         </select>
@@ -1694,55 +2269,15 @@
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <div class="col-md-4 mt-2">
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            <i class="fas fa-handshake"></i> Brokerage
-                                        </label>
-                                        <select class="form-select form-control" name="brokerage" id="brokerageSelect">
-                                            <option value="">Select Option</option>
-                                            <option value="Yes">Yes</option>
-                                            <option value="No">No</option>
-                                        </select>
-                                    </div>
-                                </div>
 
-                                <div class="col-md-4 mt-2" id="brokerageSection" style="display:none;">
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            <i class="fas fa-percent"></i> Brokerage Percentage
-                                        </label>
-                                        <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
-                                            <option value="">Select Brokerage</option>
-                                            <option value="1%">1%</option>
-                                            <option value="1.5%">1.5%</option>
-                                            <option value="2%">2%</option>
-                                            <option value="Negotiable">Negotiable</option>
-                                            <option value="Manual">Enter Manually</option>
-                                        </select>
-                                    </div>
-                                </div>
 
-                                <div class="col-md-4 mt-2" id="manualBrokerage" style="display:none;">
-                                    <div class="form-group">
-                                        <label class="form-label">
-                                            <i class="fas fa-edit"></i> Enter Brokerage
-                                        </label>
-                                        <input type="text" class="form-control" name="manual_brokerage"
-                                            placeholder="Enter Brokerage e.g. 2.5%">
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="form-group mt-2">
-                                <label class="form-label">Property Description <span class="required">*</span></label>
-                                <textarea class="form-control" id="resale_residential_desc" name="description"
-                                    placeholder="Describe property highlights, location benefits, nearby amenities..."
-                                    required></textarea>
-                            </div>
+
+
                         </div>
                     </div>
+
+
 
                     <div class="step-nav">
                         <button type="button" class="btn-step btn-prev" onclick="goToStep(1)">
@@ -1762,33 +2297,27 @@
                             <i class="fas fa-map-marker-alt"></i>
                             Nearby Facilities
                         </div>
-                        <div class="section-body">
+                        <div class="section-body mt-4">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <label class="form-label mb-0">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    Nearby Facilities <span class="required" style="color:red;">*</span>
-                                </label>
-                                
-                                <div class="selection-summary">
-                                    <span class="text-muted small" style="font-weight:bold;">Total Facilities Selected:</span>
-                                    <input type="text" id="facilityCounter" value="0" readonly 
-                                        class="counter-box blue-theme"
-                                        style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #bae6fd; font-weight: bold; background: #f0f9ff; color: #0369a1;">
-                                </div>
+                                <label class="form-label mb-0"><i class="fas fa-map-marker-alt text-primary"></i> Nearby
+                                    Facilities</label>
+                                <span class="badge bg-primary" id="facilitiesCount">0 selected</span>
                             </div>
 
-                            <div class="checkbox-group">
-                                {% for facilities in facilities_obj %}
-                                    <div class="checkbox-item">
-                                        <div class="form-check">
-                                            <input class="form-check-input facility-checkbox" type="checkbox" name="facilities[]" 
-                                                value="{{facilities.facilities_name}}" id="facility_{{ forloop.counter }}">
-                                            
-                                            <label class="form-check-label" for="facility_{{ forloop.counter }}">
-                                                <i class="{{facilities.facilities_icon}}"></i> {{facilities.facilities_name}}
-                                            </label>
-                                        </div>
-                                    </div>
+                            <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')">
+                                <i class="fas fa-plus-circle me-2"></i> Select Facilities <span
+                                    class="badge bg-light text-dark ms-2" id="facilitiesBadge">0</span>
+                            </button>
+
+                            <div id="facilitiesDisplay" class="selected-items-display">
+                                <p class="text-muted text-center">No facilities selected</p>
+                            </div>
+
+                            <!-- Hidden checkboxes for form submission -->
+                            <div style="display:none;">
+                                {% for fa in facilities_obj %}
+                                <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}"
+                                    class="facilities-checkbox" data-icon="{{fa.facilities_icon}}">
                                 {% endfor %}
                             </div>
                         </div>
@@ -1801,32 +2330,44 @@
                         </div>
                         <div class="section-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <label class="form-label mb-0">
-                                    <i class="fas fa-star"></i>
-                                    Amenities <span class="required" style="color:red;">*</span>
-                                </label>
-                                
-                                <div class="selection-summary">
-                                    <span class="text-muted small" style="font-weight:bold;">Total Amenities Selected:</span>
-                                    <input type="text" id="amenityCounter" value="0" readonly 
-                                        style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #ddd; font-weight: bold; background: #f8f9fa;">
-                                </div>
+                                <label class="form-label mb-0"><i class="fas fa-star text-warning"></i>
+                                    Amenities</label>
+                                <span class="badge bg-primary" id="amenitiesCount">0 selected</span>
                             </div>
 
-                            <div class="checkbox-group">
-                                {% for ameneties in ameneties_obj %}
-                                    <div class="checkbox-item">
-                                        <div class="form-check">
-                                            <input class="form-check-input amenity-checkbox" type="checkbox" name="amenities[]" 
-                                                value="{{ameneties.amenties_name}}" id="amenity_{{ forloop.counter }}">
-                                            
-                                            <label class="form-check-label" for="amenity_{{ forloop.counter }}">
-                                                <i class="{{ameneties.amenties_icon}}"></i> {{ameneties.amenties_name}}
-                                            </label>
-                                        </div>
-                                    </div>
+                            <button type="button" class="btn btn-primary w-100 mb-3" onclick="openModal('amenities')">
+                                <i class="fas fa-plus-circle me-2"></i> Select Amenities <span
+                                    class="badge bg-light text-dark ms-2" id="amenitiesBadge">0</span>
+                            </button>
+
+                            <div id="amenitiesDisplay" class="selected-items-display">
+                                <p class="text-muted text-center">No amenities selected</p>
+                            </div>
+
+                            <!-- Hidden checkboxes for form submission -->
+                            <div style="display:none;">
+                                {% for am in ameneties_obj %}
+                                <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}"
+                                    class="amenities-checkbox" data-icon="{{am.amenties_icon}}">
                                 {% endfor %}
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-align-left"></i>Add Property Descriptions Details
+                        </div>
+                        <div class="section-body">
+                            <div class="form-group mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Property
+                                        Description</label>
+
+                                </div>
+                                <textarea class="form-control" name="user_description" rows="3"
+                                    placeholder="Describe the commercial space briefly..."></textarea>
+                            </div>
+
                         </div>
                     </div>
 
@@ -1834,15 +2375,21 @@
                     <div class="form-section">
                         <div class="section-header">
                             <i class="fas fa-location-dot"></i>
-                            Address
+                            Property Location Details
                         </div>
                         <div class="section-body">
                             <div class="row">
                                 <div class="col-md-6 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">City <span class="required">*</span></label>
-                                        <input type="text" class="form-control" id="res_city" name="city"
-                                            placeholder="e.g., Mumbai" required>
+                                        <input type="text" class="form-control" id="cityInput" name="city"
+                                            placeholder="e.g., Pune" required>
+
+                                        <script>
+                                            document.getElementById('cityInput').addEventListener('input', function () {
+                                                this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+                                            });
+                                        </script>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mt-2">
@@ -1865,11 +2412,73 @@
                                 <textarea class="form-control" id="res_address" name="complete_address"
                                     placeholder="Enter complete address" required></textarea>
                             </div>
+
+                            <div class="col-md-6 mt-2">
+                                <label class="form-label">Property Landmark </label>
+                                <input type="text" class="form-control" id="property_landmark" name="property_landmark"
+                                    placeholder="Enter Property Landmark">
+                            </div>
+
+
+                            <div class="col-md-6 mt-2">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        State <span class="required-star" style="color:red;">*</span>
+                                    </label>
+
+                                    <select class="form-select form-control" name="state" required>
+                                        <option value="">Select State</option>
+
+                                        <!-- States -->
+                                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                        <option value="Assam">Assam</option>
+                                        <option value="Bihar">Bihar</option>
+                                        <option value="Chhattisgarh">Chhattisgarh</option>
+                                        <option value="Goa">Goa</option>
+                                        <option value="Gujarat">Gujarat</option>
+                                        <option value="Haryana">Haryana</option>
+                                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                        <option value="Jharkhand">Jharkhand</option>
+                                        <option value="Karnataka">Karnataka</option>
+                                        <option value="Kerala">Kerala</option>
+                                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                        <option value="Maharashtra">Maharashtra</option>
+                                        <option value="Manipur">Manipur</option>
+                                        <option value="Meghalaya">Meghalaya</option>
+                                        <option value="Mizoram">Mizoram</option>
+                                        <option value="Nagaland">Nagaland</option>
+                                        <option value="Odisha">Odisha</option>
+                                        <option value="Punjab">Punjab</option>
+                                        <option value="Rajasthan">Rajasthan</option>
+                                        <option value="Sikkim">Sikkim</option>
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                        <option value="Telangana">Telangana</option>
+                                        <option value="Tripura">Tripura</option>
+                                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                        <option value="Uttarakhand">Uttarakhand</option>
+                                        <option value="West Bengal">West Bengal</option>
+
+                                        <!-- Union Territories -->
+                                        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                        <option value="Chandigarh">Chandigarh</option>
+                                        <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli
+                                            and Daman and Diu</option>
+                                        <option value="Delhi">Delhi</option>
+                                        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                        <option value="Ladakh">Ladakh</option>
+                                        <option value="Lakshadweep">Lakshadweep</option>
+                                        <option value="Puducherry">Puducherry</option>
+                                    </select>
+                                </div>
+                            </div>
+
+
                         </div>
                     </div>
 
                     <!-- Section 9: Owner Contact Information -->
-                    <div class="form-section">
+                    <div class="form-section" hidden>
                         <div class="section-header">
                             <i class="fas fa-user"></i>
                             Owner Contact Information
@@ -1878,23 +2487,31 @@
                             <div class="row">
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Owner Name <span class="required">*</span></label>
+                                        <label class="form-label">Owner Name </label>
                                         <input type="text" class="form-control" id="res_owner_name" name="owner_name"
-                                            placeholder="Full name" required>
+                                            placeholder="Full name">
                                     </div>
                                 </div>
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Owner Contact <span class="required">*</span></label>
-                                        <input type="tel" class="form-control" id="res_owner_contact" name="owner_contact"
-                                            placeholder="10-digit mobile" pattern="[0-9]{10}" required>
+                                        <label class="form-label">Owner Contact</label>
+                                        <input type="tel" class="form-control" id="res_owner_contact"
+                                            name="owner_contact" placeholder="10-digit mobile" pattern="[0-9]{10}">
                                     </div>
                                 </div>
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
-                                        <label class="form-label">Email <span class="required">*</span></label>
+                                        <label class="form-label">Email</label>
                                         <input type="email" class="form-control" id="res_owner_email" name="owner_email"
-                                            placeholder="email@example.com" required>
+                                            placeholder="email@example.com">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Owner Role </label>
+                                        <input type="text" class="form-control" id="res_owner_role" name="owner_role"
+                                            placeholder="Owner,Agent,....">
                                     </div>
                                 </div>
                             </div>
@@ -1903,7 +2520,8 @@
                                 <label class="form-label">Residential Status <span class="required">*</span></label>
                                 <div class="radio-group">
                                     <label class="radio-option">
-                                        <input type="radio" name="residential_status" value="resident" required checked> Resident
+                                        <input type="radio" name="residential_status" value="resident" required checked>
+                                        Resident
                                     </label>
                                     <label class="radio-option">
                                         <input type="radio" name="residential_status" value="nri"> NRI
@@ -1930,30 +2548,31 @@
                 <div class="step-content" id="step4">
                     <!-- Section 6: Property Images -->
                     <div class="form-section">
-                        <div class="section-header">
-                            <i class="fas fa-images"></i>
-                            Property Images
+                        <div class="section-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-images"></i> Property Images</span>
+                            <span class="badge bg-primary" id="imageCounter"
+                                style="font-size: 0.9rem; padding: 0.5rem 0.8rem;">0 / 10 Images Uploaded</span>
                         </div>
                         <div class="section-body">
-                            <div class="image-upload-area" id="uploadArea">
+                            <div class="image-upload-area" id="uploadArea" style="cursor: pointer; position: relative;">
                                 <input type="file" id="imageInput" name="property_images" multiple accept="image/*"
                                     style="display: none;">
-                                <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #667eea;"></i></div>
+                                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"
+                                        style="font-size: 3rem; color: #667eea;"></i></div>
                                 <div class="upload-text">Click or Drag Images Here</div>
-                                <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG)</div>
+                                <div class="upload-subtext">Upload up to 10 high-quality images (JPG, PNG) - Drag
+                                    previews to change display sequence</div>
                             </div>
-                            <div class="image-preview" id="imagePreview"></div>
 
-                            <!-- Hidden container that holds actual File objects for form submission -->
-                            <div id="fileListContainer"></div>
+                            <div class="image-preview row g-2 mt-3" id="imagePreview"></div>
 
                             <div class="row mt-3">
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">
-                                            <i class="fa-solid fa-map"></i> Upload Floor Plan <span class="required">*</span>
+                                            <i class="fa-solid fa-map"></i> Upload Floor Plan
                                         </label>
-                                        <input type="file" class="form-control" name="floor_plan" accept="image/*" required>
+                                        <input type="file" class="form-control" name="floor_plan">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -1968,48 +2587,114 @@
                         </div>
                     </div>
 
-                    <!-- Section 10: Listing Uploaded By -->
                     <div class="form-section">
+                        <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="listed_elsewhere"
+                                                id="listed_yes" value="Yes">
+                                            <label class="form-check-label" for="listed_yes">Yes</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="listed_elsewhere"
+                                                id="listed_no" value="No" checked>
+                                            <label class="form-check-label" for="listed_no">No</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6" id="portalField" style="display:none;">
+                                    <div class="form-group">
+                                        <label class="form-label">Portal Name</label>
+                                        <input type="text" class="form-control" name="portal_name"
+                                            placeholder="Housing, 99acres, MagicBricks, NoBroker">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="form-section" style="display:none;">
                         <div class="section-header">
                             <i class="fas fa-upload"></i>
-                            Listing Uploaded By
+                            Property Listing By
+                        </div>
+                        <div class="section-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label">Listed By ID</label>
+                                        <input type="text" class="form-control" name="listed_by_id">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label"> Listed By Name</label>
+                                        <input type="text" class="form-control" name="listed_by_name">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label">Listed By Email</label>
+                                        <input type="email" class="form-control" name="listed_by_email">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label">Listed By Contact</label>
+                                        <input type="tel" class="form-control" name="listed_by_contact">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label class="form-label">Listed By Role</label>
+                                        <input type="text" class="form-control" name="listed_by_role">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Section 10: Listing Uploaded By -->
+                    <div class="form-section" style="display:none;">
+                        <div class="section-header">
+                            <i class="fas fa-upload"></i>
+                            Property Uploaded By
                         </div>
                         <div class="section-body">
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-user"></i> Name</label>
-                                        <input type="text" class="form-control"
-                                               name="uploaded_by_name"
-                                               value="{{ admin_obj.name }}"
-                                               readonly>
+                                        <input type="text" class="form-control" name="uploaded_by_name"
+                                            value="{{ admin_obj.name }}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
-                                        <input type="email" class="form-control"
-                                               name="uploaded_by_email"
-                                               value="{{ admin_obj.email }}"
-                                               readonly>
+                                        <input type="email" class="form-control" name="uploaded_by_email"
+                                            value="{{ admin_obj.email }}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-phone"></i> Contact</label>
-                                        <input type="text" class="form-control"
-                                               name="uploaded_by_contact"
-                                               value="{{ admin_obj.phone }}"
-                                               readonly>
+                                        <input type="text" class="form-control" name="uploaded_by_contact"
+                                            value="{{ admin_obj.phone }}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
-                                        <input type="text" class="form-control"
-                                               name="uploaded_by_role"
-                                               value="{{ admin_obj.role }}"
-                                               readonly>
+                                        <input type="text" class="form-control" name="uploaded_by_role"
+                                            value="{{ admin_obj.role }}" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -2075,20 +2760,462 @@
                 <div class="checklist-item" id="cl-owner"><i class="fas fa-circle"></i> Owner details filled</div>
             </div>
 
-            <div class="info-card">
-                <div class="info-title">💡 Pro Tips for Faster Sales</div>
-                <div class="info-item"><i class="fas fa-camera"></i> Add 8+ clear photos — 5× more enquiries</div>
-                <div class="info-item"><i class="fas fa-pencil-alt"></i> Write 150+ word description</div>
-                <div class="info-item"><i class="fas fa-shield-alt"></i> Request PropCRM Verification for 6× trust</div>
-                <div class="info-item"><i class="fas fa-map-pin"></i> Add Google Maps link for better search rank</div>
-                <div class="info-item"><i class="fas fa-rupee-sign"></i> Price competitively — compare nearby listings</div>
+        </div>
+    </div>
+</div>
+
+<!-- Common Modal -->
+<div class="modal fade" id="itemsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-list"></i> <span id="modalTitle">Select Items</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control mb-3" id="modalSearch" placeholder="Search...">
+                <div id="modalItemsList" class="row"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply (<span
+                        id="modalSelectedCount">0</span>)</button>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Get the radio buttons and the hidden portal input field
+        var yesRadio = document.getElementById('listed_yes');
+        var noRadio = document.getElementById('listed_no');
+        var portalField = document.getElementById('portalField');
+
+        // 2. Create a function that checks if "Yes" is selected
+        function togglePortalField() {
+            if (portalField) {
+                // If yes is checked, show it ('block'). If not, hide it ('none').
+                portalField.style.display = yesRadio.checked ? 'block' : 'none';
+            }
+        }
+
+        // 3. Attach the function to run whenever the user clicks either radio button
+        if (yesRadio) yesRadio.addEventListener('change', togglePortalField);
+        if (noRadio) noRadio.addEventListener('change', togglePortalField);
+
+        // 4. Run it once immediately when the page loads to set the initial state
+        togglePortalField();
+    });
+
+
+</script>
+
+<script>
+
+    function updateBrokerageLabel(role) {
+        var labelElement = document.getElementById('brokerageLabel');
+        if (!labelElement) return;
+
+        // Normalize the string text to lowercase to ensure clean matches
+        var normalizedRole = (role || "").trim().toLowerCase();
+        var labelText = "";
+
+        switch (normalizedRole) {
+            case 'admin':
+                labelText = "EstateFlow Service Fee";
+                break;
+            case 'relationship manager':
+                labelText = "Buyer Service Fee";
+                break;
+            case 'landlord':
+                labelText = "Buyer Service Fee";
+                break;
+            case 'agent':
+                labelText = "Brokerage";
+                break;
+            case 'agency/builder':
+            case 'builder':
+                labelText = "Brokerage/Service Fee";
+                break;
+            default:
+                labelText = "Brokerage"; // Fallback default text
+                break;
+        }
+
+        // Inject the text along with a red styled asterisk span
+        labelElement.innerHTML = labelText + ' <span style="color: red;">*</span>';
+    }
+
+</script>
+
+<script>
+    function Change_Fields() {
+        var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
+        if (!checkedInput) return;
+
+        var selectedValue = checkedInput.value;
+
+        var admin_id = document.getElementById('selfUserId')?.value || "";
+        var admin_name = document.getElementById('selfUserName')?.value || "";
+        var admin_email = document.getElementById('selfUserEmail')?.value || "";
+        var admin_phone = document.getElementById('selfUserPhone')?.value || "";
+        var admin_role = document.getElementById('selfUserRole')?.value || "";
+
+        var targetId = document.getElementById('uploaded_by_id') || document.querySelector('#user_data_div [id$="id"]');
+        var targetName = document.getElementById('uploaded_by_name') || document.querySelector('#user_data_div [id$="name"]');
+        var targetEmail = document.getElementById('uploaded_by_email') || document.querySelector('#user_data_div [id$="email"]');
+        var targetContact = document.getElementById('uploaded_by_contact') || document.querySelector('#user_data_div [id$="contact"]');
+        var targetRole = document.getElementById('uploaded_by_role') || document.querySelector('#user_data_div [id$="role"]');
+        var hiddenSelect = document.getElementById('assigned_to');
+
+        if (selectedValue == "self") {
+            var otherWrapper = document.getElementById('listedByOtherWrapper');
+            if (otherWrapper) otherWrapper.style.display = "none";
+
+            if (hiddenSelect) {
+                hiddenSelect.value = "";
+                hiddenSelect.required = false;
+                hiddenSelect.classList.remove('is-invalid');
+            }
+            var valueLabel = document.getElementById('assignedToValueLabel');
+            if (valueLabel) valueLabel.textContent = "-- Select Team Member --";
+
+            if (targetId) targetId.value = admin_id;
+            if (targetName) targetName.value = admin_name;
+            if (targetEmail) targetEmail.value = admin_email;
+            if (targetContact) targetContact.value = admin_phone;
+            if (targetRole) targetRole.value = admin_role;
+
+            updateBrokerageLabel(admin_role);
+        }
+        else {
+            if (hiddenSelect) {
+                hiddenSelect.required = true;
+            }
+
+            if (targetId) targetId.value = "";
+            if (targetName) targetName.value = "";
+            if (targetEmail) targetEmail.value = "";
+            if (targetContact) targetContact.value = "";
+            if (targetRole) targetRole.value = "";
+
+            var otherWrapper = document.getElementById('listedByOtherWrapper');
+            if (otherWrapper) otherWrapper.style.display = "block";
+        }
+    }
+</script>
+
+<script>
+
+    // ============================================================
+    // Custom searchable dropdown for "Listed By (User)"
+    // Pure vanilla JS — no Select2 dependency.
+    // ============================================================
+    (function () {
+        var wrapper = document.getElementById('assignedToSearchSelect');
+        var control = document.getElementById('assignedToControl');
+        var panel = document.getElementById('assignedToPanel');
+        var input = document.getElementById('searchTeamMember');
+        var optionsEl = document.getElementById('assignedToOptions');
+        var noResults = document.getElementById('assignedToNoResults');
+        var valueLabel = document.getElementById('assignedToValueLabel');
+        var hiddenSelect = document.getElementById('assigned_to');
+        var hiddenRole = document.getElementById('assigned_to_role');
+
+        if (!wrapper || !hiddenSelect) return;
+
+        var options = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-option'));
+        var groupLabels = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-group-label'));
+        var highlightedIndex = -1;
+
+        function openPanel() {
+            wrapper.classList.add('open');
+            input.value = '';
+            filterOptions('');
+            setTimeout(function () { input.focus(); }, 0);
+        }
+
+        function closePanel() {
+            wrapper.classList.remove('open');
+            highlightedIndex = -1;
+        }
+
+        function togglePanel() {
+            if (wrapper.classList.contains('open')) {
+                closePanel();
+            } else {
+                openPanel();
+            }
+        }
+
+        function selectOption(opt) {
+            var value = opt.getAttribute('data-value');
+            var name = opt.getAttribute('data-name');
+            var role = opt.getAttribute('data-role');
+            var uid = opt.getAttribute('data-uid');
+            var phone = opt.getAttribute('data-phone');
+
+            hiddenSelect.value = value;
+            if (hiddenRole) hiddenRole.value = role;
+            valueLabel.textContent = uid + ' - ' + name + ' - ' + role + ' - ' + phone;
+            valueLabel.classList.remove('ss-placeholder');
+
+            options.forEach(function (o) { o.classList.remove('selected'); });
+            opt.classList.add('selected');
+
+            wrapper.classList.remove('validation-error');
+            closePanel();
+
+            // Fire native change event so existing listeners (get_user_data etc.) still run
+            var evt = new Event('change', { bubbles: true });
+            hiddenSelect.dispatchEvent(evt);
+        }
+
+        function filterOptions(query) {
+            query = query.trim().toLowerCase();
+            var anyVisible = false;
+
+            // Track which groups have at least one visible option
+            var groupHasVisible = {};
+
+            options.forEach(function (opt) {
+                var haystack = opt.getAttribute('data-search') || '';
+                var match = haystack.indexOf(query) !== -1;
+                opt.style.display = match ? '' : 'none';
+                if (match) {
+                    anyVisible = true;
+                    var group = opt.closest('.search-select-options');
+                    // find the preceding group label for this option
+                    var prev = opt.previousElementSibling;
+                    while (prev && !prev.classList.contains('search-select-group-label')) {
+                        prev = prev.previousElementSibling;
+                    }
+                    if (prev) groupHasVisible[prev.textContent] = true;
+                }
+            });
+
+            groupLabels.forEach(function (label) {
+                label.style.display = groupHasVisible[label.textContent] ? '' : 'none';
+            });
+
+            noResults.style.display = anyVisible ? 'none' : 'block';
+            highlightedIndex = -1;
+            options.forEach(function (o) { o.classList.remove('highlighted'); });
+        }
+
+        function visibleOptions() {
+            return options.filter(function (o) { return o.style.display !== 'none'; });
+        }
+
+        function moveHighlight(step) {
+            var visible = visibleOptions();
+            if (!visible.length) return;
+            visible.forEach(function (o) { o.classList.remove('highlighted'); });
+            highlightedIndex += step;
+            if (highlightedIndex < 0) highlightedIndex = visible.length - 1;
+            if (highlightedIndex >= visible.length) highlightedIndex = 0;
+            var el = visible[highlightedIndex];
+            el.classList.add('highlighted');
+            el.scrollIntoView({ block: 'nearest' });
+        }
+
+        control.addEventListener('click', togglePanel);
+        control.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                togglePanel();
+            }
+        });
+
+        input.addEventListener('input', function () {
+            filterOptions(input.value);
+        });
+
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowDown') { e.preventDefault(); moveHighlight(1); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); moveHighlight(-1); }
+            else if (e.key === 'Enter') {
+                e.preventDefault();
+                var visible = visibleOptions();
+                if (highlightedIndex >= 0 && visible[highlightedIndex]) {
+                    selectOption(visible[highlightedIndex]);
+                } else if (visible.length === 1) {
+                    selectOption(visible[0]);
+                }
+            } else if (e.key === 'Escape') {
+                closePanel();
+            }
+        });
+
+        options.forEach(function (opt) {
+            opt.addEventListener('click', function () { selectOption(opt); });
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!wrapper.contains(e.target)) closePanel();
+        });
+
+        // ============================================================
+        // FIXED/ADDED: Trigger get_user_data execution on selection change
+        // ============================================================
+        hiddenSelect.addEventListener('change', function () {
+            if (typeof get_user_data === 'function') {
+                get_user_data(this);
+            }
+        });
+
+        // ============================================================
+        // ADDED HERE: Run your field configuration safely on load
+        // ============================================================
+        if (typeof Change_Fields === 'function') {
+            Change_Fields();
+        }
+
+
+    })();
+
+
+</script>
+
+{% comment %} Javascript to get user details according to listing by {% endcomment %}
+
+<script>
+    function get_user_data() {
+
+        var assigned_to = $("#assigned_to").val();
+
+        if (!assigned_to) {
+            $('#uploaded_by_id, #uploaded_by_name, #uploaded_by_email, #uploaded_by_contact, #uploaded_by_role').val('');
+            return;
+        }
+
+        $.ajax({
+            method: "POST",
+            url: "{% url 'get_user_data' %}",
+            data: {
+                'assigned_to': assigned_to,
+            },
+            dataType: "json", // Tells jQuery to parse incoming data as an object
+            success: function (response) {
+
+                // Map JSON object values directly to permanent textboxes
+                $('#uploaded_by_id').val(response.user_id || '');
+                $('#uploaded_by_name').val(response.name || '');
+                $('#uploaded_by_email').val(response.email || '');
+                $('#uploaded_by_contact').val(response.contact || '');
+                $('#uploaded_by_role').val(response.role || '');
+
+                // Call the update script immediately with the new role
+                updateBrokerageLabel(response.role);
+            },
+            error: function (xhr, status, error) {
+                console.error('Failed to fetch user data:', error);
+            }
+        });
+    }
+</script>
+
+<script>
+
+    // jQuery Version
+    $(document).ready(function () {
+        const sections = ['amenities', 'facilities'];
+
+        sections.forEach(section => {
+            updateDisplay(section);
+        });
+
+        window.openModal = function (section) {
+            currentSection = section;
+            $('#modalTitle').text(`Select ${section.charAt(0).toUpperCase() + section.slice(1)}`);
+
+            const container = $('#modalItemsList').empty();
+            $(`.${section}-checkbox`).each(function () {
+                container.append(`
+        <div class="col-md-4 col-sm-6 mb-2">
+          <div class="form-check">
+            <input class="form-check-input modal-item-checkbox" type="checkbox" 
+                   value="${this.value}" data-icon="${$(this).data('icon')}"
+                   ${this.checked ? 'checked' : ''}>
+            <label class="form-check-label"><i class="${$(this).data('icon')}"></i> ${this.value}</label>
+          </div>
+        </div>
+      `);
+            });
+
+            updateModalCount();
+            $('#itemsModal').modal('show');
+        };
+
+        window.removeItem = function (section, name) {
+            const items = $(`.${section}-checkbox`).filter(function () {
+                return this.value === name;
+            });
+            items.prop('checked', false);
+            updateDisplay(section);
+        };
+
+        window.clearAll = function () {
+            if (!currentSection) return;
+            $(`.${currentSection}-checkbox`).prop('checked', false);
+            $('.modal-item-checkbox').prop('checked', false);
+            updateDisplay(currentSection);
+            updateModalCount();
+        };
+
+        function updateDisplay(section) {
+            const checked = $(`.${section}-checkbox:checked`);
+            const count = checked.length;
+
+            $(`#${section}Count`).text(`${count} selected`);
+            $(`#${section}Badge`).text(count);
+
+            const display = $(`#${section}Display`).empty();
+
+            if (count === 0) {
+                display.html(`<p class="text-muted text-center m-0">No ${section} selected</p>`);
+            } else {
+                checked.each(function () {
+                    display.append(`
+          <span class="item-tag">
+            <i class="${$(this).data('icon')}"></i>
+            ${this.value}
+            <span class="remove-btn" onclick="removeItem('${section}', '${this.value}')">
+              <i class="fas fa-times-circle"></i>
+            </span>
+          </span>
+        `);
+                });
+            }
+        }
+
+        function updateModalCount() {
+            $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length);
+        }
+
+        $(document).on('change', '.modal-item-checkbox', updateModalCount);
+
+        $('#itemsModal .btn-primary').on('click', function () {
+            if (!currentSection) return;
+
+            const checked = $('.modal-item-checkbox:checked');
+            $(`.${currentSection}-checkbox`).prop('checked', false);
+            checked.each(function () {
+                $(`.${currentSection}-checkbox[value="${this.value}"]`).prop('checked', true);
+            });
+
+            updateDisplay(currentSection);
+        });
+    });
+
+
+</script>
 
 <script>
     let currentStep = 1;
@@ -2097,44 +3224,36 @@
        STEPPER NAVIGATION LOGIC
     ═════════════════════════════════════════════ */
     function goToStep(n) {
-        // Validate current step before moving forward
         if (n > currentStep && !validateStep(currentStep)) {
             return false;
         }
 
-        // Hide current step
         document.getElementById('step' + currentStep).classList.remove('active');
-        
-        // Show new step
         document.getElementById('step' + n).classList.add('active');
-        
-        // Update stepper UI
+
         for (let i = 1; i <= 4; i++) {
             const sc = document.getElementById('sc' + i);
             const sl = document.getElementById('sl' + i);
             const line = document.getElementById('line' + i);
-            
+
             sc.className = 'step-circle';
             sl.className = 'step-label';
             if (line) line.className = 'step-line';
-            
+
             if (i < n) {
-                // Completed steps
                 sc.classList.add('done');
                 sl.classList.add('done');
                 sc.innerHTML = '<i class="fas fa-check" style="font-size:.7rem;"></i>';
                 if (line) line.classList.add('done');
             } else if (i === n) {
-                // Active step
                 sc.classList.add('active');
                 sl.classList.add('active');
                 sc.textContent = i;
             } else {
-                // Upcoming steps
                 sc.textContent = i;
             }
         }
-        
+
         currentStep = n;
         window.scrollTo({ top: 0, behavior: 'smooth' });
         updatePreview();
@@ -2143,18 +3262,31 @@
     /* ══════════════════════════════════════════
        STEP VALIDATION
     ═════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════
+        STEP VALIDATION (Updated with Visual Error Highlight)
+     ═════════════════════════════════════════════ */
     function validateStep(step) {
         const stepElement = document.getElementById('step' + step);
         const requiredFields = stepElement.querySelectorAll('[required]');
         let isValid = true;
         let missingFields = [];
 
+        // 1. Clear any existing error highlights in this step before validating
+        stepElement.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+        stepElement.querySelectorAll('.radio-error-group').forEach(el => el.classList.remove('radio-error-group'));
+
         requiredFields.forEach(field => {
             if (field.type === 'radio') {
                 const radioGroup = stepElement.querySelectorAll(`[name="${field.name}"]`);
                 const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+
                 if (!isChecked) {
                     isValid = false;
+
+                    // Highlight the radio group container
+                    const groupContainer = field.closest('.radio-group') || field.closest('div');
+                    if (groupContainer) groupContainer.classList.add('radio-error-group');
+
                     const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
                     if (label && !missingFields.includes(label)) {
                         missingFields.push(label);
@@ -2162,6 +3294,15 @@
                 }
             } else if (!field.value.trim()) {
                 isValid = false;
+
+                // Add the red border to the specific empty field
+                field.classList.add('input-error');
+
+                // Special case: Custom Searchable Dropdown
+                if (field.id === 'assigned_to') {
+                    document.getElementById('assignedToControl')?.classList.add('input-error');
+                }
+
                 const label = field.closest('.form-group')?.querySelector('.form-label')?.textContent.replace('*', '').trim();
                 if (label && !missingFields.includes(label)) {
                     missingFields.push(label);
@@ -2177,7 +3318,7 @@
                        <ul style="text-align: left; display: inline-block;">
                          ${missingFields.map(field => `<li>${field}</li>`).join('')}
                        </ul>`,
-                confirmButtonColor: '#667eea',
+                confirmButtonColor: '#e74c3c',
                 confirmButtonText: 'Got it!'
             });
             return false;
@@ -2185,37 +3326,53 @@
 
         return true;
     }
-
     /* ══════════════════════════════════════════
        LIVE PREVIEW UPDATE
     ═════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════
+       LIVE PREVIEW UPDATE & AUTO-CALCULATE
+    ═════════════════════════════════════════════ */
     function updatePreview() {
-        // Update price
         const price = document.getElementById('res_price')?.value;
         if (price) {
-            document.getElementById('previewPrice').textContent = 
+            document.getElementById('previewPrice').textContent =
                 '₹' + parseInt(price).toLocaleString('en-IN');
         }
 
-        // Update BHK
         const bhk = document.getElementById('res_bhk')?.value;
         if (bhk) {
             document.getElementById('prevBHK').textContent = bhk.toUpperCase();
         }
 
-        // Update area
         const area = document.getElementById('res_carpet_area')?.value;
         if (area) {
             document.getElementById('prevArea').textContent = area + ' sqft';
         }
 
-        // Update location
         const locality = document.getElementById('res_locality')?.value;
-        const city = document.getElementById('res_city')?.value;
+        const city = document.getElementById('cityInput')?.value; // Uses your exact city input ID
         if (locality || city) {
-            document.getElementById('previewLoc').innerHTML = 
+            document.getElementById('previewLoc').innerHTML =
                 '<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ' +
                 (locality || 'Area') + ', ' + (city || 'City');
+        }
+
+        // --- NEW: AUTO-CALCULATE PRICE PER SQFT ---
+        const builtUpArea = document.getElementById('res_builtup_area')?.value;
+        const psfDisplay = document.getElementById('res_price_per_sqft_display');
+        const psfHidden = document.getElementById('res_price_per_sqft');
+
+        if (price && builtUpArea && parseFloat(builtUpArea) > 0) {
+            const calculatedPsf = (parseFloat(price) / parseFloat(builtUpArea)).toFixed(2);
+
+            // Show formatted string to user (e.g. ₹ 5,000 / sqft)
+            if (psfDisplay) psfDisplay.value = '₹ ' + parseFloat(calculatedPsf).toLocaleString('en-IN') + ' / sqft';
+            // Save raw number for backend submission
+            if (psfHidden) psfHidden.value = calculatedPsf;
+        } else {
+            // Clear if inputs are deleted
+            if (psfDisplay) psfDisplay.value = '';
+            if (psfHidden) psfHidden.value = '';
         }
 
         updateChecklist();
@@ -2241,17 +3398,32 @@
     }
 
     /* ══════════════════════════════════════════
-       FORM INITIALIZATION
+       FORM INITIALIZATION & INTERACTION SYSTEMS
     ═════════════════════════════════════════════ */
+    let selectedFiles = [];
+    const MAX_IMAGES = 10;
+
     document.addEventListener("DOMContentLoaded", function () {
-        // Add change listeners to all form inputs for preview update
+        // Form Input Dynamic Preview Observers
         const formInputs = document.querySelectorAll('input, select, textarea');
+        // Clear red validation errors on typing or selection
         formInputs.forEach(input => {
             input.addEventListener('change', updatePreview);
             input.addEventListener('input', updatePreview);
+
+            // Add these two lines to clear validation visually
+            input.addEventListener('input', function () { this.classList.remove('input-error'); });
+            input.addEventListener('change', function () {
+                this.classList.remove('input-error');
+                // Clear radio groups
+                if (this.type === 'radio') {
+                    const group = this.closest('.radio-error-group');
+                    if (group) group.classList.remove('radio-error-group');
+                }
+            });
         });
 
-        // Brokerage Toggle
+        // Brokerage Selection Layout Toggles
         const brokerageSelect = document.getElementById("brokerageSelect");
         const brokerageSection = document.getElementById("brokerageSection");
         const brokeragePercentage = document.getElementById("brokeragePercentage");
@@ -2267,43 +3439,32 @@
         });
 
         brokeragePercentage?.addEventListener("change", function () {
-            manualBrokerage.style.display = (this.value === "Manual") ? "block" : "none";
+            manualBrokerage.style.display = (this.value === "Fixed Amount") ? "block" : "none";
         });
 
-        // Legal Section Toggles
-        document.querySelectorAll('input[name="has_loan"]').forEach(radio => {
-            radio.addEventListener('change', function () {
-                document.getElementById('res_loan_amount_section').style.display =
-                    (this.value === 'yes') ? 'block' : 'none';
+        // Backend Synced Legal Section Panel Mapping (Updated to match your exact view names)
+        const conditionalMaps = [
+            { radioName: 'loan_on_property', sectionId: 'res_loan_amount_section' },
+            { radioName: 'existing_tenants', sectionId: 'res_tenant_details_section' },
+            { radioName: 'any_legal_dispute', sectionId: 'res_dispute_details_section' },
+            { radioName: 'government_tax_dues', sectionId: 'res_tax_amount_section' }
+        ];
+
+        conditionalMaps.forEach(map => {
+            document.querySelectorAll(`input[name="${map.radioName}"]`).forEach(radio => {
+                radio.addEventListener('change', function () {
+                    const targetSection = document.getElementById(map.sectionId);
+                    if (targetSection) {
+                        targetSection.style.display = (this.value === 'yes') ? 'block' : 'none';
+                    }
+                });
             });
         });
 
-        document.querySelectorAll('input[name="has_tenants"]').forEach(radio => {
-            radio.addEventListener('change', function () {
-                document.getElementById('res_tenant_details_section').style.display =
-                    (this.value === 'yes') ? 'block' : 'none';
-            });
-        });
-
-        document.querySelectorAll('input[name="has_legal_dispute"]').forEach(radio => {
-            radio.addEventListener('change', function () {
-                document.getElementById('res_dispute_details_section').style.display =
-                    (this.value === 'yes') ? 'block' : 'none';
-            });
-        });
-
-        document.querySelectorAll('input[name="has_tax_due"]').forEach(radio => {
-            radio.addEventListener('change', function () {
-                document.getElementById('res_tax_amount_section').style.display =
-                    (this.value === 'yes') ? 'block' : 'none';
-            });
-        });
-
-        // Multi-Image Upload
+        // Sequencing Multi-Image Drag-and-Drop System
         const uploadArea = document.getElementById('uploadArea');
         const imageInput = document.getElementById('imageInput');
         const imagePreview = document.getElementById('imagePreview');
-        let selectedFiles = [];
 
         uploadArea?.addEventListener('click', () => imageInput.click());
 
@@ -2327,61 +3488,105 @@
         });
 
         function handleFiles(files) {
-            const fileArray = Array.from(files);
-            if (selectedFiles.length + fileArray.length > 10) {
+            const fileArray = Array.from(files).filter(file => file.type.startsWith('image/'));
+            if (selectedFiles.length + fileArray.length > MAX_IMAGES) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Too Many Files',
-                    text: 'Maximum 10 images allowed',
+                    text: `Maximum ${MAX_IMAGES} images allowed`,
                     confirmButtonColor: '#667eea'
                 });
                 return;
             }
             fileArray.forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    selectedFiles.push(file);
-                    displayImage(file);
-                }
+                file.uniqueId = 'img_' + Date.now() + Math.random().toString(36).substr(2, 9);
+                selectedFiles.push(file);
             });
-            syncFileInput();
+            renderPreviews();
         }
 
-        function displayImage(file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const div = document.createElement('div');
-                div.className = 'preview-item';
-                div.dataset.fileName = file.name;
-                div.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview">
-                    <button type="button" class="remove-image"
-                        onclick="removeImage(this, '${file.name}')">
-                        <i class="fas fa-times"></i>
-                    </button>`;
-                imagePreview.appendChild(div);
-            };
-            reader.readAsDataURL(file);
+        function renderPreviews() {
+            if (!imagePreview) return;
+            imagePreview.innerHTML = '';
+
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const col = document.createElement('div');
+                    col.className = 'preview-item-wrapper';
+                    col.setAttribute('draggable', 'true');
+                    col.setAttribute('data-id', file.uniqueId);
+                    col.style.cursor = 'move';
+                    col.style.position = 'relative';
+                    col.style.display = 'inline-block';
+
+                    col.innerHTML = `
+                        <div class="preview-item" style="margin: 0; position: relative;">
+                            <img src="${e.target.result}" alt="Preview">
+                            <span class="badge bg-dark position-absolute top-0 start-0 m-2 opacity-75" style="z-index: 10;">#${index + 1}</span>
+                            <button type="button" class="remove-image" style="z-index: 10;" onclick="window.deleteSelectedImage('${file.uniqueId}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+
+                    col.addEventListener('dragstart', handleDragStart);
+                    col.addEventListener('dragover', handleDragOver);
+                    col.addEventListener('drop', handleDrop);
+
+                    imagePreview.appendChild(col);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            const imageCounter = document.getElementById('imageCounter');
+            if (imageCounter) {
+                imageCounter.innerText = `${selectedFiles.length} / ${MAX_IMAGES} Images Uploaded`;
+            }
         }
 
-        window.removeImage = function(button, fileName) {
-            selectedFiles = selectedFiles.filter(f => f.name !== fileName);
-            button.closest('.preview-item').remove();
-            syncFileInput();
+        window.deleteSelectedImage = function (uniqueId) {
+            selectedFiles = selectedFiles.filter(file => file.uniqueId !== uniqueId);
+            renderPreviews();
         };
 
-        function syncFileInput() {
-            const dt = new DataTransfer();
-            selectedFiles.forEach(f => dt.items.add(f));
-            imageInput.files = dt.files;
+        // Native Drag and Drop Implementation
+        let dragSrcEl = null;
+
+        function handleDragStart(e) {
+            dragSrcEl = this;
+            e.dataTransfer.effectAllowed = 'move';
         }
 
-        // Amenity and Facility Counters
+        function handleDragOver(e) {
+            if (e.preventDefault) e.preventDefault();
+            return false;
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            if (dragSrcEl !== this) {
+                const sourceId = dragSrcEl.getAttribute('data-id');
+                const targetId = this.getAttribute('data-id');
+
+                const sourceIndex = selectedFiles.findIndex(f => f.uniqueId === sourceId);
+                const targetIndex = selectedFiles.findIndex(f => f.uniqueId === targetId);
+
+                const [movedFile] = selectedFiles.splice(sourceIndex, 1);
+                selectedFiles.splice(targetIndex, 0, movedFile);
+
+                renderPreviews();
+            }
+            return false;
+        }
+
+        // Feature and Amenity Selections Counter Calculators
         function updateAmenityCount() {
             const totalSelected = document.querySelectorAll('input[name="amenities[]"]:checked').length;
             const counter = document.getElementById('amenityCounter');
             if (counter) {
                 counter.value = totalSelected;
-                if(totalSelected > 0) {
+                if (totalSelected > 0) {
                     counter.style.backgroundColor = '#fff3e0';
                     counter.style.borderColor = '#e85d04';
                 } else {
@@ -2407,14 +3612,14 @@
             checkbox.addEventListener('change', updateFacilityCount);
         });
 
-        // Initialize counters
+        // Initialize Base State View Elements
         updateAmenityCount();
         updateFacilityCount();
         updatePreview();
     });
 
     /* ══════════════════════════════════════════
-       SIDEBAR TOGGLE (FROM ORIGINAL)
+       SIDEBAR TOGGLE LOGIC
     ═════════════════════════════════════════════ */
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
@@ -2454,7 +3659,7 @@
 
     $("#Resale").addClass("active");
 
-    // CKEditor initialization
+    // Rich Text Editor Initialization
     window.onload = function () {
         if (typeof CKEDITOR !== 'undefined') {
             if (CKEDITOR.instances.resale_residential_desc) {
@@ -2463,74 +3668,103 @@
             CKEDITOR.replace('resale_residential_desc');
         }
     };
-</script>
 
+    /* ══════════════════════════════════════════
+       AJAX PAYLOAD SUBMISSION CONTROL
+    ═════════════════════════════════════════════ */
+    document.getElementById('propertyForm')?.addEventListener('submit', function (e) {
+        e.preventDefault();
 
-<script>
-
-document.getElementById('propertyForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // Stop standard form submission
-    
-    // Update CKEditor textareas before sending (if using CKEditor)
-    if (typeof CKEDITOR !== 'undefined') {
-        for (instance in CKEDITOR.instances) {
-            CKEDITOR.instances[instance].updateElement();
+        if (!validateStep(4)) {
+            return false;
         }
-    }
 
-    let formData = new FormData(this);
-    let submitBtn = document.querySelector('.btn-submit');
-    
-    // Show loading state
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-    submitBtn.disabled = true;
-
-    fetch(this.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest' // Tells Django this is an AJAX request
+        if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.resale_residential_desc) {
+            CKEDITOR.instances.resale_residential_desc.updateElement();
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Awesome!',
-                text: data.message,
-                confirmButtonColor: '#11998e',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Redirect to your property list page, or refresh the page
-                    window.location.reload(); 
+
+        Swal.fire({
+            title: 'Confirm Submission',
+            text: 'Are you sure you want to save and submit this residential listing?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#667eea',
+            cancelButtonColor: '#adb5bd',
+            confirmButtonText: 'Yes, Submit Property!',
+            cancelButtonText: 'Review Form'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                sendFormPayload(this);
+            }
+        });
+    });
+
+    function sendFormPayload(formElement) {
+        let formData = new FormData(formElement);
+        let submitBtn = document.querySelector('.btn-submit');
+
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            submitBtn.disabled = true;
+        }
+
+        // Clean default image inputs to allow custom ordered array append injection
+        formData.delete('property_images');
+        formData.delete('property_images[]');
+
+        selectedFiles.forEach(file => {
+            formData.append('property_images', file);
+        });
+
+        fetch(formElement.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json().then(data => {
+                if (!response.ok) {
+                    throw new Error(data.message || 'Server returned operational error code.');
+                }
+                return data;
+            }))
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message,
+                        confirmButtonColor: '#11998e',
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Validation Failed',
+                        text: data.message || 'Please verify form inputs.',
+                        confirmButtonColor: '#e74c3c'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Submission Trace Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Submission Failed',
+                    text: error.message || 'Could not write listing properties downstream.',
+                    confirmButtonColor: '#e74c3c'
+                });
+            })
+            .finally(() => {
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Submit Property';
+                    submitBtn.disabled = false;
                 }
             });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Something went wrong!',
-                confirmButtonColor: '#e74c3c'
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Server Error',
-            text: 'Could not connect to the server.',
-        });
-    })
-    .finally(() => {
-        // Reset button
-        submitBtn.innerHTML = '<i class="fas fa-save"></i> Submit Property';
-        submitBtn.disabled = false;
-    });
-});
-
+    }
 </script>
-
 </body>
+
 </html>

@@ -1,0 +1,1208 @@
+{% include "landlord/landlord_header.html" %}
+{% load static %}
+
+<!-- =========================================================
+     PLOT / LAND RESALE — LISTING PAGE  (plot_list.html)
+     ========================================================= -->
+
+<style>
+:root{--primary:#667eea;--primary-dark:#5a67d8;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6;--surface:#fff;--surface-2:#f8fafc;--border:#e2e8f0;--text:#1e293b;--text-muted:#64748b;--shadow:0 4px 20px rgba(0,0,0,.06);--radius:12px}
+/* Expanded grid support for up to 6 metric columns layout layout */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:18px 16px;box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden;transition:.2s}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.1)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--primary)}
+.stat-card.success::before{background:var(--success)}
+.stat-card.warning::before{background:var(--warning)}
+.stat-card.danger::before{background:var(--danger)}
+.stat-card.info::before{background:var(--info)}
+.stat-card.purple::before{background:#8b5cf6}
+.stat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff}
+.stat-value{font-size:24px;font-weight:700;color:var(--text);line-height:1}
+.stat-label{font-size:11px;color:var(--text-muted);margin-top:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+
+.filter-bar{background:var(--surface);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:24px}
+.filter-bar .filter-title{font-weight:700;color:var(--text);font-size:15px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.filter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;align-items:end}
+.filter-group label{font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.filter-group input,.filter-group select{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text);background:var(--surface-2);transition:.15s}
+.filter-group input:focus,.filter-group select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(102,126,234,.1),background:var(--surface)}
+.filter-actions{display:flex;gap:10px;justify-content:flex-end}
+.btn-filter{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.btn-filter.apply{background:var(--primary);color:#fff}.btn-filter.apply:hover{background:var(--primary-dark)}
+.btn-filter.reset{background:var(--surface-2);color:var(--text-muted);border:1px solid var(--border)}.btn-filter.reset:hover{background:var(--border);color:var(--text)}
+
+.properties-section{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden}
+.section-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.section-title{font-size:16px;font-weight:700;color:var(--text);margin:0;display:flex;align-items:center;gap:8px}
+.table-wrap{padding:12px}
+.properties-table th{background:var(--surface-2);font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;padding:14px 16px;border-bottom:2px solid var(--border)}
+.properties-table td{font-size:13px;padding:12px 16px;color:var(--text);vertical-align:middle;border-bottom:1px solid var(--border)}
+.badge-yes{background:#dcfce7;color:#166534;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-no{background:#f1f5f9;color:#64748b;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.price-tag{font-weight:700;color:var(--text);font-size:14px}
+.action-btn{width:32px;height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;border:none;transition:.15s;text-decoration:none}
+.action-btn.view{background:#eff6ff;color:#3b82f6}.action-btn.view:hover{background:#3b82f6;color:#fff}
+.action-btn.edit{background:#f0fdf4;color:#16a34a}.action-btn.edit:hover{background:#16a34a;color:#fff}
+.action-btn.del{background:#fff1f2;color:#e11d48}.action-btn.del:hover{background:#e11d48;color:#fff}
+
+/* Styling for the new charts section */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.chart-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chart-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 15px;
+    align-self: flex-start;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 8px;
+    width: 100%;
+}
+
+.canvas-container {
+    position: relative;
+    height: 250px; /* Forces charts to maintain a clean, uniform size */
+    width: 100%;
+}
+.page-header{margin-bottom:24px}
+.page-header-content{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.page-title{font-size:24px;font-weight:800;color:var(--text);margin:0;display:flex;align-items:center;gap:12px}
+.page-actions{display:flex;gap:10px}
+.btn-primary-custom{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:var(--primary);color:#fff;display:inline-flex;align-items:center;gap:8px;transition:.15s;text-decoration:none}
+.btn-primary-custom:hover{background:var(--primary-dark);color:#fff;transform:translateY(-1px)}
+</style>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+
+<div class="main-content">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header-content">
+      <h1 class="page-title"><i class="fas fa-map-marked-alt" style="color:var(--primary)"></i> Plot Resale Directory</h1>
+    <div class="page-actions">
+        <a href="{% url "plot_resale_res_landlord_list" %}" class="btn-primary-custom">
+          <i class="fas fa-plus"></i> Add Residential Plot
+        </a>
+        <a href="{% url 'plot_resale_comm_landlord_list' %}" class="btn-primary-custom" style="background-color:#22bb33">
+          <i class="fas fa-plus"></i> Add New Com Plot
+        </a>
+        <a href="{% url 'plot_resale_ind_landlord' %}" class="btn-primary-custom" style="background-color:#f0ad4e">
+          <i class="fas fa-plus"></i> Add New Ind Plot
+        </a>
+        <a href="{% url 'plot_resale_agri_landlord' %}" class="btn-primary-custom" style="background-color:#bb2124">
+          <i class="fas fa-plus"></i> Add New Agri Plot
+        </a>
+
+        {% comment %} <button class="btn-primary-custom" style="background:#0ea5e9"
+                data-toggle="modal" data-target="#importModal">
+          <i class="fas fa-upload"></i> Import
+        </button>
+
+        <a href="{% url 'export_plot_resale_excel' %}" class="btn-primary-custom"
+           style="background:#10b981">
+          <i class="fas fa-file-excel"></i> Export
+        </a> {% endcomment %}
+
+        <button class="btn-primary-custom" style="background:#ef4444"
+                data-toggle="modal" data-target="#bulkDeleteModal">
+          <i class="fas fa-trash-alt"></i> Bulk Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── EXPANDED CARD METRICS GRID ─────────────────────── -->
+ <div class="stats-grid">
+
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-layer-group"></i>
+        </div>
+        <div class="stat-value">
+            {{ total_properties }}
+        </div>
+        <div class="stat-label">
+            Total Inventory
+        </div>
+    </div>
+
+    <div class="stat-card success">
+        <div class="stat-icon">
+            <i class="fas fa-rupee-sign"></i>
+        </div>
+        <div class="stat-value">
+            {{ active_listings }}
+        </div>
+        <div class="stat-label">
+            Priced Listings
+        </div>
+    </div>
+
+    <div class="stat-card info">
+        <div class="stat-icon">
+            <i class="fas fa-home"></i>
+        </div>
+        <div class="stat-value">
+            {{ residential_count }}
+        </div>
+        <div class="stat-label">
+            Residential
+        </div>
+    </div>
+
+    <div class="stat-card warning">
+        <div class="stat-icon">
+            <i class="fas fa-building"></i>
+        </div>
+        <div class="stat-value">
+            {{ commercial_count }}
+        </div>
+        <div class="stat-label">
+            Commercial
+        </div>
+    </div>
+
+    <div class="stat-card danger">
+        <div class="stat-icon">
+            <i class="fas fa-seedling"></i>
+        </div>
+        <div class="stat-value">
+            {{ agricultural_count }}
+        </div>
+        <div class="stat-label">
+            Agricultural
+        </div>
+    </div>
+
+    <div class="stat-card purple">
+        <div class="stat-icon">
+            <i class="fas fa-handshake"></i>
+        </div>
+        <div class="stat-value">
+            {{ finance_ready_count }}
+        </div>
+        <div class="stat-label">
+            Finance Ready
+        </div>
+    </div>
+
+    <div class="stat-card teal">
+        <div class="stat-icon">
+            <i class="fas fa-vector-square"></i>
+        </div>
+        <div class="stat-value">
+            {{ corner_plot_count }}
+        </div>
+        <div class="stat-label">
+            Corner Plots
+        </div>
+    </div>
+
+    <div class="stat-card orange">
+        <div class="stat-icon">
+            <i class="fas fa-border-all"></i>
+        </div>
+        <div class="stat-value">
+            {{ fenced_plot_count }}
+        </div>
+        <div class="stat-label">
+            Fenced Plots
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="stats-grid">
+    </div>
+
+<div class="charts-grid">
+    <div class="chart-card">
+        <h3 class="chart-title">Property Types Breakdown</h3>
+        <div class="canvas-container">
+            <canvas id="propertyTypeChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <h3 class="chart-title">Plot Features Overview</h3>
+        <div class="canvas-container">
+            <canvas id="featuresChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <h3 class="chart-title">Inventory Pricing Status</h3>
+        <div class="canvas-container">
+            <canvas id="pricingChart"></canvas>
+        </div>
+    </div>
+
+
+    <div class="chart-card">
+        <h3 class="chart-title">New Listings (Last 6 Months)</h3>
+        <div class="canvas-container">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+</div>
+
+  <!-- Search & Filter Bar Component -->
+  
+
+ <div class="filter-bar">
+    <div class="filter-title">
+        <i class="fas fa-filter"></i>
+        Filter Inventory Matrix
+    </div>
+
+    <form method="GET" id="plotFilterForm">
+        <div class="filter-grid">
+
+            <div class="filter-group">
+                <label>Search</label>
+                <input type="text" name="search" class="auto-submit" value="{{ request.GET.search }}" placeholder="ID, Title, City, Owner...">
+            </div>
+
+            <div class="filter-group">
+                <label>City</label>
+                <input type="text" name="city" class="auto-submit" value="{{ request.GET.city }}">
+            </div>
+
+            <div class="filter-group">
+                <label>Locality</label>
+                <input type="text" name="locality" class="auto-submit" value="{{ request.GET.locality }}">
+            </div>
+
+            <div class="filter-group">
+                <label>Plot Type</label>
+                <select name="plot_type" class="auto-submit">
+                    <option value="">All Types</option>
+                    <option value="residential" {% if request.GET.plot_type == 'residential' %}selected{% endif %}>Residential</option>
+                    <option value="commercial" {% if request.GET.plot_type == 'commercial' %}selected{% endif %}>Commercial</option>
+                    <option value="agricultural" {% if request.GET.plot_type == 'agricultural' %}selected{% endif %}>Agricultural</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Road Facing</label>
+                <input type="text" name="road_facing" class="auto-submit" value="{{ request.GET.road_facing }}">
+            </div>
+
+            <div class="filter-group">
+                <label>Corner Plot</label>
+                <select name="corner_plot" class="auto-submit">
+                    <option value="">All</option>
+                    <option value="yes" {% if request.GET.corner_plot == 'yes' %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if request.GET.corner_plot == 'no' %}selected{% endif %}>No</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Finance Ready</label>
+                <select name="loan" class="auto-submit">
+                    <option value="">All</option>
+                    <option value="yes" {% if request.GET.loan == 'yes' %}selected{% endif %}>Yes</option>
+                    <option value="no" {% if request.GET.loan == 'no' %}selected{% endif %}>No</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Min Price</label>
+                <input type="number" name="min_price" class="auto-submit" value="{{ request.GET.min_price }}">
+            </div>
+
+            <div class="filter-group">
+                <label>Max Price</label>
+                <input type="number" name="max_price" class="auto-submit" value="{{ request.GET.max_price }}">
+            </div>
+
+            <div class="filter-group">
+                <label>From Date</label>
+                <input type="date" name="from_date" id="from_date" value="{{ request.GET.from_date }}">
+            </div>
+
+            <div class="filter-group">
+                <label>To Date</label>
+                <input type="date" name="to_date" id="to_date" value="{{ request.GET.to_date }}">
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-search"></i> Search
+                </button>
+                <a href="{% url 'plot_resale_list' %}" class="btn btn-danger">
+                    <i class="fas fa-times"></i> Clear
+                </a>
+            </div>
+        </div>
+    </form>
+
+    <div style="margin-top:10px;font-weight:600; color: #1e293b;">
+        Showing {{ properties.count }} of {{ total_properties }} Properties
+    </div>
+</div>
+
+
+  
+
+  <!-- Inventory Table Section -->
+  <div class="properties-section">
+    <div class="section-header">
+      <h3 class="section-title"><i class="fas fa-list" style="color:var(--primary)"></i> Plot Resale Listing Reports </h3>
+    </div>
+  
+    <div class="table-wrap">
+  
+
+
+
+
+ <div class="table-responsive">
+    <table id="plotTable" class="properties-table display nowrap" style="width:100%">
+        <thead>
+            <tr>
+                <th>Sr.No</th>
+                
+                <th>Image Gallery</th>
+<th>Property ID</th>
+                <th>Property Title</th>
+                <th> Plot Title</th>
+                <th>Plot Area</th>
+                <th>Resale Plot Type</th>
+                <th>Plot Road Facing</th>
+                <th>Corner Plot</th>
+                <th>Sanctioning Authority</th>
+                <th>Plot Fencing</th>
+
+                <th>Plot Price</th>
+                <th>Price / Sq.ft</th>
+                <th>Brokerage</th>
+                <th>Brokerage %</th>
+                <th>Ownership Type</th>
+                <th>Loan on Property?</th>
+                <th>Plot Loan Amount</th>
+
+                <th>Encumbrance Certificate</th>
+                <th>Uploaded Video</th>
+
+                <th>Plot City</th>
+                <th>Plot Locality/Area</th>
+                <th>Plot Address</th>
+
+                <th>Plot Owner Name</th>
+                <th>Plot Owner Contact</th>
+                <th>Plot Owner Email</th>
+                <th>Plot Owner Role</th>
+
+                <th>Uploader Name</th>
+                <th>Uploader Role</th>
+                <th>Uploader Email</th>
+                <th>Uploader Contact</th>
+                <th>Upload Source</th>
+
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+     
+
+        <tbody>
+            {% for p in properties %}
+            <tr id="row-{{ p.plot_property_id }}">
+                <td>{{ forloop.counter }}</td>
+
+                <td>
+                    {% if p.images.first %}
+                        <img src="{{ p.images.first.image.url }}" style="max-width:50px;border-radius:4px;">
+                    {% else %}
+                        <div style="width:50px;background:#f0fdf4;padding:5px;border-radius:4px;text-align:center;">
+                            <i class="fas fa-map-marked-alt" style="color:#16a34a;"></i>
+                        </div>
+                    {% endif %}
+                </td>
+
+                <td><strong>{{ p.plot_property_id }}</strong></td>
+
+                <td>
+                    <span title="{{ p.property_title }}">
+                        {{ p.property_title|truncatechars:30|default:"-" }}
+                    </span>
+                </td>
+
+                <td>{{ p.plot_title|default:"-" }}</td>
+                
+                <td>
+                    {% if p.plot_area %}
+                        {{ p.plot_area }} sq.ft
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                
+                <td>{{ p.resale_plot_type|default:"-" }}</td>
+                
+                <td>{{ p.plot_road_facing|default:"-" }}</td>
+                
+                <td>
+                    {% if p.corner_plot|lower == 'yes' %}
+                        <span class="badge-yes">Yes</span>
+                    {% else %}
+                        <span class="badge-no">No</span>
+                    {% endif %}
+                </td>
+                
+                <td>{{ p.sanctioning_authority|default:"-" }}</td>
+                
+                <td>
+                    {% if p.plot_fencing|lower == 'yes' %}
+                        <span class="badge-yes">Yes</span>
+                    {% else %}
+                        <span class="badge-no">No</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <span class="price-tag">
+                        ₹{{ p.plot_price|floatformat:0 }}
+                    </span>
+                </td>
+                
+                <td>₹{{ p.price_per_sqft|default:"0.00" }}</td>
+                
+                <td>{{ p.brokerage|default:"-" }}</td>
+                
+                <td>{{ p.brokerage_percentage|default:"-" }}</td>
+                
+                <td>{{ p.ownership_type|default:"-" }}</td>
+                
+                <td>
+                    {% if p.loan_on_property|lower == 'yes' %}
+                        <span class="badge-yes">Yes</span>
+                    {% else %}
+                        <span class="badge-no">No</span>
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {% if p.loan_on_property|lower == 'yes' and p.plot_loan_amount %}
+                        ₹{{ p.plot_loan_amount|floatformat:0 }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if p.encumbrance_cert %}
+                        <a href="{{ p.encumbrance_cert.url }}" target="_blank" class="action-btn view">
+                            <i class="fas fa-file-pdf"></i>
+                        </a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                
+                <td>
+                    {% if p.social_video %}
+                        <a href="{{ p.social_video.url }}" target="_blank" class="action-btn view">
+                            <i class="fas fa-play"></i>
+                        </a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+
+                <td>{{ p.plot_city|default:"-" }}</td>
+                
+                <td>{{ p.plot_locality|default:"-" }}</td>
+                
+                <td>
+                    <span title="{{ p.plot_address }}">
+                        {{ p.plot_address|truncatechars:40 }}
+                    </span>
+                </td>
+
+                <td>{{ p.plot_owner_name|default:"-" }}</td>
+                
+                <td>{{ p.plot_owner_contact|default:"-" }}</td>
+                
+                <td>{{ p.plot_owner_email|default:"-" }}</td>
+                
+                <td>{{ p.plot_owner_role|default:"-" }}</td>
+
+                <td>{{ p.uploaded_by_name|default:"-" }}</td>
+                
+                <td>{{ p.uploaded_by_role|default:"-" }}</td>
+                
+                <td>{{ p.uploaded_by_email|default:"-" }}</td>
+                
+                <td>{{ p.uploaded_by_contact|default:"-" }}</td>
+                
+                <td>
+                    <small class="text-muted">{{ p.upload_file_name|default:"Web UI Listing Form" }}</small>
+                </td>
+
+                <td>{{ p.created_at|date:"Y-m-d H:i" }}</td>
+
+                <td>
+                    <div style="display:flex;gap:5px">
+                        <a href="{% url 'plot_sale_edit' p.plot_property_id %}" class="action-btn edit" title="Edit {{ p.plot_property_id }}">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button type="button" class="action-btn del" onclick="confirmPlotDelete('{{ p.plot_property_id }}')" title="Move to Recycle Bin">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <a href="{% url 'plot_sale_view' p.plot_property_id %}" class="action-btn view" title="View Property">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+  </div>
+</div>
+
+<!-- Bulk Delete Modal -->
+<div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 10000;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:14px; overflow:hidden; border:none; box-shadow:0 20px 60px rgba(0,0,0,0.15)">
+      <div class="modal-header" style="background:linear-gradient(135deg, #ef4444, #b91c1c); border:none; padding:20px 24px">
+        <h5 class="modal-title" style="color:#fff; font-weight:700"><i class="fas fa-trash-alt" style="margin-right:8px"></i>Bulk Delete (Plots)</h5>
+        <button type="button" class="close" data-dismiss="modal" style="color:#fff; opacity:1">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:24px">
+        <div class="form-group mb-3">
+          <label style="font-size:13px; font-weight:600">Delete Criteria <span style="color:red">*</span></label>
+          <select class="form-control mt-1" id="deleteType" onchange="toggleDeleteInputs()" style="font-size:13px">
+            <option value="">-- Select Option --</option>
+            <option value="current_page">Delete Current Page Data</option>
+            <option value="date_range">Delete by Date Range</option>
+            <option value="latest_month">Delete Latest Month Data</option>
+            <option value="old_data">Delete Data Older Than 6 Months</option>
+            <option value="by_uploader">Delete by Uploaded User</option>
+            <option value="by_file">Delete by Excel File</option>
+            <option value="delete_all" style="color:red; font-weight:700">Delete ALL Data</option>
+          </select>
+        </div>
+        <div id="dateRangeInputs" style="display:none; gap:10px; margin-top:10px">
+          <div style="flex:1"><label style="font-size:12px">From Date</label><input type="date" id="fromDate" class="form-control mt-1"></div>
+          <div style="flex:1"><label style="font-size:12px">To Date</label><input type="date" id="toDate" class="form-control mt-1"></div>
+        </div>
+        <div id="uploaderInput" style="display:none; margin-top:10px">
+          <label style="font-size:12px">Uploader Name/Email</label>
+          <input type="text" id="uploaderText" class="form-control mt-1" placeholder="e.g. Admin">
+        </div>
+        <div id="fileInput" style="display:none; margin-top:10px">
+          <label style="font-size:12px">Select Excel File Reference</label>
+          <select id="selectedFile" class="form-control mt-1" style="font-size:13px">
+            <option value="">-- Select File --</option>
+            {% for f in uploaded_files %}<option value="{{ f }}">{{ f }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid #f3f4f6; padding:16px 24px; gap:10px">
+        <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" onclick="executeBulkDelete()" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none"><i class="fas fa-exclamation-triangle"></i> Confirm Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:14px; overflow:hidden">
+      <div class="modal-header" style="background:linear-gradient(135deg, #667eea, #5a67d8); border:none; padding:20px 24px">
+        <h5 class="modal-title" style="color:#fff; font-weight:700"><i class="fas fa-file-import" style="margin-right:8px"></i>Import Plot Sheets</h5>
+        <button type="button" class="close" data-dismiss="modal" style="color:#fff; opacity:1">&times;</button>
+      </div>
+      <form action="{% url 'import_plot_resale_excel' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body" style="padding:24px">
+          <div class="text-center mb-4 pb-3" style="border-bottom:1px solid #e2e8f0">
+            <p class="text-muted mb-2" style="font-size:13px">Download the layout design, compile rows (records are parsed starting Row 5), then upload.</p>
+            <a href="{% url 'download_plot_resale_template' %}" class="btn btn-outline-success btn-sm"><i class="fas fa-download"></i> Download Sheet Layout</a>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-weight:600; font-size:13px">Upload Spreadsheet File <span style="color:red">*</span></label>
+            <input type="file" class="form-control" name="excel_file" required accept=".xlsx" onchange="checkFile(this)">
+            <small class="text-muted">Accepts .xlsx workbook profiles under 5MB.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" style="background:#667eea; border:none"><i class="fas fa-upload"></i> Process Sync</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+$("#Resale").addClass("active");
+
+let dtTable;
+$(document).ready(function(){
+  dtTable = $('#plotTable').DataTable({
+    dom: 'Bfrtip',
+    scrollX: true,
+    pageLength: 25,
+    order: [[23, 'desc']], 
+    buttons: [
+      {extend:'excelHtml5', text:'<i class="fas fa-file-excel"></i> Excel Output', title:'Plot Resale Export Data', exportOptions:{columns:':not(:last-child)'}},
+      {extend:'csvHtml5',  text:'<i class="fas fa-file-csv"></i> CSV Output',   title:'Plot Resale Export Data', exportOptions:{columns:':not(:last-child)'}}
+    ],
+    language: {search: 'Local View Filtering:', paginate: {previous: '‹ Prev', next: 'Next ›'}}
+  });
+
+  // ==========================================
+  // NEW: Excel Import Form Interceptor
+  // ==========================================
+ 
+
+  // ========================================================
+  // Excel Import Form Interceptor (Watching for 0-import statuses)
+  
+// ========================================================
+$('#importModal form').on('submit', function(e) {
+
+    e.preventDefault();
+
+    const form = this;
+    const actionUrl = $(form).attr('action');
+    const formData = new FormData(form);
+
+    // Loading Popup
+    Swal.fire({
+        title: 'Importing Excel Data...',
+        html: 'Analyzing spreadsheet and validating records.<br>Please wait...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    fetch(actionUrl, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+
+    .then(response => {
+
+        if (!response.ok) {
+            throw new Error('Server communication failed.');
+        }
+
+        return response.json();
+    })
+
+    .then(data => {
+
+        // Create detailed logs HTML
+        let logsHtml = '';
+
+        if (data.logs && data.logs.length > 0) {
+
+            logsHtml = `
+                <div style="
+                    text-align:left;
+                    max-height:250px;
+                    overflow-y:auto;
+                    margin-top:15px;
+                    padding:10px;
+                    background:#f8f9fa;
+                    border-radius:8px;
+                    font-size:13px;
+                    border:1px solid #ddd;
+                ">
+                    ${data.logs.map(log => `• ${log}`).join('<br>')}
+                </div>
+            `;
+        }
+
+        // SUCCESS
+        if (data.status === 'success') {
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Import Complete',
+                html: `
+                    <div style="font-size:15px;">
+                        ${data.message}
+                    </div>
+                    ${logsHtml}
+                `,
+                confirmButtonColor: '#10b981',
+                width: '650px'
+            }).then(() => {
+                window.location.reload();
+            });
+
+        }
+
+        // ZERO IMPORTED / WARNING
+        else if (
+            data.status === 'zero_imported' ||
+            data.status === 'warning'
+        ) {
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Records Imported',
+                html: `
+                    <div style="font-size:15px;">
+                        ${data.message}
+                    </div>
+                    ${logsHtml}
+                `,
+                confirmButtonColor: '#f59e0b',
+                width: '700px'
+            });
+
+        }
+
+        // ERROR
+        else {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Import Failed',
+                html: `
+                    <div style="font-size:15px;">
+                        ${data.message}
+                    </div>
+                    ${logsHtml}
+                `,
+                confirmButtonColor: '#ef4444',
+                width: '700px'
+            });
+        }
+
+    })
+
+    .catch(error => {
+
+        console.error('Import Error:', error);
+
+        Swal.fire({
+            icon: 'error',
+            title: 'System Error',
+            html: `
+                <div style="font-size:15px;">
+                    Failed to communicate with the server.
+                </div>
+                <br>
+                <div style="
+                    color:red;
+                    font-size:13px;
+                    word-break:break-word;
+                ">
+                    ${error.message}
+                </div>
+            `,
+            confirmButtonColor: '#ef4444'
+        });
+
+    });
+
+});
+
+
+
+  // Calculate dynamic card values based on active table entries instantly
+  calculateDynamicCardMetrics();
+
+  // Attach interactive monitors to fields for local filtering
+  ['f_title','f_city','f_locality','f_type','f_facing','f_corner'].forEach(id => {
+    document.getElementById(id).addEventListener('input', applyLiveFilters);
+    document.getElementById(id).addEventListener('change', applyLiveFilters);
+  });
+  ['f_price_min','f_price_max'].forEach(id => {
+    document.getElementById(id).addEventListener('input', applyLiveFilters);
+  });
+
+  $("#Resale").addClass("active");
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // Grab the form and all elements with the 'auto-submit' class
+    const form = document.getElementById('plotFilterForm');
+    const autoSubmitElements = document.querySelectorAll('.auto-submit');
+    
+    // 1. AUTO-SUBMIT LOGIC
+    // Listens for any changes in dropdowns, text inputs, or number fields
+    autoSubmitElements.forEach(element => {
+        element.addEventListener('change', function() {
+            // Automatically submits the GET request to Django
+            form.submit();
+        });
+    });
+
+    // 2. DATE RANGE VALIDATION
+    // Only runs when the user explicitly clicks the "Search" button
+    form.addEventListener('submit', function(e) {
+        const fromDateInput = document.getElementById('from_date').value;
+        const toDateInput = document.getElementById('to_date').value;
+
+        // If both dates are filled out, verify the sequence
+        if (fromDateInput && toDateInput) {
+            const fromDate = new Date(fromDateInput);
+            const toDate = new Date(toDateInput);
+
+            // If "From" is later than "To", block the search
+            if (fromDate > toDate) {
+                e.preventDefault(); // Stops the form from submitting to the server
+                
+                // Show an error popup
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Date Range',
+                    text: "'From Date' cannot be later than 'To Date'."
+                });
+                
+                // Highlight the field they need to fix
+                document.getElementById('to_date').focus();
+            }
+        }
+    });
+
+    // 3. SMART CALENDAR UX
+    // Automatically blocks out past dates in the "To Date" calendar based on "From Date"
+    const fromField = document.getElementById('from_date');
+    const toField = document.getElementById('to_date');
+    
+    if (fromField && toField) {
+        fromField.addEventListener('change', function() {
+            if(this.value) {
+                // Sets the HTML5 'min' attribute so users can't even click invalid dates
+                toField.min = this.value; 
+            }
+        });
+    }
+    
+});
+function confirmPlotDelete(id) {
+    Swal.fire({
+        title: 'Move Property to Recycle Bin?',
+        text: 'You can restore it later from the Recycle Bin.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Delete',
+        cancelButtonText: 'Cancel'
+    })
+    .then((result) => {
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        const token =
+            document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+            '{{ csrf_token }}';
+
+        const targetUrl =
+            "{% url 'plot_sale_delete' 'PROPERTY_ID' %}"
+            .replace('PROPERTY_ID', id);
+
+        fetch(targetUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': token,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted Successfully',
+                    text: data.message,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                if (typeof dtTable !== 'undefined') {
+                    dtTable
+                        .row($('#row-' + id))
+                        .remove()
+                        .draw(false);
+                } else {
+                    $('#row-' + id).remove();
+                }
+
+                if (typeof calculateDynamicCardMetrics === 'function') {
+                    calculateDynamicCardMetrics();
+                }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message
+                });
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Server Error',
+                text: 'Unable to delete property.'
+            });
+        });
+    });
+}
+
+function toggleDeleteInputs(){
+  const t = document.getElementById('deleteType').value;
+  document.getElementById('dateRangeInputs').style.display = t === 'date_range' ? 'flex' : 'none';
+  document.getElementById('uploaderInput').style.display = t === 'by_uploader' ? 'block' : 'none';
+  document.getElementById('fileInput').style.display = t === 'by_file' ? 'block' : 'none';
+}
+
+function executeBulkDelete(){
+  const type = document.getElementById('deleteType').value;
+  if(!type){ Swal.fire('Warning','Select valid parameters.','warning'); return; }
+  let payload = {delete_type: type};
+
+  if(type === 'date_range'){
+    payload.from_date = document.getElementById('fromDate').value;
+    payload.to_date = document.getElementById('toDate').value;
+    if(!payload.from_date || !payload.to_date){ Swal.fire('Warning','Complete date items.','warning'); return; }
+  } else if(type === 'by_uploader'){
+    payload.uploader_text = document.getElementById('uploaderText').value;
+    if(!payload.uploader_text){ Swal.fire('Warning','Specify details.','warning'); return; }
+  } else if(type === 'by_file'){
+    payload.file_name = document.getElementById('selectedFile').value;
+    if(!payload.file_name){ Swal.fire('Warning','Choose file link.','warning'); return; }
+  } else if(type === 'current_page'){
+    const ids = Array.from(dtTable.rows({page:'current'}).nodes()).map(r => r.id.split('-')[1]);
+    if(!ids.length){ Swal.fire('Warning','No records targeted.','warning'); return; }
+    payload.page_ids = ids;
+  }
+
+  Swal.fire({title:'Are you sure?', icon:'warning', showCancelButton:true, confirmButtonColor:'#ef4444'}).then(res=>{
+    if(!res.isConfirmed) return;
+    fetch("{% url 'plot_sale_bulk_delete' %}", {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'X-CSRFToken':'{{ csrf_token }}', 'X-Requested-With':'XMLHttpRequest'},
+      body: JSON.stringify(payload)
+    }).then(r=>r.json()).then(data=>{
+      if(data.status==='success') Swal.fire('Success', data.message, 'success').then(()=>window.location.reload());
+      else Swal.fire('Error', data.message, 'error');
+    });
+  });
+}
+
+// ==========================================
+// UPDATED: Pre-upload size/type validations
+// ==========================================
+function checkFile(el){
+  const f = el.files[0]; 
+  if(!f) return;
+  
+  if(f.size > 5*1024*1024){ 
+    Swal.fire({
+      icon: 'warning',
+      title: 'File Too Large',
+      text: 'Spreadsheet structural size exceeds the permitted 5MB constraint limit.',
+      confirmButtonColor: '#667eea'
+    });
+    el.value=''; 
+    return; 
+  }
+  
+  if(!f.name.endsWith('.xlsx')){ 
+    Swal.fire({
+      icon: 'error',
+      title: 'Unsupported Extension',
+      text: 'Invalid sheet layout! Only standard .xlsx workbooks are accepted.',
+      confirmButtonColor: '#667eea'
+    });
+    el.value=''; 
+    return; 
+  }
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // Safely parse Django variables with fallbacks to 0
+    const totalProps = parseInt("{{ total_properties|default:'0' }}");
+    const activeListings = parseInt("{{ active_listings|default:'0' }}");
+    const resCount = parseInt("{{ residential_count|default:'0' }}");
+    const commCount = parseInt("{{ commercial_count|default:'0' }}");
+    const agriCount = parseInt("{{ agricultural_count|default:'0' }}");
+    const cornerCount = parseInt("{{ corner_plot_count|default:'0' }}");
+    const fencedCount = parseInt("{{ fenced_plot_count|default:'0' }}");
+    const financeCount = parseInt("{{ finance_ready_count|default:'0' }}");
+
+    // Common styling options for professional look
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+        }
+    };
+
+    // 1. DOUGHNUT CHART - Property Types
+    const ctxType = document.getElementById('propertyTypeChart').getContext('2d');
+    new Chart(ctxType, {
+        type: 'doughnut',
+        data: {
+            labels: ['Residential', 'Commercial', 'Agricultural'],
+            datasets: [{
+                data: [resCount, commCount, agriCount],
+                backgroundColor: ['#3B82F6', '#F59E0B', '#10B981'], // Blue, Orange, Green
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            ...commonOptions,
+            cutout: '65%' // Makes the doughnut ring thinner and more modern
+        }
+    });
+
+    // 2. BAR CHART - Plot Features
+    const ctxFeatures = document.getElementById('featuresChart').getContext('2d');
+    new Chart(ctxFeatures, {
+        type: 'bar',
+        data: {
+            labels: ['Corner Plots', 'Fenced', 'Finance Ready'],
+            datasets: [{
+                label: 'Total Count',
+                data: [cornerCount, fencedCount, financeCount],
+                backgroundColor: ['#14B8A6', '#F97316', '#8B5CF6'], // Teal, Orange, Purple
+                borderRadius: 4 // Rounded tops on the bars
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false } // Hide legend for single dataset bar chart
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 3. PIE CHART - Pricing Status
+    const unpricedCount = totalProps - activeListings;
+    const ctxPricing = document.getElementById('pricingChart').getContext('2d');
+    new Chart(ctxPricing, {
+        type: 'pie',
+        data: {
+            labels: ['Priced Listings', 'Unpriced Inventory'],
+            datasets: [{
+                data: [activeListings, unpricedCount > 0 ? unpricedCount : 0],
+                backgroundColor: ['#22C55E', '#94A3B8'], // Green, Slate Grey
+                borderWidth: 1,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: commonOptions
+    });
+});
+
+// 4. LINE CHART - Growth Trend Over Time
+    const ctxTrend = document.getElementById('trendChart').getContext('2d');
+    
+    // Note: You can pass these lists from your Django view later like:
+    // const months = {{ months_list|safe }};
+    // const growthData = {{ growth_data|safe }};
+    
+    new Chart(ctxTrend, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], // X-Axis (Time)
+            datasets: [{
+                label: 'New Properties',
+                data: [12, 19, 14, 25, 22, 30], // Y-Axis (Counts)
+                borderColor: '#3B82F6', // Blue line
+                backgroundColor: 'rgba(59, 130, 246, 0.1)', // Light blue fill under the line
+                borderWidth: 2,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#3B82F6',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: true, // Fills the area under the line
+                tension: 0.4 // Creates a smooth, curved line instead of sharp angles
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }, // Hiding legend to keep it clean
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            scales: {
+                y: { 
+                    beginAtZero: true,
+                    grid: { borderDash: [4, 4], color: '#e2e8f0' }
+                },
+                x: { 
+                    grid: { display: false } 
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+</script>
+</body>
+</html>
