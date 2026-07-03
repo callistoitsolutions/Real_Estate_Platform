@@ -1539,8 +1539,7 @@
                     <i class="fas fa-chevron-down dropdown-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="{% url "Subscriptions_Packages_List" %}" class="submenu-link" style="color:white;" id="Rent_Resident">Packages</a></li>
-                    <li><a href="{% url "Subscriptions_Plans_List" %}" class="submenu-link" style="color:white;">Plan type</a></li>
+
                     <li><a href="{% url 'Subscriptions_List' %}" class="submenu-link" style="color:white;">Subscriptions</a></li>
                 </ul>
             </li>
@@ -1578,6 +1577,49 @@
                     <li><a href="{% url 'agricultural_resale_list' %}" class="submenu-link" style="color:white;">Agricultural</a></li>
                 </ul>
             </li>
+
+
+           <li class="menu-item">
+    <a href="javascript:void(0)"
+       class="menu-link"
+       onclick="toggleSubmenu(event, this)"
+       id="PlotResale">
+
+        <i class="fas fa-map-marked-alt menu-icon"></i>
+
+        <span class="menu-text" style="color:#ffffffbf;">
+            Listed Resale Plot 
+        </span>
+
+        <i class="fas fa-angle-down dropdown-icon"></i>
+    </a>
+
+    <ul class="submenu">
+        <li>
+            <a href="{% url 'residential_plot_resale_list' %}" class="submenu-link">
+                <i class="fas fa-home"></i> Residential Plot
+            </a>
+        </li>
+
+        <li>
+            <a href="{% url 'commercial_plot_resale_list' %}" class="submenu-link">
+                <i class="fas fa-store"></i> Commercial Plot
+            </a>
+        </li>
+
+        <li>
+            <a href="{% url 'industrial_plot_resale_list' %}" class="submenu-link">
+                <i class="fas fa-industry"></i> Industrial Plot
+            </a>
+        </li>
+
+        <li>
+            <a href="{% url 'agricultural_plot_resale_list' %}" class="submenu-link">
+                <i class="fas fa-seedling"></i> Agricultural Plot
+            </a>
+        </li>
+    </ul>
+</li>
 
             <li class="menu-section-title" style="color:white;">ENQUIRIES FROM</li>
 

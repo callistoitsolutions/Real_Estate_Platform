@@ -205,3 +205,1020 @@ def update_enquiry_agency(request,id):
     return render(request, "agency_panel/Enquiry/update_enquiry.html", context)
 
 ############# Views end for update property enquiry #################################
+
+
+
+#################Views Start For Rental Residential Property###########################
+
+
+
+def residential_agency(request):
+   # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "agency_panel/Forms/Rental/residential.html", context)
+
+
+
+
+
+
+
+def rental_list_agency(request):
+       # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # ═══════════════════════════════════════
+    # GET SEARCH & FILTERS
+    # ═══════════════════════════════════════
+  
+
+    # ═══════════════════════════════════════
+   
+
+    # ═══════════════════════════════════════
+    # CONTEXT MAP
+    # ═══════════════════════════════════════
+    context = {
+        'user_obj': user_obj,
+        
+    }
+
+    return render(
+        request,
+        'agency_panel/Reports/Rental/rental_list.html',
+        context
+    )
+
+
+
+
+#################Views End For Rental Residential Property###########################
+
+
+#################Views Start For Rental Commericial Property###########################
+
+
+
+
+def commercial_agency(request):
+   # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "agency_panel/Forms/Rental/commercial.html", context)
+
+
+def commercial_list_agency(request):
+       # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # ═══════════════════════════════════════
+    # GET SEARCH & FILTERS
+    # ═══════════════════════════════════════
+  
+
+    # ═══════════════════════════════════════
+   
+
+    # ═══════════════════════════════════════
+    # CONTEXT MAP
+    # ═══════════════════════════════════════
+    context = {
+        'user_obj': user_obj,
+        
+    }
+
+    return render(
+        request,
+        'agency_panel/Reports/Rental/commercial_list.html',
+        context
+    )
+
+
+
+
+#################Views End For Rental Commericial  Property###########################
+
+
+#################Views Start For Rental Pg_coliving Property###########################
+
+
+
+def pg_coliving_agency(request):
+   # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "agency_panel/Forms/Rental/pg_coliving.html", context)
+
+
+def pg_list_agency(request):
+       # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # ═══════════════════════════════════════
+    # GET SEARCH & FILTERS
+    # ═══════════════════════════════════════
+  
+
+    # ═══════════════════════════════════════
+   
+
+    # ═══════════════════════════════════════
+    # CONTEXT MAP
+    # ═══════════════════════════════════════
+    context = {
+        'user_obj': user_obj,
+        
+    }
+
+    return render(
+        request,
+        'agency_panel/Reports/Rental/pg_list.html',
+        context
+    )
+
+
+
+
+
+#################Views Start For Resale Residential Listing Property###########################
+
+
+
+def residential_resale_agency(request):
+   # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "agency_panel/Forms/Resale/residential_resale.html", context)
+
+
+def residential_resale_list_agency(request):
+   
+
+      # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # ═══════════════════════════════════════
+    # GET SEARCH & FILTERS
+    # ═══════════════════════════════════════
+  
+
+    # ═══════════════════════════════════════
+   
+
+    # ═══════════════════════════════════════
+    # CONTEXT MAP
+    # ═══════════════════════════════════════
+    context = {
+        'user_obj': user_obj,
+        
+    }
+
+    return render(request, 'agency_panel/Reports/Resale/residential_resale_list.html', context)
+
+
+
+
+
+
+#################Views Start For Resale Commercial Listing Property###########################
+
+def commercial_resale_agency(request):
+   # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "agency_panel/Forms/Resale/commercial_resale.html", context)
+
+
+def commercial_resale_list_agency(request):
+   
+
+      # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # ═══════════════════════════════════════
+    # GET SEARCH & FILTERS
+    # ═══════════════════════════════════════
+  
+
+    # ═══════════════════════════════════════
+   
+
+    # ═══════════════════════════════════════
+    # CONTEXT MAP
+    # ═══════════════════════════════════════
+    context = {
+        'user_obj': user_obj,
+        
+    }
+
+    return render(request, 'agency_panel/Reports/Resale/commercial_list.html', context)
+
+
+
+
+#################Views Start For Resale Industrial Listing Property###########################
+
+def industrial_resale_agency(request):
+   # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "agency_panel/Forms/Resale/industrial_resale.html", context)
+
+
+def industrial_list_agency(request):
+   
+
+      # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # ═══════════════════════════════════════
+    # GET SEARCH & FILTERS
+    # ═══════════════════════════════════════
+  
+
+    # ═══════════════════════════════════════
+   
+
+    # ═══════════════════════════════════════
+    # CONTEXT MAP
+    # ═══════════════════════════════════════
+    context = {
+        'user_obj': user_obj,
+        
+    }
+
+    return render(request, 'agency_panel/Reports/Resale/industrial_list.html', context)
+
+
+#################Views Start For Resale Agricultural Listing Property###########################
+
+
+def agricultural_resale_agency(request):
+   # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "agency_panel/Forms/Resale/agricultural_resale.html", context)
+
+
+def agricultural_list_agency(request):
+   
+
+      # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # ═══════════════════════════════════════
+    # GET SEARCH & FILTERS
+    # ═══════════════════════════════════════
+  
+
+    # ═══════════════════════════════════════
+   
+
+    # ═══════════════════════════════════════
+    # CONTEXT MAP
+    # ═══════════════════════════════════════
+    context = {
+        'user_obj': user_obj,
+        
+    }
+
+    return render(request, 'agency_panel/Reports/Resale/agricultural_list.html', context)
+
+
+
+
+
+
+#################Views Start For Resale Plot Residential Listing Property###########################
+
+
+def residential_plot_resale_agency(request):
+   # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "agency_panel/Forms/Resale_Plot/residential_plot_resale.html", context)
+
+
+def residential_plot_resale_list_agency(request):
+   
+
+      # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # ═══════════════════════════════════════
+    # GET SEARCH & FILTERS
+    # ═══════════════════════════════════════
+  
+
+    # ═══════════════════════════════════════
+   
+
+    # ═══════════════════════════════════════
+    # CONTEXT MAP
+    # ═══════════════════════════════════════
+    context = {
+        'user_obj': user_obj,
+        
+    }
+
+    return render(request, 'agency_panel/Reports/Resale_Plot/residential_plot_resale_list.html', context)
+
+
+
+
+#################Views Start For Resale Plot Commericial Listing Property###########################
+
+
+def commercial_plot_resale_agency(request):
+   # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "agency_panel/Forms/Resale_Plot/commercial_plot_resale.html", context)
+
+
+def commercial_plot_resale_list_agency(request):
+   
+
+      # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # ═══════════════════════════════════════
+    # GET SEARCH & FILTERS
+    # ═══════════════════════════════════════
+  
+
+    # ═══════════════════════════════════════
+   
+
+    # ═══════════════════════════════════════
+    # CONTEXT MAP
+    # ═══════════════════════════════════════
+    context = {
+        'user_obj': user_obj,
+        
+    }
+
+    return render(request, 'agency_panel/Reports/Resale_Plot/commercial_plot_resale_list.html', context)
+
+
+
+#################Views Start For Resale Plot Industrial Listing Property###########################
+
+
+
+def industrial_plot_resale_agency(request):
+   # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "agency_panel/Forms/Resale_Plot/industrial_plot_resale.html", context)
+
+
+def industrial_plot_resale_list_agency(request):
+   
+
+      # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # ═══════════════════════════════════════
+    # GET SEARCH & FILTERS
+    # ═══════════════════════════════════════
+  
+
+    # ═══════════════════════════════════════
+   
+
+    # ═══════════════════════════════════════
+    # CONTEXT MAP
+    # ═══════════════════════════════════════
+    context = {
+        'user_obj': user_obj,
+        
+    }
+
+    return render(request, 'agency_panel/Reports/Resale_Plot/industrial_plot_resale_list.html', context)
+
+
+
+
+
+#################Views Start For Resale Plot Agricultural Listing Property###########################
+
+
+
+def agricultural_plot_resale_agency(request):
+   # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+    
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "agency_panel/Forms/Resale_Plot/agricultural_plot_resale.html", context)
+
+
+def agricultural_plot_resale_list_agency(request):
+   
+
+      # 1. Retrieve BOTH possible session IDs from the browser
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Agency/Builder")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    # ═══════════════════════════════════════
+    # GET SEARCH & FILTERS
+    # ═══════════════════════════════════════
+  
+
+    # ═══════════════════════════════════════
+   
+
+    # ═══════════════════════════════════════
+    # CONTEXT MAP
+    # ═══════════════════════════════════════
+    context = {
+        'user_obj': user_obj,
+        
+    }
+
+    return render(request, 'agency_panel/Reports/Resale_Plot/agricultural_plot_resale_list.html', context)
+
+
+

@@ -135,35 +135,35 @@ urlpatterns = [
 
     ############# urls for subscription packages list ######################
 
-    path('Subscriptions_Packages_List',views.Subscriptions_Packages_List,name="Subscriptions_Packages_List"),
+   # path('Subscriptions_Packages_List',views.Subscriptions_Packages_List,name="Subscriptions_Packages_List"),
 
     ########### urls for ajax for add/edit packages ####################
 
-    path('Packages_Ajax',views.Packages_Ajax,name="Packages_Ajax"),
+    #path('Packages_Ajax',views.Packages_Ajax,name="Packages_Ajax"),
 
     ########### urls for delete packages #########################
 
-    path('Delete_Packages',views.Delete_Packages,name="Delete_Packages"),
+   # path('Delete_Packages',views.Delete_Packages,name="Delete_Packages"),
 
     ############ urls for update packages ######################
 
-    path('Update_Packages/<int:id>',views.Update_Packages,name="Update_Packages"),
+#path('Update_Packages/<int:id>',views.Update_Packages,name="Update_Packages"),
 
     ############ urls for subscription plan types list ####################
 
-    path('Subscriptions_Plans_List',views.Subscriptions_Plans_List,name="Subscriptions_Plans_List"),
+#path('Subscriptions_Plans_List',views.Subscriptions_Plans_List,name="Subscriptions_Plans_List"),
 
     ########### urls for ajax for add/edit plans ####################
 
-    path('Plans_Ajax',views.Plans_Ajax,name="Plans_Ajax"),
+ #  path('Plans_Ajax',views.Plans_Ajax,name="Plans_Ajax"),
 
     ############# urls for delete plans #####################
 
-    path('Delete_Plans',views.Delete_Plans,name="Delete_Plans"),
+#    path('Delete_Plans',views.Delete_Plans,name="Delete_Plans"),
 
     ########## urls for update plans ##############################
 
-    path('Update_Plans/<int:id>',views.Update_Plans,name="Update_Plans"),
+   # path('Update_Plans/<int:id>',views.Update_Plans,name="Update_Plans"),
 
      ############# urls for subscriptions list ###########################
 
@@ -664,6 +664,17 @@ urlpatterns = [
     ),
     path( 'plot-sale/edit/<str:plot_property_id>/',views.plot_sale_edit,name='plot_sale_edit'),
 
+
+    path('residential_plot_resale',views.residential_plot_resale,name="residential_plot_resale"),
+    path('commercial_plot_resale',views.commercial_plot_resale,name="commercial_plot_resale"),
+    path('industrial_plot_resale',views.industrial_plot_resale,name="industrial_plot_resale"),
+    path('agricultural_plot_resale',views.agricultural_plot_resale,name="agricultural_plot_resale"),
+
+
+    path('residential_plot_resale_list',views.residential_plot_resale_list,name="residential_plot_resale_list"),
+    path('commercial_plot_resale_list',views.commercial_plot_resale_list,name="commercial_plot_resale_list"),
+    path('industrial_plot_resale_list',views.industrial_plot_resale_list,name="industrial_plot_resale_list"),
+    path('agricultural_plot_resale_list',views.agricultural_plot_resale_list,name="agricultural_plot_resale_list"),
 
 
 #######################END URL SECTION RESALE PLOT LISTING###############

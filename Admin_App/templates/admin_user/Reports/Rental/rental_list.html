@@ -934,41 +934,45 @@
             </div>
         </div>
 
-       <div class="table-responsive">
+      
+
+        <div class="table-responsive">
     <table class="properties-table" id="rentalTable">
         <thead>
             <tr>
                 <th>Sr.No</th>
                 <th>Property Id</th>
-                <th>Images</th> <th>Property Title</th>
+                <th>Images</th>
+                <th>Property Title</th>
                 <th>Property Type</th>
-                <th>BHK Type</th>
-                <th>Renting Option</th>
+                <th>Property No</th> <th>Renting Option</th>
                 <th>Built-Up Area</th>
                 <th>Bathrooms</th>
                 <th>Balconies</th>
-                <th>Floor No.</th>
+                <th>Building Config</th>
                 <th>Total Floors</th>
                 <th>Facing</th>
                 <th>Furnishing Status</th>
                 <th>Available For</th>
-                <th>Zone</th>
+                <th>City Zone</th>
                 <th>Ownership Type</th>
-                <th>Construction Status</th>
+                <th>Property Condition</th>
                 <th>Property Age</th>
                 <th>Carpet Area</th>
-                <th>Plot Area</th>
                 <th>Building / Society Name</th>
-                <th>Possession Status</th>
+                <th>Availability Status</th>
                 <th>Available From</th>
                 <th>Lease Duration</th>
-                <th>Brokerage</th>
-                <th>Brokerage %</th>
-                <th>Manual Brokerage</th>
+                <th>Brokerage Type</th> 
+
+                  <th>Brokerage / Service Fee</th> 
+                
                 <th>Monthly Rent</th>
+                <th>Advance Rent</th>
                 <th>Security Deposit</th>
                 <th>Maintenance Type</th>
                 <th>Maintenance Amt</th>
+                <th>Move-in Cost</th>
                 <th>Address</th>
                 <th>City</th>
                 <th>Locality/Area</th>
@@ -976,153 +980,154 @@
                 <th>Pincode</th>
                 <th>Main Road Connectivity</th>
                 <th>Amenities</th>
-                <th>Facilities</th>
+                <th>Nearby Facilities</th>
                 <th>Description</th>
                 <th>Rent Desc</th>
-                  <th>User Description</th>
-                <th>Owner Name</th>
-                <th>Contact</th>
-                <th>Email</th>
-                <th>Alt. Contact</th>
-              
+                <th>User Description</th>
 
+                <th>Listed By Type</th>
                 <th>Listed By Id</th>
-                <th>Listed By  Name</th>
+                <th>Listed By Name</th>
                 <th>Listed By Email</th>
                 <th>Listed By Contact</th>
                 <th>Listed By Role</th>
+                <th>Assigned To</th>
+
+                <th>Listed Elsewhere</th>
+                <th>Portal Name</th>
 
                 <th>Uploaded By</th>
                 <th>UB Email</th>
                 <th>UB Contact</th>
                 <th>UB Role</th>
                 <th>Upload File Name</th>
-                
                 <th>Created At</th>
                 <th style="position:sticky;right:0;background:#f8fafc;z-index:2;">Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for prop in page_obj %}
-            <tr id="row-{{ prop.rental_residential_id }}">
-           <td style="font-weight: 700; color: #1e293b;">{{ prop.original_sr_no }}</td>
+            <tr id="row-{{ prop.id }}">
+                <td style="font-weight: 700; color: #1e293b;">{{ prop.original_sr_no }}</td>
                 <td>{{ prop.id|default:"—" }}</td>
-     <td>
-    <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;" onclick="openImageModal('modal-{{ prop.id }}')">
-
-        {% if prop.images.all %}
-            <div style="position: relative; width: 50px; height: 50px; min-width: 50px;" title="Click to view all images">
-
-                {% with first_img=prop.images.all|first %}
-                    <img src="{{ first_img.image.url }}"
-                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                {% endwith %}
-
-                {% if prop.images.count > 1 %}
-                    <div style="
-                        position: absolute;
-                        bottom: -4px;
-                        right: -4px;
-                        background: rgba(0,0,0,0.8);
-                        color: #fff;
-                        font-size: 11px;
-                        padding: 2px 6px;
-                        border-radius: 10px;
-                        border: 1px solid white;
-                        font-weight: bold;
-                        line-height: 1;">
-                        +{{ prop.images.count|add:"-1" }}
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;" onclick="openImageModal('modal-{{ prop.id }}')">
+                        {% if prop.images.all %}
+                            <div style="position: relative; width: 50px; height: 50px; min-width: 50px;" title="Click to view all images">
+                                {% with first_img=prop.images.all|first %}
+                                    <img src="{{ first_img.image.url }}"
+                                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                {% endwith %}
+                                {% if prop.images.count > 1 %}
+                                    <div style="position: absolute; bottom: -4px; right: -4px; background: rgba(0,0,0,0.8); color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px; border: 1px solid white; font-weight: bold; line-height: 1;">
+                                        +{{ prop.images.count|add:"-1" }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div style="width: 50px; height: 50px; min-width: 50px; border-radius: 8px; background: linear-gradient(135deg, #2563eb, #1e40af); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <i class="fas fa-home" style="font-size: 16px;"></i>
+                                <span style="font-size: 6px; font-weight: 700; margin-top: 2px; line-height: 1;">EstateFlow</span>
+                            </div>
+                        {% endif %}
                     </div>
-                {% endif %}
-
-            </div>
-        {% else %}
-            <div style="
-                width: 50px;
-                height: 50px;
-                min-width: 50px;
-                border-radius: 8px;
-                background: linear-gradient(135deg, #2563eb, #1e40af);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-
-                <i class="fas fa-home" style="font-size: 16px;"></i>
-
-                <span style="
-                    font-size: 6px;
-                    font-weight: 700;
-                    margin-top: 2px;
-                    line-height: 1;">
-                    EstateFlow
-                </span>
-            </div>
-        {% endif %}
-
-    </div>
-</td>
+                </td>
                 <td>{{ prop.property_title|default:"—" }}</td>
                 <td>{{ prop.property_type|default:"—" }}</td>
-                <td>{{ prop.bhk_type|default:"—" }}</td>
+                <td title="Internal verification only — not public">{{ prop.property_no|default:"—" }}</td>
                 <td>{{ prop.renting_option|default:"—" }}</td>
                 <td>{{ prop.built_up_area|default:"—" }}</td>
                 <td>{{ prop.bathrooms|default:"—" }}</td>
                 <td>{{ prop.balconies|default:"—" }}</td>
-                <td>{{ prop.floor_number|default:"—" }}</td>
+                <td>{{ prop.building_configuration|default:"—" }}</td>
                 <td>{{ prop.total_floors|default:"—" }}</td>
-                <td>{{ prop.facing|default:"—" }}</td>
+                <td>{{ prop.facing_direction|default:"—" }}</td>
                 <td>{{ prop.furnishing_status|default:"—" }}</td>
                 <td>{{ prop.available_for|default:"—" }}</td>
-                <td>{{ prop.zone|default:"—" }}</td>
+                <td>{{ prop.city_zone|default:"—" }}</td>
                 <td>{{ prop.ownership_type|default:"—" }}</td>
-                <td>{{ prop.construction_status|default:"—" }}</td>
+                <td>{{ prop.property_condition|default:"—" }}</td>
                 <td>{{ prop.property_age|default:"—" }}</td>
                 <td>{{ prop.carpet_area|default:"—" }}</td>
-                <td>{{ prop.plot_area|default:"—" }}</td>
                 <td>{{ prop.building_name|default:"—" }}</td>
-                <td>{{ prop.possession_status|default:"—" }}</td>
+                <td>{{ prop.availability_status|default:"—" }}</td>
                 <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
                 <td>{{ prop.lease_duration|default:"—" }}</td>
-                <td>{{ prop.brokerage|default:"—" }}</td>
-                <td>{{ prop.brokerage_percentage|default:"—" }}</td>
-                <td>{{ prop.manual_brokerage|default:"—" }}</td>
+
+                <!-- ============================================================
+                     BROKERAGE / SERVICE FEE — one cell, two lines.
+                     Label (top, muted) comes from prop.get_brokerage_label,
+                     which reads THIS ROW'S listed_by_role. Value (bottom,
+                     bold) resolves "Fixed Amount" to the manual figure.
+                     Every row shows its own correct label automatically,
+                     even though the table mixes Admins, Agents, Landlords,
+                     RMs, Builders etc all at once. The column header stays
+                     generic on purpose — see note below the table.
+                ============================================================= -->
+                <td>
+                    {% if prop.brokerage_percentage %}
+                        <div style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase; letter-spacing:.02em;">
+                            {{ prop.get_brokerage_label }}
+                        </div>
+                       
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+
+                 <td>
+                    {% if prop.brokerage_percentage %}
+                       
+                        <div style="font-weight:600; color:#1e293b;">
+                            {{ prop.get_brokerage_display_value }}
+                        </div>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+
                 <td>₹{{ prop.monthly_rent|default:"—" }}</td>
-                <td>₹{{ prop.security_deposit|default:"—" }}</td>
+                <td>₹{{ prop.get_advance_rent_amount|default:"—" }}</td>
+                <td>₹{{ prop.get_security_deposit_amount|default:"—" }}</td>
                 <td>{{ prop.maintenance_type|default:"—" }}</td>
-                <td>{{ prop.maintenance_amount|default:"—" }}</td>
+                <td>{{ prop.monthy_maintenance_amount|default:"—" }}</td>
+                <td>{{ prop.total_move_in_cost|default:"—" }}</td>
                 <td>{{ prop.address|default:"—" }}</td>
                 <td>{{ prop.city|default:"—" }}</td>
-                <td>{{ prop.locality|default:"—" }}</td>
+                <td>{{ prop.locality_area|default:"—" }}</td>
                 <td>{{ prop.state|default:"—" }}</td>
                 <td>{{ prop.pincode|default:"—" }}</td>
-                <td>{{ prop.road_connectivity|default:"—" }}</td>
+                <td>{{ prop.main_road_connectivity|default:"—" }}</td>
                 <td>{{ prop.amenities|default:"—" }}</td>
-                <td>{{ prop.facilities|default:"—" }}</td>
+                <td>{{ prop.nearby_facilities|default:"—" }}</td>
                 <td>{{ prop.description|striptags|truncatechars:50|default:"—" }}</td>
                 <td>{{ prop.rent_residential_desc|striptags|truncatechars:50|default:"—" }}</td>
                 <td>{{ prop.user_description|striptags|truncatechars:50|default:"—" }}</td>
-                <td>{{ prop.owner_name|default:"—" }}</td>
-                <td>{{ prop.contact_number|default:"—" }}</td>
-                <td>{{ prop.email|default:"—" }}</td>
-                <td>{{ prop.alternate_contact|default:"—" }}</td>
-                
 
+                <td>
+                    {% if prop.listed_by_type == "other" %}
+                        <span class="badge" style="background:#eef2ff; color:#4338ca;">Assigned</span>
+                    {% else %}
+                        <span class="badge" style="background:#f0fdf4; color:#166534;">Self</span>
+                    {% endif %}
+                </td>
                 <td>{{ prop.listed_by_id|default:"—" }}</td>
                 <td>{{ prop.listed_by_name|default:"—" }}</td>
                 <td>{{ prop.listed_by_email|default:"—" }}</td>
                 <td>{{ prop.listed_by_contact|default:"—" }}</td>
-                      <td>{{ prop.listed_by_role|default:"—" }}</td>
-                      <td>{{ prop.uploaded_by_name|default:"—" }}</td>
+                <td>{{ prop.listed_by_role|default:"—" }}</td>
+                <td>{{ prop.assigned_to_role|default:"—" }}</td>
+
+                <td>{{ prop.listed_elsewhere|default:"—" }}</td>
+                <td>{{ prop.portal_name|default:"—" }}</td>
+
+                <td>{{ prop.uploaded_by_name|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_email|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_role|default:"—" }}</td>
-                
-              <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI Listing Form" }}</small></td>
-               
+                <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI Listing Form" }}</small></td>
                 <td>{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
+
                 <td style="position:sticky;right:0;background:white;z-index:1;">
                     <div style="display:flex;gap:8px;">
                         <button class="btn-action btn-view" onclick="window.location.href='{% url 'rental_residential_view' prop.id %}'">
@@ -1150,7 +1155,6 @@
         </tbody>
     </table>
 </div>
-
         {% if page_obj.paginator.num_pages > 1 %}
         <div class="pagination-wrap">
             <small style="color:#888;">
@@ -1746,7 +1750,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 
 
-function submitImport() {
+async function submitImport() {
     const fileInput = document.getElementById('rental_file');
     
     if (!fileInput.files || !fileInput.files[0]) { 
@@ -1757,6 +1761,7 @@ function submitImport() {
     const formData = new FormData();
     formData.append('rental_file', fileInput.files[0]);
 
+    // 1. Trigger the Loading UI
     Swal.fire({
         title: 'Analyzing File Matrix...',
         text: 'Please wait while we perform duplicate checking across the database.',
@@ -1775,20 +1780,23 @@ function submitImport() {
         }, 150);
     }
 
-    fetch("{% url 'import_residential_excel' %}", {
-        method: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-        body: formData
-    })
-    .then(async (res) => {
+    try {
+        // 2. Fetch data from backend
+        const response = await fetch("{% url 'import_residential_excel' %}", {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            body: formData
+        });
+
+        // 3. READ THE JSON BODY EVEN IF STATUS IS 400
+        const data = await response.json();
+
+        // 4. Clean up progress bar UI
         if (window.importInterval) clearInterval(window.importInterval);
         if (progressBar) progressBar.style.width = '100%';
         setTimeout(() => { if (progressDiv) progressDiv.style.display = 'none'; }, 400);
 
-        if (!res.ok) throw new Error(`Server execution error status: ${res.status}`);
-        const data = await res.json();
-
-        // Condition 1: Same file name, completely identical internal contents
+        // --- HANDLER A: Exact File Duplicates ---
         if (data.status === 'duplicate_filename_and_data') {
             Swal.fire({
                 icon: 'info',
@@ -1800,7 +1808,7 @@ function submitImport() {
             return;
         }
 
-        // Condition 2: Different file name, but matching duplicate property content
+        // --- HANDLER B: Content Duplicates (Different Filename) ---
         if (data.status === 'duplicate_data_different_filename') {
             Swal.fire({
                 icon: 'warning',
@@ -1812,46 +1820,75 @@ function submitImport() {
             return;
         }
 
-        // Standard formatting engine loop responses
-        let errorHtml = "";
-        if (data.errors && data.errors.length > 0) {
-            errorHtml = `<div style="text-align: left; font-size: 13px; max-height: 150px; overflow-y: auto; background: #FEF2F2; color: #DC2626; padding: 12px; border-radius: 8px; border: 1px solid #FCA5A5; margin-top: 15px;">
-                            <ul style="margin-bottom: 0; padding-left: 20px;">`;
-            data.errors.forEach(err => { errorHtml += `<li><b>${err}</b></li>`; });
-            errorHtml += `</ul></div>`;
+        // --- HANDLER C: Success or Partial Success (200 OK) ---
+        if (response.ok && (data.status === "success" || data.status === "partial_error")) {
+            let errorHtml = "";
+            if (data.errors && data.errors.length > 0) {
+                errorHtml = `<div style="text-align: left; font-size: 13px; max-height: 150px; overflow-y: auto; background: #FEF2F2; color: #DC2626; padding: 12px; border-radius: 8px; border: 1px solid #FCA5A5; margin-top: 15px;">
+                                <ul style="margin-bottom: 0; padding-left: 20px;">`;
+                data.errors.forEach(err => { errorHtml += `<li><b>${err}</b></li>`; });
+                errorHtml += `</ul></div>`;
+            }
+
+            let statsHtml = `<div style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap: wrap;">`;
+            if (data.created > 0) statsHtml += `<span style="background:#10b981; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-plus-circle"></i> ${data.created} Created</span>`;
+            if (data.updated > 0) statsHtml += `<span style="background:#3b82f6; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-edit"></i> ${data.updated} Updated</span>`;
+            if (data.skipped > 0) statsHtml += `<span style="background:#f59e0b; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-forward"></i> ${data.skipped} Skipped</span>`;
+            statsHtml += `</div>`;
+
+            Swal.fire({
+                icon: data.error_count > 0 ? 'warning' : 'success',
+                title: data.error_count > 0 ? 'Import Content Anomalies' : 'Import Complete!',
+                html: `<p style="font-size:14px; color:#4b5563; margin-bottom:0;">${data.message}</p>` + statsHtml + errorHtml,
+                confirmButtonText: 'Acknowledge',
+                confirmButtonColor: '#667eea',
+                width: '550px'
+            }).then(() => {
+                if (data.created > 0 || data.updated > 0) {
+                    window.location.reload();
+                } else {
+                    clearFile();
+                }
+            });
+            return;
         }
 
-        let statsHtml = `<div style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap: wrap;">`;
-        if (data.created > 0) statsHtml += `<span style="background:#10b981; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-plus-circle"></i> ${data.created} Created</span>`;
-        if (data.updated > 0) statsHtml += `<span style="background:#3b82f6; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-edit"></i> ${data.updated} Updated</span>`;
-        if (data.skipped > 0) statsHtml += `<span style="background:#f59e0b; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-forward"></i> ${data.skipped} Skipped</span>`;
-        statsHtml += `</div>`;
-
-        Swal.fire({
-            icon: data.error_count > 0 ? 'warning' : 'success',
-            title: data.error_count > 0 ? 'Import Content Anomalies' : 'Import Complete!',
-            html: `<p style="font-size:14px; color:#4b5563; margin-bottom:0;">${data.message}</p>` + statsHtml + errorHtml,
-            confirmButtonText: 'Acknowledge',
-            confirmButtonColor: '#667eea',
-            width: '550px'
-        }).then(() => {
-            if (data.created > 0 || data.updated > 0) {
-                window.location.reload();
-            } else {
-                clearFile();
+        // --- HANDLER D: Known Backend Errors (400 Bad Request with JSON) ---
+        if (data && data.message) {
+            let html = `<p>${data.message}</p>`;
+            if (data.unmatched_headers && data.unmatched_headers.length > 0) {
+                html += `<p style="text-align:left; font-size:13px; color:#b91c1c;">
+                            <strong>Unmatched column headers found in your file:</strong><br>
+                            ${data.unmatched_headers.join("<br>")}
+                          </p>`;
             }
-        });
-    })
-    .catch(err => {
+            if (data.header_row_detected) {
+                html += `<p style="font-size:12px; color:#64748b;">
+                            Detected header row: ${data.header_row_detected} —
+                            expected data from row: ${data.data_start_row_assumed || data.data_start_row_used}.
+                          </p>`;
+            }
+            Swal.fire({ icon: "error", title: "Import Failed", html });
+            return;
+        }
+
+        // Fallback if data is totally unrecognizable
+        throw new Error(`Unexpected server behavior. Status: ${response.status}`);
+
+    } catch (networkErr) {
+        // --- HANDLER E: Real network crashes or 500 Server Errors ---
+        // This ONLY fires if response.json() fails (e.g. Django crashed and sent an HTML debug page)
+        // or if the internet disconnected entirely.
         if (window.importInterval) clearInterval(window.importInterval);
         if (progressDiv) progressDiv.style.display = 'none';
+        
         Swal.fire({
             icon: 'error',
             title: 'System Crash Error',
-            text: `Critical operational error context: ${err.message}`,
+            text: `Critical operational error context: ${networkErr.message}`,
             confirmButtonColor: '#667eea'
         });
-    });
+    }
 }
 
 </script>
@@ -1895,7 +1932,13 @@ function submitImport() {
             alert("No properties found for the selected date range.");
         }
     };
+
+
+
+    
 </script>
+
+
 
 </body>
 </html>

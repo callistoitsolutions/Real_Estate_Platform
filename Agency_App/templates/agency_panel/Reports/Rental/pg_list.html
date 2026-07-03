@@ -1,0 +1,1960 @@
+{% include "agency_panel/agency_header.html" %}
+{% load static %}
+<style>
+:root{
+  --red:#e42525;--red2:#c01e1e;--red-bg:#fff0f0;
+  --blue:#2563eb;--blue2:#1d4ed8;--blue-bg:#eff6ff;
+  --green:#16a34a;--green2:#15803d;--green-bg:#f0fdf4;
+  --amber:#d97706;--amber-bg:#fffbeb;
+  --purple:#7c3aed;--purple-bg:#f5f3ff;
+  --teal:#0d9488;--teal-bg:#f0fdfa;
+  --orange:#ea580c;--orange-bg:#fff7ed;
+  --pink:#db2777;--pink-bg:#fdf2f8;
+  --indigo:#4f46e5;--indigo-bg:#eef2ff;
+  --cyan:#0891b2;--cyan-bg:#ecfeff;
+  --lime:#65a30d;--lime-bg:#f7fee7;
+  --rose:#e11d48;--rose-bg:#fff1f2;
+  --bg:#f0f4ff;--card:#fff;--border:#e2e8f0;
+  --text:#1e293b;--muted:#64748b;--faint:#94a3b8;
+  --r8:8px;--r12:12px;--r16:16px;--r20:20px;--rf:9999px;
+  --sh1:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --sh2:0 4px 16px rgba(0,0,0,.08);--sh3:0 12px 40px rgba(0,0,0,.12);
+  --ease:200ms cubic-bezier(.16,1,.3,1);
+  --ff:'Inter',sans-serif;--fd:'Poppins',sans-serif;
+}
+*{box-sizing:border-box}
+body{font-family:var(--ff);background:var(--bg);color:var(--text);font-size:14px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* PAGE HEADER */
+.pg-hdr{background:linear-gradient(135deg,#1a1039 0%,#4c1d95 50%,#6d28d9 100%);border-radius:var(--r20);padding:24px 28px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;box-shadow:0 8px 32px rgba(76,29,149,.4)}
+.pg-hdr h1{font-family:var(--fd);font-size:22px;font-weight:800;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+.pg-hdr p{font-size:13px;color:rgba(255,255,255,.65)}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;margin-right:5px;animation:pulse 2s infinite}
+.hdr-btns{display:flex;gap:8px;flex-wrap:wrap}
+.pg-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--r8);font-size:12px;font-weight:700;border:none;cursor:pointer;transition:var(--ease);text-decoration:none}
+.pg-btn-glass{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.25)}
+.pg-btn-glass:hover{background:rgba(255,255,255,.28);color:#fff}
+.pg-btn-purple{background:var(--purple);color:#fff;box-shadow:0 2px 10px rgba(124,58,237,.4)}
+.pg-btn-purple:hover{background:#6d28d9}
+.pg-btn-green{background:var(--green);color:#fff}.pg-btn-green:hover{background:var(--green2)}
+.pg-btn-red{background:var(--red);color:#fff}.pg-btn-red:hover{background:var(--red2)}
+.pg-btn-blue{background:var(--blue);color:#fff}.pg-btn-blue:hover{background:var(--blue2)}
+.pg-btn-outline{background:var(--card);color:var(--muted);border:1.5px solid var(--border)}
+.pg-btn-outline:hover{border-color:var(--purple);color:var(--purple)}
+.pg-btn-amber{background:var(--amber);color:#fff}
+
+/* SEARCH PANEL */
+.pg-search{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:18px 20px;margin-bottom:20px;box-shadow:var(--sh1)}
+.pg-search-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.pg-search-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.pg-sf{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px}
+.pg-sf label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+.pg-sf input,.pg-sf select{padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r8);background:var(--bg);color:var(--text);font-size:13px;outline:none;transition:var(--ease);width:100%}
+.pg-sf input:focus,.pg-sf select:focus{border-color:var(--purple);background:#fff;box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.pg-search-footer{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.pg-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--rf);font-size:12px;font-weight:700}
+.pp-purple{background:var(--purple-bg);color:var(--purple)}
+.pp-green{background:var(--green-bg);color:var(--green)}
+.pp-amber{background:var(--amber-bg);color:var(--amber)}
+.pp-teal{background:var(--teal-bg);color:var(--teal)}
+.pp-pink{background:var(--pink-bg);color:var(--pink)}
+
+#pgSearchInput { font-weight: 600; }
+#pgSearchInput:focus { transform: scale(1.01); }
+
+/* ROW DIVIDER & KPI GRID */
+.pg-row-lbl{display:flex;align-items:center;gap:12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:10px}
+.pg-row-lbl::before,.pg-row-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+.pg-kpi-wrap{margin-bottom:20px}
+.pg-kpi-grid{display:grid;gap:12px}
+.pg-g6{grid-template-columns:repeat(6,1fr)}
+.pg-g5{grid-template-columns:repeat(5,1fr)}
+.pg-g4{grid-template-columns:repeat(4,1fr)}
+.pg-kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:16px;box-shadow:var(--sh1);position:relative;overflow:hidden;transition:transform var(--ease),box-shadow var(--ease)}
+.pg-kpi:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.pg-kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r16) var(--r16) 0 0}
+.k-purple::before{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+.k-blue::before{background:linear-gradient(90deg,#2563eb,#60a5fa)}
+.k-green::before{background:linear-gradient(90deg,#16a34a,#4ade80)}
+.k-amber::before{background:linear-gradient(90deg,#d97706,#fcd34d)}
+.k-teal::before{background:linear-gradient(90deg,#0d9488,#2dd4bf)}
+.k-orange::before{background:linear-gradient(90deg,#ea580c,#fb923c)}
+.k-pink::before{background:linear-gradient(90deg,#db2777,#f472b6)}
+.k-indigo::before{background:linear-gradient(90deg,#4f46e5,#818cf8)}
+.k-cyan::before{background:linear-gradient(90deg,#0891b2,#22d3ee)}
+.k-red::before{background:linear-gradient(90deg,#e42525,#ff6b35)}
+.k-lime::before{background:linear-gradient(90deg,#65a30d,#a3e635)}
+.k-rose::before{background:linear-gradient(90deg,#e11d48,#fb7185)}
+
+.pg-kpi-ico{width:44px;height:44px;border-radius:var(--r12);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+.ic-purple{background:var(--purple-bg);color:var(--purple)}
+.ic-blue{background:var(--blue-bg);color:var(--blue)}
+.ic-green{background:var(--green-bg);color:var(--green)}
+.ic-amber{background:var(--amber-bg);color:var(--amber)}
+.ic-teal{background:var(--teal-bg);color:var(--teal)}
+.ic-orange{background:var(--orange-bg);color:var(--orange)}
+.ic-pink{background:var(--pink-bg);color:var(--pink)}
+.ic-indigo{background:var(--indigo-bg);color:var(--indigo)}
+.ic-cyan{background:var(--cyan-bg);color:var(--cyan)}
+.ic-red{background:var(--red-bg);color:var(--red)}
+.ic-lime{background:var(--lime-bg);color:var(--lime)}
+.ic-rose{background:var(--rose-bg);color:var(--rose)}
+
+.pg-kpi-val{font-family:var(--fd);font-size:24px;font-weight:800;line-height:1;margin-bottom:5px}
+.pg-kpi-lbl{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:3px}
+.pg-kpi-sub{font-size:11px;color:var(--faint);display:flex;align-items:center;gap:4px}
+.pg-kpi-sub .up{color:var(--green)}.pg-kpi-sub .dn{color:var(--red)}
+.pg-kpi-tag{position:absolute;top:10px;right:10px;padding:3px 8px;border-radius:var(--rf);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px}
+.tag-new{background:linear-gradient(135deg,#16a34a,#0d9488);color:#fff}
+.pg-kpi-bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--border)}
+.pg-kpi-bar-fill{height:100%;border-radius:var(--rf)}
+
+/* RINGS & INSIGHTS & CHARTS */
+.pg-rings-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.pg-ring-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:16px;box-shadow:var(--sh1);display:flex;flex-direction:column;align-items:center;gap:8px}
+.ring-wrap{position:relative;width:90px;height:90px}
+.ring-wrap svg{width:90px;height:90px;transform:rotate(-90deg)}
+.ring-wrap circle{fill:none;stroke-width:8;stroke-linecap:round}
+.r-bg{stroke:#f1f5f9}
+.r-fill{stroke-dasharray:245;stroke-dashoffset:245;transition:stroke-dashoffset 1.4s ease}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-family:var(--fd);font-size:16px;font-weight:800}
+.ring-lbl{font-size:10px;color:var(--muted);font-weight:700}
+.ring-name{font-size:12px;font-weight:700;text-align:center}
+.ring-sub{font-size:11px;color:var(--muted);text-align:center}
+
+.pg-ins-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px}
+.pg-ins{background:var(--card);border:1px solid var(--border);border-radius:var(--r12);padding:14px;box-shadow:var(--sh1);display:flex;align-items:center;gap:12px}
+.pg-ins-ico{width:40px;height:40px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.pg-ins-val{font-family:var(--fd);font-size:15px;font-weight:800}
+.pg-ins-lbl{font-size:11px;color:var(--muted);font-weight:600}
+
+.pg-charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.pg-chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);padding:20px;box-shadow:var(--sh1)}
+.pg-chart-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.pg-chart-hdr h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.pg-chart-canvas{position:relative;height:220px}
+.no-chart{display:flex;align-items:center;justify-content:center;height:100%;color:var(--faint);font-size:13px;gap:8px}
+
+/* TABLE */
+.pg-table-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r16);box-shadow:var(--sh1);overflow:hidden;margin-bottom:20px}
+.pg-table-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px;background:linear-gradient(135deg,#f8fafc,#f1f5f9)}
+.pg-table-hdr h3{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px}
+.tbl-wrap{overflow-x:auto}
+.tbl-wrap table{width:100%;border-collapse:collapse;font-size:12px;min-width:2000px}
+.tbl-wrap thead th{padding:10px 12px;text-align:left;background:linear-gradient(135deg,#1a1039,#4c1d95);color:rgba(255,255,255,.9);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.tbl-wrap tbody tr{border-bottom:1px solid #f1f5f9;transition:background var(--ease)}
+.tbl-wrap tbody tr:hover{background:#f5f3ff}
+.tbl-wrap tbody td{padding:10px 12px;vertical-align:middle;white-space:nowrap}
+.tbl-wrap tbody tr:nth-child(even){background:#fafafa}
+.tbl-wrap tbody tr:nth-child(even):hover{background:#f0f4ff}
+.td-name{font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.td-price{font-family:var(--fd);font-weight:800;color:var(--green);font-size:13px}
+.td-deposit{font-size:11px;color:var(--muted)}
+.td-img{width:48px;height:38px;border-radius:var(--r8);overflow:hidden;background:var(--purple-bg);display:flex;align-items:center;justify-content:center}
+.td-img img{width:100%;height:100%;object-fit:cover}
+.td-img i{color:var(--purple);font-size:15px}
+.pg-badge{padding:3px 8px;border-radius:var(--rf);font-size:11px;font-weight:700;display:inline-block;white-space:nowrap}
+.b-boys{background:#eff6ff;color:#2563eb}
+.b-girls{background:#fdf2f8;color:#db2777}
+.b-colive{background:var(--purple-bg);color:var(--purple)}
+.b-furnished{background:var(--green-bg);color:var(--green)}
+.b-semi{background:var(--amber-bg);color:var(--amber)}
+.b-unfurnished{background:#f1f5f9;color:#475569}
+.b-yes{background:var(--green-bg);color:var(--green)}
+.b-no{background:var(--red-bg);color:var(--red)}
+.b-single{background:var(--teal-bg);color:var(--teal)}
+.b-double{background:var(--blue-bg);color:var(--blue)}
+.b-triple{background:var(--orange-bg);color:var(--orange)}
+.act-btns{display:flex;gap:4px}
+.ab{width:28px;height:28px;border-radius:6px;border:none;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:var(--ease)}
+.ab-view{background:var(--purple-bg);color:var(--purple)}.ab-view:hover{background:var(--purple);color:#fff}
+.ab-edit{background:var(--amber-bg);color:var(--amber)}.ab-edit:hover{background:var(--amber);color:#fff}
+.ab-del{background:var(--red-bg);color:var(--red)}.ab-del:hover{background:var(--red);color:#fff}
+.no-data-row td{text-align:center;padding:50px;color:var(--faint)}
+.no-data-row i{font-size:40px;display:block;margin-bottom:12px}
+
+/* PAGINATION */
+.pg-pager-row{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border);background:var(--bg);flex-wrap:wrap;gap:10px}
+.pg-pager-info{font-size:13px;color:var(--muted)}
+.pg-pager{display:flex;gap:4px;flex-wrap:wrap}
+.pg-pg{min-width:34px;height:34px;padding:0 10px;border-radius:var(--r8);border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--ease);text-decoration:none}
+.pg-pg:hover{border-color:var(--purple);color:var(--purple)}
+.pg-pg.active{background:linear-gradient(135deg,#1a1039,#7c3aed);border-color:var(--purple);color:#fff}
+.pg-pg.disabled{opacity:.45;pointer-events:none}
+
+@media(max-width:1400px){.pg-ins-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:1200px){.pg-g6{grid-template-columns:repeat(3,1fr)}.pg-g5{grid-template-columns:repeat(3,1fr)}.pg-charts-grid{grid-template-columns:1fr}.pg-rings-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:900px){.pg-g6,.pg-g5,.pg-g4{grid-template-columns:repeat(2,1fr)}.pg-ins-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.pg-g6,.pg-g5,.pg-g4{grid-template-columns:1fr 1fr}.pg-form-grid{grid-template-columns:1fr}.pg-rings-grid{grid-template-columns:1fr 1fr}}
+</style>
+
+        <div class="main-content">
+            <div class="page-header">
+                <div class="page-header-content">
+                    <h1 class="page-title"><i class="fas fa-tachometer-alt"></i> Pg Co living Property Listings</h1>
+                    <div class="page-actions">
+                        <a href="{% url 'pg_coliving_agency' %}">
+                            <button class="btn-primary-custom">
+                                <i class="fas fa-plus-circle"></i> Add Pg Co living (Rent) Property
+                            </button>
+                        </a>
+                        <button class="btn-primary-custom"
+                                style="background: transparent; border: 2px solid white; color: white;"
+                                onclick="openImportModal()">
+                            <i class="fas fa-file-excel"></i> Import Excel
+                        </button>
+                        <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#bulkDeleteModal" style="background: #ef4444; border-color: #ef4444; color: white;">
+                            <i class="fas fa-trash-alt"></i> Bulk Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+<!-- ROW 2 — REVENUE KPIs (5 CARDS) -->
+
+<!-- ROW 3 — AMENITY & FACILITY KPIs (6 CARDS) -->
+
+
+<!-- ROW 4 — POLICY KPIs (5 CARDS) -->
+
+
+<!-- PERFORMANCE RINGS -->
+
+
+<!-- PERFORMANCE INSIGHTS -->
+
+
+<!-- CHARTS -->
+<div class="pg-kpi-wrap">
+  <div class="pg-row-lbl">Row 1 — Inventory Overview</div>
+  <div class="pg-kpi-grid pg-g6">
+
+    <div class="pg-kpi k-purple">
+      <div class="pg-kpi-ico ic-purple"><i class="fas fa-building"></i></div>
+      <div class="pg-kpi-val">{{ total_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Total PG Listings</div>
+      <div class="pg-kpi-sub"><i class="fas fa-database" style="font-size:10px"></i>&nbsp;All active records</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:100%;background:var(--purple)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-blue">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-blue"><i class="fas fa-male"></i></div>
+      <div class="pg-kpi-val">{{ boys_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Boys PG</div>
+      <div class="pg-kpi-sub"><i class="fas fa-user" style="font-size:10px"></i>&nbsp;Male-only listings</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:{{ boys_pct|default:0 }}%;background:var(--blue)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-pink">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-pink"><i class="fas fa-female"></i></div>
+      <div class="pg-kpi-val">{{ girls_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Girls PG</div>
+      <div class="pg-kpi-sub"><i class="fas fa-user" style="font-size:10px"></i>&nbsp;Female-only listings</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:{{ girls_pct|default:0 }}%;background:var(--pink)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-purple">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-indigo"><i class="fas fa-users"></i></div>
+      <div class="pg-kpi-val">{{ coliving_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Co-living Spaces</div>
+      <div class="pg-kpi-sub"><i class="fas fa-home" style="font-size:10px"></i>&nbsp;Mixed / shared</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:{{ coliving_pct|default:0 }}%;background:var(--indigo)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-teal">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-teal"><i class="fas fa-bed"></i></div>
+      <div class="pg-kpi-val">{{ total_beds|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Total Beds Available</div>
+      <div class="pg-kpi-sub"><span class="up"><i class="fas fa-arrow-up"></i></span>&nbsp;Across all PGs</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:80%;background:var(--teal)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-amber">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-amber"><i class="fas fa-map-marker-alt"></i></div>
+      <div class="pg-kpi-val">{{ city_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Cities Covered</div>
+      <div class="pg-kpi-sub"><i class="fas fa-globe" style="font-size:10px"></i>&nbsp;Geographic spread</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:60%;background:var(--amber)"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ROW 2 — REVENUE KPIs (5 CARDS) -->
+<div class="pg-kpi-wrap">
+  <div class="pg-row-lbl">Row 2 — Revenue &amp; Pricing</div>
+  <div class="pg-kpi-grid pg-g5">
+
+    <div class="pg-kpi k-amber">
+      <div class="pg-kpi-ico ic-amber"><i class="fas fa-rupee-sign"></i></div>
+      <div class="pg-kpi-val">{% if avg_rent %}&#8377;{{ avg_rent|floatformat:"0" }}{% else %}—{% endif %}</div>
+      <div class="pg-kpi-lbl">Avg Monthly Rent</div>
+      <div class="pg-kpi-sub"><i class="fas fa-calculator" style="font-size:10px"></i>&nbsp;Average per bed</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:60%;background:var(--amber)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-green">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-green"><i class="fas fa-coins"></i></div>
+      <div class="pg-kpi-val">{% if total_revenue %}&#8377;{{ total_revenue|floatformat:"0" }}{% else %}—{% endif %}</div>
+      <div class="pg-kpi-lbl">Total Monthly Revenue</div>
+      <div class="pg-kpi-sub"><span class="up"><i class="fas fa-arrow-up"></i></span>&nbsp;All PG income</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:85%;background:var(--green)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-purple">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-purple"><i class="fas fa-piggy-bank"></i></div>
+      <div class="pg-kpi-val">{% if total_deposit %}&#8377;{{ total_deposit|floatformat:"0" }}{% else %}—{% endif %}</div>
+      <div class="pg-kpi-lbl">Security Deposit Total</div>
+      <div class="pg-kpi-sub"><i class="fas fa-lock" style="font-size:10px"></i>&nbsp;Locked amount</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:90%;background:var(--purple)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-green">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-green"><i class="fas fa-arrow-up"></i></div>
+      <div class="pg-kpi-val">{% if max_rent %}&#8377;{{ max_rent }}{% else %}—{% endif %}</div>
+      <div class="pg-kpi-lbl">Highest Rent</div>
+      <div class="pg-kpi-sub"><i class="fas fa-crown" style="font-size:10px;color:var(--amber)"></i>&nbsp;Premium PG</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:100%;background:var(--green)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-indigo">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-indigo"><i class="fas fa-arrow-down"></i></div>
+      <div class="pg-kpi-val">{% if min_rent %}&#8377;{{ min_rent }}{% else %}—{% endif %}</div>
+      <div class="pg-kpi-lbl">Lowest Rent</div>
+      <div class="pg-kpi-sub"><i class="fas fa-tag" style="font-size:10px"></i>&nbsp;Budget PG</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:15%;background:var(--indigo)"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ROW 3 — AMENITY & FACILITY KPIs (6 CARDS) -->
+<div class="pg-kpi-wrap">
+  <div class="pg-row-lbl">Row 3 — Amenity &amp; Facility Summary</div>
+  <div class="pg-kpi-grid pg-g6">
+
+    <div class="pg-kpi k-green">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-green"><i class="fas fa-utensils"></i></div>
+      <div class="pg-kpi-val">{{ meals_available_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Meals Included</div>
+      <div class="pg-kpi-sub"><i class="fas fa-check" style="font-size:10px"></i>&nbsp;With food facility</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:{{ meals_pct|default:0 }}%;background:var(--green)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-teal">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-teal"><i class="fas fa-couch"></i></div>
+      <div class="pg-kpi-val">{{ furnished_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Fully Furnished</div>
+      <div class="pg-kpi-sub"><i class="fas fa-check-circle" style="font-size:10px"></i>&nbsp;Premium rooms</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:{{ furnished_pct|default:0 }}%;background:var(--teal)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-blue">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-blue"><i class="fas fa-user-shield"></i></div>
+      <div class="pg-kpi-val">{{ single_room_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Single Room PGs</div>
+      <div class="pg-kpi-sub"><i class="fas fa-bed" style="font-size:10px"></i>&nbsp;Private rooms</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:30%;background:var(--blue)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-orange">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-orange"><i class="fas fa-users"></i></div>
+      <div class="pg-kpi-val">{{ shared_room_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Shared Room PGs</div>
+      <div class="pg-kpi-sub"><i class="fas fa-user-friends" style="font-size:10px"></i>&nbsp;2+ sharing</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:50%;background:var(--orange)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-rose">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-rose"><i class="fas fa-ban"></i></div>
+      <div class="pg-kpi-val">{{ non_veg_allowed|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Non-Veg Allowed</div>
+      <div class="pg-kpi-sub"><i class="fas fa-drumstick-bite" style="font-size:10px"></i>&nbsp;PGs allowing it</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:40%;background:var(--rose)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-cyan">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-cyan"><i class="fas fa-images"></i></div>
+      <div class="pg-kpi-val">{{ with_images_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">With Images</div>
+      <div class="pg-kpi-sub"><span class="up"><i class="fas fa-arrow-up"></i></span>&nbsp;Listing quality</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:86%;background:var(--cyan)"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ROW 4 — POLICY KPIs (5 CARDS) -->
+<div class="pg-kpi-wrap">
+  <div class="pg-row-lbl">Row 4 — House Rules &amp; Policy Summary</div>
+  <div class="pg-kpi-grid pg-g5">
+
+    <div class="pg-kpi k-green">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-green"><i class="fas fa-clock"></i></div>
+      <div class="pg-kpi-val">{{ anytime_entry|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Anytime Entry</div>
+      <div class="pg-kpi-sub"><i class="fas fa-door-open" style="font-size:10px"></i>&nbsp;No curfew</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:35%;background:var(--green)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-blue">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-blue"><i class="fas fa-user-friends"></i></div>
+      <div class="pg-kpi-val">{{ visitors_allowed|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Visitors Allowed</div>
+      <div class="pg-kpi-sub"><i class="fas fa-handshake" style="font-size:10px"></i>&nbsp;Guest-friendly</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:45%;background:var(--blue)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-teal">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-teal"><i class="fas fa-star"></i></div>
+      <div class="pg-kpi-val">{{ premium_pg_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Premium PGs</div>
+      <div class="pg-kpi-sub"><i class="fas fa-rupee-sign" style="font-size:10px"></i>&nbsp;Above &#8377;10,000/mo</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:40%;background:var(--teal)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-lime">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-lime"><i class="fas fa-tags"></i></div>
+      <div class="pg-kpi-val">{{ budget_pg_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Budget PGs</div>
+      <div class="pg-kpi-sub"><i class="fas fa-rupee-sign" style="font-size:10px"></i>&nbsp;Under &#8377;5,000/mo</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:35%;background:var(--lime)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-pink">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-pink"><i class="fas fa-user-check"></i></div>
+      <div class="pg-kpi-val">{{ with_owner_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Owner Details Available</div>
+      <div class="pg-kpi-sub"><span class="up"><i class="fas fa-arrow-up"></i></span>&nbsp;Data completeness</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:93%;background:var(--pink)"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PERFORMANCE RINGS -->
+<div class="pg-row-lbl" style="margin-bottom:12px">Performance Rings</div>
+<div class="pg-rings-grid">
+  <div class="pg-ring-card">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 90 90"><circle class="r-bg" cx="45" cy="45" r="39"/><circle class="r-fill" cx="45" cy="45" r="39" stroke="#7c3aed" data-pct="{{ boys_pct|default:0 }}"/></svg>
+      <div class="ring-center"><div class="ring-pct" style="color:var(--purple)">{{ boys_pct|default:0 }}%</div><div class="ring-lbl">Boys</div></div>
+    </div>
+    <div class="ring-name">Boys PG Share</div>
+    <div class="ring-sub">{{ boys_count }} listings</div>
+  </div>
+  <div class="pg-ring-card">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 90 90"><circle class="r-bg" cx="45" cy="45" r="39"/><circle class="r-fill" cx="45" cy="45" r="39" stroke="#db2777" data-pct="{{ girls_pct|default:0 }}"/></svg>
+      <div class="ring-center"><div class="ring-pct" style="color:var(--pink)">{{ girls_pct|default:0 }}%</div><div class="ring-lbl">Girls</div></div>
+    </div>
+    <div class="ring-name">Girls PG Share</div>
+    <div class="ring-sub">{{ girls_count }} listings</div>
+  </div>
+  <div class="pg-ring-card">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 90 90"><circle class="r-bg" cx="45" cy="45" r="39"/><circle class="r-fill" cx="45" cy="45" r="39" stroke="#16a34a" data-pct="{{ meals_pct|default:0 }}"/></svg>
+      <div class="ring-center"><div class="ring-pct" style="color:var(--green)">{{ meals_pct|default:0 }}%</div><div class="ring-lbl">Meals</div></div>
+    </div>
+    <div class="ring-name">Meals Included</div>
+    <div class="ring-sub">{{ meals_available_count }} PGs</div>
+  </div>
+  <div class="pg-ring-card">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 90 90"><circle class="r-bg" cx="45" cy="45" r="39"/><circle class="r-fill" cx="45" cy="45" r="39" stroke="#0d9488" data-pct="{{ furnished_pct|default:0 }}"/></svg>
+      <div class="ring-center"><div class="ring-pct" style="color:var(--teal)">{{ furnished_pct|default:0 }}%</div><div class="ring-lbl">Furnished</div></div>
+    </div>
+    <div class="ring-name">Fully Furnished</div>
+    <div class="ring-sub">{{ furnished_count }} PGs</div>
+  </div>
+</div>
+
+<!-- PERFORMANCE INSIGHTS -->
+<div class="pg-row-lbl" style="margin-bottom:12px">Performance Insights</div>
+<div class="pg-ins-grid">
+  <div class="pg-ins">
+    <div class="pg-ins-ico ic-green"><i class="fas fa-arrow-up"></i></div>
+    <div><div class="pg-ins-val" style="color:var(--green)">{% if max_rent %}&#8377;{{ max_rent }}{% else %}—{% endif %}</div><div class="pg-ins-lbl">Highest Rent</div></div>
+  </div>
+  <div class="pg-ins">
+    <div class="pg-ins-ico ic-indigo"><i class="fas fa-arrow-down"></i></div>
+    <div><div class="pg-ins-val" style="color:var(--indigo)">{% if min_rent %}&#8377;{{ min_rent }}{% else %}—{% endif %}</div><div class="pg-ins-lbl">Lowest Rent</div></div>
+  </div>
+  <div class="pg-ins">
+    <div class="pg-ins-ico ic-amber"><i class="fas fa-equals"></i></div>
+    <div><div class="pg-ins-val" style="color:var(--amber)">{% if avg_rent %}&#8377;{{ avg_rent|floatformat:"0" }}{% else %}—{% endif %}</div><div class="pg-ins-lbl">Avg Monthly Rent</div></div>
+  </div>
+  <div class="pg-ins">
+    <div class="pg-ins-ico ic-teal"><i class="fas fa-bed"></i></div>
+    <div><div class="pg-ins-val" style="color:var(--teal)">{{ total_beds|default:"—" }}</div><div class="pg-ins-lbl">Total Beds</div></div>
+  </div>
+  <div class="pg-ins">
+    <div class="pg-ins-ico ic-purple"><i class="fas fa-piggy-bank"></i></div>
+    <div><div class="pg-ins-val" style="color:var(--purple)">{% if avg_deposit %}&#8377;{{ avg_deposit|floatformat:"0" }}{% else %}—{% endif %}</div><div class="pg-ins-lbl">Avg Security Deposit</div></div>
+  </div>
+  <div class="pg-ins">
+    <div class="pg-ins-ico ic-red"><i class="fas fa-city"></i></div>
+    <div><div class="pg-ins-val" style="color:var(--red)">{{ city_count }} Cities</div><div class="pg-ins-lbl">Geographic Coverage</div></div>
+  </div>
+</div>
+
+<!-- CHARTS -->
+<div class="pg-charts-grid">
+  <div class="pg-chart-card">
+    <div class="pg-chart-hdr">
+      <h3><i class="fas fa-users" style="color:var(--purple)"></i> PG For Distribution</h3>
+      <span class="pg-pill pp-purple">{{ total_count }} total</span>
+    </div>
+    <div class="pg-chart-canvas">
+      {% if pg_for_labels %}<canvas id="pgForChart"></canvas>{% else %}<div class="no-chart"><i class="fas fa-chart-pie"></i> No data available</div>{% endif %}
+    </div>
+  </div>
+  <div class="pg-chart-card">
+    <div class="pg-chart-hdr">
+      <h3><i class="fas fa-rupee-sign" style="color:var(--green)"></i> Rent Range Distribution</h3>
+      <span class="pg-pill pp-green">7 ranges</span>
+    </div>
+    <div class="pg-chart-canvas">
+      {% if rent_range_labels %}<canvas id="rentChart"></canvas>{% else %}<div class="no-chart"><i class="fas fa-chart-bar"></i> No data available</div>{% endif %}
+    </div>
+  </div>
+  <div class="pg-chart-card">
+    <div class="pg-chart-hdr">
+      <h3><i class="fas fa-couch" style="color:var(--amber)"></i> Furnishing Type</h3>
+      <span class="pg-pill pp-amber">3 types</span>
+    </div>
+    <div class="pg-chart-canvas">
+      {% if furnishing_labels %}<canvas id="furnishChart"></canvas>{% else %}<div class="no-chart"><i class="fas fa-chart-pie"></i> No data available</div>{% endif %}
+    </div>
+  </div>
+  <div class="pg-chart-card">
+    <div class="pg-chart-hdr">
+      <h3><i class="fas fa-map-marker-alt" style="color:var(--red)"></i> City-wise PG Count</h3>
+      <span class="pg-pill pp-teal">Top cities</span>
+    </div>
+    <div class="pg-chart-canvas">
+      {% if city_labels %}<canvas id="cityChart"></canvas>{% else %}<div class="no-chart"><i class="fas fa-chart-bar"></i> No data available</div>{% endif %}
+    </div>
+  </div>
+</div>
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Safely load the JSON data passed from Django View
+    const chartData = JSON.parse('{{ chart_data_json|escapejs }}');
+
+    // 2. Property Distribution Pie Chart
+    const pieCtx = document.getElementById('propertyPieChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Residential', 'Commercial', 'PG/Co-living'],
+            datasets: [{
+                data: chartData.property_distribution,
+                backgroundColor: ['#10b981', '#f59e0b', '#3b82f6'],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right' }
+            },
+            cutout: '70%'
+        }
+    });
+
+    // 3. Monthly Rental Income Bar Chart
+    const barCtx = document.getElementById('rentalIncomeChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: chartData.months,
+            datasets: [{
+                label: 'Income (₹)',
+                data: chartData.rental_income,
+                backgroundColor: '#6366f1',
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    grid: { borderDash: [5, 5], color: '#e2e8f0' },
+                    ticks: { callback: function(value) { return '₹' + (value/1000) + 'k'; } }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+});
+</script>
+
+
+<div class="pg-search">
+  <div class="pg-search-title">
+      <i class="fas fa-sliders-h"></i> Smart Search &amp; Filters 
+      <span id="loadingIndicator" style="display:none; color: #7c3aed; margin-left: 10px; font-size: 11px;">
+          <i class="fas fa-spinner fa-spin"></i> Filtering...
+      </span>
+  </div>
+  
+  <form method="GET" action="" id="pgSearchForm">
+    <div class="pg-search-row">
+      
+      <div class="pg-sf" style="flex:2;min-width:220px">
+        <label><i class="fas fa-search"></i> Search Keyword</label>
+        <input type="text" name="search" id="pgSearchInput" value="{{ search_query }}" placeholder="PG name, city, locality, owner, contact…" autocomplete="off">
+      </div>
+      
+      <div class="pg-sf">
+        <label>PG For</label>
+        <select name="pg_for" class="auto-submit">
+          <option value="">All Types</option>
+          <option value="Boys" {% if pg_for_filter == "Boys" %}selected{% endif %}>Boys</option>
+          <option value="Girls" {% if pg_for_filter == "Girls" %}selected{% endif %}>Girls</option>
+          <option value="Co-living" {% if pg_for_filter == "Co-living" %}selected{% endif %}>Co-living</option>
+        </select>
+      </div>
+      
+      <div class="pg-sf">
+        <label>City</label>
+        <select name="city" class="auto-submit">
+          <option value="">All Cities</option>
+          {% for city in cities %}
+          <option value="{{ city }}" {% if city_filter == city %}selected{% endif %}>{{ city }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="pg-sf">
+        <label>Furnishing</label>
+        <select name="furnish" class="auto-submit">
+          <option value="">All Furnishing</option>
+          <option value="Furnished" {% if furnish_filter == "Furnished" %}selected{% endif %}>Furnished</option>
+          <option value="Semi-Furnished" {% if furnish_filter == "Semi-Furnished" %}selected{% endif %}>Semi-Furnished</option>
+          <option value="Unfurnished" {% if furnish_filter == "Unfurnished" %}selected{% endif %}>Unfurnished</option>
+        </select>
+      </div>
+      
+      <div class="pg-sf">
+        <label>Meals Available</label>
+        <select name="meals" class="auto-submit">
+          <option value="">All</option>
+          <option value="Yes" {% if meals_filter == "Yes" %}selected{% endif %}>With Meals</option>
+          <option value="No" {% if meals_filter == "No" %}selected{% endif %}>Without Meals</option>
+        </select>
+      </div>
+      
+      <div class="pg-sf">
+        <label>Sharing Type</label>
+        <select name="sharing" class="auto-submit">
+          <option value="">All Sharing</option>
+          <option value="Single" {% if sharing_filter == "Single" %}selected{% endif %}>Single</option>
+          <option value="Double" {% if sharing_filter == "Double" %}selected{% endif %}>Double</option>
+          <option value="Triple" {% if sharing_filter == "Triple" %}selected{% endif %}>Triple</option>
+          <option value="Dormitory" {% if sharing_filter == "Dormitory" %}selected{% endif %}>Dormitory</option>
+        </select>
+      </div>
+      
+    </div>
+
+    <!-- Second Row (Dates) -->
+    <div class="pg-search-row" style="margin-top: 14px;">
+        <div class="pg-sf">
+            <label>From Date</label>
+            <input type="date" name="from_date" value="{{ from_date }}" class="auto-submit">
+        </div>
+        <div class="pg-sf">
+            <label>To Date</label>
+            <input type="date" name="to_date" value="{{ to_date }}" class="auto-submit">
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-end;flex-shrink:0">
+            <a href="{% url 'pg_list' %}" class="pg-btn pg-btn-outline" style="height: 38px; justify-content: center;"><i class="fas fa-times"></i> Reset</a>
+        </div>
+    </div>
+  </form>
+  
+  <div class="pg-search-footer">
+    <div class="pg-pill pp-purple"><i class="fas fa-filter"></i> Showing <strong>{{ total_count }}</strong> PG listings</div>
+    {% if search_query %}<div class="pg-pill pp-amber"><i class="fas fa-search"></i> "{{ search_query }}"</div>{% endif %}
+    {% if pg_for_filter %}<div class="pg-pill pp-pink"><i class="fas fa-users"></i> {{ pg_for_filter }}</div>{% endif %}
+    {% if city_filter %}<div class="pg-pill pp-teal"><i class="fas fa-map-marker-alt"></i> {{ city_filter }}</div>{% endif %}
+  </div>
+</div>
+            <div class="properties-section" style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 20px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+        
+    <div style="display: flex; gap: 10px;">
+    <a href="{% url 'export_pg_coliving' %}?format=excel" 
+       target="_blank" 
+       class="btn btn-sm" 
+       style="background-color: #6366f1; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
+        <i class="fas fa-file-excel"></i> Direct Excel Download
+    </a>
+    
+    <a href="{% url 'export_pg_coliving' %}?format=csv" 
+       target="_blank" 
+       class="btn btn-sm" 
+       style="background-color: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
+        <i class="fas fa-file-csv"></i> Direct CSV Download
+    </a>
+</div>
+      
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; color: #475569; font-size: 0.9rem;">
+        <span>Show</span>
+        <select style="padding: 4px 8px; border: 1px solid #e2e8f0; border-radius: 4px; outline: none;">
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select>
+        <span>entries</span>
+    </div>
+<!-- ================================================================
+     CHANGE 4 — HTML TABLE  (replace the existing <table> block)
+     Room details now show as individual columns matching the DB:
+     room_type, room_beds, room_rent, room_deposit,
+     room_brokerage, room_brokerage_percent, room_manual_brokerage,
+     room_facilities
+================================================================ -->
+
+<div class="table-responsive" style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+    <table class="properties-table" id="pgTable" style="width: 100%; border-collapse: collapse; background: white; white-space: nowrap;">
+        <thead>
+            <tr style="background: linear-gradient(135deg, #667eea10, #764ba210); border-bottom: 2px solid var(--border);">
+
+                <!-- ── Meta ─────────────────────────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Sr.No</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Images</th>
+
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Guided Video Tour</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">pg_property_id</th>
+
+
+                <!-- ── Basic Info ────────────────────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">property_title</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">city</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">building_name</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">locality</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">property_address</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">total_beds</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">pg_for</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">furnishing_type</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">sharing_type</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">best_suited_for</th>
+
+                                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">meals_available</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">meal_offerings</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">meal_speciality</th>
+
+                <!-- ── PGRoomDetail — one group of columns per room slot ── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">notice_period</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">lockin_period</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">minimum_stay</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">available_from</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">property_managed_by</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property manager stays at Property</th>
+                <!-- Room 1 -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; border-left: 3px solid #c4b5fd;">room_type_1</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_beds_1</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_rent_1</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_deposit_1</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_brokerage_1</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_brokerage_percent_1</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_manual_brokerage_1</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; border-right: 3px solid #c4b5fd;">room_facilities_1</th>
+                <!-- Room 2 -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; border-left: 3px solid #ddd6fe;">room_type_2</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_beds_2</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_rent_2</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_deposit_2</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_brokerage_2</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_brokerage_percent_2</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_manual_brokerage_2</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; border-right: 3px solid #ddd6fe;">room_facilities_2</th>
+
+                <!-- ── Meals ─────────────────────────────────────────────── -->
+
+
+                <!-- ── Rules ─────────────────────────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">opposite_sex_allowed</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">any_time_allowed</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">visitors_allowed</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">guardian_allowed</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">drinking_allowed</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">smoking_allowed</th>
+
+                <!-- ── Amenities ──────────────────────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">property_description</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">amenities</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">nearby_facilities</th>
+
+                <!-- ── Contact ───────────────────────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">owner_name</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">contact_number</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">email</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">alternate_contact</th>
+
+                <!-- ── Uploader ──────────────────────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">uploaded_by_name</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">uploaded_by_email</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">uploaded_by_contact</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">uploaded_by_role</th>
+
+                <!-- ── Audit ─────────────────────────────────────────────── -->
+
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">upload_file_name</th>
+
+                                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">created_at</th>
+
+
+                <!-- ── Actions ───────────────────────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: center; font-size: 11px; font-weight: 700; color: white; position: sticky; right: 0; background: #1a1039; z-index: 2;">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for prop in page_obj %}
+            {% with rooms=prop.rooms.all %}
+            <tr id="row-{{ prop.id }}">
+
+                <!-- Meta -->
+                <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
+
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        {% if prop.images.all %}
+                            <div style="position: relative; width: 50px; height: 50px; min-width: 50px;" title="Click to view all images">
+                                {% with first_img=prop.images.all|first %}
+                                    <img src="{{ first_img.image.url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                {% endwith %}
+                                {% if prop.images.count > 1 %}
+                                    <div style="position: absolute; bottom: -4px; right: -4px; background: rgba(0,0,0,0.8); color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px; border: 1px solid white; font-weight: bold; line-height: 1;">
+                                        +{{ prop.images.count|add:"-1" }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div style="width: 50px; height: 50px; min-width: 50px; border-radius: 8px; background: linear-gradient(135deg, #2563eb, #1e40af); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <i class="fas fa-home" style="font-size: 16px;"></i>
+                                <span style="font-size: 6px; font-weight: 700; margin-top: 2px; line-height: 1;">EstateFlow</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </td>
+
+               
+                <td>
+                    {% if prop.video %}
+                        <a href="{{ prop.video.url }}" target="_blank" onclick="openVideoPreview('{{ prop.video.url }}'); return false;" style="color: #0d9488; text-decoration: none; font-weight: 600;"><i class="fas fa-video"></i> Run Stream</a>
+                    {% else %}<span class="text-muted">—</span>{% endif %}
+                </td>
+
+                <td style="font-weight: 700; color: #7c3aed;">{{ prop.pg_property_id|default:"—" }}</td>
+              
+
+                <!-- Basic Info -->
+                <td class="property-title">{{ prop.property_title|default:"—" }}</td>
+                <td>{{ prop.city|default:"—" }}</td>
+                <td>{{ prop.building_name|default:"—" }}</td>
+                <td>{{ prop.locality|default:"—" }}</td>
+                <td><span class="truncate-cell" title="{{ prop.property_address }}">{{ prop.property_address|default:"—" }}</span></td>
+                <td style="font-weight: 700;">{{ prop.total_beds|default:"0" }} Beds</td>
+                <td><span class="badge badge-pg">{{ prop.pg_for|default:"—" }}</span></td>
+                <td>{{ prop.furnishing_type|default:"—" }}</td>
+                <td>{{ prop.sharing_type|default:"—" }}</td>
+                <td>{{ prop.best_suited_for|default:"—" }}</td>
+
+                <td><span class="badge {% if prop.meals_available %}badge-residential{% else %}badge-commercial{% endif %}">{{ prop.meals_available|yesno:"Active,None" }}</span></td>
+                <td>{{ prop.meal_offerings|default:"—" }}</td>
+                <td>{{ prop.meal_speciality|default:"—" }}</td>
+
+                <!-- Rules -->
+                <td>{{ prop.notice_period|default:"0" }} Days</td>
+                <td>{{ prop.lockin_period|default:"0" }} Days</td>
+                <td>{{ prop.minimum_stay|default:"0" }} Months</td>
+                <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
+                <td>{{ prop.property_managed_by|default:"—" }}</td>
+                <td>{{ prop.manager_stays|yesno:"Yes (On-Site),No" }}</td>
+
+                <!-- ── Room 1 — individual DB-field columns ── -->
+                {% with r=rooms|first %}
+                <td style="background: #faf5ff; border-left: 3px solid #c4b5fd;">{{ r.room_type|capfirst|default:"—" }}</td>
+                <td style="background: #faf5ff;">{{ r.room_beds|default:"—" }}</td>
+                <td style="background: #faf5ff; font-weight: 700; color: #059669;">{% if r %}₹{{ r.room_rent|floatformat:"0" }}{% else %}—{% endif %}</td>
+                <td style="background: #faf5ff;">{% if r %}₹{{ r.room_deposit|floatformat:"0" }}{% else %}—{% endif %}</td>
+                <td style="background: #faf5ff;">{{ r.room_brokerage|default:"—" }}</td>
+                <td style="background: #faf5ff;">{{ r.room_brokerage_percent|default:"—" }}</td>
+                <td style="background: #faf5ff;">{{ r.room_manual_brokerage|default:"—" }}</td>
+                <td style="background: #faf5ff; border-right: 3px solid #c4b5fd;"><span class="truncate-cell" title="{{ r.room_facilities }}">{{ r.room_facilities|default:"—" }}</span></td>
+                {% endwith %}
+
+                <!-- ── Room 2 — individual DB-field columns ── -->
+                {% with r=rooms.1 %}
+                <td style="background: #f5f3ff; border-left: 3px solid #ddd6fe;">{{ r.room_type|capfirst|default:"—" }}</td>
+                <td style="background: #f5f3ff;">{{ r.room_beds|default:"—" }}</td>
+                <td style="background: #f5f3ff; font-weight: 700; color: #059669;">{% if r %}₹{{ r.room_rent|floatformat:"0" }}{% else %}—{% endif %}</td>
+                <td style="background: #f5f3ff;">{% if r %}₹{{ r.room_deposit|floatformat:"0" }}{% else %}—{% endif %}</td>
+                <td style="background: #f5f3ff;">{{ r.room_brokerage|default:"—" }}</td>
+                <td style="background: #f5f3ff;">{{ r.room_brokerage_percent|default:"—" }}</td>
+                <td style="background: #f5f3ff;">{{ r.room_manual_brokerage|default:"—" }}</td>
+                <td style="background: #f5f3ff; border-right: 3px solid #ddd6fe;"><span class="truncate-cell" title="{{ r.room_facilities }}">{{ r.room_facilities|default:"—" }}</span></td>
+                {% endwith %}
+
+                <!-- Meals -->
+                
+                <td>{{ prop.opposite_sex_allowed|yesno:"Allowed,Banned" }}</td>
+                <td>{{ prop.any_time_allowed|yesno:"24/7 Access,Curfew Enforced" }}</td>
+                <td>{{ prop.visitors_allowed|yesno:"Allowed,Restricted" }}</td>
+                <td>{{ prop.guardian_allowed|yesno:"Allowed,Restricted" }}</td>
+                <td>{{ prop.drinking_allowed|yesno:"Allowed,Banned" }}</td>
+                <td>{{ prop.smoking_allowed|yesno:"Allowed,Banned" }}</td>
+
+                <!-- Amenities -->
+                <td><span class="truncate-cell" title="{{ prop.property_description }}">{{ prop.property_description|default:"—" }}</span></td>
+                <td><span class="truncate-cell" title="{{ prop.amenities }}"><code>{{ prop.amenities|default:"—" }}</code></span></td>
+                <td><span class="truncate-cell" title="{{ prop.nearby_facilities }}"><code>{{ prop.nearby_facilities|default:"—" }}</code></span></td>
+
+                <!-- Contact -->
+                <td>{{ prop.owner_name|default:"—" }}</td>
+                <td style="color: #2563eb; font-weight: 700;">{{ prop.contact_number|default:"—" }}</td>
+                <td>{{ prop.email|default:"—" }}</td>
+                <td>{{ prop.alternate_contact|default:"—" }}</td>
+
+                <!-- Uploader -->
+                <td>{{ prop.uploaded_by_name|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_email|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
+                <td>{{ prop.uploaded_by_role|default:"—" }}</td>
+
+             
+                <td><small class="text-muted">{{ prop.upload_file_name|default:"Web Listing Form" }}</small></td>
+                
+                  <td>{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
+               
+
+                <!-- Actions -->
+                <td style="position: sticky; right: 0; background: white; z-index: 2; box-shadow: -2px 0 5px rgba(0,0,0,0.05);">
+                    <div class="action-buttons">
+
+                        <a href="{% url 'pg_coliving_view' prop.id %}" 
+   class="btn-action btn-view" 
+   title="View Property">
+    <i class="fas fa-eye"></i>
+</a>
+      
+                        <button class="btn-action btn-edit"
+                            onclick="window.location.href='{% url 'pg_edit_page' property_id=prop.id %}'"
+                            title="Modify Record Parameters">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-action btn-delete"
+    onclick="deletePG('{{ prop.id }}')"
+    title="Delete Property">
+    <i class="fas fa-trash"></i>
+</button>
+
+              </div>
+                </td>
+            </tr>
+            {% endwith %}
+            {% empty %}
+            <tr>
+                <td colspan="70">
+                    <div class="empty-state">
+                        <i class="fas fa-home"></i>
+                         pg_coliving listing data Not found
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+ 
+
+    {% if page_obj.has_other_pages %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+        <div style="font-size: 0.85rem; color: #64748b;">
+            Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </div>
+        <div style="display: flex; gap: 5px;">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if search %}&search={{ search }}{% endif %}" style="padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #475569; background: white;">&laquo;</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}" style="padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #475569; background: white;">&lsaquo;</a>
+            {% endif %}
+            
+            <span style="padding: 6px 12px; background: #6366f1; color: white; border-radius: 6px; font-weight: 600;">{{ page_obj.number }}</span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}" style="padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #475569; background: white;">&rsaquo;</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}" style="padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #475569; background: white;">&raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+    <style>
+        .imp-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.55); z-index: 9999;
+            align-items: center; justify-content: center;
+        }
+        .imp-overlay.show { display: flex; }
+        .imp-modal {
+            background: #fff; border-radius: 20px; width: 520px; max-width: 96vw;
+            box-shadow: 0 24px 60px rgba(0,0,0,.25);
+            animation: impUp .22s ease;
+            overflow: hidden;
+        }
+        @keyframes impUp { from{transform:translateY(24px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+        .imp-header {
+            background: linear-gradient(135deg, #7C3AED, #4C1D95);
+            padding: 20px 24px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .imp-header h4 { color: #fff; margin: 0; font-size: 16px; font-weight: 700; }
+        .imp-header p  { color: rgba(255,255,255,.7); margin: 3px 0 0; font-size: 12px; }
+        .imp-close {
+            background: rgba(255,255,255,.15); border: none; color: #fff;
+            width: 30px; height: 30px; border-radius: 50%;
+            font-size: 14px; cursor: pointer; transition: background .2s;
+        }
+        .imp-close:hover { background: rgba(255,255,255,.3); }
+
+        .imp-body { padding: 24px; }
+
+        /* Drop zone */
+        .drop-zone {
+            border: 2px dashed #c4b5fd; border-radius: 14px;
+            padding: 32px 20px; text-align: center;
+            background: #faf5ff; cursor: pointer;
+            transition: all .2s; position: relative;
+        }
+        .drop-zone.drag-over { border-color: #7C3AED; background: #ede9fe; }
+        .drop-zone i { font-size: 2.2rem; color: #7C3AED; margin-bottom: 10px; display: block; }
+        .drop-zone h5 { margin: 0 0 6px; font-size: 14px; font-weight: 700; color: #1e293b; }
+        .drop-zone p  { margin: 0; font-size: 12px; color: #64748b; }
+        .drop-zone input { display: none; }
+
+        /* File selected state */
+        .file-selected {
+            background: #f5f3ff; border-color: #7C3AED; border-style: solid;
+            border-radius: 14px; padding: 14px 18px;
+            display: flex; align-items: center; gap: 12px;
+            margin-top: 12px;
+        }
+        .file-selected i { font-size: 1.6rem; color: #7C3AED; flex-shrink: 0; }
+        .file-selected .fname { font-size: 13px; font-weight: 600; color: #1e293b; }
+        .file-selected .fsize { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+        .file-clear {
+            margin-left: auto; background: #FEF2F2; border: none;
+            color: #DC2626; width: 28px; height: 28px; border-radius: 50%;
+            font-size: 12px; cursor: pointer; flex-shrink: 0;
+        }
+
+        /* Progress */
+        .imp-progress { margin-top: 14px; display: none; }
+        .prog-bar-wrap {
+            background: #e9d5ff; border-radius: 99px; height: 8px; overflow: hidden;
+        }
+        .prog-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #7C3AED, #A855F7);
+            border-radius: 99px; width: 0%; transition: width .3s;
+        }
+        .prog-text { font-size: 12px; color: #7C3AED; font-weight: 600; margin-top: 6px; text-align: center; }
+
+        /* Result */
+        .imp-result {
+            margin-top: 14px; padding: 14px 16px;
+            border-radius: 10px; display: none; font-size: 13px;
+        }
+        .imp-result.success { background: #F0FDF4; border: 1px solid #bbf7d0; color: #15803D; }
+        .imp-result.error   { background: #FEF2F2; border: 1px solid #fecaca; color: #DC2626; }
+        .imp-result .res-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
+        .imp-result .res-item { display: flex; align-items: center; gap: 6px; }
+        .imp-result .res-val  { font-weight: 700; font-size: 16px; }
+        .imp-result .err-list { margin: 8px 0 0; padding-left: 16px; font-size: 11px; }
+
+        /* Download link */
+        .download-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #faf5ff; border-radius: 10px;
+            padding: 12px 16px; margin-top: 16px;
+        }
+        .download-bar span { font-size: 12px; color: #64748b; }
+        .download-bar a {
+            font-size: 12px; font-weight: 700; color: #7C3AED;
+            text-decoration: none; display: flex; align-items: center; gap: 6px;
+        }
+        .download-bar a:hover { text-decoration: underline; }
+
+        /* Footer */
+        .imp-footer {
+            padding: 16px 24px; background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex; justify-content: flex-end; gap: 10px;
+        }
+        .imp-btn-cancel {
+            padding: 10px 22px; background: #f1f5f9; border: none;
+            border-radius: 8px; font-size: 13px; font-weight: 600;
+            color: #64748b; cursor: pointer; transition: background .2s;
+        }
+        .imp-btn-cancel:hover { background: #e2e8f0; }
+        .imp-btn-upload {
+            padding: 10px 28px;
+            background: linear-gradient(135deg, #7C3AED, #4C1D95);
+            border: none; border-radius: 8px; font-size: 13px;
+            font-weight: 700; color: #fff; cursor: pointer;
+            box-shadow: 0 4px 14px rgba(124,58,237,.35);
+            transition: all .2s; display: flex; align-items: center; gap: 8px;
+        }
+        .imp-btn-upload:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,.45); }
+        .imp-btn-upload:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+    </style>
+
+    <div class="imp-overlay" id="importModal">
+        <div class="imp-modal">
+
+            <div class="imp-header">
+                <div>
+                    <h4><i class="fas fa-file-excel"></i>&nbsp; Import PG / Co-Living Data</h4>
+                    <p>Upload an .xlsx file to bulk-import PG properties</p>
+                </div>
+                <button class="imp-close" onclick="closeImportModal()">✕</button>
+            </div>
+
+            <div class="imp-body">
+
+                <div class="drop-zone" id="dropZone"
+                     onclick="document.getElementById('pgExcelFile').click()"
+                     ondragover="handleDragOver(event)"
+                     ondragleave="handleDragLeave(event)"
+                     ondrop="handleDrop(event)">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h5>Click to browse or drag & drop</h5>
+                    <p>Accepted format: <strong>.xlsx</strong> only</p>
+                    <input type="file" id="pgExcelFile" accept=".xlsx" onchange="onFileSelect(this)">
+                </div>
+
+                <div class="file-selected" id="fileChip" style="display:none;">
+                    <i class="fas fa-file-excel"></i>
+                    <div>
+                        <div class="fname" id="chipName">—</div>
+                        <div class="fsize" id="chipSize">—</div>
+                    </div>
+                    <button class="file-clear" onclick="clearFile()" title="Remove">✕</button>
+                </div>
+
+                <div class="imp-progress" id="impProgress">
+                    <div class="prog-bar-wrap">
+                        <div class="prog-bar-fill" id="progFill"></div>
+                    </div>
+                    <div class="prog-text" id="progText">Uploading…</div>
+                </div>
+
+                <div class="imp-result" id="impResult"></div>
+
+                <div class="download-bar">
+                    <span><i class="fas fa-info-circle"></i>&nbsp; Not sure about the format?</span>
+                    <a href="{% url 'download_pg_template' %}">
+                        <i class="fas fa-download"></i> Download Template
+                    </a>
+                </div>
+
+            </div>
+
+            <div class="imp-footer">
+                <button class="imp-btn-cancel" onclick="closeImportModal()">Cancel</button>
+                <button class="imp-btn-upload" id="uploadBtn" onclick="doUpload()" disabled>
+                    <i class="fas fa-upload"></i> Upload & Import
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 10000;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="border-radius:12px; overflow:hidden; border:none; box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+                <div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none; padding:20px 24px;">
+                    <h5 class="modal-title" style="color:white; font-weight:700; font-size:16px;">
+                        <i class="fas fa-trash-alt" style="margin-right:8px;"></i> Advanced Bulk Delete (PG / Co-Living)
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="color:white; opacity:1;"></button>
+                </div>
+                <div class="modal-body" style="padding:24px;">
+                    <form id="bulkDeleteForm">
+                        <div class="form-group mb-3">
+                            <label style="font-size:13px; font-weight:600;">Delete Criteria <span style="color:red;">*</span></label>
+                            <select class="form-control mt-1" id="deleteType" name="delete_type" onchange="toggleDeleteInputs()" style="font-size:13px;">
+                                <option value="">-- Select Option --</option>
+                                <option value="current_page">Delete Current Page Data</option>
+                                <option value="date_range">Delete by Date Range</option>
+                                <option value="latest_month">Delete Latest Month Data</option>
+                                <option value="old_data">Delete Data Older Than 6 Months</option>
+                                <option value="by_uploader">Delete by Uploaded User Source</option>
+                                <option value="by_file">Delete by Specific Excel File</option>
+                                <option value="delete_all" style="color: red; font-weight: bold;">Delete ALL Data</option>
+                            </select>
+                        </div>
+
+                       <div id="dateRangeInputs" style="display:none; gap: 10px; margin-top: 10px;">
+    <div style="flex: 1;">
+        <label style="font-size:12px;">From Date</label>
+        <input type="date" id="fromDate" name="from_date" class="form-control mt-1">
+    </div>
+
+    <div style="flex: 1;">
+        <label style="font-size:12px;">To Date</label>
+        <input type="date" id="toDate" name="to_date" class="form-control mt-1">
+    </div>
+</div>
+
+
+                        <div id="uploaderInput" style="display:none; margin-top: 10px;">
+                            <label style="font-size:12px;">Uploaded By (Name/Email)</label>
+                            <input type="text" id="uploaderText" name="uploader_text" class="form-control mt-1" placeholder="e.g. Admin or admin@example.com">
+                        </div>
+
+                        <div id="fileInput" style="display:none; margin-top: 10px;">
+                            <label style="font-size:12px;">Select Uploaded Excel File</label>
+                            <select id="selectedFile" name="selected_file" class="form-control mt-1" style="font-size:13px;">
+                                <option value="">-- Select File --</option>
+                                {% for file in uploaded_files %}
+                                    <option value="{{ file }}">{{ file }}</option>
+                                {% empty %}
+                                    <option value="" disabled>No files found in database (Ensure your import script saves the filename)</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid #F3F4F6; padding:16px 24px; gap:10px;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="executeBulkDelete()" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none;">
+                        <i class="fas fa-exclamation-triangle"></i> Confirm Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000000cc; z-index:9999;">
+    <span onclick="closePreview()" style="position:absolute;top:20px;right:30px;color:white;font-size:30px;cursor:pointer;">✖</span>
+
+    <img id="previewImage" style="display:none; max-width:80%; margin:auto; margin-top:5%;">
+    <video id="previewVideo" controls style="display:none; max-width:80%; margin:auto; margin-top:5%;"></video>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+// ==========================================
+// 1. DELETE FUNCTION (SweetAlert2)
+// ==========================================
+function deletePG(propertyId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this! All associated rooms and images will be permanently deleted.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444', 
+        cancelButtonColor: '#94a3b8',  
+        confirmButtonText: '<i class="fas fa-trash-alt"></i> Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({ 
+                title: 'Deleting...', 
+                allowOutsideClick: false, 
+                didOpen: () => { Swal.showLoading(); } 
+            });
+
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+            const deleteUrl = `/Admin_App/pg-coliving/delete/${propertyId}/`; // Ensure this matches urls.py!
+
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: 'The PG property has been removed.',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    
+                    const row = document.getElementById(`row-${propertyId}`);
+                    if (row) {
+                        row.style.transition = "all 0.4s ease";
+                        row.style.opacity = "0";
+                        row.style.transform = "translateX(-20px)";
+                        setTimeout(() => row.remove(), 400);
+                    } else {
+                        setTimeout(() => window.location.reload(), 1500); 
+                    }
+                } else {
+                    Swal.fire('Error!', data.message || 'Could not delete PG.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error("Delete error:", error);
+                Swal.fire('Error!', `Server connection failed: ${error.message}`, 'error');
+            });
+        }
+    });
+}
+
+// ==========================================
+// 1.5 BULK DELETE LOGIC
+// ==========================================
+function toggleDeleteInputs() {
+    const type = document.getElementById('deleteType').value;
+    document.getElementById('dateRangeInputs').style.display = (type === 'date_range') ? 'flex' : 'none';
+    document.getElementById('uploaderInput').style.display = (type === 'by_uploader') ? 'block' : 'none';
+    document.getElementById('fileInput').style.display = (type === 'by_file') ? 'block' : 'none';
+}
+
+function executeBulkDelete() {
+    const type = document.getElementById('deleteType').value;
+    if (!type) {
+        Swal.fire('Warning', 'Please select a delete criteria.', 'warning');
+        return;
+    }
+
+    let payload = { delete_type: type };
+
+    if (type === 'date_range') {
+        payload.from_date = document.getElementById('fromDate').value;
+        payload.to_date = document.getElementById('toDate').value;
+        if (!payload.from_date || !payload.to_date) {
+            Swal.fire('Warning', 'Please select both From and To dates.', 'warning');
+            return;
+        }
+    } else if (type === 'by_uploader') {
+        payload.uploader_text = document.getElementById('uploaderText').value;
+        if (!payload.uploader_text) {
+            Swal.fire('Warning', 'Please enter the uploader detail.', 'warning');
+            return;
+        }
+    } else if (type === 'by_file') {
+        payload.file_name = document.getElementById('selectedFile').value;
+        if (!payload.file_name) {
+            Swal.fire('Warning', 'Please select an Excel file from the list.', 'warning');
+            return;
+        }
+    } else if (type === 'current_page') {
+        const rows = document.querySelectorAll('tr[id^="row-"]');
+        const ids = Array.from(rows).map(row => row.id.split('-')[1]);
+        if (ids.length === 0) {
+            Swal.fire('Warning', 'No data on the current page to delete.', 'warning');
+            return;
+        }
+        payload.page_ids = ids;
+    }
+
+    Swal.fire({
+        title: 'Are you absolutely sure?',
+        text: "This action will permanently delete the selected PG records and their media!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, delete them!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+
+            fetch("{% url 'pg_bulk_delete' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire('Deleted!', data.message, 'success').then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            })
+            .catch(err => Swal.fire('Error', 'Server error occurred.', 'error'));
+        }
+    });
+}
+
+// ==========================================
+// 2. MEDIA PREVIEW MODALS
+// ==========================================
+function openImagePreview(src){
+    document.getElementById("previewModal").style.display = "block";
+    document.getElementById("previewImage").src = src;
+    document.getElementById("previewImage").style.display = "block";
+    document.getElementById("previewVideo").style.display = "none";
+}
+
+function openVideoPreview(src){
+    document.getElementById("previewModal").style.display = "block";
+    document.getElementById("previewVideo").src = src;
+    document.getElementById("previewVideo").style.display = "block";
+    document.getElementById("previewImage").style.display = "none";
+}
+
+function closePreview(){
+    document.getElementById("previewModal").style.display = "none";
+}
+
+// ==========================================
+// 3. UI & EXCEL IMPORT MODAL
+// ==========================================
+$("#Rent").addClass("active");
+
+let selectedFile = null;
+
+function openImportModal() {
+    document.getElementById('importModal').classList.add('show');
+    resetImportModal();
+}
+function closeImportModal() {
+    document.getElementById('importModal').classList.remove('show');
+}
+function resetImportModal() {
+    selectedFile = null;
+    document.getElementById('pgExcelFile').value = '';
+    document.getElementById('fileChip').style.display = 'none';
+    document.getElementById('impProgress').style.display = 'none';
+    document.getElementById('impResult').style.display = 'none';
+    document.getElementById('uploadBtn').disabled = true;
+}
+
+function onFileSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (!file.name.endsWith('.xlsx')) {
+        alert('Please select an .xlsx file only.');
+        input.value = '';
+        return;
+    }
+    setFile(file);
+}
+
+function setFile(file) {
+    selectedFile = file;
+    document.getElementById('chipName').textContent = file.name;
+    document.getElementById('chipSize').textContent = (file.size / 1024).toFixed(1) + ' KB';
+    document.getElementById('fileChip').style.display = 'flex';
+    document.getElementById('impResult').style.display = 'none';
+    document.getElementById('impProgress').style.display = 'none';
+    document.getElementById('uploadBtn').disabled = false;
+}
+
+function clearFile() {
+    selectedFile = null;
+    document.getElementById('pgExcelFile').value = '';
+    document.getElementById('fileChip').style.display = 'none';
+    document.getElementById('uploadBtn').disabled = true;
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('dropZone').classList.add('drag-over');
+}
+function handleDragLeave(e) {
+    document.getElementById('dropZone').classList.remove('drag-over');
+}
+function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('dropZone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+        if (!file.name.endsWith('.xlsx')) {
+            alert('Please drop an .xlsx file only.');
+            return;
+        }
+        setFile(file);
+    }
+}
+
+function animateProgress(targetPct, text) {
+    document.getElementById('impProgress').style.display = 'block';
+    document.getElementById('progFill').style.width = targetPct + '%';
+    document.getElementById('progText').textContent = text;
+}
+
+function showResult(data) {
+    const box = document.getElementById('impResult');
+    if (data.status === 'success') {
+        box.className = 'imp-result success';
+        const errorHtml = data.errors && data.errors.length
+            ? `<ul class="err-list">${data.errors.map(e=>`<li>${e}</li>`).join('')}</ul>`
+            : '';
+        box.innerHTML = `
+            <strong><i class="fas fa-check-circle"></i> Import Complete</strong>
+            <div class="res-row">
+                <div class="res-item"><i class="fas fa-check"></i><span class="res-val">${data.imported}</span> Imported</div>
+                <div class="res-item"><i class="fas fa-exclamation-triangle"></i><span class="res-val">${data.skipped}</span> Skipped</div>
+            </div>
+            ${errorHtml}
+        `;
+    } else {
+        box.className = 'imp-result error';
+        box.innerHTML = `<strong><i class="fas fa-times-circle"></i> Error</strong><p style="margin:6px 0 0;">${data.message}</p>`;
+    }
+    box.style.display = 'block';
+}
+
+async function doUpload() {
+    if (!selectedFile) return;
+
+    const btn = document.getElementById('uploadBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading…';
+
+    animateProgress(30, 'Reading file…');
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+        animateProgress(60, 'Processing rows…');
+
+        const response = await fetch("{% url 'import_pg_excel' %}", {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            body: formData
+        });
+
+        animateProgress(100, 'Done!');
+        const data = await response.json();
+
+        if (data.status === "success") {
+
+            // ── CASE: Same file + same user uploaded again (all skipped) ──────
+            if (data.same_file_same_user_skipped > 0 && data.imported === 0 && data.skipped > 0 && data.diff_file_same_data_skipped === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Already Uploaded!',
+                    html: `
+                        <div style="text-align:center;">
+                            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:18px 20px;margin-bottom:16px;">
+                                <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:#d97706;margin-bottom:10px;display:block;"></i>
+                                <div style="font-size:15px;font-weight:700;color:#92400e;">Same File &amp; Same User Detected</div>
+                                <div style="font-size:13px;color:#78350f;margin-top:6px;">
+                                    The file <strong>${data.file_name}</strong> was already uploaded by <strong>${data.uploader_name || 'you'}</strong>
+                                    with the same data.
+                                </div>
+                            </div>
+                            <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
+                                <div style="background:#fef2f2;padding:14px 20px;border-radius:10px;min-width:120px;">
+                                    <div style="font-size:28px;font-weight:800;color:#dc2626;">${data.same_file_same_user_skipped}</div>
+                                    <div style="font-size:12px;color:#991b1b;font-weight:600;">Rows Skipped</div>
+                                </div>
+                                <div style="background:#f0fdf4;padding:14px 20px;border-radius:10px;min-width:120px;">
+                                    <div style="font-size:28px;font-weight:800;color:#16a34a;">${data.imported}</div>
+                                    <div style="font-size:12px;color:#166534;font-weight:600;">New Imported</div>
+                                </div>
+                            </div>
+                            <div style="margin-top:14px;font-size:12px;color:#64748b;">
+                                If you have new data in this file, it has been imported above. Duplicate rows were skipped automatically.
+                            </div>
+                        </div>
+                    `,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#7c3aed',
+                });
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-upload"></i> Upload &amp; Import';
+                return;
+            }
+
+            // ── CASE: Different file but same data already exists ─────────────
+            if (data.diff_file_same_data_skipped > 0 && data.imported === 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Duplicate Data Detected!',
+                    html: `
+                        <div style="text-align:center;">
+                            <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:18px 20px;margin-bottom:16px;">
+                                <i class="fas fa-ban" style="font-size:2rem;color:#dc2626;margin-bottom:10px;display:block;"></i>
+                                <div style="font-size:15px;font-weight:700;color:#991b1b;">Same Property Data Already Exists</div>
+                                <div style="font-size:13px;color:#7f1d1d;margin-top:6px;">
+                                    All <strong>${data.diff_file_same_data_skipped}</strong> rows in <strong>${data.file_name}</strong>
+                                    already exist in the database from a different file. No new data was imported.
+                                </div>
+                            </div>
+                            <div style="font-size:12px;color:#64748b;margin-top:10px;">
+                                The system matches records by contact number, email, property address &amp; locality.
+                                If these details are different, the record will be imported as new.
+                            </div>
+                        </div>
+                    `,
+                    confirmButtonText: 'Understood',
+                    confirmButtonColor: '#ef4444',
+                });
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-upload"></i> Upload &amp; Import';
+                return;
+            }
+
+            // ── CASE: Normal success (with optional partial skips) ────────────
+            let skippedBreakdown = '';
+            if (data.same_file_same_user_skipped > 0) {
+                skippedBreakdown += `<div style="padding:6px 10px;background:#fffbeb;border-radius:6px;color:#92400e;font-size:12px;margin-top:6px;">
+                    <i class="fas fa-info-circle"></i> ${data.same_file_same_user_skipped} rows skipped — same file &amp; user duplicate
+                </div>`;
+            }
+            if (data.same_file_diff_user_skipped > 0) {
+                skippedBreakdown += `<div style="padding:6px 10px;background:#eff6ff;border-radius:6px;color:#1e40af;font-size:12px;margin-top:6px;">
+                    <i class="fas fa-user-slash"></i> ${data.same_file_diff_user_skipped} rows skipped — same file uploaded by different user
+                </div>`;
+            }
+            if (data.diff_file_same_data_skipped > 0) {
+                skippedBreakdown += `<div style="padding:6px 10px;background:#fef2f2;border-radius:6px;color:#991b1b;font-size:12px;margin-top:6px;">
+                    <i class="fas fa-ban"></i> ${data.diff_file_same_data_skipped} rows skipped — same data exists from a different file
+                </div>`;
+            }
+
+            let errorHtml = '';
+            if (data.errors && data.errors.length > 0) {
+                errorHtml = `<div style="max-height:180px;overflow-y:auto;text-align:left;margin-top:12px;padding:10px;background:#fff7f7;border-radius:10px;border:1px solid #fecaca;font-size:12px;">`;
+                data.errors.forEach(err => {
+                    errorHtml += `<div style="padding:6px 8px;margin-bottom:6px;background:white;border-radius:5px;color:#dc2626;border-left:3px solid #dc2626;">${err}</div>`;
+                });
+                errorHtml += `</div>`;
+            }
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Import Complete',
+                width: 680,
+                html: `
+                    <div style="text-align:center;">
+                        <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:16px 0;">
+                            <div style="background:#ecfdf5;padding:16px 22px;border-radius:12px;min-width:130px;">
+                                <div style="font-size:32px;font-weight:800;color:#16a34a;">${data.imported}</div>
+                                <div style="font-size:13px;font-weight:600;color:#166534;">Imported</div>
+                            </div>
+                            <div style="background:#fef2f2;padding:16px 22px;border-radius:12px;min-width:130px;">
+                                <div style="font-size:32px;font-weight:800;color:#dc2626;">${data.skipped}</div>
+                                <div style="font-size:13px;font-weight:600;color:#991b1b;">Total Skipped</div>
+                            </div>
+                        </div>
+                        ${skippedBreakdown}
+                        ${errorHtml}
+                    </div>
+                `
+            });
+
+            if (data.imported > 0) {
+                setTimeout(() => location.reload(), 2500);
+            }
+
+        } else {
+            // ── Server returned error status ──────────────────────────────────
+            Swal.fire({
+                icon: 'error',
+                title: 'Import Failed',
+                text: data.message || 'Something went wrong. Please try again.'
+            });
+        }
+
+    } catch (err) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Network Error',
+            text: 'Could not reach the server. Please check your connection and try again.'
+        });
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-upload"></i> Upload &amp; Import';
+}
+
+// Sidebar helpers
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    } else {
+        sidebar.classList.toggle('collapsed');
+    }
+}
+function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('active');
+    document.getElementById('sidebarOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+}
+function toggleSubmenu(event, element) {
+    event.preventDefault(); event.stopPropagation();
+    const submenu = element.nextElementSibling;
+    document.querySelectorAll('.submenu').forEach(s => { if(s!==submenu) s.classList.remove('active'); });
+    document.querySelectorAll('.menu-link').forEach(l => { if(l!==element) l.classList.remove('dropdown-open'); });
+    submenu.classList.toggle('active');
+    element.classList.toggle('dropdown-open');
+}
+
+// ==========================================
+// 4. CHARTS INITIALIZATION
+// ==========================================
+document.addEventListener("DOMContentLoaded", function() {
+    if (document.getElementById('propertyPieChart')) {
+        const chartDataRaw = '{{ chart_data_json|escapejs }}';
+        let chartData = {};
+        try {
+            chartData = chartDataRaw ? JSON.parse(chartDataRaw) : null;
+        } catch(e) { console.error("Chart JSON parse error"); }
+
+        if(chartData && chartData.property_distribution) {
+            new Chart(document.getElementById('propertyPieChart').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Residential','Commercial','PG/Co-living'],
+                    datasets: [{
+                        data: chartData.property_distribution,
+                        backgroundColor: ['rgba(102,126,234,.8)','rgba(245,87,108,.8)','rgba(79,172,254,.8)'],
+                        borderColor: ['rgba(102,126,234,1)','rgba(245,87,108,1)','rgba(79,172,254,1)'],
+                        borderWidth: 2
+                    }]
+                },
+                options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true, padding:15, font:{size:11} } } } }
+            });
+
+            new Chart(document.getElementById('rentalIncomeChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: chartData.months,
+                    datasets: [{
+                        label: 'Rental Income (₹)',
+                        data: chartData.rental_income,
+                        backgroundColor: 'rgba(102,126,234,.7)',
+                        borderColor: 'rgba(102,126,234,1)',
+                        borderWidth:2, borderRadius:8
+                    }]
+                },
+                options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{ beginAtZero:true, grid:{borderDash:[5,5], color:'#e2e8f0'}, ticks:{ callback:v=>'₹'+(v/1000)+'k', font:{size:10} } }, x:{ grid:{display:false}, ticks:{font:{size:10}} } } }
+            });
+        }
+    }
+});
+
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) closeSidebar();
+});
+</script>
+
+<script>
+    const fromDate = document.getElementById("fromDate");
+    const toDate = document.getElementById("toDate");
+
+    function validateDates() {
+
+        let startDate = fromDate.value;
+        let endDate = toDate.value;
+
+        // Check both dates selected
+        if (startDate && endDate) {
+
+            // Convert to Date object
+            let start = new Date(startDate);
+            let end = new Date(endDate);
+
+            // If end date is smaller than start date
+            if (end < start) {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Date Range',
+                    text: 'To Date cannot be smaller than From Date!',
+                    confirmButtonColor: '#d33'
+                });
+
+                // Clear wrong date
+                toDate.value = "";
+            }
+        }
+    }
+
+    // Run validation when user changes date
+    fromDate.addEventListener("change", validateDates);
+    toDate.addEventListener("change", validateDates);
+</script>
+
+<script>
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    // ── AUTO-SUBMIT LOGIC FOR SMART SEARCH ──
+    const form = document.getElementById("pgSearchForm");
+    const searchInput = document.getElementById("pgSearchInput");
+    const autoSubmitElements = document.querySelectorAll(".auto-submit");
+    
+    // Create loading indicator
+    const loader = document.getElementById('loadingIndicator');
+
+    // Debounce text input
+    let typingTimer;
+    if(searchInput) {
+        let val = searchInput.value;
+        searchInput.focus();
+        searchInput.value = '';
+        searchInput.value = val;
+
+        searchInput.addEventListener("input", function() {
+            clearTimeout(typingTimer);
+            loader.style.display = 'inline-block';
+            typingTimer = setTimeout(() => { form.submit(); }, 600);
+        });
+    }
+
+    // Auto submit dropdowns and dates
+    autoSubmitElements.forEach(el => {
+        el.addEventListener("change", function() {
+            loader.style.display = 'inline-block';
+            form.submit();
+        });
+    });
+
+    // ── CHARTS INITIALIZATION ──
+    const PG_FOR_LABELS   = {{ pg_for_labels|safe }};
+    const PG_FOR_DATA     = {{ pg_for_data|safe }};
+    const RENT_LABELS     = {{ rent_range_labels|safe }};
+    const RENT_DATA       = {{ rent_range_data|safe }};
+    const FURNISH_LABELS  = {{ furnishing_labels|safe }};
+    const FURNISH_DATA    = {{ furnishing_data|safe }};
+    const CITY_LABELS     = {{ city_labels|safe }};
+    const CITY_DATA       = {{ city_data|safe }};
+
+    const COLORS = ["#7c3aed","#db2777","#2563eb","#16a34a","#d97706","#0d9488","#ea580c","#4f46e5","#0891b2","#e42525"];
+
+    function makeBar(id,labels,data,label){
+      if(!document.getElementById(id))return;
+      new Chart(document.getElementById(id),{type:"bar",data:{labels,datasets:[{label,data,backgroundColor:COLORS,borderRadius:8,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:"#f1f5f9"},ticks:{font:{size:11}}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
+    }
+    function makeDoughnut(id,labels,data){
+      if(!document.getElementById(id))return;
+      new Chart(document.getElementById(id),{type:"doughnut",data:{labels,datasets:[{data,backgroundColor:COLORS,borderWidth:2,borderColor:"#fff",hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:"60%",plugins:{legend:{position:"bottom",labels:{font:{size:11},padding:12,usePointStyle:true}}}}});
+    }
+
+    makeBar("pgForChart", PG_FOR_LABELS, PG_FOR_DATA, "PG Listings");
+    makeBar("rentChart", RENT_LABELS, RENT_DATA, "Count");
+    makeDoughnut("furnishChart", FURNISH_LABELS, FURNISH_DATA);
+    makeBar("cityChart", CITY_LABELS, CITY_DATA, "PGs");
+
+    // Animate rings
+    document.querySelectorAll(".r-fill").forEach(function(el){
+      var pct = parseFloat(el.getAttribute("data-pct"))||0;
+      pct = Math.min(pct,100);
+      setTimeout(function(){ el.style.strokeDashoffset = 245-(245*pct/100); }, 200);
+    });
+});
+
+
+
+
+function pgConfirmDelete(id, name){
+    Swal.fire({
+        title: 'Delete ' + name + '?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e42525',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = "/admin/pg/delete/" + id + "/";
+        }
+    });
+}
+</script>
+
+<script>
+function forcePGExport(format) {
+    // 1. Find your search form
+    var form = document.getElementById('liveSearchForm');
+    
+    // 2. Extract all the active search filters
+    var params = new URLSearchParams(new FormData(form));
+    
+    // 3. Attach the specific format (excel or csv)
+    params.set('format', format);
+    
+    // 4. Build the URL
+    var exportUrl = "{% url 'export_pg_coliving' %}?" + params.toString();
+    
+    // 5. 🛑 FORCE OPEN IN A NEW TAB 🛑
+    window.open(exportUrl, '_blank');
+}
+</script>
+</body>
+</html>

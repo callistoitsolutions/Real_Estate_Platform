@@ -12,9 +12,17 @@
     --sidebar-width: 280px;
     --sidebar-collapsed-width: 80px;
     --topbar-height: 70px;
-    --pr:#667eea;--pr2:#5a67d8;--sec:#0f172a;--dark:#020617;
-    --muted:#64748b;--border:#e2e8f0;--card:#fff;--bg:#f8fafc;
-    --success:#10b981;--info:#3b82f6;--warn:#f59e0b;
+    --pr: #667eea;
+    --pr2: #5a67d8;
+    --sec: #0f172a;
+    --dark: #020617;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --card: #fff;
+    --bg: #f8fafc;
+    --success: #10b981;
+    --info: #3b82f6;
+    --warn: #f59e0b;
   }
 
   * {
@@ -29,6 +37,21 @@
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     overflow-x: hidden;
     min-height: 100vh;
+  }
+
+  /* Validation Error Styling */
+  .form-control.is-invalid, 
+  .form-select.is-invalid,
+  .search-select-control.is-invalid {
+    border-color: #e74c3c !important;
+    background-color: #fff5f5 !important;
+    box-shadow: 0 0 0 4px rgba(231,76,60,0.1) !important;
+  }
+  .pill-group.is-invalid-group {
+    border: 2px dashed #e74c3c;
+    padding: 8px;
+    border-radius: 12px;
+    background-color: #fff5f5;
   }
 
   /* Sidebar Overlay */
@@ -329,6 +352,24 @@
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  }
+
+  .preview-item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    aspect-ratio: 1;
+    cursor: grab; /* ADDED for drag and drop */
+    transition: transform 0.2s;
+  }
+  .preview-item:active {
+    cursor: grabbing;
+  }
+  .preview-item.drag-over {
+    opacity: 0.5;
+    border: 2px dashed #667eea;
+    transform: scale(0.95);
   }
 
   .topbar-search i {
@@ -683,7 +724,8 @@
     outline: none;
   }
 
-  select.form-control, .form-select {
+  select.form-control,
+  .form-select {
     appearance: none;
     background: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 0.75rem center;
     background-size: 16px;
@@ -1210,11 +1252,11 @@
     border-radius: 50%;
   }
 
-  input:checked + .toggle-slider {
+  input:checked+.toggle-slider {
     background-color: #667eea;
   }
 
-  input:checked + .toggle-slider:before {
+  input:checked+.toggle-slider:before {
     transform: translateX(24px);
   }
 
@@ -1306,7 +1348,7 @@
     background: #f0f4ff;
   }
 
-  .amenity-checkbox input:checked ~ label {
+  .amenity-checkbox input:checked~label {
     color: #667eea;
     font-weight: 700;
   }
@@ -1369,7 +1411,7 @@
     .page-wrap {
       grid-template-columns: 1fr;
     }
-    
+
     .preview-sidebar {
       display: none;
     }
@@ -1432,6 +1474,197 @@
       margin: 0 8px;
     }
   }
+
+  /* Dropdown panel fix */
+  .form-group,
+  .col-md-12,
+  .section-body,
+  .step-content,
+  .row,
+  .modal-body {
+    overflow: visible !important;
+  }
+
+  #step4 .section-body {
+    overflow: visible !important;
+  }
+
+  /* Custom Searchable Dropdown */
+  .search-select {
+    position: relative;
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .search-select-control {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 12px 15px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    min-height: 48px;
+  }
+
+  .search-select-control:hover,
+  .search-select-control:focus {
+    border-color: #667eea;
+    outline: none;
+  }
+
+  .search-select.open .search-select-control {
+    border-color: #667eea;
+  }
+
+  .search-select-value {
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-height: 1.2em;
+    display: inline-block;
+  }
+
+  .search-select-value.ss-placeholder {
+    color: #94a3b8;
+  }
+
+  .search-select-value:empty::before {
+    content: "-- Select Team Member --";
+    color: #94a3b8;
+  }
+
+  .search-select-arrow {
+    color: #64748b;
+    transition: transform 0.2s ease;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+
+  .search-select.open .search-select-arrow {
+    transform: rotate(180deg);
+  }
+
+  .search-select-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .search-select.open .search-select-panel {
+    display: block;
+  }
+
+  .search-select-input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid #e9ecef;
+    padding: 12px 15px;
+    font-size: 0.9rem;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .search-select-input:focus {
+    border-bottom-color: #667eea;
+  }
+
+  .search-select-options {
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .search-select-group-label {
+    padding: 8px 15px 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: #f8f9fa;
+  }
+
+  .search-select-option {
+    padding: 10px 16px;
+    cursor: pointer;
+    color: #2d3748;
+    font-size: 0.9rem;
+  }
+
+  .search-select-option:hover,
+  .search-select-option.highlighted {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .search-select-option:hover .opt-role,
+  .search-select-option.highlighted .opt-role {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .search-select-option.selected {
+    background-color: #eef2ff;
+    font-weight: 600;
+  }
+
+  .opt-role {
+    color: #64748b;
+    font-weight: 400;
+  }
+
+  .search-select-no-results {
+    padding: 16px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+  }
+
+  .search-select.validation-error .search-select-control {
+    border-color: #e74c3c !important;
+    background: #fff5f5 !important;
+  }
+
+  .selected-items-display {
+    padding: 12px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    min-height: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .item-tag {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .item-tag .remove-btn {
+    cursor: pointer;
+    color: #dc3545;
+    margin-left: 4px;
+    font-size: 12px;
+  }
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -1462,127 +1695,274 @@
       </div>
 
       <div class="form-container">
-        <div class="form-header">
+       <div class="form-header">
           <div class="form-title">
-            <i class="fas fa-edit"></i>
-            PG / Co-Living Listing Setup
+            <i class="fas fa-bed" style="color: #667eea;"></i> List Your PG or Co-living Space
           </div>
           <button type="button" class="btn-back" onclick="history.back();">
-            <i class="fas fa-arrow-left"></i>
-            Back to List
+            <i class="fas fa-arrow-left"></i> Back to List
           </button>
         </div>
 
-       <form method="POST"
-      enctype="multipart/form-data"
-      id="pgForm"
-      action="{% url 'add_pg' %}">
+        <form method="POST" enctype="multipart/form-data" id="pgForm" action="{% url 'add_pg' %}">
           {% csrf_token %}
 
           <div class="step-content active" id="step1">
             <div class="form-section">
-              <div class="section-header">
-                <i class="fas fa-info-circle"></i>
-                Step 1 — Basic Information
+              <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <span><i class="fas fa-upload"></i> Listed By</span>
               </div>
               <div class="section-body">
                 <div class="row">
-
-                    <div class="col-md-6">
+                  <div class="col-md-12">
                     <div class="form-group">
-                      <label class="form-label">Property Title</label>
-                      <input type="text" class="form-control" id="pgName" name="property_title" placeholder="Leave blank to auto-generate title">
-                      
+                      <label class="form-label">
+                        <i class="fas fa-user"></i> Listed By <span class="text-danger">*</span>
+                      </label>
+                      <div class="listed-by-radio-group" style="display:flex; gap:24px; margin-bottom:14px;">
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
+                          <input type="radio" name="listed_by_type" id="listedBySelf" value="self" checked onchange="Change_Fields()">
+                          Listed by Self
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
+                          <input type="radio" name="listed_by_type" id="listedByOther" value="other" onchange="Change_Fields()">
+                          Listed for Other User
+                        </label>
+                      </div>
+
+                      <input type="hidden" id="selfUserId" value="{{ admin_obj.id }}">
+                      <input type="hidden" id="selfUserRole" value="{{ admin_obj.role }}">
+                      <input type="hidden" id="selfUserName" value="{{ admin_obj.name }}">
+                      <input type="hidden" id="selfUserEmail" value="{{ admin_obj.email }}">
+                      <input type="hidden" id="selfUserPhone" value="{{ admin_obj.phone }}">
+
+                      <div id="listedByOtherWrapper" style="display:none;">
+                        <div class="search-select" id="assignedToSearchSelect">
+                          <div class="search-select-control" id="assignedToControl" tabindex="0">
+                            <span class="search-select-value" id="assignedToValueLabel">-- Select Team Member --</span>
+                            <i class="fas fa-chevron-down search-select-arrow"></i>
+                          </div>
+                          <div class="search-select-panel" id="assignedToPanel">
+                            <input type="text" class="search-select-input" id="searchTeamMember" placeholder="Type to search team members...">
+                            <div class="search-select-options" id="assignedToOptions">
+                              {% regroup user_obj by user_role as grouped_users %}
+                              {% for group in grouped_users %}
+                                <div class="search-select-group-label">{{ group.grouper|upper }} ({{ group.list|length }})</div>
+                                {% for user in group.list %}
+                                  <div class="search-select-option"
+                                    data-value="{{ user.id }}-{{user.user_role}}"
+                                    data-name="{{ user.user_name }}"
+                                    data-role="{{ user.user_role }}"
+                                    data-phone="{{ user.user_phone }}"
+                                    data-uid="{{ user.user_id }}"
+                                    data-search="{{ user.user_name|lower }} {{ user.user_role|lower }} {{ user.user_phone }} {{ user.user_id|lower }}">
+                                    {{ user.user_id }} <span class="opt-role">- {{ user.user_name }}</span> <span class="opt-role">- {{ user.user_role }}</span><span class="opt-role">- {{ user.user_phone }}</span>
+                                  </div>
+                                {% endfor %}
+                              {% endfor %}
+                              <div class="search-select-no-results" id="assignedToNoResults" style="display:none;">No team members found</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <select id="assigned_to" name="assigned_to" required style="display:none;">
+                        <option value="">-- Select Team Member --</option>
+                        {% regroup user_obj by user_role as grouped_users %}
+                        {% for group in grouped_users %}
+                        <optgroup label="{{ group.grouper|upper }} ({{ group.list|length }})">
+                          {% for user in group.list %}
+                          <option value="{{ user.id }}-{{user.user_role}}" data-name="{{ user.user_name }}" data-role="{{ user.user_role }}">
+                            {{ user.user_name }} - {{ user.user_role }}
+                          </option>
+                          {% endfor %}
+                        </optgroup>
+                        {% endfor %}
+                      </select>
+
+                      <input type="hidden" id="assigned_to_role" name="assigned_to_role" value="">
                     </div>
                   </div>
-           
-                  
+                </div>
 
+                <br>
+
+                <div class="row" id="user_data_div">
+                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" readonly style="background-color: #e9ecef;"></div></div>
+                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" readonly style="background-color: #e9ecef;"></div></div>
+                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email" readonly style="background-color: #e9ecef;"></div></div>
+                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" readonly style="background-color: #e9ecef;"></div></div>
+                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" readonly style="background-color: #e9ecef;"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-header">
+                <i class="fas fa-info-circle"></i>
+                 Basic Information
+              </div>
+              <div class="section-body">
+                <div class="row">
+                 <div class="col-md-6">
+  <div class="form-group">
+    <label class="form-label">Property Title</label>
+    <input type="text" class="form-control" id="property_title" name="property_title" placeholder="Property Title auto-generated by system" disabled>
+  </div>
+</div>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Building / Project / Society Name</label>
-                      <input type="text" class="form-control" id="buildingNameInput" name="building_name" placeholder="Enter Building/Project Name">
+                      <input type="text" class="form-control" id="building_name" name="building_name"
+                        placeholder="Enter Building/Project Name">
                     </div>
                   </div>
-
-
-
-
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label class="form-label">Property No/Unit No</label>
-                      <input type="text" class="form-control" id="property_no" name="property_no" placeholder="A-4834">
+                      <label class="form-label">Property No/Unit No<span class="required">*</span></label>
+                      <input type="text" class="form-control" id="property_no" name="property_no" placeholder="e.g., Room 101 / House No. 42" required>
+                       
+                                     <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block;font-weight:bold;">
+                        <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
+                    </span>
                     </div>
                   </div>
-                    
-<div class="col-md-6">
+                  <div class="col-md-6">
                     <div class="form-group">
-                      <label class="form-label">Add Tower/Wing</label>
-                      <input type="text" class="form-control" id="tower_no" name="tower_no" placeholder="A Wing">
+                      <label class="form-label">Tower/Wing Number</label>
+                      <input type="text" class="form-control" id="wing_number" name="wing_number" placeholder="e.g., A Wing / Block B">
                     </div>
                   </div>
-
-
                 </div>
 
-              
-  <div class="row mt-2">
-
-                <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">Property Registration No</label>
-                      <input type="text" class="form-control" id="regi_no" name="registration_no" placeholder="Enter Registration No">
-                    </div>
-                  </div>
-
+                <div class="row mt-2">
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">City <span class="required">*</span></label>
-                      <input type="text" class="form-control" id="cityInput" name="city" placeholder="Enter City" required>
+                 <input type="text"
+       class="form-control"
+       id="city"
+       name="city"
+       placeholder="e.g., Pune"
+       required>
+
+<script>
+document.getElementById('city').addEventListener('input', function () {
+    this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+});
+</script>
                     </div>
                   </div>
-
-
-                  </div>
-
-
-                 <div class="col-md-6">
+                  <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Locality <span class="required">*</span></label>
-                      <input type="text" class="form-control" id="locality" name="locality" placeholder="Enter locality" required>
+                      <input type="text" class="form-control" id="locality" name="locality" placeholder="e.g., Hinjewadi" required>
                     </div>
                   </div>
+                </div>
+              
                 <div class="form-group mt-2">
                   <label class="form-label">Property Address <span class="required">*</span></label>
-                  <textarea class="form-control" name="property_address" rows="3" placeholder="Enter complete property address" required></textarea>
+                  <textarea class="form-control" name="address" id="address" rows="3"
+                    placeholder="Enter complete property address" required></textarea>
                 </div>
 
                 <div class="row mt-2">
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Property Landmark</label>
-                      <input type="text" class="form-control" id="property_landmark" name="property_landmark"  placeholder="Enter Property Landmark">
+                      <input type="text" class="form-control" id="property_landmark" name="property_landmark"
+                        placeholder="e.g., Near City Mall / Opp. Metro Station">
                     </div>
+
+                    
                   </div>
 
+
+
+                  <div class="col-md-6">
+    <div class="form-group">
+        <label class="form-label">
+            State <span class="required-star">*</span>
+        </label>
+
+        <select class="form-select form-control" name="state" id="state" required>
+            <option value="">Select State</option>
+
+            <!-- States -->
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+            <option value="Assam">Assam</option>
+            <option value="Bihar">Bihar</option>
+            <option value="Chhattisgarh">Chhattisgarh</option>
+            <option value="Goa">Goa</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Haryana">Haryana</option>
+            <option value="Himachal Pradesh">Himachal Pradesh</option>
+            <option value="Jharkhand">Jharkhand</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Madhya Pradesh">Madhya Pradesh</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Manipur">Manipur</option>
+            <option value="Meghalaya">Meghalaya</option>
+            <option value="Mizoram">Mizoram</option>
+            <option value="Nagaland">Nagaland</option>
+            <option value="Odisha">Odisha</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Rajasthan">Rajasthan</option>
+            <option value="Sikkim">Sikkim</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Telangana">Telangana</option>
+            <option value="Tripura">Tripura</option>
+            <option value="Uttar Pradesh">Uttar Pradesh</option>
+            <option value="Uttarakhand">Uttarakhand</option>
+            <option value="West Bengal">West Bengal</option>
+
+            <!-- Union Territories -->
+            <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+            <option value="Chandigarh">Chandigarh</option>
+            <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+            <option value="Delhi">Delhi</option>
+            <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+            <option value="Ladakh">Ladakh</option>
+            <option value="Lakshadweep">Lakshadweep</option>
+            <option value="Puducherry">Puducherry</option>
+        </select>
+    </div>
+</div>
+
+
+                 <div class="col-md-6 mt-3">
+                <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
+                <input type="url" class="form-control" name="google_maps_link" placeholder="https://maps.google.com/?q=…">
+              </div>
+              <div class="col-md-3 mt-3">
+                <label class="form-label">Latitude</label>
+                <input type="text" class="form-control" name="latitude" placeholder="e.g., 21.1458">
+              </div>
+              <div class="col-md-3 mt-3">
+                <label class="form-label">Longitude</label>
+                <input type="text" class="form-control" name="longitude" placeholder="e.g., 79.0882">
+              </div>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">PG for <span class="required">*</span></label>
-                      <div class="pill-group" id="pgForGroup">
+                      <div class="pill-group" id="pg_forGroup">
                         <button type="button" class="pill-btn" data-field="pg_for" data-value="Boys">Boys</button>
                         <button type="button" class="pill-btn" data-field="pg_for" data-value="Girls">Girls</button>
                         <button type="button" class="pill-btn" data-field="pg_for" data-value="Co-living">Co-living</button>
                       </div>
-                      <input type="hidden" name="pg_for" id="pgFor" required>
+                      <input type="hidden" name="pg_for" id="pg_for" required>
                     </div>
                   </div>
                 </div>
 
                 <div class="row mt-2">
-                  <div class="col-md-6">
+                  <div class="col-md-4">
                     <div class="form-group">
-                      <label class="form-label">Furnishing Type <span class="required">*</span></label>
-                      <select class="form-select" name="furnishing_type" required>
+                      <label class="form-label">Furnishing Status <span class="required">*</span></label>
+                      <select class="form-select" name="furnishing_status" id="furnishing_status" required>
                         <option value="">Select</option>
                         <option value="unfurnished">Unfurnished</option>
                         <option value="semi-furnished">Semi-Furnished</option>
@@ -1590,20 +1970,17 @@
                       </select>
                     </div>
                   </div>
-
-                  <div class="col-md-6">
-                  
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <label class="form-label">Best Suited For</label>
+                      <div class="pill-group" id="best_suited_forGroup">
+                        <button type="button" class="pill-btn" data-field="best_suited_for" data-value="Students">Students</button>
+                        <button type="button" class="pill-btn" data-field="best_suited_for" data-value="Working Professionals">Working Professionals</button>
+                        <button type="button" class="pill-btn" data-field="best_suited_for" data-value="Family">Family</button>
+                      </div>
+                      <input type="hidden" name="best_suited_for" id="best_suited_for">
+                    </div>
                   </div>
-                </div>
-
-                <div class="form-group mt-2">
-                  <label class="form-label">Best Suited For</label>
-                  <div class="pill-group" id="bestSuitedGroup">
-                    <button type="button" class="pill-btn" data-field="best_suited_for" data-value="Students">Students</button>
-                    <button type="button" class="pill-btn" data-field="best_suited_for" data-value="Working Professionals">Working Professionals</button>
-                    <button type="button" class="pill-btn" data-field="best_suited_for" data-value="Family">Family</button>
-                  </div>
-                  <input type="hidden" name="best_suited_for" id="bestSuitedFor">
                 </div>
 
                 <div class="row mt-2">
@@ -1616,7 +1993,6 @@
                       </label>
                     </div>
                   </div>
-
                   <div class="col-md-6" id="mealOfferings" style="display:none;">
                     <div class="form-group">
                       <label class="form-label">Meal Offerings</label>
@@ -1644,21 +2020,19 @@
                   <div class="col-md-4">
                     <div class="form-group">
                       <label class="form-label">Notice Period (Days)</label>
-                      <input type="number" class="form-control" name="notice_period" min="0" placeholder="e.g. 30">
+                      <input type="number" class="form-control" name="notice_period" id="notice_period" min="0" placeholder="e.g. 30">
                     </div>
                   </div>
-
                   <div class="col-md-4">
                     <div class="form-group">
                       <label class="form-label">Lock-in Period (Days)</label>
-                      <input type="number" class="form-control" name="lockin_period" min="0" placeholder="e.g. 90">
+                      <input type="number" class="form-control" name="lockin_period" id="lockin_period" min="0" placeholder="e.g. 90">
                     </div>
                   </div>
-
                   <div class="col-md-4">
                     <div class="form-group">
                       <label class="form-label">Minimum Stay (Months) <span class="required">*</span></label>
-                      <input type="number" class="form-control" name="minimum_stay" min="1" placeholder="Enter months" required>
+                      <input type="number" class="form-control" id="minimum_stay" name="minimum_stay" min="1" placeholder="Enter months" required>
                     </div>
                   </div>
                 </div>
@@ -1667,35 +2041,65 @@
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Available From <span class="required">*</span></label>
-                      <input type="date" class="form-control" name="available_from" required>
+                      <input type="date" class="form-control" id="available_from" name="available_from" required>
                     </div>
                   </div>
-
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Property Managed By</label>
-                      <select class="form-select" name="property_managed_by">
-                        <option value="">Select</option>
-                        <option value="self">Self</option>
-                        <option value="family">Family</option>
-                        <option value="caretaker">Caretaker</option>
-                        <option value="company">Management Company</option>
-                      </select>
+                      
+                      <select class="form-select form-control" id="property_managed_by" name="property_managed_by">
+    <option value="">Select Property Manager</option>
+
+    <option value="owner">Owner / Self Managed</option>
+    <option value="family">Family Member</option>
+    <option value="caretaker">Caretaker</option>
+    <option value="warden">Warden</option>
+    <option value="manager">Property Manager</option>
+    <option value="management_company">Management Company</option>
+    <option value="pg_operator">PG Operator</option>
+    <option value="co_living_operator">Co-Living Operator</option>
+    <option value="agency">Agency / Broker</option>
+  
+</select>
                     </div>
                   </div>
                 </div>
-
-                <div class="form-group mt-2">
-                  <label class="form-label">Property Manager Stays at Property?</label>
-                  <div style="display:flex;gap:20px;margin-top:6px;">
-                    <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;cursor:pointer;">
-                      <input type="radio" name="manager_stays" value="true" style="accent-color:#667eea;width:18px;height:18px;"> Yes
-                    </label>
-                    <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;cursor:pointer;">
-                      <input type="radio" name="manager_stays" value="false" checked style="accent-color:#667eea;width:18px;height:18px;"> No
-                    </label>
+                <br>
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Property Manager Stays at Property?</label>
+                      <div style="display:flex;gap:20px;margin-top:6px;">
+                        <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;cursor:pointer;">
+                          <input type="radio" name="manager_stays" id="manager_stays" value="true" style="accent-color:#667eea;width:18px;height:18px;"> Yes
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;cursor:pointer;">
+                          <input type="radio" name="manager_stays" id="manager_stays" value="false" checked style="accent-color:#667eea;width:18px;height:18px;"> No
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3" id="brokerageSection">
+                    <label class="form-label" id="brokerageLabel">Brokerage <span class="required">*</span></label>
+                    <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
+                      <option value="">Select</option>
+                      <option value="No Brokerage">No Brokerage</option>
+                      <option value="15 Days Rent">15 Days Rent</option>
+                      <option value="1 Month Rent" selected>1 Month Rent</option>
+                      <option value="Fixed Amount">Fixed Amount</option>
+                      <option value="Negotiable">Negotiable</option>
+                    </select>
                   </div>
                 </div>
+
+                <div class="row mt-2" id="manualBrokerage" style="display:none;">
+                  <div class="col-md-6">
+                    <label class="form-label">Enter Fixed Brokerage</label>
+                    <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. Fixed Amount">
+                  </div>
+                </div>
+                
               </div>
             </div>
 
@@ -1715,20 +2119,18 @@
               </div>
               <div class="section-body">
                 <div id="rooms-container">
+                  <!-- Dynamic Room Card Template -->
                   <div class="room-card" data-room-index="1">
                     <div class="room-card-header">
-                      <div class="room-card-title">Room Specification</div>
-                      <button type="button" class="btn-remove-room" onclick="removeRoom(this)" style="display:none;">
-                        <i class="fas fa-minus-circle"></i> Remove Room
-                      </button>
+                      <div class="room-card-title">Room Details & Pricing</div>
                     </div>
-
+                    
                     <div class="row">
                       <div class="col-md-6">
                         <div class="form-group">
                           <label class="form-label">Room Type <span class="required">*</span></label>
-                          <select class="form-select" name="room_type[]" required>
-                            <option value="">Select</option>
+                          <select class="form-select" name="room_type" id="room_type" required>
+                            <option value="">Select Type</option>
                             <option value="single">Single Occupancy</option>
                             <option value="double">Double Sharing</option>
                             <option value="triple">Triple Sharing</option>
@@ -1736,11 +2138,10 @@
                           </select>
                         </div>
                       </div>
-
                       <div class="col-md-6">
                         <div class="form-group">
-                          <label class="form-label">Total Beds In Room</label>
-                          <input type="number" class="form-control pg-room-beds" name="room_beds[]" min="1">
+                          <label class="form-label">Total Beds In Room <span class="required">*</span></label>
+                          <input type="number" class="form-control pg-room-beds" name="room_beds" id="room_beds" placeholder="e.g,2" required>
                         </div>
                       </div>
                     </div>
@@ -1749,87 +2150,120 @@
                       <div class="col-md-6">
                         <div class="form-group">
                           <label class="form-label">Rent Per Occupant (₹/Bed/Month/Person) <span class="required">*</span></label>
-                          <input type="number" class="form-control room-rent" id="roomRent1" name="room_rent[]" min="0" placeholder="Amount" required>
+                          <input type="number" class="form-control room-rent" id="room_rent" name="room_rent" min="0" placeholder="e.g., 8000" required>
                         </div>
                       </div>
-
-
                       <div class="col-md-6">
                         <div class="form-group">
-                          <label class="form-label">Advance Rent </label>
-                          <input type="number" class="form-control room-rent" min="0" placeholder="Amount">
-                        </div>
-                      </div>
-                      
-
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <label class="form-label">Refundable Room Security_Deposite (₹/Person) <span class="required">*</span></label>
-                          <input type="number" class="form-control" name="room_deposit[]" min="0" placeholder="Amount" required>
+                          <label class="form-label">Advance Rent Month</label>
+                          <select class="form-select form-control" id="advance_rent_month" name="advance_rent_month">
+                            <option value="">Select</option>
+                            <option value="0">No Advance</option>
+                            <option value="1" selected>1 Month Rent</option>
+                            <option value="2">2 Months Rent</option>
+                            <option value="3">3 Months Rent</option>
+                            <option value="4">4 Months Rent</option>
+                            <option value="5">5 Months Rent</option>
+                            <option value="6">6 Months Rent</option>
+                            <option value="7">7 Months Rent</option>
+                            <option value="8">8 Months Rent</option>
+                            <option value="9">9 Months Rent</option>
+                            <option value="10">10 Months Rent</option>
+                            <option value="11">11 Months Rent</option>
+                            <option value="fixed">Fixed Amount</option>
+                          </select>
                         </div>
                       </div>
                     </div>
 
                     <div class="row mt-2">
-                      <div class="col-md-6">
+                      <div class="col-md-6" id="advance_amount_div" style="display:none;">
                         <div class="form-group">
-                          <label class="form-label"><i class="fas fa-handshake"></i> Brokerage</label>
-                          <select class="form-select brokerageSelect" name="room_brokerage[]">
-                            <option value="">Select Option</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>
-                          </select>
+                          <label class="form-label">Advance Rent Amount</label>
+                          <div class="input-group">
+                            <input type="number" class="form-control" name="advance_rent_amount" id="advance_rent_amount" placeholder="e.g., 5000">
+                          </div>
                         </div>
                       </div>
-
-                      <div class="col-md-6 brokerageSection" style="display:none;">
+                      <div class="col-md-6">
                         <div class="form-group">
-                          <label class="form-label"><i class="fas fa-percent"></i> Brokerage Type</label>
-                          <select class="form-select brokeragePercentage" name="room_brokerage_percent[]">
-                            <option value="">Select Brokerage</option>
-                            <option value="1%">1%</option>
-                            <option value="1.5%">1.5%</option>
-                            <option value="2%">2%</option>
-                            <option value="Negotiable">Negotiable</option>
-                            <option value="Manual">Enter Manually</option>
+                          <label class="form-label">Refundable Room Security_Deposite (₹/Person) <span class="required">*</span></label>
+                          <select class="form-select form-control" id="security_deposit_type" name="security_deposit_type" required>
+                            <option value="">Select</option>
+                            <option value="0">No Deposit</option>
+                            <option value="1" selected>1 Month Rent</option>
+                            <option value="2">2 Months Rent</option>
+                            <option value="3">3 Months Rent</option>
+                            <option value="4">4 Months Rent</option>
+                            <option value="5">5 Months Rent</option>
+                            <option value="6">6 Months Rent</option>
+                            <option value="7">7 Months Rent</option>
+                            <option value="8">8 Months Rent</option>
+                            <option value="9">9 Months Rent</option>
+                            <option value="10">10 Months Rent</option>
+                            <option value="11">11 Months Rent</option>
+                            <option value="fixed">Fixed Amount</option>
                           </select>
                         </div>
                       </div>
                     </div>
 
-                    <div class="row mt-2 manualBrokerage" style="display:none;">
+                    <div class="row mt-2" id="security_deposit_div" style="display:none;">
                       <div class="col-md-6">
                         <div class="form-group">
-                          <label class="form-label"><i class="fas fa-edit"></i> Brokerage Amount (₹)</label>
-                          <input type="text" class="form-control" name="room_manual_brokerage[]" placeholder="e.g. 2.5%">
+                          <label class="form-label">Security Deposit Amount</label>
+                          <div class="input-group">
+                            <input type="number" class="form-control" name="security_deposit_amount" id="security_deposit_amount" placeholder="e.g., 10000">
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div class="form-group mt-2">
-                     
-
-                       <div class="col-md-6">
+                    <div class="row mt-2">
+                      <div class="col-md-12">
                         <div class="form-group">
-                          <label class="form-label"> Monthly Maintainance Amount </label>
-                          <input type="number" class="form-control" name="monthly_maintainance  min="0" placeholder="73433">
+                          <label class="form-label">Maintenance Type</label>
+                          <div class="radio-group">
+                            <div class="radio-item">
+                              <div class="form-check">
+                                <input class="form-check-input" type="radio" name="maintenance_type" id="maintenance_included" value="Included in Rent" checked>
+                                <label class="form-check-label" for="maintenance_included">Included in Rent</label>
+                              </div>
+                            </div>
+                            <div class="radio-item">
+                              <div class="form-check">
+                                <input class="form-check-input" type="radio" name="maintenance_type" id="maintenance_extra" value="Extra">
+                                <label class="form-check-label" for="maintenance_extra">Excluding from Rent</label>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
+                    </div>
 
-                        <div class="col-md-6">
+                    <div class="row mt-2">
+                      <div class="col-md-6" id="maintenanceAmountDiv" style="display:none;">
                         <div class="form-group">
-                          <label class="form-label"> Estimated Move-In Cost (Per Occupant) </label>
-                          <input type="number" class="form-control"  min="0" placeholder="Amount">
+                          <label class="form-label">Monthly Maintenance Amount</label>
+                          <div class="input-group">
+                            <input type="number" class="form-control" name="maintenance_amount" placeholder="e.g., 2000">
+                          </div>
                         </div>
                       </div>
-
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label class="form-label">Estimated Move-In Cost (Per Occupant)</label>
+                          <div class="input-group">
+                            <input type="number" class="form-control" name="total_move_in_cost" id="total_move_in_cost" placeholder="e.g., 18000">
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                  <!-- End Dynamic Room Card Template -->
                 </div>
-
-                <button type="button" class="add-btn" onclick="addRoom()">
-                  <i class="fa-solid fa-plus"></i> Add Another Room Variant
-                </button>
+                
+               
               </div>
             </div>
 
@@ -1847,151 +2281,153 @@
             <div class="form-section">
               <div class="section-header">
                 <i class="fa-solid fa-gavel"></i>
-                Step 3 — PG Regulations 
+                Step 3 — PG Regulations
               </div>
               <div class="section-body">
+                <!-- Row 1 -->
                 <div class="row">
-               
-
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label class="form-label">Opposite Sex Allowed?</label>
+                      <label class="form-label">Opposite Gender Visitors Allowed?</label>
                       <label class="toggle-switch">
-                        <input type="checkbox" name="opposite_sex_allowed">
+                        <input type="checkbox" name="opposite_gender_visitors_allowed" id="opposite_gender_visitors_allowed">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Visitors Allowed?</label>
+                      <label class="toggle-switch">
+                        <input type="checkbox" name="visitors_allowed" id="visitors_allowed">
                         <span class="toggle-slider"></span>
                       </label>
                     </div>
                   </div>
                 </div>
 
+                <!-- Row 2 -->
                 <div class="row mt-2">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label class="form-label">Any Time Allowed?</label>
+                      <label class="form-label">Parents/Guardians Allowed?</label>
                       <label class="toggle-switch">
-                        <input type="checkbox" name="any_time_allowed">
+                        <input type="checkbox" name="parents_guardians_allowed" id="parents_guardians_allowed">
                         <span class="toggle-slider"></span>
                       </label>
                     </div>
                   </div>
-
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label class="form-label"> Visitors Allowed?</label>
+                      <label class="form-label">24x7 Entry Allowed?</label>
                       <label class="toggle-switch">
-                        <input type="checkbox" name="visitors_allowed">
+                        <input type="checkbox" id="entry_24x7_allowed" name="entry_24x7_allowed" id="entry_24x7_allowed">
                         <span class="toggle-slider"></span>
                       </label>
                     </div>
                   </div>
                 </div>
 
-                <div class="row mt-2">
+                <!-- Curfew Time -->
+                <div class="row mt-2" id="curfew_time_row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label class="form-label">Guardian Allowed?</label>
-                      <label class="toggle-switch">
-                        <input type="checkbox" name="guardian_allowed">
-                        <span class="toggle-slider"></span>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">Drinking Allowed?</label>
-                      <label class="toggle-switch">
-                        <input type="checkbox" name="drinking_allowed">
-                        <span class="toggle-slider"></span>
-                      </label>
+                      <label class="form-label">Curfew Time</label>
+                      <input type="time" class="form-control" name="curfew_time" id="curfew_time">
                     </div>
                   </div>
                 </div>
 
+                <!-- Row 3 -->
                 <div class="row mt-2">
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Smoking Allowed?</label>
                       <label class="toggle-switch">
-                        <input type="checkbox" name="smoking_allowed">
+                        <input type="checkbox" name="smoking_allowed" id="smoking_allowed">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Alcohol Consumption Allowed?</label>
+                      <label class="toggle-switch">
+                        <input type="checkbox" name="alcohol_consumption_allowed" id="alcohol_consumption_allowed">
                         <span class="toggle-slider"></span>
                       </label>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-        <div class="form-section">
-    <div class="section-header"><i class="fas fa-align-left"></i> System-Generated Property Descriptions</div>
-    <div class="section-body">
-        
-        <div class="alert alert-info d-flex align-items-center mb-4" style="background-color: #f8fafc; border-left: 4px solid #667eea; border-radius: 4px; padding: 12px 16px; border-top: none; border-right: none; border-bottom: none;">
-            <i class="fas fa-info-circle me-2" style="color: #667eea;"></i>
-            <span style="font-size: 0.9rem; color: #4a5568;">
-                <strong>Smart Generation:</strong> These fields are read-only. The system will automatically update the summary and detailed descriptions based on any changes you make to the PG details upon saving.
-            </span>
-        </div>
-
-        <div class="form-group mb-4">
-            <label class="form-label mb-2"><i class="fas fa-file-alt"></i> Property Summary</label>
-            <textarea class="form-control bg-light" name="property_summary" rows="3" placeholder="This summary will be auto-generated by the system upon saving..." readonly>{{ prop.property_summary|default:'' }}</textarea>
-        </div>
-        
-        <div class="form-group">
-            <label class="form-label mb-2"><i class="fas fa-file-alt"></i> Property Description (Rich Text)</label>
-            <div class="form-control bg-light" style="height: auto; min-height: 150px; max-height: 250px; overflow-y: auto; cursor: not-allowed; color: #4a5568;">
-                {{ prop.property_description|default:''|safe }}
-            </div>
-            <input type="hidden" name="property_description" value="{{ prop.property_description|default:'' }}">
-        </div>
-        
-    </div>
-</div>
-
-              <div class="form-section">
-              <div class="section-header"><i class="fas fa-align-left"></i>Detailed User Property Description </div>
-              <div class="section-body">
-                <div class="form-group">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i>User Property Description</label>
-                   
+                <!-- Row 4 -->
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Couples Allowed?</label>
+                      <label class="toggle-switch">
+                        <input type="checkbox" name="couples_allowed" id="couples_allowed">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
                   </div>
-                  <textarea class="form-control" name="user_description" id="user_description" rows="6" placeholder="Add Property description details..."></textarea>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Pets Allowed?</label>
+                      <label class="toggle-switch">
+                        <input type="checkbox" name="pets_allowed" id="pets_allowed">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
+
+                <!-- Row 5 -->
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Cooking Allowed?</label>
+                      <label class="toggle-switch">
+                        <input type="checkbox" name="cooking_allowed" id="cooking_allowed">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Police Verification Required?</label>
+                      <label class="toggle-switch">
+                        <input type="checkbox" name="police_verification_required" id="police_verification_required">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
 
             <div class="form-section">
               <div class="section-header">
                 <i class="fas fa-star"></i>
-                 Amenities & Nearby Facilities
+                Amenities & Nearby Facilities
               </div>
               <div class="section-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                  <label class="form-label mb-0">
-                    Select  Amenities <span class="required-star">*</span>
-                  </label>
-                  <div class="selection-summary">
-                    <span class="text-muted small" style="font-weight:bold;">Total Active:</span>
-                    <input type="text" id="amenityCounter" value="0" readonly 
-                      style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #ddd; font-weight: bold; background: #f8f9fa;">
-                  </div>
+                  <label class="form-label mb-0"><i class="fas fa-star text-warning"></i> Amenities</label>
+                  <span class="badge bg-primary" id="amenitiesCount">0 selected</span>
                 </div>
-
-                <div class="checkbox-group">
-                  {% for amenities in ameneties_obj %}
-                    <div class="checkbox-item">
-                      <div class="form-check">
-                        <input class="form-check-input amenity-checkbox-input" type="checkbox" name="amenities[]" 
-                          value="{{amenities.amenties_name}}" id="amenity_{{ forloop.counter }}">
-                        <label class="form-check-label" for="amenity_{{ forloop.counter }}">
-                          <i class="{{amenities.amenties_icon}}"></i> {{amenities.amenties_name}}
-                        </label>
-                      </div>
-                    </div>
-                  {% empty %}
-                    <p class="text-muted small">No structural dynamic amenities configured in view database mapping.</p>
+                <button type="button" class="btn btn-primary w-100 mb-3" onclick="openModal('amenities')">
+                  <i class="fas fa-plus-circle me-2"></i> Select Amenities <span class="badge bg-light text-dark ms-2"
+                    id="amenitiesBadge">0</span>
+                </button>
+                <div id="amenitiesDisplay" class="selected-items-display">
+                  <p class="text-muted text-center">No amenities selected</p>
+                </div>
+                <div style="display:none;">
+                  {% for am in ameneties_obj %}
+                  <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}" class="amenities-checkbox"
+                    data-icon="{{am.amenties_icon}}">
                   {% endfor %}
                 </div>
               </div>
@@ -2002,32 +2438,37 @@
                 <i class="fas fa-map-marker-alt"></i>
                 Nearby Facilities
               </div>
-              <div class="section-body">
+              <div class="section-body mt-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                  <label class="form-label mb-0">
-                    Select Nearby Facilities <span class="required-star">*</span>
-                  </label>
-                  <div class="selection-summary">
-                    <span class="text-muted small" style="font-weight:bold;">Total Active:</span>
-                    <input type="text" id="facilityCounter" value="0" readonly 
-                      style="width: 50px; text-align: center; border-radius: 8px; border: 1px solid #bae6fd; font-weight: bold; background: #f0f9ff; color: #0369a1;">
-                  </div>
+                  <label class="form-label mb-0"><i class="fas fa-map-marker-alt text-primary"></i> Nearby
+                    Facilities</label>
+                  <span class="badge bg-primary" id="facilitiesCount">0 selected</span>
                 </div>
-
-                <div class="checkbox-group">
-                  {% for facilities in facilities_obj %}
-                    <div class="checkbox-item">
-                      <div class="form-check">
-                        <input class="form-check-input facility-checkbox-input" type="checkbox" name="facilities[]" 
-                          value="{{facilities.facilities_name}}" id="facility_{{ forloop.counter }}">
-                        <label class="form-check-label" for="facility_{{ forloop.counter }}">
-                          <i class="{{facilities.facilities_icon}}"></i> {{facilities.facilities_name}}
-                        </label>
-                      </div>
-                    </div>
-                  {% empty %}
-                    <p class="text-muted small">No surrounding vicinity facility variables mapped in request framework context.</p>
+                <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')">
+                  <i class="fas fa-plus-circle me-2"></i> Select Facilities <span class="badge bg-light text-dark ms-2"
+                    id="facilitiesBadge">0</span>
+                </button>
+                <div id="facilitiesDisplay" class="selected-items-display">
+                  <p class="text-muted text-center">No facilities selected</p>
+                </div>
+                <div style="display:none;">
+                  {% for fa in facilities_obj %}
+                  <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}"
+                    class="facilities-checkbox" data-icon="{{fa.facilities_icon}}">
                   {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-align-left"></i>Add Property Description </div>
+              <div class="section-body">
+                <div class="form-group">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Property Description</label>
+                  </div>
+                  <textarea class="form-control" name="user_description" id="user_description" rows="6"
+                    placeholder="Add Property description details..."></textarea>
                 </div>
               </div>
             </div>
@@ -2046,137 +2487,68 @@
             <div class="form-section">
               <div class="section-header">
                 <i class="fa-solid fa-images"></i>
-                Step 4 — Media 
+                Step 4 — Media
               </div>
               <div class="section-body">
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fa-solid fa-camera"></i> Upload Property Images
-                  </label>
-                  <p class="text-muted small">Listings with high-res property images convert at a 5x faster baseline rate. Add at least 3 photos.</p>
-                  <div class="image-upload-area" id="uploadArea">
-                    <input type="file" id="imageInput" name="property_images[]" multiple accept="image/" style="display:none;">
-                    <div class="upload-icon" style="font-size:2.5rem;margin-bottom:10px;">📷</div>
-                    <div class="upload-text">Click or Drag/Drop Images Directly Here</div>
-                    <div class="upload-subtext">Upload standard asset sets between 3 and 10 dynamic images (JPG, PNG)</div>
-                  </div>
-                  <div class="image-preview" id="imagePreview"></div>
-                </div>
-
                 <div class="row mt-3">
-                
-
+                  <div class="col-md-12">
+                    
+                    <div class="form-group">
+  <label class="form-label">
+    <i class="fa-solid fa-camera"></i> Upload Property Images
+  </label>
+  <p class="text-muted small">Listings with high-res property images convert at a 5x faster baseline rate. Add at least 3 photos.</p>
+  <div class="image-upload-area" id="uploadArea">
+    <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
+    <div class="upload-icon" style="font-size:2.5rem;margin-bottom:10px;">📷</div>
+    <div class="upload-text">Click or Drag/Drop Images Directly Here</div>
+    <div class="upload-subtext">Upload standard asset sets between 3 and 10 dynamic images (JPG, PNG)</div>
+    
+    <div style="font-size:0.8rem; color:#64748b; margin-top:10px;">
+        <i class="fas fa-arrows-alt"></i> Drag and drop images below to rearrange their sequence
+    </div>
+  </div>
+  <div class="image-preview" id="imagePreview"></div>
+</div>
+                  </div>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">
                         <i class="fa-solid fa-video"></i> Upload Video
                       </label>
-                      <input type="file" class="form-control" name="video" accept="video/*" style="padding:8px;">
+                      <p class="text-muted small">Virtual tours capture attention. (Optional, MP4/WebM allowed)</p>
+                      <div class="image-upload-area" style="padding:40px; background:#f0f4ff; border-color:#667eea; border-style:dashed;">
+                        <input type="file" class="form-control" id="video" name="video" accept="video/*" style="border:none; background:transparent;">
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="form-section" hidden>
-              <div class="section-header">
-                <i class="fas fa-address-book"></i>
-                 Contact Information
-              </div>
-              <div class="section-body">
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fas fa-user"></i>  Owner Name 
-                      </label>
-                      <input type="text" class="form-control" id="ownerName" name="owner_name" placeholder="Enter full primary name">
-                    </div>
+            <div class="form-section">
+              <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
+                  <div class="row">
+                      <div class="col-md-6">
+                          <div class="form-group">
+                              <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
+                              <div class="form-check form-check-inline">
+                                  <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes">
+                                  <label class="form-check-label" for="listed_yes">Yes</label>
+                              </div>
+                              <div class="form-check form-check-inline">
+                                  <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" checked>
+                                  <label class="form-check-label" for="listed_no">No</label>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-md-6" id="portalField" style="display:none;">
+                          <div class="form-group">
+                              <label class="form-label">Portal Name</label>
+                              <input type="text" class="form-control" name="portal_name" id="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker">
+                          </div>
+                      </div>
                   </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fas fa-phone"></i>  Contact Number
-                      </label>
-                      <input type="tel" class="form-control" name="contact_number" placeholder="e.g., +91 9876543210">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row mt-2">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fas fa-envelope"></i>  Email 
-                      </label>
-                      <input type="email" class="form-control" name="email" placeholder="owner.email@example.com">
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fas fa-phone-alt"></i>  Alternate Contact Number
-                      </label>
-                      <input type="tel" class="form-control" name="alternate_contact" placeholder="e.g., +91 9876543210">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-               <div class="form-section">
-              <div class="section-header">
-                <i class="fas fa-address-book"></i>
-                 Property Listed By
-              </div>
-              <div class="section-body">
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fas fa-user"></i>  Listed By ID
-                      </label>
-                      <input type="text" class="form-control" id="listedbyid" name="listed_by_id">
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fas fa-phone"></i> Listed By Name
-                      </label>
-                      <input type="text" class="form-control" name="listed_by_name">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row mt-2">
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fas fa-envelope"></i> Listed By  Email 
-                      </label>
-                      <input type="email" class="form-control" name="listed_by_email">
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fas fa-phone-alt"></i>  Listed By Contact
-                      </label>
-                      <input type="tel" class="form-control" name="listed_by_contact">
-                    </div>
-                  </div>
-
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fas fa-phone-alt"></i>  Listed By Role
-                      </label>
-                      <input type="text" class="form-control" name="listed_by_role">
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -2189,69 +2561,34 @@
                 <div class="row">
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label class="form-label"><i class="fas fa-user"></i> Uploder By Name</label>
-                      <input type="text" class="form-control" name="uploaded_by_name" value="{{ admin_obj.name }}" readonly style="background:#f0fdf4;color:#065f46;font-weight:600;">
+                      <label class="form-label"><i class="fas fa-user"></i>  Name</label>
+                      <input type="text" class="form-control" name="uploaded_by_name"  id="uploaded_by_name" value="{{ admin_obj.name }}"
+                        readonly style="background:#f0fdf4;color:#065f46;font-weight:600;">
                     </div>
                   </div>
-
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label class="form-label"><i class="fas fa-envelope"></i> Uploaded By Email</label>
-                      <input type="email" class="form-control" name="uploaded_by_email" value="{{ admin_obj.email }}" readonly style="background:#f0fdf4;color:#065f46;font-weight:600;">
+                      <label class="form-label"><i class="fas fa-envelope"></i>  Email</label>
+                      <input type="email" class="form-control" name="uploaded_by_email"  id="uploaded_by_email" value="{{ admin_obj.email }}"
+                        readonly style="background:#f0fdf4;color:#065f46;font-weight:600;">
                     </div>
                   </div>
-
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label class="form-label"><i class="fas fa-phone"></i> Uploaded By Contact</label>
-                      <input type="text" class="form-control" name="uploaded_by_contact" value="{{ admin_obj.phone }}" readonly style="background:#f0fdf4;color:#065f46;font-weight:600;">
+                      <label class="form-label"><i class="fas fa-phone"></i>  Contact</label>
+                      <input type="text" class="form-control" name="uploaded_by_contact"  id="uploaded_by_contact" value="{{ admin_obj.phone }}"
+                        readonly style="background:#f0fdf4;color:#065f46;font-weight:600;">
                     </div>
                   </div>
-
                   <div class="col-md-3">
                     <div class="form-group">
-                      <label class="form-label"><i class="fas fa-user-tag"></i> Uploaded By sRole</label>
-                      <input type="text" class="form-control" name="uploaded_by_role" value="{{ admin_obj.role }}" readonly style="background:#f0fdf4;color:#065f46;font-weight:600;">
+                      <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
+                      <input type="text" class="form-control" name="uploaded_by_role" id="uploaded_by_role" value="{{ admin_obj.role }}"
+                        readonly style="background:#f0fdf4;color:#065f46;font-weight:600;">
                     </div>
                   </div>
-                </div>
-
-                <div class="inline-status is-info mt-2">
-                  <i class="fas fa-info-circle"></i>
-                  <span style="font-size:.8rem;">Security validation logs trace this upload instance directly to your backend admin session registry.</span>
                 </div>
               </div>
-            </div>
-
-            <div class="review-box">
-              <h5 style="margin-bottom:15px;color:#2d3748;font-weight:800;"><i class="fas fa-clipboard-check"></i> Final Review Before Publishing Listing</h5>
-              <div class="rb-row"><span class="rb-label">Calculated Title Name</span><span class="rb-val" id="rv-pgname">—</span></div>
-              <div class="rb-row"><span class="rb-label">Zonal Location Mapping</span><span class="rb-val" id="rv-location">—</span></div>
-              <div class="rb-row"><span class="rb-label">Total Structural Beds</span><span class="rb-val" id="rv-beds">—</span></div>
-              <div class="rb-row"><span class="rb-label">Base Dynamic Rent Index</span><span class="rb-val" id="rv-rent">—</span></div>
-              <div class="rb-row"><span class="rb-label">Listing Classification Category</span><span class="rb-val">PG / Co-Living Asset Block</span></div>
-            </div>
-
-            <div class="inline-status is-success mb-3">
-              <i class="fas fa-rocket"></i>
-              <div>
-                <div style="font-weight:800;font-size:.85rem;">🚀 Instant Deployment Pipelines Engaged</div>
-                <div style="font-size:.76rem;margin-top:6px;line-height:1.7;">
-                  ✅ Listing scales immediately into open search indices<br>
-                  ✅ Visibility indexing goes live to regional professional directories<br>
-                  ✅ Automatic validation channels activate within dashboard frameworks<br>
-                  ✅ Audit trail parameters logged cleanly across verification lines
-                </div>
-              </div>
-            </div>
-
-            <div style="margin-bottom:20px;">
-              <label class="amenity-checkbox" style="background:#fffbeb;border-color:#fcd34d;">
-                <input type="checkbox" id="agreeTerms" style="accent-color:#667eea;width:18px;height:18px;">
-                <label for="agreeTerms" style="font-size:.85rem;font-weight:600;color:#92400e;cursor:pointer;">
-                  I agree to structural posting policies and certify that all inputs are accurate.
-                </label>
-              </label>
             </div>
 
             <div class="step-nav">
@@ -2259,7 +2596,7 @@
                 <i class="fas fa-arrow-left"></i> Back
               </button>
               <button type="submit" class="btn btn-pr btn-lg">
-                <i class="fas fa-rocket"></i> Submit Listing Infrastructure
+               <i class="fas fa-save"></i> Submit Property
               </button>
             </div>
           </div>
@@ -2302,146 +2639,353 @@
         <div class="cl-item" id="cl-owner"><i class="fas fa-circle"></i> Valid contact profile mapped</div>
         <div class="cl-item" id="cl-photos"><i class="fas fa-circle"></i> Portfolio image attachments verified</div>
       </div>
+    </div>
+  </div>
+</div>
 
-      <div class="info-card">
-        <div class="ic-title">💡 Fast-Track Directory Conversion Tips</div>
-        <div class="ic-item"><i class="fas fa-camera"></i> 8+ structural images increases inquiry rates by up to 300%</div>
-        <div class="ic-item"><i class="fas fa-utensils"></i> Explicit meal offering definitions help capture filter queries</div>
-        <div class="ic-item"><i class="fas fa-map-pin"></i> Adding accurate project descriptors accelerates location rank accuracy</div>
+<!-- Common Modal -->
+<div class="modal fade" id="itemsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-list"></i> <span id="modalTitle">Select Items</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control mb-3" id="modalSearch" placeholder="Search...">
+        <div id="modalItemsList" class="row"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply (<span id="modalSelectedCount">0</span>)</button>
       </div>
     </div>
   </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+  function updateBrokerageLabel(role) {
+    var labelElement = document.getElementById('brokerageLabel');
+    if (!labelElement) return;
+    var normalizedRole = (role || "").trim().toLowerCase();
+    var labelText = "";
+    switch (normalizedRole) {
+      case 'admin': labelText = "EstateFlow Service Fee"; break;
+      case 'relationship manager': labelText = "Service Fee"; break;
+      case 'landlord': labelText = "Tenant Service Fee"; break;
+      case 'agent': labelText = "Brokerage"; break;
+      case 'agency/builder':
+      case 'builder': labelText = "Service Fee"; break;
+      default: labelText = "Brokerage"; break;
+    }
+    labelElement.innerHTML = labelText + ' <span class="required">*</span>';
+  }
+
+  function Change_Fields(){
+    var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
+    if (!checkedInput) return;
+    var selectedValue = checkedInput.value;
+    
+    var admin_id    = document.getElementById('selfUserId')?.value || "";
+    var admin_name  = document.getElementById('selfUserName')?.value || "";
+    var admin_email = document.getElementById('selfUserEmail')?.value || "";
+    var admin_phone = document.getElementById('selfUserPhone')?.value || "";
+    var admin_role  = document.getElementById('selfUserRole')?.value || "";
+
+    var targetId      = document.getElementById('listed_by_id');
+    var targetName    = document.getElementById('listed_by_name');
+    var targetEmail   = document.getElementById('listed_by_email');
+    var targetContact = document.getElementById('listed_by_contact');
+    var targetRole    = document.getElementById('listed_by_role');
+    var hiddenSelect  = document.getElementById('assigned_to');
+
+    if(selectedValue == "self"){
+        var otherWrapper = document.getElementById('listedByOtherWrapper');
+        if (otherWrapper) otherWrapper.style.display = "none";
+        if (hiddenSelect) {
+            hiddenSelect.value = "";
+            hiddenSelect.required = false; 
+            hiddenSelect.classList.remove('is-invalid');
+            var searchControl = document.getElementById('assignedToSearchSelect');
+            if (searchControl) searchControl.classList.remove('is-invalid');
+        }
+        var valueLabel = document.getElementById('assignedToValueLabel');
+        if (valueLabel) valueLabel.textContent = "-- Select Team Member --";
+
+        if (targetId) targetId.value = admin_id;
+        if (targetName) targetName.value = admin_name;
+        if (targetEmail) targetEmail.value = admin_email;
+        if (targetContact) targetContact.value = admin_phone;
+        if (targetRole) targetRole.value = admin_role;
+        updateBrokerageLabel(admin_role);
+    } else {
+        if (hiddenSelect) hiddenSelect.required = true;
+        if (targetId) targetId.value = "";
+        if (targetName) targetName.value = "";
+        if (targetEmail) targetEmail.value = "";
+        if (targetContact) targetContact.value = "";
+        if (targetRole) targetRole.value = "";
+        var otherWrapper = document.getElementById('listedByOtherWrapper');
+        if (otherWrapper) otherWrapper.style.display = "block";
+    }
+  }
+
+  // Remove red borders upon typing or changing inputs globally
+  document.addEventListener('input', function(e) {
+    if(e.target.classList && e.target.classList.contains('is-invalid')) {
+      e.target.classList.remove('is-invalid');
+    }
+  });
+  document.addEventListener('change', function(e) {
+    if(e.target.classList && e.target.classList.contains('is-invalid')) {
+      e.target.classList.remove('is-invalid');
+    }
+  });
+
+  // Custom searchable dropdown for "Listed By (User)"
+  (function () {
+    var wrapper = document.getElementById('assignedToSearchSelect');
+    var control = document.getElementById('assignedToControl');
+    var panel = document.getElementById('assignedToPanel');
+    var input = document.getElementById('searchTeamMember');
+    var optionsEl = document.getElementById('assignedToOptions');
+    var noResults = document.getElementById('assignedToNoResults');
+    var valueLabel = document.getElementById('assignedToValueLabel');
+    var hiddenSelect = document.getElementById('assigned_to');
+    var hiddenRole = document.getElementById('assigned_to_role');
+
+    if (!wrapper || !hiddenSelect) return;
+
+    var options = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-option'));
+    var groupLabels = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-group-label'));
+    var highlightedIndex = -1;
+
+    function openPanel() { wrapper.classList.add('open'); input.value = ''; filterOptions(''); setTimeout(function () { input.focus(); }, 0); }
+    function closePanel() { wrapper.classList.remove('open'); highlightedIndex = -1; }
+    function togglePanel() { if (wrapper.classList.contains('open')) { closePanel(); } else { openPanel(); } }
+
+    function selectOption(opt) {
+      var value = opt.getAttribute('data-value'), name = opt.getAttribute('data-name'), role = opt.getAttribute('data-role'), uid = opt.getAttribute('data-uid'), phone = opt.getAttribute('data-phone');
+      hiddenSelect.value = value;
+      if (hiddenRole) hiddenRole.value = role;
+      valueLabel.textContent = uid + ' - ' + name + ' - ' + role + ' - ' + phone;
+      valueLabel.classList.remove('ss-placeholder');
+      options.forEach(function (o) { o.classList.remove('selected'); });
+      opt.classList.add('selected');
+      wrapper.classList.remove('is-invalid');
+      closePanel();
+      var evt = new Event('change', { bubbles: true });
+      hiddenSelect.dispatchEvent(evt);
+    }
+
+    function filterOptions(query) {
+      query = query.trim().toLowerCase();
+      var anyVisible = false;
+      var groupHasVisible = {};
+      options.forEach(function (opt) {
+        var haystack = opt.getAttribute('data-search') || '';
+        var match = haystack.indexOf(query) !== -1;
+        opt.style.display = match ? '' : 'none';
+        if (match) {
+          anyVisible = true;
+          var prev = opt.previousElementSibling;
+          while (prev && !prev.classList.contains('search-select-group-label')) { prev = prev.previousElementSibling; }
+          if (prev) groupHasVisible[prev.textContent] = true;
+        }
+      });
+      groupLabels.forEach(function (label) { label.style.display = groupHasVisible[label.textContent] ? '' : 'none'; });
+      noResults.style.display = anyVisible ? 'none' : 'block';
+      highlightedIndex = -1;
+      options.forEach(function (o) { o.classList.remove('highlighted'); });
+    }
+
+    function visibleOptions() { return options.filter(function (o) { return o.style.display !== 'none'; }); }
+    function moveHighlight(step) {
+      var visible = visibleOptions();
+      if (!visible.length) return;
+      visible.forEach(function (o) { o.classList.remove('highlighted'); });
+      highlightedIndex += step;
+      if (highlightedIndex < 0) highlightedIndex = visible.length - 1;
+      if (highlightedIndex >= visible.length) highlightedIndex = 0;
+      var el = visible[highlightedIndex];
+      el.classList.add('highlighted');
+      el.scrollIntoView({ block: 'nearest' });
+    }
+
+    control.addEventListener('click', togglePanel);
+    control.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePanel(); } });
+    input.addEventListener('input', function () { filterOptions(input.value); });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); moveHighlight(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); moveHighlight(-1); }
+      else if (e.key === 'Enter') { e.preventDefault(); var visible = visibleOptions(); if (highlightedIndex >= 0 && visible[highlightedIndex]) { selectOption(visible[highlightedIndex]); } else if (visible.length === 1) { selectOption(visible[0]); } }
+      else if (e.key === 'Escape') { closePanel(); }
+    });
+    options.forEach(function (opt) { opt.addEventListener('click', function () { selectOption(opt); }); });
+    document.addEventListener('click', function (e) { if (!wrapper.contains(e.target)) closePanel(); });
+
+    hiddenSelect.addEventListener('change', function () { if (typeof get_user_data === 'function') { get_user_data(this); } });
+    if (typeof Change_Fields === 'function') { Change_Fields(); }
+  })();
+
+  function get_user_data() {
+    var assigned_to = $("#assigned_to").val();
+    if (!assigned_to) {
+      $('#listed_by_id, #listed_by_name, #listed_by_email, #listed_by_contact, #listed_by_role').val('');
+      return;
+    }
+    $.ajax({
+      method: "POST",
+      url: "{% url 'get_user_data' %}",
+      data: { 'assigned_to': assigned_to },
+      dataType: "json",
+      success: function (response) {
+        $('#listed_by_id').val(response.user_id || '');
+        $('#listed_by_name').val(response.name || '');
+        $('#listed_by_email').val(response.email || '');
+        $('#listed_by_contact').val(response.contact || '');
+        $('#listed_by_role').val(response.role || '');
+        updateBrokerageLabel(response.role);
+      },
+      error: function (xhr, status, error) { console.error('Failed to fetch user data:', error); }
+    });
+  }
+
+  $(document).ready(function () {
+    const sections = ['amenities', 'facilities'];
+    sections.forEach(section => { updateDisplay(section); });
+
+    window.openModal = function (section) {
+      currentSection = section;
+      $('#modalTitle').text(`Select ${section.charAt(0).toUpperCase() + section.slice(1)}`);
+      const container = $('#modalItemsList').empty();
+      $(`.${section}-checkbox`).each(function () {
+        container.append(`
+        <div class="col-md-4 col-sm-6 mb-2">
+          <div class="form-check">
+            <input class="form-check-input modal-item-checkbox" type="checkbox" value="${this.value}" data-icon="${$(this).data('icon')}" ${this.checked ? 'checked' : ''}>
+            <label class="form-check-label"><i class="${$(this).data('icon')}"></i> ${this.value}</label>
+          </div>
+        </div>
+      `);
+      });
+      updateModalCount();
+      $('#itemsModal').modal('show');
+    };
+
+    window.removeItem = function (section, name) {
+      const items = $(`.${section}-checkbox`).filter(function () { return this.value === name; });
+      items.prop('checked', false);
+      updateDisplay(section);
+    };
+
+    window.clearAll = function () {
+      if (!currentSection) return;
+      $(`.${currentSection}-checkbox`).prop('checked', false);
+      $('.modal-item-checkbox').prop('checked', false);
+      updateDisplay(currentSection);
+      updateModalCount();
+    };
+
+    function updateDisplay(section) {
+      const checked = $(`.${section}-checkbox:checked`);
+      const count = checked.length;
+      $(`#${section}Count`).text(`${count} selected`);
+      $(`#${section}Badge`).text(count);
+      const display = $(`#${section}Display`).empty();
+      if (count === 0) { display.html(`<p class="text-muted text-center m-0">No ${section} selected</p>`); } 
+      else { checked.each(function () { display.append(`<span class="item-tag"><i class="${$(this).data('icon')}"></i> ${this.value} <span class="remove-btn" onclick="removeItem('${section}', '${this.value}')"><i class="fas fa-times-circle"></i></span></span>`); }); }
+    }
+
+    function updateModalCount() { $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length); }
+    $(document).on('change', '.modal-item-checkbox', updateModalCount);
+    $('#itemsModal .btn-primary').on('click', function () {
+      if (!currentSection) return;
+      const checked = $('.modal-item-checkbox:checked');
+      $(`.${currentSection}-checkbox`).prop('checked', false);
+      checked.each(function () { $(`.${currentSection}-checkbox[value="${this.value}"]`).prop('checked', true); });
+      updateDisplay(currentSection);
+    });
+  });
+
   let currentStep = 1;
   let roomCount = 1;
   let selectedFiles = [];
 
-  // ── STEPPER ──────────────────────────────────────────────────────────────
   function goToStep(n) {
     if (n > currentStep && !validateStep(currentStep)) return;
-
     document.getElementById('step' + currentStep).classList.remove('active');
     document.getElementById('step' + n).classList.add('active');
-
     for (let i = 1; i <= 4; i++) {
-      const sc   = document.getElementById('sc' + i);
-      const sl   = document.getElementById('sl' + i);
-      const line = document.getElementById('line' + i);
-
-      if (sc)   sc.className   = 'step-circle';
-      if (sl)   sl.className   = 'step-label';
-      if (line) line.className = 'step-line';
-
-      if (i < n) {
-        if (sc)   { sc.classList.add('done'); sc.innerHTML = '<i class="fas fa-check" style="font-size:.65rem;"></i>'; }
-        if (sl)   sl.classList.add('done');
-        if (line) line.classList.add('done');
-      } else if (i === n) {
-        if (sc)   { sc.classList.add('active'); sc.textContent = i; }
-        if (sl)   sl.classList.add('active');
-      } else {
-        if (sc) sc.textContent = i;
-      }
+      const sc = document.getElementById('sc' + i), sl = document.getElementById('sl' + i), line = document.getElementById('line' + i);
+      if (sc) sc.className = 'step-circle'; if (sl) sl.className = 'step-label'; if (line) line.className = 'step-line';
+      if (i < n) { if (sc) { sc.classList.add('done'); sc.innerHTML = '<i class="fas fa-check" style="font-size:.65rem;"></i>'; } if (sl) sl.classList.add('done'); if (line) line.classList.add('done'); } 
+      else if (i === n) { if (sc) { sc.classList.add('active'); sc.textContent = i; } if (sl) sl.classList.add('active'); } 
+      else { if (sc) sc.textContent = i; }
     }
-
     currentStep = n;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    updateReview();
   }
 
-  // ── VALIDATORS ───────────────────────────────────────────────────────────
   function validateStep(step) {
+    let isValid = true;
+    const stepEl = document.getElementById('step' + step);
+    if (!stepEl) return true;
 
-    if (step === 1) {
-      const city          = document.getElementById('cityInput').value.trim();
-      const locality      = document.getElementById('locality').value.trim();
-      const furnishingType = document.querySelector('select[name="furnishing_type"]').value;
-      const minStay       = document.querySelector('input[name="minimum_stay"]').value;
-      const availableFrom = document.querySelector('input[name="available_from"]').value;
-      const pgFor         = document.getElementById('pgFor').value;
+    const invalidElements = stepEl.querySelectorAll('.is-invalid, .is-invalid-group');
+    invalidElements.forEach(el => {
+      el.classList.remove('is-invalid');
+      el.classList.remove('is-invalid-group');
+    });
 
-      // BUG FIX 1: removed non-existent `totalBeds` from Step 1 check
-      if (!city || !locality || !furnishingType || !minStay || !availableFrom) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Fields Missing!',
-          html: 'Please fill all required fields marked <span style="color:red;">*</span>.',
-          confirmButtonColor: '#667eea'
-        });
-        return false;
-      }
-
-      if (!pgFor) {
-        Swal.fire({
-          icon: 'error',
-          title: 'PG For Required!',
-          text: 'Select Boys / Girls / Co-living.',
-          confirmButtonColor: '#667eea'
-        });
-        return false;
-      }
-      return true;
-    }
-
-    if (step === 2) {
-      const roomTypes    = document.querySelectorAll('select[name="room_type[]"]');
-      const roomBeds     = document.querySelectorAll('input[name="room_beds[]"]');
-      const roomRents    = document.querySelectorAll('input[name="room_rent[]"]');
-      const roomDeposits = document.querySelectorAll('input[name="room_deposit[]"]');
-
-      for (let i = 0; i < roomTypes.length; i++) {
-        if (!roomTypes[i].value || !roomBeds[i].value || !roomRents[i].value || !roomDeposits[i].value) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Room Data Incomplete!',
-            text: `Fill all required fields for Room #${i + 1}.`,
-            confirmButtonColor: '#667eea'
-          });
-          return false;
+    const requiredFields = stepEl.querySelectorAll('input[required], select[required], textarea[required]');
+    requiredFields.forEach(field => {
+      if (!field.value || field.value.trim() === '') {
+        field.classList.add('is-invalid');
+        isValid = false;
+        if(field.id === 'assigned_to') {
+            document.getElementById('assignedToSearchSelect').classList.add('is-invalid');
         }
       }
-      setCheck('cl-rooms', true);
-      return true;
-    }
+    });
 
-    if (step === 3) {
-      const amenitiesChecked  = document.querySelectorAll('input[name="amenities[]"]:checked').length;
-      const facilitiesChecked = document.querySelectorAll('input[name="facilities[]"]:checked').length;
-
-      if (amenitiesChecked === 0 || facilitiesChecked === 0) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Selection Required!',
-          text: 'Select at least one amenity and one nearby facility.',
-          confirmButtonColor: '#667eea'
-        });
-        return false;
+    if (step === 1) {
+      const pgFor = document.getElementById('pg_for').value;
+      if (!pgFor) {
+        document.getElementById('pg_forGroup').classList.add('is-invalid-group');
+        isValid = false;
       }
-      return true;
     }
 
+    if (!isValid) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Incomplete Details',
+        html: 'Please fill out all highlighted required fields before moving to the next step.',
+        confirmButtonColor: '#667eea'
+      });
+      return false;
+    }
+
+    if (step === 2) { setCheck('cl-rooms', true); }
     return true;
   }
 
-  // ── PILL BUTTONS ─────────────────────────────────────────────────────────
   document.querySelectorAll('.pill-btn').forEach(btn => {
     btn.addEventListener('click', function (e) {
       e.preventDefault();
       const field = this.dataset.field;
-
       if (field === 'pg_for') {
         this.parentElement.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
+        this.closest('.pill-group').classList.remove('is-invalid-group');
       } else {
         this.classList.toggle('active');
       }
-
       syncPillInputsValue();
       updatePreview();
     });
@@ -2449,69 +2993,32 @@
 
   function syncPillInputsValue() {
     const activePgFor = document.querySelector('.pill-btn[data-field="pg_for"].active');
-    document.getElementById('pgFor').value = activePgFor ? activePgFor.dataset.value : '';
-
+    document.getElementById('pg_for').value = activePgFor ? activePgFor.dataset.value : '';
     ['best_suited_for', 'meal_offerings', 'meal_speciality'].forEach(fieldName => {
-      const vals = Array.from(document.querySelectorAll(`.pill-btn[data-field="${fieldName}"].active`))
-                        .map(b => b.dataset.value);
-
-      const idMap = {
-        meal_offerings:  'mealOfferingsHidden',
-        meal_speciality: 'mealSpecialityHidden',
-        best_suited_for: 'bestSuitedFor'
-      };
-
+      const vals = Array.from(document.querySelectorAll(`.pill-btn[data-field="${fieldName}"].active`)).map(b => b.dataset.value);
+      const idMap = { meal_offerings: 'mealOfferingsHidden', meal_speciality: 'mealSpecialityHidden', best_suited_for: 'best_suited_ForFor' };
       const el = document.getElementById(idMap[fieldName]);
       if (el) el.value = vals.join(',');
     });
   }
 
-  // ── MEALS TOGGLE ─────────────────────────────────────────────────────────
   document.getElementById('mealsToggle').addEventListener('change', function () {
     const show = this.checked;
-    document.getElementById('mealOfferings').style.display  = show ? 'block' : 'none';
+    document.getElementById('mealOfferings').style.display = show ? 'block' : 'none';
     document.getElementById('mealSpeciality').style.display = show ? 'block' : 'none';
   });
 
-  // ── BROKERAGE DYNAMIC ROWS ────────────────────────────────────────────────
-  document.addEventListener('change', function (e) {
-    if (e.target.classList.contains('brokerageSelect')) {
-      const card     = e.target.closest('.room-card');
-      const bSection = card.querySelector('.brokerageSection');
-      const mSection = card.querySelector('.manualBrokerage');
-
-      if (e.target.value === 'Yes') {
-        bSection.style.display = 'block';
-      } else {
-        bSection.style.display = 'none';
-        mSection.style.display = 'none';
-        card.querySelector('.brokeragePercentage').value = '';
-      }
-    }
-
-    if (e.target.classList.contains('brokeragePercentage')) {
-      const card     = e.target.closest('.room-card');
-      const mSection = card.querySelector('.manualBrokerage');
-      mSection.style.display = e.target.value === 'Manual' ? 'block' : 'none';
-    }
-  });
-
-  // ── ADD ROOM ──────────────────────────────────────────────────────────────
   function addRoom() {
     roomCount++;
     const wrapper = document.getElementById('rooms-container');
-    const card    = document.createElement('div');
+    const card = document.createElement('div');
     card.className = 'room-card';
     card.setAttribute('data-room-index', roomCount);
-
     card.innerHTML = `
       <div class="room-card-header">
         <div class="room-card-title">Room Specification #${roomCount}</div>
-        <button type="button" class="btn-remove-room" onclick="removeRoom(this)">
-          <i class="fas fa-minus-circle"></i> Remove
-        </button>
+        <button type="button" class="btn-remove-room" onclick="removeRoom(this)"><i class="fas fa-minus-circle"></i> Remove</button>
       </div>
-
       <div class="row">
         <div class="col-md-6">
           <div class="form-group">
@@ -2527,89 +3034,92 @@
         </div>
         <div class="col-md-6">
           <div class="form-group">
-            <label class="form-label">Total Beds <span class="required">*</span></label>
+            <label class="form-label">Total Beds In Room <span class="required">*</span></label>
             <input type="number" class="form-control pg-room-beds" name="room_beds[]" min="1" required>
           </div>
         </div>
       </div>
-
       <div class="row mt-2">
         <div class="col-md-6">
           <div class="form-group">
-            <label class="form-label">Rent (₹/month) <span class="required">*</span></label>
-            <input type="number" class="form-control room-rent" name="room_rent[]" min="0" placeholder="Amount" required>
+            <label class="form-label">Rent Per Occupant (₹) <span class="required">*</span></label>
+            <input type="number" class="form-control room-rent" name="room_rent[]" min="0" placeholder="e.g., 8000" required>
           </div>
         </div>
         <div class="col-md-6">
           <div class="form-group">
-            <label class="form-label">Advance Rent</label>
-            <input type="number" class="form-control" min="0" placeholder="Amount">
-          </div>
-        </div>
-        <div class="col-md-6 mt-2">
-          <div class="form-group">
-            <label class="form-label">Security Deposit (₹) <span class="required">*</span></label>
-            <input type="number" class="form-control" name="room_deposit[]" min="0" placeholder="Amount" required>
-          </div>
-        </div>
-      </div>
-
-      <div class="row mt-2">
-        <div class="col-md-6">
-          <div class="form-group">
-            <label class="form-label">Brokerage</label>
-            <select class="form-select brokerageSelect" name="room_brokerage[]">
+            <label class="form-label">Advance Rent Month</label>
+            <select class="form-select form-control" name="advance_rent_month[]">
               <option value="">Select</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
-          </div>
-        </div>
-        <div class="col-md-6 brokerageSection" style="display:none;">
-          <div class="form-group">
-            <label class="form-label">Brokerage Type</label>
-            <select class="form-select brokeragePercentage" name="room_brokerage_percent[]">
-              <option value="">Select</option>
-              <option value="1%">1%</option>
-              <option value="1.5%">1.5%</option>
-              <option value="2%">2%</option>
-              <option value="Negotiable">Negotiable</option>
-              <option value="Manual">Enter Manually</option>
+              <option value="0">No Advance</option>
+              <option value="1">1 Month</option>
+              <option value="2">2 Months</option>
+              <option value="fixed">Fixed Amount</option>
             </select>
           </div>
         </div>
       </div>
-
-      <div class="row mt-2 manualBrokerage" style="display:none;">
+      <div class="row mt-2">
         <div class="col-md-6">
           <div class="form-group">
-            <label class="form-label">Brokerage Amount</label>
-            <input type="text" class="form-control" name="room_manual_brokerage[]" placeholder="e.g. 2.5%">
+            <label class="form-label">Advance Rent Amount</label>
+            <input type="number" class="form-control" name="advance_amount[]" placeholder="e.g., 5000">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label class="form-label">Security Deposit (₹/Person) <span class="required">*</span></label>
+            <input type="number" class="form-control" name="security_deposit[]" min="0" placeholder="e.g., 10000" required>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-12">
+          <div class="form-group">
+            <label class="form-label">Maintenance Type</label>
+            <div class="radio-group">
+              <div class="radio-item">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="maintenance_type_${roomCount}" value="Included in Rent" checked>
+                  <label class="form-check-label">Included in Rent</label>
+                </div>
+              </div>
+              <div class="radio-item">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="maintenance_type_${roomCount}" value="Extra">
+                  <label class="form-check-label">Excluding from Rent</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-2">
+        <div class="col-md-6">
+          <div class="form-group">
+            <label class="form-label">Monthly Maintenance</label>
+            <input type="number" class="form-control" name="maintenance_amount[]" placeholder="e.g., 2000">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="form-group">
+            <label class="form-label">Estimated Move-In Cost</label>
+            <input type="number" class="form-control" name="total_move_in_cost[]" placeholder="e.g., 18000">
           </div>
         </div>
       </div>
     `;
-
     wrapper.appendChild(card);
     toggleGlobalRemoveButtonsState();
     updatePreview();
   }
 
-  // ── REMOVE ROOM ───────────────────────────────────────────────────────────
   function removeRoom(btn) {
     if (document.querySelectorAll('#rooms-container .room-card').length <= 1) {
       Swal.fire({ icon: 'warning', title: 'Cannot Remove!', text: 'At least one room is required.', confirmButtonColor: '#667eea' });
       return;
     }
-
-    Swal.fire({
-      title: 'Remove this room?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#64748b',
-      confirmButtonText: 'Yes, remove'
-    }).then(r => {
+    Swal.fire({ title: 'Remove this room?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Yes, remove' }).then(r => {
       if (r.isConfirmed) {
         btn.closest('.room-card').remove();
         reindexRoomCardTitles();
@@ -2631,104 +3141,128 @@
 
   function toggleGlobalRemoveButtonsState() {
     const cards = document.querySelectorAll('#rooms-container .room-card');
-    cards.forEach((card, idx) => {
+    cards.forEach(card => {
       const btn = card.querySelector('.btn-remove-room');
       if (btn) btn.style.display = cards.length <= 1 ? 'none' : 'block';
     });
   }
 
-  // ── AUTO TITLE ────────────────────────────────────────────────────────────
-  function calculateAutoTitle() {
-    const manual = document.getElementById('pgName').value.trim();
+function calculateAutoTitle() {
+    const titleEl = document.getElementById('property_title');
+    const manual = titleEl ? titleEl.value.trim() : '';
     if (manual) return manual;
 
-    const gender   = document.getElementById('pgFor').value || 'Co-Living';
-    const locality = document.getElementById('locality').value.trim() || '[Locality]';
-    const city     = document.getElementById('cityInput').value.trim();
-    const building = document.getElementById('buildingNameInput').value.trim();
-
+    const gender = document.getElementById('pg_for')?.value || 'Co-Living';
+    const locality = document.getElementById('locality')?.value.trim() || '[Locality]';
+    const city = document.getElementById('city')?.value.trim();
+    const building = document.getElementById('building_name')?.value.trim();
     return `Premium ${gender} PG at ${building ? building + ' ' : ''}${locality}${city ? ', ' + city : ''}`;
   }
 
-  // ── PREVIEW (sidebar card) ────────────────────────────────────────────────
-  // BUG FIX 2: replaced non-existent `totalBeds` with sum of room_beds[] inputs
   function updatePreview() {
-    const city  = document.getElementById('cityInput').value.trim() || 'City';
-    const loc   = document.getElementById('locality').value.trim()  || 'Area';
+    const city = document.getElementById('city')?.value.trim() || 'City';
+    const loc = document.getElementById('locality')?.value.trim() || 'Area';
+    
+    // 1. Calculate total beds using your actual class name (.pg-room-beds)
+    const totalBeds = Array.from(document.querySelectorAll('.pg-room-beds')).reduce((sum, el) => {
+      return sum + (parseInt(el.value, 10) || 0);
+    }, 0);
 
-    // Sum all room bed inputs dynamically
-    const totalBeds = Array.from(document.querySelectorAll('input[name="room_beds[]"]'))
-                           .reduce((sum, el) => sum + (parseInt(el.value) || 0), 0);
-
-    // Always read first room's rent field by ID
-    const baseRentEl  = document.getElementById('roomRent1');
-    const baseRentVal = baseRentEl ? baseRentEl.value : '';
+    // 2. Find the lowest starting rent across all created room cards (.room-rent)
+    const rentInputs = Array.from(document.querySelectorAll('.room-rent'))
+      .map(el => parseInt(el.value, 10))
+      .filter(val => !isNaN(val) && val > 0);
+    const lowestRent = rentInputs.length > 0 ? Math.min(...rentInputs) : 0;
 
     const title = calculateAutoTitle();
 
-    document.getElementById('previewTitle').textContent = title;
-    document.getElementById('previewLoc').innerHTML =
-      `<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ${loc}${city !== 'City' ? ', ' + city : ''}`;
-    document.getElementById('previewPrice').textContent =
-      baseRentVal ? '₹' + parseInt(baseRentVal).toLocaleString('en-IN') + '/mo' : '₹ — /mo';
-    document.getElementById('prevBeds').textContent =
-      totalBeds > 0 ? totalBeds + ' beds registered' : '— capacity tracks';
+    // 3. Safely update the Live Preview Card elements
+    const previewTitleEl = document.getElementById('previewTitle');
+    const previewLocEl = document.getElementById('previewLoc');
+    const previewPriceEl = document.getElementById('previewPrice');
+    const prevBedsEl = document.getElementById('prevBeds');
 
-    setCheck('cl-pgname',   !!title && !title.includes('[Locality]'));
+    if (previewTitleEl) previewTitleEl.textContent = title;
+    if (previewLocEl) {
+      previewLocEl.innerHTML = `<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ${loc}${city !== 'City' ? ', ' + city : ''}`;
+    }
+    if (previewPriceEl) {
+      previewPriceEl.textContent = lowestRent > 0 ? '₹' + lowestRent.toLocaleString('en-IN') + '/mo' : '₹ — /mo';
+    }
+    if (prevBedsEl) {
+      prevBedsEl.textContent = totalBeds > 0 ? totalBeds + ' beds registered' : '— capacity tracks';
+    }
+
+    // 4. Update the Sidebar Checklist indicators without undefined variable crashes
+    setCheck('cl-pgname', !!title && !title.includes('[Locality]'));
     setCheck('cl-location', loc !== 'Area');
-    setCheck('cl-beds',     totalBeds > 0);
+    setCheck('cl-beds', totalBeds > 0);
+    setCheck('cl-rooms', rentInputs.length > 0);
   }
 
   function setCheck(id, valid) {
     const el = document.getElementById(id);
     if (!el) return;
     el.className = 'cl-item' + (valid ? ' done' : '');
-    el.querySelector('i').className = 'fas ' + (valid ? 'fa-check-circle' : 'fa-circle');
+    const icon = el.querySelector('i');
+    if (icon) icon.className = 'fas ' + (valid ? 'fa-check-circle' : 'fa-circle');
   }
 
-  // ── REVIEW BOX (step 4 summary) ───────────────────────────────────────────
-  // BUG FIX 3: same totalBeds fix applied here too
-  function updateReview() {
-    const city = document.getElementById('cityInput').value || '—';
-    const loc  = document.getElementById('locality').value  || '—';
+  // Bind real-time event listeners for Basic Info fields
+  ['city', 'locality', 'property_title', 'building_name'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updatePreview);
+  });
 
-    const totalBeds = Array.from(document.querySelectorAll('input[name="room_beds[]"]'))
-                           .reduce((sum, el) => sum + (parseInt(el.value) || 0), 0);
+  const furnishingSelect = document.querySelector('select[name="furnishing_status"]');
+  if (furnishingSelect) furnishingSelect.addEventListener('change', updatePreview);
 
-    const baseRentEl  = document.getElementById('roomRent1');
-    const baseRentVal = baseRentEl ? baseRentEl.value : '';
+  // Global event delegation captures typing in dynamically added/removed rooms
+  document.addEventListener('input', function (e) {
+    if (e.target.classList.contains('pg-room-beds') || e.target.classList.contains('room-rent')) {
+      updatePreview();
+    }
+  });
 
-    document.getElementById('rv-pgname').textContent   = calculateAutoTitle();
-    document.getElementById('rv-location').textContent = `${loc}, ${city}`;
-    document.getElementById('rv-beds').textContent     = totalBeds > 0 ? `${totalBeds} beds` : '—';
-    document.getElementById('rv-rent').textContent     = baseRentVal
-      ? '₹' + parseInt(baseRentVal).toLocaleString('en-IN') + '/month'
-      : '—';
-  }
-
-  // ── IMAGE UPLOAD ──────────────────────────────────────────────────────────
-  const uploadArea   = document.getElementById('uploadArea');
-  const imageInput   = document.getElementById('imageInput');
+ // ── IMAGE UPLOAD & SEQUENCING ──────────────────────────────────────────
+  const uploadArea = document.getElementById('uploadArea');
+  const imageInput = document.getElementById('imageInput');
   const imagePreview = document.getElementById('imagePreview');
+  let draggedItemName = null; // Tracks the image being dragged
 
-  uploadArea.addEventListener('click',     ()  => imageInput.click());
-  uploadArea.addEventListener('dragover',  (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-  uploadArea.addEventListener('dragleave', ()  => uploadArea.classList.remove('dragover'));
-  uploadArea.addEventListener('drop',      (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-  imageInput.addEventListener('change',    (e) => handleFiles(e.target.files));
+  uploadArea.addEventListener('click', () => imageInput.click());
+  uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+  uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+  uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+  imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
 
   function handleFiles(files) {
     const arr = Array.from(files);
-    if (selectedFiles.length + arr.length > 10) {
-      Swal.fire({ icon: 'warning', title: 'Limit Exceeded!', text: 'Maximum 10 images allowed.', confirmButtonColor: '#667eea' });
-      return;
+    if (selectedFiles.length + arr.length > 10) { 
+        Swal.fire({ icon: 'warning', title: 'Limit Exceeded!', text: 'Maximum 10 images allowed.', confirmButtonColor: '#667eea' }); 
+        return; 
     }
-    arr.forEach(file => {
-      if (file.type.startsWith('image/')) {
-        selectedFiles.push(file);
-        displayImagePreviewElement(file);
-      }
+    arr.forEach(file => { 
+        if (file.type.startsWith('image/')) { 
+            selectedFiles.push(file); 
+        } 
     });
+    syncFileInputAndRender();
+  }
+
+  // Master function to sync the files array to the input and redraw the UI
+  function syncFileInputAndRender() {
+    const dt = new DataTransfer();
+    selectedFiles.forEach(f => dt.items.add(f));
+    imageInput.files = dt.files;
+
+    imagePreview.innerHTML = "";
+    if (selectedFiles.length > 0) {
+        imagePreview.style.display = 'grid';
+        selectedFiles.forEach(file => displayImagePreviewElement(file));
+    } else {
+        imagePreview.style.display = 'none';
+    }
     setCheck('cl-photos', selectedFiles.length >= 3);
   }
 
@@ -2737,93 +3271,128 @@
     reader.onload = (e) => {
       const item = document.createElement('div');
       item.className = 'preview-item';
+      item.draggable = true; // Make element draggable
+      item.dataset.fileName = file.name;
       item.innerHTML = `
         <img src="${e.target.result}" alt="preview">
-        <button type="button" class="remove-image" onclick="removeImageFromQueue(this, '${file.name}')">
+        <button type="button" class="remove-image" onclick="removeImageFromQueue(event, '${file.name}')">
           <i class="fas fa-times"></i>
         </button>`;
+      
+      // Attach Drag and Drop Event Listeners
+      item.addEventListener('dragstart', handleDragStart);
+      item.addEventListener('dragover', handleDragOver);
+      item.addEventListener('dragenter', handleDragEnter);
+      item.addEventListener('dragleave', handleDragLeave);
+      item.addEventListener('drop', handleDrop);
+
       imagePreview.appendChild(item);
-      imagePreview.style.display = 'grid';
     };
     reader.readAsDataURL(file);
   }
 
-  function removeImageFromQueue(btn, name) {
+  function removeImageFromQueue(event, name) {
+    event.stopPropagation(); // Prevents click from triggering drag
     selectedFiles = selectedFiles.filter(f => f.name !== name);
-    btn.parentElement.remove();
-    if (selectedFiles.length === 0) imagePreview.style.display = 'none';
-    setCheck('cl-photos', selectedFiles.length >= 3);
+    syncFileInputAndRender();
   }
 
-  // ── LIVE INPUT LISTENERS ──────────────────────────────────────────────────
-  // BUG FIX 4: removed 'totalBeds' from this array — that ID doesn't exist
-  ['cityInput', 'locality', 'pgName', 'roomRent1', 'buildingNameInput'].forEach(id => {
+  // ── DRAG AND DROP HANDLERS ──────────────────────────────────────────────
+  function handleDragStart(e) {
+    draggedItemName = this.dataset.fileName;
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => this.style.opacity = '0.5', 0);
+  }
+  function handleDragOver(e) {
+    e.preventDefault(); 
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+  }
+  function handleDragEnter(e) {
+    this.classList.add('drag-over');
+  }
+  function handleDragLeave(e) {
+    this.classList.remove('drag-over');
+  }
+  function handleDrop(e) {
+    e.stopPropagation();
+    this.classList.remove('drag-over');
+    const targetItemName = this.dataset.fileName;
+    
+    if (draggedItemName !== targetItemName) {
+      // Find indices in our file array
+      const draggedIndex = selectedFiles.findIndex(f => f.name === draggedItemName);
+      const targetIndex  = selectedFiles.findIndex(f => f.name === targetItemName);
+      
+      // Reorder the array
+      const movedItem = selectedFiles.splice(draggedIndex, 1)[0];
+      selectedFiles.splice(targetIndex, 0, movedItem);
+      
+      // Update UI and Input Files
+      syncFileInputAndRender();
+    }
+    return false;
+  }
+
+  ['city', 'locality', 'property_title', 'room_rent', 'building_name'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', updatePreview);
   });
-
-  // Also update preview when any room_beds[] input changes (for bed count)
-  document.addEventListener('input', function (e) {
-    if (e.target.name === 'room_beds[]') updatePreview();
-  });
-
-  document.querySelector('select[name="furnishing_type"]').addEventListener('change', updatePreview);
-
-  // BUG FIX 5: `ownerName` input is inside a hidden section — guard with null check
+  document.addEventListener('input', function (e) { if (e.target.name === 'room_beds') updatePreview(); });
+  document.querySelector('select[name="furnishing_status"]').addEventListener('change', updatePreview);
   const ownerNameEl = document.getElementById('ownerName');
-  if (ownerNameEl) {
-    ownerNameEl.addEventListener('input', function () {
-      setCheck('cl-owner', !!this.value.trim());
-    });
-  }
+  if (ownerNameEl) { ownerNameEl.addEventListener('input', function () { setCheck('cl-owner', !!this.value.trim()); }); }
 
-  // ── JQUERY CHECKBOX COUNTERS ──────────────────────────────────────────────
   $(document).ready(function () {
-    function updateAmenityCount() {
-      const n = $('input[name="amenities[]"]:checked').length;
-      $('#amenityCounter').val(n);
-      setCheck('cl-amenities', n > 0);
-    }
-    function updateFacilityCount() {
-      const n = $('input[name="facilities[]"]:checked').length;
-      $('#facilityCounter').val(n);
-      setCheck('cl-facilities', n > 0);
-    }
-
-    $(document).on('change', 'input[name="amenities[]"]',  updateAmenityCount);
+    function updateAmenityCount() { const n = $('input[name="amenities[]"]:checked').length; $('#amenityCounter').val(n); setCheck('cl-amenities', n > 0); }
+    function updateFacilityCount() { const n = $('input[name="facilities[]"]:checked').length; $('#facilityCounter').val(n); setCheck('cl-facilities', n > 0); }
+    $(document).on('change', 'input[name="amenities[]"]', updateAmenityCount);
     $(document).on('change', 'input[name="facilities[]"]', updateFacilityCount);
-
-    updateAmenityCount();
-    updateFacilityCount();
-    toggleGlobalRemoveButtonsState();
-    updatePreview();   // render sidebar card on page load
+    updateAmenityCount(); updateFacilityCount(); toggleGlobalRemoveButtonsState(); updatePreview();
   });
 
-  // ── SUBMIT ────────────────────────────────────────────────────────────────
   document.getElementById('pgForm').addEventListener('submit', function (e) {
     e.preventDefault();
-
-    if (selectedFiles.length < 3) {
-      Swal.fire({ icon: 'error', title: 'Images Required!', text: 'Upload at least 3 property images.', confirmButtonColor: '#667eea' });
-      return;
-    }
-
-    if (!document.getElementById('agreeTerms').checked) {
-      Swal.fire({ icon: 'warning', title: 'Agreement Required!', text: 'Check the terms checkbox before submitting.', confirmButtonColor: '#667eea' });
-      return;
-    }
-
-    Swal.fire({
-      icon: 'success',
-      title: '🎉 Ready to Submit!',
-      html: `<div style="text-align:center;font-size:.95rem;font-weight:700;">Listing is being saved...</div>`,
-      confirmButtonColor: '#667eea',
-      confirmButtonText: 'Confirm & Submit'
-    }).then(() => {
-      const dt = new DataTransfer();
-      selectedFiles.forEach(f => dt.items.add(f));
-      document.getElementById('imageInput').files = dt.files;
-      this.submit();
+    if (selectedFiles.length < 3) { Swal.fire({ icon: 'error', title: 'Images Required!', text: 'Upload at least 3 property images.', confirmButtonColor: '#667eea' }); return; }
+    Swal.fire({ icon: 'success', title: '🎉 Ready to Submit!', html: `<div style="text-align:center;font-size:.95rem;font-weight:700;">Listing is being saved...</div>`, confirmButtonColor: '#667eea', confirmButtonText: 'Confirm & Submit' }).then((result) => {
+      if(result.isConfirmed){
+        const dt = new DataTransfer();
+        selectedFiles.forEach(f => dt.items.add(f));
+        document.getElementById('imageInput').files = dt.files;
+        this.submit();
+      }
     });
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var yesRadio = document.getElementById('listed_yes');
+    var noRadio = document.getElementById('listed_no');
+    var portalField = document.getElementById('portalField');
+    function togglePortalField() { if (portalField) { portalField.style.display = yesRadio.checked ? 'block' : 'none'; } }
+    if (yesRadio) yesRadio.addEventListener('change', togglePortalField);
+    if (noRadio) noRadio.addEventListener('change', togglePortalField);
+    togglePortalField();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const advanceRent = document.getElementById('advance_rent_month');
+    const advanceAmountDiv = document.getElementById('advance_amount_div');
+    const securityType = document.getElementById('security_deposit_type');
+    const securityDepositDiv = document.getElementById('security_deposit_div');
+    function toggleAdvanceAmount() { if(advanceAmountDiv) advanceAmountDiv.style.display = advanceRent.value === 'fixed' ? 'block' : 'none'; }
+    function toggleSecurityAmount() { if(securityDepositDiv) securityDepositDiv.style.display = securityType.value === 'fixed' ? 'block' : 'none'; }
+    if(advanceRent) advanceRent.addEventListener('change', toggleAdvanceAmount);
+    if(securityType) securityType.addEventListener('change', toggleSecurityAmount);
+    toggleAdvanceAmount(); toggleSecurityAmount();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const included = document.getElementById('maintenance_included');
+    const extra = document.getElementById('maintenance_extra');
+    const maintenanceDiv = document.getElementById('maintenanceAmountDiv');
+    function toggleMaintenanceField() { if(maintenanceDiv && extra) maintenanceDiv.style.display = extra.checked ? 'block' : 'none'; }
+    if(included) included.addEventListener('change', toggleMaintenanceField);
+    if(extra) extra.addEventListener('change', toggleMaintenanceField);
+    toggleMaintenanceField();
   });
 </script>

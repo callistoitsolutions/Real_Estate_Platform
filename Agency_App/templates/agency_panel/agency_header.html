@@ -1718,9 +1718,9 @@
                     <i class="fas fa-chevron-down dropdown-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#" class="submenu-link" style="color:white;" id="Rent_Resident">Residential</a></li>
-                    <li><a href="#" class="submenu-link" style="color:white;">Commercial</a></li>
-                    <li><a href="#" class="submenu-link" style="color:white;">PG/Co-living</a></li>
+                    <li><a href="{% url 'rental_list_agency'  %}" class="submenu-link" style="color:white;" id="Rent_Resident">Residential</a></li>
+                    <li><a href="{% url 'commercial_list_agency'  %}" class="submenu-link" style="color:white;">Commercial</a></li>
+                    <li><a href="{% url 'pg_list_agency'  %}" class="submenu-link" style="color:white;">PG/Co-living</a></li>
                 </ul>
             </li>
 
@@ -1731,11 +1731,26 @@
                     <i class="fas fa-chevron-down dropdown-icon"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#" class="submenu-link" style="color:white;">Residential</a></li>
-                    <li><a href="#" class="submenu-link" style="color:white;">Commercial</a></li>
-                    <li><a href="#" class="submenu-link" style="color:white;">Plot/Land</a></li>
-                    <li><a href="#" class="submenu-link" style="color:white;">Industrial</a></li>
-                    <li><a href="#" class="submenu-link" style="color:white;">Agricultural</a></li>
+                    <li><a href="{% url 'residential_resale_list_agency'  %}" class="submenu-link" style="color:white;">Residential</a></li>
+                    <li><a href="{% url 'commercial_resale_list_agency'  %}" class="submenu-link" style="color:white;">Commercial</a></li>
+                
+                    <li><a href="{% url 'industrial_list_agency'  %}"  class="submenu-link" style="color:white;">Industrial</a></li>
+                    <li><a href="{% url 'agricultural_list_agency'  %}" class="submenu-link" style="color:white;">Agricultural</a></li>
+                </ul>
+            </li>
+
+             <li class="menu-item">
+                <a href="javascript:void(0)" class="menu-link" onclick="toggleSubmenu(event, this)" id="Resale_Plot">
+                    <i class="fas fa-building menu-icon"></i>
+                    <span class="menu-text" style="color:white;"> Resale Plot Properties</span>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </a>
+                <ul class="submenu">
+                    <li><a href="{% url 'residential_plot_resale_list_agency'  %}" class="submenu-link" style="color:white;">Residential Plot</a></li>
+                    <li><a href="{% url 'commercial_plot_resale_list_agency'  %}" class="submenu-link" style="color:white;">Commercial Plot</a></li>
+                
+                    <li><a href="{% url 'industrial_plot_resale_list_agency'  %}"  class="submenu-link" style="color:white;">Industrial Plot</a></li>
+                    <li><a href="{% url 'agricultural_plot_resale_list_agency'  %}" class="submenu-link" style="color:white;">Agricultural Plot</a></li>
                 </ul>
             </li>
         </ul>
@@ -1798,6 +1813,25 @@
             dropdown.classList.remove('show');
         }
     });
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('active');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+    }
+
+    function toggleSubmenu(event, element) {
+        event.preventDefault();
+        element.classList.toggle('dropdown-open');
+        let submenu = element.nextElementSibling;
+        submenu.classList.toggle('active');
+    }
+
+
 </script>
 
 {% comment %} Ajax Jquery and Javascript for agent Logout {% endcomment %}

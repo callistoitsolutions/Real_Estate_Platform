@@ -29,11 +29,11 @@ admin.site.register(User_Details)
 
 ############ Register Subscription Package Details Table/Modal #################
 
-admin.site.register(Package_Details)
+#admin.site.register(Package_Details)
 
 ########### Register Subscription Plan Details Table/Modal ###################
 
-admin.site.register(Plan_Details)
+#admin.site.register(Plan_Details)
 
 ############# Register Subscription Details Table/Modal ####################
 

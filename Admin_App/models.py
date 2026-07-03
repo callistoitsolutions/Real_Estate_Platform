@@ -412,25 +412,16 @@ class Subscription_Details(models.Model):
 
 
 
-# ==========================================
-# GENERATE UNIQUE PROPERTY ID
-# ==========================================
-
 
 def generate_unique_rental_residential_id():
     return f"EFPRR-{uuid.uuid4().hex[:8].upper()}"
+
 
 # ==========================================
 # MAIN MODEL
 # ==========================================
 
 class RentalResidentialProperty(models.Model):
-
-    
-
-    # =====================================================
-    # BASIC INFORMATION
-    # =====================================================
 
     id = models.CharField(
         max_length=20,
@@ -439,79 +430,72 @@ class RentalResidentialProperty(models.Model):
         editable=False,
     )
 
-    property_title = models.CharField(max_length=255, blank=True, null=True)
+    # =====================================================
+    # LISTED BY  (Step 1, section 1 on the form)
+    # =====================================================
+
+    listed_by_type = models.CharField(max_length=100, blank=True, null=True)
+    assigned_to = models.CharField(max_length=50, blank=True, null=True)     # "id-role" value from dropdown, only if "other"
+  
+
+    listed_by_id = models.CharField(max_length=150, blank=True, null=True)
+    listed_by_name = models.CharField(max_length=150, blank=True, null=True)
+    listed_by_email = models.CharField(max_length=150, blank=True, null=True)
+    listed_by_contact = models.CharField(max_length=20, blank=True, null=True)
+    listed_by_role = models.CharField(max_length=100, blank=True, null=True)    # <-- drives the brokerage label
+
+    # =====================================================
+    # BASIC INFORMATION
+    # =====================================================
+
+    property_title = models.CharField(max_length=255, blank=True, null=True)   # auto-generated in save()
 
     property_type = models.CharField(max_length=100, blank=True, null=True)
+
+    # INTERNAL ONLY — used for office verification, never shown publicly,
+    # and deliberately excluded from property_title / description / FAQs.
     property_no = models.CharField(max_length=100, blank=True, null=True)
 
-    bhk_type = models.CharField(max_length=50, blank=True, null=True)
+    renting_option = models.CharField(max_length=50, blank=True, null=True)     # Full Property / Single Room / Shared Room
 
-    renting_option = models.CharField(max_length=50, blank=True, null=True)
-
-    built_up_area = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        blank=True,
-        null=True
-    )
+    built_up_area = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     bathrooms = models.IntegerField(blank=True, null=True)
-
     balconies = models.IntegerField(blank=True, null=True)
 
-    floor_number = models.CharField(max_length=50, blank=True, null=True)
-
+    building_configuration = models.CharField(max_length=20, blank=True, null=True)   # e.g. "G+3"
     total_floors = models.IntegerField(blank=True, null=True)
 
-    facing = models.CharField(max_length=50, blank=True, null=True)
-
+    facing_direction = models.CharField(max_length=50, blank=True, null=True)
     furnishing_status = models.CharField(max_length=50, blank=True, null=True)
-
     available_for = models.CharField(max_length=50, blank=True, null=True)
 
     # =====================================================
     # PROPERTY DETAILS
     # =====================================================
 
-    zone = models.CharField(max_length=50, blank=True, null=True)
-
+    carpet_area = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    city_zone = models.CharField(max_length=50, blank=True, null=True)
     ownership_type = models.CharField(max_length=50, blank=True, null=True)
-
-    construction_status = models.CharField(max_length=50, blank=True, null=True)
-
+    property_condition = models.CharField(max_length=50, blank=True, null=True)
     property_age = models.CharField(max_length=50, blank=True, null=True)
-
-    carpet_area = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        blank=True,
-        null=True
-    )
-
-    plot_area = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        blank=True,
-        null=True
-    )
-
+    wing_number = models.CharField(max_length=50, blank=True, null=True)
     building_name = models.CharField(max_length=200, blank=True, null=True)
 
     # =====================================================
-    # AVAILABILITY DETAILS
+    # AVAILABILITY & BROKERAGE
     # =====================================================
 
-    possession_status = models.CharField(max_length=50, blank=True, null=True)
-
+    availability_status = models.CharField(max_length=50, blank=True, null=True)
     available_from = models.DateField(blank=True, null=True)
-
     lease_duration = models.CharField(max_length=50, blank=True, null=True)
 
-    brokerage = models.CharField(max_length=10, blank=True, null=True)
-
-    brokerage_percentage = models.CharField(max_length=20, blank=True, null=True)
-
-    manual_brokerage = models.CharField(max_length=20, blank=True, null=True)
+    # ONE column for the select value. The label shown above it on the
+    # form ("Brokerage" / "Service Fee" / ...) is NOT stored here — see
+    # get_brokerage_label() below. This is the only brokerage-related
+    # column besides manual_brokerage.
+    brokerage_percentage = models.CharField(max_length=30, blank=True, null=True)
+    manual_brokerage = models.CharField(max_length=50, blank=True, null=True)   # only used if brokerage_percentage == "Fixed Amount"
 
     # =====================================================
     # PRICING DETAILS
@@ -519,189 +503,210 @@ class RentalResidentialProperty(models.Model):
 
     monthly_rent = models.BigIntegerField(blank=True, null=True)
 
-    security_deposit = models.BigIntegerField(blank=True, null=True)
+    advance_rent_month = models.CharField(max_length=10, blank=True, null=True)   # "0".."11" or "fixed"
+    advance_rent_amount = models.BigIntegerField(blank=True, null=True)           # only if advance_rent_month == "fixed"
 
-    maintenance_type = models.CharField(max_length=50, blank=True, null=True)
+    security_deposit_type = models.CharField(max_length=10, blank=True, null=True)  # "0".."11" or "fixed"
+    security_deposit_amount = models.BigIntegerField(blank=True, null=True)          # only if security_deposit_type == "fixed"
 
-    maintenance_amount = models.BigIntegerField(blank=True, null=True)
+    maintenance_type = models.CharField(max_length=50, blank=True, null=True)     # "Included in Rent" / "Extra"
+    monthy_maintenance_amount = models.BigIntegerField(blank=True, null=True)     # only if maintenance_type == "Extra"
+
+    total_move_in_cost = models.BigIntegerField(blank=True, null=True)
 
     # =====================================================
     # LOCATION DETAILS
     # =====================================================
 
     address = models.TextField(blank=True, null=True)
-
     city = models.CharField(max_length=150, blank=True, null=True)
-
-    locality = models.CharField(max_length=150, blank=True, null=True)
-
+    locality_area = models.CharField(max_length=150, blank=True, null=True)
+    property_landmark = models.CharField(max_length=200, blank=True, null=True)
     state = models.CharField(max_length=150, blank=True, null=True)
-
     pincode = models.CharField(max_length=10, blank=True, null=True)
-
-    road_connectivity = models.CharField(max_length=150, blank=True, null=True)
+    main_road_connectivity = models.CharField(max_length=50, blank=True, null=True)
+    google_maps_link = models.CharField(max_length=50, blank=True, null=True)
+    latitude = models.CharField(max_length=50, blank=True, null=True)
+    longitude = models.CharField(max_length=50, blank=True, null=True)
 
     # =====================================================
     # AMENITIES & FACILITIES
     # =====================================================
 
-    amenities = models.TextField(blank=True, null=True)
-
-    facilities = models.TextField(blank=True, null=True)
+    amenities = models.TextField(blank=True, null=True)          # comma-separated, from amenities[]
+    nearby_facilities = models.TextField(blank=True, null=True)  # comma-separated, from nearby_facilities[]
 
     # =====================================================
     # DESCRIPTION
     # =====================================================
 
-    description = models.TextField(blank=True, null=True)
-
-    rent_residential_desc = models.TextField(blank=True, null=True)
-    
-    user_description = models.TextField(blank=True, null=True)
+    user_description = models.TextField(blank=True, null=True)         # user-entered, kept as-is
+    description = models.TextField(blank=True, null=True)               # auto-generated on save()
+    rent_residential_desc = models.TextField(blank=True, null=True)     # auto-generated on save()
 
     # =====================================================
-    # OWNER DETAILS
+    # MEDIA & LISTING STATUS
     # =====================================================
 
-    owner_name = models.CharField(max_length=150, blank=True, null=True)
-
-    contact_number = models.CharField(max_length=15, blank=True, null=True)
-
-    email = models.EmailField(blank=True, null=True)
-
-    alternate_contact = models.CharField(max_length=15, blank=True, null=True)
+    listed_elsewhere = models.CharField(max_length=3, blank=True, null=True, default="No")
+    portal_name = models.CharField(max_length=100, blank=True, null=True)
 
     # =====================================================
-    # UPLOADED BY
+    # UPLOADED BY (system)
     # =====================================================
 
     uploaded_by_name = models.CharField(max_length=150, blank=True, null=True)
-
     uploaded_by_email = models.CharField(max_length=150, blank=True, null=True)
-
     uploaded_by_contact = models.CharField(max_length=20, blank=True, null=True)
-
     uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
-
     upload_file_name = models.CharField(max_length=255, blank=True, null=True)
-
-
-    
-  
-
-    listed_by_id = models.CharField(max_length=150, blank=True, null=True)
-
-    listed_by_name = models.CharField(max_length=150, blank=True, null=True)
-
-    listed_by_email = models.CharField(max_length=20, blank=True, null=True)
-
-    listed_by_contact = models.CharField(max_length=100, blank=True, null=True)
-
-    listed_by_role = models.CharField(max_length=255, blank=True, null=True)
-
 
     # =====================================================
     # STATUS
     # =====================================================
 
     is_deleted = models.BooleanField(default=False)
-
     deleted_at = models.DateTimeField(null=True, blank=True)
-
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
-
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     # =====================================================
+    # BROKERAGE LABEL — computed, never stored.
+    # Mirrors updateBrokerageLabel(role) from the form's JS exactly.
+    # =====================================================
+
+    BROKERAGE_LABEL_MAP = {
+        "admin": "EstateFlow Service Fee",
+        "relationship manager": "Service Fee",
+        "landlord": "Tenant Service Fee",
+        "agent": "Brokerage",
+        "agency/builder": "Service Fee",
+        "builder": "Service Fee",
+    }
+
+    def get_brokerage_label(self):
+        role = (self.listed_by_role or "").strip().lower()
+        return self.BROKERAGE_LABEL_MAP.get(role, "Brokerage")   # default fallback
+
+    def get_brokerage_display_value(self):
+        """Returns the value that should sit next to the label — resolves
+        the 'Fixed Amount' case to the manually typed figure."""
+        if self.brokerage_percentage == "Fixed Amount":
+            return self.manual_brokerage or "-"
+        return self.brokerage_percentage or "-"
+
+    # =====================================================
+    # DERIVED MONEY HELPERS (month-based vs fixed selects)
+    # =====================================================
+
+    def get_security_deposit_amount(self):
+        if self.security_deposit_type == "fixed":
+            return self.security_deposit_amount or 0
+        try:
+            months = int(self.security_deposit_type or 0)
+            return months * (self.monthly_rent or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    def get_advance_rent_amount(self):
+        if self.advance_rent_month == "fixed":
+            return self.advance_rent_amount or 0
+        try:
+            months = int(self.advance_rent_month or 0)
+            return months * (self.monthly_rent or 0)
+        except (TypeError, ValueError):
+            return 0
+
+    # =====================================================
     # AUTO DESCRIPTION GENERATOR
     # =====================================================
-    
-    # =====================================================
-    # AUTO DESCRIPTION GENERATOR
-    # =====================================================
-    
+
     def generate_auto_descriptions(self):
-        # Fetch values with defaults to prevent NoneType errors
-        p_type = self.property_type or 'property'
-        bhk = self.bhk_type or 'A well-maintained'
-        locality = self.locality or 'a prime location'
+        # NOTE: property_no is intentionally NEVER used below —
+        # it's internal-only and must not leak into public text.
+
+        p_type = self.property_type or "property"
+        renting = f" ({self.renting_option})" if self.renting_option else ""
+        locality = self.locality_area or "a prime location"
         city_str = f", {self.city}" if self.city else ""
-        furnishing = self.furnishing_status or 'comfortable'
-        available_for = self.available_for or 'tenants'
-        possession = self.possession_status or 'soon'
-        
+        furnishing = self.furnishing_status or "comfortable"
+        available_for = self.available_for or "tenants"
+        possession = self.availability_status or "soon"
+
         # -----------------------------------
-        # SUMMARY TEXT (Always Regerates on Save)
+        # SUMMARY TEXT
         # -----------------------------------
-        summary = f"{bhk} {p_type} is available for rent in {locality}{city_str}. "
-        
+        summary = f"This {p_type}{renting} is available for rent in {locality}{city_str}. "
+
         if self.monthly_rent:
             summary += f"Available at a competitive rent of ₹{self.monthly_rent:,}/month. "
-        
+
         if self.built_up_area:
-            area = str(self.built_up_area).rstrip('0').rstrip('.')
+            area = str(self.built_up_area).rstrip("0").rstrip(".")
             summary += f"It offers a spacious built-up area of {area} sq.ft. "
-            
+
         summary += f"This property is {furnishing} and makes for an ideal home for {available_for}."
-        
-        # Overwrite the field
+
         self.description = summary
 
         # -----------------------------------
-        # LONG DESCRIPTION (Always Regerates on Save)
+        # LONG DESCRIPTION
         # -----------------------------------
-        bhk_prefix = bhk if bhk != 'A well-maintained' else ''
-        bhk_title = f"{bhk_prefix} {p_type}".strip()
-        
-        long_desc = f"<p>Experience comfortable living in this highly sought-after <strong>{bhk_title}</strong> located in <strong>{locality}{city_str}</strong>.</p>"
-        
+        title_bit = f"{p_type}{renting}".strip()
+
+        long_desc = f"<p>Experience comfortable living in this highly sought-after <strong>{title_bit}</strong> located in <strong>{locality}{city_str}</strong>.</p>"
+
         if self.building_name:
             long_desc += f"<p>Situated in the prestigious residential society of <strong>{self.building_name}</strong>, this home is meticulously designed to meet your lifestyle requirements while offering peace and privacy.</p>"
-            
+
         long_desc += "<h3>Property Highlights:</h3><ul>"
-        
+
         if self.built_up_area:
-            area = str(self.built_up_area).rstrip('0').rstrip('.')
+            area = str(self.built_up_area).rstrip("0").rstrip(".")
             carpet_str = ""
             if self.carpet_area:
-                carpet = str(self.carpet_area).rstrip('0').rstrip('.')
+                carpet = str(self.carpet_area).rstrip("0").rstrip(".")
                 carpet_str = f" with a highly usable carpet area of {carpet} sq.ft."
-            long_desc += f"<li><strong>Space & Dimensions:</strong> Features a generous built-up area of {area} sq.ft.{carpet_str}.</li>"
-            
+            long_desc += f"<li><strong>Space & Dimensions:</strong> Features a generous built-up area of {area} sq.ft.{carpet_str}</li>"
+
         if self.monthly_rent:
-            deposit_str = f" (Security Deposit: ₹{self.security_deposit:,})" if self.security_deposit else ""
+            deposit_val = self.get_security_deposit_amount()
+            deposit_str = f" (Security Deposit: ₹{deposit_val:,})" if deposit_val else ""
             long_desc += f"<li><strong>Pricing:</strong> Set at a reasonable monthly rent of ₹{self.monthly_rent:,}{deposit_str}.</li>"
-            
+
         long_desc += f"<li><strong>Furnishing Status:</strong> The property is {furnishing}, saving you immense setup time and cost.</li>"
-        
-        if self.floor_number:
-            total_str = f" of a well-maintained {self.total_floors}-story building" if self.total_floors else ""
-            long_desc += f"<li><strong>Floor Details:</strong> Positioned comfortably on the {self.floor_number}{total_str}.</li>"
-            
-        if self.facing:
-            long_desc += f"<li><strong>Vastu & Orientation:</strong> {self.facing}-facing property, ensuring ample natural sunlight.</li>"
-            
+
+        if self.building_configuration or self.total_floors:
+            config_str = f"{self.building_configuration} configuration" if self.building_configuration else ""
+            total_str = f" across {self.total_floors} floors" if self.total_floors else ""
+            wing_str = f" in {self.wing_number}" if self.wing_number else ""
+            long_desc += f"<li><strong>Building Details:</strong> {config_str}{total_str}{wing_str}.</li>"
+
+        if self.facing_direction:
+            long_desc += f"<li><strong>Vastu & Orientation:</strong> {self.facing_direction}-facing property, ensuring ample natural sunlight.</li>"
+
+        if self.main_road_connectivity:
+            long_desc += f"<li><strong>Connectivity:</strong> {self.main_road_connectivity} from the main road.</li>"
+
         long_desc += f"<li><strong>Availability:</strong> The property status is {possession}.</li>"
         long_desc += f"<li><strong>Preferred Tenants:</strong> Highly suited for {available_for}.</li>"
         long_desc += "</ul>"
-        
+
         # -----------------------------------
-        # AMENITIES & FACILITIES FORMATTING
+        # AMENITIES & FACILITIES
         # -----------------------------------
         extras = []
         if self.amenities:
             extras.append(str(self.amenities).strip())
-        if self.facilities:
-            extras.append(str(self.facilities).strip())
-            
+        if self.nearby_facilities:
+            extras.append(str(self.nearby_facilities).strip())
+
         if extras:
-            # Joins amenities and facilities cleanly with a comma if both exist
             extras_str = ", ".join(extras)
             long_desc += f"<h3>Top Amenities & Lifestyle:</h3><p>Residents will enjoy exclusive access to top-tier amenities & facilities including: <strong>{extras_str}</strong>.</p>"
-            
+
         long_desc += "<p>This property provides seamless road connectivity to major commercial hubs, and medical options. Don't miss this opportunity.</p>"
-        
-        # Overwrite the field
+
         self.rent_residential_desc = long_desc
 
     # =====================================================
@@ -712,59 +717,41 @@ class RentalResidentialProperty(models.Model):
 
         title_parts = []
 
-        # Furnishing Status
         if self.furnishing_status:
             title_parts.append(self.furnishing_status)
 
-        # BHK Type
-        if self.bhk_type:
-            title_parts.append(self.bhk_type)
-
-        # Property Type
         if self.property_type:
             title_parts.append(self.property_type)
         else:
             title_parts.append("Property")
 
-        # For Rent
+        if self.renting_option:
+            title_parts.append(f"({self.renting_option})")
+
         title_parts.append("for Rent")
 
-        # Location
-        location = ""
+        # property_no is deliberately NOT included — internal only.
 
+        location = ""
         if self.building_name:
             location = f"in {self.building_name}"
-
-        if self.locality:
-            if location:
-                location += f", {self.locality}"
-            else:
-                location = f"in {self.locality}"
-
+        if self.locality_area:
+            location = f"{location}, {self.locality_area}" if location else f"in {self.locality_area}"
         if self.city:
-            if location:
-                location += f", {self.city}"
-            else:
-                location = f"in {self.city}"
-
+            location = f"{location}, {self.city}" if location else f"in {self.city}"
         if location:
             title_parts.append(location)
 
-        # Built-up Area
         if self.built_up_area:
-            area = str(self.built_up_area).rstrip('0').rstrip('.')
+            area = str(self.built_up_area).rstrip("0").rstrip(".")
             title_parts.append(f"({area} sq.ft.)")
 
-        # Final Property Title
         self.property_title = " ".join(title_parts).strip()[:255]
 
-        # Trigger auto-description generator before saving to DB
         self.generate_auto_descriptions()
 
-        # Save Property
         super(RentalResidentialProperty, self).save(*args, **kwargs)
 
-        # Generate FAQs (Depends on ID, so it stays after super().save())
         self.generate_auto_faqs()
 
     # =====================================================
@@ -777,146 +764,115 @@ class RentalResidentialProperty(models.Model):
 
         faq_pool = []
 
-        # -----------------------------------
-        # SAFE NUMERIC CONVERSION
-        # -----------------------------------
-
-        try:
-            rent_val = int(float(str(self.monthly_rent or 0).replace(",", "").strip()))
-        except:
-            rent_val = 0
-
-        try:
-            deposit_val = int(float(str(self.security_deposit or 0).replace(",", "").strip()))
-        except:
-            deposit_val = 0
-
-        try:
-            maint_val = int(float(str(self.maintenance_amount or 0).replace(",", "").strip()))
-        except:
-            maint_val = 0
+        rent_val = self.monthly_rent or 0
+        deposit_val = self.get_security_deposit_amount()
+        maint_val = self.monthy_maintenance_amount or 0
 
         # -----------------------------------
         # RENT FAQ
         # -----------------------------------
-
         if rent_val > 0:
-
             maint_str = ""
-
-            if maint_val > 0:
-                maint_str = (
-                    f" Maintenance is configured as "
-                    f"'{self.maintenance_type}' "
-                    f"with an outlay of ₹{maint_val:,}."
-                )
+            if self.maintenance_type == "Extra" and maint_val > 0:
+                maint_str = f" Maintenance is charged separately at ₹{maint_val:,}/month."
+            elif self.maintenance_type == "Included in Rent":
+                maint_str = " Maintenance charges are included in the rent."
 
             faq_pool.append({
-                "q": f"What are the rent breakdown details and security deposit for this {self.bhk_type or ''} {self.property_type or 'Property'}?",
-                "a": f"The scheduled monthly rental valuation for this property is ₹{rent_val:,}. Securing this listing requires a security deposit of ₹{deposit_val:,}.{maint_str}"
+                "q": f"What are the rent breakdown details and security deposit for this {self.property_type or 'property'}?",
+                "a": f"The monthly rent for this property is ₹{rent_val:,}. A refundable security deposit of ₹{deposit_val:,} is required.{maint_str}",
             })
 
         # -----------------------------------
-        # AREA FAQ
+        # BROKERAGE / SERVICE FEE FAQ
         # -----------------------------------
+        if self.brokerage_percentage:
+            label = self.get_brokerage_label()
+            value = self.get_brokerage_display_value()
+            faq_pool.append({
+                "q": f"Is there a {label.lower()} applicable on this listing?",
+                "a": f"The applicable {label.lower()} for this property is: {value}.",
+            })
 
-        if self.built_up_area and self.floor_number:
-
+        # -----------------------------------
+        # AREA & BUILDING FAQ
+        # -----------------------------------
+        if self.built_up_area:
             carpet_str = ""
-
             if self.carpet_area:
-                carpet_str = (
-                    f" out of which the actual usable carpet area "
-                    f"maps to {self.carpet_area} sq.ft."
-                )
+                carpet_str = f" out of which the usable carpet area is {self.carpet_area} sq.ft."
+
+            building_str = ""
+            if self.building_configuration or self.total_floors:
+                building_str = f" The building configuration is {self.building_configuration or 'N/A'}" \
+                                f"{f', spread across {self.total_floors} floors' if self.total_floors else ''}."
 
             faq_pool.append({
-                "q": "How much space does this rental option offer and which floor is it located on?",
-                "a": f"This residential configuration encompasses a spacious built-up area of {self.built_up_area} sq.ft.{carpet_str} The home is comfortably positioned on the {self.floor_number} floor."
+                "q": "How much space does this rental option offer?",
+                "a": f"This residential unit offers a built-up area of {self.built_up_area} sq.ft.{carpet_str}{building_str}",
             })
 
         # -----------------------------------
         # FURNISHING FAQ
         # -----------------------------------
-
         if self.furnishing_status:
-
-            balcony_str = ""
-
-            if self.balconies:
-                balcony_str = (
-                    f" accompanied by {self.balconies} "
-                    f"well-ventilated balcony areas"
-                )
-
+            balcony_str = f" accompanied by {self.balconies} well-ventilated balcony areas" if self.balconies else ""
             faq_pool.append({
-                "q": "What is the furnishing status and physical asset configuration of this property?",
-                "a": f"The property is verified as {self.furnishing_status}. The functional architecture provides {self.bathrooms or 1} bathrooms{balcony_str}."
+                "q": "What is the furnishing status and physical configuration of this property?",
+                "a": f"The property is {self.furnishing_status}, with {self.bathrooms or 1} bathroom(s){balcony_str}.",
             })
 
         # -----------------------------------
         # FACING FAQ
         # -----------------------------------
-
-        if self.facing:
-
+        if self.facing_direction:
             faq_pool.append({
                 "q": "Which direction does this rental unit face?",
-                "a": f"This property features a strategic {self.facing}-facing layout orientation."
+                "a": f"This property features a {self.facing_direction}-facing layout orientation.",
             })
 
         # -----------------------------------
         # LEASE FAQ
         # -----------------------------------
-
         if self.available_for or self.lease_duration:
-
             faq_pool.append({
-                "q": "Who is eligible to lease this home and what is the standard commitment duration?",
-                "a": f"The property allocation preferences match expectations for a {self.available_for or 'family or working professionals'}. The standard lease duration is {self.lease_duration or '11 Months'}."
+                "q": "Who is eligible to lease this home and what is the standard lease duration?",
+                "a": f"This property is suited for {self.available_for or 'family or working professionals'}. The standard lease duration is {self.lease_duration or '11 Months'}.",
             })
 
         # -----------------------------------
         # POSSESSION FAQ
         # -----------------------------------
-
-        if self.possession_status:
-
+        if self.availability_status:
             date_str = " immediately"
-
             if self.available_from:
-
                 try:
-                    date_str = (
-                        f" starting from "
-                        f"{self.available_from.strftime('%d %B %Y')}"
-                    )
-                except:
+                    date_str = f" starting from {self.available_from.strftime('%d %B %Y')}"
+                except Exception:
                     date_str = f" starting from {self.available_from}"
 
             faq_pool.append({
                 "q": "When can tenants move into this property?",
-                "a": f"The present occupancy status is '{self.possession_status}'. Possession can begin{date_str}."
+                "a": f"The current availability status is '{self.availability_status}'. Possession can begin{date_str}.",
             })
 
         # -----------------------------------
-        # SAVE FAQS
+        # CONNECTIVITY FAQ
         # -----------------------------------
+        if self.main_road_connectivity:
+            faq_pool.append({
+                "q": "How well connected is this property to the main road?",
+                "a": f"This property is located {self.main_road_connectivity.lower()} of the main road, ensuring convenient access.",
+            })
 
         for item in faq_pool:
-
             RentalResidentialFAQ.objects.create(
                 property=self,
                 question=item["q"],
-                answer=item["a"]
+                answer=item["a"],
             )
 
-    # =====================================================
-    # STRING METHOD
-    # =====================================================
-
     def __str__(self):
-
         return self.property_title if self.property_title else f"Property #{self.id}"
 
 
@@ -925,19 +881,12 @@ class RentalResidentialProperty(models.Model):
 # ==========================================
 
 class RentalResidentialImage(models.Model):
-
-    property = models.ForeignKey(
-        RentalResidentialProperty,
-        on_delete=models.CASCADE,
-        related_name='images'
-    )
-
-    image = models.ImageField(upload_to='residential_rent/')
-
+    property = models.ForeignKey(RentalResidentialProperty, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to="residential_rent/")
     sequence_order = models.PositiveIntegerField(default=0)
 
     class Meta:
-        ordering = ['sequence_order']
+        ordering = ["sequence_order"]
 
 
 # ==========================================
@@ -945,86 +894,38 @@ class RentalResidentialImage(models.Model):
 # ==========================================
 
 class RentalResidentialFAQ(models.Model):
-
-    property = models.ForeignKey(
-        RentalResidentialProperty,
-        on_delete=models.CASCADE,
-        related_name='faqs'
-    )
-
+    property = models.ForeignKey(RentalResidentialProperty, on_delete=models.CASCADE, related_name="faqs")
     question = models.CharField(max_length=255)
-
     answer = models.TextField()
 
 
 # ==========================================
-# ACTIVITY LOG
+# ACTIVITY LOG  (unchanged from your original)
 # ==========================================
 
 class RentalActivityLog(models.Model):
 
     ACTION_CHOICES = [
-        ('SEARCH', 'Manual Query Search'),
-        ('CREATE', 'Property Entry Created'),
-        ('UPDATE', 'Record Update Action'),
-        ('DELETE', 'Deletion / Purge Record'),
-        ('EXCEL_IMPORT', 'Excel Sheet Import Data'),
+        ("SEARCH", "Manual Query Search"),
+        ("CREATE", "Property Entry Created"),
+        ("UPDATE", "Record Update Action"),
+        ("DELETE", "Deletion / Purge Record"),
+        ("EXCEL_IMPORT", "Excel Sheet Import Data"),
     ]
 
     timestamp = models.DateTimeField(auto_now_add=True)
-
-    user_identity = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True
-    )
-
-    user_role = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True
-    )
-
-    action_type = models.CharField(
-        max_length=50,
-        choices=ACTION_CHOICES
-    )
-
-    property_id = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True
-    )
-
-    targeted_fields = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True
-    )
-
-    associated_file = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True
-    )
-
-    action_payload = models.TextField(
-        null=True,
-        blank=True
-    )
-
-    ip_address = models.GenericIPAddressField(
-        null=True,
-        blank=True
-    )
-
-    status = models.CharField(
-        max_length=20,
-        default='SUCCESS'
-    )
+    user_identity = models.CharField(max_length=255, null=True, blank=True)
+    user_role = models.CharField(max_length=100, null=True, blank=True)
+    action_type = models.CharField(max_length=50, choices=ACTION_CHOICES)
+    property_id = models.CharField(max_length=100, null=True, blank=True)
+    targeted_fields = models.CharField(max_length=255, null=True, blank=True)
+    associated_file = models.CharField(max_length=255, null=True, blank=True)
+    action_payload = models.TextField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    status = models.CharField(max_length=20, default="SUCCESS")
 
     class Meta:
-        ordering = ['-timestamp']
+        ordering = ["-timestamp"]
 
 ################################END MODEL SECTION OF THE RENTAL RESIDENTIAL LISTING####################
 

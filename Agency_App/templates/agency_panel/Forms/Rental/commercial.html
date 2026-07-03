@@ -1,0 +1,2475 @@
+{% include "agency_panel/agency_header.html" %}
+{% load static %}
+
+<script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
+
+<style>
+  :root {
+     --primary-gradient: linear-gradient(135deg, #ca8a04 0%, #9a3412 100%); /* Gold to Bronze */
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #065f46 100%); /* Jade Green */
+    --danger-gradient: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); /* Neon Orange-Red */
+    --warning-gradient: linear-gradient(135deg, #facc15 0%, #ca8a04 100%); /* Vivid Yellow */
+    --info-gradient: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%); /* Electric Blue */
+    --dark-gradient: linear-gradient(180deg, #0b1528 0%, #1e293b 100%); /* Dark Deep Ocean Blue */
+    --sidebar-width: 280px;
+    --sidebar-collapsed-width: 80px;
+    --topbar-height: 70px;
+}
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  .page-wrap {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+    max-width: 100%;
+  }
+
+  .form-container {
+    background: white;
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  .form-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .form-title i {
+    width: 45px;
+    height: 45px;
+    background: var(--primary-gradient);
+    color: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-back {
+    background: #f8f9fa;
+    color: #2d3748;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .btn-back:hover {
+    background: var(--dark-gradient);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  /* STEPPER STYLES */
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 30px;
+    padding: 20px 0;
+  }
+
+  .step-item {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  .step-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .9rem;
+    font-weight: 900;
+    flex-shrink: 0;
+    border: 3px solid var(--border);
+    background: white;
+    color: var(--muted);
+    transition: .3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .step-circle.active {
+    background: var(--primary-gradient);
+    color: white;
+    border-color: transparent;
+    transform: scale(1.1);
+  }
+
+  .step-circle.done {
+    background: var(--success-gradient);
+    color: white;
+    border-color: transparent;
+  }
+
+  .step-label {
+    font-size: .85rem;
+    font-weight: 700;
+    margin-left: 10px;
+    color: var(--muted);
+    transition: .3s;
+  }
+
+  .step-label.active {
+    color: #667eea;
+  }
+
+  .step-label.done {
+    color: var(--success);
+  }
+
+  .step-line {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    margin: 0 15px;
+  }
+
+  .step-line.done {
+    background: var(--success-gradient);
+  }
+
+  .step-content {
+    display: none;
+  }
+
+  .step-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Form Sections */
+  .form-section {
+    margin-bottom: 30px;
+  }
+
+  .section-header {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px 12px 0 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-body {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 0 0 12px 12px;
+    border: 2px solid #e9ecef;
+    border-top: none;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .required {
+    color: #e74c3c;
+    font-size: 1rem;
+  }
+
+  .form-control,
+  .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 12px 15px;
+    font-size: 0.95rem;
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #667eea;
+    outline: none;
+  }
+
+  .form-control[readonly] {
+    background-color: #edf2f7;
+    border-color: #cbd5e0;
+    color: #4a5568;
+    font-weight: 600;
+  }
+
+  select.form-control,
+  .form-select {
+    appearance: none;
+    background: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 0.75rem center;
+    background-size: 16px;
+    background-color: white;
+    padding-right: 2rem;
+  }
+
+  textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  /* Utilities */
+  .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .checkbox-item {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .form-check {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+  }
+
+  .form-check-input {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e0;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+  }
+
+  .form-check-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-left: 10px;
+    cursor: pointer;
+  }
+
+  /* Navigation */
+  .step-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    gap: 15px;
+  }
+
+  .btn-submit,
+  .btn-next {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 12px 35px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-prev {
+    background: #f8f9fa;
+    color: #2d3748;
+    padding: 12px 35px;
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Sidebar */
+  .preview-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 90px;
+  }
+
+  .preview-card {
+    background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+    border-radius: 16px;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  .pcm-img {
+    height: 140px;
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    position: relative;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .pcm-body {
+    background: white;
+    padding: 15px;
+    border-radius: 0 0 12px 12px;
+    color: #0f172a;
+  }
+
+  .checklist-card {
+    background: white;
+    border-radius: 16px;
+    border: 2px solid #e9ecef;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .cl-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: .8rem;
+    color: var(--muted);
+  }
+
+  .cl-item.done {
+    color: var(--success);
+  }
+
+  .cl-item.done i {
+    color: var(--success);
+  }
+
+  @media (max-width: 1200px) {
+    .page-wrap {
+      grid-template-columns: 1fr;
+    }
+
+    .preview-sidebar {
+      display: none;
+    }
+  }
+
+  /* Image Upload & Drag/Drop */
+  .image-upload-area {
+    border: 3px dashed #cbd5e0;
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+
+  .image-upload-area:hover {
+    border-color: #667eea;
+  }
+
+  .image-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .preview-item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    border: 2px solid #e2e8f0;
+    cursor: grab;
+    background: #fff;
+  }
+
+  .preview-item:active {
+    cursor: grabbing;
+  }
+
+  .preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  .drag-handle-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 0.75rem;
+    text-align: center;
+    padding: 4px;
+    pointer-events: none;
+    font-weight: 600;
+  }
+
+  .remove-image {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 25px;
+    height: 25px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+
+  .selected-items-display {
+    padding: 12px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    min-height: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .item-tag {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .item-tag .remove-btn {
+    cursor: pointer;
+    color: #dc3545;
+    margin-left: 4px;
+    font-size: 12px;
+  }
+
+
+  /* Switches / Stepper */
+  .number-stepper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .stepper-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #667eea;
+    background: #fff;
+    color: #667eea;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .stepper-value {
+    min-width: 40px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 26px;
+  }
+
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+
+  .toggle-switch input:checked+.toggle-slider {
+    background-color: #667eea;
+  }
+
+  .toggle-switch input:checked+.toggle-slider:before {
+    transform: translateX(24px);
+  }
+
+  .validation-error {
+    border: 2px solid #e74c3c !important;
+    background: #fff5f5 !important;
+  }
+
+  /* ============================================================
+   DROPDOWN PANEL OVERFLOW FIX
+   ============================================================ */
+  /* Fix parent containers that might hide the dropdown panel */
+  .form-group,
+  .col-md-12,
+  .section-body,
+  .step-content,
+  .row,
+  .modal-body {
+    overflow: visible !important;
+  }
+
+  /* Specifically fix Step 4 */
+  #step4 .section-body {
+    overflow: visible !important;
+  }
+
+  /* ============================================================
+   CUSTOM SEARCHABLE DROPDOWN (no jQuery / Select2 dependency)
+   ============================================================ */
+  .search-select {
+    position: relative;
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .search-select-control {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 12px 15px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    min-height: 48px;
+  }
+
+  .search-select-control:hover,
+  .search-select-control:focus {
+    border-color: #667eea;
+    outline: none;
+  }
+
+  .search-select.open .search-select-control {
+    border-color: #667eea;
+  }
+
+  .search-select-value {
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-height: 1.2em;
+    display: inline-block;
+  }
+
+  .search-select-value.ss-placeholder {
+    color: #94a3b8;
+  }
+
+  .search-select-value:empty::before {
+    content: "-- Select Team Member --";
+    color: #94a3b8;
+  }
+
+  .search-select-arrow {
+    color: #64748b;
+    transition: transform 0.2s ease;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+
+  .search-select.open .search-select-arrow {
+    transform: rotate(180deg);
+  }
+
+  .search-select-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .search-select.open .search-select-panel {
+    display: block;
+  }
+
+  .search-select-input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid #e9ecef;
+    padding: 12px 15px;
+    font-size: 0.9rem;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .search-select-input:focus {
+    border-bottom-color: #667eea;
+  }
+
+  .search-select-options {
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .search-select-group-label {
+    padding: 8px 15px 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: #f8f9fa;
+  }
+
+  .search-select-option {
+    padding: 10px 16px;
+    cursor: pointer;
+    color: #2d3748;
+    font-size: 0.9rem;
+  }
+
+  .search-select-option:hover,
+  .search-select-option.highlighted {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .search-select-option:hover .opt-role,
+  .search-select-option.highlighted .opt-role {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .search-select-option.selected {
+    background-color: #eef2ff;
+    font-weight: 600;
+  }
+
+  .opt-role {
+    color: #64748b;
+    font-weight: 400;
+  }
+
+  .search-select-no-results {
+    padding: 16px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+  }
+
+  .search-select.validation-error .search-select-control {
+    border-color: #e74c3c !important;
+    background: #fff5f5 !important;
+  }
+</style>
+
+<div class="main-content" style="margin-left: 280px; margin-top: 70px; padding: 30px;">
+  <div class="page-wrap">
+
+    <div>
+      <div class="form-container">
+        <div class="form-header">
+          <div class="form-title">
+            <i class="fas fa-building" style="color: #667eea;"></i> Post Your Commercial Rental
+          </div>
+          <button class="btn-back" onclick="history.back();">
+            <i class="fas fa-arrow-left"></i> Back to List
+          </button>
+        </div>
+
+        <div class="stepper" id="stepper">
+          <div class="step-item">
+            <div class="step-circle active" id="sc1">1</div>
+            <div class="step-label active" id="sl1">Basic Info & Property Location Details</div>
+          </div>
+          <div class="step-line" id="line1"></div>
+          <div class="step-item">
+            <div class="step-circle" id="sc2">2</div>
+            <div class="step-label" id="sl2">Property Specifications & Pricing</div>
+          </div>
+          <div class="step-line" id="line2"></div>
+          <div class="step-item">
+            <div class="step-circle" id="sc3">3</div>
+            <div class="step-label" id="sl3">Amenities</div>
+          </div>
+          <div class="step-line" id="line3"></div>
+          <div class="step-item">
+            <div class="step-circle" id="sc4">4</div>
+            <div class="step-label" id="sl4">Images & Contact</div>
+          </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" action="{% url 'commercial_rental_add' %}"
+          id="commercialForm">
+          {% csrf_token %}
+
+          <div class="step-content active" id="step1">
+
+            <div class="form-section">
+              <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <span><i class="fas fa-upload"></i> Listed By</span>
+                
+              </div>
+
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label class="form-label">
+                        <i class="fas fa-user"></i> Listed By <span class="text-danger">*</span>
+                      </label>
+
+                    
+
+                     
+
+                  
+
+                     
+
+                      
+                    </div>
+                  </div>
+                </div>
+
+                <br>
+
+                <div class="row" id="user_data_div">
+
+                   <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" value="{{ user_obj.user_id }}" readonly style="background-color:#e9ecef;"></div></div>
+
+                                <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" value="{{ user_obj.user_name }}" readonly style="background-color:#e9ecef;"></div></div>
+
+                                <div class="col-md-5"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="listed_by_email" value="{{ user_obj.user_email }}" id="listed_by_email" readonly style="background-color:#e9ecef;"></div></div>
+
+                                <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="listed_by_contact" value="{{ user_obj.user_phone }}" id="listed_by_contact" readonly style="background-color:#e9ecef;"></div></div>
+
+                                <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="listed_by_role" value="{{ user_obj.user_role }}" id="listed_by_role" readonly style="background-color:#e9ecef;"></div></div>
+
+                </div>
+              </div>
+            </div>
+
+
+<div class="form-section mb-4">
+  <div class="section-header"><i class="fas fa-info-circle"></i> Basic Information </div>
+  <div class="section-body">
+    <div class="row">
+
+      <div class="col-md-12 mb-4">
+        <label class="form-label">Property Title</label>
+        <input type="text" class="form-control" name="property_title" id="propertyTitle" readonly
+          placeholder="Property Title auto-generated by system">
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Property Type <span class="required">*</span></label>
+       <select class="form-select" name="property_type" id="property_type" required>
+    <option value="">Select Property Type</option>
+
+    <!-- Office -->
+    <option value="office_space">Office Space</option>
+    <option value="coworking_space">Co-working Space</option>
+    <option value="business_center">Business Center</option>
+
+    <!-- Retail -->
+    <option value="shop">Shop</option>
+    <option value="showroom">Showroom</option>
+    <option value="retail_space">Retail Space</option>
+
+    <!-- Industrial & Storage -->
+    <option value="warehouse">Warehouse</option>
+    <option value="godown">Godown</option>
+    <option value="industrial_shed">Industrial Shed</option>
+    <option value="factory">Factory</option>
+    <option value="industrial_building">Industrial Building</option>
+
+    <!-- Land -->
+    <option value="commercial_land">Commercial Land</option>
+    <option value="industrial_land">Industrial Land</option>
+
+    <!-- Hospitality -->
+    <option value="hotel">Hotel</option>
+    <option value="guest_house">Guest House</option>
+    <option value="restaurant">Restaurant Space</option>
+    <option value="cafe">Cafe Space</option>
+
+    <!-- Healthcare -->
+    <option value="clinic">Clinic</option>
+    <option value="hospital">Hospital</option>
+
+    <!-- Education -->
+    <option value="school">School</option>
+    <option value="college">College / Institute</option>
+
+    <!-- Others -->
+    <option value="mixed_use_building">Mixed Use Building</option>
+    <option value="commercial_building">Commercial Building</option>
+    <option value="other">Other</option>
+</select>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Building / Project Name <span class="required">*</span></label>
+        <input type="text" class="form-control" name="building_name" placeholder="e.g. Alpha Tower" required>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Tower/Wing Number </label>
+        <input type="number" class="form-control" name="tower_number" id="tower_number" placeholder="Enter Tower/Wing Number">
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Shop No/Godown/Unit No <span style="color:red;">*</span></label>
+        <input type="text" class="form-control" name="property_no" id="propertyno" placeholder="Enter Shop No/Godown/Unit No" required>
+        <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block; font-weight: bold;">
+          <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
+        </span>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">
+        Availability Status <span class="required">*</span>
+    </label>
+
+    <select class="form-select" name="possession_status" required>
+        <option value="">Select Availability Status</option>
+
+        <option value="available_immediately">Available Immediately</option>
+        <option value="within_7_days">Available Within 7 Days</option>
+        <option value="within_15_days">Available Within 15 Days</option>
+        <option value="within_30_days">Available Within 30 Days</option>
+        <option value="within_60_days">Available Within 60 Days</option>
+        <option value="within_90_days">Available Within 90 Days</option>
+
+        <option value="currently_occupied">Currently Occupied</option>
+        <option value="under_renovation">Under Renovation</option>
+        <option value="ready_to_move">Ready to Move</option>
+
+        <option value="custom_date">Available From Specific Date</option>
+    </select>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Available From</label>
+        <input type="date" class="form-control" name="available_from">
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Age of Property <span class="required">*</span></label>
+        <input type="number" class="form-control" name="property_age" placeholder="Enter property age in years (e.g., 5)">
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Zone Type</label>
+      <select class="form-select" name="zone_type">
+    <option value="">Select Zone Type</option>
+
+    <option value="commercial">Commercial Zone</option>
+    <option value="industrial">Industrial Zone</option>
+    <option value="mixed_use">Mixed Use Zone</option>
+    <option value="residential_commercial">Residential-Cum-Commercial Zone</option>
+    <option value="it_park">IT / Tech Park Zone</option>
+    <option value="business_district">Business District (CBD)</option>
+    <option value="special_economic_zone">Special Economic Zone (SEZ)</option>
+    <option value="logistics_zone">Logistics / Warehousing Zone</option>
+    <option value="industrial_corridor">Industrial Corridor</option>
+    <option value="export_processing_zone">Export Processing Zone (EPZ)</option>
+   
+</select>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Ownership Type <span class="required">*</span></label>
+        <select class="form-select" name="ownership_type" required>
+          <option value="">Select ownership</option>
+          <option value="Freehold">Freehold (You Own the Property & Land)</option>
+          <option value="Leasehold">Leasehold (Property on Long-Term Lease)</option>
+          <option value="Co-operative Society">Co-operative Society Flat</option>
+          <option value="Power of Attorney">Power of Attorney (POA)</option>
+          <option value="Inherited Property">Inherited / Family Property</option>
+      
+        </select>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Property Condition</label>
+        <select class="form-select" name="property_condition">
+          <option value="">Select </option>
+          <option value="Brand New">Brand New</option>
+          <option value="Less than 1 Year Old">Less than 1 Year Old</option>
+          <option value="Well Maintained">Well Maintained</option>
+          <option value="Recently Renovated">Recently Renovated</option>
+          <option value="Needs Renovation">Needs Renovation</option>
+
+
+
+<option value="Ready to Move">
+    Ready to Move
+</option>
+
+<option value="Warm Shell">
+    Partially Fitted (Flooring, Ceiling & Lights Ready)
+</option>
+
+<option value="Bare Shell">
+    Raw Unfinished Space (Interior Work Required)
+</option>
+
+<option value="Fully Furnished">
+    Fully Furnished
+</option>
+
+<option value="Semi Furnished">
+    Semi Furnished
+</option>
+
+
+
+
+        </select>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Built-up Area (sq.ft) <span class="required">*</span></label>
+        <input type="number" class="form-control" name="builtup_area" id="builtArea" placeholder="e.g. 1500" required>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Carpet Area (sq.ft)</label>
+        <input type="number" class="form-control" name="carpet_area" placeholder="e.g. 1200">
+      </div>
+
+      <div class="col-md-6 mb-3" id="brokerageSection">
+        <label class="form-label" id="brokerageLabel">Service Fee <span class="required">*</span></label>
+        <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
+          <option value="">Select</option>
+          <option value="No Brokerage">No Brokerage</option>
+          <option value="15 Days Rent">15 Days Rent</option>
+          <option value="1 Month Rent" selected>1 Month Rent</option>
+          <option value="Fixed Amount">Fixed Amount</option>
+          <option value="Negotiable">Negotiable</option>
+        </select>
+      </div>
+
+      <div class="col-md-6 mb-3" id="manualBrokerage" style="display:none;">
+        <label class="form-label">Enter Fixed Brokerage</label>
+        <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. Fixed Amount">
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="form-section">
+  <div class="section-header"><i class="fas fa-map-marker-alt"></i> Property Location Details </div>
+  <div class="section-body">
+    <div class="row">
+
+      <div class="col-md-12 mb-3">
+        <label class="form-label">Property Address <span class="required">*</span></label>
+        <textarea class="form-control" name="property_address" rows="2" placeholder="e.g. 402, Alpha Tower, Near Phoenix Mall..." required></textarea>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Area/Locality <span class="required">*</span></label>
+        <input type="text" class="form-control" name="area_locality" id="locality" placeholder="e.g. Viman Nagar" required>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Property Landmark </label>
+        <input type="text" class="form-control" name="property_landmark" id="property_landmark" placeholder="Enter Property Landmark">
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">City <span class="required" style="color:red;">*</span></label>
+        <input type="text" class="form-control" id="cityInput" name="city" placeholder="e.g., Pune" required>
+        <script>
+          document.getElementById('cityInput').addEventListener('input', function () {
+            this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+          });
+        </script>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <div class="form-group">
+          <label class="form-label">State <span class="required-star" style="color:red;">*</span></label>
+          <select class="form-select form-control" name="state" required>
+            <option value="">Select State</option>
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+            <option value="Assam">Assam</option>
+            <option value="Bihar">Bihar</option>
+            <option value="Chhattisgarh">Chhattisgarh</option>
+            <option value="Goa">Goa</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Haryana">Haryana</option>
+            <option value="Himachal Pradesh">Himachal Pradesh</option>
+            <option value="Jharkhand">Jharkhand</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Madhya Pradesh">Madhya Pradesh</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Manipur">Manipur</option>
+            <option value="Meghalaya">Meghalaya</option>
+            <option value="Mizoram">Mizoram</option>
+            <option value="Nagaland">Nagaland</option>
+            <option value="Odisha">Odisha</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Rajasthan">Rajasthan</option>
+            <option value="Sikkim">Sikkim</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Telangana">Telangana</option>
+            <option value="Tripura">Tripura</option>
+            <option value="Uttar Pradesh">Uttar Pradesh</option>
+            <option value="Uttarakhand">Uttarakhand</option>
+            <option value="West Bengal">West Bengal</option>
+            <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+            <option value="Chandigarh">Chandigarh</option>
+            <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+            <option value="Delhi">Delhi</option>
+            <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+            <option value="Ladakh">Ladakh</option>
+            <option value="Lakshadweep">Lakshadweep</option>
+            <option value="Puducherry">Puducherry</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Location Hub</label>
+       <select class="form-select" name="location_hub">
+    <option value="">Select Location Hub</option>
+
+    <option value="business_district">Business District (CBD)</option>
+    <option value="it_park">IT / Technology Park</option>
+    <option value="corporate_hub">Corporate Hub</option>
+    <option value="commercial_complex">Commercial Complex</option>
+    <option value="shopping_mall">Shopping Mall</option>
+    <option value="high_street">High Street Market</option>
+    <option value="market_area">Market Area</option>
+    <option value="industrial_estate">Industrial Estate</option>
+    <option value="logistics_hub">Logistics / Warehouse Hub</option>
+    <option value="sez">Special Economic Zone (SEZ)</option>
+    <option value="transport_hub">Transport Hub</option>
+    <option value="airport_corridor">Airport Corridor</option>
+    <option value="metro_corridor">Metro Corridor</option>
+    <option value="mixed_use_development">Mixed Use Development</option>
+    <option value="standalone">Standalone Property</option>
+   
+</select>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+            
+           
+            <div class="step-nav">
+              <div></div>
+              <button type="button" class="btn-next" onclick="goToStep(2)">Next <i
+                  class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <div class="step-content" id="step2">
+            <div class="form-section">
+              <div class="section-header"><i class="fa-solid fa-ruler-combined"></i> Property Specifications</div>
+              <div class="section-body">
+                <div class="row">
+                 
+                 
+                 
+                 
+               
+
+               
+
+
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">DG & UPS Included?</label>
+                    <label class="toggle-switch"><input type="checkbox" name="dg_ups_included"><span
+                        class="toggle-slider"></span></label>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Electricity Included?</label>
+                    <label class="toggle-switch"><input type="checkbox" name="electricity_included"><span
+                        class="toggle-slider"></span></label>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Water Included?</label>
+                    <label class="toggle-switch"><input type="checkbox" name="water_included"><span
+                        class="toggle-slider"></span></label>
+                  </div>
+
+                 
+
+                             <div class="col-md-4 mb-3">
+        <div class="form-group">
+            <label class="form-label">
+                Building Configuration <span style="color: red;"class="required">*</span>
+            </label>
+            <input type="text" class="form-control"
+                   id="res_floor"
+                   name="building_configuration"
+                   placeholder="e.g., G, G+1, G+2, G+3"
+                   required>
+        </div>
+    </div>
+                                 <div class="col-md-4 mb-3">
+        <div class="form-group">
+            <label class="form-label">
+                Total Floors Constructed <span style="color: red;"class="required">*</span>
+            </label>
+            <input type="number" class="form-control"
+                   id="res_total_floors"
+                   name="total_floors"
+                   placeholder="e.g., 3"
+                   required>
+        </div>
+    </div>
+                  <div class="col-md-4 mb-3"><label class="form-label">Staircases</label><input type="number"
+                      class="form-control" name="staircases" placeholder="e.g. 2"></div>
+
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Passenger Lifts</label>
+                    <div class="number-stepper">
+                      <button type="button" class="stepper-btn"
+                        onclick="updateStepper('passenger_lifts', -1)">−</button>
+                      <span id="passenger_lifts_display">0</span>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('passenger_lifts', 1)">+</button>
+                      <input type="hidden" name="passenger_lifts" id="passenger_lifts" value="0">
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Service Lifts</label>
+                    <div class="number-stepper">
+                      <button type="button" class="stepper-btn" onclick="updateStepper('service_lifts', -1)">−</button>
+                      <span id="service_lifts_display">0</span>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('service_lifts', 1)">+</button>
+                      <input type="hidden" name="service_lifts" id="service_lifts" value="0">
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label">Private Parking</label>
+                    <div class="number-stepper">
+                      <button type="button" class="stepper-btn"
+                        onclick="updateStepper('private_parking', -1)">−</button>
+                      <span id="private_parking_display">0</span>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('private_parking', 1)">+</button>
+                      <input type="hidden" name="private_parking" id="private_parking" value="0">
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3"><label class="form-label">Minimum Seats Occupancy</label><input
+                      type="number" class="form-control" name="min_seats" placeholder="e.g. 20"></div>
+                  <div class="col-md-6 mb-3"><label class="form-label">Maximum Seats Occupancy</label><input
+                      type="number" class="form-control" name="max_seats" placeholder="e.g. 50"></div>
+                  <div class="col-md-6 mb-3"><label class="form-label">Cabins</label><input type="number"
+                      class="form-control" name="cabins" placeholder="e.g. 2"></div>
+                  <div class="col-md-6 mb-3"><label class="form-label">Meeting Rooms</label><input type="number"
+                      class="form-control" name="meeting_rooms" placeholder="e.g. 1"></div>
+
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Private Washrooms</label>
+                    <div class="number-stepper">
+                      <button type="button" class="stepper-btn"
+                        onclick="updateStepper('private_washroom', -1)">−</button>
+                      <span id="private_washroom_display">0</span>
+                      <button type="button" class="stepper-btn"
+                        onclick="updateStepper('private_washroom', 1)">+</button>
+                      <input type="hidden" name="private_washroom" id="private_washroom" value="0">
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Public Washrooms</label>
+                    <div class="number-stepper">
+                      <button type="button" class="stepper-btn"
+                        onclick="updateStepper('public_washroom', -1)">−</button>
+                      <span id="public_washroom_display">0</span>
+                      <button type="button" class="stepper-btn" onclick="updateStepper('public_washroom', 1)">+</button>
+                      <input type="hidden" name="public_washroom" id="public_washroom" value="0">
+                    </div>
+                  </div>
+
+                  <div class="col-md-12 mb-3">
+                    <label class="form-label">Flooring Type</label>
+                    <select class="form-select" name="flooring_type">
+                      <option value="">Select flooring</option>
+                      <option value="marble">Marble</option>
+                      <option value="vitrified">Vitrified Tiles</option>
+                      <option value="granite">Granite</option>
+                      <option value="wooden">Wooden</option>
+                      <option value="ceramic">Ceramic Tiles</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+
+
+              <div class="form-section">
+                <div class="section-header"><i class="fa-solid fa-ruler-combined"></i> Pricing Details </div>
+                <div class="section-body">
+                  <div class="row">
+                    
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Monthly Rent (mo) <span class="required">*</span></label>
+                      <input type="number" class="form-control" name="expected_rent" id="monthlyRent" placeholder="e.g. 75000" required>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Advanced Rent <span style="color:red;">*</span></label>
+                      <select class="form-select" name="advanced_rent_type" id="advanced_rent" required>
+                        <option value="No Advance">No Advance</option>
+                        <option value="1 Month Rent" selected>1 Month Rent</option>                
+                        <option value="2 Months Rent">2 Months Rent</option>
+                        <option value="3 Months Rent">3 Months Rent</option>
+                        <option value="4 Months Rent">4 Months Rent</option>
+                        <option value="5 Months Rent">5 Months Rent</option>
+                        <option value="6 Months Rent">6 Months Rent</option>
+                        <option value="7 Months Rent">7 Months Rent</option>
+                        <option value="8 Months Rent">8 Months Rent</option>
+                        <option value="9 Months Rent">9 Months Rent</option>
+                        <option value="10 Months Rent">10 Months Rent</option>
+                        <option value="11 Months Rent">11 Months Rent</option>
+                        <option value="Fixed Amount">Fixed Amount</option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3" id="advanced_rent_amount_container" style="display: none;">
+                      <label class="form-label">Advance Rent Amount</label>
+                      <input type="number" class="form-control" name="advanced_rent_fixed" id="advanced_rent_amount" placeholder="e.g. 75000">
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Refundable Security Deposit <span style="color:red;">*</span></label>
+                      <select class="form-select" name="security_deposit_type" id="security_deposit_type" required  >
+                        <option value="No Deposit">No Deposit</option>
+                        <option value="1 Month Rent" selected>1 Month Rent</option>
+                        <option value="2 Months Rent">2 Months Rent</option>
+                        <option value="3 Months Rent">3 Months Rent</option>
+                        <option value="4 Months Rent">4 Months Rent</option>
+                        <option value="5 Months Rent">5 Months Rent</option>
+                        <option value="6 Months Rent">6 Months Rent</option>
+                        <option value="7 Months Rent">7 Months Rent</option>
+                        <option value="8 Months Rent">8 Months Rent</option>
+                        <option value="9 Months Rent">9 Months Rent</option>
+                        <option value="10 Months Rent">10 Months Rent</option>
+                        <option value="11 Months Rent">11 Months Rent</option>
+                        <option value="Fixed Amount">Fixed Amount</option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3" id="security_deposit_amount_container" style="display: none;">
+                      <label class="form-label">Deposit Amount</label>
+                      <input type="number" class="form-control" name="security_deposit" id="security_deposit_amount" placeholder="e.g. 250000">
+                    </div>
+
+                    
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Maintenance Charges</label>
+                      <div class="d-flex align-items-center gap-2 mt-2">
+                        <div class="form-check form-check-inline" style="margin-right: 15px;">
+                          <input class="form-check-input" type="radio" name="maintenance_type" value="Included" id="maint-inc" checked>
+                          <label class="form-check-label" for="maint-inc">Included in rent</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="maintenance_type" value="Excluding" id="maint-exc">
+                          <label class="form-check-label" for="maint-exc">Excluding rent</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div class="col-md-4 mb-3" id="maintenance_amount_container" style="display: none;">
+                      <label class="form-label">Monthly Maintenance</label>
+                      <input type="number" class="form-control" name="maintenance_charges" id="maintenance_charges" placeholder="e.g. 5000">
+                    </div>
+
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<div class="col-md-4 mb-3">
+                      <label class="form-label">Total Move In Cost</label>
+                      <input type="number" class="form-control" name="total_move_in_cost" placeholder="e.g. 5000">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Negotiable</label>
+                      <div class="d-flex align-items-center gap-2 mt-2">
+                        <div class="form-check form-check-inline" style="margin-right: 15px;">
+                          <input class="form-check-input" type="radio" name="negotiable" value="Yes" id="neg-yes">
+                          <label class="form-check-label" for="neg-yes">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="negotiable" value="No" id="neg-no">
+                          <label class="form-check-label" for="neg-no">No</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Lock-in Period (months)</label>
+                      <input type="number" class="form-control" name="lockin_period" placeholder="e.g. 11">
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                      <label class="form-label">Rent Increase (%/year)</label>
+                      <input type="number" class="form-control" name="rent_increase" step="0.1" placeholder="e.g. 5">
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+
+
+
+
+
+            <div class="step-nav">
+              <button type="button" class="btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i>
+                Back</button>
+              <button type="button" class="btn-next" onclick="goToStep(3)">Next <i
+                  class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <div class="step-content" id="step3">
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-star"></i> Amenities</div>
+              <!-- Amenities Section -->
+              <div class="section-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <label class="form-label mb-0"><i class="fas fa-star text-warning"></i> Amenities</label>
+                  <span class="badge bg-primary" id="amenitiesCount">0 selected</span>
+                </div>
+
+                <button type="button" class="btn btn-primary w-100 mb-3" onclick="openModal('amenities')">
+                  <i class="fas fa-plus-circle me-2"></i> Select Amenities <span class="badge bg-light text-dark ms-2"
+                    id="amenitiesBadge">0</span>
+                </button>
+
+                <div id="amenitiesDisplay" class="selected-items-display">
+                  <p class="text-muted text-center">No amenities selected</p>
+                </div>
+
+                <!-- Hidden checkboxes for form submission -->
+                <div style="display:none;">
+                  {% for am in ameneties_obj %}
+                  <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}" class="amenities-checkbox"
+                    data-icon="{{am.amenties_icon}}">
+                  {% endfor %}
+                </div>
+              </div>
+
+
+              <br>
+
+              <div class="section-header"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
+              <!-- Facilities Section -->
+              <div class="section-body mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <label class="form-label mb-0"><i class="fas fa-map-marker-alt text-primary"></i> Nearby
+                    Facilities</label>
+                  <span class="badge bg-primary" id="facilitiesCount">0 selected</span>
+                </div>
+
+                <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')">
+                  <i class="fas fa-plus-circle me-2"></i> Select Facilities <span class="badge bg-light text-dark ms-2"
+                    id="facilitiesBadge">0</span>
+                </button>
+
+                <div id="facilitiesDisplay" class="selected-items-display">
+                  <p class="text-muted text-center">No facilities selected</p>
+                </div>
+
+                <!-- Hidden checkboxes for form submission -->
+                <div style="display:none;">
+                  {% for fa in facilities_obj %}
+                  <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}"
+                    class="facilities-checkbox" data-icon="{{fa.facilities_icon}}">
+                  {% endfor %}
+                </div>
+              </div>
+
+
+            </div>
+
+
+
+            <div class="form-section" hidden>
+              <div class="section-header"><i class="fas fa-align-left"></i> System-Generated Property Descriptions</div>
+              <div class="section-body">
+
+                <div class="alert alert-info d-flex align-items-center mb-4"
+                  style="background-color: #f8fafc; border-left: 4px solid #667eea; border-radius: 4px; padding: 12px 16px; border-top: none; border-right: none; border-bottom: none;">
+                  <i class="fas fa-info-circle me-2" style="color: #667eea;"></i>
+                  <span style="font-size: 0.9rem; color: #4a5568;">
+                    <strong>Smart Generation:</strong> These fields are read-only. The system will automatically update
+                    the descriptions based on any changes you make to the property details upon saving.
+                  </span>
+                </div>
+
+                <div class="form-group mb-4">
+                  <label class="form-label mb-2"><i class="fas fa-file-alt"></i> Property Summary</label>
+                  <textarea class="form-control bg-light" name="property_summary" rows="3"
+                    readonly>{{ prop.property_summary|default:'' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label mb-2"><i class="fas fa-file-alt"></i> Property Description (Rich
+                    Text)</label>
+                  <div class="form-control bg-light"
+                    style="height: auto; min-height: 150px; max-height: 250px; overflow-y: auto; cursor: not-allowed; color: #4a5568;">
+                    {{ prop.property_description|default:''|safe }}
+                  </div>
+                  <input type="hidden" name="property_description" value="{{ prop.property_description|default:'' }}">
+                </div>
+
+              </div>
+            </div>
+
+
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-align-left"></i>Add Property Descriptions Details</div>
+              <div class="section-body">
+                <div class="form-group mb-4">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Property Description</label>
+
+                  </div>
+                  <textarea class="form-control" name="user_description" rows="3"
+                    placeholder="Describe the commercial space briefly..."></textarea>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="step-nav">
+              <button type="button" class="btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i>
+                Back</button>
+              <button type="button" class="btn-next" onclick="goToStep(4)">Next <i
+                  class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <div class="step-content" id="step4">
+            <div class="form-section">
+              <div class="section-header"><i class="fa-solid fa-images"></i> Media & Contact</div>
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-12 mb-3">
+                    <label class="form-label"><i class="fa-solid fa-camera"></i> Upload Property Images <span
+                        class="required">*</span></label>
+                    <div class="image-upload-area" id="uploadArea">
+                      <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" hidden>
+                      <i class="fas fa-cloud-upload-alt" style="font-size:3rem;color:#667eea;"></i>
+                      <div class="upload-text" style="font-weight:600; font-size:1.1rem; margin-top:10px;">Click or Drag
+                        Images Here</div>
+                      <div class="upload-subtext" style="color:#64748b; font-size:0.9rem;">Upload up to 10 images (JPG,
+                        PNG). <br><strong>Tip:</strong> Drag & Drop preview images to arrange their sequence.</div>
+                    </div>
+
+                    <div id="imageCount" style="font-weight: 600; color: #64748b; margin-top: 15px; text-align: right;">
+                      0 out of 10 images selected</div>
+                    <div class="image-preview" id="imagePreview"></div>
+                  </div>
+
+                  <div class="col-md-6 mb-3"><label class="form-label"><i class="fa-solid fa-video"></i>
+                      Video</label><input type="file" class="form-control" name="video" accept="video/*"></div>
+                </div>
+              </div>
+            </div>
+
+
+
+            {% comment %} <div class="form-section">
+              <div class="section-header"><i class="fas fa-address-book"></i> Contact Information</div>
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-6 mb-3"><label class="form-label">Owner Name <span
+                        class="required">*</span></label><input type="text" class="form-control" name="owner_name"
+                      id="ownerName" placeholder="e.g. John Doe" required></div>
+                  <div class="col-md-6 mb-3"><label class="form-label">Contact Number <span
+                        class="required">*</span></label><input class="form-control" type="tel" name="contact_number"
+                      placeholder="e.g. 9876543210" required></div>
+                  <div class="col-md-6 mb-3"><label class="form-label">Email <span
+                        class="required">*</span></label><input type="email" class="form-control" name="email"
+                      placeholder="e.g. owner@example.com" required></div>
+                  <div class="col-md-6 mb-3"><label class="form-label">Alternate Contact</label><input type="tel"
+                      class="form-control" name="alternate_contact" placeholder="Optional"></div>
+                </div>
+              </div>
+            </div> {% endcomment %}
+
+            <div class="form-section">
+                <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes">
+                                    <label class="form-check-label" for="listed_yes">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" checked>
+                                    <label class="form-check-label" for="listed_no">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="portalField" style="display:none;">
+                            <div class="form-group">
+                                <label class="form-label">Portal Name</label>
+                                <input type="text" class="form-control" name="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section" hidden>
+              <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-3">
+                    <div class="form-group"><label class="form-label"><i class="fas fa-user"></i>Name</label><input type="text"
+                        class="form-control" name="uploaded_by_name" value="{{ user_obj.user_name }}" disabled></div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i>Email</label><input type="email"
+                        class="form-control" name="uploaded_by_email" value="{{ user_obj.user_email }}" disabled></div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group"><label class="form-label"><i class="fas fa-phone"></i>Contact</label><input type="text"
+                        class="form-control" name="uploaded_by_contact" value="{{ user_obj.user_phone }}" disabled></div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i>Role</label><input type="text"
+                        class="form-control" name="uploaded_by_role" value="{{ user_obj.user_role }}" disabled></div>
+                  </div>
+                </div>
+              </div>
+              <br>
+            
+            </div>
+
+
+            
+
+            <div class="step-nav">
+              <button type="button" class="btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i>
+                Back</button>
+              <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Submit Property</button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <div class="preview-sidebar">
+      <div class="preview-card">
+        <div class="pc-head"><i class="fas fa-eye"></i> Live Preview</div>
+        <div class="pc-mock">
+          <div class="pcm-img">
+            🏢
+            <div style="position: absolute; top: 10px; left: 10px; display: flex; gap: 5px;">
+              <span
+                style="font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; background: rgba(255, 255, 255, 0.95); color: #0f172a;">FOR
+                RENT</span>
+              <span id="previewType"
+                style="font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 6px; background: #7c3aed; color: white;">Commercial</span>
+            </div>
+            <div id="previewPrice"
+              style="position: absolute; bottom: 10px; left: 10px; background: rgba(15, 23, 42, 0.9); color: white; font-size: 0.9rem; font-weight: 900; padding: 5px 12px; border-radius: 8px;">
+              ₹ 0 /mo</div>
+          </div>
+          <div class="pcm-body">
+            <div id="previewTitle" style="font-size: 0.95rem; font-weight: 800; margin-bottom: 5px;">Commercial Property
+            </div>
+            <div id="previewLoc" style="font-size: 0.75rem; color: #64748b; margin-bottom: 10px;"><i
+                class="fas fa-map-marker-alt" style="color:#667eea;"></i> Area, City</div>
+            <div style="display: flex; gap: 12px; font-size: 0.75rem; color: #475569; font-weight: 600;"><span
+                id="prevArea">— sqft</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card">
+        <div style="font-size:.9rem; font-weight:800; color:#2c3e50; margin-bottom:15px;">📋 Listing Checklist</div>
+        <div class="cl-item" id="cl-basic"><i class="fas fa-circle"></i> Basic details verified</div>
+        <div class="cl-item" id="cl-price"><i class="fas fa-circle"></i> Rent entered</div>
+        <div class="cl-item" id="cl-desc"><i class="fas fa-circle"></i> Description added</div>
+        <div class="cl-item" id="cl-photos"><i class="fas fa-circle"></i> Photos uploaded</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Common Modal -->
+<div class="modal fade" id="itemsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-list"></i> <span id="modalTitle">Select Items</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control mb-3" id="modalSearch" placeholder="Search...">
+        <div id="modalItemsList" class="row"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply (<span
+            id="modalSelectedCount">0</span>)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+
+  $("#Rent").addClass("active");
+
+  document.addEventListener("DOMContentLoaded", function () {
+  
+  // 1. Advanced Rent Toggle
+  const advancedRentSelect = document.getElementById("advanced_rent");
+  const advancedRentContainer = document.getElementById("advanced_rent_amount_container");
+
+  advancedRentSelect.addEventListener("change", function () {
+    if (this.value === "Fixed Amount") {
+      advancedRentContainer.style.display = "block";
+    } else {
+      advancedRentContainer.style.display = "none";
+      document.getElementById("advanced_rent_amount").value = ""; // Clear input if hidden
+    }
+  });
+
+  // 2. Refundable Security Deposit Toggle
+  const securityDepositSelect = document.getElementById("security_deposit_type");
+  const securityDepositContainer = document.getElementById("security_deposit_amount_container");
+
+  securityDepositSelect.addEventListener("change", function () {
+    if (this.value === "Fixed Amount") {
+      securityDepositContainer.style.display = "block";
+    } else {
+      securityDepositContainer.style.display = "none";
+      document.getElementById("security_deposit_amount").value = ""; // Clear input if hidden
+    }
+  });
+
+  // 3. Maintenance Charges Toggle
+  const maintenanceRadios = document.querySelectorAll('input[name="maintenance_type"]');
+  const maintenanceContainer = document.getElementById("maintenance_amount_container");
+
+  maintenanceRadios.forEach(radio => {
+    radio.addEventListener("change", function () {
+      if (this.value === "Excluding") {
+        maintenanceContainer.style.display = "block";
+      } else {
+        maintenanceContainer.style.display = "none";
+        document.getElementById("maintenance_charges").value = ""; // Clear input if hidden
+      }
+    });
+  });
+
+});
+
+
+</script>
+
+<script>
+
+  function updateBrokerageLabel(role) {
+    var labelElement = document.getElementById('brokerageLabel');
+    if (!labelElement) return;
+
+    // Normalize the string text to lowercase to ensure clean matches
+    var normalizedRole = (role || "").trim().toLowerCase();
+    var labelText = "";
+
+    switch (normalizedRole) {
+      case 'admin':
+        labelText = "EstateFlow Service Fee";
+        break;
+      case 'relationship manager':
+        labelText = "Service Fee";
+        break;
+      case 'landlord':
+        labelText = "Tenant Service Fee";
+        break;
+      case 'agent':
+        labelText = "Brokerage";
+        break;
+      case 'agency/builder':
+      case 'builder':
+        labelText = "Service Fee";
+        break;
+      default:
+        labelText = "Brokerage"; // Fallback default text
+        break;
+    }
+
+    // Inject the text along with a red styled asterisk span
+    labelElement.innerHTML = labelText + ' <span style="color: red;">*</span>';
+  }
+
+</script>
+
+
+
+<script>
+  function Change_Fields(){
+    var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
+    if (!checkedInput) return;
+    
+    var selectedValue = checkedInput.value;
+    
+    var admin_id    = document.getElementById('selfUserId')?.value || "";
+    var admin_name  = document.getElementById('selfUserName')?.value || "";
+    var admin_email = document.getElementById('selfUserEmail')?.value || "";
+    var admin_phone = document.getElementById('selfUserPhone')?.value || "";
+    var admin_role  = document.getElementById('selfUserRole')?.value || "";
+
+    var targetId      = document.getElementById('uploaded_by_id')      || document.querySelector('#user_data_div [id$="id"]');
+    var targetName    = document.getElementById('uploaded_by_name')    || document.querySelector('#user_data_div [id$="name"]');
+    var targetEmail   = document.getElementById('uploaded_by_email')   || document.querySelector('#user_data_div [id$="email"]');
+    var targetContact = document.getElementById('uploaded_by_contact') || document.querySelector('#user_data_div [id$="contact"]');
+    var targetRole    = document.getElementById('uploaded_by_role')    || document.querySelector('#user_data_div [id$="role"]');
+    var hiddenSelect  = document.getElementById('assigned_to');
+
+    if(selectedValue == "self"){
+        var otherWrapper = document.getElementById('listedByOtherWrapper');
+        if (otherWrapper) otherWrapper.style.display = "none";
+        
+        if (hiddenSelect) {
+            hiddenSelect.value = "";
+            hiddenSelect.required = false; 
+            hiddenSelect.classList.remove('is-invalid');
+        }
+        var valueLabel = document.getElementById('assignedToValueLabel');
+        if (valueLabel) valueLabel.textContent = "-- Select Team Member --";
+
+        if (targetId)      targetId.value = admin_id;
+        if (targetName)    targetName.value = admin_name;
+        if (targetEmail)   targetEmail.value = admin_email;
+        if (targetContact) targetContact.value = admin_phone;
+        if (targetRole)    targetRole.value = admin_role;
+
+        updateBrokerageLabel(admin_role);
+    }
+    else {
+        if (hiddenSelect) {
+            hiddenSelect.required = true;
+        }
+        
+        if (targetId)      targetId.value = "";
+        if (targetName)    targetName.value = "";
+        if (targetEmail)   targetEmail.value = "";
+        if (targetContact) targetContact.value = "";
+        if (targetRole)    targetRole.value = "";
+        
+        var otherWrapper = document.getElementById('listedByOtherWrapper');
+        if (otherWrapper) otherWrapper.style.display = "block";
+    }
+}
+</script>
+
+
+
+<script>
+
+  // ============================================================
+  // Custom searchable dropdown for "Listed By (User)"
+  // Pure vanilla JS — no Select2 dependency.
+  // ============================================================
+  (function () {
+    var wrapper = document.getElementById('assignedToSearchSelect');
+    var control = document.getElementById('assignedToControl');
+    var panel = document.getElementById('assignedToPanel');
+    var input = document.getElementById('searchTeamMember');
+    var optionsEl = document.getElementById('assignedToOptions');
+    var noResults = document.getElementById('assignedToNoResults');
+    var valueLabel = document.getElementById('assignedToValueLabel');
+    var hiddenSelect = document.getElementById('assigned_to');
+    var hiddenRole = document.getElementById('assigned_to_role');
+
+    if (!wrapper || !hiddenSelect) return;
+
+    var options = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-option'));
+    var groupLabels = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-group-label'));
+    var highlightedIndex = -1;
+
+    function openPanel() {
+      wrapper.classList.add('open');
+      input.value = '';
+      filterOptions('');
+      setTimeout(function () { input.focus(); }, 0);
+    }
+
+    function closePanel() {
+      wrapper.classList.remove('open');
+      highlightedIndex = -1;
+    }
+
+    function togglePanel() {
+      if (wrapper.classList.contains('open')) {
+        closePanel();
+      } else {
+        openPanel();
+      }
+    }
+
+    function selectOption(opt) {
+      var value = opt.getAttribute('data-value');
+      var name = opt.getAttribute('data-name');
+      var role = opt.getAttribute('data-role');
+      var uid = opt.getAttribute('data-uid');
+      var phone = opt.getAttribute('data-phone');
+
+      hiddenSelect.value = value;
+      if (hiddenRole) hiddenRole.value = role;
+      valueLabel.textContent = uid + ' - ' + name + ' - ' + role + ' - ' + phone;
+      valueLabel.classList.remove('ss-placeholder');
+
+      options.forEach(function (o) { o.classList.remove('selected'); });
+      opt.classList.add('selected');
+
+      wrapper.classList.remove('validation-error');
+      closePanel();
+
+      // Fire native change event so existing listeners (get_user_data etc.) still run
+      var evt = new Event('change', { bubbles: true });
+      hiddenSelect.dispatchEvent(evt);
+    }
+
+    function filterOptions(query) {
+      query = query.trim().toLowerCase();
+      var anyVisible = false;
+
+      // Track which groups have at least one visible option
+      var groupHasVisible = {};
+
+      options.forEach(function (opt) {
+        var haystack = opt.getAttribute('data-search') || '';
+        var match = haystack.indexOf(query) !== -1;
+        opt.style.display = match ? '' : 'none';
+        if (match) {
+          anyVisible = true;
+          var group = opt.closest('.search-select-options');
+          // find the preceding group label for this option
+          var prev = opt.previousElementSibling;
+          while (prev && !prev.classList.contains('search-select-group-label')) {
+            prev = prev.previousElementSibling;
+          }
+          if (prev) groupHasVisible[prev.textContent] = true;
+        }
+      });
+
+      groupLabels.forEach(function (label) {
+        label.style.display = groupHasVisible[label.textContent] ? '' : 'none';
+      });
+
+      noResults.style.display = anyVisible ? 'none' : 'block';
+      highlightedIndex = -1;
+      options.forEach(function (o) { o.classList.remove('highlighted'); });
+    }
+
+    function visibleOptions() {
+      return options.filter(function (o) { return o.style.display !== 'none'; });
+    }
+
+    function moveHighlight(step) {
+      var visible = visibleOptions();
+      if (!visible.length) return;
+      visible.forEach(function (o) { o.classList.remove('highlighted'); });
+      highlightedIndex += step;
+      if (highlightedIndex < 0) highlightedIndex = visible.length - 1;
+      if (highlightedIndex >= visible.length) highlightedIndex = 0;
+      var el = visible[highlightedIndex];
+      el.classList.add('highlighted');
+      el.scrollIntoView({ block: 'nearest' });
+    }
+
+    control.addEventListener('click', togglePanel);
+    control.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        togglePanel();
+      }
+    });
+
+    input.addEventListener('input', function () {
+      filterOptions(input.value);
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); moveHighlight(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); moveHighlight(-1); }
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        var visible = visibleOptions();
+        if (highlightedIndex >= 0 && visible[highlightedIndex]) {
+          selectOption(visible[highlightedIndex]);
+        } else if (visible.length === 1) {
+          selectOption(visible[0]);
+        }
+      } else if (e.key === 'Escape') {
+        closePanel();
+      }
+    });
+
+    options.forEach(function (opt) {
+      opt.addEventListener('click', function () { selectOption(opt); });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!wrapper.contains(e.target)) closePanel();
+    });
+
+    // ============================================================
+    // FIXED/ADDED: Trigger get_user_data execution on selection change
+    // ============================================================
+    hiddenSelect.addEventListener('change', function () {
+      if (typeof get_user_data === 'function') {
+        get_user_data(this);
+      }
+    });
+
+    // ============================================================
+    // ADDED HERE: Run your field configuration safely on load
+    // ============================================================
+    if (typeof Change_Fields === 'function') {
+      Change_Fields();
+    }
+
+
+  })();
+
+
+</script>
+
+{% comment %} Javascript to get user details according to listing by {% endcomment %}
+
+<script>
+  function get_user_data() {
+
+    var assigned_to = $("#assigned_to").val();
+
+    if (!assigned_to) {
+      $('#uploaded_by_id, #uploaded_by_name, #uploaded_by_email, #uploaded_by_contact, #uploaded_by_role').val('');
+      return;
+    }
+
+    $.ajax({
+      method: "POST",
+      url: "{% url 'get_user_data' %}",
+      data: {
+        'assigned_to': assigned_to,
+      },
+      dataType: "json", // Tells jQuery to parse incoming data as an object
+      success: function (response) {
+
+        // Map JSON object values directly to permanent textboxes
+        $('#uploaded_by_id').val(response.user_id || '');
+        $('#uploaded_by_name').val(response.name || '');
+        $('#uploaded_by_email').val(response.email || '');
+        $('#uploaded_by_contact').val(response.contact || '');
+        $('#uploaded_by_role').val(response.role || '');
+
+        // Call the update script immediately with the new role
+        updateBrokerageLabel(response.role);
+      },
+      error: function (xhr, status, error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    });
+  }
+</script>
+
+<script>
+
+  // jQuery Version
+  $(document).ready(function () {
+    const sections = ['amenities', 'facilities'];
+
+    sections.forEach(section => {
+      updateDisplay(section);
+    });
+
+    window.openModal = function (section) {
+      currentSection = section;
+      $('#modalTitle').text(`Select ${section.charAt(0).toUpperCase() + section.slice(1)}`);
+
+      const container = $('#modalItemsList').empty();
+      $(`.${section}-checkbox`).each(function () {
+        container.append(`
+        <div class="col-md-4 col-sm-6 mb-2">
+          <div class="form-check">
+            <input class="form-check-input modal-item-checkbox" type="checkbox" 
+                   value="${this.value}" data-icon="${$(this).data('icon')}"
+                   ${this.checked ? 'checked' : ''}>
+            <label class="form-check-label"><i class="${$(this).data('icon')}"></i> ${this.value}</label>
+          </div>
+        </div>
+      `);
+      });
+
+      updateModalCount();
+      $('#itemsModal').modal('show');
+    };
+
+    window.removeItem = function (section, name) {
+      const items = $(`.${section}-checkbox`).filter(function () {
+        return this.value === name;
+      });
+      items.prop('checked', false);
+      updateDisplay(section);
+    };
+
+    window.clearAll = function () {
+      if (!currentSection) return;
+      $(`.${currentSection}-checkbox`).prop('checked', false);
+      $('.modal-item-checkbox').prop('checked', false);
+      updateDisplay(currentSection);
+      updateModalCount();
+    };
+
+    function updateDisplay(section) {
+      const checked = $(`.${section}-checkbox:checked`);
+      const count = checked.length;
+
+      $(`#${section}Count`).text(`${count} selected`);
+      $(`#${section}Badge`).text(count);
+
+      const display = $(`#${section}Display`).empty();
+
+      if (count === 0) {
+        display.html(`<p class="text-muted text-center m-0">No ${section} selected</p>`);
+      } else {
+        checked.each(function () {
+          display.append(`
+          <span class="item-tag">
+            <i class="${$(this).data('icon')}"></i>
+            ${this.value}
+            <span class="remove-btn" onclick="removeItem('${section}', '${this.value}')">
+              <i class="fas fa-times-circle"></i>
+            </span>
+          </span>
+        `);
+        });
+      }
+    }
+
+    function updateModalCount() {
+      $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length);
+    }
+
+    $(document).on('change', '.modal-item-checkbox', updateModalCount);
+
+    $('#itemsModal .btn-primary').on('click', function () {
+      if (!currentSection) return;
+
+      const checked = $('.modal-item-checkbox:checked');
+      $(`.${currentSection}-checkbox`).prop('checked', false);
+      checked.each(function () {
+        $(`.${currentSection}-checkbox[value="${this.value}"]`).prop('checked', true);
+      });
+
+      updateDisplay(currentSection);
+    });
+  });
+
+
+</script>
+
+
+
+<script>
+  // --- CKEDITOR INIT ---
+  window.onload = function () {
+    if (typeof CKEDITOR !== 'undefined') {
+      if (CKEDITOR.instances.property_description) {
+        CKEDITOR.instances.property_description.destroy();
+      }
+      CKEDITOR.replace('property_description');
+    }
+  };
+
+  // --- MULTI-STEP LOGIC ---
+  let currentStep = 1;
+  function goToStep(n) {
+    if (n > currentStep && !validateStep(currentStep)) return false;
+    document.getElementById('step' + currentStep).classList.remove('active');
+    document.getElementById('step' + n).classList.add('active');
+    for (let i = 1; i <= 4; i++) {
+      const sc = document.getElementById('sc' + i), sl = document.getElementById('sl' + i), line = document.getElementById('line' + i);
+      if (i < n) { sc.className = 'step-circle done'; sl.className = 'step-label done'; sc.innerHTML = '<i class="fas fa-check"></i>'; if (line) line.className = 'step-line done'; }
+      else if (i === n) { sc.className = 'step-circle active'; sl.className = 'step-label active'; sc.innerHTML = i; if (line) line.className = 'step-line'; }
+      else { sc.className = 'step-circle'; sl.className = 'step-label'; sc.textContent = i; if (line) line.className = 'step-line'; }
+    }
+    currentStep = n;
+    if (n === 3) generateAIDetails(false);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function validateStep(step) {
+    let isValid = true;
+    document.getElementById('step' + step).querySelectorAll('[required]').forEach(f => {
+      f.classList.remove('validation-error');
+      if (!f.value.trim()) { f.classList.add('validation-error'); isValid = false; }
+    });
+    if (!isValid) Swal.fire('Incomplete', 'Please fill required fields.', 'warning');
+    return isValid;
+  }
+
+  // --- NEW: PROPERTY TITLE GENERATOR ---
+  function generatePropertyTitle() {
+    const pType = document.querySelector('select[name="property_type"]');
+    const typeText = (pType && pType.value) ? pType.options[pType.selectedIndex].text : '';
+    const pCond = document.querySelector('select[name="property_condition"]');
+    const condText = (pCond && pCond.value) ? pCond.options[pCond.selectedIndex].text : '';
+    const locality = document.getElementById('locality')?.value.trim() || '';
+    const city = document.getElementById('cityInput')?.value.trim() || '';
+    const area = document.getElementById('builtArea')?.value.trim() || '';
+
+    let parts = [];
+    if (condText) parts.push(condText);
+    if (typeText) parts.push(typeText);
+    else parts.push("Commercial Property");
+
+    parts.push("for Rent in");
+
+    if (locality) parts.push(locality + ",");
+    if (city) parts.push(city);
+    if (area) parts.push(`(${area} sq.ft.)`);
+
+    // Combine array to string, remove accidental double spaces or floating commas
+    let generatedTitle = parts.join(" ").replace(/ ,/g, ",");
+    document.getElementById('propertyTitle').value = generatedTitle;
+  }
+
+  // --- AI AUTO GENERATOR ---
+  function generateAIDetails(force = false) {
+    const pType = document.querySelector('select[name="property_type"]');
+    const type = (pType && pType.value) ? pType.options[pType.selectedIndex].text : 'commercial space';
+    const pCond = document.querySelector('select[name="property_condition"]');
+    const condition = (pCond && pCond.value) ? pCond.options[pCond.selectedIndex].text : 'well-maintained';
+    const area = document.querySelector('input[name="builtup_area"]')?.value || '';
+    const rent = document.querySelector('input[name="expected_rent"]')?.value || '';
+    const deposit = document.querySelector('input[name="security_deposit"]')?.value || '';
+    const locality = document.querySelector('input[name="area_locality"]')?.value || 'a prime location';
+    const city = document.querySelector('input[name="city"]')?.value || '';
+    const building = document.querySelector('input[name="building_name"]')?.value || '';
+    const floor = document.querySelector('input[name="your_floor"]')?.value || '';
+    const totalFloors = document.querySelector('input[name="total_floors"]')?.value || '';
+
+    const amenitiesList = Array.from(document.querySelectorAll('input[name="amenities[]"]:checked')).map(el => el.value);
+
+    let summaryText = `A premium ${condition.toLowerCase()} ${type.toLowerCase()} is available for rent in ${locality}${city ? ', ' + city : ''}. `;
+    if (rent) summaryText += `Available at a highly competitive rent of ₹${Number(rent).toLocaleString('en-IN')}/month. `;
+    if (area) summaryText += `This property offers a spacious built-up area of ${area} sq.ft. `;
+    summaryText += `It is highly suitable for setting up a professional workspace or retail business.`;
+
+    const summaryField = document.querySelector('textarea[name="property_summary"]');
+    if (summaryField && (force || summaryField.value.trim() === '')) summaryField.value = summaryText;
+
+    let longDesc = `<p>Elevate your business presence with this strategically located <strong>${condition.toLowerCase()} ${type.toLowerCase()}</strong> in <strong>${locality}${city ? ', ' + city : ''}</strong>.</p>`;
+    if (building) longDesc += `<p>Situated within the highly sought-after commercial complex of <strong>${building}</strong>, this property ensures excellent visibility and professional appeal for your brand.</p>`;
+    longDesc += `<h3>Property Highlights:</h3><ul>`;
+    if (area) longDesc += `<li><strong>Space & Dimensions:</strong> Generous built-up area of ${area} sq.ft., offering flexibility for diverse commercial layouts.</li>`;
+    if (rent) longDesc += `<li><strong>Pricing:</strong> Competitively priced at ₹${Number(rent).toLocaleString('en-IN')}/month ${deposit ? `(Security Deposit: ₹${Number(deposit).toLocaleString('en-IN')})` : ''}.</li>`;
+    longDesc += `<li><strong>Condition:</strong> The space is currently provided in a ${condition.toLowerCase()} status.</li>`;
+    if (floor) longDesc += `<li><strong>Floor Details:</strong> Conveniently located on floor ${floor} ${totalFloors ? `out of a total ${totalFloors} floors` : ''}.</li>`;
+    longDesc += `</ul>`;
+    if (amenitiesList.length > 0) longDesc += `<h3>Facilities & Amenities:</h3><p>The building provides excellent amenities to support your daily operations, including: <strong>${amenitiesList.join(', ')}</strong>.</p>`;
+    longDesc += `<p>Don't miss out on this fantastic opportunity to establish your business in a thriving hub. Contact us today to schedule a site visit or to discuss further details.</p>`;
+
+    if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.property_description) {
+      const currentData = CKEDITOR.instances.property_description.getData().trim();
+      if (force || currentData === '') CKEDITOR.instances.property_description.setData(longDesc);
+    } else {
+      const descField = document.querySelector('textarea[name="property_description"]');
+      if (descField && (force || descField.value.trim() === '')) {
+        descField.value = longDesc.replace(/<[^>]*>?/gm, '\n').replace(/\n\n+/g, '\n').trim();
+      }
+    }
+    updatePreview();
+  }
+
+  // --- UPDATE PREVIEW ---
+  function updatePreview() {
+    generatePropertyTitle(); // Generate title on every input change
+
+    const city = document.getElementById('cityInput')?.value || 'City';
+    const loc = document.getElementById('locality')?.value || 'Area';
+    const rent = document.getElementById('monthlyRent')?.value;
+    const area = document.getElementById('builtArea')?.value;
+    const pType = document.getElementById('property_type');
+    let typeStr = pType.options[pType.selectedIndex]?.text || 'Commercial';
+
+    let desc = document.querySelector('textarea[name="property_summary"]')?.value || "";
+    if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.property_description) desc += CKEDITOR.instances.property_description.getData();
+
+    document.getElementById('previewTitle').textContent = loc ? loc + ' Commercial Property' : 'Commercial Property';
+    document.getElementById('previewLoc').innerHTML = '<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ' + (loc || 'Area') + ', ' + (city || 'City');
+    document.getElementById('previewPrice').textContent = rent ? '₹' + parseInt(rent).toLocaleString('en-IN') + '/mo' : '₹ — /mo';
+    document.getElementById('prevArea').textContent = area ? area + ' sqft' : '— sqft';
+    document.getElementById('previewType').textContent = typeStr;
+
+    const colorSuccess = '#10b981', colorPending = '#cbd5e0';
+    document.getElementById('cl-basic').style.color = (city && loc && typeStr !== 'Select property type') ? colorSuccess : colorPending;
+    document.getElementById('cl-basic').querySelector('i').style.color = (city && loc && typeStr !== 'Select property type') ? colorSuccess : colorPending;
+    document.getElementById('cl-price').style.color = (rent && area) ? colorSuccess : colorPending;
+    document.getElementById('cl-price').querySelector('i').style.color = (rent && area) ? colorSuccess : colorPending;
+    document.getElementById('cl-desc').style.color = (desc.length > 20) ? colorSuccess : colorPending;
+    document.getElementById('cl-desc').querySelector('i').style.color = (desc.length > 20) ? colorSuccess : colorPending;
+  }
+
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('input', updatePreview);
+    el.addEventListener('change', () => { updatePreview(); generateAIDetails(false); });
+  });
+
+  function updateStepper(field, change) {
+    const hiddenInput = document.getElementById(field), display = document.getElementById(field + "_display");
+    let val = Math.max(0, (parseInt(hiddenInput.value) || 0) + change);
+    hiddenInput.value = val; display.textContent = val;
+  }
+  document.getElementById('brokerageSelect')?.addEventListener('change', function () {
+    document.getElementById('brokerageSection').style.display = this.value === 'Yes' ? 'block' : 'none';
+    if (this.value !== 'Yes') document.getElementById('manualBrokerage').style.display = 'none';
+  });
+  document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
+    document.getElementById('manualBrokerage').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+  });
+
+  // --- NEW: DRAG AND DROP IMAGE SEQUENCE ARRANGEMENT ---
+  const uploadArea = document.getElementById("uploadArea"), imageInput = document.getElementById("imageInput"), preview = document.getElementById("imagePreview");
+  let selectedFiles = [];
+  let dragStartIndex;
+
+  uploadArea.addEventListener("click", () => imageInput.click());
+  uploadArea.addEventListener("dragover", (e) => { e.preventDefault(); uploadArea.style.borderColor = '#667eea'; });
+  uploadArea.addEventListener("dragleave", () => { uploadArea.style.borderColor = '#cbd5e0'; });
+  uploadArea.addEventListener("drop", (e) => { e.preventDefault(); uploadArea.style.borderColor = '#cbd5e0'; handleFiles(e.dataTransfer.files); });
+  imageInput.addEventListener("change", function () { handleFiles(this.files); });
+
+  function handleFiles(files) {
+    Array.from(files).forEach(f => { if (f.type.startsWith('image/') && selectedFiles.length < 10) selectedFiles.push(f); });
+    if (files.length > 0 && selectedFiles.length >= 10) Swal.fire('Limit Reached', 'You can only upload up to 10 images.', 'warning');
+    renderImagePreview();
+  }
+
+  function renderImagePreview() {
+    const dt = new DataTransfer();
+    selectedFiles.forEach(f => dt.items.add(f));
+    imageInput.files = dt.files;
+
+    preview.innerHTML = "";
+    selectedFiles.forEach((f, index) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        // Create draggable preview items
+        preview.innerHTML += `
+      <div class="preview-item" draggable="true" data-index="${index}" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)" ondragenter="e.preventDefault()">
+        <img src="${e.target.result}">
+        <div class="drag-handle-overlay">Move</div>
+        <button type="button" class="remove-image" onclick="removeImage('${f.name}')"><i class="fas fa-times"></i></button>
+      </div>`;
+      };
+      reader.readAsDataURL(f);
+    });
+
+    // Update Checklist and Tracker Text
+    document.getElementById('imageCount').textContent = `${selectedFiles.length} out of 10 images selected`;
+    document.getElementById('cl-photos').style.color = selectedFiles.length > 0 ? '#10b981' : '#cbd5e0';
+    document.getElementById('cl-photos').querySelector('i').style.color = selectedFiles.length > 0 ? '#10b981' : '#cbd5e0';
+  }
+
+  function removeImage(fname) {
+    selectedFiles = selectedFiles.filter(f => f.name !== fname);
+    renderImagePreview();
+  }
+
+  // Drag and Drop Logic
+  function dragStart(e) {
+    dragStartIndex = +e.target.closest('.preview-item').getAttribute('data-index');
+  }
+  function dragOver(e) { e.preventDefault(); }
+  function dragDrop(e) {
+    const dragEndIndex = +e.target.closest('.preview-item').getAttribute('data-index');
+    swapItems(dragStartIndex, dragEndIndex);
+  }
+  function swapItems(fromIndex, toIndex) {
+    const itemOne = selectedFiles[fromIndex];
+    selectedFiles.splice(fromIndex, 1);
+    selectedFiles.splice(toIndex, 0, itemOne);
+    renderImagePreview();
+  }
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Get the radio buttons and the hidden portal input field
+    var yesRadio = document.getElementById('listed_yes');
+    var noRadio = document.getElementById('listed_no');
+    var portalField = document.getElementById('portalField');
+    
+    // 2. Create a function that checks if "Yes" is selected
+    function togglePortalField() {
+        if (portalField) {
+            // If yes is checked, show it ('block'). If not, hide it ('none').
+            portalField.style.display = yesRadio.checked ? 'block' : 'none';
+        }
+    }
+    
+    // 3. Attach the function to run whenever the user clicks either radio button
+    if (yesRadio) yesRadio.addEventListener('change', togglePortalField);
+    if (noRadio) noRadio.addEventListener('change', togglePortalField);
+    
+    // 4. Run it once immediately when the page loads to set the initial state
+    togglePortalField();
+});
+  // --- NEW: SUBMIT WITH CONFIRMATION ALERT ---
+  const form = document.getElementById("commercialForm");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!validateStep(4)) return;
+
+    // Fire SweetAlert before submission
+    Swal.fire({
+      title: 'Submit Listing?',
+      text: "Are you sure you want to save and list this commercial property?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#667eea',
+      cancelButtonColor: '#cbd5e0',
+      confirmButtonText: '<i class="fas fa-check"></i> Yes, Submit'
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        if (typeof CKEDITOR !== 'undefined') { for (instance in CKEDITOR.instances) CKEDITOR.instances[instance].updateElement(); }
+
+        fetch(form.action, { method: "POST", body: new FormData(form), headers: { "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value } })
+          .then(res => res.json()).then(data => {
+            if (data.status === "success") { Swal.fire({ icon: "success", title: "Success!", text: data.message }).then(() => { form.reset(); window.location.reload(); }); }
+            else Swal.fire("Error", data.message, "error");
+          }).catch(() => Swal.fire("Error", "Server error", "error"));
+      }
+    });
+  });
+</script>   

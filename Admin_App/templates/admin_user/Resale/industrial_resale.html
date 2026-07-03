@@ -63,14 +63,25 @@
     .btn-prev:hover { background: #e9ecef; }
     .btn-success-grad { background: var(--success-gradient); color: white; box-shadow: 0 4px 14px rgba(17,153,142,0.35); border: none; }
 
-    /* ── IMAGE UPLOAD ── */
+    
+    /* ── IMAGE UPLOAD & DRAG/DROP ── */
     .image-upload-area { border: 2px dashed #cbd5e0; cursor: pointer; border-radius: 12px; padding: 30px; text-align: center; background: #fff; transition: all 0.3s; }
     .image-upload-area:hover { border-color: #667eea; background: #f0f4ff; }
-    .image-preview { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; min-height: 90px; padding: 10px; border: 1px dashed #cbd5e0; border-radius: 12px; background: #fff; }
-    .preview-item { width: 90px; height: 90px; border-radius: 10px; overflow: hidden; border: 2px solid #cbd5e0; position: relative; cursor: grab; user-select: none; }
+    
+    /* The large grid preview */
+    .image-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; min-height: 120px; padding: 15px; border: 2px dashed #cbd5e0; border-radius: 12px; background: #f8f9fa; }
+    
+    /* The draggable wrapper */
+    .preview-item-wrapper { position: relative; cursor: move; transition: transform 0.2s ease; }
+    .preview-item-wrapper:active { transform: scale(0.95); }
+    
+    /* The image item itself */
+    .preview-item { width: 100%; height: 100%; aspect-ratio: 1; border-radius: 10px; overflow: hidden; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #fff; margin: 0; }
     .preview-item img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-    .remove-image { position: absolute; top: 4px; right: 4px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; }
-
+    
+    /* The remove button */
+    .remove-image { position: absolute; top: 6px; right: 6px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 13px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s; }
+    .remove-image:hover { transform: scale(1.15); background: #dc2626; }
     /* ── INLINE STATUS ── */
     .inline-status { padding: 12px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 10px; margin-top: 12px; }
     .is-info { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
@@ -90,6 +101,220 @@
     .sortable-ghost { opacity: 0.4; background: #667eea; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     @media (max-width: 1200px) { .page-wrapper { grid-template-columns: 1fr; } .preview-sidebar { display: none; } }
+
+    /* ============================================================
+   DROPDOWN PANEL OVERFLOW FIX
+   ============================================================ */
+  /* Fix parent containers that might hide the dropdown panel */
+  .form-group,
+  .col-md-12,
+  .section-body,
+  .step-content,
+  .row,
+  .modal-body {
+    overflow: visible !important;
+  }
+
+  /* Specifically fix Step 4 */
+  #step4 .section-body {
+    overflow: visible !important;
+  }
+
+  /* ============================================================
+   CUSTOM SEARCHABLE DROPDOWN (no jQuery / Select2 dependency)
+   ============================================================ */
+  .search-select {
+    position: relative;
+    width: 100%;
+    font-size: 0.95rem;
+  }
+
+  .search-select-control {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 12px 15px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    min-height: 48px;
+  }
+
+  /* Drag and Drop Image Sequencing Styles */
+    .preview-item-wrapper {
+        position: relative;
+        cursor: move;
+        transition: transform 0.2s ease;
+    }
+    .preview-item-wrapper:active {
+        transform: scale(0.95);
+    }
+    .preview-item-wrapper .preview-item {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+
+  .search-select-control:hover,
+  .search-select-control:focus {
+    border-color: #667eea;
+    outline: none;
+  }
+
+  .search-select.open .search-select-control {
+    border-color: #667eea;
+  }
+
+  .search-select-value {
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-height: 1.2em;
+    display: inline-block;
+  }
+
+  .search-select-value.ss-placeholder {
+    color: #94a3b8;
+  }
+
+  .search-select-value:empty::before {
+    content: "-- Select Team Member --";
+    color: #94a3b8;
+  }
+
+  .search-select-arrow {
+    color: #64748b;
+    transition: transform 0.2s ease;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+
+  .search-select.open .search-select-arrow {
+    transform: rotate(180deg);
+  }
+
+  .search-select-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .search-select.open .search-select-panel {
+    display: block;
+  }
+
+  .search-select-input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid #e9ecef;
+    padding: 12px 15px;
+    font-size: 0.9rem;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .search-select-input:focus {
+    border-bottom-color: #667eea;
+  }
+
+  .search-select-options {
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .search-select-group-label {
+    padding: 8px 15px 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: #f8f9fa;
+  }
+
+  .search-select-option {
+    padding: 10px 16px;
+    cursor: pointer;
+    color: #2d3748;
+    font-size: 0.9rem;
+  }
+
+  .search-select-option:hover,
+  .search-select-option.highlighted {
+    background-color: #667eea;
+    color: white;
+  }
+
+  .search-select-option:hover .opt-role,
+  .search-select-option.highlighted .opt-role {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .search-select-option.selected {
+    background-color: #eef2ff;
+    font-weight: 600;
+  }
+
+  .opt-role {
+    color: #64748b;
+    font-weight: 400;
+  }
+
+  .search-select-no-results {
+    padding: 16px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+  }
+
+  .search-select.validation-error .search-select-control {
+    border-color: #e74c3c !important;
+    background: #fff5f5 !important;
+  }
+
+  .selected-items-display {
+    padding: 12px;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    min-height: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .item-tag {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .item-tag .remove-btn {
+    cursor: pointer;
+    color: #dc3545;
+    margin-left: 4px;
+    font-size: 12px;
+  }
+
+
 </style>
 
 <div class="main-content">
@@ -97,9 +322,12 @@
 
     <!-- ── PAGE HEADER ── -->
     <div class="page-header">
-      <h1 style="font-size:1.8rem;font-weight:700;margin:0 0 6px;">🏭 Add Industrial Resale Property Listing</h1>
-      <p style="font-size:0.95rem;opacity:0.85;margin:0;">Complete 4 simple steps to list your property</p>
-
+      <h1 style="font-size:1.8rem;font-weight:700;margin:0 0 6px;">
+        <i class="fas fa-industry" style="margin-right: 10px; opacity: 0.9;"></i>Sell Your Industrial Property
+      </h1>
+      <p style="font-size:0.95rem;opacity:0.85;margin:0;">
+        List your warehouse, factory, or industrial land in 4 easy steps to connect with serious business buyers.
+      </p>
     </div>
 
     <!-- ── STEPPER ── -->
@@ -138,6 +366,98 @@
         ══════════════════════════════════════════════ -->
         <div class="step-content active" id="step1">
 
+          <div class="form-section">
+              <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                  <span><i class="fas fa-upload"></i> Listed By</span>
+                            
+              </div>
+
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-12">
+                      <div class="form-group">
+                        <label class="form-label">
+                          <i class="fas fa-user"></i> Listed By <span class="text-danger">*</span>
+                        </label>
+
+                        <div class="listed-by-radio-group" style="display:flex; gap:24px; margin-bottom:14px;">
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
+                          <input type="radio" name="listed_by_type" id="listedBySelf" value="self" checked onchange="Change_Fields()">
+                          Listed by Self
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:500;">
+                            <input type="radio" name="listed_by_type" id="listedByOther" value="other" onchange="Change_Fields()">
+                            Listed for Other User
+                        </label>
+                      </div>
+
+                      <input type="hidden" id="selfUserId" value="{{ admin_obj.id }}">
+                      <input type="hidden" id="selfUserRole" value="{{ admin_obj.role }}">
+                      <input type="hidden" id="selfUserName" value="{{ admin_obj.name }}">
+                      <input type="hidden" id="selfUserEmail" value="{{ admin_obj.email }}">
+                      <input type="hidden" id="selfUserPhone" value="{{ admin_obj.phone }}">
+
+                      <div id="listedByOtherWrapper" style="display:none;">
+                        <div class="search-select" id="assignedToSearchSelect">
+                          <div class="search-select-control" id="assignedToControl" tabindex="0">
+                            <span class="search-select-value" id="assignedToValueLabel">-- Select Team Member --</span>
+                            <i class="fas fa-chevron-down search-select-arrow"></i>
+                          </div>
+                          <div class="search-select-panel" id="assignedToPanel">
+                            <input type="text" class="search-select-input" id="searchTeamMember" placeholder="Type to search team members...">
+                            <div class="search-select-options" id="assignedToOptions">
+                                {% regroup user_obj by user_role as grouped_users %}
+                                  {% for group in grouped_users %}
+                                      <div class="search-select-group-label">{{ group.grouper|upper }} ({{ group.list|length }})</div>
+                                          {% for user in group.list %}
+                                            <div class="search-select-option"
+                                              data-value="{{ user.id }}-{{user.user_role}}"
+                                              data-name="{{ user.user_name }}"
+                                              data-role="{{ user.user_role }}"
+                                              data-phone="{{ user.user_phone }}"
+                                              data-uid="{{ user.user_id }}"
+                                              data-search="{{ user.user_name|lower }} {{ user.user_role|lower }} {{ user.user_phone }} {{ user.user_id|lower }}">
+                                              {{ user.user_id }} <span class="opt-role">- {{ user.user_name }}</span> <span class="opt-role">- {{ user.user_role }}</span><span class="opt-role">- {{ user.user_phone }}</span>
+                                            </div>
+                                          {% endfor %}
+                                        {% endfor %}
+                                        <div class="search-select-no-results" id="assignedToNoResults" style="display:none;">No team members found</div>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>
+
+                                <select id="assigned_to" name="assigned_to" required style="display:none;">
+                                    <option value="">-- Select Team Member --</option>
+                                    {% regroup user_obj by user_role as grouped_users %}
+                                    {% for group in grouped_users %}
+                                    <optgroup label="{{ group.grouper|upper }} ({{ group.list|length }})">
+                                    {% for user in group.list %}
+                                    <option value="{{ user.id }}-{{user.user_role}}" data-name="{{ user.user_name }}" data-role="{{ user.user_role }}">
+                                        {{ user.user_name }} - {{ user.user_role }}
+                                    </option>
+                                    {% endfor %}
+                                    </optgroup>
+                                    {% endfor %}
+                                </select>
+
+                                <input type="hidden" id="assigned_to_role" name="assigned_to_role" value="">
+                                </div>
+                            </div>
+                            </div>
+
+                            <br>
+
+                            <div class="row" id="user_data_div">
+                            <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Id</label><input type="text" class="form-control" name="uploaded_by_id" id="uploaded_by_id" readonly style="background-color: #e9ecef;"></div></div>
+                            <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" name="uploaded_by_name" id="uploaded_by_name" readonly style="background-color: #e9ecef;"></div></div>
+                            <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="uploaded_by_email" id="uploaded_by_email" readonly style="background-color: #e9ecef;"></div></div>
+                            <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="uploaded_by_contact" id="uploaded_by_contact" readonly style="background-color: #e9ecef;"></div></div>
+                            <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="uploaded_by_role" id="uploaded_by_role" readonly style="background-color: #e9ecef;"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
           <!-- Basic Details -->
           <div class="form-section">
             <div class="section-header"><i class="fas fa-industry"></i> Basic Property Details</div>
@@ -145,9 +465,9 @@
 
               <div class="row">
                 <div class="col-md-12 mb-3">
-                  <label class="form-label"><i class="fas fa-wand-magic-sparkles" style="color:#667eea;"></i> Property Title <span class="text-muted" style="font-weight:400;">(Auto-Generated)</span></label>
+                  <label class="form-label"> Property Title <span class="text-muted" style="font-weight:400;"></span></label>
                   <input type="text" class="form-control" id="ind_title"
-                    placeholder="Fills automatically from your inputs..." readonly>
+                   placeholder="Property Title auto-generated by system" readonly>
                 </div>
 
                 <div class="col-md-4 mt-2">
@@ -165,9 +485,12 @@
                 </div>
 
                 <div class="col-md-4 mt-2">
-                  <label class="form-label">Property No</label>
+                  <label class="form-label">Property No <span style="color:red;">*</span></label>
                   <input type="text" class="form-control" name="property_no" id="property_no"
-                    placeholder="Enter Property No">
+                    placeholder="Enter Property No" required>
+                  <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block;font-weight:bold;">
+                    <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
+                  </span>
                 </div>
 
                 <div class="col-md-4 mt-2">
@@ -208,11 +531,11 @@
                 </div>
 
 
-                 <div class="col-md-4 mt-3">
+                 {% comment %} <div class="col-md-4 mt-3">
                   <label class="form-label">Property Registration No</label>
                   <input type="text"  class="form-control"
                     name="property_regi_no"  placeholder="Enter Property Regi No">
-                </div>
+                </div> {% endcomment %}
               </div><!-- /row -->
 
             </div><!-- /section-body -->
@@ -298,6 +621,24 @@
                   </select>
                 </div>
 
+                <div class="col-md-6">
+                  <label class="form-label mt-2" id="brokerageLabel">Brokerage <span class="required">*</span></label>
+                      <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
+                        <option value="">Select</option>
+                        <option value="No Brokerage">No Brokerage</option>
+                        <option value="1% of amount">1% of sale value</option>
+                        <option value="1.5% of amount">1.5% of sale value</option>
+                        <option value="2% of amount">2% of sale value</option>
+                        <option value="Fixed Amount">Fixed Amount</option>
+                        <option value="Negotiable">Negotiable</option>
+                      </select>
+                </div>
+
+                <div class="col-md-6 mb-3" id="manualBrokerage" style="display:none;">
+                  <label class="form-label">Enter Fixed Brokerage</label>
+                  <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. Fixed Amount">
+                </div>
+
               </div><!-- /row -->
             </div><!-- /section-body -->
           </div><!-- /form-section -->
@@ -347,9 +688,9 @@
                 <div class="col-md-4 mt-3" id="brokerageSection" style="display:none;">
                   <label class="form-label">Brokerage Percentage</label>
                   <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
-                    <option value="1%">1%</option>
-                    <option value="2%">2%</option>
-                    <option value="3%">3%</option>
+                    <option value="1%">1% of sale value</option>
+                    <option value="2%">2% sale value</option>
+                    <option value="3%">3% sale value</option>
                     <option value="Negotiable">Negotiable</option>
                     <option value="Manual">Enter Manually</option>
                   </select>
@@ -373,12 +714,26 @@
 
                 <div class="col-md-6 mt-2">
                   <label class="form-label">Ownership Type</label>
-                  <select class="form-control form-select" name="ownership_type" id="ownership_type">
-                    <option value="">Select Ownership</option>
-                    <option value="freehold">Freehold</option>
-                    <option value="leasehold">Leasehold (MIDC/GIDC)</option>
-                    <option value="co_operative">Co-operative Society</option>
-                  </select>
+                  
+
+                 
+
+<select class="form-control form-select" name="ownership_type" id="ownership_type">
+    <option value="">Select Ownership Type</option>
+
+    <option value="freehold">Freehold</option>
+    <option value="leasehold">Leasehold</option>
+    <option value="midc_lease">MIDC Leasehold</option>
+    <option value="gidc_lease">GIDC Leasehold</option>
+    <option value="riico_lease">RIICO Leasehold</option>
+    <option value="industrial_development_authority">Industrial Development Authority Lease</option>
+    <option value="cooperative_industrial_society">Co-operative Industrial Society</option>
+    <option value="company_owned">Company Owned</option>
+    <option value="partnership_owned">Partnership Owned</option>
+    <option value="individual_owned">Individual Owned</option>
+    <option value="government_allotted">Government Allotted</option>
+  
+</select>
                 </div>
 
                 <div class="col-md-6 mt-2">
@@ -457,7 +812,7 @@
                 <div class="col-md-6 mt-3">
                   <label class="form-label">Government Tax Dues?</label>
                   <div class="radio-group">
-                    <label class="radio-option"><input type="radio" name="government_tax_dues" value="False" checked> No — Paid</label>
+                    <label class="radio-option"><input type="radio" name="government_tax_dues" value="False" checked> No </label>
                     <label class="radio-option"><input type="radio" name="government_tax_dues" value="True"> Yes — Pending</label>
                   </div>
                   <div id="tax_amount_section" style="display:none;" class="mt-2">
@@ -522,9 +877,68 @@
             </div><!-- /section-body -->
           </div><!-- /form-section -->
 
-          <!-- Description — SEPARATE SECTION -->
+          
+
+
           <div class="form-section">
-            <div class="section-header"><i class="fas fa-align-left"></i> Property Description</div>
+              <div class="section-header"><i class="fas fa-star"></i> Amenities & Features</div>
+            <div class="section-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label mb-0"><i class="fas fa-star text-warning"></i> Amenities</label>
+                <span class="badge bg-primary" id="amenitiesCount">0 selected</span>
+              </div>
+
+              <button type="button" class="btn btn-primary w-100 mb-3" onclick="openModal('amenities')">
+                <i class="fas fa-plus-circle me-2"></i> Select Amenities <span class="badge bg-light text-dark ms-2"
+                id="amenitiesBadge">0</span>
+              </button>
+
+              <div id="amenitiesDisplay" class="selected-items-display">
+                <p class="text-muted text-center">No amenities selected</p>
+              </div>
+
+              <!-- Hidden checkboxes for form submission -->
+              <div style="display:none;">
+                {% for am in ameneties_obj %}
+                  <input type="checkbox" name="amenities[]" value="{{am.amenties_name}}" class="amenities-checkbox"
+                  data-icon="{{am.amenties_icon}}">
+                {% endfor %}
+              </div>
+            </div>
+          </div><!-- /form-section -->
+
+
+<!-- ── NEARBY FACILITIES ── -->
+<div class="form-section">
+  <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
+  <div class="section-body mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <label class="form-label mb-0"><i class="fas fa-map-marker-alt text-primary"></i> Nearby Facilities</label>
+      <span class="badge bg-primary" id="facilitiesCount">0 selected</span>
+    </div>
+
+    <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')">
+      <i class="fas fa-plus-circle me-2"></i> Select Facilities <span class="badge bg-light text-dark ms-2"
+      id="facilitiesBadge">0</span>
+    </button>
+
+    <div id="facilitiesDisplay" class="selected-items-display">
+      <p class="text-muted text-center">No facilities selected</p>
+    </div>
+
+    <!-- Hidden checkboxes for form submission -->
+    <div style="display:none;">
+      {% for fa in facilities_obj %}
+        <input type="checkbox" name="nearby_facilities[]" value="{{fa.facilities_name}}"
+        class="facilities-checkbox" data-icon="{{fa.facilities_icon}}">
+      {% endfor %}
+      </div>
+    </div>
+</div><!-- /form-section -->
+
+<!-- Description — SEPARATE SECTION -->
+          <div class="form-section">
+            <div class="section-header"><i class="fas fa-align-left"></i> Add Property Description</div>
             <div class="section-body">
               <div class="form-group">
                 <label class="form-label">User Description</label>
@@ -535,87 +949,9 @@
             </div><!-- /section-body -->
           </div><!-- /form-section -->
 
-
-          <div class="form-section">
-  <div class="section-header"><i class="fas fa-star"></i> Amenities & Features</div>
-  <div class="section-body">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <label class="form-label mb-0">Select Amenities <span class="required">*</span></label>
-      <div class="d-flex align-items-center gap-2">
-        <span class="text-muted small fw-bold">Total Selected:</span>
-        <input type="text" id="amenityCounter" value="0" readonly
-          style="width:50px;text-align:center;border-radius:8px;border:1px solid #e2e8f0;
-                 font-weight:700;background:#f8faff;color:#2d3748;padding:4px 0;font-size:0.85rem;">
-      </div>
-    </div>
-    <div class="checkbox-group" style="display:flex;flex-wrap:wrap;gap:12px;">
-      {% for amenities in ameneties_obj %}
-        <div style="flex:1;min-width:145px;">
-          <div style="padding:12px 14px;background:#fff;border-radius:10px;
-                      border:2px solid #e9ecef;transition:border-color 0.2s;height:100%;"
-               onmouseover="this.style.borderColor='#667eea'"
-               onmouseout="this.style.borderColor=this.querySelector('input').checked?'#667eea':'#e9ecef'">
-            <input class="form-check-input amenity-checkbox" type="checkbox"
-              name="amenities[]" value="{{ amenities.amenties_name }}"
-              id="amenity_{{ forloop.counter }}"
-              style="width:17px;height:17px;border:2px solid #cbd5e0;border-radius:5px;
-                     cursor:pointer;accent-color:#667eea;vertical-align:middle;">
-            <label class="form-check-label" for="amenity_{{ forloop.counter }}"
-              style="font-weight:600;color:#2d3748;margin-left:8px;cursor:pointer;
-                     font-size:0.85rem;vertical-align:middle;">
-              <i class="{{ amenities.amenties_icon }}"></i> {{ amenities.amenties_name }}
-            </label>
-          </div>
-        </div>
-      {% empty %}
-        <p class="text-muted small">No amenities configured in the system.</p>
-      {% endfor %}
-    </div>
-  </div><!-- /section-body -->
-</div><!-- /form-section -->
-
-<!-- ── NEARBY FACILITIES ── -->
-<div class="form-section">
-  <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
-  <div class="section-body">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <label class="form-label mb-0">Select Nearby Facilities <span class="required">*</span></label>
-      <div class="d-flex align-items-center gap-2">
-        <span class="text-muted small fw-bold">Total Selected:</span>
-        <input type="text" id="facilityCounter" value="0" readonly
-          style="width:50px;text-align:center;border-radius:8px;border:1px solid #bae6fd;
-                 font-weight:700;background:#f0f9ff;color:#0369a1;padding:4px 0;font-size:0.85rem;">
-      </div>
-    </div>
-    <div class="checkbox-group" style="display:flex;flex-wrap:wrap;gap:12px;">
-      {% for facilities in facilities_obj %}
-        <div style="flex:1;min-width:145px;">
-          <div style="padding:12px 14px;background:#fff;border-radius:10px;
-                      border:2px solid #e9ecef;transition:border-color 0.2s;height:100%;"
-               onmouseover="this.style.borderColor='#4facfe'"
-               onmouseout="this.style.borderColor=this.querySelector('input').checked?'#4facfe':'#e9ecef'">
-            <input class="form-check-input facility-checkbox" type="checkbox"
-              name="facilities[]" value="{{ facilities.facilities_name }}"
-              id="facility_{{ forloop.counter }}"
-              style="width:17px;height:17px;border:2px solid #cbd5e0;border-radius:5px;
-                     cursor:pointer;accent-color:#4facfe;vertical-align:middle;">
-            <label class="form-check-label" for="facility_{{ forloop.counter }}"
-              style="font-weight:600;color:#2d3748;margin-left:8px;cursor:pointer;
-                     font-size:0.85rem;vertical-align:middle;">
-              <i class="{{ facilities.facilities_icon }}"></i> {{ facilities.facilities_name }}
-            </label>
-          </div>
-        </div>
-      {% empty %}
-        <p class="text-muted small">No nearby facilities configured in the system.</p>
-      {% endfor %}
-    </div>
-  </div><!-- /section-body -->
-</div><!-- /form-section -->
-
           <div class="step-nav">
             <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
-            <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next: Media <i class="fas fa-arrow-right"></i></button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next: Locations Details <i class="fas fa-arrow-right"></i></button>
           </div>
 
         </div><!-- /step2 -->
@@ -625,14 +961,141 @@
         ══════════════════════════════════════════════ -->
         <div class="step-content" id="step3">
 
+        
+
+        
+
+
           <div class="form-section">
+            <div class="section-header"><i class="fas fa-location-dot"></i> Property Location Details</div>
+            <div class="section-body">
+              <div class="row">
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">City <span class="required">*</span></label>
+                   <input type="text"
+       class="form-control"
+       id="cityInput"
+       name="city"
+       placeholder="e.g., Pune"
+       required>
+
+<script>
+document.getElementById('cityInput').addEventListener('input', function () {
+    this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+});
+</script>
+                </div>
+                <div class="col-md-6 mt-2">
+                  <label class="form-label">Locality / Area <span class="required">*</span></label>
+                  <input type="text" class="form-control" name="locality_area" id="locality_area"
+                    placeholder="e.g., Bhosari MIDC" required>
+                </div>
+                <div class="col-md-12 mt-3">
+                  <label class="form-label">Property Address <span class="required">*</span></label>
+                  <textarea class="form-control" name="Property_address" id="Property_address"
+                    placeholder="Full property address with plot number, sector, zone" required></textarea>
+                </div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Nearby Landmark</label>
+                  <input type="text" class="form-control" name="property_landmark"
+                    placeholder="e.g., Near NH-48, Bhosari Junction, MIDC Gate No. 3">
+                </div>
+
+
+
+               <div class="col-md-6 mt-3" >
+    <div class="form-group">
+        <label class="form-label">
+            State <span style="color:red;" class="required-star">*</span>
+        </label>
+
+        <select class="form-select form-control" name="state" required>
+            <option value="">Select State</option>
+
+            <!-- States -->
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+            <option value="Assam">Assam</option>
+            <option value="Bihar">Bihar</option>
+            <option value="Chhattisgarh">Chhattisgarh</option>
+            <option value="Goa">Goa</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Haryana">Haryana</option>
+            <option value="Himachal Pradesh">Himachal Pradesh</option>
+            <option value="Jharkhand">Jharkhand</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Madhya Pradesh">Madhya Pradesh</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Manipur">Manipur</option>
+            <option value="Meghalaya">Meghalaya</option>
+            <option value="Mizoram">Mizoram</option>
+            <option value="Nagaland">Nagaland</option>
+            <option value="Odisha">Odisha</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Rajasthan">Rajasthan</option>
+            <option value="Sikkim">Sikkim</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Telangana">Telangana</option>
+            <option value="Tripura">Tripura</option>
+            <option value="Uttar Pradesh">Uttar Pradesh</option>
+            <option value="Uttarakhand">Uttarakhand</option>
+            <option value="West Bengal">West Bengal</option>
+
+            <!-- Union Territories -->
+            <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+            <option value="Chandigarh">Chandigarh</option>
+            <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+            <option value="Delhi">Delhi</option>
+            <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+            <option value="Ladakh">Ladakh</option>
+            <option value="Lakshadweep">Lakshadweep</option>
+            <option value="Puducherry">Puducherry</option>
+        </select>
+    </div>
+</div>
+                <div class="col-md-6 mt-3">
+                  <label class="form-label">Residency Status <span class="required">*</span></label>
+                  <div class="radio-group">
+                    <label class="radio-option"><input type="radio" name="residency_status" value="resident" checked required> Resident Indian</label>
+                    <label class="radio-option"><input type="radio" name="residency_status" value="nri"> NRI</label>
+                    <label class="radio-option"><input type="radio" name="residency_status" value="pio"> PIO</label>
+                  </div>
+                </div>
+              </div><!-- /row -->
+            </div><!-- /section-body -->
+          </div><!-- /form-section -->
+
+
+       
+
+
+
+          <!-- ── AMENITIES ── -->
+
+
+          <div class="step-nav">
+            <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+            <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Next: Media & Publish <i class="fas fa-arrow-right"></i></button>
+          </div>
+
+        </div><!-- /step3 -->
+
+        <!-- ══════════════════════════════════════════════
+             STEP 4 — LOCATION & PUBLISH
+        ══════════════════════════════════════════════ -->
+        <div class="step-content" id="step4">
+
+
+
+            <div class="form-section">
             <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
             <div class="section-body">
               <p class="text-muted small mb-3"><i class="fas fa-lightbulb" style="color:#f59e0b;"></i> <strong>Pro Tip:</strong> Drag thumbnails to reorder. Upload at least 3 images for better listing performance.</p>
 
               <div class="image-upload-area" id="uploadArea">
                 <input type="file" id="imageInput" name="property_images[]"
-                  multiple accept="image/" style="display:none;">
+                  multiple accept="image/*" style="display:none;">
                 <i class="fas fa-cloud-upload-alt fa-2x mb-2" style="color:#667eea;"></i>
                 <p class="mb-1" style="font-weight:600; color:#2d3748;">Click or Drag Images Here</p>
                 <p id="uploadCounterText" class="mb-0" style="font-size:0.85rem;font-weight:600;color:#667eea;">
@@ -642,8 +1105,9 @@
               <div class="image-preview" id="imagePreview"></div>
             </div><!-- /section-body -->
           </div><!-- /form-section -->
+          <!-- Location -->
 
-          <div class="form-section">
+            <div class="form-section">
             <div class="section-header dark-theme"><i class="fas fa-file-contract"></i> Compliance Documents & Video</div>
             <div class="section-body">
               <div class="row">
@@ -661,61 +1125,33 @@
             </div><!-- /section-body -->
           </div><!-- /form-section -->
 
-
-
-
-          <!-- ── AMENITIES ── -->
-
-
-          <div class="step-nav">
-            <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
-            <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Next: Location & Publish <i class="fas fa-arrow-right"></i></button>
-          </div>
-
-        </div><!-- /step3 -->
-
-        <!-- ══════════════════════════════════════════════
-             STEP 4 — LOCATION & PUBLISH
-        ══════════════════════════════════════════════ -->
-        <div class="step-content" id="step4">
-
-          <!-- Location -->
-          <div class="form-section">
-            <div class="section-header"><i class="fas fa-location-dot"></i> Location Details</div>
-            <div class="section-body">
+             <div class="form-section">
+            <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
               <div class="row">
-                <div class="col-md-6 mt-2">
-                  <label class="form-label">City <span class="required">*</span></label>
-                  <input type="text" class="form-control" name="city" id="city"
-                    placeholder="e.g., Pune" required>
-                </div>
-                <div class="col-md-6 mt-2">
-                  <label class="form-label">Locality / Area <span class="required">*</span></label>
-                  <input type="text" class="form-control" name="locality_area" id="locality_area"
-                    placeholder="e.g., Bhosari MIDC" required>
-                </div>
-                <div class="col-md-12 mt-3">
-                  <label class="form-label">Property Address <span class="required">*</span></label>
-                  <textarea class="form-control" name="Property_address" id="Property_address"
-                    placeholder="Full property address with plot number, sector, zone" required></textarea>
-                </div>
-                <div class="col-md-6 mt-3">
-                  <label class="form-label">Nearby Landmark</label>
-                  <input type="text" class="form-control" name="property_landmark"
-                    placeholder="e.g., Near NH-48, Bhosari Junction, MIDC Gate No. 3">
-                </div>
-                <div class="col-md-6 mt-3">
-                  <label class="form-label">Residency Status <span class="required">*</span></label>
-                  <div class="radio-group">
-                    <label class="radio-option"><input type="radio" name="residency_status" value="resident" checked required> Resident Indian</label>
-                    <label class="radio-option"><input type="radio" name="residency_status" value="nri"> NRI</label>
-                    <label class="radio-option"><input type="radio" name="residency_status" value="pio"> PIO</label>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes">
+                        <label class="form-check-label" for="listed_yes">Yes</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" checked>
+                        <label class="form-check-label" for="listed_no">No</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6" id="portalField" style="display:none;">
+                    <div class="form-group">
+                      <label class="form-label">Portal Name</label>
+                        <input type="text" class="form-control" name="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker">
+                    </div>
                   </div>
                 </div>
-              </div><!-- /row -->
-            </div><!-- /section-body -->
-          </div><!-- /form-section -->
+              </div>
+          </div>
 
+          
           <!-- Owner Contact (hidden as per original intent) -->
           <div class="form-section" hidden>
             <div class="section-header"><i class="fas fa-user"></i> Owner Contact</div>
@@ -730,7 +1166,7 @@
           </div>
 
           <!-- Listed By -->
-          <div class="form-section">
+          <div class="form-section" style="display:none;">
             <div class="section-header"><i class="fas fa-id-badge"></i> Property Listed By</div>
             <div class="section-body">
               <div class="row">
@@ -760,7 +1196,7 @@
 
           <!-- Uploaded By -->
           <div class="form-section">
-            <div class="section-header dark-theme"><i class="fas fa-upload"></i> Listing Uploaded By</div>
+            <div class="section-header dark-theme"><i class="fas fa-upload"></i> Property Uploaded By</div>
             <div class="section-body">
               <div class="row">
                 <div class="col-md-3 mt-2">
@@ -785,8 +1221,7 @@
                 </div>
               </div>
               <div class="inline-status is-info mt-3">
-                <i class="fas fa-info-circle"></i>
-                <span>This upload is securely logged to your admin session.</span>
+                
               </div>
             </div><!-- /section-body -->
           </div><!-- /form-section -->
@@ -794,7 +1229,7 @@
           <div class="step-nav">
             <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
             <button type="submit" class="btn-step btn-success-grad" id="submitBtn">
-              <i class="fas fa-rocket"></i> Submit Industrial Listing
+            <i class="fas fa-save"></i> Submit Property
             </button>
           </div>
 
@@ -846,8 +1281,461 @@
   </div><!-- /page-wrapper -->
 </div><!-- /main-content -->
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<!-- Common Modal -->
+<div class="modal fade" id="itemsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-list"></i> <span id="modalTitle">Select Items</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control mb-3" id="modalSearch" placeholder="Search...">
+        <div id="modalItemsList" class="row"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply (<span
+            id="modalSelectedCount">0</span>)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+    $("#Resale").addClass("active");
+
+    document.addEventListener('DOMContentLoaded', function() {
+    // 1. Get the radio buttons and the hidden portal input field
+    var yesRadio = document.getElementById('listed_yes');
+    var noRadio = document.getElementById('listed_no');
+    var portalField = document.getElementById('portalField');
+    
+    // 2. Create a function that checks if "Yes" is selected
+    function togglePortalField() {
+        if (portalField) {
+            // If yes is checked, show it ('block'). If not, hide it ('none').
+            portalField.style.display = yesRadio.checked ? 'block' : 'none';
+        }
+    }
+    
+    // 3. Attach the function to run whenever the user clicks either radio button
+    if (yesRadio) yesRadio.addEventListener('change', togglePortalField);
+    if (noRadio) noRadio.addEventListener('change', togglePortalField);
+    
+    // 4. Run it once immediately when the page loads to set the initial state
+    togglePortalField();
+});
+
+
+</script>
+
+<script>
+
+  function updateBrokerageLabel(role) {
+    var labelElement = document.getElementById('brokerageLabel');
+    if (!labelElement) return;
+
+    // Normalize the string text to lowercase to ensure clean matches
+    var normalizedRole = (role || "").trim().toLowerCase();
+    var labelText = "";
+
+    switch (normalizedRole) {
+      case 'admin':
+        labelText = "EstateFlow Service Fee";
+        break;
+      case 'relationship manager':
+        labelText = "Buyer Service Fee";
+        break;
+      case 'landlord':
+        labelText = "Buyer Service Fee";
+        break;
+      case 'agent':
+        labelText = "Brokerage";
+        break;
+      case 'agency/builder':
+      case 'builder':
+        labelText = "Brokerage/Service Fee";
+        break;
+      default:
+        labelText = "Brokerage"; // Fallback default text
+        break;
+    }
+
+    // Inject the text along with a red styled asterisk span
+    labelElement.innerHTML = labelText + ' <span style="color: red;">*</span>';
+  }
+
+</script>
+
+<script>
+  function Change_Fields(){
+    var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
+    if (!checkedInput) return;
+    
+    var selectedValue = checkedInput.value;
+    
+    var admin_id    = document.getElementById('selfUserId')?.value || "";
+    var admin_name  = document.getElementById('selfUserName')?.value || "";
+    var admin_email = document.getElementById('selfUserEmail')?.value || "";
+    var admin_phone = document.getElementById('selfUserPhone')?.value || "";
+    var admin_role  = document.getElementById('selfUserRole')?.value || "";
+
+    var targetId      = document.getElementById('uploaded_by_id')      || document.querySelector('#user_data_div [id$="id"]');
+    var targetName    = document.getElementById('uploaded_by_name')    || document.querySelector('#user_data_div [id$="name"]');
+    var targetEmail   = document.getElementById('uploaded_by_email')   || document.querySelector('#user_data_div [id$="email"]');
+    var targetContact = document.getElementById('uploaded_by_contact') || document.querySelector('#user_data_div [id$="contact"]');
+    var targetRole    = document.getElementById('uploaded_by_role')    || document.querySelector('#user_data_div [id$="role"]');
+    var hiddenSelect  = document.getElementById('assigned_to');
+
+    if(selectedValue == "self"){
+        var otherWrapper = document.getElementById('listedByOtherWrapper');
+        if (otherWrapper) otherWrapper.style.display = "none";
+        
+        if (hiddenSelect) {
+            hiddenSelect.value = "";
+            hiddenSelect.required = false; 
+            hiddenSelect.classList.remove('is-invalid');
+        }
+        var valueLabel = document.getElementById('assignedToValueLabel');
+        if (valueLabel) valueLabel.textContent = "-- Select Team Member --";
+
+        if (targetId)      targetId.value = admin_id;
+        if (targetName)    targetName.value = admin_name;
+        if (targetEmail)   targetEmail.value = admin_email;
+        if (targetContact) targetContact.value = admin_phone;
+        if (targetRole)    targetRole.value = admin_role;
+
+        updateBrokerageLabel(admin_role);
+    }
+    else {
+        if (hiddenSelect) {
+            hiddenSelect.required = true;
+        }
+        
+        if (targetId)      targetId.value = "";
+        if (targetName)    targetName.value = "";
+        if (targetEmail)   targetEmail.value = "";
+        if (targetContact) targetContact.value = "";
+        if (targetRole)    targetRole.value = "";
+        
+        var otherWrapper = document.getElementById('listedByOtherWrapper');
+        if (otherWrapper) otherWrapper.style.display = "block";
+    }
+}
+</script>
+
+<script>
+
+  // ============================================================
+  // Custom searchable dropdown for "Listed By (User)"
+  // Pure vanilla JS — no Select2 dependency.
+  // ============================================================
+  (function () {
+    var wrapper = document.getElementById('assignedToSearchSelect');
+    var control = document.getElementById('assignedToControl');
+    var panel = document.getElementById('assignedToPanel');
+    var input = document.getElementById('searchTeamMember');
+    var optionsEl = document.getElementById('assignedToOptions');
+    var noResults = document.getElementById('assignedToNoResults');
+    var valueLabel = document.getElementById('assignedToValueLabel');
+    var hiddenSelect = document.getElementById('assigned_to');
+    var hiddenRole = document.getElementById('assigned_to_role');
+
+    if (!wrapper || !hiddenSelect) return;
+
+    var options = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-option'));
+    var groupLabels = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-group-label'));
+    var highlightedIndex = -1;
+
+    function openPanel() {
+      wrapper.classList.add('open');
+      input.value = '';
+      filterOptions('');
+      setTimeout(function () { input.focus(); }, 0);
+    }
+
+    function closePanel() {
+      wrapper.classList.remove('open');
+      highlightedIndex = -1;
+    }
+
+    function togglePanel() {
+      if (wrapper.classList.contains('open')) {
+        closePanel();
+      } else {
+        openPanel();
+      }
+    }
+
+    function selectOption(opt) {
+      var value = opt.getAttribute('data-value');
+      var name = opt.getAttribute('data-name');
+      var role = opt.getAttribute('data-role');
+      var uid = opt.getAttribute('data-uid');
+      var phone = opt.getAttribute('data-phone');
+
+      hiddenSelect.value = value;
+      if (hiddenRole) hiddenRole.value = role;
+      valueLabel.textContent = uid + ' - ' + name + ' - ' + role + ' - ' + phone;
+      valueLabel.classList.remove('ss-placeholder');
+
+      options.forEach(function (o) { o.classList.remove('selected'); });
+      opt.classList.add('selected');
+
+      wrapper.classList.remove('validation-error');
+      closePanel();
+
+      // Fire native change event so existing listeners (get_user_data etc.) still run
+      var evt = new Event('change', { bubbles: true });
+      hiddenSelect.dispatchEvent(evt);
+    }
+
+    function filterOptions(query) {
+      query = query.trim().toLowerCase();
+      var anyVisible = false;
+
+      // Track which groups have at least one visible option
+      var groupHasVisible = {};
+
+      options.forEach(function (opt) {
+        var haystack = opt.getAttribute('data-search') || '';
+        var match = haystack.indexOf(query) !== -1;
+        opt.style.display = match ? '' : 'none';
+        if (match) {
+          anyVisible = true;
+          var group = opt.closest('.search-select-options');
+          // find the preceding group label for this option
+          var prev = opt.previousElementSibling;
+          while (prev && !prev.classList.contains('search-select-group-label')) {
+            prev = prev.previousElementSibling;
+          }
+          if (prev) groupHasVisible[prev.textContent] = true;
+        }
+      });
+
+      groupLabels.forEach(function (label) {
+        label.style.display = groupHasVisible[label.textContent] ? '' : 'none';
+      });
+
+      noResults.style.display = anyVisible ? 'none' : 'block';
+      highlightedIndex = -1;
+      options.forEach(function (o) { o.classList.remove('highlighted'); });
+    }
+
+    function visibleOptions() {
+      return options.filter(function (o) { return o.style.display !== 'none'; });
+    }
+
+    function moveHighlight(step) {
+      var visible = visibleOptions();
+      if (!visible.length) return;
+      visible.forEach(function (o) { o.classList.remove('highlighted'); });
+      highlightedIndex += step;
+      if (highlightedIndex < 0) highlightedIndex = visible.length - 1;
+      if (highlightedIndex >= visible.length) highlightedIndex = 0;
+      var el = visible[highlightedIndex];
+      el.classList.add('highlighted');
+      el.scrollIntoView({ block: 'nearest' });
+    }
+
+    control.addEventListener('click', togglePanel);
+    control.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        togglePanel();
+      }
+    });
+
+    input.addEventListener('input', function () {
+      filterOptions(input.value);
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); moveHighlight(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); moveHighlight(-1); }
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        var visible = visibleOptions();
+        if (highlightedIndex >= 0 && visible[highlightedIndex]) {
+          selectOption(visible[highlightedIndex]);
+        } else if (visible.length === 1) {
+          selectOption(visible[0]);
+        }
+      } else if (e.key === 'Escape') {
+        closePanel();
+      }
+    });
+
+    options.forEach(function (opt) {
+      opt.addEventListener('click', function () { selectOption(opt); });
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!wrapper.contains(e.target)) closePanel();
+    });
+
+    // ============================================================
+    // FIXED/ADDED: Trigger get_user_data execution on selection change
+    // ============================================================
+    hiddenSelect.addEventListener('change', function () {
+      if (typeof get_user_data === 'function') {
+        get_user_data(this);
+      }
+    });
+
+    // ============================================================
+    // ADDED HERE: Run your field configuration safely on load
+    // ============================================================
+    if (typeof Change_Fields === 'function') {
+      Change_Fields();
+    }
+
+
+  })();
+
+
+</script>
+
+{% comment %} Javascript to get user details according to listing by {% endcomment %}
+
+<script>
+  function get_user_data() {
+
+    var assigned_to = $("#assigned_to").val();
+
+    if (!assigned_to) {
+      $('#uploaded_by_id, #uploaded_by_name, #uploaded_by_email, #uploaded_by_contact, #uploaded_by_role').val('');
+      return;
+    }
+
+    $.ajax({
+      method: "POST",
+      url: "{% url 'get_user_data' %}",
+      data: {
+        'assigned_to': assigned_to,
+      },
+      dataType: "json", // Tells jQuery to parse incoming data as an object
+      success: function (response) {
+
+        // Map JSON object values directly to permanent textboxes
+        $('#uploaded_by_id').val(response.user_id || '');
+        $('#uploaded_by_name').val(response.name || '');
+        $('#uploaded_by_email').val(response.email || '');
+        $('#uploaded_by_contact').val(response.contact || '');
+        $('#uploaded_by_role').val(response.role || '');
+
+        // Call the update script immediately with the new role
+        updateBrokerageLabel(response.role);
+      },
+      error: function (xhr, status, error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    });
+  }
+</script>
+
+
+<script>
+
+  // jQuery Version
+  $(document).ready(function () {
+    const sections = ['amenities', 'facilities'];
+
+    sections.forEach(section => {
+      updateDisplay(section);
+    });
+
+    window.openModal = function (section) {
+      currentSection = section;
+      $('#modalTitle').text(`Select ${section.charAt(0).toUpperCase() + section.slice(1)}`);
+
+      const container = $('#modalItemsList').empty();
+      $(`.${section}-checkbox`).each(function () {
+        container.append(`
+        <div class="col-md-4 col-sm-6 mb-2">
+          <div class="form-check">
+            <input class="form-check-input modal-item-checkbox" type="checkbox" 
+                   value="${this.value}" data-icon="${$(this).data('icon')}"
+                   ${this.checked ? 'checked' : ''}>
+            <label class="form-check-label"><i class="${$(this).data('icon')}"></i> ${this.value}</label>
+          </div>
+        </div>
+      `);
+      });
+
+      updateModalCount();
+      $('#itemsModal').modal('show');
+    };
+
+    window.removeItem = function (section, name) {
+      const items = $(`.${section}-checkbox`).filter(function () {
+        return this.value === name;
+      });
+      items.prop('checked', false);
+      updateDisplay(section);
+    };
+
+    window.clearAll = function () {
+      if (!currentSection) return;
+      $(`.${currentSection}-checkbox`).prop('checked', false);
+      $('.modal-item-checkbox').prop('checked', false);
+      updateDisplay(currentSection);
+      updateModalCount();
+    };
+
+    function updateDisplay(section) {
+      const checked = $(`.${section}-checkbox:checked`);
+      const count = checked.length;
+
+      $(`#${section}Count`).text(`${count} selected`);
+      $(`#${section}Badge`).text(count);
+
+      const display = $(`#${section}Display`).empty();
+
+      if (count === 0) {
+        display.html(`<p class="text-muted text-center m-0">No ${section} selected</p>`);
+      } else {
+        checked.each(function () {
+          display.append(`
+          <span class="item-tag">
+            <i class="${$(this).data('icon')}"></i>
+            ${this.value}
+            <span class="remove-btn" onclick="removeItem('${section}', '${this.value}')">
+              <i class="fas fa-times-circle"></i>
+            </span>
+          </span>
+        `);
+        });
+      }
+    }
+
+    function updateModalCount() {
+      $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length);
+    }
+
+    $(document).on('change', '.modal-item-checkbox', updateModalCount);
+
+    $('#itemsModal .btn-primary').on('click', function () {
+      if (!currentSection) return;
+
+      const checked = $('.modal-item-checkbox:checked');
+      $(`.${currentSection}-checkbox`).prop('checked', false);
+      checked.each(function () {
+        $(`.${currentSection}-checkbox[value="${this.value}"]`).prop('checked', true);
+      });
+
+      updateDisplay(currentSection);
+    });
+  });
+
+
+</script>
 
 <script>
   let currentStep = 1;
@@ -855,27 +1743,11 @@
 
   // ── SORTABLE GALLERY ──────────────────────────────────────
   window.onload = function () {
-    initializeSortableGallery();
+  
     updatePreview();
   };
 
-  function initializeSortableGallery() {
-    const container = document.getElementById('imagePreview');
-    if (!container || typeof Sortable === 'undefined') return;
-    new Sortable(container, {
-      animation: 250,
-      ghostClass: 'sortable-ghost',
-      onEnd: function () {
-        const order = Array.from(document.querySelectorAll('.preview-item')).map(el => el.dataset.fileName);
-        const reordered = [];
-        order.forEach(name => {
-          const f = selectedFiles.find(f => f.name === name);
-          if (f) reordered.push(f);
-        });
-        selectedFiles = reordered;
-      }
-    });
-  }
+  
 
   // ── STEPPER ───────────────────────────────────────────────
   function goToStep(n) {
@@ -916,9 +1788,7 @@
         missing.push(lbl);
       }
     });
-    if (step === 3 && selectedFiles.length < 1) {
-      missing.push('At least 1 property image');
-    }
+   
     if (missing.length > 0) {
       Swal.fire({
         icon: 'warning', title: 'Missing Information',
@@ -994,6 +1864,8 @@
     document.getElementById(id)?.addEventListener('change', updatePreview);
   });
 
+  
+
   // ── CONDITIONAL TOGGLES ───────────────────────────────────
   const setupToggle = (name, sectionId) => {
     document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
@@ -1007,18 +1879,20 @@
   setupToggle('legal_dispute',       'dispute_details_section');
   setupToggle('government_tax_dues', 'tax_amount_section');
 
-  document.getElementById('brokerageSelect').addEventListener('change', function () {
-    document.getElementById('brokerageSection').style.display = this.value === 'Yes' ? 'block' : 'none';
-    if (this.value !== 'Yes') document.getElementById('manualBrokerage').style.display = 'none';
-  });
-  document.getElementById('brokeragePercentage').addEventListener('change', function () {
-    document.getElementById('manualBrokerage').style.display = this.value === 'Manual' ? 'block' : 'none';
-  });
+  document.getElementById('brokerageSelect')?.addEventListener('change', function () {
+      document.getElementById('brokerageSection').style.display = this.value === 'Yes' ? 'block' : 'none';
+      if (this.value !== 'Yes') document.getElementById('manualBrokerage').style.display = 'none';
+    });
+    document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
+      document.getElementById('manualBrokerage').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+    });
 
   // ── IMAGE UPLOAD ──────────────────────────────────────────
+// ── IMAGE UPLOAD & DRAG-AND-DROP SEQUENCING ────────────────────────
   const uploadArea   = document.getElementById('uploadArea');
   const imageInput   = document.getElementById('imageInput');
   const imagePreview = document.getElementById('imagePreview');
+  const maxAllowedImages = 10;
 
   uploadArea.addEventListener('click',     ()  => imageInput.click());
   uploadArea.addEventListener('dragover',  (e) => { e.preventDefault(); uploadArea.style.borderColor = '#667eea'; });
@@ -1027,39 +1901,102 @@
   imageInput.addEventListener('change',    (e) => handleFiles(e.target.files));
 
   function handleFiles(files) {
-    let incoming = Array.from(files);
-    if (selectedFiles.length + incoming.length > 10) {
-      Swal.fire({ icon: 'warning', title: 'Limit Exceeded', text: 'Maximum 10 images allowed.', confirmButtonColor: '#667eea' });
-      incoming = incoming.slice(0, 10 - selectedFiles.length);
+    const arr = Array.from(files).filter(file => file.type.startsWith('image/'));
+    if (selectedFiles.length + arr.length > maxAllowedImages) {
+      Swal.fire({ icon: 'warning', title: 'Limit Exceeded', text: `Max ${maxAllowedImages} images allowed`, confirmButtonColor: '#667eea' });
+      return;
     }
-    selectedFiles = selectedFiles.concat(incoming);
-    renderThumbnails();
+
+    arr.forEach(file => {
+      // Assign a unique ID so we can track it when dragged
+      file.uniqueId = 'img_' + Date.now() + Math.random().toString(36).substr(2, 9);
+      selectedFiles.push(file);
+    });
+    renderPreviews();
   }
 
-  function renderThumbnails() {
+  function renderPreviews() {
+    if (!imagePreview) return;
     imagePreview.innerHTML = '';
-    selectedFiles.forEach(file => {
+
+    selectedFiles.forEach((file, index) => {
       const reader = new FileReader();
-      reader.onload = ev => {
-        const div = document.createElement('div');
-        div.className = 'preview-item';
-        div.setAttribute('data-file-name', file.name);
-        div.innerHTML = `
-          <img src="${ev.target.result}" alt="preview">
-          <button type="button" class="remove-image" onclick="removeImage('${file.name}')">
-            <i class="fas fa-times"></i>
-          </button>`;
-        imagePreview.appendChild(div);
+      reader.onload = e => {
+        // Create the draggable wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = 'preview-item-wrapper';
+        wrapper.setAttribute('draggable', 'true');
+        wrapper.setAttribute('data-id', file.uniqueId);
+
+        wrapper.innerHTML = `
+          <div class="preview-item">
+            <span class="img-sequence-badge" style="position:absolute;top:4px;left:4px;background:rgba(102,126,234,.95);color:white;font-size:0.6rem;font-weight:bold;padding:2px 6px;border-radius:4px;z-index:5;">#${index + 1}</span>
+            <img src="${e.target.result}" alt="preview">
+            <button type="button" class="remove-image" onclick="removeImage('${file.uniqueId}')"><i class="fas fa-times"></i></button>
+          </div>`;
+
+        // Attach drag events to the wrapper
+        wrapper.addEventListener('dragstart', handleDragStart);
+        wrapper.addEventListener('dragover', handleDragOver);
+        wrapper.addEventListener('drop', handleDrop);
+
+        imagePreview.appendChild(wrapper);
       };
       reader.readAsDataURL(file);
     });
-    updatePreview();
+
+    updatePreview(); // Update sidebar checklist and counter
   }
 
-  function removeImage(name) {
-    selectedFiles = selectedFiles.filter(f => f.name !== name);
-    renderThumbnails();
+  // --- Native Drag & Drop Handlers ---
+  let dragSrcEl = null;
+
+  function handleDragStart(e) {
+    dragSrcEl = this;
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => this.style.opacity = '0.4', 0); // Dim while dragging
   }
+
+  function handleDragOver(e) {
+    if (e.preventDefault) e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+  }
+
+  function handleDrop(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    dragSrcEl.style.opacity = '1';
+
+    if (dragSrcEl !== this) {
+      const sourceId = dragSrcEl.getAttribute('data-id');
+      const targetId = this.getAttribute('data-id');
+
+      const sourceIndex = selectedFiles.findIndex(f => f.uniqueId === sourceId);
+      const targetIndex = selectedFiles.findIndex(f => f.uniqueId === targetId);
+
+      // Reorder the array based on drop position
+      const [movedFile] = selectedFiles.splice(sourceIndex, 1);
+      selectedFiles.splice(targetIndex, 0, movedFile);
+
+      // Re-draw with new sequence
+      renderPreviews();
+    }
+    return false;
+  }
+
+  // Reset opacity if dropped outside
+  document.addEventListener('dragend', e => {
+    if(e.target.classList && e.target.classList.contains('preview-item-wrapper')) {
+      e.target.style.opacity = '1';
+    }
+  });
+
+  // Remove by unique ID instead of file name
+  window.removeImage = function(uniqueId) {
+    selectedFiles = selectedFiles.filter(f => f.uniqueId !== uniqueId);
+    renderPreviews();
+  };
 
   // ── FORM SUBMIT ───────────────────────────────────────────
   document.getElementById('industrialForm').addEventListener('submit', function (e) {
@@ -1077,11 +2014,7 @@
     }
     if (!validateStep(currentStep)) return;
 
-    if (selectedFiles.length < 1) {
-      Swal.fire({ icon: 'warning', title: 'Images Missing', text: 'Upload at least one property image.', confirmButtonColor: '#667eea' });
-      goToStep(3);
-      return;
-    }
+   
 
     Swal.fire({
       title: 'Confirm Submission?',
