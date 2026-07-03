@@ -1,0 +1,837 @@
+{% include "landlord/landlord_header.html" %}
+{% load static %}
+
+<style>
+    /* ── Root Variables ── */
+    :root {
+        --primary: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+        --primary-dark: #3730a3;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --info: #3b82f6;
+        --dark-bg: #0f172a;
+        --card-bg: #1e293b;
+        --border: #e2e8f0;
+        --border-dark: #334155;
+    }
+
+    * { box-sizing: border-box; }
+    .main-content { padding: 20px; background-color: #f8fafc; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+    /* ── Dark Dashboard Header ── */
+    .dashboard-header {
+        background-color: var(--dark-bg);
+        border-radius: 12px;
+        padding: 24px;
+        color: white;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .dash-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    .dash-title h1 { font-size: 22px; font-weight: 700; margin: 0; color: #f8fafc; }
+    .dash-title p { color: #94a3b8; font-size: 13px; margin: 4px 0 0 0; }
+
+    .btn-primary-custom {
+        padding: 9px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+        color: white; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;
+        display: inline-flex; align-items: center; gap: 7px; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-primary-custom.solid { background: white; color: var(--dark-bg); }
+    .btn-primary-custom:hover { background: rgba(255,255,255,0.2); color: white; }
+
+    /* ── KPI Cards ── */
+    .kpi-row { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+    .kpi-card { 
+        flex: 1; min-width: 200px; border-radius: 12px; padding: 18px; 
+        color: white; position: relative; overflow: hidden;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+    }
+    .kpi-card.green { background: linear-gradient(135deg, #10b981 0%, #047857 100%); }
+    .kpi-card.blue { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); }
+    .kpi-card.yellow { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); }
+    .kpi-card.red { background: linear-gradient(135deg, #ef4444 0%, #be123c 100%); }
+    .kpi-val { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 6px; }
+    .kpi-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; opacity: 0.9; }
+    .kpi-desc { font-size: 11px; opacity: 0.75; }
+
+    /* ── Dark Charts Section ── */
+    .chart-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+    .dark-chart-card { background: var(--card-bg); border: 1px solid var(--border-dark); border-radius: 12px; padding: 16px; color: white; }
+    .dark-chart-header { font-size: 13px; font-weight: 600; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+    .chart-wrapper { height: 200px; position: relative; }
+
+    /* ── Advanced Search & Filters ── */
+    .table-section { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-top: 24px; border: 1px solid var(--border); }
+    .advanced-search-bar { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin-bottom: 24px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .search-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
+    .search-group.wide { flex: 2; min-width: 250px; }
+    .search-group label { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; }
+    .filter-input { width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; background: white; }
+
+    /* ── Standard Table Design ── */
+    .table-responsive { width: 100%; overflow-x: auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .properties-table { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; background: white; min-width: 2500px; }
+    .properties-table thead th { background: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; padding: 12px 15px; border-bottom: 2px solid #e2e8f0; text-align: left; position: sticky; top: 0; z-index: 1;}
+    .properties-table tbody td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; color: #334155; }
+    .badge-status { padding: 4px 8px; border-radius: 6px; font-weight: 600; font-size: 11px; }
+    .badge-status.yes { background-color: #dcfce7; color: #15803d; }
+    .badge-status.no { background-color: #fee2e2; color: #991b1b; }
+
+    /* ── Action Buttons ── */
+    .action-buttons { display: flex; gap: 8px; }
+    .btn-action { width: 32px; height: 32px; border-radius: 8px; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; transition: all 0.2s; }
+    .btn-action:hover { transform: translateY(-2px); }
+    .btn-view { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .btn-edit { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .btn-delete { background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); }
+
+    /* ── Image Modal ── */
+    .property-image-modal { display: none; position: fixed; z-index: 999999 !important; left: 0; top: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.85); }
+    .property-image-modal .modal-content { background-color: #fefefe; margin: 5vh auto; padding: 20px; border-radius: 12px; width: 80%; max-width: 900px; max-height: 80vh; overflow-y: auto; position: relative; }
+    .property-image-modal .close-modal { color: #888; position: absolute; top: 15px; right: 20px; font-size: 30px; font-weight: bold; cursor: pointer; }
+
+    /* ── Drag & Drop Excel Modal ── */
+    .dropzone { border: 2px dashed #c7d2fe; border-radius: 10px; padding: 30px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: #fafafe; }
+    .dropzone:hover { border-color: var(--primary); background: #eef2ff; }
+</style>
+
+<div class="main-content">
+
+    <div class="dashboard-header">
+        <div class="dash-title-row">
+            <div class="dash-title">
+                <h1><i class="fas fa-industry"></i> Industrial Properties Business Summary</h1>
+                <p>Industrial sheds, warehouses, factories & logistics parks — inventory, capacity, compliance, & monetization.</p>
+            </div>
+            <div class="page-actions" style="display: flex; gap: 10px;">
+                <a href="{% url 'industry_resale_landlord' %}" class="btn-primary-custom solid">
+                    <i class="fas fa-plus-circle"></i> Add Industrial Property
+                </a>
+
+                 <a href="{% url 'agriculture_resale_landlord' %}" class="btn-primary-custom solid">
+                    <i class="fas fa-plus-circle"></i> Add Agri Property
+                </a>
+                {% comment %} <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#excelImportModal">
+                    <i class="fas fa-file-excel"></i> Import Excel Data
+                </button> {% endcomment %}
+                <button class="btn-primary-custom" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444;" data-bs-toggle="modal" data-bs-target="#bulkDeleteModal">
+                    <i class="fas fa-trash-alt"></i> Bulk Delete
+                </button>
+            </div>
+        </div>
+
+        <div class="kpi-row">
+            <div class="kpi-card green">
+                <div class="kpi-label">TOTAL INDUSTRIAL INVENTORY</div>
+                <div class="kpi-val">{{ total_properties|default:"0" }}</div>
+                <div class="kpi-desc">Sheds, warehouses, factories listed</div>
+            </div>
+            <div class="kpi-card blue">
+                <div class="kpi-label">LIVE ACTIVE LISTINGS</div>
+                <div class="kpi-val">{{ active_listings|default:"0" }}</div>
+                <div class="kpi-desc">Currently available for sale/lease</div>
+            </div>
+            <div class="kpi-card yellow">
+                <div class="kpi-label">WAREHOUSES REGISTERED</div>
+                <div class="kpi-val">{{ warehouse_count|default:"0" }}</div>
+                <div class="kpi-desc">Dedicated warehousing units</div>
+            </div>
+            <div class="kpi-card red">
+                <div class="kpi-label">COMPLIANCE DOCS PASSED</div>
+                <div class="kpi-val">{{ compliance_passed|default:"0" }}</div>
+                <div class="kpi-desc">Fire, Factory, Tax & Pollution NOCs</div>
+            </div>
+        </div>
+
+        <div class="chart-row">
+            <div class="dark-chart-card">
+                <div class="dark-chart-header"><i class="fas fa-chart-bar"></i> Capacity & Infra Snapshot</div>
+                <div class="chart-wrapper"><canvas id="capacityChart"></canvas></div>
+            </div>
+            <div class="dark-chart-card">
+                <div class="dark-chart-header"><i class="fas fa-industry"></i> Property Type Funnel</div>
+                <div class="chart-wrapper"><canvas id="typeChart"></canvas></div>
+            </div>
+            <div class="dark-chart-card">
+                <div class="dark-chart-header"><i class="fas fa-shield-alt"></i> Risk & Compliance Overview</div>
+                <div class="chart-wrapper"><canvas id="riskChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-section">
+        
+        <form method="GET" action="" id="liveSearchForm" class="advanced-search-bar">
+            <input type="hidden" name="from_date" value="{{ request.GET.from_date }}">
+            <input type="hidden" name="to_date" value="{{ request.GET.to_date }}">
+
+            <div class="search-group wide">
+                <label><i class="fas fa-search"></i> Direct Search</label>
+                <input type="text" name="search" id="searchInput" value="{{ search_query }}" class="filter-input" placeholder="Search ID, title, city, owner...">
+            </div>
+            
+            <div class="search-group">
+                <label>City Filter</label>
+                <select name="city" class="filter-input" onchange="this.form.submit()">
+                    <option value="All Cities">All Cities</option>
+                    {% for city in unique_cities %}
+                        <option value="{{ city }}" {% if city_query == city %}selected{% endif %}>{{ city }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="search-group">
+                <label>Property Type</label>
+                <select name="property_type" class="filter-input" onchange="this.form.submit()">
+                    <option value="All Types">All Types</option>
+                    {% for pt in unique_property_types %}
+                        <option value="{{ pt }}" {% if prop_type_query == pt %}selected{% endif %}>{{ pt }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="search-group">
+                <label>Power Supply</label>
+                <select name="power_supply" class="filter-input" onchange="this.form.submit()">
+                    <option value="Any Power Supply">Any Power Supply</option>
+                    <option value="heavy" {% if power_query == 'heavy' %}selected{% endif %}>Heavy (> 100 KVA)</option>
+                    <option value="light" {% if power_query == 'light' %}selected{% endif %}>Standard Light</option>
+                </select>
+            </div>
+            <button type="submit" style="display:none;"></button>
+        </form>
+
+       <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+    <form id="dateSearchForm" method="GET" onsubmit="return validateDateSearch()" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+        {% for key, value in request.GET.items %}
+            {% if key != 'from_date' and key != 'to_date' %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+        {% endfor %}
+        <div>
+            <label style="font-weight: bold; font-size: 13px; color: #6b7280;">Start Date</label><br>
+            <input type="date" id="from_date" name="from_date" value="{{ request.GET.from_date }}" class="filter-input" style="padding: 8px;">
+        </div>
+        <div>
+            <label style="font-weight: bold; font-size: 13px; color: #6b7280;">End Date</label><br>
+            <input type="date" id="to_date" name="to_date" value="{{ request.GET.to_date }}" class="filter-input" style="padding: 8px;">
+        </div>
+        <div>
+            <button type="submit" style="padding: 9px 15px; background: #3182ce; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                <i class="fas fa-search"></i> Search Dates
+            </button>
+            <a href="{% url 'industrial_resale_list' %}" style="padding: 9px 15px; background: #cbd5e0; color: #2d3748; text-decoration: none; border-radius: 6px; margin-left: 8px; font-size: 13px; font-weight: 600;">Clear</a>
+        </div>
+    </form>
+</div>
+
+      <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+    <span style="background: #eff6ff; color: #2563eb; font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 6px; border: 1px solid #bfdbfe;">
+        <i class="fas fa-list"></i> Showing {{ properties|length }} of {{ total_properties }} properties
+    </span>
+
+    <a href="?download=csv&search={{ search_query }}&city={{ city_query }}&property_type={{ prop_type_query }}&power_supply={{ power_query }}&from_date={{ request.GET.from_date }}&to_date={{ request.GET.to_date }}" 
+       class="btn-primary-custom" style="background: white; color: #3b82f6; border-color: #3b82f6; padding: 6px 12px;">
+        <i class="fas fa-file-csv"></i> Download CSV
+    </a>
+
+    <a href="?download=excel&search={{ search_query }}&city={{ city_query }}&property_type={{ prop_type_query }}&power_supply={{ power_query }}&from_date={{ request.GET.from_date }}&to_date={{ request.GET.to_date }}" 
+       class="btn-primary-custom" style="background: white; color: #10b981; border-color: #10b981; padding: 6px 12px;">
+        <i class="fas fa-file-excel"></i> Download Excel
+    </a>
+</div>
+
+       <div class="table-responsive">
+    <table class="properties-table">
+        <thead>
+            <tr>
+                <th>Sr.No</th>
+                <th>Industrial ID</th>
+                <th>Property Title</th>
+                <th>Images</th>
+                
+                <th>Property Type</th>
+                <th>Land Area (Sqft)</th>
+               
+                <th>Power Supply</th>
+                <th>KVA Capacity</th>
+                <th>Water Supply</th>
+                <th>Crane/Heavy Mach.</th>
+                <th>Road Connectivity</th>
+                <th>Worker Housing Nearby</th>
+
+                <th>Expected Price (₹)</th>
+                <th>Price Per Sqft (₹)</th>
+                <th>Brokerage</th>
+                <th>Brokerage %</th>
+                <th>Manual Brokerage</th>
+                <th>Sanctioning Authority</th>
+                <th>Ownership Type</th>
+                <th>Loan on Property</th>
+                <th>Loan Amount</th>
+                <th>Existing Tenants</th>
+                <th>Tenant Details</th>
+                <th>Legal Dispute</th>
+                <th>Dispute Details</th>
+                <th>Govt Tax Dues</th>
+                <th>Tax Amount</th>
+                <th>Tax Clearance Cert</th>
+                <th>Property Description</th>
+
+                <th>Compliance Docs</th>
+                <th>Social Video</th>
+
+                <th>City</th>
+                <th>Locality Area</th>
+                <th>Property Address</th>
+                <th>Owner Name</th>
+                <th>Owner Contact</th>
+                <th>Owner Email</th>
+                <th>Owner Role</th>
+                <th>Residency Status</th>
+
+                <th>Uploaded By Name</th>
+                <th>Uploaded By Role</th>
+                <th>Uploaded By Email</th>
+                <th>Uploaded By Contact</th>
+                <th>Upload File Name</th>
+                <th>Created At</th>
+                <th style="position:sticky; right:0; background:#f8fafc; z-index:2;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prop in properties %}
+            <tr id="row-{{ prop.id }}">
+                <td>{{ forloop.counter }}</td>
+                <td><strong>{{ prop.id|default:"-" }}</strong></td>
+                <td style="font-weight: 700; color: #1e293b;">{{ prop.property_title|truncatechars:30|default:"-" }}</td>
+                
+                <td>
+                    <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;" onclick="openImageModal('modal-{{ prop.id }}')">
+                        {% if prop.images.all %}
+                            <div style="position: relative; width: 45px; height: 45px;" title="Click to view all images">
+                                {% with first_img=prop.images.all|first %}
+                                    <img src="{{ first_img.image.url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                {% endwith %}
+                                {% if prop.images.count > 1 %}
+                                    <div style="position: absolute; bottom: -4px; right: -4px; background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; padding: 2px 5px; border-radius: 10px; border: 1px solid white; font-weight: bold; line-height: 1;">
+                                        +{{ prop.images.count|add:"-1" }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div style="width: 45px; height: 45px; border-radius: 6px; background: linear-gradient(135deg, #2563eb, #1e40af); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;">
+                                <i class="fas fa-industry" style="font-size: 14px;"></i>
+                                <span style="font-size: 6px; font-weight: 700; margin-top: 2px;">EstateFlow</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </td>
+
+                <td style="text-transform:capitalize;">{{ prop.property_type|default:"-" }}</td>
+                <td>{{ prop.land_area|floatformat:2|default:"-" }}</td>
+                
+                <td><span class="badge-status {% if prop.power_supply %}yes{% else %}no{% endif %}">{% if prop.power_supply %}Yes{% else %}No{% endif %}</span></td>
+                <td>{{ prop.kva_capacity|default:"-" }}</td>
+                <td>{{ prop.water_supply|default:"-" }}</td>
+                <td><span class="badge-status {% if prop.crane_heavy_machinery %}yes{% else %}no{% endif %}">{% if prop.crane_heavy_machinery %}Yes{% else %}No{% endif %}</span></td>
+                <td>{{ prop.road_connectivity|default:"-" }}</td>
+                <td><span class="badge-status {% if prop.worker_housing_nearby %}yes{% else %}no{% endif %}">{% if prop.worker_housing_nearby %}Yes{% else %}No{% endif %}</span></td>
+
+                <td style="font-weight:700; color:#4f46e5;">₹{{ prop.expected_price|floatformat:0|default:"-" }}</td>
+                <td style="font-weight:600; color:#10b981;">₹{{ prop.price_per_sqft|floatformat:2|default:"-" }}</td>
+                <td>{{ prop.brokerage|default:"-" }}</td>
+                <td>{{ prop.brokerage_percentage|default:"-" }}</td>
+                <td>{{ prop.manual_brokerage|default:"-" }}</td>
+                <td>{{ prop.sanctioning_authority|default:"-" }}</td>
+                <td style="text-transform:capitalize;">{{ prop.ownership_type|default:"-" }}</td>
+                <td><span class="badge-status {% if prop.loan_on_property %}yes{% else %}no{% endif %}">{% if prop.loan_on_property %}Yes{% else %}No{% endif %}</span></td>
+                <td>{% if prop.loan_on_property %}₹{{ prop.loan_amount|floatformat:0 }}{% else %}-{% endif %}</td>
+                <td><span class="badge-status {% if prop.existing_tenants %}yes{% else %}no{% endif %}">{% if prop.existing_tenants %}Yes{% else %}No{% endif %}</span></td>
+                <td>{{ prop.tenant_details|truncatechars:20|default:"-" }}</td>
+                <td><span class="badge-status {% if prop.legal_dispute %}no{% else %}yes{% endif %}">{% if prop.legal_dispute %}Litigation{% else %}Clear{% endif %}</span></td>
+                <td>{{ prop.dispute_details|truncatechars:20|default:"-" }}</td>
+                <td><span class="badge-status {% if prop.government_tax_dues %}no{% else %}yes{% endif %}">{% if prop.government_tax_dues %}Due{% else %}Clear{% endif %}</span></td>
+                <td>{% if prop.government_tax_dues %}₹{{ prop.tax_amount|floatformat:0 }}{% else %}-{% endif %}</td>
+                <td><span class="badge-status {% if prop.tax_clearance_cert %}yes{% else %}no{% endif %}">{% if prop.tax_clearance_cert %}Passed{% else %}No Cert{% endif %}</span></td>
+                <td>{{ prop.property_description|striptags|truncatechars:20|default:"-" }}</td>
+
+                <td>{% if prop.compliance_docs %}<a href="{{ prop.compliance_docs.url }}" target="_blank" style="color:#ef4444;"><i class="fas fa-file-pdf"></i> PDF</a>{% else %}-{% endif %}</td>
+                <td>{% if prop.social_video %}<a href="{{ prop.social_video.url }}" target="_blank" style="color:#3b82f6;"><i class="fas fa-video"></i> Video</a>{% else %}-{% endif %}</td>
+
+                <td>{{ prop.city|default:"-" }}</td>
+                <td>{{ prop.locality_area|default:"-" }}</td>
+                <td>{{ prop.Property_address|truncatechars:20|default:"-" }}</td>
+                <td>{{ prop.owner_name|default:"-" }}</td>
+                <td>{{ prop.owner_contact|default:"-" }}</td>
+                <td>{{ prop.owner_email|default:"-" }}</td>
+                <td>{{ prop.owner_role|default:"-" }}</td>
+                <td>{{ prop.residency_status|default:"-" }}</td>
+
+                <td>{{ prop.uploaded_by_name|default:"-" }}</td>
+                <td><span style="background:#e2e8f0; padding:2px 6px; border-radius:4px; font-size:10px;">{{ prop.uploaded_by_role|default:"-" }}</span></td>
+                <td>{{ prop.uploaded_by_email|default:"-" }}</td>
+                <td>{{ prop.uploaded_by_contact|default:"-" }}</td>
+                <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI" }}</small></td>
+                <td>{{ prop.created_at|date:"d M Y H:i" }}</td>
+                
+                <td style="position:sticky; right:0; background:white; z-index:1; border-left: 1px solid #e2e8f0;">
+                    <div class="action-buttons">
+                        <a href="{% url 'industrial_resale_view' prop.id %}" class="btn-action btn-view"><i class="fas fa-eye"></i></a>
+                        <a href="{% url 'industrial_resale_edit' prop.id %}" class="btn-action btn-edit"><i class="fas fa-edit"></i></a>
+                        <button class="btn-action btn-delete" onclick="deleteIndustrial({{ prop.id }}, '{% url 'industrial_resale_delete' prop.id %}')"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="47" style="text-align: center; padding: 40px; color: #94a3b8;">
+                    <i class="fas fa-industry" style="font-size: 3rem; opacity: 0.5; display: block; margin-bottom: 10px;"></i>
+                    No properties match your criteria.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+        {% if properties.paginator.num_pages > 1 %}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+            <small style="color:#64748b; font-weight:600;">Page {{ properties.number }} of {{ properties.paginator.num_pages }}</small>
+            <div style="display:flex; gap:6px;">
+                {% if properties.has_previous %}
+                    <a href="?page={{ properties.previous_page_number }}&search={{ search_query }}&city={{ city_query }}&property_type={{ prop_type_query }}&power_supply={{ power_query }}" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; text-decoration: none; color: #475569;">&lsaquo; Prev</a>
+                {% endif %}
+                {% if properties.has_next %}
+                    <a href="?page={{ properties.next_page_number }}&search={{ search_query }}&city={{ city_query }}&property_type={{ prop_type_query }}&power_supply={{ power_query }}" style="padding: 6px 12px; border: 1px solid #cbd5e1; border-radius: 6px; text-decoration: none; color: #475569;">Next &rsaquo;</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% for prop in properties %} 
+    <div id="modal-{{ prop.id }}" class="property-image-modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeImageModal('modal-{{ prop.id }}')">&times;</span>
+            <h3 style="margin-top: 0; margin-bottom: 15px; text-align: center;">Industrial Property Images</h3>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                {% if prop.images.all %}
+                    {% for img in prop.images.all %}
+                        <img src="{{ img.image.url }}" style="width: 200px; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                    {% endfor %}
+                {% else %}
+                    <p style="text-align: center; width: 100%;">No images available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+<div class="modal fade" id="excelImportModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: 14px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.12);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border: none; padding: 20px 24px;">
+                <h5 class="modal-title" style="color: white; font-weight: 700; font-size: 16px;">
+                    <i class="fas fa-file-excel" style="margin-right:8px;"></i> Upload Industrial Property Data
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <div style="background:#EEF2FF; border:1px solid #C7D2FE; border-radius:8px; padding:12px 16px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                    <div>
+                        <p style="margin:0; font-size:13px; font-weight:600; color:#4338CA;">
+                            <i class="fas fa-info-circle"></i> First time? Download the template
+                        </p>
+                        <p style="margin:2px 0 0; font-size:12px; color:#6B7280;">Fill in the template and re-upload. Do not change column headers.</p>
+                    </div>
+                    <a href="{% url 'download_industrial_resale_template' %}" style="padding:7px 16px; background:#4F46E5; color:white; border-radius:6px; text-decoration:none; font-size:12px; font-weight:600; white-space:nowrap;">
+                        <i class="fas fa-download"></i> Export Template
+                    </a>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; display:block;">Upload Data Via Excel <span style="color:red;">*</span></label>
+                    <div class="dropzone" onclick="document.getElementById('industrial_file').click()" ondragover="event.preventDefault(); this.style.borderColor='#4f46e5'; this.style.background='#EEF2FF';" ondragleave="this.style.borderColor='#C7D2FE'; this.style.background='#FAFAFE';" ondrop="handleDrop(event)">
+                        <i class="fas fa-cloud-upload-alt" style="font-size:2rem; color:#4f46e5; display:block; margin-bottom:8px;"></i>
+                        <p style="margin:0; font-size:13px; font-weight:600; color:#374151;">Click to browse or drag & drop</p>
+                        <p style="margin:4px 0 0; font-size:12px; color:#9CA3AF;">Accepted: <strong>.xlsx</strong> only</p>
+                    </div>
+                    <input type="file" id="industrial_file" name="industrial_file" accept=".xlsx" style="display:none;" onchange="handleFileSelect(this)">
+
+                    <div id="file-preview" style="display:none; margin-top:10px; padding:10px 14px; background:#F0FDF4; border:1px solid #86EFAC; border-radius:6px; align-items:center; gap:10px;">
+                        <i class="fas fa-file-excel" style="color:#16A34A; font-size:1.2rem;"></i>
+                        <div>
+                            <p id="file-name" style="margin:0; font-size:13px; font-weight:600; color:#15803D;"></p>
+                            <p id="file-size" style="margin:0; font-size:11px; color:#6B7280;"></p>
+                        </div>
+                        <button type="button" onclick="clearFile()" style="margin-left:auto; background:none; border:none; cursor:pointer; color:#6B7280; font-size:16px;">&times;</button>
+                    </div>
+                </div>
+
+                <div id="import-progress" style="display:none; margin-top:16px;">
+                    <div style="height:6px; background:#E5E7EB; border-radius:3px; overflow:hidden;">
+                        <div id="progress-bar" style="height:100%; width:0%; background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius:3px; transition:width 0.3s;"></div>
+                    </div>
+                    <p style="margin:6px 0 0; font-size:12px; color:#6B7280; text-align:center;">Uploading and processing...</p>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #e2e8f0; padding: 16px 24px;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:6px; font-size:13px;">Close</button>
+                <button type="button" id="upload-btn" onclick="submitImport()" style="padding:8px 24px; background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color:white; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">
+                    <i class="fas fa-upload"></i> Import Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 10000;">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius:12px; overflow:hidden; border:none; box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+            <div class="modal-header" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none; padding:20px 24px;">
+                <h5 class="modal-title" style="color:white; font-weight:700; font-size:16px;">
+                    <i class="fas fa-trash-alt" style="margin-right:8px;"></i> Advanced Bulk Delete
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding:24px;">
+                <form id="bulkDeleteForm">
+                    <div class="form-group mb-3">
+                        <label style="font-size:13px; font-weight:600;">Delete Criteria <span style="color:red;">*</span></label>
+                        <select class="form-control mt-1" id="deleteType" name="delete_type" onchange="toggleDeleteInputs()" style="font-size:13px;">
+                            <option value="">-- Select Option --</option>
+                            <option value="current_page">Delete Current Page Data</option>
+                            <option value="date_range">Delete by Date Range</option>
+                            <option value="latest_month">Delete Latest Month Data</option>
+                            <option value="old_data">Delete Data Older Than 6 Months</option>
+                            <option value="by_uploader">Delete by Uploaded User Source</option>
+                            <option value="by_file">Delete by Specific Excel File</option>
+                            <option value="delete_all" style="color: red; font-weight: bold;">Delete ALL Data</option>
+                        </select>
+                    </div>
+                    <div id="dateRangeInputs" style="display:none; gap: 10px; margin-top: 10px;">
+                        <div style="flex: 1;"><label style="font-size:12px;">From Date</label><input type="date" id="fromDate" class="form-control mt-1"></div>
+                        <div style="flex: 1;"><label style="font-size:12px;">To Date</label><input type="date" id="toDate" class="form-control mt-1"></div>
+                    </div>
+                    <div id="uploaderInput" style="display:none; margin-top: 10px;">
+                        <label style="font-size:12px;">Uploaded By (Name/Email/Role)</label>
+                        <input type="text" id="uploaderText" class="form-control mt-1" placeholder="e.g. Admin or admin@example.com">
+                    </div>
+                    <div id="fileInput" style="display:none; margin-top: 10px;">
+                        <label style="font-size:12px;">Select Uploaded Excel File</label>
+                        <select id="selectedFile" class="form-control mt-1" style="font-size:13px;">
+                            <option value="">-- Select File --</option>
+                            {% for file in uploaded_files %}
+                                <option value="{{ file }}">{{ file }}</option>
+                            {% empty %}
+                                <option value="" disabled>No files found</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="border-top:1px solid #F3F4F6; padding:16px 24px; gap:10px;">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="executeBulkDelete()" style="background:linear-gradient(135deg,#ef4444,#b91c1c); border:none;">
+                    <i class="fas fa-exclamation-triangle"></i> Confirm Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+
+    $("#Resale").addClass("active");
+
+    // ── Live Search JS (Debounce) ──
+    let typingTimer;
+    const searchInput = document.getElementById('searchInput');
+    const form = document.getElementById('liveSearchForm');
+
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function () {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => { form.submit(); }, 600);
+        });
+        searchInput.addEventListener('keydown', function () { clearTimeout(typingTimer); });
+        const len = searchInput.value.length;
+        if (len) { searchInput.focus(); searchInput.setSelectionRange(len, len); }
+    }
+
+    // ── Image Modal JS ──
+    function openImageModal(modalId) {
+        var modal = document.getElementById(modalId);
+        if (modal) { modal.style.display = "block"; document.body.style.overflow = "hidden"; }
+    }
+    function closeImageModal(modalId) {
+        var modal = document.getElementById(modalId);
+        if (modal) { modal.style.display = "none"; document.body.style.overflow = "auto"; }
+    }
+    window.onclick = function(event) {
+        if (event.target.classList.contains('property-image-modal')) {
+            event.target.style.display = "none"; document.body.style.overflow = "auto";
+        }
+    }
+
+    // ── Single Delete JS ──
+    function deleteIndustrial(propId, deleteUrl) {
+        Swal.fire({
+            title: 'Delete this record?',
+            text: "This action cannot be undone.",
+            icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#ef4444', cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(deleteUrl, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        Swal.fire('Deleted!', 'Record removed.', 'success').then(() => location.reload());
+                    } else { Swal.fire('Error', data.message, 'error'); }
+                });
+            }
+        });
+    }
+
+    // ── Bulk Delete JS (EXACTLY AS PROVIDED) ──
+    function toggleDeleteInputs() {
+        const type = document.getElementById('deleteType').value;
+        document.getElementById('dateRangeInputs').style.display = (type === 'date_range') ? 'flex' : 'none';
+        document.getElementById('uploaderInput').style.display = (type === 'by_uploader') ? 'block' : 'none';
+        document.getElementById('fileInput').style.display = (type === 'by_file') ? 'block' : 'none';
+    }
+
+    function executeBulkDelete() {
+        const type = document.getElementById('deleteType').value;
+        if (!type) { Swal.fire('Warning', 'Please select a delete criteria.', 'warning'); return; }
+
+        let payload = { delete_type: type };
+
+        if (type === 'date_range') {
+            payload.from_date = document.getElementById('fromDate').value;
+            payload.to_date = document.getElementById('toDate').value;
+            if (!payload.from_date || !payload.to_date) { Swal.fire('Warning', 'Select both dates.', 'warning'); return; }
+        } else if (type === 'by_uploader') {
+            payload.uploader_text = document.getElementById('uploaderText').value;
+            if (!payload.uploader_text) { Swal.fire('Warning', 'Enter the uploader detail.', 'warning'); return; }
+        } else if (type === 'by_file') {
+            payload.file_name = document.getElementById('selectedFile').value;
+            if (!payload.file_name) { Swal.fire('Warning', 'Select an Excel file.', 'warning'); return; }
+        } else if (type === 'current_page') {
+            const rows = document.querySelectorAll('tr[id^="row-"]');
+            const ids = Array.from(rows).map(row => row.id.split('-')[1]);
+            if (ids.length === 0) { Swal.fire('Warning', 'No data on page.', 'warning'); return; }
+            payload.page_ids = ids;
+        }
+
+        Swal.fire({
+            title: 'Are you absolutely sure?',
+            text: "This action will permanently delete the selected records!",
+            icon: 'warning', showCancelButton: true,
+            confirmButtonColor: '#ef4444', cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, delete them!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+                fetch("{% url 'industrial_bulk_delete' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}', 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') { Swal.fire('Deleted!', data.message, 'success').then(() => window.location.reload()); } 
+                    else { Swal.fire('Error', data.message, 'error'); }
+                }).catch(err => Swal.fire('Error', 'Server error occurred.', 'error'));
+            }
+        });
+    }
+
+    function validateDateSearch() {
+    const fromDate = document.getElementById('from_date').value;
+    const toDate = document.getElementById('to_date').value;
+
+    if (!fromDate && !toDate) {
+        Swal.fire('Warning', "Please select at least a 'From Date' or 'To Date' to search.", 'warning');
+        return false;
+    }
+
+    if (fromDate && toDate) {
+        if (new Date(fromDate) > new Date(toDate)) {
+            // Blocks search if Start Date is greater than End Date
+            Swal.fire('Invalid Date Range', "'Start Date' cannot be later than 'End Date'.", 'error');
+            return false;
+        }
+    }
+    return true; 
+}
+
+    // ── Custom Excel Import JS (EXACTLY AS PROVIDED) ──
+    function handleFileSelect(input) { if (input.files && input.files[0]) showFilePreview(input.files[0]); }
+    function handleDrop(event) {
+        event.preventDefault();
+        const el = document.querySelector('.dropzone');
+        el.style.borderColor = '#C7D2FE'; el.style.background = '#FAFAFE';
+        const file = event.dataTransfer.files[0];
+        if (!file) return;
+        if (!file.name.endsWith('.xlsx')) { Swal.fire('Invalid File', 'Please upload a .xlsx file only.', 'warning'); return; }
+        const dt = new DataTransfer(); dt.items.add(file);
+        document.getElementById('industrial_file').files = dt.files;
+        showFilePreview(file);
+    }
+    function showFilePreview(file) {
+        if (!file.name.endsWith('.xlsx')) { Swal.fire('Invalid File', 'Please upload a .xlsx file only.', 'warning'); clearFile(); return; }
+        document.getElementById('file-name').textContent = file.name;
+        document.getElementById('file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
+        document.getElementById('file-preview').style.display = 'flex';
+    }
+    function clearFile() {
+        document.getElementById('industrial_file').value = '';
+        document.getElementById('file-preview').style.display = 'none';
+    }
+
+   
+   
+
+function submitImport() {
+    const fileInput = document.getElementById('industrial_file');
+    if (!fileInput.files || !fileInput.files[0]) { 
+        Swal.fire('No File', 'Please select an Excel file to upload.', 'warning'); 
+        return; 
+    }
+    
+    const formData = new FormData();
+    formData.append('industrial_file', fileInput.files[0]);
+    
+    document.getElementById('import-progress').style.display = 'block';
+    document.getElementById('upload-btn').disabled = true;
+    document.getElementById('upload-btn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing...';
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress = Math.min(progress + 10, 85);
+        document.getElementById('progress-bar').style.width = progress + '%';
+    }, 200);
+
+    fetch("{% url 'import_industrial_resale_excel' %}", {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        body: formData
+    })
+    .then(async (res) => {
+        clearInterval(interval);
+        document.getElementById('progress-bar').style.width = '100%';
+        if (!res.ok) throw new Error(`Server error: ${res.status}`);
+        const data = await res.json();
+        
+        setTimeout(() => {
+            document.getElementById('import-progress').style.display = 'none';
+            document.getElementById('upload-btn').disabled = false;
+            document.getElementById('upload-btn').innerHTML = '<i class="fas fa-upload"></i> Import Data';
+            
+            // ── Exact File Duplicate Block ──
+            if (data.status === 'duplicate_filename_and_data') {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Duplicate File Blocked',
+                    text: data.message,
+                    confirmButtonColor: '#3b82f6',
+                    confirmButtonText: 'OK'
+                });
+                clearFile();
+                return;
+            }
+            
+            // ── Hidden Matrix Duplicate Block ──
+            if (data.status === 'duplicate_data_different_filename') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Identical Dataset Blocked',
+                    text: data.message,
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: 'Acknowledge'
+                });
+                clearFile();
+                return;
+            }
+            
+            // ── General / Required Field Server Error Block ──
+            if (data.status === 'error') {
+                Swal.fire('Validation Error', data.message, 'error');
+                return;
+            }
+
+            // ── Success Display Logic ──
+            let statsHtml = `<div style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap: wrap;">`;
+            if (data.created > 0) statsHtml += `<span style="background:#10b981; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-plus-circle"></i> ${data.created} Created</span>`;
+            if (data.updated > 0) statsHtml += `<span style="background:#3b82f6; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-edit"></i> ${data.updated} Updated</span>`;
+            if (data.skipped > 0) statsHtml += `<span style="background:#f59e0b; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-forward"></i> ${data.skipped} Skipped</span>`;
+            statsHtml += `</div>`;
+
+            Swal.fire({
+                icon: data.error_count > 0 ? 'warning' : 'success',
+                title: data.error_count > 0 ? 'Import Complete with Warnings' : 'Import Complete!',
+                html: `<p style="font-size:14px; color:#4b5563; margin-bottom:0;">${data.message}</p>` + statsHtml,
+                confirmButtonColor: '#4f46e5'
+            }).then(() => { 
+                location.reload(); 
+            });
+            
+        }, 400);
+    })
+    .catch(err => {
+        clearInterval(interval);
+        document.getElementById('import-progress').style.display = 'none';
+        document.getElementById('upload-btn').disabled = false;
+        document.getElementById('upload-btn').innerHTML = '<i class="fas fa-upload"></i> Import Data';
+        Swal.fire('System Error', `Upload failed: ${err.message}`, 'error');
+    });
+}
+
+
+    // ── CHART.JS INIT ──
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+    
+    const capLabels = {{ capacity_labels|safe|default:"[]" }};
+    const capData = {{ capacity_data|safe|default:"[]" }};
+    const typeLabels = {{ type_labels|safe|default:"[]" }};
+    const typeData = {{ type_data|safe|default:"[]" }};
+    const riskLabels = {{ risk_labels|safe|default:"[]" }};
+    const riskData = {{ risk_data|safe|default:"[]" }};
+
+    if(capLabels.length) {
+        new Chart(document.getElementById('capacityChart'), {
+            type: 'bar',
+            data: { labels: capLabels, datasets: [{ data: capData, backgroundColor: '#10b981', borderRadius: 4 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+        });
+    }
+
+    if(typeLabels.length) {
+        new Chart(document.getElementById('typeChart'), {
+            type: 'bar',
+            data: { labels: typeLabels, datasets: [{ data: typeData, backgroundColor: '#3b82f6', borderRadius: 4 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+        });
+    }
+
+    if(riskLabels.length) {
+        new Chart(document.getElementById('riskChart'), {
+            type: 'doughnut',
+            data: { labels: riskLabels, datasets: [{ data: riskData, backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { boxWidth: 10, color: '#f8fafc' } } } }
+        });
+    }
+</script>

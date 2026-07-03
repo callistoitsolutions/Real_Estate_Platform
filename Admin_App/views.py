@@ -1575,6 +1575,184 @@ def Update_Faqs(request,id):
 ############## Views end for update faqs ############################
 
 
+############ Views start for subscription packages list ###################
+
+def Subscriptions_Packages_List(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        packages_obj = Package_Details.objects.all().order_by('-package_upload_date')
+        packages_obj_count = Package_Details.objects.all().count()
+
+        rendered = render_to_string("admin_user/render_to_string/R_Subscription/r_t_s_packages.html",{'packages_obj':packages_obj,'packages_obj_count':packages_obj_count})
+
+        context = {'admin_obj':admin_obj,'packages_list':rendered}
+
+        return render(request,"admin_user/Subscription/packages_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+########## Views end for subscription packages list ########################
+
+
+########### Views start for ajax for add/edit packages #####################
+
+@csrf_exempt
+def Packages_Ajax(request):
+    data = request.POST.dict()
+
+    if data.get('id') == "":
+        data.pop("id", None)        
+        data['package_upload_date'] = datetime.today()
+        data['package_upload_time'] = datetime.now()
+        Package_Details.objects.create(**data)
+        return JsonResponse({"status":"1", "msg" : f"Package Details added successfully"})
+
+    # UPDATE MODE
+    else:
+        try:
+            packages = Package_Details.objects.get(id=data['id'])
+        except Package_Details.DoesNotExist:
+            return JsonResponse({'status': '0', 'msg': 'Packages Details not found'})
+
+
+        # Update withdraw fields (unchanged)
+        for key, value in data.items():
+            setattr(packages, key, value)
+
+        packages.save()
+        return JsonResponse({"status":"1", "msg" : f"Packages Details updated successfully"})
+
+############ Views end for ajax for add/edit packages ##########################
+
+########### Views start for delete packages ########################
+
+@csrf_exempt
+def Delete_Packages(request):
+    try:
+        try:
+            package_id = request.POST.get('package_id')
+            Package_Details.objects.filter(id=package_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Packages details deleted successfully...'})
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    
+
+########### Views end for delete packages ########################
+
+
+############# Views start for update packages #######################
+
+def Update_Packages(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        package = Package_Details.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'package':package}
+
+        return render(request,"admin_user/Subscription/update_packages.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############ Views end foor update packages ##########################
+
+############ Views start for subscription plan types list ########################
+
+def Subscriptions_Plans_List(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        plans_obj = Plan_Details.objects.all().order_by('-plan_upload_date')
+        plans_obj_count = Plan_Details.objects.all().count()
+
+        rendered = render_to_string("admin_user/render_to_string/R_Subscription/r_t_s_plans.html",{'plans_obj':plans_obj,'plans_obj_count':plans_obj_count})
+
+        context = {'admin_obj':admin_obj,'plans_list':rendered}
+
+        return render(request,"admin_user/Subscription/plans_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for subscription plan types list #####################
+
+
+########## Views start for ajax for add/edit plans  #######################
+
+@csrf_exempt
+def Plans_Ajax(request):
+    data = request.POST.dict()
+
+    if data.get('id') == "":
+        data.pop("id", None)        
+        data['plan_upload_date'] = datetime.today()
+        data['plan_upload_time'] = datetime.now()
+        Plan_Details.objects.create(**data)
+        return JsonResponse({"status":"1", "msg" : f"Plan Details added successfully"})
+
+    # UPDATE MODE
+    else:
+        try:
+            plans = Plan_Details.objects.get(id=data['id'])
+        except Plan_Details.DoesNotExist:
+            return JsonResponse({'status': '0', 'msg': 'Plans Details not found'})
+
+
+        # Update withdraw fields (unchanged)
+        for key, value in data.items():
+            setattr(plans, key, value)
+
+        plans.save()
+        return JsonResponse({"status":"1", "msg" : f"Plans Details updated successfully"})
+
+############ Views end for ajax for add/edit plans #######################
+
+
+############ Views start for delete plans ########################
+
+@csrf_exempt
+def Delete_Plans(request):
+    try:
+        try:
+            plan_id = request.POST.get('plan_id')
+            Plan_Details.objects.filter(id=plan_id).delete()
+            return JsonResponse({'status':'1', 'msg':'Plan details deleted successfully...'})
+        except:
+            traceback.print_exc()
+            return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+    except:
+        traceback.print_exc()
+        return JsonResponse({"status":"0", "msg" : "Something went wrong..."})
+
+
+########### Views end for delete plans ################################
+
+
+############## Views start for update plans ########################
+
+def Update_Plans(request,id):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+
+        plan = Plan_Details.objects.get(id=id)
+
+        context = {'admin_obj':admin_obj,'plan':plan}
+
+        return render(request,"admin_user/Subscription/update_plans.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+########## Views end for update plans #########################
+
+
 ############## Views start for subscriptions list ##########################
 
 def Subscriptions_List(request):
@@ -2911,7 +3089,9 @@ def commercial_resale(request):
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
 
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+        user_obj = User_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
         return render(request,"admin_user/Resale/commercial_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -2940,7 +3120,10 @@ def industrial_resale(request):
         admin_obj = Admin_Login.objects.get(id=session_id)
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+        user_obj = User_Details.objects.all()
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
         return render(request,"admin_user/Resale/industrial_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -2952,7 +3135,11 @@ def agricultural_resale(request):
         admin_obj = Admin_Login.objects.get(id=session_id)
         ameneties_obj = Ameneties_Details.objects.all()
         facilities_obj = Facilities_Details.objects.all()
-        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj}
+
+        user_obj = User_Details.objects.all()
+
+
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
         return render(request,"admin_user/Resale/agricultural_resale.html",context)
     else:
         return render(request,'home_page/Adminlogin.html')
@@ -3042,22 +3229,44 @@ def Rm_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Relationship Manager"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    user_state = row[8] if len(row) > 8 else None
-                    user_city = row[9] if len(row) > 9 else None
-                    user_address = row[10] if len(row) > 10 else None
-                    register_date_value = row[11] if len(row) > 11 else None
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
+                    
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
+                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3066,13 +3275,13 @@ def Rm_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    #  Register date: Today's date as default
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3085,13 +3294,35 @@ def Rm_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass  # Keep today's date if parsing fails
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
+                    
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3100,10 +3331,13 @@ def Rm_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3113,17 +3347,29 @@ def Rm_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                    
-                    success_count += 1
+                        
+                        # Generate USER_ID: EF-{ID}-{YY}
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Relationship Managers. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Relationship Managers. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
@@ -3361,22 +3607,44 @@ def Landlord_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Landlord"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    user_state = row[8] if len(row) > 8 else None
-                    user_city = row[9] if len(row) > 9 else None
-                    user_address = row[10] if len(row) > 10 else None
-                    register_date_value = row[11] if len(row) > 11 else None
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
+                
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
+                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3385,13 +3653,13 @@ def Landlord_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    #  Register date: Today's date as default
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3404,13 +3672,35 @@ def Landlord_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass  # Keep today's date if parsing fails
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
+                    
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3419,10 +3709,13 @@ def Landlord_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3432,17 +3725,29 @@ def Landlord_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                    
-                    success_count += 1
+                        
+                        # Generate USER_ID: EF-{ID}-{YY}
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Landlords. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Landlords. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
@@ -3557,22 +3862,44 @@ def Tenant_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Tenant"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    user_state = row[8] if len(row) > 8 else None
-                    user_city = row[9] if len(row) > 9 else None
-                    user_address = row[10] if len(row) > 10 else None
-                    register_date_value = row[11] if len(row) > 11 else None
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
+                
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
+                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3581,13 +3908,13 @@ def Tenant_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    #  Register date: Today's date as default
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3600,13 +3927,35 @@ def Tenant_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass  # Keep today's date if parsing fails
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
+                    
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3615,10 +3964,13 @@ def Tenant_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3628,17 +3980,29 @@ def Tenant_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                    
-                    success_count += 1
+                        
+                        # Generate USER_ID: EF-{ID}-{YY}
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Tenants. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Tenants. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
@@ -3749,22 +4113,44 @@ def Buyer_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Buyer"
             
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    user_state = row[8] if len(row) > 8 else None
-                    user_city = row[9] if len(row) > 9 else None
-                    user_address = row[10] if len(row) > 10 else None
-                    register_date_value = row[11] if len(row) > 11 else None
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
+                
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
+                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
@@ -3773,13 +4159,13 @@ def Buyer_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
                     
-                    #  Register date: Today's date as default
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
                     
                     # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
@@ -3792,13 +4178,35 @@ def Buyer_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
-                            pass  # Keep today's date if parsing fails
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
+                    
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -3807,10 +4215,13 @@ def Buyer_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -3820,23 +4231,36 @@ def Buyer_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                    
-                    success_count += 1
+                        
+                        # Generate USER_ID: EF-{ID}-{YY}
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Buyers. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Buyers. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
             return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
     
     return JsonResponse({"status": "0", "msg": "Invalid request method"})
+
 
 ######### Views end for buyer data functionality via excel ###########################
 
@@ -3943,54 +4367,74 @@ def Agent_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Agent"
             
-            # Data starts from row 3 (row 1 = title, row 2 = headers)
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
                     
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    agency_name = row[8] if len(row) > 8 else None
-                    license_number = row[9] if len(row) > 9 else None
-                    user_state = row[10] if len(row) > 10 else None
-                    user_city = row[11] if len(row) > 11 else None
-                    user_address = row[12] if len(row) > 12 else None
-                    register_date_value = row[13] if len(row) > 13 else None
+                    # ================================================================
+                    # COLUMN MAPPING (Based on your Agents Report structure)
+                    # ================================================================
+                    # Column 0: Actions (empty)
+                    # Column 1: Sr. No.
+                    # Column 2: Profile
+                    # Column 3: User Id
+                    # Column 4: Role (contains "Agent")
+                    # Column 5: Name (contains "Anita Chacko")
+                    # Column 6: Email Address (contains "anita.chacko@example.com")
+                    # Column 7: Phone Number
+                    # Column 8: Password
+                    # Column 9: Agency Name
+                    # Column 10: License Number
+                    # Column 11: State
+                    # Column 12: City
+                    # Column 13: Address
+                    # Column 14: Register Date
+                    # ================================================================
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    agency_name = row[9] if len(row) > 9 else None  # Column 9: Agency Name
+                    license_number = row[10] if len(row) > 10 else None  # Column 10: License Number
+                    user_state = row[11] if len(row) > 11 else None  # Column 11: State
+                    user_city = row[12] if len(row) > 12 else None  # Column 12: City
+                    user_address = row[13] if len(row) > 13 else None  # Column 13: Address
+                    register_date_value = row[14] if len(row) > 14 else None  # Column 14: Register Date
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
-                    if isinstance(user_phone, (int, float)):
-                        user_phone = str(int(user_phone))
-                    else:
-                        user_phone = str(user_phone).replace('-', '').replace(' ', '').strip()
+                    user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
                     
-                    # Clean name
+                    # Clean other fields
                     user_name = str(user_name).strip()
-                    
-                    # Clean password
-                    if user_password:
-                        if isinstance(user_password, (int, float)):
-                            user_password = str(int(user_password))
-                        else:
-                            user_password = str(user_password).split('.')[0].strip()
-                    else:
-                        user_password = 'default123'
-                    
-                    # Clean email
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
-                    
-                    # Clean agency fields
+                    user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
                     agency_name = str(agency_name).strip() if agency_name and str(agency_name) != '---' else None
                     license_number = str(license_number).strip() if license_number and str(license_number) != '---' else None
-                    
-                    # Clean address fields
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
@@ -3999,7 +4443,7 @@ def Agent_Data(request):
                     register_date = datetime.now().date()
                     
                     # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-', 'None']:
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
                         try:
                             if isinstance(register_date_value, (date, datetime)):
                                 register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
@@ -4010,16 +4454,15 @@ def Agent_Data(request):
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                                 elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%d/%m/%Y').date()
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
                             pass  # Keep today's date if parsing fails
                     
-                    print(f"Row {row_idx}: Importing Agent - {user_name} ({user_phone}) - Agency: {agency_name or 'N/A'}")
-                    
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -4032,9 +4475,11 @@ def Agent_Data(request):
                         existing_user.user_register_date = register_date
                         existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        print(f"Row {row_idx}: Updated existing Agent")
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -4048,17 +4493,31 @@ def Agent_Data(request):
                             user_register_date=register_date,
                             user_register_time=datetime.now().time()
                         )
-                        print(f"Row {row_idx}: Created new Agent")
-                    
-                    success_count += 1
+                        
+                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
+                        
+                        # Format: EF-{user.id}-{YY}
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        
+                        # Update the user with the generated user_id
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    print(f"Row {row_idx} error: {e}")
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Agents. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Agents. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]  # Limit to first 10 errors for response
             })
             
         except Exception as e:
@@ -4172,54 +4631,74 @@ def Agency_Data(request):
             
             success_count = 0
             error_count = 0
+            error_details = []
             
             FIXED_ROLE = "Agency/Builder"
             
-            # Data starts from row 3 (row 1 = title, row 2 = headers)
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
                 try:
+                    # Skip empty rows
+                    if not row or all(cell is None or str(cell).strip() == '' for cell in row):
+                        continue
                     
-                    user_name = row[4] if len(row) > 4 else None
-                    user_email = row[5] if len(row) > 5 else None
-                    user_phone = row[6] if len(row) > 6 else None
-                    user_password = row[7] if len(row) > 7 else None
-                    agency_name = row[8] if len(row) > 8 else None
-                    license_number = row[9] if len(row) > 9 else None
-                    user_state = row[10] if len(row) > 10 else None
-                    user_city = row[11] if len(row) > 11 else None
-                    user_address = row[12] if len(row) > 12 else None
-                    register_date_value = row[13] if len(row) > 13 else None
+                    # ================================================================
+                    # COLUMN MAPPING (Based on your Agents Report structure)
+                    # ================================================================
+                    # Column 0: Actions (empty)
+                    # Column 1: Sr. No.
+                    # Column 2: Profile
+                    # Column 3: User Id
+                    # Column 4: Role (contains "Agent")
+                    # Column 5: Name (contains "Anita Chacko")
+                    # Column 6: Email Address (contains "anita.chacko@example.com")
+                    # Column 7: Phone Number
+                    # Column 8: Password
+                    # Column 9: Agency Name
+                    # Column 10: License Number
+                    # Column 11: State
+                    # Column 12: City
+                    # Column 13: Address
+                    # Column 14: Register Date
+                    # ================================================================
+                    
+                    # Extract values with correct column indices
+                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    agency_name = row[9] if len(row) > 9 else None  # Column 9: Agency Name
+                    license_number = row[10] if len(row) > 10 else None  # Column 10: License Number
+                    user_state = row[11] if len(row) > 11 else None  # Column 11: State
+                    user_city = row[12] if len(row) > 12 else None  # Column 12: City
+                    user_address = row[13] if len(row) > 13 else None  # Column 13: Address
+                    register_date_value = row[14] if len(row) > 14 else None  # Column 14: Register Date
+                    
+                    # Clean and validate user_name (from Name column - index 5)
+                    if user_name and str(user_name).strip() not in ['', '---', '-']:
+                        user_name = str(user_name).strip()
+                    else:
+                        user_name = None
+                    
+                    # Clean and validate user_email (from Email column - index 6)
+                    if user_email and str(user_email).strip() not in ['', '---', '-']:
+                        user_email = str(user_email).strip()
+                    else:
+                        user_email = None
                     
                     if not user_name or not user_phone:
                         error_count += 1
+                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
                         continue
                     
                     # Clean phone
-                    if isinstance(user_phone, (int, float)):
-                        user_phone = str(int(user_phone))
-                    else:
-                        user_phone = str(user_phone).replace('-', '').replace(' ', '').strip()
+                    user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
                     
-                    # Clean name
+                    # Clean other fields
                     user_name = str(user_name).strip()
-                    
-                    # Clean password
-                    if user_password:
-                        if isinstance(user_password, (int, float)):
-                            user_password = str(int(user_password))
-                        else:
-                            user_password = str(user_password).split('.')[0].strip()
-                    else:
-                        user_password = 'default123'
-                    
-                    # Clean email
-                    user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
-                    
-                    # Clean agency fields
+                    user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
                     agency_name = str(agency_name).strip() if agency_name and str(agency_name) != '---' else None
                     license_number = str(license_number).strip() if license_number and str(license_number) != '---' else None
-                    
-                    # Clean address fields
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
@@ -4228,7 +4707,7 @@ def Agency_Data(request):
                     register_date = datetime.now().date()
                     
                     # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-', 'None']:
+                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
                         try:
                             if isinstance(register_date_value, (date, datetime)):
                                 register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
@@ -4239,16 +4718,15 @@ def Agency_Data(request):
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                                 elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%d/%m/%Y').date()
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
                             pass  # Keep today's date if parsing fails
                     
-                    print(f"Row {row_idx}: Importing Agent - {user_name} ({user_phone}) - Agency: {agency_name or 'N/A'}")
-                    
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
                         existing_user.user_role = FIXED_ROLE
@@ -4261,9 +4739,11 @@ def Agency_Data(request):
                         existing_user.user_register_date = register_date
                         existing_user.user_register_time = datetime.now().time()
                         existing_user.save()
-                        print(f"Row {row_idx}: Updated existing Agent")
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
@@ -4277,17 +4757,31 @@ def Agency_Data(request):
                             user_register_date=register_date,
                             user_register_time=datetime.now().time()
                         )
-                        print(f"Row {row_idx}: Created new Agent")
-                    
-                    success_count += 1
+                        
+                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
+                        
+                        # Format: EF-{user.id}-{YY}
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        
+                        # Update the user with the generated user_id
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
-                    print(f"Row {row_idx} error: {e}")
+                    error_details.append(f"Row {row_idx}: {str(e)}")
+                    print(f"Error at row {row_idx}: {str(e)}")
             
             return JsonResponse({
                 "status": "1",
-                "msg": f"Successfully imported {success_count} Agency/Builder. Failed: {error_count}"
+                "msg": f"Successfully imported {success_count} Agencies/Builders. Failed: {error_count}",
+                "success_count": success_count,
+                "error_count": error_count,
+                "error_details": error_details[:10]  # Limit to first 10 errors for response
             })
             
         except Exception as e:
@@ -4410,6 +4904,9 @@ def Vendor_Data(request):
             success_count = 0
             error_count = 0
             skipped_count = 0
+            error_details = []
+            
+            FIXED_ROLE = "Vendor"
             
             # Data starts from row 3
             for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
@@ -4417,32 +4914,34 @@ def Vendor_Data(request):
                     if not any(row) or len(row) < 18:
                         skipped_count += 1
                         continue
+                   
                     
-                    user_service_type = row[4] if len(row) > 4 else None
-                    user_name = row[5] if len(row) > 5 else None
-                    user_email = row[6] if len(row) > 6 else None
-                    user_phone = row[7] if len(row) > 7 else None
-                    user_password = row[8] if len(row) > 8 else None
-                    user_state = row[9] if len(row) > 9 else None
-                    user_city = row[10] if len(row) > 10 else None
-                    user_address = row[11] if len(row) > 11 else None
-                    user_company_name = row[12] if len(row) > 12 else None
-                    user_pan_number = row[13] if len(row) > 13 else None
-                    user_gstin_number = row[14] if len(row) > 14 else None
-                    operational_scope = row[15] if len(row) > 15 else None
-                    selected_regions = row[16] if len(row) > 16 else None  
-                    register_date_value = row[17] if len(row) > 17 else None
+                    user_service_type = row[4] if len(row) > 4 else None  # Column 4: Service Type
+                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
+                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
+                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
+                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
+                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
+                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
+                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
+                    user_company_name = row[12] if len(row) > 12 else None  # Column 12: Company Name
+                    user_pan_number = row[13] if len(row) > 13 else None  # Column 13: PAN
+                    user_gstin_number = row[14] if len(row) > 14 else None  # Column 14: GSTIN
+                    operational_scope = row[15] if len(row) > 15 else None  # Column 15: Operational Scope
+                    selected_regions = row[16] if len(row) > 16 else None  # Column 16: Selected Regions
+                    register_date_value = row[17] if len(row) > 17 else None  # Column 17: Register Date
+                    register_time_value = row[18] if len(row) > 18 else None  # Column 18: Register Time
                     
                     # Skip if no name or phone
                     if not user_name or not user_phone:
                         skipped_count += 1
-                        print(f"Row {row_idx}: Missing name or phone, skipping")
+                        error_details.append(f"Row {row_idx}: Missing name or phone")
                         continue
                     
                     # Skip if name is "View Profile" (Profile column value)
                     user_name_str = str(user_name).strip()
                     if user_name_str == 'View Profile' or user_name_str == 'None' or user_name_str.isdigit():
-                        print(f"Row {row_idx}: Invalid name '{user_name_str}', skipping")
+                        error_details.append(f"Row {row_idx}: Invalid name '{user_name_str}'")
                         skipped_count += 1
                         continue
                     
@@ -4465,6 +4964,7 @@ def Vendor_Data(request):
                     user_email = str(user_email).strip() if user_email and str(user_email) != '---' else None
                     
                     # Clean address fields
+                    user_name = str(user_name).strip()
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
@@ -4476,14 +4976,17 @@ def Vendor_Data(request):
                     user_gstin_number = str(user_gstin_number).strip().upper() if user_gstin_number and str(user_gstin_number) != '---' else None
                     operational_scope = str(operational_scope).strip() if operational_scope and str(operational_scope) != '---' else None
                     
-                    #  Clean selected_regions (this is the correct field name)
+                    # Clean selected_regions
                     if selected_regions and str(selected_regions) != '---':
                         selected_regions = str(selected_regions).strip()
                     else:
                         selected_regions = None
                     
-                    # Register date
+                    # Register date: Today's date as default
                     register_date = datetime.now().date()
+                    register_time = datetime.now().time()
+                    
+                    # If date provided in Excel, try to parse it
                     if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
                         try:
                             if isinstance(register_date_value, (date, datetime)):
@@ -4494,18 +4997,38 @@ def Vendor_Data(request):
                                     register_date = datetime.strptime(date_str, '%B %d, %Y').date()
                                 elif '-' in date_str:
                                     register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                                elif '/' in date_str:
+                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
                         except:
                             pass
                     
-                    print(f"Row {row_idx}: Importing Vendor - Name: {user_name}, Phone: {user_phone}, Company: {user_company_name}")
+                    # If time provided in Excel, try to parse it
+                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+                        try:
+                            if isinstance(register_time_value, time):
+                                register_time = register_time_value
+                            else:
+                                time_str = str(register_time_value).strip()
+                                if ':' in time_str:
+                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                                    try:
+                                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                                    except:
+                                        try:
+                                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                                        except:
+                                            pass
+                        except:
+                            pass
                     
-                    # Update or create
-                    existing_user = User_Details.objects.filter(user_phone=user_phone).first()
+                    # Check if user exists by phone number and role
+                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
+                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
-                        existing_user.user_role = "Vendor"
+                        existing_user.user_role = FIXED_ROLE
                         existing_user.user_service_type = user_service_type
                         existing_user.user_company_name = user_company_name
                         existing_user.user_pan_number = user_pan_number
@@ -4517,15 +5040,17 @@ def Vendor_Data(request):
                         existing_user.user_address = user_address
                         existing_user.user_password = user_password
                         existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        existing_user.user_register_time = register_time
                         existing_user.save()
-                        print(f"Row {row_idx}: Updated existing Vendor")
+                        
+                        success_count += 1
                     else:
-                        User_Details.objects.create(
+                        # --- CREATE MODE: GENERATE USER_ID ---
+                        new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
-                            user_role="Vendor",
+                            user_role=FIXED_ROLE,
                             user_service_type=user_service_type,
                             user_company_name=user_company_name,
                             user_pan_number=user_pan_number,
@@ -4537,14 +5062,25 @@ def Vendor_Data(request):
                             user_address=user_address,
                             user_password=user_password,
                             user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_register_time=register_time
                         )
-                        print(f"Row {row_idx}: Created new Vendor")
-                    
-                    success_count += 1
+                        
+                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
+                        current_year = datetime.now().year
+                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
+                        
+                        # Format: EF-{user.id}-{YY}
+                        user_id = f"EF-{new_user.id}-{year_suffix}"
+                        
+                        # Update the user with the generated user_id
+                        new_user.user_id = user_id
+                        new_user.save()
+                        
+                        success_count += 1
                     
                 except Exception as e:
                     error_count += 1
+                    error_details.append(f"Row {row_idx}: {str(e)}")
                     print(f"Row {row_idx} error: {e}")
             
             msg = f"Successfully imported {success_count} Vendors."
@@ -4555,7 +5091,11 @@ def Vendor_Data(request):
             
             return JsonResponse({
                 "status": "1",
-                "msg": msg
+                "msg": msg,
+                "success_count": success_count,
+                "error_count": error_count,
+                "skipped_count": skipped_count,
+                "error_details": error_details[:10]
             })
             
         except Exception as e:
@@ -13378,254 +13918,254 @@ def residential_resale_list(request):
 
     admin_obj = Admin_Login.objects.get(id=session_id)
 
-    # ── Fetch ALL properties (used for KPI stats & chart data) ───────────────
-    all_properties = (
-        ResaleResidentialProperty.objects
-        .prefetch_related('images')
-        .order_by('-created_at')
-    )
+    # # ── Fetch ALL properties (used for KPI stats & chart data) ───────────────
+    # all_properties = (
+    #     ResaleResidentialProperty.objects
+    #     .prefetch_related('images')
+    #     .order_by('-created_at')
+    # )
 
-    # ── Read query params ────────────────────────────────────────────────────
-    search_query    = request.GET.get('search', '').strip()
-    prop_type       = request.GET.get('prop_type', '').strip()
-    bhk_filter      = request.GET.get('bhk', '').strip()
-    furnish         = request.GET.get('furnish', '').strip()
-    zone_filter     = request.GET.get('zone', '').strip()
-    ownership       = request.GET.get('ownership', '').strip()
-    negotiable      = request.GET.get('negotiable', '').strip()
-    from_date       = request.GET.get('from_date', '').strip()
-    to_date         = request.GET.get('to_date', '').strip()
+    # # ── Read query params ────────────────────────────────────────────────────
+    # search_query    = request.GET.get('search', '').strip()
+    # prop_type       = request.GET.get('prop_type', '').strip()
+    # bhk_filter      = request.GET.get('bhk', '').strip()
+    # furnish         = request.GET.get('furnish', '').strip()
+    # zone_filter     = request.GET.get('zone', '').strip()
+    # ownership       = request.GET.get('ownership', '').strip()
+    # negotiable      = request.GET.get('negotiable', '').strip()
+    # from_date       = request.GET.get('from_date', '').strip()
+    # to_date         = request.GET.get('to_date', '').strip()
 
-    # ── Apply filters ────────────────────────────────────────────────────────
-    properties = all_properties
+    # # ── Apply filters ────────────────────────────────────────────────────────
+    # properties = all_properties
 
-    if search_query:
-        properties = properties.filter(
-            Q(property_title__icontains=search_query)  |
-            Q(city__icontains=search_query)           |
-            Q(locality__icontains=search_query)       |
-            Q(owner_name__icontains=search_query)     |
-            Q(bhk__icontains=search_query)            |
-            Q(building_name__icontains=search_query)
-        )
+    # if search_query:
+    #     properties = properties.filter(
+    #         Q(property_title__icontains=search_query)  |
+    #         Q(city__icontains=search_query)           |
+    #         Q(locality__icontains=search_query)       |
+    #         Q(owner_name__icontains=search_query)     |
+    #         Q(bhk__icontains=search_query)            |
+    #         Q(building_name__icontains=search_query)
+    #     )
 
-    if prop_type:
-        properties = properties.filter(property_type=prop_type)
+    # if prop_type:
+    #     properties = properties.filter(property_type=prop_type)
 
-    if bhk_filter:
-        properties = properties.filter(bhk=bhk_filter)
+    # if bhk_filter:
+    #     properties = properties.filter(bhk=bhk_filter)
 
-    if furnish:
-        properties = properties.filter(furnishing_type=furnish)
+    # if furnish:
+    #     properties = properties.filter(furnishing_type=furnish)
 
-    if zone_filter:
-        properties = properties.filter(zone=zone_filter)
+    # if zone_filter:
+    #     properties = properties.filter(zone=zone_filter)
 
-    if ownership:
-        properties = properties.filter(ownership_type=ownership)
+    # if ownership:
+    #     properties = properties.filter(ownership_type=ownership)
 
-    if negotiable:
-        properties = properties.filter(price_negotiable=negotiable) # Synced field name
+    # if negotiable:
+    #     properties = properties.filter(price_negotiable=negotiable) # Synced field name
 
-    if from_date:
-        properties = properties.filter(created_at__date__gte=from_date)
+    # if from_date:
+    #     properties = properties.filter(created_at__date__gte=from_date)
 
-    if to_date:
-        properties = properties.filter(created_at__date__lte=to_date)
+    # if to_date:
+    #     properties = properties.filter(created_at__date__lte=to_date)
 
-    # ── Thumbnail + helper attributes for each filtered property ─────────────
-    for prop in properties:
-        prop.thumbnail = prop.images.first()
+    # # ── Thumbnail + helper attributes for each filtered property ─────────────
+    # for prop in properties:
+    #     prop.thumbnail = prop.images.first()
 
-        prop.nearby_facilities_list = (
-            [f.strip() for f in prop.nearby_facilities.split(',')]
-            if prop.nearby_facilities else []
-        )
-        prop.amenities_list = (
-            [a.strip() for a in prop.amenities.split(',')]
-            if prop.amenities else []
-        )
-        prop.image_count = prop.images.count()
-        prop.image_urls  = [img.image.url for img in prop.images.all()]
+    #     prop.nearby_facilities_list = (
+    #         [f.strip() for f in prop.nearby_facilities.split(',')]
+    #         if prop.nearby_facilities else []
+    #     )
+    #     prop.amenities_list = (
+    #         [a.strip() for a in prop.amenities.split(',')]
+    #         if prop.amenities else []
+    #     )
+    #     prop.image_count = prop.images.count()
+    #     prop.image_urls  = [img.image.url for img in prop.images.all()]
 
-    # ════════════════════════════════════════════════════════════════════════
-    # KPI STATS (Calculated using correct DB layout keys)
-    # ════════════════════════════════════════════════════════════════════════
-    total_count = all_properties.count()
+    # # ════════════════════════════════════════════════════════════════════════
+    # # KPI STATS (Calculated using correct DB layout keys)
+    # # ════════════════════════════════════════════════════════════════════════
+    # total_count = all_properties.count()
 
-    # ── Row 1 — Inventory ────────────────────────────────────────────────────
-    total_negotiable  = all_properties.filter(price_negotiable='yes').count() # Synced
-    total_furnished   = all_properties.filter(furnishing_type='fully').count()
-    total_freehold    = all_properties.filter(ownership_type='freehold').count()
-    total_with_images = all_properties.filter(images__isnull=False).distinct().count()
+    # # ── Row 1 — Inventory ────────────────────────────────────────────────────
+    # total_negotiable  = all_properties.filter(price_negotiable='yes').count() # Synced
+    # total_furnished   = all_properties.filter(furnishing_type='fully').count()
+    # total_freehold    = all_properties.filter(ownership_type='freehold').count()
+    # total_with_images = all_properties.filter(images__isnull=False).distinct().count()
 
-    def pct(part, whole):
-        return round(part / whole * 100) if whole else 0
+    # def pct(part, whole):
+    #     return round(part / whole * 100) if whole else 0
 
-    negotiable_pct = pct(total_negotiable,  total_count)
-    furnished_pct  = pct(total_furnished,   total_count)
-    freehold_pct   = pct(total_freehold,    total_count)
-    images_pct     = pct(total_with_images, total_count)
+    # negotiable_pct = pct(total_negotiable,  total_count)
+    # furnished_pct  = pct(total_furnished,   total_count)
+    # freehold_pct   = pct(total_freehold,    total_count)
+    # images_pct     = pct(total_with_images, total_count)
 
-    # ── Row 2 — Pricing ──────────────────────────────────────────────────────
-    price_agg = all_properties.aggregate(
-        avg      = Avg('expected_price'),
-        max_val  = Max('expected_price'),
-        min_val  = Min('expected_price'),
-        avg_sqft = Avg('price_per_sqft'),
-        avg_area = Avg('builtup_area'),
-    )
-    avg_price      = price_agg['avg']
-    max_price      = price_agg['max_val']
-    min_price      = price_agg['min_val']
-    avg_price_sqft = price_agg['avg_sqft']
-    avg_builtup    = price_agg['avg_area']
-    total_with_loan = all_properties.filter(loan_on_property='yes').count() # Synced
+    # # ── Row 2 — Pricing ──────────────────────────────────────────────────────
+    # price_agg = all_properties.aggregate(
+    #     avg      = Avg('expected_price'),
+    #     max_val  = Max('expected_price'),
+    #     min_val  = Min('expected_price'),
+    #     avg_sqft = Avg('price_per_sqft'),
+    #     avg_area = Avg('builtup_area'),
+    # )
+    # avg_price      = price_agg['avg']
+    # max_price      = price_agg['max_val']
+    # min_price      = price_agg['min_val']
+    # avg_price_sqft = price_agg['avg_sqft']
+    # avg_builtup    = price_agg['avg_area']
+    # total_with_loan = all_properties.filter(loan_on_property='yes').count() # Synced
 
-    # ── Row 3 — Legal & Status ───────────────────────────────────────────────
-    no_dispute_count  = all_properties.filter(any_legal_dispute='no').count() # Synced
-    dispute_count     = all_properties.filter(any_legal_dispute='yes').count() # Synced
-    tax_pending_count = all_properties.filter(government_tax_dues='yes').count() # Synced
-    tenant_occupied   = all_properties.filter(existing_tenants='yes').count() # Synced
-    premium_count     = all_properties.filter(expected_price__gte=10000000).count()   # >= 1 Cr
+    # # ── Row 3 — Legal & Status ───────────────────────────────────────────────
+    # no_dispute_count  = all_properties.filter(any_legal_dispute='no').count() # Synced
+    # dispute_count     = all_properties.filter(any_legal_dispute='yes').count() # Synced
+    # tax_pending_count = all_properties.filter(government_tax_dues='yes').count() # Synced
+    # tenant_occupied   = all_properties.filter(existing_tenants='yes').count() # Synced
+    # premium_count     = all_properties.filter(expected_price__gte=10000000).count()   # >= 1 Cr
 
-    # ── Row 4 — Listing Quality ──────────────────────────────────────────────
-    with_video_count = (
-        all_properties
-        .exclude(property_video__isnull=True)
-        .exclude(property_video='')
-        .count()
-    )
-    with_floor_plan = (
-        all_properties
-        .exclude(floor_plan__isnull=True)
-        .exclude(floor_plan='')
-        .count()
-    )
-    with_owner_count = (
-        all_properties
-        .exclude(owner_name__isnull=True)
-        .exclude(owner_name='')
-        .count()
-    )
-    budget_count = all_properties.filter(expected_price__lt=3000000).count()          # < 30 L
+    # # ── Row 4 — Listing Quality ──────────────────────────────────────────────
+    # with_video_count = (
+    #     all_properties
+    #     .exclude(property_video__isnull=True)
+    #     .exclude(property_video='')
+    #     .count()
+    # )
+    # with_floor_plan = (
+    #     all_properties
+    #     .exclude(floor_plan__isnull=True)
+    #     .exclude(floor_plan='')
+    #     .count()
+    # )
+    # with_owner_count = (
+    #     all_properties
+    #     .exclude(owner_name__isnull=True)
+    #     .exclude(owner_name='')
+    #     .count()
+    # )
+    # budget_count = all_properties.filter(expected_price__lt=3000000).count()          # < 30 L
 
-    # ── Charts ───────────────────────────────────────────────────────────────
-    property_type_counts = dict(
-        all_properties.values('property_type')
-        .annotate(count=Count('id'))
-        .values_list('property_type', 'count')
-    )
-    bhk_counts = dict(
-        all_properties.values('bhk')
-        .annotate(count=Count('id'))
-        .values_list('bhk', 'count')
-    )
-    fully_furnished = all_properties.filter(furnishing_type='fully').count()
-    semi_furnished  = all_properties.filter(furnishing_type='semi').count()
-    unfurnished     = all_properties.filter(furnishing_type='unfurnished').count()
+    # # ── Charts ───────────────────────────────────────────────────────────────
+    # property_type_counts = dict(
+    #     all_properties.values('property_type')
+    #     .annotate(count=Count('id'))
+    #     .values_list('property_type', 'count')
+    # )
+    # bhk_counts = dict(
+    #     all_properties.values('bhk')
+    #     .annotate(count=Count('id'))
+    #     .values_list('bhk', 'count')
+    # )
+    # fully_furnished = all_properties.filter(furnishing_type='fully').count()
+    # semi_furnished  = all_properties.filter(furnishing_type='semi').count()
+    # unfurnished     = all_properties.filter(furnishing_type='unfurnished').count()
 
-    zone_counts = dict(
-        all_properties.values('zone')
-        .annotate(count=Count('id'))
-        .values_list('zone', 'count')
-    )
+    # zone_counts = dict(
+    #     all_properties.values('zone')
+    #     .annotate(count=Count('id'))
+    #     .values_list('zone', 'count')
+    # )
 
-    # ── Unique values for Select2 searchable dropdowns ───────────────────────
-    unique_prop_types  = list(
-        all_properties.values_list('property_type', flat=True)
-        .distinct().order_by('property_type')
-    )
-    unique_bhk_values  = list(
-        all_properties.values_list('bhk', flat=True)
-        .distinct().order_by('bhk')
-    )
-    unique_zones       = list(
-        all_properties.values_list('zone', flat=True)
-        .distinct().order_by('zone')
-    )
-    unique_cities      = list(
-        all_properties.values_list('city', flat=True)
-        .distinct().order_by('city')
-    )
+    # # ── Unique values for Select2 searchable dropdowns ───────────────────────
+    # unique_prop_types  = list(
+    #     all_properties.values_list('property_type', flat=True)
+    #     .distinct().order_by('property_type')
+    # )
+    # unique_bhk_values  = list(
+    #     all_properties.values_list('bhk', flat=True)
+    #     .distinct().order_by('bhk')
+    # )
+    # unique_zones       = list(
+    #     all_properties.values_list('zone', flat=True)
+    #     .distinct().order_by('zone')
+    # )
+    # unique_cities      = list(
+    #     all_properties.values_list('city', flat=True)
+    #     .distinct().order_by('city')
+    # )
 
-    try:
-        uploaded_files = (
-            all_properties
-            .exclude(upload_file_name__isnull=True)
-            .exclude(upload_file_name='')
-            .values_list('upload_file_name', flat=True)
-            .distinct()
-        )
-    except Exception:
-        uploaded_files = []
+    # try:
+    #     uploaded_files = (
+    #         all_properties
+    #         .exclude(upload_file_name__isnull=True)
+    #         .exclude(upload_file_name='')
+    #         .values_list('upload_file_name', flat=True)
+    #         .distinct()
+    #     )
+    # except Exception:
+    #     uploaded_files = []
 
     # ── Context ──────────────────────────────────────────────────────────────
     context = {
         'admin_obj'  : admin_obj,
-        'properties' : properties,
+        # 'properties' : properties,
 
-        # Counts
-        'filtered_count' : properties.count(),
-        'total_count'    : total_count,
+        # # Counts
+        # 'filtered_count' : properties.count(),
+        # 'total_count'    : total_count,
 
-        # Active search params
-        'search_query'   : search_query,
-        'prop_type_query': prop_type,
-        'bhk_query'      : bhk_filter,
-        'furnish_query'  : furnish,
-        'zone_query'     : zone_filter,
-        'ownership_query': ownership,
-        'negotiable_query': negotiable,
-        'from_date'      : from_date,
-        'to_date'        : to_date,
+        # # Active search params
+        # 'search_query'   : search_query,
+        # 'prop_type_query': prop_type,
+        # 'bhk_query'      : bhk_filter,
+        # 'furnish_query'  : furnish,
+        # 'zone_query'     : zone_filter,
+        # 'ownership_query': ownership,
+        # 'negotiable_query': negotiable,
+        # 'from_date'      : from_date,
+        # 'to_date'        : to_date,
 
-        # Row 1 — Inventory
-        'total_negotiable' : total_negotiable,
-        'total_furnished'  : total_furnished,
-        'total_freehold'   : total_freehold,
-        'total_with_images': total_with_images,
-        'negotiable_pct'   : negotiable_pct,
-        'furnished_pct'    : furnished_pct,
-        'freehold_pct'     : freehold_pct,
-        'images_pct'       : images_pct,
+        # # Row 1 — Inventory
+        # 'total_negotiable' : total_negotiable,
+        # 'total_furnished'  : total_furnished,
+        # 'total_freehold'   : total_freehold,
+        # 'total_with_images': total_with_images,
+        # 'negotiable_pct'   : negotiable_pct,
+        # 'furnished_pct'    : furnished_pct,
+        # 'freehold_pct'     : freehold_pct,
+        # 'images_pct'       : images_pct,
 
-        # Row 2 — Pricing
-        'avg_price'       : avg_price,
-        'max_price'       : max_price,
-        'min_price'       : min_price,
-        'avg_price_sqft'  : avg_price_sqft,
-        'total_with_loan' : total_with_loan,
+        # # Row 2 — Pricing
+        # 'avg_price'       : avg_price,
+        # 'max_price'       : max_price,
+        # 'min_price'       : min_price,
+        # 'avg_price_sqft'  : avg_price_sqft,
+        # 'total_with_loan' : total_with_loan,
 
-        # Row 3 — Legal
-        'no_dispute_count' : no_dispute_count,
-        'dispute_count'    : dispute_count,
-        'tax_pending_count': tax_pending_count,
-        'tenant_occupied'  : tenant_occupied,
-        'avg_builtup'      : avg_builtup,
-        'premium_count'    : premium_count,
+        # # Row 3 — Legal
+        # 'no_dispute_count' : no_dispute_count,
+        # 'dispute_count'    : dispute_count,
+        # 'tax_pending_count': tax_pending_count,
+        # 'tenant_occupied'  : tenant_occupied,
+        # 'avg_builtup'      : avg_builtup,
+        # 'premium_count'    : premium_count,
 
-        # Row 4 — Quality
-        'with_video_count': with_video_count,
-        'with_floor_plan' : with_floor_plan,
-        'with_owner_count': with_owner_count,
-        'budget_count'    : budget_count,
+        # # Row 4 — Quality
+        # 'with_video_count': with_video_count,
+        # 'with_floor_plan' : with_floor_plan,
+        # 'with_owner_count': with_owner_count,
+        # 'budget_count'    : budget_count,
 
-        # Charts
-        'property_type_counts': property_type_counts,
-        'bhk_counts'          : bhk_counts,
-        'fully_furnished'     : fully_furnished,
-        'semi_furnished'      : semi_furnished,
-        'unfurnished'         : unfurnished,
-        'zone_counts'         : zone_counts,
+        # # Charts
+        # 'property_type_counts': property_type_counts,
+        # 'bhk_counts'          : bhk_counts,
+        # 'fully_furnished'     : fully_furnished,
+        # 'semi_furnished'      : semi_furnished,
+        # 'unfurnished'         : unfurnished,
+        # 'zone_counts'         : zone_counts,
 
-        # Select2 unique options
-        'unique_prop_types' : unique_prop_types,
-        'unique_bhk_values' : unique_bhk_values,
-        'unique_zones'      : unique_zones,
-        'unique_cities'     : unique_cities,
+        # # Select2 unique options
+        # 'unique_prop_types' : unique_prop_types,
+        # 'unique_bhk_values' : unique_bhk_values,
+        # 'unique_zones'      : unique_zones,
+        # 'unique_cities'     : unique_cities,
 
-        'uploaded_files': uploaded_files,
+        # 'uploaded_files': uploaded_files,
     }
 
     return render(request, 'admin_user/Reports/Resale/residential_resale_list.html', context)
@@ -14778,187 +15318,150 @@ def commercial_resale_list(request):
         except User_Details.DoesNotExist:
             return render(request, 'home_page/Adminlogin.html')
 
-    # ── Base Queryset ──────────────────────────────────────
-    props = CommercialResaleProperty.objects.filter(is_deleted=False)
+    # # ── Base Queryset ──────────────────────────────────────
+    # props = CommercialResaleProperty.objects.filter(is_deleted=False)
 
-    # ── Advanced Real-Time Extraction Filters ──────────────
-    search_query = request.GET.get('search_query', '').strip()
-    property_type = request.GET.get('property_type', '').strip()
-    zone_type = request.GET.get('zone_type', '').strip()
-    city = request.GET.get('city', '').strip()
-    property_condition = request.GET.get('property_condition', '').strip()
-    ownership_type = request.GET.get('ownership_type', '').strip()
-    status_filter = request.GET.get('status_filter', '').strip()
+    # # ── Advanced Real-Time Extraction Filters ──────────────
+    # search_query = request.GET.get('search_query', '').strip()
+    # property_type = request.GET.get('property_type', '').strip()
+    # zone_type = request.GET.get('zone_type', '').strip()
+    # city = request.GET.get('city', '').strip()
+    # property_condition = request.GET.get('property_condition', '').strip()
+    # ownership_type = request.GET.get('ownership_type', '').strip()
+    # status_filter = request.GET.get('status_filter', '').strip()
     
-    start_date_str = request.GET.get('start_date', '').strip()
-    end_date_str = request.GET.get('end_date', '').strip()
+    # start_date_str = request.GET.get('start_date', '').strip()
+    # end_date_str = request.GET.get('end_date', '').strip()
 
-    # 1. Global text lookup matching primary data vectors
-    if search_query:
-        props = props.filter(
-            Q(property_title__icontains=search_query) |
-            Q(area_locality__icontains=search_query) |
-            Q(building_name__icontains=search_query) |
-            Q(owner_name__icontains=search_query)
-        )
+    # # 1. Global text lookup matching primary data vectors
+    # if search_query:
+    #     props = props.filter(
+    #         Q(property_title__icontains=search_query) |
+    #         Q(area_locality__icontains=search_query) |
+    #         Q(building_name__icontains=search_query) |
+    #         Q(owner_name__icontains=search_query)
+    #     )
 
-    # 2. Dropdown exact match filters
-    if property_type:
-        props = props.filter(property_type=property_type)
-    if zone_type:
-        props = props.filter(zone_type=zone_type)
-    if city:
-        props = props.filter(city__iexact=city)
-    if property_condition:
-        props = props.filter(property_condition=property_condition)
-    if ownership_type:
-        props = props.filter(ownership_type=ownership_type)
+    # # 2. Dropdown exact match filters
+    # if property_type:
+    #     props = props.filter(property_type=property_type)
+    # if zone_type:
+    #     props = props.filter(zone_type=zone_type)
+    # if city:
+    #     props = props.filter(city__iexact=city)
+    # if property_condition:
+    #     props = props.filter(property_condition=property_condition)
+    # if ownership_type:
+    #     props = props.filter(ownership_type=ownership_type)
         
-    # 3. Active/Inactive Status toggle matches
-    if status_filter:
-        if status_filter == 'active':
-            props = props.filter(is_active=True)
-        elif status_filter == 'inactive':
-            props = props.filter(is_active=False)
+    # # 3. Active/Inactive Status toggle matches
+    # if status_filter:
+    #     if status_filter == 'active':
+    #         props = props.filter(is_active=True)
+    #     elif status_filter == 'inactive':
+    #         props = props.filter(is_active=False)
 
-    # 4. Strict Date-Range queries with automated datetime conversions
-    if start_date_str:
-        try:
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-            props = props.filter(created_at__gte=start_date)
-        except ValueError:
-            pass
+    # # 4. Strict Date-Range queries with automated datetime conversions
+    # if start_date_str:
+    #     try:
+    #         start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+    #         props = props.filter(created_at__gte=start_date)
+    #     except ValueError:
+    #         pass
             
-    if end_date_str:
-        try:
-            # Append 23:59:59 to capture the entire final calendar day
-            end_date = datetime.strptime(end_date_str + ' 23:59:59', '%Y-%m-%d %H:%M:%S')
-            props = props.filter(created_at__lte=end_date)
-        except ValueError:
-            pass
+    # if end_date_str:
+    #     try:
+    #         # Append 23:59:59 to capture the entire final calendar day
+    #         end_date = datetime.strptime(end_date_str + ' 23:59:59', '%Y-%m-%d %H:%M:%S')
+    #         props = props.filter(created_at__lte=end_date)
+    #     except ValueError:
+    #         pass
 
-    # ── ORDERING FIX ───────────────────────────────────────
-    # Order results matching historical sequence trends
-    # Changed from '-id' to '-created_at' due to the new UUID string format
-    props = props.order_by('-created_at')
+    # # ── ORDERING FIX ───────────────────────────────────────
+    # # Order results matching historical sequence trends
+    # # Changed from '-id' to '-created_at' due to the new UUID string format
+    # props = props.order_by('-created_at')
 
-    # ── Dynamic Metric Aggregations (Reflects Filtered Querysets) ──
-    # SECTION 1: Portfolio Quantities
-    total_properties = props.count()
-    active_properties = props.filter(is_active=True).count()
-    inactive_properties = props.filter(is_active=False).count()
+    # # ── Dynamic Metric Aggregations (Reflects Filtered Querysets) ──
+    # # SECTION 1: Portfolio Quantities
+    # total_properties = props.count()
+    # active_properties = props.filter(is_active=True).count()
+    # inactive_properties = props.filter(is_active=False).count()
 
-    # SECTION 2: Financial Aggregations & Capital Under Management
-    avg_price = props.aggregate(Avg('expected_price'))['expected_price__avg'] or 0
-    avg_price_per_sqft = props.aggregate(Avg('price_per_sqft'))['price_per_sqft__avg'] or 0
+    # # SECTION 2: Financial Aggregations & Capital Under Management
+    # avg_price = props.aggregate(Avg('expected_price'))['expected_price__avg'] or 0
+    # avg_price_per_sqft = props.aggregate(Avg('price_per_sqft'))['price_per_sqft__avg'] or 0
     
-    raw_portfolio_sum = props.aggregate(Sum('expected_price'))['expected_price__sum'] or 0
+    # raw_portfolio_sum = props.aggregate(Sum('expected_price'))['expected_price__sum'] or 0
     
-    # Elegant short notation scale conversion formatting for large asset valuations (Crores / Lakhs)
-    if raw_portfolio_sum >= 10000000:
-        total_portfolio_value = f"{round(raw_portfolio_sum / 10000000, 2)} Cr"
-    elif raw_portfolio_sum >= 100000:
-        total_portfolio_value = f"{round(raw_portfolio_sum / 100000, 2)} L"
-    else:
-        total_portfolio_value = f"₹{raw_portfolio_sum:,}"
+    # # Elegant short notation scale conversion formatting for large asset valuations (Crores / Lakhs)
+    # if raw_portfolio_sum >= 10000000:
+    #     total_portfolio_value = f"{round(raw_portfolio_sum / 10000000, 2)} Cr"
+    # elif raw_portfolio_sum >= 100000:
+    #     total_portfolio_value = f"{round(raw_portfolio_sum / 100000, 2)} L"
+    # else:
+    #     total_portfolio_value = f"₹{raw_portfolio_sum:,}"
 
-    # Brokerage Performance Metrics tracking
-    brokered_deals_count = props.filter(brokerage__iexact='yes').count()
-    brokerage_with_fees_count = props.filter(brokerage__iexact='yes').exclude(brokerage_percentage='').count()
+    # # Brokerage Performance Metrics tracking
+    # brokered_deals_count = props.filter(brokerage__iexact='yes').count()
+    # brokerage_with_fees_count = props.filter(brokerage__iexact='yes').exclude(brokerage_percentage='').count()
 
-    # SECTION 3: Property Mix Distribution
-    office_count     = props.filter(property_type='office').count()
-    shop_count       = props.filter(property_type='shop').count()
-    warehouse_count  = props.filter(property_type='warehouse').count()
-    industrial_count = props.filter(property_type='industrial').count()
-    land_count       = props.filter(property_type='land').count()
+    # # SECTION 3: Property Mix Distribution
+    # office_count     = props.filter(property_type='office').count()
+    # shop_count       = props.filter(property_type='shop').count()
+    # warehouse_count  = props.filter(property_type='warehouse').count()
+    # industrial_count = props.filter(property_type='industrial').count()
+    # land_count       = props.filter(property_type='land').count()
 
-    # Extract dynamic list arrays for autocomplete filter options lookups
-    distinct_cities = CommercialResaleProperty.objects.filter(is_deleted=False).values_list('city', flat=True).distinct()
+    # # Extract dynamic list arrays for autocomplete filter options lookups
+    # distinct_cities = CommercialResaleProperty.objects.filter(is_deleted=False).values_list('city', flat=True).distinct()
     
-    # Uploaded Excel Files for Bulk Delete Dropdown
-    # ── FIX APPLIED: Changed uploaded_file_name to upload_file_name ──
-    uploaded_files = (
-        CommercialResaleProperty.objects
-        .filter(is_deleted=False)
-        .exclude(upload_file_name__isnull=True)
-        .exclude(upload_file_name='')
-        .values_list('upload_file_name', flat=True)
-        .distinct()
-        .order_by('upload_file_name')
-    )
+    # # Uploaded Excel Files for Bulk Delete Dropdown
+    # # ── FIX APPLIED: Changed uploaded_file_name to upload_file_name ──
+    # uploaded_files = (
+    #     CommercialResaleProperty.objects
+    #     .filter(is_deleted=False)
+    #     .exclude(upload_file_name__isnull=True)
+    #     .exclude(upload_file_name='')
+    #     .values_list('upload_file_name', flat=True)
+    #     .distinct()
+    #     .order_by('upload_file_name')
+    # )
 
-    # ── Chart Data 1: Property Type Pie ────────────────────
-    type_map = {
-        'office': 'Office Space',
-        'shop': 'Shop/Showroom',
-        'warehouse': 'Warehouse',
-        'industrial': 'Industrial',
-        'land': 'Commercial Land',
-    }
-    type_qs = props.values('property_type').annotate(count=Count('id'))
-    type_labels = [type_map.get(x['property_type'], x['property_type'].upper()) for x in type_qs]
-    type_data = [x['count'] for x in type_qs]
+    # # ── Chart Data 1: Property Type Pie ────────────────────
+    # type_map = {
+    #     'office': 'Office Space',
+    #     'shop': 'Shop/Showroom',
+    #     'warehouse': 'Warehouse',
+    #     'industrial': 'Industrial',
+    #     'land': 'Commercial Land',
+    # }
+    # type_qs = props.values('property_type').annotate(count=Count('id'))
+    # type_labels = [type_map.get(x['property_type'], x['property_type'].upper()) for x in type_qs]
+    # type_data = [x['count'] for x in type_qs]
 
-    # ── Chart Data 2: Monthly Timeline (Current Year) ──────
-    current_year = timezone.now().year
-    monthly_data = [0] * 12
-    monthly_qs = props.filter(created_at__year=current_year).values('created_at__month').annotate(count=Count('id'))
-    for x in monthly_qs:
-        monthly_data[x['created_at__month'] - 1] = x['count']
+    # # ── Chart Data 2: Monthly Timeline (Current Year) ──────
+    # current_year = timezone.now().year
+    # monthly_data = [0] * 12
+    # monthly_qs = props.filter(created_at__year=current_year).values('created_at__month').annotate(count=Count('id'))
+    # for x in monthly_qs:
+    #     monthly_data[x['created_at__month'] - 1] = x['count']
 
-    # ── Chart Data 3: Zone Distribution ────────────────────
-    zone_map = {
-        'industrial': 'Industrial',
-        'commercial': 'Commercial',
-        'residential': 'Residential',
-        'sez': 'SEZ',
-    }
-    zone_qs = props.values('zone_type').annotate(count=Count('id'))
-    zone_labels = [zone_map.get(x['zone_type'], x['zone_type'].upper()) for x in zone_qs]
-    zone_data = [x['count'] for x in zone_qs]
+    # # ── Chart Data 3: Zone Distribution ────────────────────
+    # zone_map = {
+    #     'industrial': 'Industrial',
+    #     'commercial': 'Commercial',
+    #     'residential': 'Residential',
+    #     'sez': 'SEZ',
+    # }
+    # zone_qs = props.values('zone_type').annotate(count=Count('id'))
+    # zone_labels = [zone_map.get(x['zone_type'], x['zone_type'].upper()) for x in zone_qs]
+    # zone_data = [x['count'] for x in zone_qs]
 
     context = {
         'admin_obj': admin_obj,
         'user_obj' : user_obj,
-        'commercial_list': props,
-
-        'uploaded_files': uploaded_files,
-        # Metrics values (Reflecting custom grouped updates)
-        'total_properties': total_properties,
-        'active_properties': active_properties,
-        'inactive_properties': inactive_properties,
         
-        'avg_price': avg_price,
-        'avg_price_per_sqft': avg_price_per_sqft,
-        'total_portfolio_value': total_portfolio_value,
-        'brokered_deals_count': brokered_deals_count,
-        'brokerage_with_fees_count': brokerage_with_fees_count,
-        
-        'office_count'    : office_count,
-        'shop_count'      : shop_count,
-        'warehouse_count' : warehouse_count,
-        'industrial_count': industrial_count,
-        'land_count'      : land_count,
-        'distinct_cities': distinct_cities,
-
-        # Retained Filter Form States
-        'search_query': search_query,
-        'property_type': property_type,
-        'zone_type': zone_type,
-        'city_selected': city,
-        'property_condition': property_condition,
-        'ownership_type': ownership_type,
-        'status_filter': status_filter,
-        'start_date': start_date_str,
-        'end_date': end_date_str,
-
-        # Structured Analytics
-        'chart_type_labels' : json.dumps(type_labels),
-        'chart_type_data'   : json.dumps(type_data),
-        'chart_monthly_data': json.dumps(monthly_data),
-        'chart_zone_labels' : json.dumps(zone_labels),
-        'chart_zone_data'   : json.dumps(zone_data),
     }
 
     return render(request, 'admin_user/Reports/Resale/commercial_list.html', context)
@@ -17118,6 +17621,141 @@ def agricultural_resale_list(request):
     }
     return render(request, 'admin_user/Reports/Resale/agricultural_list.html', context)
 
+
+########### Views start for plot residential list ##########################
+
+def residential_plot_resale_list(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Reports/Resale_Plot/residential_plot_resale_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for plot residential list ################################
+
+
+############# Views start for plot residential form #####################
+
+def residential_plot_resale(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Resale_plot/residential_plot_resale.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for plot residential form #################################
+
+
+########### Views start for plot commercial list ###########################
+
+def commercial_plot_resale_list(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Reports/Resale_Plot/commercial_plot_resale_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############## Views end for plot commercial list ###########################
+
+
+########### Views start for plot commercial form ##########################
+
+def commercial_plot_resale(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Resale_plot/commercial_plot_resale.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############## Views end for plot commercial form ###########################
+
+
+############ Views start for plot industrial list #######################
+
+def industrial_plot_resale_list(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Reports/Resale_Plot/industrial_plot_resale_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for plot industrial list ###############################
+
+
+########## Views start for plot industrial form ################################
+
+def industrial_plot_resale(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Resale_plot/industrial_plot_resale.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for plot industrail form ######################
+
+
+############# Views start for plot agricultural list ######################
+
+def agricultural_plot_resale_list(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Reports/Resale_Plot/agricultural_plot_resale_list.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+########### Views end for plot agricultural list #########################
+
+
+########## Views start for plot agricultural form #######################
+
+def agricultural_plot_resale(request):
+    session_id = request.session.get('Admin_id')
+    if session_id:
+        admin_obj = Admin_Login.objects.get(id=session_id)
+        ameneties_obj = Ameneties_Details.objects.all()
+        facilities_obj = Facilities_Details.objects.all()
+        user_obj = User_Details.objects.all()
+        context = {'admin_obj':admin_obj,'ameneties_obj':ameneties_obj,'facilities_obj':facilities_obj,'user_obj':user_obj}
+        return render(request,"admin_user/Resale_plot/agricultural_plot_resale.html",context)
+    else:
+        return render(request,'home_page/Adminlogin.html')
+
+############# Views end for plot agricultural form ###########################
 
 
 

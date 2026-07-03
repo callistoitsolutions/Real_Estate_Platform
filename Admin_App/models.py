@@ -379,6 +379,31 @@ class User_Details(models.Model):
 
     def __str__(self):
         return str(self.user_id)+"-"+self.user_name+"-"+self.user_role
+
+
+############## Modal starts for subscription package details ###################
+
+class Package_Details(models.Model):
+   
+    package_id = models.CharField(max_length=200,blank=True,null=True)
+    package_name = models.CharField(max_length=200,blank=True,null=True)
+    package_upload_date = models.DateField(blank=True,null=True)
+    package_upload_time = models.TimeField(blank=True,null=True)
+
+    def __str__(self):
+        return str(self.package_id)+"-"+self.package_name
+
+############# Modal starts for subscription plan type details ################
+
+class Plan_Details(models.Model):
+   
+    plan_id = models.CharField(max_length=200,blank=True,null=True)
+    plan_name = models.CharField(max_length=200,blank=True,null=True)
+    plan_upload_date = models.DateField(blank=True,null=True)
+    plan_upload_time = models.TimeField(blank=True,null=True)
+
+    def __str__(self):
+        return str(self.plan_id)+"-"+self.plan_name
     
 
 ########### Modal starts for subscription details model #########################
@@ -1602,7 +1627,6 @@ def generate_resale_unique_property_id():
 
 
 class ResaleResidentialProperty(models.Model):
-    # ── SYSTEM CONTROL & IDENTIFICATION ─────────────────────
     id = models.CharField(
         max_length=50, 
         primary_key=True, 
@@ -1610,78 +1634,97 @@ class ResaleResidentialProperty(models.Model):
         editable=False,
         help_text="Automated unique serial lookup tracking tag"
     )
+
+    ############## Listed By Section ###############################
+
+    listed_by_type = models.CharField(max_length=255, blank=True, null=True)
+    assigned_to = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_id = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_name = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_email = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_contact = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_role = models.CharField(max_length=255, blank=True, null=True)
+
+
+    ############# Basic Information Section #############################
+
     property_title = models.CharField(max_length=255, blank=True, null=True)
-
-    # ── STEP 1: BASIC INFO & CONFIGURATION ──────────────────
-    property_type = models.CharField(max_length=50) 
+    property_type = models.CharField(max_length=255,blank=True,null=True) 
     property_no = models.CharField(max_length=100, blank=True, null=True)
-    zone = models.CharField(max_length=50)          
-    society_type = models.CharField(max_length=50)  
-    water_type = models.CharField(max_length=50)    
-    furnishing_type = models.CharField(max_length=50) 
-    age_of_property = models.CharField(max_length=50) 
-    facing_direction = models.CharField(max_length=50)          
+    society_type = models.CharField(max_length=100, blank=True, null=True)      
+    wing_no = models.CharField(max_length=100, blank=True, null=True)      
+    water_type = models.CharField(max_length=100, blank=True, null=True)      
+    furnishing_status = models.CharField(max_length=100, blank=True, null=True)      
+    property_age = models.CharField(max_length=100, blank=True, null=True)      
+    facing_direction = models.CharField(max_length=100, blank=True, null=True)      
+    occupancy_status = models.CharField(max_length=100, blank=True, null=True)      
 
-    # Property Configuration
-    bhk = models.CharField(max_length=20)             
-    bathrooms = models.PositiveIntegerField(default=1)
-    balconies = models.PositiveIntegerField(default=0)
-    covered_parking = models.PositiveIntegerField(default=0)
-    open_parking = models.PositiveIntegerField(default=0)
+    ################## Property Measurements Section ###########################
 
-    # Measurements
-    builtup_area = models.DecimalField(max_digits=12, decimal_places=2)
-    carpet_area = models.DecimalField(max_digits=12, decimal_places=2)
-    plot_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    floor_no = models.IntegerField() 
-    total_floors = models.PositiveIntegerField()
+    builtup_area = models.DecimalField(max_digits=12, decimal_places=2)             
+    carpet_area = models.DecimalField(max_digits=12, decimal_places=2)             
+    plot_area = models.DecimalField(max_digits=12, decimal_places=2)             
+    building_configuration = models.CharField(max_length=100, blank=True, null=True)
+    total_floors = models.PositiveIntegerField(default=1)
+    brokerage_percentage = models.CharField(max_length=100, blank=True, null=True)
+    manual_brokerage = models.PositiveIntegerField(default=0)
 
-    # ── STEP 2: LEGAL & PRICING DETAILS ─────────────────────
-    ownership_type = models.CharField(max_length=50)   
-    num_owners = models.CharField(max_length=20)       
-    
-    loan_on_property = models.CharField(max_length=5, default='no') 
+    ################## Property Configuration Section ###########################
+
+    bhk = models.CharField(max_length=100, blank=True, null=True)
+    bathrooms = models.IntegerField(default=0) 
+    balconies = models.IntegerField(default=0) 
+    covered_parking = models.IntegerField(default=0) 
+    open_parking = models.CharField(max_length=100, blank=True, null=True)
+
+    ############# Legal and Pricing Section ##########################
+
+    no_of_owners = models.CharField(max_length=50,blank=True,null=True)   
+    ownership_status = models.CharField(max_length=50,blank=True,null=True)   
+    ownership_document_type = models.CharField(max_length=50,blank=True,null=True)   
+    title_clarity_status = models.CharField(max_length=50,blank=True,null=True)   
+    encumbrance_status = models.CharField(max_length=50,blank=True,null=True)   
+    property_loan = models.CharField(max_length=5,blank=True,null=True,default='no')   
     loan_amount = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
-    
-    existing_tenants = models.CharField(max_length=5, default='no')
-    tenant_details = models.TextField(blank=True, null=True)
-    
-    any_legal_dispute = models.CharField(max_length=5, default='no')
-    dispute_details = models.TextField(blank=True, null=True)
-    
-    government_tax_dues = models.CharField(max_length=5, default='no')
+    existing_tenants = models.CharField(max_length=5, default='no',blank=True,null=True)         
+    tenant_details = models.TextField(blank=True, null=True) 
+    any_legal_dispute = models.CharField(max_length=5, default='no',blank=True,null=True)
+    dispute_details = models.TextField(blank=True, null=True)  
+    government_tax = models.CharField(max_length=5, default='no',blank=True,null=True)
     pending_tax_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    sanctioning_authority =  models.TextField(blank=True, null=True)
 
-    expected_price = models.DecimalField(max_digits=15, decimal_places=2)
+    ################### Pricing Details ##############################
+
+    selling_price = models.DecimalField(max_digits=15, decimal_places=2)
     price_per_sqft = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) 
-    price_negotiable = models.CharField(max_length=5, default='yes') 
-    
-    brokerage = models.CharField(max_length=5, blank=True, null=True) 
-    brokerage_percentage = models.CharField(max_length=50, blank=True, null=True) 
-    manual_brokerage = models.CharField(max_length=100, blank=True, null=True)
-    
+    price_negotiable = models.CharField(max_length=5, default='yes')
+
+    ############# Ameneties and Facilities Section ############################ 
+
+    nearby_facilities = models.TextField(blank=True, null=True) 
+    amenities = models.TextField(blank=True, null=True)
     property_summary = models.TextField(blank=True, null=True)
     property_description = models.TextField(blank=True, null=True)
-    user_description = models.TextField(blank=True, null=True) 
-
-    # ── STEP 3: AMENITIES & LOCATION ────────────────────────
-    nearby_facilities = models.TextField(blank=True, null=True) 
-    amenities = models.TextField(blank=True, null=True)         
+    user_description = models.TextField(blank=True, null=True)
     
-    city = models.CharField(max_length=100)
-    locality = models.CharField(max_length=150)
+    ################ Location Details Section #############################
+
+    city = models.CharField(max_length=100,blank=True,null=True)
+    locality = models.CharField(max_length=150,blank=True,null=True)
     building_name = models.CharField(max_length=200, blank=True, null=True)
-    complete_address = models.TextField()
+    property_landmark = models.CharField(max_length=200, blank=True, null=True)
+    state = models.CharField(max_length=200, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    
+    ############## Property Images Docs and Videos Section ###########################
 
-    owner_name = models.CharField(max_length=150)
-    owner_contact = models.CharField(max_length=20)
-    owner_email = models.EmailField()
-    owner_role = models.CharField(max_length=50, blank=True, null=True)
-    residential_status = models.CharField(max_length=20) 
-
-    # ── STEP 4: PHOTOS & PUBLISH SYSTEM ─────────────────────
     floor_plan = models.ImageField(upload_to='properties/floor_plans/', null=True, blank=True) 
     property_video = models.FileField(upload_to='properties/videos/', null=True, blank=True)
+    listed_elsewhere = models.CharField(max_length=150, blank=True, null=True)
+    portal_name = models.CharField(max_length=150, blank=True, null=True)
+
+    ############## Listing Uploaded By Section ############################
 
     uploaded_by_name = models.CharField(max_length=150, blank=True, null=True)
     uploaded_by_email = models.EmailField(blank=True, null=True)
@@ -1689,15 +1732,7 @@ class ResaleResidentialProperty(models.Model):
     uploaded_by_role = models.CharField(max_length=50, blank=True, null=True)
     upload_file_name = models.CharField(max_length=255, blank=True, null=True)
 
-    listed_by_id = models.CharField(max_length=150, blank=True, null=True)
-
-    listed_by_name = models.CharField(max_length=150, blank=True, null=True)
-
-    listed_by_email = models.CharField(max_length=20, blank=True, null=True)
-
-    listed_by_contact = models.CharField(max_length=100, blank=True, null=True)
-
-    listed_by_role = models.CharField(max_length=255, blank=True, null=True)
+    ############### Timestamp and other dettails ###########################
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1966,7 +2001,7 @@ def generate_property_id():
 
 
 class CommercialResaleProperty(models.Model):
-    # ── SYSTEM CONTROL & IDENTIFICATION ─────────────────────
+
     id = models.CharField(
         max_length=50,
         primary_key=True,
@@ -1974,92 +2009,108 @@ class CommercialResaleProperty(models.Model):
         editable=False,
         help_text="Automated unique serial lookup tracking tag"
     )
+
+    ############## Listed By Section ###############################
+
+    listed_by_type = models.CharField(max_length=255, blank=True, null=True)
+    assigned_to = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_id = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_name = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_email = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_contact = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_role = models.CharField(max_length=255, blank=True, null=True)
+
+    ############ Basic Information Section #############################
+
     property_title = models.CharField(max_length=255, blank=True, null=True)
+    property_type = models.CharField(max_length=50,blank=True,null=True)  
+    property_category = models.CharField(max_length=50,blank=True,null=True)  
+    property_no = models.CharField(max_length=100, blank=True, null=True) 
+    occupancy_status = models.CharField(max_length=50,blank=True,null=True)
+    location_hub = models.CharField(max_length=50, blank=True, null=True)
+    zone_type = models.CharField(max_length=50,blank=True,null=True)
+    location_hub = models.CharField(max_length=50,blank=True,null=True)
+    property_condition = models.CharField(max_length=50,blank=True,null=True)
+    property_age = models.CharField(max_length=50,blank=True,null=True)
+    furnishing_status = models.CharField(max_length=50,blank=True,null=True)
+    facing_direction = models.CharField(max_length=50,blank=True,null=True)
 
-    # ── STEP 1: BASIC INFO & SPECIFICATIONS ──────────────────
-    property_type = models.CharField(max_length=50)  
-    property_no = models.CharField(max_length=100, blank=True, null=True)      # office, shop, warehouse, industrial, land
-    zone_type = models.CharField(max_length=50)            # industrial, commercial, residential, sez
-    location_hub = models.CharField(max_length=50, blank=True, null=True)  # it, business, mall, standalone
-    property_condition = models.CharField(max_length=50)   # new, excellent, good, renovation
-    ownership_type = models.CharField(max_length=50)       # freehold, leasehold, cooperative
-    age_of_property = models.CharField(max_length=50)      # 0-1, 1-3, 3-5, 5-10, 10+
+    ################# Area Measurements Section ##############################
 
-    # Commercial Specifications
-    num_staircases = models.PositiveIntegerField(default=0, blank=True, null=True)
-    passenger_lifts = models.PositiveIntegerField(default=0)
-    service_lifts = models.PositiveIntegerField(default=0)
-    num_cabins = models.PositiveIntegerField(default=0, blank=True, null=True)
-    meeting_rooms = models.PositiveIntegerField(default=0, blank=True, null=True)
-    min_seats = models.PositiveIntegerField(blank=True, null=True)
-    max_seats = models.PositiveIntegerField(blank=True, null=True)
-    private_parking = models.PositiveIntegerField(default=0)
-    public_parking = models.PositiveIntegerField(default=0, blank=True, null=True)
-
-    # Area Measurements
-    builtup_area = models.DecimalField(max_digits=12, decimal_places=2)
+    builtup_area = models.DecimalField(max_digits=12, decimal_places=2,blank=True,null=True)
     carpet_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     plot_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
-    # ── STEP 2: LEGAL & PRICING DETAILS ─────────────────────
-    num_owners = models.CharField(max_length=20)           # 1, 2, 3, 4+
-    loan_on_property = models.CharField(max_length=5, default='no')
+    ############# Commercial Specifications Section ############################
+
+    no_staircases = models.PositiveIntegerField(default=0)
+    passenger_lifts = models.PositiveIntegerField(default=0, blank=True, null=True)
+    num_cabins = models.PositiveIntegerField(default=0, blank=True, null=True)
+    meeting_rooms = models.PositiveIntegerField(blank=True, null=True)
+    min_seats = models.PositiveIntegerField(blank=True, null=True)
+    max_seats = models.PositiveIntegerField(default=0)
+    private_parking = models.PositiveIntegerField(default=0, blank=True, null=True)
+    public_parking = models.PositiveIntegerField(default=0, blank=True, null=True)
+    public_parking = models.PositiveIntegerField(default=0, blank=True, null=True)
+    brokerage_percentage = models.CharField(max_length=100, blank=True, null=True)
+    manual_brokerage = models.PositiveIntegerField(default=0)
+
+    ############### Ownership and Legal Details Section #######################
+   
+    no_of_owners = models.CharField(max_length=20,blank=True,null=True)
+    ownership_status = models.CharField(max_length=20,blank=True,null=True)
+    ownership_document_type = models.CharField(max_length=20,blank=True,null=True)
+    title_clarity_status = models.CharField(max_length=20,blank=True,null=True)
+    encumbrance_status = models.CharField(max_length=20,blank=True,null=True)
+    property_loan = models.CharField(max_length=5, default='no')
     loan_amount = models.DecimalField(max_digits=15, decimal_places=2, blank=True, null=True)
     existing_tenants = models.CharField(max_length=5, default='no')
     tenant_details = models.TextField(blank=True, null=True)
     any_legal_dispute = models.CharField(max_length=5, default='no')
     dispute_details = models.TextField(blank=True, null=True)
-    government_tax_dues = models.CharField(max_length=5, default='no')
+    government_tax = models.CharField(max_length=5, default='no')
     pending_tax_amount = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
-    fire_safety_noc_available = models.CharField(max_length=5, blank=True, null=True)
+    fire_safety_noc = models.CharField(max_length=5, blank=True, null=True)
+    sanctioning_authority = models.TextField(blank=True, null=True)
 
-    # Pricing Metrics
-    brokerage = models.CharField(max_length=5, blank=True, null=True)
-    brokerage_percentage = models.CharField(max_length=50, blank=True, null=True)
-    manual_brokerage = models.CharField(max_length=100, blank=True, null=True)
-    expected_price = models.DecimalField(max_digits=15, decimal_places=2)
-    price_per_sqft = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)  # Auto-calculated in save()
-    property_summary = models.TextField() 
+    ################# Pricing Details Section ################################
+
+    selling_price = models.DecimalField(max_digits=15, decimal_places=2)
+    price_per_sqft = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True) 
+
+    ############# Ameneties and Neacby Facilities Section ############################
+
+    nearby_facilities = models.TextField(blank=True, null=True)  
+    amenities = models.TextField(blank=True, null=True)
     property_summary = models.TextField(blank=True, null=True)
     property_description = models.TextField(blank=True, null=True)
     user_description = models.TextField(blank=True, null=True)
 
-    # ── STEP 3: AMENITIES & LOCATION ────────────────────────
-    nearby_facilities = models.TextField(blank=True, null=True)  # Comma-separated list
-    amenities = models.TextField(blank=True, null=True)          # Comma-separated list
+    ############## Address Details Section ############################
 
-    city = models.CharField(max_length=100)
-    area_locality = models.CharField(max_length=100)
-    building_name = models.CharField(max_length=200, blank=True, null=True)
-    property_address = models.TextField()
+    city = models.CharField(max_length=100,blank=True,null=True)
+    locality = models.CharField(max_length=100,blank=True,null=True)
+    building_name = models.CharField(max_length=100,blank=True,null=True)
+    address = models.TextField(blank=True,null=True)
+    property_landmark = models.CharField(max_length=100,blank=True,null=True)
+    state = models.CharField(max_length=100,blank=True,null=True)
 
-    # Contact Sequence
-    owner_name = models.CharField(max_length=100)
-    owner_contact = models.CharField(max_length=20)
-    owner_email = models.EmailField()
-    owner_role = models.CharField(max_length=100, blank=True, null=True)  # ✅ ADDED — matches form name="owner_role"
-    residential_status = models.CharField(max_length=20)   # resident, nri, pio
+    ############# Property Images Docs and Videos Sections #########################
 
-    # ── STEP 4: PHOTOS & PUBLISH SYSTEM ─────────────────────
     floor_plan = models.ImageField(upload_to='commercial/floor_plans/', null=True, blank=True)
     property_video = models.FileField(upload_to='commercial/videos/', blank=True, null=True)
+    listed_elsewhere = models.CharField(max_length=100,blank=True,null=True)
+    portal_name = models.CharField(max_length=100,blank=True,null=True)
+
+    ############# Listing Uploaded By Section ############################
 
     uploaded_by_name = models.CharField(max_length=100, blank=True, null=True)
     uploaded_by_email = models.EmailField(blank=True, null=True)
     uploaded_by_contact = models.CharField(max_length=30, blank=True, null=True)
     uploaded_by_role = models.CharField(max_length=50, blank=True, null=True)
 
-    listed_by_id = models.CharField(max_length=150, blank=True, null=True)
+    ############# Timestamp and other details section ##########################
 
-    listed_by_name = models.CharField(max_length=150, blank=True, null=True)
-
-    listed_by_email = models.CharField(max_length=20, blank=True, null=True)
-
-    listed_by_contact = models.CharField(max_length=100, blank=True, null=True)
-
-    listed_by_role = models.CharField(max_length=255, blank=True, null=True)
-
-    # ── METRIC TIMESTAMPS & AUDITING TRAILS ──────────────────
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
@@ -2362,9 +2413,129 @@ class CommercialPropertyImage(models.Model):
 
 
 
-############## Models End for Resale Commericial  Property  model ############################ 
+########### Models End for Resale Commericial  Property  model ############################ ###
 
-#########################Start Model of RESALE PLOT LISTING####################3
+
+############### Modal Start for Residential Resale Plot ########################
+
+def generate_residential_resale_plot_id():
+    return f"EFPLT-{uuid.uuid4().hex[:8].upper()}"
+
+class ResidentialResalePlot(models.Model):
+    plot_property_id = models.CharField(
+        max_length=20,
+        primary_key=True,
+        default=generate_residential_resale_plot_id,
+        editable=False
+    )
+
+    ############## Listed By Section Details ############################
+
+    listed_by_type = models.CharField(max_length=255, blank=True, null=True)
+    assigned_to = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_id = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_name = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_email = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_contact = models.CharField(max_length=255, blank=True, null=True)
+    listed_by_role = models.CharField(max_length=255, blank=True, null=True)
+
+    ################## Basic Details Section #################################
+
+    property_title = models.CharField(max_length=255, blank=True, null=True)
+    plot_title = models.CharField(max_length=255,null=True,blank=True)
+    property_no = models.CharField(max_length=255,null=True,blank=True)
+    plot_area = models.DecimalField(max_digits=12, decimal_places=2)
+    property_type = models.CharField(max_length=255,null=True,blank=True)
+    
+    ############ Zone Classification and Approval Details #######################
+
+    land_use = models.CharField(max_length=150, blank=True, null=True)
+    na_status = models.CharField(max_length=10, blank=True,null=True)
+    layout_approval_status = models.CharField(max_length=10, blank=True,null=True)
+    residential_zone_type = models.CharField(max_length=10, blank=True,null=True)
+    gated_community = models.CharField(max_length=10, blank=True,null=True)
+    layout_name = models.CharField(max_length=10, blank=True,null=True)
+
+    ############ Plot specification and physical details #######################
+
+    plot_frontage = models.PositiveIntegerField(blank=True,null=True)
+    plot_depth = models.PositiveIntegerField(blank=True,null=True)
+    plot_shape = models.CharField(max_length=500, blank=True,null=True)
+    road_connectivity = models.CharField(max_length=500, blank=True,null=True)
+    road_width = models.CharField(max_length=500, blank=True,null=True)
+    corner_plot = models.CharField(max_length=500, blank=True,null=True)
+    plot_facing = models.CharField(max_length=500, blank=True,null=True)
+    plot_fencing = models.CharField(max_length=500, blank=True,null=True)
+    current_possession_status = models.CharField(max_length=500, blank=True,null=True)
+
+    ################# Pricing and Legal Detail Section ################################
+
+    price_per_sqft       = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    brokerage            = models.CharField(max_length=10, default='No')
+    brokerage_percentage = models.CharField(max_length=50, blank=True, null=True)
+    ownership_type       = models.CharField(max_length=100)
+    loan_on_property     = models.CharField(max_length=10, default='no')  # Kept as loan_on_property
+    plot_loan_amount     = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+
+
+    nearby_facilities = models.TextField(blank=True, null=True)  # Comma-separated list
+    amenities = models.TextField(blank=True, null=True) 
+
+    # ── STEP 3: Media & Certificates ─────────────────────────────
+    encumbrance_cert  = models.FileField(upload_to='plot_docs/certificates/', null=True, blank=True)
+    social_video      = models.FileField(upload_to='plot_docs/videos/', blank=True, null=True)
+
+    # ── STEP 4: Location & Contact ────────────────────────────────
+    plot_city          = models.CharField(max_length=100)
+    plot_locality      = models.CharField(max_length=150)
+    plot_address       = models.TextField()
+
+    property_summary = models.TextField(blank=True, null=True)
+    property_description = models.TextField(blank=True, null=True)
+    user_description = models.TextField(blank=True, null=True)
+
+    plot_owner_name    = models.CharField(max_length=150)
+    plot_owner_contact = models.CharField(max_length=20)
+    plot_owner_email   = models.EmailField()
+    plot_owner_role    = models.CharField(max_length=20, null=True, blank=True)
+
+    # ── Uploader / Audit ─────────────────────────────────────────
+    uploaded_by_name    = models.CharField(max_length=100, blank=True, null=True)
+    uploaded_by_role    = models.CharField(max_length=50, blank=True, null=True)
+    uploaded_by_email   = models.EmailField(blank=True, null=True)
+    uploaded_by_contact = models.CharField(max_length=30, blank=True, null=True)
+    upload_file_name    = models.CharField(max_length=255, blank=True, null=True)
+
+    listed_by_id = models.CharField(max_length=150, blank=True, null=True)
+
+    listed_by_name = models.CharField(max_length=150, blank=True, null=True)
+
+    listed_by_email = models.CharField(max_length=20, blank=True, null=True)
+
+    listed_by_contact = models.CharField(max_length=100, blank=True, null=True)
+
+    listed_by_role = models.CharField(max_length=255, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.CharField(max_length=150, blank=True, null=True)
+
+    class Meta:
+        verbose_name        = "Plot Sale Property"
+        verbose_name_plural = "Plot Sale Properties"
+        ordering            = ['-created_at']
+
+    def __str__(self):
+        return f"{self.plot_title or 'Plot'} ({self.plot_property_id})"
+
+############# Modal Ends for Residential Resale Plot ################################
+
+
+
+
+#########################Start Model of RESALE PLOT LISTING####################
 
 
 

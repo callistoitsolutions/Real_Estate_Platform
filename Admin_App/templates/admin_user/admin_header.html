@@ -1532,14 +1532,15 @@
 
             <li class="menu-section-title" style="color:white;">SUBSCRIPTION DETAILS</li>
 
-            <li class="menu-item">
+           <li class="menu-item">
                 <a  class="menu-link" onclick="toggleSubmenu(event, this)" id="Subscriptions">
                     <i class="fas fa-money-bill-wave menu-icon"></i>
                     <span class="menu-text" style="color:white;">Subscriptions</span>
                     <i class="fas fa-chevron-down dropdown-icon"></i>
                 </a>
                 <ul class="submenu">
-
+                    <li><a href="{% url "Subscriptions_Packages_List" %}" class="submenu-link" style="color:white;" id="Rent_Resident">Packages</a></li>
+                    <li><a href="{% url "Subscriptions_Plans_List" %}" class="submenu-link" style="color:white;">Plan type</a></li>
                     <li><a href="{% url 'Subscriptions_List' %}" class="submenu-link" style="color:white;">Subscriptions</a></li>
                 </ul>
             </li>
@@ -1572,7 +1573,7 @@
                 <ul class="submenu">
                     <li><a href="{% url 'residential_resale_list' %}" class="submenu-link" style="color:white;">Residential</a></li>
                     <li><a href="{% url 'commercial_resale_list' %}" class="submenu-link" style="color:white;">Commercial</a></li>
-                    <li><a href="{% url 'plot_resale_list' %}" class="submenu-link" style="color:white;">Plot/Land</a></li>
+                    {% comment %} <li><a href="{% url 'plot_resale_list' %}" class="submenu-link" style="color:white;">Plot/Land</a></li> {% endcomment %}
                     <li><a href="{% url 'industrial_resale_list' %}" class="submenu-link" style="color:white;">Industrial</a></li>
                     <li><a href="{% url 'agricultural_resale_list' %}" class="submenu-link" style="color:white;">Agricultural</a></li>
                 </ul>

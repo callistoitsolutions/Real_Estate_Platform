@@ -386,15 +386,28 @@ def update_enquiry_rm(request,id):
 
 def residential_rm_list(request):
     # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    # If they are an Admin, we only care that they have an impersonate_id.
+    # We don't care if their standard 'User_id' is missing.
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    user_role = user_obj.user_role
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
@@ -413,22 +426,39 @@ def residential_rm_list(request):
 
 def residential_rm(request):
     # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    user_role = user_obj.user_role
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
         'user_role': user_role,
-        'enquiry_obj_rm':enquiry_obj_rm
+        'enquiry_obj_rm':enquiry_obj_rm,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
     }
     
     return render(request, "rm_panel/Forms/Rental/residential.html", context)
@@ -440,21 +470,31 @@ def residential_rm(request):
 
 def commercial_rm_list(request):
     # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
+        'user_role': user_obj.user_role,
         'enquiry_obj_rm':enquiry_obj_rm
     }
     
@@ -467,22 +507,37 @@ def commercial_rm_list(request):
 
 def commercial_rm(request):
      # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
-        'enquiry_obj_rm':enquiry_obj_rm
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
     }
     
     return render(request, "rm_panel/Forms/Rental/commercial.html", context)
@@ -494,21 +549,31 @@ def commercial_rm(request):
 
 def pg_rm_list(request):
     # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
-    # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
+     # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
+        'user_role': user_obj.user_role,
         'enquiry_obj_rm':enquiry_obj_rm
     }
     
@@ -521,22 +586,37 @@ def pg_rm_list(request):
 
 def pg_rm(request):
     # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
-        'enquiry_obj_rm':enquiry_obj_rm
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
     }
     
     return render(request, "rm_panel/Forms/Rental/pg_coliving.html", context)
@@ -548,21 +628,31 @@ def pg_rm(request):
 
 def residential_resale_rm_list(request):
     # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
+        'user_role': user_obj.user_role,
         'enquiry_obj_rm':enquiry_obj_rm
     }
     
@@ -573,22 +663,37 @@ def residential_resale_rm_list(request):
 
 def residential_resale_rm(request):
     # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
-        'enquiry_obj_rm':enquiry_obj_rm
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
     }
     
     return render(request, "rm_panel/Forms/Resale/residential_resale.html", context)
@@ -599,22 +704,32 @@ def residential_resale_rm(request):
 ############ Views start for resale commercial property list ##################
 
 def commercial_resale_rm_list(request):
-    # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+     # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
+        'user_role': user_obj.user_role,
         'enquiry_obj_rm':enquiry_obj_rm
     }
     
@@ -626,23 +741,38 @@ def commercial_resale_rm_list(request):
 ########## Views start for resale property for commercial ####################
 
 def commercial_resale_rm(request):
-    # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+     # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
-        'enquiry_obj_rm':enquiry_obj_rm
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
     }
     
     return render(request, "rm_panel/Forms/Resale/commercial_resale.html", context)
@@ -653,22 +783,32 @@ def commercial_resale_rm(request):
 ########## Views start  for plot resale property list ######################
 
 def plot_resale_rm_list(request):
-    # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+     # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
+        'user_role': user_obj.user_role,
         'enquiry_obj_rm':enquiry_obj_rm
     }
     
@@ -680,22 +820,32 @@ def plot_resale_rm_list(request):
 ############# Views start for resale property from plot ##################
 
 def plot_resale_rm(request):
-    # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+     # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
+        'user_role': user_obj.user_role,
         'enquiry_obj_rm':enquiry_obj_rm
     }
     
@@ -704,26 +854,279 @@ def plot_resale_rm(request):
 ######### Views end for resale property from plot ########################
 
 
-########### Views start for industrial property list #########################
+######### Views start for residential plot list from rm ###################
 
-def industry_resale_rm_list(request):
+def plot_resale_res_rm_list(request):
     # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
-        'enquiry_obj_rm':enquiry_obj_rm
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+    }
+    
+    return render(request, "rm_panel/Reports/Resale/Plots/res_plots_list.html", context)
+
+########### Views end for residential plot list from rm ########################
+
+
+############### Views start for residential plot list form ####################
+
+def plot_resale_res_rm(request):
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "rm_panel/Forms/Resale/Plots/res_plots.html", context)
+
+############# Views end for residential plot list form ###########################
+
+
+########### Views start for commercial plot list for rm ########################
+
+def plot_resale_comm_rm_list(request):
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+    }
+    
+    return render(request, "rm_panel/Reports/Resale/Plots/comm_plots_list.html", context)
+
+######## Views end for commercial plot list for rm ###########################
+
+
+############## Views start for commercial plot for rm ####################
+
+def plot_resale_comm_rm(request):
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "rm_panel/Forms/Resale/Plots/comm_plots.html", context)
+
+############ Views end for commercial plot for rm #######################
+
+
+############ Views start for industrial plot list for rm ##################
+
+def plot_resale_ind_rm_list(request):
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+    
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+    }
+    
+    return render(request, "rm_panel/Reports/Resale/Plots/ind_plots_list.html", context)
+
+############ Views end for industrial plot list for rm #########################
+
+
+############# Views start for industrial plot for rm ###########################
+
+def plot_resale_ind_rm(request):
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "rm_panel/Forms/Resale/Plots/ind_plots.html", context)
+
+############# Views end for industrial plot for rm #############################
+
+
+########### Views start for industrial property list #########################
+
+def industry_resale_rm_list(request):
+     # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
     }
     
     return render(request, "rm_panel/Reports/Resale/industrial_list.html", context)
@@ -734,23 +1137,38 @@ def industry_resale_rm_list(request):
 ########### Views start for industrial resale property form #####################
 
 def industry_resale_rm(request):
-    # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+     # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
-        'enquiry_obj_rm':enquiry_obj_rm
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
     }
     
     return render(request, "rm_panel/Forms/Resale/industrial_resale.html", context)
@@ -758,25 +1176,116 @@ def industry_resale_rm(request):
 ############### Views end for industrial resale property form ######################
 
 
-############ Views start for agricultural resale property list #####################
+############## Views start for agricultural plot list for rm ####################
 
-def agriculture_resale_rm_list(request):
+def plot_resale_agri_rm_list(request):
     # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+    }
+    
+    return render(request, "rm_panel/Reports/Resale/Plots/agri_plots_list.html", context)
+
+############## Views end for agricultural plot list for rm #####################
+
+
+############ Views start for agricultural plot form #####################
+
+def plot_resale_agri_rm(request):
+    # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
+
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
+    }
+    
+    return render(request, "rm_panel/Forms/Resale/Plots/agri_plots.html", context)
+
+############# Views end for agricultural plot form ############################
+
+
+############ Views start for agricultural resale property list #####################
+
+def agriculture_resale_rm_list(request):
+     # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
+    # 3. Data Fetching: Get the full user object for the template
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+    
+    context = {
+        'user_obj': user_obj,
+        'user_role': user_obj.user_role,
         'enquiry_obj_rm':enquiry_obj_rm
     }
     
@@ -788,23 +1297,38 @@ def agriculture_resale_rm_list(request):
 ############ Views start for agricultural resale property form ######################
 
 def agriculture_resale_rm(request):
-    # 1. Retrieve identity from browser session
-    user_id = request.session.get('User_id')
-    user_role = request.session.get('user_type')
+     # 1. Retrieve identity from browser session
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
 
-    # 2. Access Control: If ID is missing OR role is wrong, redirect to login
-    if not user_id or user_role != "Relationship Manager":
+    #  2. UPDATED SECURITY CHECK
+    
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
 
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id 
+
     # 3. Data Fetching: Get the full user object for the template
-    user_obj = User_Details.objects.get(id=user_id)
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+
+    ameneties_obj = Ameneties_Details.objects.all()
+    facilities_obj = Facilities_Details.objects.all()
     
     context = {
         'user_obj': user_obj,
-        'user_role': user_role,
-        'enquiry_obj_rm':enquiry_obj_rm
+        'user_role': user_obj.user_role,
+        'enquiry_obj_rm':enquiry_obj_rm,
+        'ameneties_obj':ameneties_obj,
+        'facilities_obj':facilities_obj
     }
     
     return render(request, "rm_panel/Forms/Resale/agricultural_resale.html", context)
