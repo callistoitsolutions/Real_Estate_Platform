@@ -2303,15 +2303,16 @@
                                             placeholder="e.g., 5000000" required>
                                     </div>
                                 </div>
-                               <div class="col-md-4 mt-2">
-    <div class="form-group">
-        <label class="form-label" style="color:#11998e;"><i class="fas fa-calculator"></i> Price per Sq.ft (Auto)</label>
-        <input type="text" class="form-control" id="price_per_sqft_display"
-            placeholder="Calculated automatically..." readonly
-            style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
-        <input type="hidden" id="price_per_sqft" name="price_per_sqft">
-    </div>
-</div>
+                                <div class="col-md-4 mt-2">
+                                    <div class="form-group">
+                                        <label class="form-label" style="color:#11998e;"><i class="fas fa-calculator"></i> Price per Sq.ft (Auto)</label>
+                                        <input type="text" class="form-control" id="price_per_sqft" name="price_per_sqft"
+                                            placeholder="Calculated automatically..." readonly
+                                            style="background-color:#edf2f7; font-weight:700; color:#0369a1;">
+                                        <!-- Hidden field sends the raw number to your database -->
+                                        <input type="hidden" id="price_per_sqft" name="price_per_sqft">
+                                    </div>
+                                </div>
                                 <div class="col-md-4 mt-2">
                                     <div class="form-group">
                                         <label class="form-label">Selling Price Negotiable?</label>
@@ -3387,72 +3388,45 @@
     /* ══════════════════════════════════════════
        LIVE PREVIEW UPDATE & AUTO-CALCULATE
     ═════════════════════════════════════════════ */
-
-    /* ══════════════════════════════════════════
-       LIVE PREVIEW UPDATE & AUTO-CALCULATE
-    ═════════════════════════════════════════════ */
     function updatePreview() {
-        // 1. Update Price
         const price = document.getElementById('selling_price')?.value;
         if (price) {
-            document.getElementById('previewPrice').textContent = '₹' + parseInt(price).toLocaleString('en-IN');
-        } else {
-            document.getElementById('previewPrice').textContent = '₹ —';
+            document.getElementById('previewPrice').textContent =
+                '₹' + parseInt(price).toLocaleString('en-IN');
         }
 
-        // 2. Update BHK
         const bhk = document.getElementById('bhk')?.value;
         if (bhk) {
             document.getElementById('prevBHK').textContent = bhk.toUpperCase();
-        } else {
-            document.getElementById('prevBHK').textContent = '—';
         }
 
-        // 3. Update Area (Fixed ID: carpet_area)
-        const area = document.getElementById('carpet_area')?.value;
+        const area = document.getElementById('res_carpet_area')?.value;
         if (area) {
             document.getElementById('prevArea').textContent = area + ' sqft';
-        } else {
-            document.getElementById('prevArea').textContent = '— sqft';
         }
 
-        // 4. Update Locality & City (Fixed IDs: locality, city)
-        const locality = document.getElementById('locality')?.value;
-        const city = document.getElementById('city')?.value;
-        
+        const locality = document.getElementById('res_locality')?.value;
+        const city = document.getElementById('cityInput')?.value; // Uses your exact city input ID
         if (locality || city) {
             document.getElementById('previewLoc').innerHTML =
                 '<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ' +
                 (locality || 'Area') + ', ' + (city || 'City');
         }
 
-        // Auto-generate the Property Title
-        let autoTitle = '';
-        if (bhk) autoTitle += bhk.toUpperCase() + ' ';
-        const propType = document.getElementById('property_type');
-        if (propType && propType.value) {
-            autoTitle += propType.options[propType.selectedIndex].text + ' ';
-        }
-        if (locality || city) autoTitle += 'in ' + [locality, city].filter(Boolean).join(', ');
-        
-        const propTitleInput = document.getElementById('property_title');
-        if (propTitleInput && autoTitle.trim() !== '') {
-            propTitleInput.value = autoTitle.trim();
-            document.getElementById('previewTitle').textContent = autoTitle.trim();
-        }
-
-        // 5. AUTO-CALCULATE PRICE PER SQFT (Fixed IDs to match the HTML update)
+        // --- NEW: AUTO-CALCULATE PRICE PER SQFT ---
         const builtUpArea = document.getElementById('builtup_area')?.value;
-        const psfDisplay = document.getElementById('price_per_sqft_display'); 
-        const psfHidden = document.getElementById('price_per_sqft');
+        const psfDisplay = document.getElementById('res_price_per_sqft_display');
+        const psfHidden = document.getElementById('res_price_per_sqft');
 
         if (price && builtUpArea && parseFloat(builtUpArea) > 0) {
             const calculatedPsf = (parseFloat(price) / parseFloat(builtUpArea)).toFixed(2);
-            // Show formatted string to user
+
+            // Show formatted string to user (e.g. ₹ 5,000 / sqft)
             if (psfDisplay) psfDisplay.value = '₹ ' + parseFloat(calculatedPsf).toLocaleString('en-IN') + ' / sqft';
-            // Save raw number for backend
+            // Save raw number for backend submission
             if (psfHidden) psfHidden.value = calculatedPsf;
         } else {
+            // Clear if inputs are deleted
             if (psfDisplay) psfDisplay.value = '';
             if (psfHidden) psfHidden.value = '';
         }
@@ -3464,15 +3438,14 @@
        CHECKLIST UPDATE
     ═════════════════════════════════════════════ */
     function updateChecklist() {
-        // Fixed all IDs to match your actual HTML elements
-        setCheck('cl-type', !!document.getElementById('property_type')?.value);
-        setCheck('cl-bhk', !!document.getElementById('bhk')?.value);
-        setCheck('cl-area', !!document.getElementById('carpet_area')?.value);
-        setCheck('cl-price', !!document.getElementById('selling_price')?.value);
-        setCheck('cl-location', !!document.getElementById('city')?.value && !!document.getElementById('locality')?.value);
-        // Changed to listed_by_name since the owner section is currently hidden/commented out
-        setCheck('cl-owner', !!document.getElementById('listed_by_name')?.value);
+        setCheck('cl-type', !!document.getElementById('res_property_type')?.value);
+        setCheck('cl-bhk', !!document.getElementById('res_bhk')?.value);
+        setCheck('cl-area', !!document.getElementById('res_carpet_area')?.value);
+        setCheck('cl-price', !!document.getElementById('res_price')?.value);
+        setCheck('cl-location', !!document.getElementById('res_city')?.value && !!document.getElementById('res_locality')?.value);
+        setCheck('cl-owner', !!document.getElementById('res_owner_name')?.value);
     }
+
     function setCheck(id, done) {
         const el = document.getElementById(id);
         if (!el) return;

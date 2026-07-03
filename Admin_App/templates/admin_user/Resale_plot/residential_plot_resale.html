@@ -1623,17 +1623,15 @@
                     <span class="input-unit">₹</span>
                   </div>
                 </div>
-              
-
                 <div class="col-md-6 mt-2">
-  <label class="form-label">Price per Sq.ft <span
-      style="font-weight:400;font-size:.78rem;color:var(--muted)">(Auto-calculated)</span></label>
-  <div class="input-with-unit">
-    <input type="number" class="form-control" id="plot_price_per_sqft" name="plot_price_per_sqft"
-      placeholder="Auto-filled…" readonly>
-    <span class="input-unit">₹/sq.ft</span>
-  </div>
-</div>
+                  <label class="form-label">Price per Sq.ft <span
+                      style="font-weight:400;font-size:.78rem;color:var(--muted)">(Auto-calculated)</span></label>
+                  <div class="input-with-unit">
+                    <input type="number" class="form-control" id="plot_price_per_sqft" nam="plot_price_per_sqft"
+                      placeholder="Auto-filled…" readonly>
+                    <span class="input-unit">₹/sq.ft</span>
+                  </div>
+                </div>
                 <div class="col-md-6 mt-3">
                   <label class="form-label">Is the Price Negotiable?</label>
                   <div class="radio-group">
@@ -2259,54 +2257,33 @@
   }
 
   /* ═══ LIVE PREVIEW ═══ */
- /* ═══ LIVE PREVIEW ═══ */
   function updatePreview() {
-    // 1. Fetch values using exact HTML field IDs
     const area = document.getElementById('plot_area')?.value || '';
-    const price = document.getElementById('selling_price')?.value || '';
-    const city = document.getElementById('city')?.value || '';
-    const loc = document.getElementById('locality')?.value || '';
-    const catEl = document.getElementById('property_type');
-    const catTxt = catEl && catEl.value ? catEl.options[catEl.selectedIndex].text.split('(')[0].trim() : 'Residential Plot';
+    const price = document.getElementById('plot_price')?.value || '';
+    const city = document.getElementById('plot_city')?.value || '';
+    const loc = document.getElementById('plot_locality')?.value || '';
+    const catEl = document.getElementById('plot_category');
+    const catTxt = catEl?.value ? catEl.options[catEl.selectedIndex].text.split('(')[0].trim() : '—';
 
-    // 2. Generate and update Property Title
     let autoTitle = '';
     if (area) autoTitle += Number(area).toLocaleString('en-IN') + ' sq.ft ';
-    autoTitle += catTxt + ' ';
-    if (loc || city) autoTitle += `in ${[loc, city].filter(Boolean).join(', ')}`;
-    
-    const titleBox = document.getElementById('property_title');
-    if (titleBox && autoTitle.trim() !== '') {
-      titleBox.value = autoTitle.trim();
-    }
+    autoTitle += 'Commercial Plot ';
+    if (loc || city) autoTitle += `@ ${[loc, city].filter(Boolean).join(', ')}`;
+    document.getElementById('property_title').value = autoTitle.trim();
 
-    // 3. Update Preview Card DOM Elements
-    const pPrice = document.getElementById('p_price');
-    const pArea = document.getElementById('p_area');
-    const pCat = document.getElementById('p_cat');
-    const pLoc = document.getElementById('p_loc');
-    const pTitle = document.getElementById('p_title');
+    document.getElementById('p_price').textContent = price ? '₹' + parseInt(price).toLocaleString('en-IN') : '₹ 0';
+    document.getElementById('p_area').textContent = area ? `${Number(area).toLocaleString('en-IN')} sq.ft` : '0 sq.ft';
+    document.getElementById('p_cat').textContent = catEl?.value ? catTxt : 'Commercial Plot';
+    document.getElementById('p_loc').textContent = (city || loc) ? [city, loc].filter(Boolean).join(', ') : 'City, Area';
 
-    if (pTitle) pTitle.textContent = autoTitle.trim() || 'Your Plot Headline';
-    if (pPrice) pPrice.textContent = price ? '₹' + parseInt(price, 10).toLocaleString('en-IN') : '₹ 0';
-    if (pArea) pArea.textContent = area ? `${Number(area).toLocaleString('en-IN')} sq.ft` : '0 sq.ft';
-    if (pCat) pCat.textContent = catEl && catEl.value ? catTxt : '—';
-    if (pLoc) pLoc.textContent = (city || loc) ? [city, loc].filter(Boolean).join(', ') : 'City, Locality';
-
-    // 4. Auto-calculate Price per Sq.ft
     const psf = document.getElementById('plot_price_per_sqft');
-    if (psf) {
-      if (price && area && parseFloat(area) > 0) {
-        psf.value = Math.round(parseFloat(price) / parseFloat(area));
-      } else {
-        psf.value = '';
-      }
-    }
+    if (price && area && parseFloat(area) > 0) psf.value = Math.round(parseFloat(price) / parseFloat(area));
+    else psf.value = '';
 
-    // 5. Update Sidebar Checklist
     setCheck('cl-area', !!area);
     setCheck('cl-price', !!price);
     setCheck('cl-loc', !!city && !!loc);
+    setCheck('cl-category', !!catEl?.value);
   }
 
   /* ═══ CHECKLIST ═══ */
@@ -2314,55 +2291,9 @@
     const el = document.getElementById(id);
     if (!el) return;
     el.className = 'checklist-item' + (done ? ' done' : '');
-    const icon = el.querySelector('i');
-    if (icon) icon.className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+    el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
   }
 
-  /* ═══ EVENT LISTENERS FOR INPUTS (Matched to exact HTML IDs) ═══ */
-  ['plot_area', 'selling_price', 'city', 'locality'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', updatePreview);
-  });
-  document.getElementById('property_type')?.addEventListener('change', updatePreview);
-
-  /* ═══ SUBMIT HANDLER (Fixed ID from comPlotForm to plotForm) ═══ */
-  document.getElementById('plotForm')?.addEventListener('submit', function (e) {
-    e.preventDefault();
-    for (let i = 1; i <= 4; i++) {
-      if (i !== currentStep) {
-        for (const f of document.getElementById('step' + i).querySelectorAll('[required]'))
-          if (!f.value.trim()) { goToStep(i); return; }
-      }
-    }
-    Swal.fire({
-      title: 'Publish Residential Plot Listing?',
-      text: 'Once published, this listing will be visible to buyers on the portal.',
-      icon: 'question', showCancelButton: true,
-      confirmButtonColor: '#667eea', cancelButtonColor: '#cbd5e0',
-      confirmButtonText: '✓ Yes, Publish Now', cancelButtonText: 'Review Again'
-    }).then(result => {
-      if (!result.isConfirmed) return;
-      const btn = document.getElementById('submitBtn');
-      if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing…'; btn.disabled = true; }
-      const formData = new FormData(this);
-      formData.delete('property_images[]');
-      selectedFiles.forEach(f => formData.append('property_images[]', f));
-      fetch(this.getAttribute('action'), { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(r => r.json())
-        .then(data => {
-          if (data.status === 'success') {
-            Swal.fire({ icon: 'success', title: '🎉 Listing Published!', text: data.message }).then(() => window.location.reload());
-          } else {
-            Swal.fire({ icon: 'error', title: 'Submission Failed', text: data.message });
-            if (btn) { btn.innerHTML = '<i class="fas fa-save"></i> Submit Property'; btn.disabled = false; }
-          }
-        })
-        .catch(() => {
-          Swal.fire({ icon: 'error', title: 'Server Error', text: 'Could not reach server. Please try again.' });
-          if (btn) { btn.innerHTML = '<i class="fas fa-save"></i> Submit Property'; btn.disabled = false; }
-        });
-    });
-  });
   /* ═══ IMAGE UPLOAD ═══ */
   /* ═══ IMAGE UPLOAD ═══ */
   const uploadArea = document.getElementById('uploadArea');

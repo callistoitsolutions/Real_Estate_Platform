@@ -2141,53 +2141,29 @@
   }
 
   /* ═══ LIVE PREVIEW ═══ */
-  
-
-  /* ═══ LIVE PREVIEW ═══ */
   function updatePreview() {
-    // 1. Fetch values using exact HTML field IDs
     const area = document.getElementById('plot_area')?.value || '';
     const price = document.getElementById('selling_price')?.value || '';
     const city = document.getElementById('city')?.value || '';
     const loc = document.getElementById('locality')?.value || '';
     const catEl = document.getElementById('property_type');
-    const catTxt = catEl && catEl.value ? catEl.options[catEl.selectedIndex].text.split('(')[0].trim() : 'Commercial Plot';
+    const catTxt = catEl?.value ? catEl.options[catEl.selectedIndex].text.split('(')[0].trim() : '—';
 
-    // 2. Generate and update Property Title
     let autoTitle = '';
     if (area) autoTitle += Number(area).toLocaleString('en-IN') + ' sq.ft ';
-    autoTitle += catTxt + ' ';
-    if (loc || city) autoTitle += `in ${[loc, city].filter(Boolean).join(', ')}`;
-    
-    const titleBox = document.getElementById('property_title');
-    if (titleBox && (area || price || city || loc)) {
-      titleBox.value = autoTitle.trim();
-    }
+    autoTitle += 'Commercial Plot ';
+    if (loc || city) autoTitle += `@ ${[loc, city].filter(Boolean).join(', ')}`;
+    document.getElementById('property_title').value = autoTitle.trim();
 
-    // 3. Update Preview Card DOM Elements
-    const pPrice = document.getElementById('p_price');
-    const pArea = document.getElementById('p_area');
-    const pCat = document.getElementById('p_cat');
-    const pLoc = document.getElementById('p_loc');
-    const pTitle = document.getElementById('p_title');
+    document.getElementById('p_price').textContent = price ? '₹' + parseInt(price).toLocaleString('en-IN') : '₹ 0';
+    document.getElementById('p_area').textContent = area ? `${Number(area).toLocaleString('en-IN')} sq.ft` : '0 sq.ft';
+    document.getElementById('p_cat').textContent = catEl?.value ? catTxt : 'Commercial Plot';
+    document.getElementById('p_loc').textContent = (city || loc) ? [city, loc].filter(Boolean).join(', ') : 'City, Area';
 
-    if (pTitle) pTitle.textContent = autoTitle.trim() || 'Commercial Plot Headline';
-    if (pPrice) pPrice.textContent = price ? '₹' + parseInt(price, 10).toLocaleString('en-IN') : '₹ 0';
-    if (pArea) pArea.textContent = area ? `${Number(area).toLocaleString('en-IN')} sq.ft` : '0 sq.ft';
-    if (pCat) pCat.textContent = catEl && catEl.value ? catTxt : '—';
-    if (pLoc) pLoc.textContent = (city || loc) ? [city, loc].filter(Boolean).join(', ') : 'City, Area';
-
-    // 4. Auto-calculate Price per Sq.ft
     const psf = document.getElementById('plot_price_per_sqft');
-    if (psf) {
-      if (price && area && parseFloat(area) > 0) {
-        psf.value = Math.round(parseFloat(price) / parseFloat(area));
-      } else {
-        psf.value = '';
-      }
-    }
+    if (price && area && parseFloat(area) > 0) psf.value = Math.round(parseFloat(price) / parseFloat(area));
+    else psf.value = '';
 
-    // 5. Update Sidebar Checklist
     setCheck('cl-area', !!area);
     setCheck('cl-price', !!price);
     setCheck('cl-loc', !!city && !!loc);
@@ -2199,16 +2175,9 @@
     const el = document.getElementById(id);
     if (!el) return;
     el.className = 'checklist-item' + (done ? ' done' : '');
-    const icon = el.querySelector('i');
-    if (icon) icon.className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+    el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
   }
 
-  /* ═══ EVENT LISTENERS FOR INPUTS (Matched to exact HTML IDs) ═══ */
-  ['plot_area', 'selling_price', 'city', 'locality'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', updatePreview);
-  });
-  document.getElementById('property_type')?.addEventListener('change', updatePreview);
   /* ═══ IMAGE UPLOAD ═══ */
   /* ═══ IMAGE UPLOAD ═══ */
   const uploadArea = document.getElementById('uploadArea');
