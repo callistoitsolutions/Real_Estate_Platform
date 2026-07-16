@@ -24,6 +24,8 @@ urlpatterns = [
      ############ urls for Rental Residential Listing ############################
 
     path('residential_agency',views.residential_agency,name="residential_agency"),
+    path('residential_agency_edit/<str:pk>',views.residential_agency_edit,name="residential_agency_edit"),
+    path('residential_agency_view/<str:pk>',views.residential_agency_view,name="residential_agency_view"),
     path('rental_list_agency',views.rental_list_agency,name="rental_list_agency"),
 
 
@@ -43,6 +45,11 @@ urlpatterns = [
 
 
     path('residential_resale_agency',views.residential_resale_agency,name="residential_resale_agency"),
+
+    ############ urls for view resale residential form ########################
+
+    path('residential_resale_agency_view/<str:id>',views.residential_resale_agency_view,name="residential_resale_agency_view"),
+
     path('residential_resale_list_agency',views.residential_resale_list_agency,name="residential_resale_list_agency"),
 
 

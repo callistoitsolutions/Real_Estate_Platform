@@ -47,6 +47,7 @@ urlpatterns = [
     ############ urls for Rental Residential Listing ############################
 
     path('residential_agent',views.residential_agent,name="residential_agent"),
+    path('residential_agent_edit/<str:pk>',views.residential_agent_edit,name="residential_agent_edit"),
     path('rental_list_agent',views.rental_list_agent,name="rental_list_agent"),
 
 
@@ -66,6 +67,15 @@ urlpatterns = [
 
 
     path('residential_resale_agent',views.residential_resale_agent,name="residential_resale_agent"),
+
+    ########### urls for view residential resale form ######################
+
+    path('residential_resale_agent_view/<str:id>',views.residential_resale_agent_view,name="residential_resale_agent_view"),
+
+   ########### urls for edit residential resale form ######################
+
+    path('residential_resale_agent_edit/<str:id>',views.residential_resale_agent_edit,name="residential_resale_agent_edit"),
+
     path('residential_resale_list_agent',views.residential_resale_list_agent,name="residential_resale_list_agent"),
 
 

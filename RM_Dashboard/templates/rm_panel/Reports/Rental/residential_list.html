@@ -1,6 +1,41 @@
 {% include "rm_panel/rm_header.html" %}
 {% load static %}
 
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+                Swal.fire({
+                    icon: "error",
+                    title: "Duplicate Property Detected",
+                    text: "{{ message|escapejs }}",
+                    confirmButtonColor: '#e74c3c',
+                    confirmButtonText: 'Understood',
+                    allowOutsideClick: false
+                });
+            {% elif message.tags == 'warning' %}
+                Swal.fire({
+                    icon: "warning",
+                    title: "Action Required",
+                    text: "{{ message|escapejs }}",
+                    confirmButtonColor: '#f39c12',
+                    confirmButtonText: 'Review'
+                });
+            {% else %}
+                Swal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: "{{ message|escapejs }}",
+                    showConfirmButton: false,
+                    timer: 2500
+                });
+            {% endif %}
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
 <style>
     /* ── Root Variables ── */
     :root {
@@ -20,15 +55,12 @@
         --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
         --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
         --radius: 12px;
-        --primary-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+        --primary-gradient: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); /* Pink to Violet */
         --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
         --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         --info-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         --dark-gradient: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-        --sidebar-width: 280px;
-        --sidebar-collapsed-width: 80px;
-        --topbar-height: 70px;
     }
 
     * { box-sizing: border-box; }
@@ -473,12 +505,12 @@
                 <a href="{% url 'residential_rm' %}" class="btn-primary-custom solid">
                     <i class="fas fa-plus-circle"></i> Add Rental Residential Property Listing
                 </a>
-                <a href="{% url 'rental_residential_logs' %}" class="btn-primary-custom" style="background: #764ba2; border-color: #764ba2;">
+                <a hidden href="{% url 'rental_residential_logs' %}" class="btn-primary-custom" style="background: #764ba2; border-color: #764ba2;">
     <i class="fas fa-history"></i> View Activity Logs
 </a>
-                {% comment %} <button class="btn-primary-custom" data-toggle="modal" data-target="#exampleModalCenter">
+                <button class="btn-primary-custom" data-toggle="modal" data-target="#exampleModalCenter">
                     <i class="fas fa-file-excel"></i>  Download/Upload Rental Residential Property Data Via Excel File
-                </button> {% endcomment %}
+                </button>
                 <button class="btn-primary-custom" data-toggle="modal" data-target="#bulkDeleteModal" style="background: #ef4444; border-color: #ef4444;">
                     <i class="fas fa-trash-alt"></i> Bulk Delete
                 </button>
@@ -498,7 +530,7 @@
             <div class="kpi-label">Total Properties</div>
             <div class="kpi-desc"><i class="fas fa-database"></i> All listed records</div>
         </div>
-        <div class="kpi-card b-blue">
+        <div class="kpi-card b-blue" hidden>
             <span class="badge-tag tag-existing">EXISTING</span>
             <div class="kpi-icon ic-blue"><i class="fas fa-wifi"></i></div>
             <div class="kpi-val">{{ active_count }}</div>
@@ -696,18 +728,84 @@
             <div class="kpi-desc"><i class="fas fa-camera"></i> Visual appeal</div>
         </div>
 
+        
+        
+
     </div>
 
+
+    <div class="row-divider"><span>LISTING, APPROVAL & DUPLICATE STATUS</span></div>
+<div class="kpi-row">
+    <div class="kpi-card b-green">
+        <div class="kpi-icon ic-green"><i class="fas fa-wifi"></i></div>
+        <div class="kpi-val">{{ active_listing_count }}</div>
+        <div class="kpi-label">Active Listings</div>
+        <div class="kpi-desc c-up"><i class="fas fa-circle" style="color:#10b981;font-size:8px;"></i> Live listings</div>
+    </div>
+    <div class="kpi-card b-orange">
+        <div class="kpi-icon ic-orange"><i class="fas fa-pause-circle"></i></div>
+        <div class="kpi-val">{{ inactive_listing_count }}</div>
+        <div class="kpi-label">Inactive Listings</div>
+        <div class="kpi-desc">Not currently live</div>
+    </div>
+    <div class="kpi-card b-blue">
+        <div class="kpi-icon ic-blue"><i class="fas fa-handshake"></i></div>
+        <div class="kpi-val">{{ sold_listing_count }}</div>
+        <div class="kpi-label">Sold</div>
+        <div class="kpi-desc">Closed deals</div>
+    </div>
+    <div class="kpi-card b-purple">
+        <div class="kpi-icon ic-purple"><i class="fas fa-key"></i></div>
+        <div class="kpi-val">{{ rented_listing_count }}</div>
+        <div class="kpi-label">Rented</div>
+        <div class="kpi-desc">Currently occupied</div>
+    </div>
+    <div class="kpi-card b-orange">
+        <div class="kpi-icon ic-orange"><i class="fas fa-hourglass-half"></i></div>
+        <div class="kpi-val">{{ pending_approval_count }}</div>
+        <div class="kpi-label">Pending Approval</div>
+        <div class="kpi-desc">Awaiting review</div>
+    </div>
+    <div class="kpi-card b-green">
+        <div class="kpi-icon ic-green"><i class="fas fa-check-circle"></i></div>
+        <div class="kpi-val">{{ approved_count }}</div>
+        <div class="kpi-label">Approved</div>
+        <div class="kpi-desc c-up">Verified listings</div>
+    </div>
+    <div class="kpi-card b-red">
+        <div class="kpi-icon ic-red"><i class="fas fa-times-circle"></i></div>
+        <div class="kpi-val">{{ rejected_count }}</div>
+        <div class="kpi-label">Rejected</div>
+        <div class="kpi-desc c-down">Needs correction</div>
+    </div>
+    <div class="kpi-card b-pink">
+        <span class="badge-tag tag-new">NEW</span>
+        <div class="kpi-icon ic-pink"><i class="fas fa-clone"></i></div>
+        <div class="kpi-val">{{ duplicate_properties_count }}</div>
+        <div class="kpi-label">Duplicate Properties</div>
+        <div class="kpi-desc c-down"><i class="fas fa-exclamation-triangle"></i> Flagged as duplicate</div>
+    </div>
+    <div class="kpi-card b-cyan">
+        <span class="badge-tag tag-new">NEW</span>
+        <div class="kpi-icon ic-cyan"><i class="fas fa-fingerprint"></i></div>
+        <div class="kpi-val">{{ unique_properties_count }}</div>
+        <div class="kpi-label">Unique Properties</div>
+        <div class="kpi-desc c-up">No duplicate match</div>
+    </div>
+</div>
+
+    
+
      <div class="analytics-section">
-        <div class="chart-container">
-            <div class="chart-header">
-                <h3 class="chart-title"><i class="fas fa-chart-pie"></i> BHK Distribution</h3>
-            </div>
-            <div class="chart-wrapper">
-                <canvas id="bhkPieChart"></canvas>
-                {% if not bhk_labels %}<div class="chart-no-data"><i class="fas fa-chart-pie"></i><span>No data available</span></div>{% endif %}
-            </div>
-        </div>
+      <div class="chart-container">
+    <div class="chart-header">
+        <h3 class="chart-title"><i class="fas fa-chart-pie"></i> Renting Option Distribution</h3>
+    </div>
+    <div class="chart-wrapper">
+        <canvas id="rentingOptionChart"></canvas>
+        {% if not renting_option_labels %}<div class="chart-no-data"><i class="fas fa-chart-pie"></i><span>No data available</span></div>{% endif %}
+    </div>
+</div>
         <div class="chart-container">
             <div class="chart-header">
                 <h3 class="chart-title"><i class="fas fa-chart-bar"></i> Rent Range Distribution</h3>
@@ -759,86 +857,130 @@
         <input type="text" name="search" id="searchInput" value="{{ search_query }}" class="filter-input" placeholder="Type ID, title, city, listed by, owner name...">
     </div>
     
+  
     <div class="search-group">
-        <label>BHK TYPE</label>
-        <select name="bhk_type" class="filter-input" onchange="this.form.submit()">
-            <option value="All BHK">All BHK</option>
-            {% for bhk in unique_bhk %}
-                <option value="{{ bhk }}" {% if bhk_query == bhk %}selected{% endif %}>{{ bhk }}</option>
-            {% endfor %}
-        </select>
-    </div>
+    <label>BHK TYPE</label>
+    <select name="bhk_type" class="filter-input" onchange="this.form.submit()">
+        <option value="All BHK">All BHK</option>
+        {% for bhk in unique_bhk %}
+            <option value="{{ bhk }}" {% if bhk_query == bhk %}selected{% endif %}>{{ bhk }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+   
+
 
     <div class="search-group">
-        <label>CITY</label>
-        <select name="city" class="filter-input" onchange="this.form.submit()">
-            <option value="All Cities">All Cities</option>
-            {% for city in unique_cities %}
-                <option value="{{ city }}" {% if city_query == city %}selected{% endif %}>{{ city }}</option>
-            {% endfor %}
-        </select>
-    </div>
+    <label>CITY</label>
+    <select name="city" class="filter-input" onchange="this.form.submit()">
+        <option value="All Cities">All Cities</option>
+        {% for city in unique_cities %}
+            <option value="{{ city }}" {% if city_query == city %}selected{% endif %}>{{ city }}</option>
+        {% endfor %}
+    </select>
+</div>
 
-    <div class="search-group">
-        <label>FURNISHING</label>
-        <select name="furnishing" class="filter-input" onchange="this.form.submit()">
-            <option value="All">All</option>
-            {% for f in unique_furnish %}
-                <option value="{{ f }}" {% if furnish_query == f %}selected{% endif %}>{{ f }}</option>
-            {% endfor %}
-        </select>
-    </div>
+<div class="search-group">
+    <label>STATE</label>
+    <select name="state" class="filter-input" onchange="this.form.submit()">
+        <option value="All States">All States</option>
+        {% for st in unique_states %}
+            <option value="{{ st }}" {% if state_query == st %}selected{% endif %}>{{ st }}</option>
+        {% endfor %}
+    </select>
+</div>
 
-    <div class="search-group">
-        <label>POSSESSION</label>
-        <select name="possession" class="filter-input" onchange="this.form.submit()">
-            <option value="All Status">All Status</option>
-            {% for p in unique_possession %}
-                <option value="{{ p }}" {% if possession_query == p %}selected{% endif %}>{{ p }}</option>
-            {% endfor %}
-        </select>
-    </div>
+<div class="search-group">
+    <label>FURNISHING</label>
+    <select name="furnishing" class="filter-input" onchange="this.form.submit()">
+        <option value="All">All</option>
+        {% for f in unique_furnish %}
+            <option value="{{ f }}" {% if furnish_query == f %}selected{% endif %}>{{ f }}</option>
+        {% endfor %}
+    </select>
+</div>
 
-    <div class="search-group">
-        <label>PROPERTY TYPE</label>
-        <select name="property_type" class="filter-input" onchange="this.form.submit()">
-            <option value="All Types">All Types</option>
-            {% for pt in unique_property_types %}
-                <option value="{{ pt }}" {% if prop_type_query == pt %}selected{% endif %}>{{ pt }}</option>
-            {% endfor %}
-        </select>
-    </div>
+<div class="search-group">
+    <label>AVAILABILITY STATUS</label>
+    <select name="possession" class="filter-input" onchange="this.form.submit()">
+        <option value="All Status">All Status</option>
+        {% for p in unique_possession %}
+            <option value="{{ p }}" {% if possession_query == p %}selected{% endif %}>{{ p }}</option>
+        {% endfor %}
+    </select>
+</div>
 
-    <div class="search-group">
-        <label>LISTED BY ROLE</label>
-        <select name="listed_by" class="filter-input" onchange="this.form.submit()">
-            <option value="All Roles">All Roles</option>
-            {% for role in unique_listed_roles %}
-                <option value="{{ role }}" {% if listed_by_query == role %}selected{% endif %}>{{ role }}</option>
-            {% endfor %}
-        </select>
-    </div>
+<div class="search-group">
+    <label>PROPERTY TYPE</label>
+    <select name="property_type" class="filter-input" onchange="this.form.submit()">
+        <option value="All Types">All Types</option>
+        {% for pt in unique_property_types %}
+            <option value="{{ pt }}" {% if prop_type_query == pt %}selected{% endif %}>{{ pt }}</option>
+        {% endfor %}
+    </select>
+</div>
 
-    <div class="search-group">
-        <label>UPLOADED BY ROLE</label>
-        <select name="uploaded_by" class="filter-input" onchange="this.form.submit()">
-            <option value="All Roles">All Roles</option>
-            {% for role in unique_uploaded_roles %}
-                <option value="{{ role }}" {% if uploaded_by_query == role %}selected{% endif %}>{{ role }}</option>
-            {% endfor %}
-        </select>
-    </div>
+<div class="search-group">
+    <label>LISTED BY ROLE</label>
+    <select name="listed_by" class="filter-input" onchange="this.form.submit()">
+        <option value="All Roles">All Roles</option>
+        {% for role in unique_listed_roles %}
+            <option value="{{ role }}" {% if listed_by_query == role %}selected{% endif %}>{{ role }}</option>
+        {% endfor %}
+    </select>
+</div>
 
-    <div class="search-group">
-        <label>BUDGET</label>
-        <select name="budget" class="filter-input" onchange="this.form.submit()">
-            <option value="All Budgets">All Budgets</option>
-            <option value="under_10k" {% if budget_query == 'under_10k' %}selected{% endif %}>Under ₹10,000</option>
-            <option value="10k_25k" {% if budget_query == '10k_25k' %}selected{% endif %}>₹10,000 - ₹25,000</option>
-            <option value="25k_50k" {% if budget_query == '25k_50k' %}selected{% endif %}>₹25,000 - ₹50,000</option>
-            <option value="above_50k" {% if budget_query == 'above_50k' %}selected{% endif %}>Above ₹50,000</option>
-        </select>
-    </div>
+<div class="search-group">
+    <label>UPLOADED BY ROLE</label>
+    <select name="uploaded_by" class="filter-input" onchange="this.form.submit()">
+        <option value="All Roles">All Roles</option>
+        {% for role in unique_uploaded_roles %}
+            <option value="{{ role }}" {% if uploaded_by_query == role %}selected{% endif %}>{{ role }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="search-group">
+    <label>BUDGET</label>
+    <select name="budget" class="filter-input" onchange="this.form.submit()">
+        <option value="All Budgets">All Budgets</option>
+        <option value="under_10k" {% if budget_query == 'under_10k' %}selected{% endif %}>Under ₹10,000</option>
+        <option value="10k_25k" {% if budget_query == '10k_25k' %}selected{% endif %}>₹10,000 - ₹25,000</option>
+        <option value="25k_50k" {% if budget_query == '25k_50k' %}selected{% endif %}>₹25,000 - ₹50,000</option>
+        <option value="above_50k" {% if budget_query == 'above_50k' %}selected{% endif %}>Above ₹50,000</option>
+    </select>
+</div>
+
+
+<div class="search-group">
+    <label>LISTING STATUS</label>
+    <select name="listing_status" class="filter-input" onchange="this.form.submit()">
+        <option value="All Status">All Status</option>
+        {% for ls in unique_listing_status %}
+            <option value="{{ ls }}" {% if listing_status_query == ls %}selected{% endif %}>{{ ls }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="search-group">
+    <label>APPROVAL STATUS</label>
+    <select name="approval_status" class="filter-input" onchange="this.form.submit()">
+        <option value="All Approval">All Approval</option>
+        {% for a in unique_approval_status %}
+            <option value="{{ a }}" {% if approval_status_query == a %}selected{% endif %}>{{ a }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="search-group">
+    <label>DUPLICATE STATUS</label>
+    <select name="duplicate" class="filter-input" onchange="this.form.submit()">
+        <option value="All">All Properties</option>
+        <option value="duplicates_only" {% if duplicate_query == 'duplicates_only' %}selected{% endif %}>Duplicates Only</option>
+        <option value="unique_only" {% if duplicate_query == 'unique_only' %}selected{% endif %}>Unique Only</option>
+    </select>
+</div>
 
     <div class="search-actions" style="margin-top:auto; padding-bottom:2px;">
         <button type="submit" style="display:none;"></button>
@@ -880,6 +1022,17 @@
             {% if budget_query and budget_query != 'All Budgets' %}
                 <span class="active-tag">Budget: {{ budget_query }} <i class="fas fa-times" onclick="clearFilterSelect('budget')"></i></span>
             {% endif %}
+
+
+            {% if listing_status_query and listing_status_query != 'All Status' %}
+    <span class="active-tag">Listing Status: {{ listing_status_query }} <i class="fas fa-times" onclick="clearFilterSelect('listing_status')"></i></span>
+{% endif %}
+{% if approval_status_query and approval_status_query != 'All Approval' %}
+    <span class="active-tag">Approval: {{ approval_status_query }} <i class="fas fa-times" onclick="clearFilterSelect('approval_status')"></i></span>
+{% endif %}
+{% if duplicate_query and duplicate_query != 'All' %}
+    <span class="active-tag">Duplicates: {{ duplicate_query }} <i class="fas fa-times" onclick="clearFilterSelect('duplicate')"></i></span>
+{% endif %}
         </div>
     </div>
 </form>
@@ -923,7 +1076,7 @@
                 </small>
                
 
-    {% comment %} <a href="?download=csv&search={{ search_query }}&bhk_type={{ bhk_query }}&city={{ city_query }}&furnishing={{ furnish_query }}&possession={{ possession_query }}" 
+    <a hidden href="?download=csv&search={{ search_query }}&bhk_type={{ bhk_query }}&city={{ city_query }}&furnishing={{ furnish_query }}&possession={{ possession_query }}" 
        class="btn btn-outline-primary btn-sm">
         <i class="fas fa-file-csv"></i> Download CSV
     </a>
@@ -931,229 +1084,374 @@
     <a href="?download=excel&search={{ search_query }}&bhk_type={{ bhk_query }}&city={{ city_query }}&furnishing={{ furnish_query }}&possession={{ possession_query }}" 
        class="btn btn-outline-success btn-sm">
         <i class="fas fa-file-excel"></i> Download Excel
-    </a> {% endcomment %}
+    </a>
 
 
             </div>
         </div>
 
-       <div class="table-responsive">
+      
+
+      
+
+        <div class="table-responsive">
     <table class="properties-table" id="rentalTable">
         <thead>
             <tr>
                 <th>Sr.No</th>
+                <th>Listing Status</th>
+                <th>Approval Status</th>
                 <th>Property Id</th>
-                <th>Images</th> <th>Property Title</th>
-                <th>Property Type</th>
-                <th>BHK Type</th>
-                <th>Renting Option</th>
-                <th>Built-Up Area</th>
-                <th>Bathrooms</th>
-                <th>Balconies</th>
-                <th>Floor No.</th>
-                <th>Total Floors</th>
-                <th>Facing</th>
-                <th>Furnishing Status</th>
-                <th>Available For</th>
-                <th>Zone</th>
-                <th>Ownership Type</th>
-                <th>Construction Status</th>
-                <th>Property Age</th>
-                <th>Carpet Area</th>
-                <th>Plot Area</th>
-                <th>Building / Society Name</th>
-                <th>Possession Status</th>
-                <th>Available From</th>
-                <th>Lease Duration</th>
-                <th>Brokerage</th>
-                <th>Brokerage %</th>
-                <th>Manual Brokerage</th>
-                <th>Monthly Rent</th>
-                <th>Security Deposit</th>
-                <th>Maintenance Type</th>
-                <th>Maintenance Amt</th>
-                <th>Address</th>
-                <th>City</th>
-                <th>Locality/Area</th>
-                <th>State</th>
-                <th>Pincode</th>
-                <th>Main Road Connectivity</th>
-                <th>Amenities</th>
-                <th>Facilities</th>
-                <th>Description</th>
-                <th>Rent Desc</th>
-                  <th>User Description</th>
-                <th>Owner Name</th>
-                <th>Contact</th>
-                <th>Email</th>
-                <th>Alt. Contact</th>
+                <th>Images</th>
+                
               
-
+              
+                
+                <!-- NEW: Duplicate Tracking -->
+              
+                <th>Listed By Type</th>
                 <th>Listed By Id</th>
-                <th>Listed By  Name</th>
+                <th>Listed By Name</th>
                 <th>Listed By Email</th>
                 <th>Listed By Contact</th>
                 <th>Listed By Role</th>
-
-                <th>Uploaded By</th>
-                <th>UB Email</th>
-                <th>UB Contact</th>
-                <th>UB Role</th>
-                <th>Upload File Name</th>
+               
+                <th>Property Title</th>
+                <th>Property Type</th>
+                <th>Flat No/House No/Unit No</th> 
+                <th>BHK Type</th> 
+                <th>Renting Option</th>
+                <th>Built-Up Area(Sq.ft)</th>
+                <th>Bathrooms</th>
+                <th>Balconies</th>
+                <th>Building Configuration</th>
+                <th>Total Floors Constructed</th>
+                <th>Facing Direction</th>
+                <th>Furnishing Status</th>
+                <th>Available For</th>
+                <th>Carpet Area(Sq.ft)</th>
+                <th>City Zone</th>
+                <th>Ownership Type</th>
+                <th>Property Condition</th>
+                <th>Property Age</th>
+                <th>Tower/Wing Number</th>
+                <th>Building / Society Name</th>
+                <th>Availability Status</th>
+                <th>Available From</th>
+                <th>Lease Duration</th>
                 
+               
+                <th>Monthly Rent</th>
+                 <th>Brokerage Type</th> 
+             
+                <th>Brokerage / Service Fee</th> 
+                
+                <th>Advance Rent Month</th>
+                <th>Advance Rent Amount</th>
+                <th>Refundable Security Deposit Type</th>
+                <th>Refundable Security Deposit Amount</th>
+                
+                <th>Maintenance Type</th>
+                <th>Monthly Maintenance Amt</th>
+                <th>Total Move-in Cost</th>
+                <th>Address</th>
+                <th>City</th>
+                <th>Locality/Area</th>
+                <!-- NEW: Landmark -->
+                <th>Property Landmark</th>
+                <th>State</th>
+                <th>Pincode</th>
+                <th>Main Road Connectivity</th>
+                <th>Google Maps Link</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                
+                <th>Amenities & Features</th>
+                <th>Nearby Facilities</th>
+                <th>Property Summary</th>
+                <th>Property Description</th>
+                <th>Property Description(By User)</th>
+                
+                <th>Listed Elsewhere</th>
+                <th>Portal Name</th>
+                
+                <th>Upload File Name</th>
                 <th>Created At</th>
+
+                  
+                
                 <th style="position:sticky;right:0;background:#f8fafc;z-index:2;">Actions</th>
             </tr>
         </thead>
         <tbody>
-            {% for prop in page_obj %}
-            <tr id="row-{{ prop.rental_residential_id }}">
-           <td style="font-weight: 700; color: #1e293b;">{{ prop.original_sr_no }}</td>
-                <td>{{ prop.id|default:"—" }}</td>
-     <td>
-    <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;" onclick="openImageModal('modal-{{ prop.id }}')">
+{% for prop in page_obj %}
+<tr id="row-{{ prop.id }}">
 
-        {% if prop.images.all %}
-            <div style="position: relative; width: 50px; height: 50px; min-width: 50px;" title="Click to view all images">
+    <!-- 1. Sr.No -->
+   <td style="font-weight:700;color:#1e293b;">{{ prop.original_sr_no }}</td>
+    <!-- 2. Listing Status -->
+    <td>
+        {% if prop.listing_status == "Active" %}
+            <span class="badge bg-success">Active</span>
+        {% elif prop.listing_status == "Inactive" %}
+            <span class="badge bg-secondary">Inactive</span>
+        {% elif prop.listing_status == "Sold" %}
+            <span class="badge bg-primary">Sold</span>
+        {% elif prop.listing_status == "Rented" %}
+            <span class="badge bg-info text-dark">Rented</span>
+        {% else %}
+            <span class="badge bg-light text-dark">N/A</span>
+        {% endif %}
+    </td>
+    
+    <!-- 3. Approval Status -->
+    <td>
+        {% if prop.approval_status == "Pending" %}
+            <span class="badge bg-warning text-dark">Pending</span>
+        {% elif prop.approval_status == "Approved" %}
+            <span class="badge bg-success">Approved</span>
+        {% elif prop.approval_status == "Rejected" %}
+            <span class="badge bg-danger">Rejected</span>
+        {% else %}
+            <span class="badge bg-light text-dark">N/A</span>
+        {% endif %}
+    </td>
 
-                {% with first_img=prop.images.all|first %}
-                    <img src="{{ first_img.image.url }}"
-                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                {% endwith %}
+    <!-- 4. Property ID -->
+    <td>{{ prop.id }}</td>
 
-                {% if prop.images.count > 1 %}
+    <!-- 5. Images -->
+    <td>
+        <div style="display:flex;align-items:center;gap:8px;cursor:pointer;"
+             onclick="openImageModal('modal-{{ prop.id }}')">
+            {% if prop.images.all %}
+                <div style="position:relative;width:50px;height:50px;min-width:50px;">
+                    {% with first_img=prop.images.all|first %}
+                        <img src="{{ first_img.image.url }}"
+                             alt="Property Image"
+                             style="width:100%;height:100%;object-fit:cover;border-radius:8px;border:1px solid #ddd;">
+                    {% endwith %}
+                    {% if prop.images.count > 1 %}
                     <div style="
-                        position: absolute;
-                        bottom: -4px;
-                        right: -4px;
-                        background: rgba(0,0,0,0.8);
-                        color: #fff;
-                        font-size: 11px;
-                        padding: 2px 6px;
-                        border-radius: 10px;
-                        border: 1px solid white;
-                        font-weight: bold;
-                        line-height: 1;">
+                        position:absolute;
+                        bottom:-4px;
+                        right:-4px;
+                        background:#000;
+                        color:#fff;
+                        padding:2px 6px;
+                        border-radius:10px;
+                        font-size:11px;
+                        font-weight:600;">
                         +{{ prop.images.count|add:"-1" }}
                     </div>
-                {% endif %}
+                    {% endif %}
+                </div>
+            {% else %}
+                <div style="
+                    width:50px;
+                    height:50px;
+                    border-radius:8px;
+                    background:linear-gradient(135deg,#f8fafc,#e2e8f0);
+                    border:1px solid #cbd5e1;
+                    position:relative;
+                    overflow:hidden;
+                    display:flex;
+                    flex-direction:column;
+                    justify-content:center;
+                    align-items:center;">
+                    <i class="fas fa-building" style="font-size:18px;color:#2563eb;margin-bottom:2px;"></i>
+                    <span style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:.3px;line-height:1;">EstateFlow</span>
+                    <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-size:8px;font-weight:bold;color:rgba(37,99,235,.08);white-space:nowrap;pointer-events:none;user-select:none;">EstateFlow</span>
+                </div>
+            {% endif %}
+        </div>
+    </td>
 
+    <!-- NEW: Listing Metadata -->
+    
+
+    <!-- NEW: Duplicate Tracking -->
+  
+
+    <!-- Listed By Details -->
+    <td>{{ prop.listed_by_type|default:"—" }}</td>
+    <td>{{ prop.listed_by_id|default:"—" }}</td>
+    <td>{{ prop.listed_by_name|default:"—" }}</td>
+    <td>{{ prop.listed_by_email|default:"—" }}</td>
+    <td>{{ prop.listed_by_contact|default:"—" }}</td>
+    <td>{{ prop.listed_by_role|default:"—" }}</td>
+
+    <!-- Property Basic Info -->
+    <td style="font-weight:600;color:#0f172a;">{{ prop.property_title|default:"—" }}</td>
+    <td>{{ prop.property_type|default:"—" }}</td>
+    <td>{{ prop.property_no|default:"—" }}</td>
+    <td>{{ prop.bhk_type|default:"—" }}</td>
+    <td>{{ prop.renting_option|default:"—" }}</td>
+    <td>{{ prop.built_up_area|default:"—" }}</td>
+    <td>{{ prop.bathrooms|default:"—" }}</td>
+    <td>{{ prop.balconies|default:"—" }}</td>
+    <td>{{ prop.building_configuration|default:"—" }}</td>
+    <td>{{ prop.total_floors|default:"—" }}</td>
+    <td>{{ prop.facing_direction|default:"—" }}</td>
+    <td>{{ prop.furnishing_status|default:"—" }}</td>
+    <td>{{ prop.available_for|default:"—" }}</td>
+    <td>{{ prop.carpet_area|default:"—" }}</td>
+    <td>{{ prop.city_zone|default:"—" }}</td>
+    <td>{{ prop.ownership_type|default:"—" }}</td>
+    <td>{{ prop.property_condition|default:"—" }}</td>
+    <td>{{ prop.property_age|default:"—" }}</td>
+    <td>{{ prop.wing_number|default:"—" }}</td>
+    <td>{{ prop.building_name|default:"—" }}</td>
+    <td>{{ prop.availability_status|default:"—" }}</td>
+    <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
+    <td>{{ prop.lease_duration|default:"—" }}</td>
+
+    <!-- Brokerage Details -->
+  
+
+    <!-- Pricing & Rent Breakdown -->
+    <td style="font-weight:700;color:#16a34a;">
+        {% if prop.monthly_rent %}₹{{ prop.monthly_rent }}{% else %}—{% endif %}
+    </td>
+
+      <td>
+        {% if prop.brokerage_percentage %}
+            <div style="font-size:11px;color:#64748b;font-weight:600;">
+                {{ prop.get_brokerage_label }}
             </div>
         {% else %}
-            <div style="
-                width: 50px;
-                height: 50px;
-                min-width: 50px;
-                border-radius: 8px;
-                background: linear-gradient(135deg, #2563eb, #1e40af);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-
-                <i class="fas fa-home" style="font-size: 16px;"></i>
-
-                <span style="
-                    font-size: 6px;
-                    font-weight: 700;
-                    margin-top: 2px;
-                    line-height: 1;">
-                    EstateFlow
-                </span>
-            </div>
+            —
         {% endif %}
-
-    </div>
+    </td>
+  
+   <td>
+    {% if prop.brokerage_percentage %}
+        <div style="font-weight:600;color:#1e293b;">
+            ₹{{ prop.get_brokerage_amount|floatformat:"0" }}
+        </div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px;">
+            ({{ prop.get_brokerage_display_value }})
+        </div>
+    {% else %}
+        —
+    {% endif %}
 </td>
-                <td>{{ prop.property_title|default:"—" }}</td>
-                <td>{{ prop.property_type|default:"—" }}</td>
-                <td>{{ prop.bhk_type|default:"—" }}</td>
-                <td>{{ prop.renting_option|default:"—" }}</td>
-                <td>{{ prop.built_up_area|default:"—" }}</td>
-                <td>{{ prop.bathrooms|default:"—" }}</td>
-                <td>{{ prop.balconies|default:"—" }}</td>
-                <td>{{ prop.floor_number|default:"—" }}</td>
-                <td>{{ prop.total_floors|default:"—" }}</td>
-                <td>{{ prop.facing|default:"—" }}</td>
-                <td>{{ prop.furnishing_status|default:"—" }}</td>
-                <td>{{ prop.available_for|default:"—" }}</td>
-                <td>{{ prop.zone|default:"—" }}</td>
-                <td>{{ prop.ownership_type|default:"—" }}</td>
-                <td>{{ prop.construction_status|default:"—" }}</td>
-                <td>{{ prop.property_age|default:"—" }}</td>
-                <td>{{ prop.carpet_area|default:"—" }}</td>
-                <td>{{ prop.plot_area|default:"—" }}</td>
-                <td>{{ prop.building_name|default:"—" }}</td>
-                <td>{{ prop.possession_status|default:"—" }}</td>
-                <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
-                <td>{{ prop.lease_duration|default:"—" }}</td>
-                <td>{{ prop.brokerage|default:"—" }}</td>
-                <td>{{ prop.brokerage_percentage|default:"—" }}</td>
-                <td>{{ prop.manual_brokerage|default:"—" }}</td>
-                <td>₹{{ prop.monthly_rent|default:"—" }}</td>
-                <td>₹{{ prop.security_deposit|default:"—" }}</td>
-                <td>{{ prop.maintenance_type|default:"—" }}</td>
-                <td>{{ prop.maintenance_amount|default:"—" }}</td>
-                <td>{{ prop.address|default:"—" }}</td>
-                <td>{{ prop.city|default:"—" }}</td>
-                <td>{{ prop.locality|default:"—" }}</td>
-                <td>{{ prop.state|default:"—" }}</td>
-                <td>{{ prop.pincode|default:"—" }}</td>
-                <td>{{ prop.road_connectivity|default:"—" }}</td>
-                <td>{{ prop.amenities|default:"—" }}</td>
-                <td>{{ prop.facilities|default:"—" }}</td>
-                <td>{{ prop.description|striptags|truncatechars:50|default:"—" }}</td>
-                <td>{{ prop.rent_residential_desc|striptags|truncatechars:50|default:"—" }}</td>
-                <td>{{ prop.user_description|striptags|truncatechars:50|default:"—" }}</td>
-                <td>{{ prop.owner_name|default:"—" }}</td>
-                <td>{{ prop.contact_number|default:"—" }}</td>
-                <td>{{ prop.email|default:"—" }}</td>
-                <td>{{ prop.alternate_contact|default:"—" }}</td>
-                
 
-                <td>{{ prop.listed_by_id|default:"—" }}</td>
-                <td>{{ prop.listed_by_name|default:"—" }}</td>
-                <td>{{ prop.listed_by_email|default:"—" }}</td>
-                <td>{{ prop.listed_by_contact|default:"—" }}</td>
-                      <td>{{ prop.listed_by_role|default:"—" }}</td>
-                      <td>{{ prop.uploaded_by_name|default:"—" }}</td>
-                <td>{{ prop.uploaded_by_email|default:"—" }}</td>
-                <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
-                <td>{{ prop.uploaded_by_role|default:"—" }}</td>
-                
-              <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI Listing Form" }}</small></td>
-               
-                <td>{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
-                <td style="position:sticky;right:0;background:white;z-index:1;">
-                    <div style="display:flex;gap:8px;">
-                        <button class="btn-action btn-view" onclick="window.location.href='{% url 'rental_residential_view' prop.id %}'">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn-action btn-edit" onclick="window.location.href='{% url 'rental_residential_edit' prop.id %}'">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-action btn-delete" onclick="deleteProperty('{{ prop.id }}')">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="56">
-                    <div class="empty-state" style="text-align: center; padding: 40px; color: #718096;">
-                        <i class="fas fa-home" style="font-size: 3rem; color: #cbd5e0; margin-bottom: 15px; display: block;"></i>
-                        No properties found.
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
+    <!-- ADVANCE RENT (Updated with clean labels) -->
+    <td style="font-weight:500;">
+        {{ prop.get_advance_rent_type_label|default:"—" }}
+    </td>
+    <td>
+        {% if prop.get_advance_rent_amount %}
+            <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_advance_rent_amount|floatformat:"0" }}</div>
+            {% if prop.advance_rent_month != "fixed" and prop.advance_rent_month != "0" %}
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                    ({{ prop.get_advance_rent_type_label }})
+                </div>
+            {% elif prop.advance_rent_month == "fixed" %}
+                <div style="font-size:11px;color:#2563eb;margin-top:2px;">(Manual Fixed)</div>
+            {% endif %}
+        {% else %}
+            —
+        {% endif %}
+    </td>
+
+    <!-- SECURITY DEPOSIT (Updated with clean labels) -->
+    <td style="font-weight:500;">
+        {{ prop.get_security_deposit_type_label|default:"—" }}
+    </td>
+    <td>
+        {% if prop.get_security_deposit_amount %}
+            <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_security_deposit_amount|floatformat:"0" }}</div>
+            {% if prop.security_deposit_type != "fixed" and prop.security_deposit_type != "0" %}
+                <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                    ({{ prop.get_security_deposit_type_label }})
+                </div>
+            {% elif prop.security_deposit_type == "fixed" %}
+                <div style="font-size:11px;color:#2563eb;margin-top:2px;">(Manual Fixed)</div>
+            {% endif %}
+        {% else %}
+            —
+        {% endif %}
+    </td>
+
+    <!-- Maintenance & Move-in Cost -->
+    <td>{{ prop.maintenance_type|default:"—" }}</td>
+    <td>{% if prop.monthy_maintenance_amount %}₹{{ prop.monthy_maintenance_amount }}{% else %}—{% endif %}</td>
+    <td style="font-weight:700;color:#2563eb;">
+        {% if prop.total_move_in_cost %}₹{{ prop.total_move_in_cost }}{% else %}—{% endif %}
+    </td>
+
+    <!-- Location Details -->
+    <td>{{ prop.address|default:"—" }}</td>
+    <td>{{ prop.city|default:"—" }}</td>
+    <td>{{ prop.locality_area|default:"—" }}</td>
+    <!-- NEW: Landmark -->
+    <td>{{ prop.property_landmark|default:"—" }}</td>
+    <td>{{ prop.state|default:"—" }}</td>
+    <td>{{ prop.pincode|default:"—" }}</td>
+    <td>{{ prop.main_road_connectivity|default:"—" }}</td>
+    <td>
+        {% if prop.google_maps_link %}
+            <a href="{{ prop.google_maps_link }}" target="_blank" style="color:#2563eb;"><i class="fas fa-map-marker-alt"></i> View</a>
+        {% else %}
+            —
+        {% endif %}
+    </td>
+    <td>{{ prop.latitude|default:"—" }}</td>
+    <td>{{ prop.longitude|default:"—" }}</td>
+
+    <!-- Amenities & Descriptions -->
+    <td>{{ prop.amenities|default:"—" }}</td>
+    <td>{{ prop.nearby_facilities|default:"—" }}</td>
+    <td>{{ prop.description|striptags|truncatechars:50|default:"—" }}</td>
+    <td>{{ prop.rent_residential_desc|striptags|truncatechars:50|default:"—" }}</td>
+    <td>{{ prop.user_description|striptags|truncatechars:50|default:"—" }}</td>
+
+    <!-- External Listing & Upload Details -->
+    <td>{{ prop.listed_elsewhere|default:"—" }}</td>
+    <td>{{ prop.portal_name|default:"—" }}</td>
+    
+    <td>{{ prop.upload_file_name|default:"Web UI Listing Form" }}</td>
+    <td>{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
+
+      
+
+    <!-- Actions Sticky Column -->
+    <td style="position:sticky;right:0;background:white;z-index:1;">
+        <div style="display:flex;gap:8px;">
+            <button class="btn-action btn-view"
+                    onclick="window.location.href='{% url 'rental_residential_view' prop.id %}'">
+                <i class="fas fa-eye"></i>
+            </button>
+
+            <button class="btn-action btn-edit"
+                    onclick="window.location.href='{% url 'residential_rm_edit' prop.id %}'">
+                <i class="fas fa-edit"></i>
+            </button>
+
+            <button class="btn-action btn-delete"
+                    onclick="deleteProperty('{{ prop.id }}')">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </div>
+    </td>
+
+</tr>
+
+{% empty %}
+<tr>
+    <td colspan="75">
+        <div class="empty-state" style="text-align:center;padding:40px;color:#718096;">
+            <i class="fas fa-home" style="font-size:3rem;color:#cbd5e0;margin-bottom:15px;display:block;"></i>
+            No properties found.
+        </div>
+    </td>
+</tr>
+{% endfor %}
         </tbody>
     </table>
 </div>
-
         {% if page_obj.paginator.num_pages > 1 %}
         <div class="pagination-wrap">
             <small style="color:#888;">
@@ -1354,14 +1652,16 @@
 
 <script>
 /* ─── Chart Data from Django Context ─── */
-const bhkLabels       = {{ bhk_labels|safe|default:"[]" }};
-const bhkData         = {{ bhk_data|safe|default:"[]" }};
-const rentRangeLabels = {{ rent_range_labels|safe|default:"[]" }};
-const rentRangeData   = {{ rent_range_data|safe|default:"[]" }};
-const furnishLabels   = {{ furnishing_labels|safe|default:"[]" }};
-const furnishData     = {{ furnishing_data|safe|default:"[]" }};
-const propTypeLabels  = {{ prop_type_labels|safe|default:"[]" }};
-const propTypeData    = {{ prop_type_data|safe|default:"[]" }};
+
+/* ─── Chart Data from Django Context ─── */
+const rentingOptionLabels = {{ renting_option_labels|safe|default:"[]" }};
+const rentingOptionData   = {{ renting_option_data|safe|default:"[]" }};
+const rentRangeLabels     = {{ rent_range_labels|safe|default:"[]" }};
+const rentRangeData       = {{ rent_range_data|safe|default:"[]" }};
+const furnishLabels       = {{ furnishing_labels|safe|default:"[]" }};
+const furnishData         = {{ furnishing_data|safe|default:"[]" }};
+const propTypeLabels      = {{ prop_type_labels|safe|default:"[]" }};
+const propTypeData        = {{ prop_type_data|safe|default:"[]" }};
 
 const COLORS = ['#667eea','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f97316','#6366f1'];
 
@@ -1412,7 +1712,7 @@ function makeBar(id, labels, data, label, color) {
     });
 }
 
-makePie('bhkPieChart', bhkLabels, bhkData);
+makePie('rentingOptionChart', rentingOptionLabels, rentingOptionData);
 makeBar('rentRangeChart', rentRangeLabels, rentRangeData, 'Properties', '#667eea');
 makePie('furnishingChart', furnishLabels, furnishData);
 makeBar('propTypeChart', propTypeLabels, propTypeData, 'Properties', '#10b981');
@@ -1749,7 +2049,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 
 
-function submitImport() {
+async function submitImport() {
     const fileInput = document.getElementById('rental_file');
     
     if (!fileInput.files || !fileInput.files[0]) { 
@@ -1760,6 +2060,7 @@ function submitImport() {
     const formData = new FormData();
     formData.append('rental_file', fileInput.files[0]);
 
+    // 1. Trigger the Loading UI
     Swal.fire({
         title: 'Analyzing File Matrix...',
         text: 'Please wait while we perform duplicate checking across the database.',
@@ -1778,20 +2079,23 @@ function submitImport() {
         }, 150);
     }
 
-    fetch("{% url 'import_residential_excel' %}", {
-        method: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-        body: formData
-    })
-    .then(async (res) => {
+    try {
+        // 2. Fetch data from backend
+        const response = await fetch("{% url 'import_residential_excel' %}", {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            body: formData
+        });
+
+        // 3. READ THE JSON BODY EVEN IF STATUS IS 400
+        const data = await response.json();
+
+        // 4. Clean up progress bar UI
         if (window.importInterval) clearInterval(window.importInterval);
         if (progressBar) progressBar.style.width = '100%';
         setTimeout(() => { if (progressDiv) progressDiv.style.display = 'none'; }, 400);
 
-        if (!res.ok) throw new Error(`Server execution error status: ${res.status}`);
-        const data = await res.json();
-
-        // Condition 1: Same file name, completely identical internal contents
+        // --- HANDLER A: Exact File Duplicates ---
         if (data.status === 'duplicate_filename_and_data') {
             Swal.fire({
                 icon: 'info',
@@ -1803,7 +2107,7 @@ function submitImport() {
             return;
         }
 
-        // Condition 2: Different file name, but matching duplicate property content
+        // --- HANDLER B: Content Duplicates (Different Filename) ---
         if (data.status === 'duplicate_data_different_filename') {
             Swal.fire({
                 icon: 'warning',
@@ -1815,46 +2119,94 @@ function submitImport() {
             return;
         }
 
-        // Standard formatting engine loop responses
-        let errorHtml = "";
-        if (data.errors && data.errors.length > 0) {
-            errorHtml = `<div style="text-align: left; font-size: 13px; max-height: 150px; overflow-y: auto; background: #FEF2F2; color: #DC2626; padding: 12px; border-radius: 8px; border: 1px solid #FCA5A5; margin-top: 15px;">
-                            <ul style="margin-bottom: 0; padding-left: 20px;">`;
-            data.errors.forEach(err => { errorHtml += `<li><b>${err}</b></li>`; });
-            errorHtml += `</ul></div>`;
+        // --- HANDLER C: Success or Partial Success (200 OK) ---
+        if (response.ok && (data.status === "success" || data.status === "partial_error")) {
+            let errorHtml = "";
+            if (data.errors && data.errors.length > 0) {
+                errorHtml = `<div style="text-align: left; font-size: 13px; max-height: 150px; overflow-y: auto; background: #FEF2F2; color: #DC2626; padding: 12px; border-radius: 8px; border: 1px solid #FCA5A5; margin-top: 15px;">
+                                <ul style="margin-bottom: 0; padding-left: 20px;">`;
+                data.errors.forEach(err => { errorHtml += `<li><b>${err}</b></li>`; });
+                errorHtml += `</ul></div>`;
+            }
+
+            let statsHtml = `<div style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap: wrap;">`;
+            if (data.created > 0) statsHtml += `<span style="background:#10b981; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-plus-circle"></i> ${data.created} Created</span>`;
+            if (data.updated > 0) statsHtml += `<span style="background:#3b82f6; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-edit"></i> ${data.updated} Updated</span>`;
+            if (data.skipped > 0) statsHtml += `<span style="background:#f59e0b; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-forward"></i> ${data.skipped} Skipped</span>`;
+            statsHtml += `</div>`;
+
+            Swal.fire({
+                icon: data.error_count > 0 ? 'warning' : 'success',
+                title: data.error_count > 0 ? 'Cannot Import' : 'Import Complete!',
+                html: `<p style="font-size:14px; color:#4b5563; margin-bottom:0;">${data.message}</p>` + statsHtml + errorHtml,
+                confirmButtonText: 'Okay',
+                confirmButtonColor: '#667eea',
+                width: '550px'
+            }).then(() => {
+                if (data.created > 0 || data.updated > 0) {
+                    window.location.reload();
+                } else {
+                    clearFile();
+                }
+            });
+            return;
         }
 
-        let statsHtml = `<div style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap: wrap;">`;
-        if (data.created > 0) statsHtml += `<span style="background:#10b981; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-plus-circle"></i> ${data.created} Created</span>`;
-        if (data.updated > 0) statsHtml += `<span style="background:#3b82f6; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-edit"></i> ${data.updated} Updated</span>`;
-        if (data.skipped > 0) statsHtml += `<span style="background:#f59e0b; color:white; padding:6px 12px; border-radius:20px; font-size:13px; font-weight:600;"><i class="fas fa-forward"></i> ${data.skipped} Skipped</span>`;
-        statsHtml += `</div>`;
+        // --- HANDLER D: Known Backend Errors (400 Bad Request with JSON) ---
+      // --- HANDLER D: Known Backend Errors (400 Bad Request with JSON) ---
+        if (data && data.message) {
+            let html = `<p>${data.message}</p>`;
 
-        Swal.fire({
-            icon: data.error_count > 0 ? 'warning' : 'success',
-            title: data.error_count > 0 ? 'Import Content Anomalies' : 'Import Complete!',
-            html: `<p style="font-size:14px; color:#4b5563; margin-bottom:0;">${data.message}</p>` + statsHtml + errorHtml,
-            confirmButtonText: 'Acknowledge',
-            confirmButtonColor: '#667eea',
-            width: '550px'
-        }).then(() => {
-            if (data.created > 0 || data.updated > 0) {
-                window.location.reload();
-            } else {
-                clearFile();
+            // NEW — show exactly which field(s) are missing, per row. The
+            // backend already computes this in required_field_errors /
+            // row_errors; it just was never rendered before.
+            if (data.row_errors && data.row_errors.length > 0) {
+                const rowItems = data.row_errors.map(r =>
+                    `<li style="font-size:12px;color:#b91c1c;">
+                        <strong>Row ${r.row}:</strong> missing ${r.missing_fields.join(", ")}
+                     </li>`
+                ).join("");
+                html += `<div style="text-align:left; margin-top:10px; background:#FEF2F2; border:1px solid #FCA5A5; border-radius:8px; padding:10px 14px;">
+                            <p style="margin:0 0 6px; font-size:12px; font-weight:700; color:#DC2626;">
+                                Exact missing fields:
+                            </p>
+                            <ul style="margin:0; padding-left:18px;">${rowItems}</ul>
+                         </div>`;
             }
-        });
-    })
-    .catch(err => {
+
+            if (data.unmatched_headers && data.unmatched_headers.length > 0) {
+                html += `<p style="text-align:left; font-size:13px; color:#b91c1c;">
+                            <strong>Unmatched column headers found in your file:</strong><br>
+                            ${data.unmatched_headers.join("<br>")}
+                          </p>`;
+            }
+            if (data.header_row_detected) {
+                html += `<p style="font-size:12px; color:#64748b;">
+                            Detected header row: ${data.header_row_detected} —
+                            expected data from row: ${data.data_start_row_assumed || data.data_start_row_used}.
+                          </p>`;
+            }
+            Swal.fire({ icon: "error", title: "Import Failed", html, width: '550px' });
+            return;
+        }
+
+        // Fallback if data is totally unrecognizable
+        throw new Error(`Unexpected server behavior. Status: ${response.status}`);
+
+    } catch (networkErr) {
+        // --- HANDLER E: Real network crashes or 500 Server Errors ---
+        // This ONLY fires if response.json() fails (e.g. Django crashed and sent an HTML debug page)
+        // or if the internet disconnected entirely.
         if (window.importInterval) clearInterval(window.importInterval);
         if (progressDiv) progressDiv.style.display = 'none';
+        
         Swal.fire({
             icon: 'error',
             title: 'System Crash Error',
-            text: `Critical operational error context: ${err.message}`,
+            text: `Critical operational error context: ${networkErr.message}`,
             confirmButtonColor: '#667eea'
         });
-    });
+    }
 }
 
 </script>
@@ -1898,7 +2250,13 @@ function submitImport() {
             alert("No properties found for the selected date range.");
         }
     };
+
+
+
+    
 </script>
+
+
 
 </body>
 </html>

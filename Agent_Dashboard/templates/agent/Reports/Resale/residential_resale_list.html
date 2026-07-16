@@ -421,199 +421,361 @@
                    
 
                     <table class="properties-table table table-hover" id="resaleTable" style="width:100%">
-<thead>
-        <tr>
-            <th>Sr.No</th>
-            <th>Images</th>
-            <th>Property ID</th>
-            <th>Property Title</th>
+                        <thead>
+                            <tr>
+                                <th>Actions</th>
+                                <th>Sr.No</th>
+                                <th>Images</th>
+                                <th>Property ID</th>
+                                <th>Property Title</th>
+                                <th>Property Type</th>
+                                <th>Property No</th>
+                                <th>Society Type</th>
+                                <th>Wing No</th>
+                                <th>Water Type</th>
+                                <th>Furnishing Status</th>
+                                <th>Age of Property</th>
+                                <th>Facing Direction</th>
+                                <th>Occupancy Status</th>
+                                <th>BHK</th>
+                                <th>Bathrooms</th>
+                                <th>Balconies</th>
+                                <th>Covered Parking</th>
+                                <th>Open Parking</th>
+                                <th>Built-up Area (sqft)</th>
+                                <th>Carpet Area (sqft)</th>
+                                <th>Plot Area (sqft)</th>
+                                <th>Total Floors</th>
+                                <th>Building Configuration</th>
+                                <th>Ownership Status</th>
+                                <th>No. of Owners</th>
+                                <th>Ownership Document Type</th>
+                                <th>Title Clarity Status</th>
+                                <th>Encumbrance Status</th>
+                                <th>Loan on Property</th>
+                                <th>Loan Amount (₹)</th>
+                                <th>Existing Tenants</th>
+                                <th>Tenant Details</th>
+                                <th>Legal Dispute</th>
+                                <th>Dispute Details</th>
+                                <th>Government Tax Dues</th>
+                                <th>Pending Tax Amount (₹)</th>
+                                <th>Sanctioning Authority</th>
+                                <th>Selling Price (₹)</th>
+                                <th>Price per Sqft (₹)</th>
+                                <th>Price Negotiable</th>
+                                <th>Brokerage</th>
+                                <th>Brokerage Percentage</th>
+                                <th>Manual Brokerage</th>
+                                <th>Nearby Facilities</th>
+                                <th>Amenities</th>
+                                <th>Property Summary</th>
+                                <th>Property Description</th>
+                                <th>User Description</th>
+                                <th>City</th>
+                                <th>Locality</th>
+                                <th>Building Name</th>
+                                <th>Property Landmark</th>
+                                <th>Complete Address</th>
+                                <th>State</th>
+                                <th>Listed By Type</th>
+                                <th>Listed By Name</th>
+                                <th>Listed By Email</th>
+                                <th>Listed By Contact</th>
+                                <th>Listed By Role</th>
+                                <th>Assigned To</th>
+                                <th>Floor Plan</th>
+                                <th>Property Video</th>
+                                <th>Listed Elsewhere</th>
+                                <th>Portal Name</th>
+                                <th>Uploaded By Name</th>
+                                <th>Uploaded By Email</th>
+                                <th>Uploaded By Contact</th>
+                                <th>Uploaded By Role</th>
+                                <th>Upload File Name</th>
+                                <th>Listing Status</th>
+                                <th>Approval Status</th>
+                                <th>Is Duplicate</th>
+                                <th>Duplicate Group ID</th>
+                                <th>Created At</th>
+                                <th>Updated At</th>
+                                
+                            </tr>
+                        </thead>
 
-            <th>Property Type</th>
-            <th>Zone</th>
-            <th>Society Type</th>
-            <th>Water Type</th>
-            <th>Furnishing Type</th>
-            <th>Age of Property</th>
-            <th>Facing Direction</th>
-            <th>BHK</th>
-            <th>Bathrooms</th>
-            <th>Balconies</th>
-            <th>Covered Parking</th>
-            <th>Open Parking</th>
-            <th>Built-up Area (sqft)</th>
-            <th>Carpet Area (sqft)</th>
-            <th>Plot Area (sqft)</th>
-            <th>Floor No</th>
-            <th>Total Floors</th>
+                        <tbody>
+                            {% for prop in properties %}
+                                <tr id="row-{{ prop.pk }}">
 
-            <th>Ownership Type</th>
-            <th>No.of Owners</th>
-            <th>Loan on Property?(Yes/No)</th>
-            <th>Loan Amount</th>
-            <th>Existing Tenants?(Yes/No)</th>
-            <th>Tenant Details</th>
-            <th>Any Legal Dispute?(Yes/No)</th>
-            <th>Dispute Details</th>
-            <th>Government Tax Dues?</th>
-            <th>Pending Tax Amount (₹)</th>
-            <th>Expected Price</th>
-            <th>Price per Sqft</th>
-            <th>Price Negotiable?</th>
-            <th>Brokerage</th>
-            <th>Brokerage Percentage</th>
-            <th>Manual Brokerage</th>
-            <th>Property Description</th>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="{% url 'residential_resale_agent_view' prop.pk %}" class="btn-action btn-view"
+                                                title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'residential_resale_agent_edit' prop.id %}" class="btn-action btn-edit"
+                                                title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button class="btn-action btn-delete" title="Delete" onclick="Delete_Property('{{ prop.id }}')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
 
-            <th>Nearby Facilities</th>
-            <th>Amenities & Features</th>
-            <th>City</th>
-            <th>Locality</th>
-            <th>Building/Society Name</th>
-            <th>Complete Address</th>
-            <th>Owner Name</th>
-            <th>Owner Contact</th>
-            <th>Owner Email</th>
-            <th>Owner Role</th>
-            <th>Residential Status</th>
 
-            <th>Floor Plan</th>
-            <th>Property Video</th>
-            <th>Uploaded By Name</th>
-            <th>Uploaded By Email</th>
-            <th>Uploaded By Contact</th>
-            <th>Uploaded By Role</th>
-            <th>Upload File Name</th>
-            <th>Created At</th>
-            <th>Updated At</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>
+                                        {% if prop.thumbnail %}
+                                        <div style="position:relative;">
+                                            <img src="{{ prop.thumbnail.image.url }}"
+                                                style="width:70px;height:55px;border-radius:6px;cursor:pointer;object-fit:cover;"
+                                                onclick="openGallery(this)" data-images='{{ prop.image_urls|join:"|" }}'>
+                                            <span
+                                                style="position:absolute;top:-5px;right:-5px;background:#6366f1;color:white;font-size:10px;padding:2px 6px;border-radius:10px;">
+                                                {{ prop.image_count }}
+                                            </span>
+                                        </div>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td>{{ prop.id|default:"—" }}</td>
+                                    <td>
+                                        <div style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                            title="{{ prop.property_title }}">
+                                            {{ prop.property_title|default:"—" }}
+                                        </div>
+                                    </td>
+                                    <td>{{ prop.property_type|default:"—" }}</td>
+                                    <td>{{ prop.property_no|default:"—" }}</td>
+                                    <td>{{ prop.society_type|default:"—" }}</td>
+                                    <td>{{ prop.wing_no|default:"—" }}</td>
+                                    <td>{{ prop.water_type|default:"—" }}</td>
+                                    <td>
+                                        {% if prop.furnishing_status %}
+                                        <span
+                                            class="badge {% if prop.furnishing_status == 'fully' %}bg-success{% elif prop.furnishing_status == 'semi' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                            {{ prop.furnishing_status|title }}
+                                        </span>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td>{{ prop.property_age|default:"—" }}</td>
+                                    <td>{{ prop.facing_direction|default:"—" }}</td>
+                                    <td>
+                                        {% if prop.occupancy_status %}
+                                        <span
+                                            class="badge {% if prop.occupancy_status == 'Vacant' %}bg-success{% elif prop.occupancy_status == 'Tenant Occupied' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                            {{ prop.occupancy_status }}
+                                        </span>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prop.bhk %}
+                                        <span class="badge bg-info">{{ prop.bhk|upper }}</span>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td>{{ prop.bathrooms|default:"0" }}</td>
+                                    <td>{{ prop.balconies|default:"0" }}</td>
+                                    <td>{{ prop.covered_parking|default:"0" }}</td>
+                                    <td>{{ prop.open_parking|default:"—" }}</td>
+                                    <td>{% if prop.builtup_area %}{{ prop.builtup_area|floatformat:2 }}{% else %}—{% endif %}</td>
+                                    <td>{% if prop.carpet_area %}{{ prop.carpet_area|floatformat:2 }}{% else %}—{% endif %}</td>
+                                    <td>{% if prop.plot_area %}{{ prop.plot_area|floatformat:2 }}{% else %}—{% endif %}</td>
+                                    <td>{{ prop.total_floors|default:"1" }}</td>
+                                    <td>{{ prop.building_configuration|default:"—" }}</td>
+                                    <td>{{ prop.ownership_status|default:"—" }}</td>
+                                    <td>{{ prop.no_of_owners|default:"—" }}</td>
+                                    <td>{{ prop.ownership_document_type|default:"—" }}</td>
+                                    <td>{{ prop.title_clarity_status|default:"—" }}</td>
+                                    <td>{{ prop.encumbrance_status|default:"—" }}</td>
+                                    <td>
+                                        {% if prop.property_loan == 'yes' %}
+                                        <span class="badge bg-danger">Yes</span>
+                                        {% else %}
+                                        <span class="badge bg-success">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{% if prop.loan_amount %}₹{{ prop.loan_amount|floatformat:0 }}{% else %}—{% endif %}</td>
+                                    <td>
+                                        {% if prop.existing_tenants == 'yes' %}
+                                        <span class="badge bg-warning">Yes</span>
+                                        {% else %}
+                                        <span class="badge bg-success">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                            title="{{ prop.tenant_details }}">
+                                            {{ prop.tenant_details|default:"—" }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if prop.any_legal_dispute == 'yes' %}
+                                        <span class="badge bg-danger">Yes</span>
+                                        {% else %}
+                                        <span class="badge bg-success">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                            title="{{ prop.dispute_details }}">
+                                            {{ prop.dispute_details|default:"—" }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if prop.government_tax == 'yes' %}
+                                        <span class="badge bg-danger">Pending</span>
+                                        {% else %}
+                                        <span class="badge bg-success">Paid</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{% if prop.pending_tax_amount %}₹{{ prop.pending_tax_amount|floatformat:0 }}{% else %}—{% endif %}</td>
+                                    <td>
+                                        <div style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                            title="{{ prop.sanctioning_authority }}">
+                                            {{ prop.sanctioning_authority|default:"—" }}
+                                        </div>
+                                    </td>
+                                    <td>{% if prop.selling_price %}₹{{ prop.selling_price|floatformat:0 }}{% else %}—{% endif %}
+                                    </td>
+                                    <td>{% if prop.price_per_sqft %}₹{{ prop.price_per_sqft|floatformat:2 }}{% else %}—{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prop.price_negotiable == 'yes' %}
+                                        <span class="badge bg-success">Yes</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Fixed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ prop.brokerage_percentage|default:"—" }}</td>
+                                    <td>{{ prop.brokerage_percentage|default:"—" }}</td>
+                                    <td>{{ prop.manual_brokerage|default:"—" }}</td>
+                                    <td>
+                                        {% if prop.nearby_facilities_list %}
+                                        {% for f in prop.nearby_facilities_list|slice:":3" %}
+                                        <span class="badge bg-primary" style="margin: 1px;">{{ f }}</span>
+                                        {% endfor %}
+                                        {% if prop.nearby_facilities_list|length > 3 %}
+                                        <span class="badge bg-secondary">+{{ prop.nearby_facilities_list|length|add:"-3" }}</span>
+                                        {% endif %}
+                                        {% elif prop.nearby_facilities %}
+                                        <span class="badge bg-primary">{{ prop.nearby_facilities|truncatechars:20 }}</span>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prop.amenities_list %}
+                                        {% for a in prop.amenities_list|slice:":3" %}
+                                        <span class="badge bg-success" style="margin: 1px;">{{ a }}</span>
+                                        {% endfor %}
+                                        {% if prop.amenities_list|length > 3 %}
+                                        <span class="badge bg-secondary">+{{ prop.amenities_list|length|add:"-3" }}</span>
+                                        {% endif %}
+                                        {% elif prop.amenities %}
+                                        <span class="badge bg-success">{{ prop.amenities|truncatechars:20 }}</span>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                            title="{{ prop.property_summary }}">
+                                            {{ prop.property_summary|default:"—" }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                            title="{{ prop.property_description|striptags }}">
+                                            {{ prop.property_description|striptags|default:"—" }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                            title="{{ prop.user_description }}">
+                                            {{ prop.user_description|default:"—" }}
+                                        </div>
+                                    </td>
+                                    <td>{{ prop.city|default:"—" }}</td>
+                                    <td>{{ prop.locality|default:"—" }}</td>
+                                    <td>{{ prop.building_name|default:"—" }}</td>
+                                    <td>{{ prop.property_landmark|default:"—" }}</td>
+                                    <td>
+                                        <div style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                            title="{{ prop.address }}">
+                                            {{ prop.address|default:"—" }}
+                                        </div>
+                                    </td>
+                                    <td>{{ prop.state|default:"—" }}</td>
+                                    <td>
+                                        {% if prop.listed_by_type == 'self' %}
+                                        <span class="badge bg-info">Self</span>
+                                        {% elif prop.listed_by_type == 'other' %}
+                                        <span class="badge bg-warning">Other</span>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td>{{ prop.listed_by_name|default:"—" }}</td>
+                                    <td>{{ prop.listed_by_email|default:"—" }}</td>
+                                    <td>{{ prop.listed_by_contact|default:"—" }}</td>
+                                    <td>{{ prop.listed_by_role|default:"—" }}</td>
+                                    <td>{{ prop.assigned_to|default:"—" }}</td>
+                                    <td>
+                                        {% if prop.floor_plan %}
+                                        <a href="{{ prop.floor_plan.url }}" target="_blank" class="btn btn-sm btn-outline-secondary"
+                                            style="padding: 2px 8px; font-size: 11px;">
+                                            <i class="fas fa-file-pdf"></i> View
+                                        </a>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prop.property_video %}
+                                        <a href="{{ prop.property_video.url }}" target="_blank"
+                                            class="btn btn-sm btn-outline-secondary" style="padding: 2px 8px; font-size: 11px;">
+                                            <i class="fas fa-play"></i> View
+                                        </a>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prop.listed_elsewhere == 'Yes' %}
+                                        <span class="badge bg-warning">Yes</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ prop.portal_name|default:"—" }}</td>
+                                    <td>{{ prop.uploaded_by_name|default:"—" }}</td>
+                                    <td>{{ prop.uploaded_by_email|default:"—" }}</td>
+                                    <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
+                                    <td>{{ prop.uploaded_by_role|default:"—" }}</td>
+                                    <td>{{ prop.upload_file_name|default:"Web_Listing_Ui_Form" }}</td>
+                                    <td>
+                                        {% if prop.listing_status %}
+                                        <span
+                                            class="badge {% if prop.listing_status == 'Active' %}bg-success{% elif prop.listing_status == 'Draft' %}bg-secondary{% else %}bg-warning{% endif %}">
+                                            {{ prop.listing_status }}
+                                        </span>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prop.approval_status %}
+                                        <span
+                                            class="badge {% if prop.approval_status == 'Approved' %}bg-success{% elif prop.approval_status == 'Pending' %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ prop.approval_status }}
+                                        </span>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if prop.is_duplicate %}
+                                        <span class="badge bg-danger">Yes</span>
+                                        {% else %}
+                                        <span class="badge bg-success">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ prop.duplicate_group_id|default:"—" }}</td>
+                                    <td>{{ prop.created_at|date:"d M Y H:i" }}</td>
+                                    <td>{{ prop.updated_at|date:"d M Y H:i" }}</td>
 
-<tbody>
-        {% for prop in properties %}
-        <tr id="row-{{ prop.pk }}">
-            <td>{{ forloop.counter }}</td>
-            <td>
-                {% if prop.thumbnail %}
-                <div style="position:relative;">
-                    <img src="{{ prop.thumbnail.image.url }}"
-                         style="width:70px;height:55px;border-radius:6px;cursor:pointer;"
-                         onclick="openGallery(this)"
-                         data-images='{{ prop.image_urls|join:"|" }}'>
-                    <span style="position:absolute;top:-5px;right:-5px;background:#6366f1;color:white;font-size:10px;padding:2px 6px;border-radius:10px;">
-                        {{ prop.image_count }}
-                    </span>
-                </div>
-                {% else %}—{% endif %}
-            </td>
-            <td>{{ prop.id|default:"—" }}</td>
-            <td>{{ prop.property_title|default:"—" }}</td>
+                                    
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
 
-            <td>{{ prop.property_type }}</td>
-            <td>{{ prop.zone}} Zone</td>
-            <td>{{ prop.society_type}}</td>
-            <td>{{ prop.water_type }}</td>
-            <td>{{ prop.furnishing_type }}</td>
-            <td>{{ prop.age_of_property }}</td>
-            <td>{{ prop.facing_direction }}</td>
-            <td>{{ prop.bhk }}</td>
-            <td>{{ prop.bathrooms }}</td>
-            <td>{{ prop.balconies }}</td>
-            <td>{{ prop.covered_parking }}</td>
-            <td>{{ prop.open_parking }}</td>
-            <td>{{ prop.builtup_area }}</td>
-            <td>{{ prop.carpet_area }}</td>
-            <td>{{ prop.plot_area|default:"—" }}</td>
-            <td>{{ prop.floor_no }}</td>
-            <td>{{ prop.total_floors }}</td>
-
-            <td>{{ prop.ownership_type }}</td>
-            <td>{{ prop.num_owners }}</td>
-            <td>{% if prop.loan_on_property == 'yes' %}Yes{% else %}No{% endif %}</td>
-            <td>{% if prop.loan_amount %}₹{{ prop.loan_amount }}{% else %}—{% endif %}</td>
-            <td>{% if prop.existing_tenants == 'yes' %}Yes{% else %}No{% endif %}</td>
-            <td>{{ prop.tenant_details|default:"—" }}</td>
-            <td>{% if prop.any_legal_dispute == 'yes' %}Yes{% else %}No{% endif %}</td>
-            <td>{{ prop.dispute_details|default:"—" }}</td>
-            <td>{% if prop.government_tax_dues == 'yes' %}Pending{% else %}Paid{% endif %}</td>
-            <td>{% if prop.pending_tax_amount %}₹{{ prop.pending_tax_amount }}{% else %}—{% endif %}</td>
-            <td>₹{{ prop.expected_price|floatformat:0 }}</td>
-            <td>{% if prop.price_per_sqft %}₹{{ prop.price_per_sqft }}{% else %}—{% endif %}</td>
-            <td>{{ prop.price_negotiable }}</td>
-            <td>{{ prop.brokerage|default:"—" }}</td>
-            <td>{{ prop.brokerage_percentage|default:"—" }}</td>
-            <td>{{ prop.manual_brokerage|default:"—" }}</td>
-            <td>
-                <div style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.property_description|striptags }}">
-                    {{ prop.property_description|striptags }}
-                </div>
-            </td>
-
-            <td>
-                {% if prop.nearby_facilities_list %}
-                    {% for f in prop.nearby_facilities_list %}
-                        <span class="badge bg-primary" style="margin: 1px;">{{ f }}</span>
-                    {% endfor %}
-                {% elif prop.nearby_facilities %}
-                    <span class="badge bg-primary">{{ prop.nearby_facilities }}</span>
-                {% else %}—{% endif %}
-            </td>
-            <td>
-                {% if prop.amenities_list %}
-                    {% for a in prop.amenities_list %}
-                        <span class="badge bg-success" style="margin: 1px;">{{ a }}</span>
-                    {% endfor %}
-                {% elif prop.amenities %}
-                    <span class="badge bg-success">{{ prop.amenities }}</span>
-                {% else %}—{% endif %}
-            </td>
-            <td>{{ prop.city }}</td>
-            <td>{{ prop.locality }}</td>
-            <td>{{ prop.building_name|default:"—" }}</td>
-            <td>{{ prop.complete_address }}</td>
-            <td>{{ prop.owner_name }}</td>
-            <td>{{ prop.owner_contact }}</td>
-            <td>{{ prop.owner_email }}</td>
-            <td>{{ prop.owner_role|default:"—" }}</td>
-            <td>{{ prop.residential_status }}</td>
-
-            <td>
-                {% if prop.floor_plan %}
-                <a href="{{ prop.floor_plan.url }}" target="_blank" class="btn btn-sm btn-outline-secondary" style="padding: 2px 8px; font-size: 11px;">View Plan</a>
-                {% else %}—{% endif %}
-            </td>
-            <td>
-                {% if prop.property_video %}
-                <a href="{{ prop.property_video.url }}" target="_blank" class="btn btn-sm btn-outline-secondary" style="padding: 2px 8px; font-size: 11px;">View Video</a>
-                {% else %}—{% endif %}
-            </td>
-            <td>{{ prop.uploaded_by_name|default:"—" }}</td>
-            <td>{{ prop.uploaded_by_email|default:"—" }}</td>
-            <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
-            <td>{{ prop.uploaded_by_role|default:"—" }}</td>
-            <td>{{ prop.upload_file_name|default:"Web_Listing_Ui_Form" }}</td>
-            <td>{{ prop.created_at|date:"d M Y" }}</td>
-            <td>{{ prop.updated_at|date:"d M Y" }}</td>
-
-            <td class="text-center">
-                <div class="d-flex justify-content-center gap-2">
-                    <a href="{% url 'resale_residential_view' prop.pk %}" class="btn-action btn-view" title="View">
-                        <i class="fas fa-eye"></i>
-                    </a>
-                 <a href="{% url 'resale_residential_edit' prop.id %}" 
-   class="btn-action btn-edit" 
-   title="Edit">
-    <i class="fas fa-edit"></i>
-</a>
-                    <button class="btn-action btn-delete" title="Delete" onclick="Delete_Property({{ prop.pk }})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
                 </div>
             </div>
 

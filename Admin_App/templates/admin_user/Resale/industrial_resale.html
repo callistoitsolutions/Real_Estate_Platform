@@ -2172,7 +2172,7 @@
       }
     }
     currentStep = n;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
     updatePreview();
   }
 

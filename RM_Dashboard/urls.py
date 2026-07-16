@@ -38,6 +38,10 @@ urlpatterns = [
 
     path('residential_rm',views.residential_rm,name="residential_rm"),
 
+    ############# urls for rental edit forms for RM ###################
+
+    path('residential_rm_edit/<str:pk>',views.residential_rm_edit,name="residential_rm_edit"),
+
     ########## urls for commercial rent forms for RM ################
 
     path('commercial_rm_list',views.commercial_rm_list,name="commercial_rm_list"),
@@ -62,6 +66,10 @@ urlpatterns = [
     ########### urls for resale property form residential ################
 
     path('residential_resale_rm',views.residential_resale_rm,name="residential_resale_rm"),
+
+    ############# urls for update resale property form residential ####################
+
+    path('residential_resale_rm_update/<str:id>',views.residential_resale_rm_update,name="residential_resale_rm_update"),
 
     ######### urls for resale commercial property list #########################
 

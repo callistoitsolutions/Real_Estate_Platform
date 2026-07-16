@@ -2770,7 +2770,7 @@
       }
     }
     currentStep = n;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
     updatePreview();
   }
 
@@ -2813,43 +2813,62 @@
     return isValid;
   }
 
-  function updatePreview() {
-    const typeEl = document.getElementById('comm_property_type');
-    const typeTxt = typeEl?.value ? typeEl.options[typeEl.selectedIndex].text : 'Commercial';
-    const areaVal = document.getElementById('comm_builtup_area')?.value || '—';
-    const buildVal = document.getElementById('comm_building')?.value;
-    const localityVal = document.getElementById('comm_locality')?.value || 'Area';
-    const cityVal = document.getElementById('comm_city')?.value || 'City';
+  
 
-    let title = `Premium ${areaVal} Sqft ${typeTxt}`;
+  function updatePreview() {
+    // 1. Fetch exact fields from your HTML
+    const typeEl = document.getElementById('property_type');
+    const typeTxt = typeEl && typeEl.value ? typeEl.options[typeEl.selectedIndex].text : 'Commercial';
+    const areaVal = document.getElementById('builtup_area')?.value || '—';
+    const buildVal = document.getElementById('building_name')?.value;
+    const localityVal = document.getElementById('locality')?.value || 'Area';
+    const cityVal = document.getElementById('city')?.value || 'City';
+    const price = document.getElementById('selling_price')?.value;
+
+    // 2. Build Title
+    let title = `Premium ${areaVal !== '—' ? areaVal + ' Sqft ' : ''}${typeTxt}`;
     if (buildVal) title += ` in ${buildVal}`;
     title += ` at ${localityVal}, ${cityVal}`;
 
-    const titleBox = document.getElementById('comm_title_display');
-    if (titleBox) titleBox.value = title;
+    // 3. Update Title Boxes safely
+    const titleBox = document.getElementById('property_title');
+    if (titleBox && (localityVal !== 'Area' || typeEl?.value)) {
+      titleBox.value = title;
+    }
     const previewTitle = document.getElementById('previewTitle');
     if (previewTitle) previewTitle.textContent = title;
 
-    const price = document.getElementById('selling_price')?.value;
-    if (price) document.getElementById('previewPrice').textContent = '₹' + parseInt(price).toLocaleString('en-IN');
+    // 4. Update Price & Location on Preview Card
+    if (price) {
+      document.getElementById('previewPrice').textContent = '₹' + parseInt(price, 10).toLocaleString('en-IN');
+    } else {
+      document.getElementById('previewPrice').textContent = '₹ —';
+    }
+    
     document.getElementById('prevArea').textContent = (areaVal !== '—' ? areaVal : '—') + ' sqft';
     document.getElementById('previewLoc').innerHTML = `<i class="fas fa-map-marker-alt" style="color:#667eea;"></i> ${localityVal}, ${cityVal}`;
 
+    // 5. Calculate Price Per Sqft
     const psf = document.getElementById('price_per_sqft');
-    if (price && areaVal && parseFloat(areaVal) > 0) {
-      psf.value = '₹' + (parseFloat(price) / parseFloat(areaVal)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' / sqft';
-    } else {
-      psf.value = '';
+    if (psf) {
+      if (price && areaVal !== '—' && parseFloat(areaVal) > 0) {
+        const calcRate = (parseFloat(price) / parseFloat(areaVal)).toFixed(2);
+        psf.value = '₹ ' + parseFloat(calcRate).toLocaleString('en-IN') + ' / sqft';
+      } else {
+        psf.value = '';
+      }
     }
+
     updateChecklist();
   }
 
   function updateChecklist() {
-    setCheck('cl-type', !!document.getElementById('comm_property_type')?.value);
-    setCheck('cl-area', !!document.getElementById('comm_builtup_area')?.value);
+    // Corrected to check the actual IDs used in your HTML form
+    setCheck('cl-type', !!document.getElementById('property_type')?.value);
+    setCheck('cl-area', !!document.getElementById('builtup_area')?.value);
     setCheck('cl-price', !!document.getElementById('selling_price')?.value);
-    setCheck('cl-location', !!document.getElementById('comm_city')?.value && !!document.getElementById('comm_locality')?.value);
-    setCheck('cl-owner', !!document.getElementById('comm_owner_name')?.value && !!document.getElementById('comm_owner_role')?.value);
+    setCheck('cl-location', !!document.getElementById('city')?.value && !!document.getElementById('locality')?.value);
+    setCheck('cl-owner', !!document.getElementById('listed_by_name')?.value);
   }
 
   function setCheck(id, done) {

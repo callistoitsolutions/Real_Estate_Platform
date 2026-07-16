@@ -2472,7 +2472,7 @@
       }
     }
     currentStep = n;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
     updatePreview();
   }
 
@@ -2510,59 +2510,77 @@
   }
 
   // ── PREVIEW ──
+ // ── PREVIEW ──
   function generateTitle() {
-    const typeEl = document.getElementById('agriculture_property_type');
-    const typeText = typeEl?.options[typeEl.selectedIndex]?.text || '';
+    const typeEl = document.getElementById('property_type');
+    const typeText = typeEl && typeEl.value ? typeEl.options[typeEl.selectedIndex].text : '';
     const area = document.getElementById('land_area')?.value?.trim();
     const vil = document.getElementById('village')?.value?.trim();
     const tal = document.getElementById('taluka')?.value?.trim();
+    const dist = document.getElementById('district')?.value?.trim();
+    
     if (!typeText || !area || !vil) return '';
     const areaLabel = parseFloat(area).toLocaleString('en-IN') + ' Acres';
-    const loc = tal ? `in ${vil}, ${tal}` : `in ${vil}`;
-    return `${areaLabel} ${typeText} ${loc}`;
+    const locParts = [vil, tal, dist].filter(Boolean).join(', ');
+    return `${areaLabel} ${typeText} in ${locParts}`;
   }
 
   function updatePreview() {
+    // 1. Fetch values using exact HTML IDs
     const area = document.getElementById('land_area')?.value || '';
     const price = document.getElementById('selling_price')?.value || '';
-    const city = document.getElementById('city')?.value || '';
-    const loc = document.getElementById('locality')?.value || '';
-    const soilEl = document.querySelector('select[name="soil_type"]');
-    const soilText = soilEl?.options[soilEl?.selectedIndex]?.text || '—';
-    const waterEl = document.querySelector('select[name="water_source"]');
+    const village = document.getElementById('village')?.value || '';
+    const taluka = document.getElementById('taluka')?.value || '';
+    const district = document.getElementById('district')?.value || '';
+    const soilEl = document.getElementById('soil_type');
+    const soilText = soilEl && soilEl.value ? soilEl.options[soilEl.selectedIndex].text : '—';
+    const waterEl = document.getElementById('water_source');
 
+    // 2. Generate and display Property Title
     const title = generateTitle();
-    const titleInput = document.getElementById('agri_title');
-    if (titleInput) titleInput.value = title;
+    const titleInput = document.getElementById('property_title');
+    if (titleInput && (title || area || village)) {
+      titleInput.value = title;
+    }
 
-    const el = id => document.getElementById(id);
-    if (el('p_title')) el('p_title').textContent = title || 'Your Agricultural Property';
-    if (el('p_area')) el('p_area').textContent = area ? parseFloat(area).toLocaleString('en-IN') + ' Acres' : '— Acres';
-    if (el('p_soil')) el('p_soil').textContent = soilEl?.value ? 'Soil: ' + soilText : 'Soil: —';
-    if (el('p_price')) el('p_price').textContent = price ? '₹' + parseInt(price).toLocaleString('en-IN') : '₹ —';
-    if (el('p_loc')) el('p_loc').innerHTML = `<i class="fas fa-map-marker-alt" style="color:#56ab2f;"></i> ${loc || 'Locality'}, ${city || 'City'}`;
+    // 3. Update Preview Card elements safely
+    const pTitle = document.getElementById('p_title');
+    const pArea = document.getElementById('p_area');
+    const pSoil = document.getElementById('p_soil');
+    const pPrice = document.getElementById('p_price');
+    const pLoc = document.getElementById('p_loc');
 
-    // Auto price per acre
+    if (pTitle) pTitle.textContent = title || 'Your Agricultural Property';
+    if (pArea) pArea.textContent = area ? parseFloat(area).toLocaleString('en-IN') + ' Acres' : '— Acres';
+    if (pSoil) pSoil.textContent = soilEl && soilEl.value ? 'Soil: ' + soilText : 'Soil: —';
+    if (pPrice) pPrice.textContent = price ? '₹' + parseInt(price, 10).toLocaleString('en-IN') : '₹ —';
+    
+    if (pLoc) {
+      const locationString = [village, taluka, district].filter(Boolean).join(', ') || 'Village, District';
+      pLoc.innerHTML = `<i class="fas fa-map-marker-alt" style="color:#56ab2f;"></i> ${locationString}`;
+    }
+
+    // 4. Auto-calculate Price Per Acre
     const ppa = document.getElementById('price_per_acre_display');
     const ppaHidden = document.getElementById('price_per_acre_hidden');
     if (price && area && parseFloat(area) > 0) {
-      const val = (parseFloat(price) / parseFloat(area)).toFixed(0);
-      if (ppa) ppa.value = '₹' + parseInt(val).toLocaleString('en-IN') + ' / Acre';
+      const val = Math.round(parseFloat(price) / parseFloat(area));
+      if (ppa) ppa.value = '₹ ' + parseInt(val, 10).toLocaleString('en-IN') + ' / Acre';
       if (ppaHidden) ppaHidden.value = val;
     } else {
       if (ppa) ppa.value = '';
       if (ppaHidden) ppaHidden.value = '';
     }
 
-    // Checklist
+    // 5. Update Checklist Indicators
     setCheck('cl-type', !!document.getElementById('property_type')?.value);
     setCheck('cl-area', !!area);
-    setCheck('cl-village', !!document.getElementById('village')?.value && !!document.getElementById('district')?.value);
+    setCheck('cl-village', !!village && !!district);
     setCheck('cl-price', !!price);
     setCheck('cl-water', !!waterEl?.value && waterEl.value !== 'none');
-    setCheck('cl-loc', !!city && !!loc);
+    setCheck('cl-loc', !!village || !!taluka || !!district);
 
-    // Upload counter
+    // 6. Update Upload Counter Badge
     const badge = document.getElementById('uploadCounterBadge');
     if (badge) badge.textContent = `Uploaded: ${selectedFiles.length} / ${maxImages} Images`;
   }
@@ -2571,9 +2589,9 @@
     const el = document.getElementById(id);
     if (!el) return;
     el.className = 'checklist-item' + (done ? ' done' : '');
-    el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+    const icon = el.querySelector('i');
+    if (icon) icon.className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
   }
-
   // ── CONDITIONALS ──
   function setupToggle(name, sectionId) {
     document.querySelectorAll(`input[name="${name}"]`).forEach(r => {

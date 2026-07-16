@@ -454,11 +454,11 @@
             white-space: nowrap;
         }
 
-        /* Main Content */
+     * Main Content */
         .main-wrapper {
             transition: all 0.3s ease;
             width: 100%;
-            overflow-x: hidden;
+            
         }
 
         .main-content {
@@ -468,7 +468,7 @@
             min-height: calc(100vh - var(--topbar-height));
             transition: all 0.3s ease;
             max-width: 100%;
-            overflow-x: hidden;
+           
         }
 
         .sidebar.collapsed ~ .main-wrapper .main-content {
@@ -1532,7 +1532,7 @@
 
             <li class="menu-section-title" style="color:white;">SUBSCRIPTION DETAILS</li>
 
-            <li class="menu-item">
+           <li class="menu-item">
                 <a  class="menu-link" onclick="toggleSubmenu(event, this)" id="Subscriptions">
                     <i class="fas fa-money-bill-wave menu-icon"></i>
                     <span class="menu-text" style="color:white;">Subscriptions</span>
@@ -1555,8 +1555,7 @@
                 </a>
                 <ul class="submenu">
                     <li><a href="{% url 'residential_list' %}" class="submenu-link" style="color:white;" id="Rent_Resident">Residential</a></li>
-                    
-                    <li><a href="{% url 'rental_reports' %}" class="submenu-link" style="color:white;" id="Rent_Resident"> Rental Residential Reports</a></li>
+                                        <li><a href="{% url 'rental_reports' %}" class="submenu-link" style="color:white;" id="Rent_Resident"> Rental Residential Reports</a></li>
 
                     <li><a href="{% url 'commercial_list' %}" class="submenu-link" style="color:white;">Commercial</a></li>
                     
@@ -1580,44 +1579,48 @@
                 </ul>
             </li>
 
-            <li class="menu-item">
-                <a href="javascript:void(0)" class="menu-link" onclick="toggleSubmenu(event, this)" id="PlotResale">
 
-                    <i class="fas fa-map-marked-alt menu-icon"></i>
+           <li class="menu-item">
+    <a href="javascript:void(0)"
+       class="menu-link"
+       onclick="toggleSubmenu(event, this)"
+       id="PlotResale">
 
-                    <span class="menu-text" style="color:#ffffffbf;">
-                        Listed Resale Plot
-                    </span>
+        <i class="fas fa-map-marked-alt menu-icon"></i>
 
-                    <i class="fas fa-angle-down dropdown-icon"></i>
-                </a>
+        <span class="menu-text" style="color:#ffffffbf;">
+            Listed Resale Plot 
+        </span>
 
-                <ul class="submenu">
-                    <li>
-                        <a href="{% url 'residential_plot_resale_list' %}" class="submenu-link">
-                            <i class="fas fa-home"></i> Residential Plot
-                        </a>
-                    </li>
+        <i class="fas fa-angle-down dropdown-icon"></i>
+    </a>
 
-                    <li>
-                        <a href="{% url 'commercial_plot_resale_list' %}" class="submenu-link">
-                            <i class="fas fa-store"></i> Commercial Plot
-                        </a>
-                    </li>
+    <ul class="submenu">
+        <li>
+            <a href="{% url 'residential_plot_resale_list' %}" class="submenu-link">
+                <i class="fas fa-home"></i> Residential Plot
+            </a>
+        </li>
 
-                    <li>
-                        <a href="{% url 'industrial_plot_resale_list' %}" class="submenu-link">
-                            <i class="fas fa-industry"></i> Industrial Plot
-                        </a>
-                    </li>
+        <li>
+            <a href="{% url 'commercial_plot_resale_list' %}" class="submenu-link">
+                <i class="fas fa-store"></i> Commercial Plot
+            </a>
+        </li>
 
-                    <li>
-                        <a href="{% url 'agricultural_plot_resale_list' %}" class="submenu-link">
-                            <i class="fas fa-seedling"></i> Agricultural Plot
-                        </a>
-                    </li>
-                </ul>
-            </li>
+        <li>
+            <a href="{% url 'industrial_plot_resale_list' %}" class="submenu-link">
+                <i class="fas fa-industry"></i> Industrial Plot
+            </a>
+        </li>
+
+        <li>
+            <a href="{% url 'agricultural_plot_resale_list' %}" class="submenu-link">
+                <i class="fas fa-seedling"></i> Agricultural Plot
+            </a>
+        </li>
+    </ul>
+</li>
 
             <li class="menu-section-title" style="color:white;">ENQUIRIES FROM</li>
 

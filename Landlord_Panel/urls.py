@@ -23,6 +23,14 @@ urlpatterns = [
 
     path('residential_landlord',views.residential_landlord,name="residential_landlord"),
 
+    ############ urls for edit rental forms for landlord #################
+
+    path('residential_landlord_edit/<str:pk>',views.residential_landlord_edit,name="residential_landlord_edit"),
+
+    ############## urls for view rental forms for landlord ###################
+
+    path('residential_landlord_view/<str:pk>',views.residential_landlord_view,name="residential_landlord_view"),
+
     ########## urls for commercial rent forms for landlord ################
 
     path('commercial_landlord_list',views.commercial_landlord_list,name="commercial_landlord_list"),
@@ -46,6 +54,14 @@ urlpatterns = [
     ########### urls for resale property form residential ################
 
     path('residential_resale_landlord',views.residential_resale_landlord,name="residential_resale_landlord"),
+
+    ############ urls for resale property view form residential ##################
+
+    path('residential_resale_landlord_view/<str:id>',views.residential_resale_landlord_view,name="residential_resale_landlord_view"),
+
+    ######## urls for resale property edit form residential ######################
+
+    path('residential_resale_landlord_edit/<str:id>',views.residential_resale_landlord_edit,name="residential_resale_landlord_edit"),
 
     ######### urls for resale commercial property list #########################
 
