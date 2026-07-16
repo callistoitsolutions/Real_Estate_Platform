@@ -49,6 +49,15 @@ urlpatterns = [
     path('residential_agent',views.residential_agent,name="residential_agent"),
     path('residential_agent_edit/<str:pk>',views.residential_agent_edit,name="residential_agent_edit"),
     path('rental_list_agent',views.rental_list_agent,name="rental_list_agent"),
+    path(
+    'rental/residential_view_agent/<str:pk>/',
+    views.rental_residential_view_agent,
+    name='rental_residential_view_agent'
+    ),
+
+    path('residential_import_excel_agent/', views.import_residential_excel_agent, name='import_residential_excel_agent'),
+
+    path('residential_download_template_agent/', views.download_residential_template_agent, name='download_residential_template_agent'),
 
 
      ############ urls for Rental Residential Listing ############################

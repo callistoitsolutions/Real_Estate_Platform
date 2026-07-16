@@ -23,6 +23,170 @@ import hashlib
 import re
 from django.core.paginator import Paginator
 
+from django.shortcuts import render,HttpResponse
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+# Create your views here.
+from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import render,redirect,get_object_or_404
+from Admin_App .models import *
+from Main_App .models import *
+from seo .models import *
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from datetime import datetime
+from openpyxl import load_workbook
+from django.template.loader import render_to_string
+import traceback
+import json
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.db.models import Q
+from django.core.paginator import Paginator  # ← ADD THIS
+import csv
+import csv
+import json
+from django.db.models import Count, Avg, Max, Min, Q
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from datetime import datetime
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from datetime import datetime
+from datetime import datetime
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.db import transaction  
+from django.utils import timezone
+import csv
+from datetime import datetime, date
+import io
+from collections import OrderedDict
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+from django.http import HttpResponse
+
+import openpyxl
+from django.contrib import messages
+from django.http import HttpResponse, JsonResponse
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_POST
+from openpyxl import Workbook
+from django.db import transaction
+import pandas as pd
+import io
+from django.urls import reverse,NoReverseMatch
+
+from openpyxl.styles import Font, PatternFill
+from datetime import timedelta
+from django.utils import timezone
+
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+import csv
+import json
+# I added 'Sum' to the end of this line:
+from django.db.models import Q, Count, Avg, Max, Min, Sum
+from django.core.paginator import Paginator
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_protect
+from django.shortcuts import render,HttpResponse
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+# Create your views here.
+from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import render,redirect,get_object_or_404
+from Admin_App .models import *
+from Main_App .models import *
+from seo .models import *
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from datetime import datetime
+from openpyxl import load_workbook
+from django.template.loader import render_to_string
+import traceback
+import json
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.db.models import Q
+from django.core.paginator import Paginator  # ← ADD THIS
+import csv
+import csv
+import json
+from django.db.models import Count, Avg, Max, Min, Q
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from datetime import datetime
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from datetime import datetime
+from datetime import datetime
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.db import transaction  
+from django.utils import timezone
+import csv
+from datetime import datetime, date
+import io
+from collections import OrderedDict
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+from django.http import HttpResponse
+
+import openpyxl
+from django.contrib import messages
+from django.http import HttpResponse, JsonResponse
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_POST
+from openpyxl import Workbook
+from django.db import transaction
+import pandas as pd
+import io
+from django.urls import reverse,NoReverseMatch
+
+from openpyxl.styles import Font, PatternFill
+from datetime import timedelta
+from django.utils import timezone
+
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+import csv
+import json
+# I added 'Sum' to the end of this line:
+from django.db.models import Q, Count, Avg, Max, Min, Sum
+from django.core.paginator import Paginator
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_protect
+
+
 
 def generate_property_fingerprint(property_no, building_name, locality, pincode=""):
     """
@@ -406,6 +570,7 @@ def update_enquiry_rm(request,id):
 ############ Views end for update property enquiry #################################
 
 
+
 ############ Views start for rental forms for RM ######################
 
 def residential_rm_list(request):
@@ -642,13 +807,7 @@ def residential_rm_list(request):
             "listed_elsewhere": "Listed Elsewhere?",
             "portal_name": "Portal Name",
 
-            "property_unique_key": "Property Unique Key",
-            "duplicate_count":  "Duplicate Count",
-            "duplicate_group_id": "Duplicate Group ID",
-            "is_duplicate": "Is Duplicate",
-            "is_deleted": "Is Deleted",
-            "deleted_at": "Deleted At",
-            "deleted_by": "Deleted By",
+            
             "created_at": "Created At",
         })
 
@@ -704,15 +863,10 @@ def residential_rm_list(request):
                 "listed_elsewhere", "portal_name",
                 
             ],
-            "Property Uploaded By(Auto Generated)": [
-                "uploaded_by_name", "uploaded_by_email",
-                "uploaded_by_contact", "uploaded_by_role", "upload_file_name",
-            ],
+           
             "Record Management": [
-            "listing_status", "approval_status","property_unique_key",
-            "duplicate_count", "duplicate_group_id" ,
-            "is_duplicate" , 
-            "is_deleted","deleted_at", "deleted_by", "created_at"
+            "listing_status", "approval_status",
+            "created_at"
             ]
         }
 
@@ -739,15 +893,9 @@ def residential_rm_list(request):
             "portal_name": "e.g. 99acres, MagicBricks",
             "listed_by_name": "Full Name", "listed_by_contact": "10 Digits", "listed_by_email": "email@example.com",
             "listed_by_role": "Owner/Agent/Admin", "listed_by_type": "Self/Other",
-            "uploaded_by_name": "Admin Name", "uploaded_by_email": "Admin Email",
-            "uploaded_by_contact": "Admin Contact", "uploaded_by_role": "Admin Role",
+           
             "upload_file_name": "File Name", "listing_status": "Published/Draft", "approval_status": "Approved/Pending",
-            "property_unique_key" : "Property unique id",
-            "duplicate_count": "duplicate_count" ,
-            "duplicate_group_id": "Duplicate Ggroup Id",
-            "is_duplicate": "Yes/No", 
-            "is_deleted": "Yes/No",
-            "deleted_at": "YYYY-MM-DD (Auto)", "deleted_by": "Admin Name",
+          
             "created_at": "YYYY-MM-DD"
         }
 
@@ -1399,6 +1547,558 @@ def residential_rm(request):
     return render(request, "rm_panel/Forms/Rental/residential.html", context)
 
 ############# Views end for rental forms for RM #######################
+
+
+
+
+
+
+def rental_residential_view_rm(request, pk):
+   
+
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    admin_obj = None
+    user_obj = None
+
+    if admin_id:
+        admin_obj = Admin_Login.objects.filter(id=admin_id).first()
+
+    if user_id:
+        user_obj = User_Details.objects.filter(id=user_id).first()
+
+    #  2. UPDATED SECURITY CHECK
+    # If they are an Admin, we only care that they have an impersonate_id.
+    # We don't care if their standard 'User_id' is missing.
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return redirect('login') 
+
+    # 3. The ID Swap
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = user_obj
+
+    
+
+    user_role = user_obj.user_role
+
+    enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
+
+    if request.method == 'POST':
+        try:
+            # ---------- SAFE TYPE CONVERSIONS ----------
+            def to_int(val):
+                try:
+                    return int(val) if val else None
+                except:
+                    return None
+
+            def to_decimal(val):
+                try:
+                    return float(val) if val else None
+                except:
+                    return None
+
+            # ---------- DATE PARSING ----------
+            date_val = request.POST.get('available_from')
+            if date_val:
+                try:
+                    available_from = datetime.strptime(date_val, "%Y-%m-%d").date()
+                except:
+                    available_from = None
+            else:
+                available_from = None
+
+            # ---------- AMENITIES & FACILITIES ----------
+            amenities = ",".join(request.POST.getlist('amenities[]'))
+            facilities = ",".join(request.POST.getlist('nearby_facilities[]')) or ",".join(request.POST.getlist('facilities[]'))
+
+            # ---------- UPLOADER IDENTIFICATION (Who submitted the HTML form) ----------
+            if admin_obj:
+                uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
+                uploader_email = getattr(admin_obj, 'email', '')
+                uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
+                uploader_role = "Admin"
+                uploader_id = f"ADMIN_{admin_id}"
+            elif user_obj:
+                uploader_name = user_obj.user_name
+                uploader_email = user_obj.user_email
+                uploader_contact = user_obj.user_phone
+                uploader_role = "User"
+                uploader_id = f"USER_{user_id}"
+            else:
+                uploader_name, uploader_email, uploader_contact, uploader_role, uploader_id = "", "", "", "", ""
+
+            # ---------- LISTED BY IDENTIFICATION (Who owns/manages the listing) ----------
+            input_listed_by_id = (request.POST.get('listed_by_id') or uploader_id).strip()
+            input_listed_by_name = (request.POST.get('listed_by_name') or uploader_name).strip()
+            input_listed_by_email = (request.POST.get('listed_by_email') or uploader_email).strip().lower()
+            input_listed_by_contact = (request.POST.get('listed_by_contact') or uploader_contact).strip()
+            input_listed_by_role = (request.POST.get('listed_by_role') or uploader_role).strip()
+
+            # ==========================================================
+            # DUPLICATE DETECTION ENGINE (Checking LISTED BY, not UPLOADED BY)
+            # ==========================================================
+            input_property_no = (request.POST.get('property_no') or '').strip()
+            input_building_name = (request.POST.get('building_name') or '').strip()
+            input_locality = (request.POST.get('locality_area') or request.POST.get('locality') or '').strip()
+            input_pincode = (request.POST.get('pincode') or '').strip()
+
+            fingerprint_key = generate_property_fingerprint(
+                input_property_no, 
+                input_building_name, 
+                input_locality, 
+                input_pincode
+            )
+
+            # 1. Direct Case-Insensitive Query for same unit in same locality/building
+            direct_duplicates = RentalResidentialProperty.objects.filter(
+                is_deleted=False,
+                property_no__iexact=input_property_no,
+                locality_area__iexact=input_locality
+            )
+            if input_building_name:
+                direct_duplicates = direct_duplicates.filter(building_name__iexact=input_building_name)
+
+            # Combine fingerprint match OR direct field match
+            existing_duplicates = (
+                RentalResidentialProperty.objects.filter(property_unique_key=fingerprint_key, is_deleted=False) | direct_duplicates
+            ).distinct()
+
+            is_dup_flag = False
+            dup_group_id = fingerprint_key
+            total_dup_count = 1
+
+            if existing_duplicates.exists():
+                # Level 1: Hard Block if LISTED BY the exact same person (ID, Email, OR Phone match)
+                for existing_prop in existing_duplicates:
+                    same_id = (existing_prop.listed_by_id and input_listed_by_id and 
+                               existing_prop.listed_by_id.strip() == input_listed_by_id)
+                    
+                    same_email = (existing_prop.listed_by_email and input_listed_by_email and 
+                                  existing_prop.listed_by_email.strip().lower() == input_listed_by_email)
+                    
+                    same_contact = (existing_prop.listed_by_contact and input_listed_by_contact and 
+                                    existing_prop.listed_by_contact.strip() == input_listed_by_contact)
+                    
+                    if same_id or same_email or same_contact:
+                        # INSTANT REJECTION: Same agent/owner cannot list the same property twice
+                        messages.error(
+                            request, 
+                            f"Duplicate Blocked: This property (Unit {input_property_no}) is already listed by/for {input_listed_by_name or 'this user'}. Please edit the existing listing instead."
+                        )
+                        return redirect('residential')
+
+                # Level 2: Different Agent/User listing the exact same physical unit -> Allow save & Flag
+                is_dup_flag = True
+                total_dup_count = existing_duplicates.count() + 1
+                existing_duplicates.update(
+                    is_duplicate=True, 
+                    duplicate_count=total_dup_count,
+                    duplicate_group_id=dup_group_id
+                )
+
+            # ---------- CREATE DATABASE OBJECT ----------
+            prop = RentalResidentialProperty.objects.create(
+                property_unique_key=fingerprint_key,
+                is_duplicate=is_dup_flag,
+                duplicate_count=total_dup_count,
+                duplicate_group_id=dup_group_id if is_dup_flag else None,
+
+                listing_type="Rental",
+                category="Residential",
+
+                listed_by_type=request.POST.get('listed_by_type'),
+                assigned_to=request.POST.get('assigned_to'),
+                listed_by_id=input_listed_by_id,
+                listed_by_name=input_listed_by_name,
+                listed_by_email=input_listed_by_email,
+                listed_by_contact=input_listed_by_contact,
+                listed_by_role=input_listed_by_role,
+
+                property_title=request.POST.get('property_title'),
+                property_type=request.POST.get('property_type'),
+                property_no=input_property_no,
+                bhk_type=request.POST.get('bhk_type'),
+                renting_option=request.POST.get('renting_option'),
+                built_up_area=to_decimal(request.POST.get('built_up_area')),
+                bathrooms=to_int(request.POST.get('bathrooms')),
+                balconies=to_int(request.POST.get('balconies')),
+                building_configuration=request.POST.get('building_configuration'),
+                total_floors=to_int(request.POST.get('total_floors')),
+                facing_direction=request.POST.get('facing_direction', request.POST.get('facing')),
+                furnishing_status=request.POST.get('furnishing_status'),
+                available_for=request.POST.get('available_for'),
+
+                carpet_area=to_decimal(request.POST.get('carpet_area')),
+                city_zone=request.POST.get('city_zone', request.POST.get('zone')),
+                ownership_type=request.POST.get('ownership_type'),
+                property_condition=request.POST.get('property_condition', request.POST.get('construction_status')),
+                property_age=request.POST.get('property_age'),
+                wing_number=request.POST.get('wing_number'),
+                building_name=input_building_name,
+
+                availability_status=request.POST.get('availability_status', request.POST.get('possession_status')),
+                available_from=available_from,
+                lease_duration=request.POST.get('lease_duration'),
+                brokerage_percentage=request.POST.get('brokerage_percentage', request.POST.get('brokerage')),
+                manual_brokerage=request.POST.get('manual_brokerage'),
+
+                monthly_rent=to_int(request.POST.get('monthly_rent')),
+                advance_rent_month=request.POST.get('advance_rent_month'),
+                advance_rent_amount=to_int(request.POST.get('advance_rent_amount')),
+                security_deposit_type=request.POST.get('security_deposit_type'),
+                security_deposit_amount=to_int(request.POST.get('security_deposit_amount', request.POST.get('security_deposit'))),
+                maintenance_type=request.POST.get('maintenance_type'),
+                monthy_maintenance_amount=to_int(request.POST.get('monthy_maintenance_amount', request.POST.get('maintenance_amount'))),
+                total_move_in_cost=to_int(request.POST.get('total_move_in_cost')),
+
+                address=request.POST.get('address'),
+                city=request.POST.get('city'),
+                locality_area=input_locality,
+                property_landmark=request.POST.get('property_landmark'),
+                state=request.POST.get('state'),
+                pincode=input_pincode,
+                main_road_connectivity=request.POST.get('main_road_connectivity', request.POST.get('road_connectivity')),
+                google_maps_link=request.POST.get('google_maps_link'),
+                latitude=request.POST.get('latitude'),
+                longitude=request.POST.get('longitude'),
+
+                amenities=amenities,
+                nearby_facilities=facilities,
+
+                user_description=request.POST.get('user_description'),
+                description=request.POST.get('description'),
+                rent_residential_desc=request.POST.get('rent_residential_desc'),
+
+                listed_elsewhere=request.POST.get('listed_elsewhere', 'No'),
+                portal_name=request.POST.get('portal_name'),
+
+                uploaded_by_name=uploader_name,
+                uploaded_by_email=uploader_email,
+                uploaded_by_contact=uploader_contact,
+                uploaded_by_role=uploader_role,
+                upload_file_name=None
+            )
+
+            # ---------- IMAGES MULTI-UPLOAD LOGIC ----------
+            images = request.FILES.getlist('property_images[]')
+            for index, img in enumerate(images[:10]):
+                RentalResidentialImage.objects.create(
+                    property=prop, 
+                    image=img,
+                    sequence_order=index
+                )
+
+            messages.success(request, "Property Added Successfully ")
+            
+            return redirect('residential_rm_list')
+
+        except Exception as e:
+            print("ERROR DETECTED:", str(e))
+            messages.error(request, f"Error while saving listing: {str(e)}")
+            return redirect('residential_rm')
+    
+    # Context cross-linking: Pull the latest uploaded properties along with their dynamic FAQs
+    latest_properties = RentalResidentialProperty.objects.filter(
+        is_deleted=False
+    ).exclude(
+        id=prop.id
+    ).prefetch_related('faqs').order_by('-created_at')[:4]
+
+    # Convert comma-separated string arrays smoothly
+    amenities_list = [x.strip() for x in prop.amenities.split(',')] if prop.amenities else []
+    
+    # FIX APPLIED HERE: Changed prop.facilities to prop.nearby_facilities to match the updated model
+    facilities_list = [x.strip() for x in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+
+    context = {
+        'property': prop,
+        'images': prop.images.all(),
+        'faqs': prop.faqs.all(), # Dynamic property FAQs
+        'amenities_list': amenities_list,
+        'facilities_list': facilities_list,
+        'latest_properties': latest_properties,
+        'user_obj': user_obj,
+        'user_role' : user_role,
+        'enquiry_obj_rm' :  enquiry_obj_rm,
+        
+    }
+    return render(request,
+        'rm_panel/Reports/Rental/rental_residential_detail.html',
+        context)
+
+
+
+
+
+
+
+############### Views start for rental edit forms for RM ###################
+
+def residential_rm_edit(request, pk):
+    prop = get_object_or_404(RentalResidentialProperty, id=pk)
+
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
+    logged_in_role = request.session.get('user_type')
+
+    admin_obj = None
+    user_obj = None
+
+    if admin_id:
+        admin_obj = Admin_Login.objects.filter(id=admin_id).first()
+
+    if user_id:
+        user_obj = User_Details.objects.filter(id=user_id).first()
+
+    # 2.  VIP Access Control
+    is_valid_agency = (user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (admin_id and logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    # If they aren't a valid Agency/Builder, AND they aren't an Admin trying to impersonate... kick them out.
+    if not is_valid_agency and not is_valid_admin:
+        return redirect('login') 
+
+    # 3.  The ID Swap
+    if is_valid_admin:
+        # Admin is visiting: pull the target Agency's ID
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        # Normal Agency is visiting: use their normal ID
+        dashboard_user_id = user_id
+
+    # 4. Data Fetching: Get the full user object using the final decided ID
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
+
+
+    if request.method == 'POST':
+        try:
+            def to_int(val):
+                try:
+                    return int(val) if val else None
+                except:
+                    return None
+
+            def to_decimal(val):
+                try:
+                    return float(val) if val else None
+                except:
+                    return None
+
+            # =====================================================
+            # AUDIT LOGIC: Snapshot current state BEFORE modification
+            # =====================================================
+            tracked_fields_list = [
+                'property_type', 'property_no', 'bhk_type', 'renting_option',
+                'built_up_area', 'bathrooms', 'balconies', 'building_configuration',
+                'total_floors', 'facing_direction', 'furnishing_status', 'available_for',
+                'carpet_area', 'city_zone', 'ownership_type', 'property_condition',
+                'property_age', 'wing_number', 'building_name',
+                'availability_status', 'available_from', 'lease_duration',
+                'brokerage_percentage', 'manual_brokerage', 'monthly_rent',
+                'advance_rent_month', 'advance_rent_amount',
+                'security_deposit_type', 'security_deposit_amount',
+                'maintenance_type', 'monthy_maintenance_amount', 'total_move_in_cost',
+                'address', 'city', 'locality_area', 'property_landmark', 'state', 'pincode',
+                'main_road_connectivity', 'google_maps_link', 'latitude', 'longitude',
+                'listed_by_id', 'listed_by_name', 'listed_by_email', 'listed_by_contact', 'listed_by_role',
+                'listing_status', 'approval_status',
+            ]
+            old_state_snapshot = {field: str(getattr(prop, field, '')) for field in tracked_fields_list}
+
+           
+            # =====================================================
+            prop.listed_by_type = request.POST.get('listed_by_type', prop.listed_by_type)
+            prop.assigned_to = request.POST.get('assigned_to', prop.assigned_to)
+            # assigned_to_role is posted alongside assigned_to (mirrors the Add form)
+            # and is available here if you want to store it on the model as well, e.g.:
+            # prop.assigned_to_role = request.POST.get('assigned_to_role', getattr(prop, 'assigned_to_role', ''))
+            prop.listed_by_id = (request.POST.get('listed_by_id') or prop.listed_by_id or '').strip()
+            prop.listed_by_name = (request.POST.get('listed_by_name') or prop.listed_by_name or '').strip()
+            prop.listed_by_email = (request.POST.get('listed_by_email') or prop.listed_by_email or '').strip().lower()
+            prop.listed_by_contact = (request.POST.get('listed_by_contact') or prop.listed_by_contact or '').strip()
+            prop.listed_by_role = (request.POST.get('listed_by_role') or prop.listed_by_role or '').strip()
+
+            # =====================================================
+            # 2. BASIC INFORMATION
+            # =====================================================
+            prop.property_type = request.POST.get('property_type')
+            prop.property_no = request.POST.get('property_no', prop.property_no)
+            prop.bhk_type = request.POST.get('bhk_type')
+            prop.renting_option = request.POST.get('renting_option')
+            prop.built_up_area = to_decimal(request.POST.get('built_up_area'))
+            prop.bathrooms = to_int(request.POST.get('bathrooms'))
+            prop.balconies = to_int(request.POST.get('balconies'))
+            prop.building_configuration = request.POST.get('building_configuration')
+            prop.total_floors = to_int(request.POST.get('total_floors'))
+            prop.facing_direction = request.POST.get('facing_direction')
+            prop.furnishing_status = request.POST.get('furnishing_status')
+            prop.available_for = request.POST.get('available_for')
+
+            # =====================================================
+            # 3. PROPERTY DETAILS
+            # =====================================================
+            prop.carpet_area = to_decimal(request.POST.get('carpet_area'))
+            prop.city_zone = request.POST.get('city_zone')
+            prop.ownership_type = request.POST.get('ownership_type')
+            prop.property_condition = request.POST.get('property_condition')
+            prop.property_age = request.POST.get('property_age')
+            prop.wing_number = request.POST.get('wing_number')
+            prop.building_name = request.POST.get('building_name')
+
+            # =====================================================
+            # 4. AVAILABILITY DETAILS
+            # =====================================================
+            prop.availability_status = request.POST.get('availability_status')
+
+            available_from_raw = request.POST.get('available_from')
+            if available_from_raw and available_from_raw.strip():
+                try:
+                    prop.available_from = datetime.strptime(available_from_raw.strip(), "%Y-%m-%d").date()
+                except ValueError:
+                    prop.available_from = None
+            else:
+                prop.available_from = None
+
+            prop.lease_duration = request.POST.get('lease_duration')
+            prop.brokerage_percentage = request.POST.get('brokerage_percentage')
+            prop.manual_brokerage = request.POST.get('manual_brokerage')
+
+            # =====================================================
+            # 5. PRICING DETAILS
+            # =====================================================
+            prop.monthly_rent = to_int(request.POST.get('monthly_rent'))
+            prop.advance_rent_month = request.POST.get('advance_rent_month')
+            prop.advance_rent_amount = to_int(request.POST.get('advance_rent_amount'))
+            prop.security_deposit_type = request.POST.get('security_deposit_type')
+            prop.security_deposit_amount = to_int(request.POST.get('security_deposit_amount'))
+            prop.maintenance_type = request.POST.get('maintenance_type')
+            prop.monthy_maintenance_amount = to_int(request.POST.get('monthy_maintenance_amount'))
+            prop.total_move_in_cost = to_int(request.POST.get('total_move_in_cost'))
+
+            # =====================================================
+            # 6. LOCATION DETAILS
+            # =====================================================
+            prop.address = request.POST.get('address')
+            prop.city = request.POST.get('city')
+            prop.locality_area = request.POST.get('locality_area')
+            prop.property_landmark = request.POST.get('property_landmark')
+            prop.state = request.POST.get('state')
+            prop.pincode = request.POST.get('pincode')
+            prop.main_road_connectivity = request.POST.get('main_road_connectivity')
+            prop.google_maps_link = request.POST.get('google_maps_link')
+            prop.latitude = request.POST.get('latitude')
+            prop.longitude = request.POST.get('longitude')
+
+            # =====================================================
+            # 7. AMENITIES & FACILITIES
+            # (Unchanged — the modal-picker in the template still posts the exact
+            # same field names amenities[] / nearby_facilities[], so no view
+            # changes were required here.)
+            # =====================================================
+            prop.amenities = ",".join(request.POST.getlist('amenities[]'))
+            prop.nearby_facilities = ",".join(request.POST.getlist('nearby_facilities[]'))
+
+            # =====================================================
+            # 8. DESCRIPTIONS
+            # =====================================================
+            prop.user_description = request.POST.get('user_description')
+
+            # =====================================================
+            # 9. LISTED ELSEWHERE
+            # =====================================================
+            prop.listed_elsewhere = request.POST.get('listed_elsewhere', 'No')
+            prop.portal_name = request.POST.get('portal_name')
+
+            # =====================================================
+            # 10. LISTING STATUS & APPROVAL STATUS
+            # =====================================================
+            prop.listing_status = request.POST.get('listing_status', prop.listing_status)
+            prop.approval_status = request.POST.get('approval_status', prop.approval_status)
+
+            # description / rent_residential_desc are auto-regenerated in model.save()
+            # via generate_auto_descriptions() — no need to set them from POST.
+
+            prop.save()
+
+            # =====================================================
+            # 11. IMAGE UPLOAD & SEQUENCE LOGIC
+            # =====================================================
+            images = request.FILES.getlist('property_images[]')
+            current_count = prop.images.count()
+            for img in images:
+                if current_count < 10:
+                    RentalResidentialImage.objects.create(
+                        property=prop, image=img, sequence_order=current_count
+                    )
+                    current_count += 1
+
+            # =====================================================
+            # AUDIT LOGIC: Diff dictionary
+            # =====================================================
+            modifications_diff = {}
+            modified_fields_summary = []
+
+            for field in tracked_fields_list:
+                new_val = str(getattr(prop, field, ''))
+                if old_state_snapshot[field] != new_val:
+                    modifications_diff[field] = {
+                        "old_value": old_state_snapshot[field],
+                        "new_value": new_val
+                    }
+                    modified_fields_summary.append(field)
+
+            # if modified_fields_summary:
+            #     RentalActivityLog.objects.create(
+            #         user_identity=admin_obj.email or admin_obj.username,
+            #         user_role="Admin",
+            #         action_type='UPDATE',
+            #         property_id=prop.id,
+            #         targeted_fields=", ".join(modified_fields_summary[:4]) + ("..." if len(modified_fields_summary) > 4 else ""),
+            #         associated_file=prop.upload_file_name or "Web UI Form",
+            #         action_payload=json.dumps(modifications_diff),
+            #         ip_address=_get_client_ip(request),
+            #         status='SUCCESS'
+            #     )
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Property updated successfully!',
+                'redirect_url': reverse('residential_rm_list')
+            })
+
+        except Exception as e:
+            # RentalActivityLog.objects.create(
+            #     user_identity=admin_obj.email if 'admin_obj' in locals() else "Unknown Session",
+            #     user_role="Admin",
+            #     action_type='UPDATE',
+            #     property_id=pk,
+            #     targeted_fields="System Errors",
+            #     action_payload=f"Failed modification update runtime sequence execution target: {str(e)}",
+            #     ip_address=_get_client_ip(request),
+            #     status='FAILED'
+            # )
+            return JsonResponse({
+                'status': 'error',
+                'message': f"Failed to save data: {str(e)}"
+            }, status=400)
+
+    return render(request, 'rm_panel/Forms/Rental/residential_edit.html', {
+        'property': prop,
+        'user_obj': user_obj,
+      
+        
+        'ameneties_obj': Ameneties_Details.objects.all(),
+        'facilities_obj': Facilities_Details.objects.all()
+    })
+
+########### Views end for rental edit forms for RM ###########################
 
 
 ############### Views start for rental edit forms for RM ###################
@@ -3037,3 +3737,751 @@ def checkout_complete(request):
 
 def affilate_page(request):
     return render(request,"rm_panel/affilate_page.html")
+
+
+
+
+
+
+
+def _residential_field_map():
+    """Returns (sections, field_to_label, label_to_field, system_injected,
+    helper_only_labels, decimal_fields, int_fields). Called fresh by both
+    the download view and the import view — always local, never global."""
+ 
+    sections = OrderedDict([
+        ("Listed By", [
+            ("listed_by_type",   "Listed By Type (Self)", False),
+            ("listed_by_id",     "Listed By Id", False),
+            ("listed_by_name",   "Listed By Name", False),
+            ("listed_by_email",  "Listed By Email", False),
+            ("listed_by_contact","Listed By Contact", False),
+            ("listed_by_role",   "Listed By Role", True),   # drives the brokerage label
+        ]),
+        ("Basic Information", [
+            ("property_type",           "Property Type", True),
+            ("property_no",             "Flat/House/Unit No", True),
+            ("bhk_type",                "BHK Type", True),
+            ("renting_option",          "Renting Option", True),
+            ("built_up_area",           "Built-up Area (sq.ft)", True),
+            ("bathrooms",                "Bathrooms", True),
+            ("balconies",                "Balconies", False),
+            ("building_configuration",  "Building Configuration", True),
+            ("total_floors",             "Total Floors Constructed", True),
+            ("facing_direction",        "Facing Direction", False),
+            ("furnishing_status",       "Furnishing Status", True),
+            ("available_for",           "Available For", True),
+        ]),
+        ("Property Details", [
+            ("carpet_area",     "Carpet Area (sq.ft)", False),
+            ("city_zone",       "City Zone", False),
+            ("ownership_type",  "Ownership Type", False),
+            ("property_condition", "Property Condition", False),
+            ("property_age",    "Property Age (Years)", False),
+            ("wing_number",     "Tower/Wing Number", False),
+            ("building_name",   "Building/Society Name", False),
+        ]),
+        ("Availability Details", [
+            ("availability_status",   "Availability Status", False),
+            ("available_from",        "Available From", False),
+            ("lease_duration",        "Lease Duration", False),
+           
+        ]),
+        ("Pricing & Brokarage Details", [
+            
+            ("monthly_rent",              "Monthly Rent", True),
+            ("brokerage_percentage",  "Brokerage / Service Fee", True),
+            ("manual_brokerage",      "Fixed Brokerage Amount", False),
+            ("advance_rent_month",        "Advance Rent Month", False),
+            ("advance_rent_amount",       "Advance Rent Amount", False),
+            ("security_deposit_type",     "Refundable Security Deposit", True),
+            ("security_deposit_amount",   "Refundable Security Deposit Amount", False),
+            ("maintenance_type",          "Maintenance Type", False),
+            ("monthy_maintenance_amount", "Monthly Maintenance Amount", False),
+            ("total_move_in_cost",        "Total Move In Cost", False),
+        ]),
+        ("Property Location Details", [
+            ("address",                 "Address", True),
+            ("city",                    "City", True),
+            ("locality_area",           "Locality/Area", True),
+            ("property_landmark",       "Property Landmark", False),
+            ("state",                   "State", True),
+            ("pincode",                 "Pincode", True),
+            ("main_road_connectivity",  "Main Road Connectivity", False),
+            # --- newly added: present on the form, were missing from the map ---
+            ("google_maps_link",        "Google Maps Link", False),
+            ("latitude",                 "Latitude", False),
+            ("longitude",                "Longitude", False),
+        ]),
+        ("Amenities & Features", [
+            ("amenities",          "Amenities (comma-separated)", False),
+           
+        ]),
+        ("Nearby Facilities", [
+           
+            ("nearby_facilities",  "Nearby Facilities (comma-separated)", False),
+        ]),
+        ("Property Descriptions", [
+            ("user_description", "Property Description", False),
+        ]),
+        ("Media & Listing Status", [
+            ("listed_elsewhere", "Listed Elsewhere (Yes/No)", False),
+            ("portal_name",      "Portal Name", False),
+            ("created_at",          "Created At (Auto)", False),
+        ]),
+        
+    ])
+ 
+    field_to_label = {f: lbl for _, fields in sections.items() for f, lbl, _ in fields}
+    label_to_field = {lbl.strip().lower(): f for _, fields in sections.items() for f, lbl, _ in fields}
+ 
+    system_injected = {
+        "created_at",
+    }
+    helper_only_labels = {"brokerage label preview (auto)"}
+    decimal_fields = {"built_up_area", "carpet_area"}
+    int_fields = {
+        "bathrooms", "balconies", "total_floors", "monthly_rent",
+        "advance_rent_amount", "security_deposit_amount",
+        "monthy_maintenance_amount", "total_move_in_cost",
+    }
+ 
+    return sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields
+ 
+ 
+def _sample_row_data():
+    """One complete example value per column so every column in the
+    downloaded template shows the expected format — nothing left blank."""
+    return {
+       
+        "listed_by_id": "rm0943", "listed_by_name": "Vikas", "listed_by_email": "vikas@test.com",
+        "listed_by_contact": "9876543210", "listed_by_role": "Relationship Manager",
+
+        "property_type": "Apartment", "property_no": "B-402", "bhk_type": "2bhk" , "renting_option": "Full Property",
+        "built_up_area": "1200", "bathrooms": "2", "balconies": "1",
+        "building_configuration": "G+3", "total_floors": "4", "facing_direction": "East",
+        "furnishing_status": "Semi Furnished", "available_for": "Family",
+ 
+        "carpet_area": "950", "city_zone": "West Zone", "ownership_type": "Freehold",
+        "property_condition": "Well Maintained", "property_age": "5", "wing_number": "A Wing",
+        "building_name": "Green Valley Apartments",
+ 
+        "availability_status": "Available Immediately", "available_from": "2026-07-15",
+        "lease_duration": "11 Months",   # only used when brokerage_percentage = "Fixed Amount"
+ 
+        "monthly_rent": "25000","brokerage_percentage": "1 Month Rent",
+        "manual_brokerage": "", "advance_rent_month": "1", "advance_rent_amount": "",
+        "security_deposit_type": "2", "security_deposit_amount": "",
+        "maintenance_type": "Included in Rent", "monthy_maintenance_amount": "",
+        "total_move_in_cost": "75000",
+ 
+        "address": "Flat 402, Green Valley", "city": "Nagpur", "locality_area": "Dharampeth",
+        "property_landmark": "Near Railway Station", "state": "Maharashtra", "pincode": "440010",
+        "main_road_connectivity": "Within 500 Meters",
+        "google_maps_link": "https://maps.google.com/?q=21.1458,79.0882",
+        "latitude": "21.1458", "longitude": "79.0882",
+ 
+        "amenities": "Wi-Fi, AC, Lift", "nearby_facilities": "Metro, Hospital",
+ 
+        "user_description": "Spacious and well-lit apartment close to all amenities.",
+ 
+        "listed_elsewhere": "No", "portal_name": "",
+    }
+
+# =====================================================================
+# DOWNLOAD TEMPLATE
+# =====================================================================
+
+def download_residential_template_rm(request):
+    """Download the upload template — column headers are the same
+    human-readable labels used on the actual form, not raw field names.
+    Includes a live 'brokerage label preview' formula so staff can see
+    the label change instantly when they type a different role."""
+
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+    from openpyxl.comments import Comment
+
+    sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields = _residential_field_map()
+    sample = _sample_row_data()
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Rental Residential"
+
+    HDR_BG, REQ_BG, OPT_BG, SAMP_BG = "667EEA", "FEF3C7", "F0FDF4", "ECFDF5"
+    thin = Side(style="thin", color="CBD5E1")
+    bdr = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    col = 1
+    role_col = None
+    brokerage_col = None
+
+    for section, fields in sections.items():
+        start_col = col
+        for field, label, required in fields:
+            header_text = label + (" *" if required else "")
+            c1 = ws.cell(row=2, column=col, value=header_text)
+            c1.font = Font(bold=True, color="1E293B", name="Arial", size=9)
+            c1.fill = PatternFill("solid", fgColor=REQ_BG if required else OPT_BG)
+            c1.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            c1.border = bdr
+
+            sc = ws.cell(row=4, column=col, value=sample.get(field, ""))
+            sc.font = Font(name="Arial", size=9, color="065F46")
+            sc.fill = PatternFill("solid", fgColor=SAMP_BG)
+            sc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            sc.border = bdr
+
+            ws.column_dimensions[get_column_letter(col)].width = max(18, len(label) // 2 + 6)
+
+            if field == "listed_by_role":
+                role_col = col
+            if field == "brokerage_percentage":
+                brokerage_col = col
+
+            # NEW: explain the Self/Other rule directly on the relevant columns
+            if field == "listed_by_id":
+                ws.cell(row=2, column=col).comment = Comment(
+                    "Required ONLY if 'Listed By Type' = Self.\n"
+                    "If 'Listed By Type' = Self, leave this BLANK — it will\n"
+                    "be auto-filled from your logged-in agent profile.",
+                    "System"
+                )
+            if field == "listed_by_name":
+                ws.cell(row=2, column=col).comment = Comment(
+                    "Required ONLY if 'Listed By Type' = Self.\n"
+                    "Leave blank for Self — auto-filled from your session.",
+                    "System"
+                )
+            if field == "listed_by_email":
+                ws.cell(row=2, column=col).comment = Comment(
+                    "Required ONLY if 'Listed By Self' = Other.\n"
+                    "Leave blank for Self — auto-filled from your session.",
+                    "System"
+                )
+            if field == "listed_by_contact":
+                ws.cell(row=2, column=col).comment = Comment(
+                    "Required ONLY if 'Listed By Self' = Other.\n"
+                    "Leave blank for Self — auto-filled from your session.",
+                    "System"
+                )
+
+            col += 1
+
+        end_col = col - 1
+        hc = ws.cell(row=1, column=start_col, value=f"\U0001F4CB {section}")
+        hc.font = Font(bold=True, color="FFFFFF", name="Arial", size=11)
+        hc.fill = PatternFill("solid", fgColor=HDR_BG)
+        hc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        for cc in range(start_col, end_col + 1):
+            ws.cell(row=1, column=cc).fill = PatternFill("solid", fgColor=HDR_BG)
+            ws.cell(row=1, column=cc).border = bdr
+        if end_col > start_col:
+            ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
+
+    # ---- live brokerage label preview column, appended at the end ----
+    preview_col = col
+    pc = ws.cell(row=2, column=preview_col, value="Brokerage Label Preview (auto)")
+    pc.font = Font(bold=True, color="92400E", name="Arial", size=9)
+    pc.fill = PatternFill("solid", fgColor="FEF3C7")
+    pc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    pc.border = bdr
+    ws.column_dimensions[get_column_letter(preview_col)].width = 26
+
+    role_letter = get_column_letter(role_col)
+    formula = (
+        f"=IFERROR(INDEX('Notes - Brokerage Label'!$B$4:$B$9,"
+        f"MATCH(LOWER(TRIM({role_letter}4)),'Notes - Brokerage Label'!$C$4:$C$9,0)),\"Brokerage\")"
+    )
+    fcell = ws.cell(row=4, column=preview_col, value=formula)
+    fcell.fill = PatternFill("solid", fgColor="FEF3C7")
+    fcell.font = Font(bold=True, color="92400E", name="Arial", size=9)
+    fcell.alignment = Alignment(horizontal="center", vertical="center")
+
+    if brokerage_col:
+        note = (
+            "The LABEL text shown above this field on the live form changes based on\n"
+            "the 'Listed By Role' in the same row. The stored value/column never changes.\n\n"
+            "Admin -> EstateFlow Service Fee\n"
+            "Relationship Manager -> Service Fee\n"
+            "Landlord -> Tenant Service Fee\n"
+            "Agent -> Brokerage\n"
+            "Agency/Builder or Builder -> Service Fee\n"
+            "Any other role -> Brokerage (default)\n\n"
+            "See 'Notes - Brokerage Label' sheet, and the live preview column at the end of this sheet."
+        )
+        ws.cell(row=2, column=brokerage_col).comment = Comment(note, "System")
+
+    ws.row_dimensions[1].height = 26
+    ws.row_dimensions[2].height = 40
+    ws.row_dimensions[4].height = 24
+    ws.freeze_panes = "A5"
+
+    # ---- Notes sheet (lookup table the formula above reads from) ----
+    notes = wb.create_sheet("Notes - Brokerage Label")
+    notes.column_dimensions['A'].width = 26
+    notes.column_dimensions['B'].width = 26
+    notes.column_dimensions['C'].width = 4
+    notes.sheet_view.showGridLines = False
+
+    t = notes["A1"]
+    notes.merge_cells("A1:B1")
+    t.value = "Brokerage label — driven by Listed By Role"
+    t.font = Font(bold=True, size=13, color="FFFFFF", name="Arial")
+    t.fill = PatternFill("solid", fgColor=HDR_BG)
+    t.alignment = Alignment(horizontal="center", vertical="center")
+
+    hdrs = ["Listed By Role", "Label shown on form"]
+    for i, h in enumerate(hdrs, start=1):
+        c = notes.cell(row=3, column=i, value=h)
+        c.font = Font(bold=True, color="1E293B", name="Arial")
+        c.fill = PatternFill("solid", fgColor=OPT_BG)
+        c.border = bdr
+
+    role_rows = [
+        ("Admin", "EstateFlow Service Fee"),
+        ("Relationship Manager", "Service Fee"),
+        ("Landlord", "Tenant Service Fee"),
+        ("Agent", "Brokerage"),
+        ("Agency/Builder", "Service Fee"),
+        ("Builder", "Service Fee"),
+    ]
+    for r, (role, label) in enumerate(role_rows, start=4):
+        notes.cell(row=r, column=1, value=role).border = bdr
+        notes.cell(row=r, column=2, value=label).border = bdr
+        notes.cell(row=r, column=3, value=f"=LOWER(TRIM(A{r}))")
+
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="Rental_Residential_Template.xlsx"'
+    wb.save(response)
+    return response
+
+
+
+
+
+
+
+def _normalize_label(raw):
+    if raw is None:
+        return ""
+    text = str(raw).replace("\u00a0", " ")           
+    text = text.replace(" *", "").strip()
+    text = re.sub(r"\s+", " ", text)                  
+    return text.lower()
+
+
+def _find_header_row(ws, label_to_field, max_scan_rows=6):
+    best_row, best_score = None, -1
+    for r in range(1, max_scan_rows + 1):
+        row_vals = [cell.value for cell in ws[r]]
+        score = sum(1 for v in row_vals if _normalize_label(v) in label_to_field)
+        if score > best_score:
+            best_row, best_score = r, score
+    return best_row, best_score
+
+
+
+
+def _get_client_ip(request):
+    """Helper to safely fetch client IP address reference."""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '127.0.0.1')
+
+@csrf_exempt
+@require_POST
+def import_residential_excel_rm(request):
+    excel_file = request.FILES.get("rental_file")
+    if not excel_file:
+        return JsonResponse({"status": "error", "message": "No file uploaded."}, status=400)
+    if not excel_file.name.endswith(".xlsx"):
+        return JsonResponse({"status": "error", "message": "Only .xlsx files allowed."}, status=400)
+
+    sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields = _residential_field_map()
+
+    # -------------------------------------------------------------------
+    # REQUIRED FIELDS - must mirror the `required` inputs in the Add form.
+    # listed_by_type is ALWAYS required. The 4 identity fields
+    # (name/email/contact/role) are only required when Listed By Type = Other
+    # — when Self, they're auto-filled from the logged-in agent's session.
+    # -------------------------------------------------------------------
+    REQUIRED_FIELD_KEYS = [
+        'property_type',
+        'property_no',
+        'bhk_type',
+        'renting_option',
+        'built_up_area',
+        'bathrooms',
+        'building_configuration',
+        'total_floors',
+        'furnishing_status',
+        'available_for',
+        'monthly_rent',
+        'address',
+        'city',
+        'locality_area',
+        'state',
+        'pincode',
+        'listed_by_type',
+    ]
+
+    OTHER_ONLY_REQUIRED_FIELD_KEYS = [
+        'listed_by_name',
+        'listed_by_email',
+        'listed_by_contact',
+        'listed_by_role',
+    ]
+
+    def _field_label(field):
+        return field_to_label.get(field) or field.replace('_', ' ').title()
+
+    def _is_missing(val):
+        """Treat None / empty-string as missing. Does NOT treat 0 / '0' as missing,
+        so numeric fields like bathrooms=0 aren't incorrectly flagged."""
+        if val is None:
+            return True
+        if isinstance(val, str) and val.strip() == "":
+            return True
+        return False
+
+    # ---- 1. Uploader Identity (system audit trail — who UPLOADED the file) ----
+    admin_id = request.session.get('Admin_id')
+    user_id = request.session.get('User_id')
+
+    admin_obj = Admin_Login.objects.filter(id=admin_id).first() if admin_id else None
+    user_obj = User_Details.objects.filter(id=user_id).first() if user_id else None
+
+    uploader_name = uploader_email = uploader_contact = ""
+    uploader_role = "Automated Engine"
+    user_identity = "Automated Engine"
+
+    if admin_obj:
+        uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
+        uploader_email = getattr(admin_obj, 'email', '')
+        uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
+        uploader_role = "Admin"
+        user_identity = uploader_email or uploader_name
+    elif user_obj:
+        uploader_name = user_obj.user_name
+        uploader_email = user_obj.user_email
+        uploader_contact = user_obj.user_phone
+        uploader_role = "User"
+        user_identity = uploader_email or uploader_name
+
+    # ---- 1b. Determine the CURRENT LOGGED-IN AGENT (for "Listed By = Self" auto-fill) ----
+    # Mirrors the exact same session/impersonation logic as rental_list_agent().
+    session_user_id = request.session.get('User_id')
+    session_admin_id = request.session.get('Admin_id')
+    session_role = request.session.get('user_type')
+
+    is_valid_agent = (session_user_id and session_role == "Agent")
+    is_valid_admin_impersonating = (
+        session_admin_id and session_role == "Admin" and 'impersonate_id' in request.session
+    )
+
+    agent_obj = None
+    if is_valid_admin_impersonating:
+        agent_obj = User_Details.objects.filter(id=request.session.get('impersonate_id')).first()
+    elif is_valid_agent:
+        agent_obj = User_Details.objects.filter(id=session_user_id).first()
+
+    # ---- 2. Parse Excel ----
+    try:
+        wb = openpyxl.load_workbook(excel_file, data_only=True)
+        ws = wb["Rental Residential"] if "Rental Residential" in wb.sheetnames else wb.active
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": f"Cannot open file: {e}"}, status=400)
+
+    header_row, matched_count = _find_header_row(ws, label_to_field)
+
+    if matched_count == 0:
+        return JsonResponse({
+            "status": "error",
+            "message": (
+                "No recognizable column headers were found in this file. "
+                "Please use the official template downloaded from "
+                "'Download Template' — don't rename or re-order the header row."
+            ),
+        }, status=400)
+
+    raw_headers = [cell.value for cell in ws[header_row]]
+    field_headers = []
+    unmatched_headers = []
+
+    for h in raw_headers:
+        norm = _normalize_label(h)
+        if not norm:
+            field_headers.append(None)
+            continue
+        if norm in helper_only_labels:
+            field_headers.append(None)
+            continue
+        field = label_to_field.get(norm)
+        field_headers.append(field)
+        if field is None:
+            unmatched_headers.append(str(h))
+
+    data_start_row = header_row + 1
+
+    parsed_rows = []
+    skipped_empty_after_mapping = 0
+    required_field_errors = []  # collected across ALL rows before we decide to accept/reject the file
+
+    for row_idx, row in enumerate(ws.iter_rows(min_row=data_start_row, values_only=True), start=data_start_row):
+        if all(v is None or str(v).strip() == "" for v in row):
+            continue
+
+        obj_data = {}
+        for col_idx, field in enumerate(field_headers):
+            if not field or field in system_injected:
+                continue
+            val = row[col_idx] if col_idx < len(row) else None
+            if val is not None and str(val).strip() != "":
+                obj_data[field] = val
+
+        if not obj_data:
+            skipped_empty_after_mapping += 1
+            continue
+
+        # ---- Type Coercion (unchanged) ----
+        if 'available_from' in obj_data:
+            d_val = obj_data['available_from']
+            if isinstance(d_val, str):
+                c_str = d_val.strip().split(" ")[0]
+                for fmt in ("%Y-%m-%d", "%d-%m-%Y"):
+                    try:
+                        obj_data['available_from'] = datetime.strptime(c_str, fmt).date()
+                        break
+                    except ValueError:
+                        obj_data['available_from'] = None
+            elif isinstance(d_val, datetime):
+                obj_data['available_from'] = d_val.date()
+
+        for f in int_fields:
+            if f in obj_data and obj_data[f] is not None:
+                try:
+                    obj_data[f] = int(float(str(obj_data[f]).replace(",", "").strip()))
+                except (TypeError, ValueError):
+                    obj_data[f] = None
+
+        for f in decimal_fields:
+            if f in obj_data and obj_data[f] is not None:
+                try:
+                    obj_data[f] = Decimal(str(obj_data[f]).replace(",", "").strip())
+                except (InvalidOperation, ValueError):
+                    obj_data[f] = None
+
+        for f in ("advance_rent_month", "security_deposit_type"):
+            if f in obj_data and obj_data[f] is not None and str(obj_data[f]).lower() != "fixed":
+                try:
+                    obj_data[f] = str(int(float(obj_data[f])))
+                except (TypeError, ValueError):
+                    obj_data[f] = str(obj_data[f]).strip()
+
+        # ---- LISTED BY TYPE VALIDATION + CONDITIONAL REQUIRED FIELDS (new) ----
+        listed_type_val = str(obj_data.get('listed_by_type', '')).strip().lower()
+
+        if listed_type_val not in ('self', 'other'):
+            required_field_errors.append({
+                "row": row_idx,
+                "missing_fields": ["Listed By Type must be exactly 'Self' or 'Other'"],
+            })
+            continue
+
+        required_keys_for_row = list(REQUIRED_FIELD_KEYS)
+        if listed_type_val != 'self':
+            required_keys_for_row += OTHER_ONLY_REQUIRED_FIELD_KEYS
+
+        missing_fields = [
+            _field_label(f) for f in required_keys_for_row if _is_missing(obj_data.get(f))
+        ]
+        if missing_fields:
+            required_field_errors.append({
+                "row": row_idx,
+                "missing_fields": missing_fields,
+            })
+            # Don't add to parsed_rows yet — we may reject the whole file below.
+            continue
+
+        parsed_rows.append({'row_idx': row_idx, 'data': obj_data})
+
+    wb.close()
+
+    # ---- Bail out if any row failed required-field validation ----
+    if required_field_errors:
+        return JsonResponse({
+            "status": "error",
+            "message": (
+                f"Upload Denied: {len(required_field_errors)} row(s) are missing mandatory fields. "
+                "Please fill in every required column (as marked * on the Add Listing form) for "
+                "all rows and re-upload the file. No records were saved."
+            ),
+            "row_errors": required_field_errors,
+        }, status=400)
+
+    # ---- Bail out if nothing usable was found ----
+    if not parsed_rows:
+        return JsonResponse({
+            "status": "error",
+            "message": (
+                f"0 usable data rows found. Detected header row {header_row}, "
+                f"data expected from row {data_start_row} onward. "
+                f"{skipped_empty_after_mapping} row(s) had values but none matched a known column."
+            ),
+            "unmatched_headers": unmatched_headers,
+            "header_row_detected": header_row,
+            "data_start_row_assumed": data_start_row,
+        }, status=400)
+
+    # ---- 3. Whole-file duplicate check (unchanged) ----
+    file_name_exists = RentalResidentialProperty.objects.filter(
+        upload_file_name=excel_file.name
+    ).exists()
+
+    # ---- 4. Write to DB (fingerprint-based duplicate engine) ----
+    created, updated, skipped, errors = 0, 0, skipped_empty_after_mapping, []
+    duplicate_blocked_rows = []
+
+    for item in parsed_rows:
+        o_data = item['data']
+        row_idx = item['row_idx']
+
+        # ---- SELF vs OTHER: auto-fill Listed By fields from session ----
+        listed_type = str(o_data.get('listed_by_type', '')).strip().lower()
+
+        if listed_type == 'self':
+            if not agent_obj:
+                errors.append(
+                    f"Row {row_idx}: 'Listed By Type' is Self but no logged-in "
+                    f"agent session was found. Row skipped."
+                )
+                skipped += 1
+                continue
+            o_data['listed_by_id'] = agent_obj.user_id
+            o_data['listed_by_name'] = agent_obj.user_name
+            o_data['listed_by_email'] = agent_obj.user_email
+            o_data['listed_by_contact'] = agent_obj.user_phone
+            o_data['listed_by_role'] = agent_obj.user_role
+        # else 'other' -> keep the values already typed in the sheet (already validated above)
+
+        input_property_no = str(o_data.get('property_no', '')).strip()
+        input_building_name = str(o_data.get('building_name', '')).strip()
+        input_locality = str(o_data.get('locality_area', '')).strip()
+        input_pincode = str(o_data.get('pincode', '')).strip()
+
+        input_listed_by_id = str(o_data.get('listed_by_id', '')).strip()
+        input_listed_by_name = str(o_data.get('listed_by_name', '')).strip()
+        input_listed_by_email = str(o_data.get('listed_by_email', '')).strip().lower()
+        input_listed_by_contact = str(o_data.get('listed_by_contact', '')).strip()
+
+        fingerprint_key = generate_property_fingerprint(
+            input_property_no,
+            input_building_name,
+            input_locality,
+            input_pincode
+        )
+
+        direct_duplicates = RentalResidentialProperty.objects.filter(
+            is_deleted=False,
+            property_no__iexact=input_property_no,
+            locality_area__iexact=input_locality
+        )
+        if input_building_name:
+            direct_duplicates = direct_duplicates.filter(building_name__iexact=input_building_name)
+
+        existing_duplicates = (
+            RentalResidentialProperty.objects.filter(property_unique_key=fingerprint_key, is_deleted=False)
+            | direct_duplicates
+        ).distinct()
+
+        is_dup_flag = False
+        dup_group_id = fingerprint_key
+        total_dup_count = 1
+        hard_blocked = False
+
+        if existing_duplicates.exists():
+            for existing_prop in existing_duplicates:
+                same_id = (existing_prop.listed_by_id and input_listed_by_id and
+                           existing_prop.listed_by_id.strip() == input_listed_by_id)
+                same_email = (existing_prop.listed_by_email and input_listed_by_email and
+                              existing_prop.listed_by_email.strip().lower() == input_listed_by_email)
+                same_contact = (existing_prop.listed_by_contact and input_listed_by_contact and
+                                existing_prop.listed_by_contact.strip() == input_listed_by_contact)
+
+                if same_id or same_email or same_contact:
+                    hard_blocked = True
+                    break
+
+            if hard_blocked:
+                duplicate_blocked_rows.append(
+                    f"Row {row_idx}: Duplicate Blocked - Unit '{input_property_no}' is already listed "
+                    f"by/for {input_listed_by_name or 'this user'}. Row skipped; edit the existing listing instead."
+                )
+                skipped += 1
+                continue
+
+            is_dup_flag = True
+            total_dup_count = existing_duplicates.count() + 1
+            existing_duplicates.update(
+                is_duplicate=True,
+                duplicate_count=total_dup_count,
+                duplicate_group_id=dup_group_id
+            )
+
+        o_data["property_unique_key"] = fingerprint_key
+        o_data["is_duplicate"] = is_dup_flag
+        o_data["duplicate_count"] = total_dup_count
+        o_data["duplicate_group_id"] = dup_group_id if is_dup_flag else None
+
+        o_data["listing_type"] = o_data.get("listing_type") or "Rental"
+        o_data["category"] = o_data.get("category") or "Residential"
+
+        o_data["upload_file_name"] = excel_file.name
+        o_data["uploaded_by_name"] = uploader_name
+        o_data["uploaded_by_email"] = uploader_email
+        o_data["uploaded_by_contact"] = uploader_contact
+        o_data["uploaded_by_role"] = uploader_role
+
+        try:
+            RentalResidentialProperty.objects.create(**o_data)
+            created += 1
+        except Exception as e:
+            errors.append(f"Row {row_idx} processing failure: {str(e)}")
+
+    errors.extend(duplicate_blocked_rows)
+
+    # ---- 5. Audit Log ----
+    RentalActivityLog.objects.create(
+        user_identity=user_identity,
+        user_role=uploader_role,
+        action_type='EXCEL_IMPORT',
+        property_id="Multiple / Sheet Records",
+        targeted_fields="bulk_action",
+        associated_file=excel_file.name,
+        action_payload=json.dumps({
+            "filename": excel_file.name,
+            "records_created": created,
+            "records_updated": updated,
+            "records_skipped": skipped,
+            "duplicates_blocked": len(duplicate_blocked_rows),
+            "errors_encountered": len(errors),
+        }),
+        ip_address=_get_client_ip(request),
+        status='SUCCESS' if not errors else 'PARTIAL',
+    )
+
+    return JsonResponse({
+        "status": "success" if not errors else "partial_error",
+        "message": f"{created} Created | {updated} Updated | {skipped} Skipped due to system rules.",
+        "created": created, "updated": updated, "skipped": skipped,
+        "duplicates_blocked": len(duplicate_blocked_rows),
+        "error_count": len(errors), "errors": errors,
+        "unmatched_headers": unmatched_headers,
+        "header_row_detected": header_row,
+        "data_start_row_used": data_start_row,
+    })

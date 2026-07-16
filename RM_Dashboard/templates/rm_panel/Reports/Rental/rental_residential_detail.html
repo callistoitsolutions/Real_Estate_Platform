@@ -1,0 +1,1564 @@
+{% include "rm_panel/rm_header.html" %}
+{% load static %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #1a56db;
+        --primary-light: #ebf0ff;
+        --primary-dark: #1342b0;
+        --accent: #f97316;
+        --dark: #111827;
+        --mid: #374151;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --surface: #f9fafb;
+        --white: #ffffff;
+        --success: #10b981;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+        --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body, .main-content {
+        font-family: 'DM Sans', sans-serif;
+        background: #f3f4f8;
+        color: var(--dark);
+    }
+
+    /* ============ TOP BREADCRUMB BAR ============ */
+    .prop-topbar {
+        background: var(--white);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 0;
+        font-size: 0.8rem;
+        color: var(--muted);
+    }
+    .prop-topbar a { color: var(--primary); text-decoration: none; }
+    .prop-topbar .prop-id-badge {
+        background: #f1f5ff;
+        color: var(--primary);
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        border: 1px solid #d1dcff;
+        font-family: monospace;
+    }
+    .prop-verified-badge {
+        background: #ecfdf5;
+        color: var(--success);
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        border: 1px solid #a7f3d0;
+    }
+    .badge-duplicate {
+        background: #fef2f2;
+        color: #ef4444;
+        border: 1px solid #fecaca;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* ============ HERO TITLE SECTION ============ */
+    .prop-hero-header {
+        background: var(--white);
+        padding: 20px 0 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .prop-hero-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 6px;
+        line-height: 1.3;
+    }
+    .prop-hero-location {
+        color: var(--muted);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .prop-hero-location i { color: var(--primary); }
+    .prop-hero-price-tag {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+        line-height: 1;
+    }
+    .prop-hero-price-tag span { font-size: 0.9rem; color: var(--muted); font-weight: 400; }
+
+    /* ============ MEDIA GALLERY ============ */
+    .prop-gallery-grid {
+        display: grid;
+        grid-template-columns: 1.65fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 6px;
+        height: 420px;
+        border-radius: 0;
+        overflow: hidden;
+        background: var(--dark);
+        margin-bottom: 0;
+    }
+    .prop-gallery-main {
+        grid-row: 1 / 3;
+        position: relative;
+        overflow: hidden;
+        background: #0d1117;
+        cursor: pointer;
+    }
+    .prop-gallery-thumb {
+        position: relative;
+        overflow: hidden;
+        background: #1e2733;
+        cursor: pointer;
+    }
+    .prop-gallery-thumb img,
+    .prop-gallery-main .walkthrough-slide img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.4s ease;
+    }
+    .prop-gallery-thumb:hover img { transform: scale(1.05); }
+
+    /* Walkthrough slide engine */
+    .walkthrough-slide {
+        position: absolute; inset: 0;
+        opacity: 0; transition: opacity 0.7s ease;
+        display: none;
+    }
+    .walkthrough-slide.active { display: block; opacity: 1; }
+
+    .gallery-hud {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        padding: 20px 16px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        z-index: 10;
+    }
+    .gallery-hud-left { display: flex; align-items: center; gap: 10px; }
+    .btn-play-pause {
+        width: 34px; height: 34px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        color: white;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 0.75rem;
+        backdrop-filter: blur(4px);
+        transition: background 0.2s;
+    }
+    .btn-play-pause:hover { background: rgba(255,255,255,0.25); }
+    .gallery-timer { color: rgba(255,255,255,0.7); font-size: 0.72rem; font-family: monospace; }
+    .gallery-badge-walkthrough {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        padding: 4px 9px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        backdrop-filter: blur(4px);
+    }
+
+    /* More images overlay */
+    .thumb-more-overlay {
+        position: absolute; inset: 0;
+        background: rgba(17,24,39,0.7);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .thumb-more-overlay:hover { background: rgba(17,24,39,0.85); }
+    .thumb-more-overlay span {
+        color: white; font-size: 1.2rem; font-weight: 700;
+    }
+    .thumb-more-overlay small {
+        display: block; color: rgba(255,255,255,0.6); font-size: 0.7rem; margin-top: 2px;
+    }
+
+    /* ============ STICKY NAV ============ */
+    .prop-sticky-nav {
+        position: sticky;
+        top: 68px;
+        background: var(--white);
+        border-bottom: 2px solid var(--border);
+        z-index: 990;
+        padding: 0;
+    }
+
+    /* 👇 ONLY THIS PART CHANGES 👇 */
+    .prop-sticky-nav-inner {
+        display: flex;
+        gap: 0;
+        overflow-x: auto;
+        scrollbar-width: thin; 
+        padding-bottom: 5px; 
+    }
+    .prop-sticky-nav-inner::-webkit-scrollbar { 
+        height: 6px; 
+    }
+    .prop-sticky-nav-inner::-webkit-scrollbar-track { 
+        background: #f1f1f1; 
+    }
+    .prop-sticky-nav-inner::-webkit-scrollbar-thumb { 
+        background: #ccc; 
+        border-radius: 4px; 
+    }
+    /* 👆 ONLY THIS PART CHANGES 👆 */
+
+    .prop-nav-link {
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        padding: 14px 18px;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .prop-nav-link i { font-size: 0.75rem; }
+    .prop-nav-link:hover { color: var(--primary); background: var(--primary-light); }
+    .prop-nav-link.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
+
+    /* ============ LAYOUT SPLIT ============ */
+    .prop-page-body { padding: 28px 0 60px; }
+    .prop-layout-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+        align-items: start;
+    }
+    @media (max-width: 1100px) {
+        .prop-layout-grid { grid-template-columns: 1fr; }
+        .prop-gallery-grid { grid-template-columns: 1fr; height: 260px; }
+        .prop-gallery-thumb { display: none; }
+        .prop-gallery-main { grid-row: 1; }
+    }
+
+    /* ============ SECTION CARDS ============ */
+    .prop-section {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-bottom: 20px;
+        scroll-margin-top: 130px;
+        box-shadow: var(--shadow-sm);
+    }
+    .prop-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .prop-section-title .section-icon {
+        width: 32px; height: 32px;
+        background: var(--primary-light);
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--primary);
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    /* Spec rows */
+    .spec-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+    }
+    .spec-item {
+        padding: 11px 12px;
+        border-bottom: 1px solid #f3f4f6;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .spec-item:nth-child(odd) { border-right: 1px solid #f3f4f6; }
+    .spec-item:last-child, .spec-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+    .spec-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+    .spec-value {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--dark);
+    }
+    .spec-full { grid-column: 1 / -1; border-right: none !important; }
+
+    /* Highlight pricing row */
+    .spec-item.highlight-price {
+        background: linear-gradient(135deg, #f0f4ff, #e8eeff);
+        border-radius: 8px;
+        border: 1px solid #d1dcff !important;
+        padding: 14px;
+    }
+    .spec-item.highlight-price .spec-label { color: var(--primary); }
+    .spec-item.highlight-price .spec-value { font-size: 1.1rem; color: var(--primary); }
+
+    /* Amenity pills */
+    .amenity-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--mid);
+    }
+    .amenity-pill i { color: var(--success); font-size: 0.68rem; }
+    .facility-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: #15803d;
+    }
+    .facility-pill i { font-size: 0.68rem; }
+
+    /* Address box */
+    .address-box {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+        font-size: 0.85rem;
+        color: var(--mid);
+        line-height: 1.6;
+        border-left: 3px solid var(--primary);
+    }
+
+    /* Description */
+    .desc-body {
+        font-size: 0.88rem;
+        line-height: 1.8;
+        color: #4b5563;
+    }
+
+    /* FAQ accordion */
+    .prop-faq .accordion-item {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm) !important;
+        margin-bottom: 10px;
+        overflow: hidden;
+    }
+    .prop-faq .accordion-button {
+        font-weight: 600;
+        font-size: 0.88rem;
+        color: var(--dark);
+        background: var(--white);
+        padding: 14px 16px;
+        box-shadow: none;
+    }
+    .prop-faq .accordion-button:not(.collapsed) {
+        background: #f5f7ff;
+        color: var(--primary);
+        border-bottom: 1px solid #e0e7ff;
+    }
+    .prop-faq .accordion-button::after { filter: none; }
+    .prop-faq .accordion-body {
+        font-size: 0.85rem;
+        line-height: 1.75;
+        color: var(--mid);
+        background: var(--white);
+        padding: 14px 16px;
+    }
+
+    /* ============ SIDEBAR ============ */
+    .prop-sidebar { position: sticky; top: 130px; display: flex; flex-direction: column; gap: 16px; }
+
+    /* Price card */
+    .sidebar-price-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+    .sidebar-price-header {
+        background: linear-gradient(135deg, #1a56db, #3b82f6);
+        padding: 20px 20px 16px;
+        color: white;
+    }
+    .sidebar-price-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.8; font-weight: 600; }
+    .sidebar-price-amount { font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin: 4px 0 0; }
+    .sidebar-price-amount span { font-size: 0.85rem; opacity: 0.7; font-weight: 400; }
+    .sidebar-price-body { padding: 16px 20px; }
+    .sidebar-mini-stat {
+        text-align: center;
+        padding: 10px 0;
+    }
+    .sidebar-mini-stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; }
+    .sidebar-mini-stat-val { font-size: 0.95rem; font-weight: 700; color: var(--dark); margin-top: 3px; }
+
+    /* Owner card */
+    .sidebar-owner-card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        box-shadow: var(--shadow-sm);
+    }
+    .owner-avatar {
+        width: 46px; height: 46px;
+        background: linear-gradient(135deg, var(--primary), #6366f1);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .owner-name { font-size: 0.9rem; font-weight: 700; color: var(--dark); }
+    .owner-email {
+        font-size: 0.75rem;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
+    }
+    /* Masked phone */
+    .owner-phone-masked {
+        font-size: 0.82rem;
+        color: var(--mid);
+        font-weight: 500;
+        font-family: monospace;
+    }
+    .btn-reveal-phone {
+        font-size: 0.73rem;
+        color: var(--primary);
+        border: 1px solid #d1dcff;
+        background: var(--primary-light);
+        padding: 2px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .btn-reveal-phone:hover { background: var(--primary); color: white; border-color: var(--primary); }
+    .btn-call-primary {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #1a56db, #3b82f6);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        padding: 12px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        width: 100%;
+        cursor: pointer;
+        text-decoration: none;
+        margin-top: 14px;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(26,86,219,0.3);
+    }
+    .btn-call-primary:hover {
+        background: linear-gradient(135deg, #1342b0, #2563eb);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(26,86,219,0.4);
+        color: white;
+    }
+
+    /* Shared info row in owner card */
+    .owner-info-row {
+        display: flex; align-items: center; gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 0.8rem;
+    }
+    .owner-info-row:last-child { border: none; padding-bottom: 0; }
+    .owner-info-row i { color: var(--muted); width: 14px; text-align: center; flex-shrink: 0; }
+    .owner-info-row span { color: var(--mid); }
+
+    /* Contact card divider */
+    .sidebar-divider { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 600; margin-bottom: 10px; }
+
+    /* Image gallery section within media */
+    .prop-image-strip {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding: 6px 0 0;
+        scrollbar-width: thin;
+    }
+    .prop-image-strip::-webkit-scrollbar { height: 4px; }
+    .prop-image-strip::-webkit-scrollbar-track { background: #f1f1f1; }
+    .prop-image-strip::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+    .strip-thumb {
+        flex-shrink: 0;
+        width: 72px; height: 54px;
+        border-radius: 5px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: border-color 0.2s;
+    }
+    .strip-thumb.active-thumb { border-color: var(--primary); }
+    .strip-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Quick stats bar below title */
+    .prop-quick-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 14px 0;
+        border-top: 1px solid var(--border);
+        margin-top: 12px;
+    }
+    .quick-stat-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--mid);
+    }
+    .quick-stat-chip i { color: var(--primary); font-size: 0.72rem; }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 24px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        border: 1px dashed var(--border);
+    }
+    .empty-state i { font-size: 1.5rem; color: #d1d5db; margin-bottom: 8px; display: block; }
+    .empty-state p { font-size: 0.8rem; color: var(--muted); margin: 0; }
+
+    /* Section labels */
+    .sub-section-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--muted);
+        margin-bottom: 12px;
+        margin-top: 18px;
+    }
+    .sub-section-label:first-child { margin-top: 0; }
+
+    /* Soft delete badge */
+    .badge-deleted { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; }
+    .badge-active { background: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; }
+
+    /* Description highlight */
+    .desc-highlight {
+        background: #f8f9ff;
+        border-left: 3px solid var(--primary);
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        font-size: 0.88rem;
+        color: var(--mid);
+        line-height: 1.8;
+    }
+</style>
+
+<div class="main-content">
+
+    <!-- TOP BAR -->
+    <div class="prop-topbar">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="{% url 'residential_list' %}"><i class="fas fa-home"></i> Rental Listings</a>
+                    <span class="text-muted">/</span>
+                    <span>{{ property.property_title|truncatechars:40 }}</span>
+                    <span class="prop-id-badge">ID: {{ property.id }}</span>
+                    <span class="prop-verified-badge"><i class="fas fa-circle-check"></i> System Verified</span>
+                    
+                </div>
+                <a href="{% url 'residential_list' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600;">
+                    <i class="fas fa-arrow-left"></i> Back to Listing
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- HERO HEADER -->
+    <div class="prop-hero-header">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
+                <div style="flex: 1; min-width: 260px;">
+                    <h1>{{ property.property_title }}</h1>
+                    <div class="prop-hero-location">
+                        <i class="fas fa-location-dot"></i>
+                        {{ property.locality }}, {{ property.city }}, {{ property.state }}
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="prop-hero-price-tag">₹{{ property.monthly_rent|default:"0" }} <span>/ month</span></div>
+                    <div style="font-size:0.78rem; color: var(--muted); margin-top:4px;">+ ₹{{ property.monthy_maintenance_amount }} maintenance</div>
+                </div>
+            </div>
+            <!-- Quick stats chips -->
+            <div class="prop-quick-stats">
+                <div class="quick-stat-chip"><i class="fas fa-tags"></i> {{ property.listing_type|default:"Rental" }} / {{ property.category|default:"Residential" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-bed"></i> {{ property.bhk_type|default:"BHK" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-bath"></i> {{ property.bathrooms|default:"—" }} Bath</div>
+                <div class="quick-stat-chip"><i class="fas fa-ruler-combined"></i> {{ property.built_up_area|default:"—" }} sq.ft</div>
+                <div class="quick-stat-chip"><i class="fas fa-layer-group"></i> Floor {{ property.floor_number|default:"—" }} of {{ property.total_floors|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-couch"></i> {{ property.furnishing_status|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-compass"></i> {{ property.facing_direction }} Facing</div>
+                <div class="quick-stat-chip"><i class="fas fa-users"></i> {{ property.available_for|default:"—" }}</div>
+            </div>
+        </div>
+    </div>
+
+  <div style="background: #111827;">
+    <div class="container-fluid px-0">
+        <div class="prop-gallery-grid">
+
+            <!-- Main Gallery -->
+            <div class="prop-gallery-main" id="galMain">
+
+                {% if images %}
+
+                    {% for img in images %}
+                    <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
+                        <img src="{{ img.image.url }}" alt="Property view {{ forloop.counter }}">
+                    </div>
+                    {% endfor %}
+
+                    <div class="gallery-hud">
+                        <div class="gallery-hud-left">
+                            <button class="btn-play-pause" id="playPauseBtn">
+                                <i class="fas fa-pause"></i>
+                            </button>
+                            <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
+                        </div>
+                        <span class="gallery-badge-walkthrough">
+                            <i class="fas fa-play-circle"></i>
+                            AI Video Walkthrough
+                        </span>
+                    </div>
+
+                {% else %}
+
+                   <div class="w-100 h-100 position-relative overflow-hidden">
+
+    <!-- Background -->
+    <div style="
+        position:absolute;
+        inset:0;
+        background:linear-gradient(135deg,#f8fafc,#eef2f7,#e2e8f0);
+    "></div>
+
+    <!-- Watermark -->
+    <div style="
+        position:absolute;
+        inset:0;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        transform:rotate(-30deg);
+        font-size:80px;
+        font-weight:800;
+        color:rgba(37,99,235,.05);
+        letter-spacing:8px;
+        user-select:none;
+        pointer-events:none;
+    ">
+        EstateFlow
+    </div>
+
+    <!-- Main Content -->
+    <div class="w-100 h-100 d-flex align-items-center justify-content-center position-relative">
+
+        <div class="text-center">
+
+            <!-- Icon Circle -->
+            <div style="
+                width:140px;
+                height:140px;
+                border-radius:50%;
+                background:#ffffff;
+                border:2px solid #dbeafe;
+                box-shadow:0 10px 25px rgba(0,0,0,.08);
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                margin:auto;
+            ">
+                <i class="fas fa-building"
+                   style="
+                        font-size:60px;
+                        color:#2563eb;
+                   ">
+                </i>
+            </div>
+
+            <!-- Brand -->
+            <h2 style="
+                margin-top:22px;
+                font-weight:700;
+                color:#1e293b;
+                letter-spacing:.5px;
+            ">
+                EstateFlow
+            </h2>
+
+            <!-- Subtitle -->
+            <p style="
+                color:#64748b;
+                font-size:15px;
+                margin-bottom:6px;
+            ">
+                Property Images Not Available
+            </p>
+
+            <!-- Property Type -->
+            <span style="
+                display:inline-block;
+                background:#dbeafe;
+                color:#1d4ed8;
+                padding:6px 16px;
+                border-radius:20px;
+                font-size:13px;
+                font-weight:600;
+            ">
+                <i class="fas fa-building me-1"></i>
+                Rental Residential Property
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+                {% endif %}
+
+            </div>
+
+            <!-- Thumbnail 1 -->
+         <div class="prop-gallery-thumb"
+     style="background:#0d1117; cursor:pointer;"
+     onclick="setSlide(1)"
+     id="galThumb1">
+
+    {% if images.count > 1 %}
+
+        <img src="{{ images.1.image.url }}"
+             alt="Property thumbnail 2">
+
+    {% else %}
+
+        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center position-relative overflow-hidden"
+             style="background:linear-gradient(135deg,#f8fafc,#eef2f7,#e2e8f0);">
+
+            <!-- Watermark -->
+            <div style="
+                position:absolute;
+                inset:0;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                transform:rotate(-30deg);
+                font-size:18px;
+                font-weight:800;
+                color:rgba(37,99,235,.06);
+                pointer-events:none;
+                user-select:none;">
+                EstateFlow
+            </div>
+
+            <!-- Building Icon -->
+            <i class="fas fa-building"
+               style="
+                    font-size:20px;
+                    color:#2563eb;
+                    z-index:2;">
+            </i>
+
+            <!-- Brand -->
+            <span style="
+                font-size:9px;
+                font-weight:700;
+                color:#1e293b;
+                margin-top:3px;
+                z-index:2;">
+                EstateFlow
+            </span>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+            <!-- Thumbnail 2 -->
+          <div class="prop-gallery-thumb"
+     style="background:#0d1117; cursor:pointer;"
+     onclick="setSlide(2)"
+     id="galThumb2">
+
+    {% if images.count > 2 %}
+
+        <img src="{{ images.2.image.url }}"
+             alt="Property thumbnail 3">
+
+        {% if images.count > 3 %}
+        <div class="thumb-more-overlay"
+             data-bs-toggle="modal"
+             data-bs-target="#photoLightboxStrip">
+            <div class="text-center">
+                <span>+{{ images.count|add:"-3" }}</span>
+                <small>More Photos</small>
+            </div>
+        </div>
+        {% endif %}
+
+    {% else %}
+
+        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center position-relative overflow-hidden"
+             style="background:linear-gradient(135deg,#f8fafc,#eef2f7,#e2e8f0);">
+
+            <!-- Watermark -->
+            <div style="
+                position:absolute;
+                inset:0;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                transform:rotate(-30deg);
+                font-size:18px;
+                font-weight:800;
+                color:rgba(37,99,235,.06);
+                pointer-events:none;
+                user-select:none;">
+                EstateFlow
+            </div>
+
+            <!-- Building Icon -->
+            <i class="fas fa-building"
+               style="
+                    font-size:20px;
+                    color:#2563eb;
+                    z-index:2;">
+            </i>
+
+            <!-- Brand -->
+            <span style="
+                font-size:9px;
+                font-weight:700;
+                color:#1e293b;
+                margin-top:3px;
+                z-index:2;">
+                EstateFlow
+            </span>
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+        </div>
+    </div>
+
+    {% if images %}
+    <div style="background:#0d1117;padding:8px 16px 12px;">
+        <div class="prop-image-strip" id="imageStrip">
+            {% for img in images %}
+            <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}"
+                 data-slide="{{ forloop.counter0 }}"
+                 onclick="setSlide({{ forloop.counter0 }})">
+                <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+    <!-- STICKY NAV -->
+    <div class="prop-sticky-nav">
+        <div class="container-fluid px-4">
+            <div class="prop-sticky-nav-inner" id="propNavTabs">
+                <a href="#sec-listed" class="prop-nav-link active" data-target="sec-listed"><i class="fas fa-user-tie"></i> Listed By</a>
+                <a href="#sec-basic" class="prop-nav-link" data-target="sec-basic"><i class="fas fa-layer-group"></i> Basic Info</a>
+                <a href="#sec-propdetails" class="prop-nav-link" data-target="sec-propdetails"><i class="fas fa-sliders"></i> Property Details</a>
+                <a href="#sec-avail" class="prop-nav-link" data-target="sec-avail"><i class="fas fa-clock"></i> Availability</a>
+                <a href="#sec-pricing" class="prop-nav-link" data-target="sec-pricing"><i class="fas fa-indian-rupee-sign"></i> Pricing</a>
+                <a href="#sec-location" class="prop-nav-link" data-target="sec-location"><i class="fas fa-map-location-dot"></i> Location</a>
+                <a href="#sec-amenities" class="prop-nav-link" data-target="sec-amenities"><i class="fas fa-wand-magic-sparkles"></i> Amenities</a>
+                <a href="#sec-desc" class="prop-nav-link" data-target="sec-desc"><i class="fas fa-align-left"></i> Description</a>
+                <a href="#sec-owner" class="prop-nav-link" data-target="sec-owner"><i class="fas fa-database"></i> Media & Upload Meta</a>
+                <a href="#sec-faqs" class="prop-nav-link" data-target="sec-faqs"><i class="fas fa-comments-question"></i> FAQs</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN BODY -->
+    <div class="prop-page-body">
+        <div class="container-fluid px-4">
+            <div class="prop-layout-grid">
+
+                <!-- LEFT COLUMN -->
+                <div>
+
+                    <!-- SECTION 1: LISTED BY -->
+                    <div class="prop-section" id="sec-listed">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-user-tie"></i></div>
+                            Listed By
+                        </div>
+                        <div class="spec-grid">
+                         
+                            
+                       
+                            <div class="spec-item">
+                                <div class="spec-label">Lister ID</div>
+                                <div class="spec-value">{{ property.listed_by_id|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Lister Name</div>
+                                <div class="spec-value">{{ property.listed_by_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Lister Email</div>
+                                <div class="spec-value" style="font-size:0.85rem;">{{ property.listed_by_email|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Lister Contact</div>
+                                <div class="spec-value">{{ property.listed_by_contact|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Lister Role</div>
+                                <div class="spec-value">{{ property.listed_by_role|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: BASIC INFO -->
+                    <div class="prop-section" id="sec-basic">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-layer-group"></i></div>
+                            Basic Information
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Property Title</div>
+                                <div class="spec-value">{{ property.property_title|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Property Type</div>
+                                <div class="spec-value">{{ property.property_type|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Flat No / House No / Unit No</div>
+                                <div class="spec-value">{{ property.property_no|default:"—" }}</div>
+                            </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">BHK Type</div>
+                                <div class="spec-value">{{ property.bhk_type|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Renting Option</div>
+                                <div class="spec-value">{{ property.renting_option|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Built-Up Area</div>
+                                <div class="spec-value">{{ property.built_up_area|default:"—" }} sq.ft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Bathrooms</div>
+                                <div class="spec-value">{{ property.bathrooms|default:"—" }} Units</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Balconies</div>
+                                <div class="spec-value">{{ property.balconies|default:"0" }} Units</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Building Configuration</div>
+                                <div class="spec-value">{{ property.building_configuration|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Total Floors</div>
+                                <div class="spec-value">{{ property.total_floors|default:"—" }} Floors</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Facing Direction</div>
+                                <div class="spec-value">{{ property.facing_direction|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Furnishing Status</div>
+                                <div class="spec-value">{{ property.furnishing_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Available For</div>
+                                <div class="spec-value">{{ property.available_for|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: PROPERTY DETAILS -->
+                    <div class="prop-section" id="sec-propdetails">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-sliders"></i></div>
+                            Property Details
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Carpet Area</div>
+                                <div class="spec-value">{{ property.carpet_area|default:"—" }} sq.ft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">City Zone</div>
+                                <div class="spec-value">{{ property.city_zone|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Ownership Type</div>
+                                <div class="spec-value">{{ property.ownership_type|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Property Condition</div>
+                                <div class="spec-value">{{ property.property_condition|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Property Age</div>
+                                <div class="spec-value">{{ property.property_age|default:"—" }} Years</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Tower / Wing Number</div>
+                                <div class="spec-value">{{ property.wing_number|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Building / Society Name</div>
+                                <div class="spec-value"><i class="fas fa-building text-muted me-1"></i>{{ property.building_name|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 4: AVAILABILITY -->
+                    <div class="prop-section" id="sec-avail">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-clock"></i></div>
+                            Availability Details
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Availability Status</div>
+                                <div class="spec-value">{{ property.availability_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Available From</div>
+                                <div class="spec-value"><i class="far fa-calendar-check text-muted me-1"></i>{{ property.available_from|date:"d M Y"|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Lease Duration</div>
+                                <div class="spec-value">{{ property.lease_duration|default:"—" }}</div>
+                            </div>
+                          
+                        </div>
+                    </div>
+
+                    <!-- SECTION 5: PRICING -->
+                   <!-- SECTION 5: PRICING -->
+                    <div class="prop-section" id="sec-pricing">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-indian-rupee-sign"></i></div>
+                            Pricing Details
+                        </div>
+                        <div class="spec-grid">
+                            
+                            <!-- Monthly Rent -->
+                            <div class="spec-item highlight-price">
+                                <div class="spec-label">Monthly Rent</div>
+                                <div class="spec-value">₹{{ property.monthly_rent|default:"0" }} / mo</div>
+                            </div>
+                            
+                            <!-- Advance Rent (Formatted with brackets below) -->
+                            <div class="spec-item">
+                                <div class="spec-label">Advance Rent</div>
+                                <div class="spec-value">
+                                    {% if property.get_advance_rent_amount %}
+                                        <div style="font-weight:700; color:#1e293b;">
+                                            ₹{{ property.get_advance_rent_amount|floatformat:"0" }}
+                                        </div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">
+                                            ({{ property.get_advance_rent_type_label }})
+                                        </div>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Security Deposit (Formatted with brackets below) -->
+                            <div class="spec-item highlight-price" style="background: linear-gradient(135deg, #fff7ed, #ffedd5); border-color: #fed7aa !important;">
+                                <div class="spec-label" style="color:#ea580c;">Security Deposit</div>
+                                <div class="spec-value" style="color:#c2410c;">
+                                    {% if property.get_security_deposit_amount %}
+                                        <div style="font-weight:700;">
+                                            ₹{{ property.get_security_deposit_amount|floatformat:"0" }}
+                                        </div>
+                                        <div style="font-size:0.75rem; opacity:0.85; font-weight:500; margin-top:2px;">
+                                            ({{ property.get_security_deposit_type_label }})
+                                        </div>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Brokerage / Service Fee (Formatted with brackets below) -->
+                            <div class="spec-item">
+                                <div class="spec-label">{{ property.get_brokerage_label|default:"Brokerage" }}</div>
+                                <div class="spec-value">
+                                    {% if property.brokerage_percentage %}
+                                        <div style="font-weight:700; color:#1e293b;">
+                                            ₹{{ property.get_brokerage_amount|floatformat:"0" }}
+                                        </div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">
+                                            ({{ property.get_brokerage_display_value }})
+                                        </div>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Maintenance -->
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Maintenance Type</div>
+                                <div class="spec-value">{{ property.maintenance_type|default:"—" }}</div>
+                            </div>
+                            {% if property.maintenance_type == 'Extra' %}
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Monthly Maintenance Amount</div>
+                                <div class="spec-value">₹{{ property.monthy_maintenance_amount|default:property.maintenance_amount|default:"0" }}</div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Total Move In -->
+                            <div class="spec-item spec-full" style="background:#f3f4f6;">
+                                <div class="spec-label">Total Move In Cost</div>
+                                <div class="spec-value fw-bold">₹{{ property.total_move_in_cost|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 6: LOCATION -->
+                    <div class="prop-section" id="sec-location">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-map-location-dot"></i></div>
+                            Location Details
+                        </div>
+                        <div class="mt-2 mb-4">
+                            <div class="spec-label mb-2">Complete Address</div>
+                            <div class="address-box">
+                                <i class="fas fa-map-pin text-primary me-2"></i>
+                                {{ property.address|default:"No address provided." }}
+                            </div>
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">City</div>
+                                <div class="spec-value">{{ property.city|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Locality / Area</div>
+                                <div class="spec-value">{{ property.locality|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Property Landmark</div>
+                                <div class="spec-value">{{ property.property_landmark|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">State</div>
+                                <div class="spec-value">{{ property.state|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Pincode</div>
+                                <div class="spec-value" style="font-family:monospace;">{{ property.pincode|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Main Road Connectivity</div>
+                                <div class="spec-value">{{ property.main_road_connectivity|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Google Maps Link</div>
+                                <div class="spec-value">
+                                    {% if property.google_maps_link %}
+                                    <a href="{{ property.google_maps_link }}" target="_blank" style="color:var(--primary); text-decoration:underline;">View on Map <i class="fas fa-external-link-alt"></i></a>
+                                    {% else %}—{% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Latitude</div>
+                                <div class="spec-value">{{ property.latitude|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Longitude</div>
+                                <div class="spec-value">{{ property.longitude|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 7: AMENITIES -->
+                    <div class="prop-section" id="sec-amenities">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+                            Amenities & Features
+                        </div>
+                        <div class="sub-section-label">Amenities</div>
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            {% for item in amenities_list %}
+                                <div class="amenity-pill"><i class="fas fa-circle-check"></i> {{ item }}</div>
+                            {% empty %}
+                                <div class="empty-state w-100" style="padding:14px;">
+                                    <i class="fas fa-list-check"></i>
+                                    <p>No amenities mapped for this property.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="sub-section-label">Nearby Facilities</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for item in facilities_list %}
+                                <div class="facility-pill"><i class="fas fa-map-pin"></i> {{ item }}</div>
+                            {% empty %}
+                                <div class="empty-state w-100" style="padding:14px;">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <p>No nearby facilities markers toggled.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- SECTION 8: DESCRIPTION -->
+                    <div class="prop-section" id="sec-desc">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-align-left"></i></div>
+                            Property Descriptions
+                        </div>
+                        <div class="desc-body">
+                            <div class="sub-section-label">User Provided Description</div>
+                            {% if property.user_description %}
+                                <div class="desc-highlight">{{ property.user_description|safe }}</div>
+                            {% else %}
+                                <p class="mb-4 text-muted">No custom description provided by user.</p>
+                            {% endif %}
+
+                            <div class="sub-section-label">Property Summary</div>
+                            {% if property.description %}
+                                <p class="mb-4">{{ property.description }}</p>
+                            {% else %}
+                                <p class="mb-4 text-muted">Not generated.</p>
+                            {% endif %}
+
+                            <div class="sub-section-label">Property Description</div>
+                            {% if property.rent_residential_desc %}
+                                <div class="desc-highlight">{{ property.rent_residential_desc|safe }}</div>
+                            {% else %}
+                                <p class="text-muted">Not generated.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- SECTION 9: MEDIA & UPLOAD META -->
+                    <div class="prop-section" id="sec-owner">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-database"></i></div>
+                            Media & Upload Meta-Data
+                        </div>
+
+                        <div class="sub-section-label">Listing Portals</div>
+                        <div class="spec-grid mb-4">
+                            <div class="spec-item">
+                                <div class="spec-label">Is Property Already Listed Elsewhere?</div>
+                                <div class="spec-value">{{ property.listed_elsewhere|default:"No" }}</div>
+                            </div>
+                            {% if property.listed_elsewhere == 'Yes' %}
+                            <div class="spec-item">
+                                <div class="spec-label">Portal Name</div>
+                                <div class="spec-value">{{ property.portal_name|default:"—" }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="sub-section-label">Data Uploaded (System Meta)</div>
+                        <div class="spec-grid mb-4">
+                           
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Data Uploaded Via</div>
+                                <div class="spec-value" style="font-size:0.8rem; color: var(--muted);">{{ property.upload_file_name|default:"Web_Listing UI Form" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">System Record Creation Date</div>
+                                <div class="spec-value">{{ property.created_at|date:"d M Y, h:i A" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Soft Delete Status</div>
+                                <div class="spec-value">
+                                    {% if property.is_deleted %}
+                                        <span class="badge-deleted">True — Deleted</span>
+                                    {% else %}
+                                        <span class="badge-active">False — Active</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                     
+
+                    </div>
+
+                    <!-- SECTION 10: FAQs -->
+                    <div class="prop-section" id="sec-faqs">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-comments-question"></i></div>
+                            Property Frequently Asked Questions
+                        </div>
+                        <div class="accordion prop-faq" id="faqAccordion">
+                            {% for faq in property.faqs.all %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="faqHead{{ faq.id }}">
+                                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faqBody{{ faq.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+                                            {{ faq.question }}
+                                        </button>
+                                    </h2>
+                                    <div id="faqBody{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">{{ faq.answer }}</div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="empty-state">
+                                    <i class="fas fa-database"></i>
+                                    <p>No FAQ matrices cached for this entry ID.</p>
+                                    <p style="font-size:0.72rem; margin-top:4px;">Re-save this listing in your Admin panel to generate data cards.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT SIDEBAR (Pricing & Contact Panel) -->
+                <div class="prop-sidebar">
+
+                    <!-- Price card -->
+                   
+
+    <!-- Price card -->
+    <div class="sidebar-price-card">
+        <div class="sidebar-price-header">
+            <div class="sidebar-price-label">Widescreen Price Tag</div>
+            <div class="sidebar-price-amount">₹{{ property.monthly_rent|default:"0" }} <span>/ mo</span></div>
+        </div>
+        <div class="sidebar-price-body">
+            <div class="row g-0">
+                <!-- Deposit Valuation (Updated with brackets) -->
+                <div class="col-6 sidebar-mini-stat" style="border-right: 1px solid var(--border);">
+                    <div class="sidebar-mini-stat-label">Deposit Valuation</div>
+                    <div class="sidebar-mini-stat-val">
+                        ₹{{ property.get_security_deposit_amount|default:"0"|floatformat:"0" }}
+                    </div>
+                    {% if property.get_security_deposit_type_label != "-" %}
+                    <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">
+                        ({{ property.get_security_deposit_type_label }})
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Maintenance Charge (Updated with brackets) -->
+                <div class="col-6 sidebar-mini-stat">
+                    <div class="sidebar-mini-stat-label">Maintenance Charge</div>
+                    <div class="sidebar-mini-stat-val">
+                        ₹{{ property.monthy_maintenance_amount|default:"0"|floatformat:"0" }}
+                    </div>
+                    <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">
+                        ({{ property.maintenance_type|default:"Included" }})
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Owner contact card -->
+    <div class="sidebar-owner-card">
+        <div class="sidebar-divider">Listed By / Contact Info</div>
+        <div class="d-flex align-items-center gap-12 mb-3" style="gap:12px;">
+            <div class="owner-avatar">{{ property.listed_by_name|slice:":1"|upper }}</div>
+            <div style="min-width:0;">
+                <div class="owner-name">{{ property.listed_by_name|default:"Undisclosed Identity" }}</div>
+                <div class="owner-email"><i class="fas fa-envelope me-1"></i>{{ property.listed_by_email|default:"No email logged" }}</div>
+            </div>
+        </div>
+
+        <!-- Masked phone display -->
+        <div class="owner-info-row">
+            <i class="fas fa-phone"></i>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="owner-phone-masked" id="sidebarPhone" data-phone="{{ property.listed_by_contact|default:'' }}">
+                    {% if property.listed_by_contact %}
+                        {% with phone=property.listed_by_contact %}
+                        {{ phone|slice:":2" }}XXXXXX{{ phone|slice:"-2:" }}
+                        {% endwith %}
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </span>
+                {% if property.listed_by_contact %}
+                    <button type="button" class="btn-reveal-phone" onclick="revealPhone('sidebarPhone', '{{ property.listed_by_contact }}')">View Number</button>
+                {% endif %}
+            </div>
+        </div>
+
+        <a href="tel:{{ property.listed_by_contact }}" class="btn-call-primary">
+            <i class="fas fa-phone-volume"></i> Call Primary Line
+        </a>
+    </div>
+
+</div>
+
+                    <!-- Owner contact card -->
+                 
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LIGHTBOX MODAL -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+
+
+    window.addEventListener('scroll', updateActiveNav, { passive: true });
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.getElementById(this.getAttribute('data-target'));
+            if (target) {
+                const top = target.getBoundingClientRect().top + window.scrollY - 130;
+                window.scrollTo({ top, behavior: 'smooth' });
+            }
+        });
+    });
+
+    updateActiveNav();
+
+    // 👇 ADD THE NEW JS RIGHT HERE 👇
+    // ============================
+    // 4. HORIZONTAL SCROLL FIX FOR NAV
+    // ============================
+    const navTabs = document.getElementById('propNavTabs');
+    if (navTabs) {
+        navTabs.addEventListener('wheel', function(e) {
+            if (e.deltaY !== 0) {
+                e.preventDefault(); 
+                this.scrollLeft += e.deltaY; 
+            }
+        });
+    }
+    // 👆 END OF NEW JS 👆
+
+}); // <-- This is the closing bracket for your DOMContentLoaded function
+
+// ============================
+// 3. PHONE REVEAL
+// ============================
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// ==========================================
+// 1. GLOBAL PHONE REVEAL FUNCTION (Fixed)
+// ==========================================
+function revealPhone(elementId, phone) {
+    const el = document.getElementById(elementId);
+    if (el && phone) {
+        // Replace masked text with actual phone number
+        el.textContent = phone;
+        el.style.color = '#1a56db';
+        el.style.fontWeight = '700';
+        
+        // Remove the "View Number" button after clicking
+        const btn = el.nextElementSibling;
+        if (btn && btn.classList.contains('btn-reveal-phone')) {
+            btn.remove();
+        }
+    }
+}
+
+
+</script>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for faq in property.faqs.all %}
+    {
+      "@type": "Question",
+      "name": "{{ faq.question|escapejs }}",
+      "acceptedAnswer": { "@type": "Answer", "text": "{{ faq.answer|escapejs }}" }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>

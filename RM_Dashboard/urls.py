@@ -42,6 +42,19 @@ urlpatterns = [
 
     path('residential_rm_edit/<str:pk>',views.residential_rm_edit,name="residential_rm_edit"),
 
+ ############# urls for rental view forms for RM ###################
+
+    path(
+    'rental/residential_view_rm/<str:pk>/',
+    views.rental_residential_view_rm,
+    name='rental_residential_view_rm'
+    ),
+
+
+    path('residential_import_excel_rm/', views.import_residential_excel_rm, name='import_residential_excel_rm'),
+
+    path('residential_download_template_rm/', views.download_residential_template_rm, name='download_residential_template_rm'),
+
     ########## urls for commercial rent forms for RM ################
 
     path('commercial_rm_list',views.commercial_rm_list,name="commercial_rm_list"),

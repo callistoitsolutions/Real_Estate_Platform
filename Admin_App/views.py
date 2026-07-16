@@ -8611,9 +8611,13 @@ def download_residential_template(request):
     """Download the upload template — column headers are the same
     human-readable labels used on the actual form, not raw field names.
     Includes a live 'brokerage label preview' formula so staff can see
-    the label change instantly when they type a different role."""
+    the label change instantly when they type a different role.
 
-    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    Row 4 (sample data) is LOCKED — visible for reference only, cannot
+    be edited or deleted. Rows 5+ are unlocked for actual data entry.
+    """
+
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, Protection
     from openpyxl.utils import get_column_letter
     from openpyxl.comments import Comment
 
@@ -8647,6 +8651,7 @@ def download_residential_template(request):
             sc.fill = PatternFill("solid", fgColor=SAMP_BG)
             sc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             sc.border = bdr
+            sc.protection = Protection(locked=True)  # <-- NEW: sample stays read-only
 
             ws.column_dimensions[get_column_letter(col)].width = max(18, len(label) // 2 + 6)
 
@@ -8667,6 +8672,14 @@ def download_residential_template(request):
         if end_col > start_col:
             ws.merge_cells(start_row=1, start_column=start_col, end_row=1, end_column=end_col)
 
+    # ---- NEW: unlock data-entry rows (5+) so users can fill them in ----
+    total_cols = col - 1
+    unlocked = Protection(locked=False)
+    MAX_DATA_ROWS = 500  # adjust if you expect more than 500 rows of data
+    for r in range(5, 5 + MAX_DATA_ROWS):
+        for c in range(1, total_cols + 1):
+            ws.cell(row=r, column=c).protection = unlocked
+
     # ---- live brokerage label preview column, appended at the end ----
     preview_col = col
     pc = ws.cell(row=2, column=preview_col, value="Brokerage Label Preview (auto)")
@@ -8685,6 +8698,7 @@ def download_residential_template(request):
     fcell.fill = PatternFill("solid", fgColor="FEF3C7")
     fcell.font = Font(bold=True, color="92400E", name="Arial", size=9)
     fcell.alignment = Alignment(horizontal="center", vertical="center")
+    fcell.protection = Protection(locked=True)  # <-- NEW: preview formula stays read-only too
 
     if brokerage_col:
         note = (
@@ -8739,13 +8753,21 @@ def download_residential_template(request):
         notes.cell(row=r, column=2, value=label).border = bdr
         notes.cell(row=r, column=3, value=f"=LOWER(TRIM(A{r}))")
 
+    # ---- NEW: lock the whole sheet, keep only rows 5+ editable ----
+    ws.protection.sheet = True
+    ws.protection.formatColumns = True   # allow resizing columns
+    ws.protection.formatRows = True      # allow resizing rows
+    ws.protection.insertRows = False     # block inserting rows (protects layout)
+    ws.protection.deleteRows = False     # block deleting rows (protects the sample row)
+    ws.protection.autoFilter = False
+    ws.protection.sort = False
+
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
     response["Content-Disposition"] = 'attachment; filename="Rental_Residential_Template.xlsx"'
     wb.save(response)
     return response
-
 
 # =====================================================================
 # IMPORT
