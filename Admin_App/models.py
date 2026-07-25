@@ -1680,8 +1680,11 @@ class ResaleResidentialProperty(models.Model):
         help_text="Automated unique serial lookup tracking tag"
     )
 
-    ############## Listed By Section ###############################
+    ############# Category Fields ###########################
+    listing_type = models.CharField(max_length=255, blank=True, null=True)
+    category = models.CharField(max_length=255, blank=True, null=True)
 
+    ############## Listed By Section ###############################
     listed_by_type = models.CharField(max_length=255, blank=True, null=True)
     assigned_to = models.CharField(max_length=255, blank=True, null=True)
     listed_by_id = models.CharField(max_length=255, blank=True, null=True)
@@ -1690,11 +1693,13 @@ class ResaleResidentialProperty(models.Model):
     listed_by_contact = models.CharField(max_length=255, blank=True, null=True)
     listed_by_role = models.CharField(max_length=255, blank=True, null=True)
 
+    property_unique_key = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    duplicate_count = models.PositiveIntegerField(default=0)
+    duplicate_group_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)   # <-- drives the brokerage label
 
     ############# Basic Information Section #############################
-
     property_title = models.CharField(max_length=255, blank=True, null=True)
-    property_type = models.CharField(max_length=255,blank=True,null=True) 
+    property_type = models.CharField(max_length=255, blank=True, null=True) 
     property_no = models.CharField(max_length=100, blank=True, null=True)
     society_type = models.CharField(max_length=100, blank=True, null=True)      
     wing_no = models.CharField(max_length=100, blank=True, null=True)      
@@ -1703,50 +1708,47 @@ class ResaleResidentialProperty(models.Model):
     property_age = models.CharField(max_length=100, blank=True, null=True)      
     facing_direction = models.CharField(max_length=100, blank=True, null=True)      
     occupancy_status = models.CharField(max_length=100, blank=True, null=True)      
+    floor_no = models.PositiveIntegerField(default=1, null=True, blank=True)  # ADD THIS FIELD
 
     ################## Property Measurements Section ###########################
-
-    builtup_area = models.DecimalField(max_digits=12, decimal_places=2)             
-    carpet_area = models.DecimalField(max_digits=12, decimal_places=2)             
-    plot_area = models.DecimalField(max_digits=12, decimal_places=2)             
+    super_builtup_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
+    builtup_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
+    carpet_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
+    plot_area = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)             
     building_configuration = models.CharField(max_length=100, blank=True, null=True)
-    total_floors = models.PositiveIntegerField(default=1)
+    total_floors = models.PositiveIntegerField(default=1, null=True, blank=True)
     brokerage_percentage = models.CharField(max_length=100, blank=True, null=True)
-    manual_brokerage = models.PositiveIntegerField(default=0)
+    manual_brokerage = models.PositiveIntegerField(default=0, null=True, blank=True)
 
     ################## Property Configuration Section ###########################
-
     bhk = models.CharField(max_length=100, blank=True, null=True)
-    bathrooms = models.IntegerField(default=0) 
-    balconies = models.IntegerField(default=0) 
-    covered_parking = models.IntegerField(default=0) 
+    bathrooms = models.IntegerField(default=0, null=True, blank=True) 
+    balconies = models.IntegerField(default=0, null=True, blank=True) 
+    covered_parking = models.IntegerField(default=0, null=True, blank=True) 
     open_parking = models.CharField(max_length=100, blank=True, null=True)
 
     ############# Legal and Pricing Section ##########################
-
-    no_of_owners = models.CharField(max_length=50,blank=True,null=True)   
-    ownership_status = models.CharField(max_length=50,blank=True,null=True)   
-    ownership_document_type = models.CharField(max_length=50,blank=True,null=True)   
-    title_clarity_status = models.CharField(max_length=50,blank=True,null=True)   
-    encumbrance_status = models.CharField(max_length=50,blank=True,null=True)   
-    property_loan = models.CharField(max_length=5,blank=True,null=True,default='no')   
+    no_of_owners = models.CharField(max_length=50, blank=True, null=True)   
+    ownership_status = models.CharField(max_length=50, blank=True, null=True)   
+    ownership_document_type = models.CharField(max_length=50, blank=True, null=True)   
+    title_clarity_status = models.CharField(max_length=50, blank=True, null=True)   
+    encumbrance_status = models.CharField(max_length=50, blank=True, null=True)   
+    property_loan = models.CharField(max_length=5, blank=True, null=True, default='no')   
     loan_amount = models.DecimalField(max_digits=14, decimal_places=2, null=True, blank=True)
-    existing_tenants = models.CharField(max_length=5, default='no',blank=True,null=True)         
+    existing_tenants = models.CharField(max_length=5, default='no', blank=True, null=True)         
     tenant_details = models.TextField(blank=True, null=True) 
-    any_legal_dispute = models.CharField(max_length=5, default='no',blank=True,null=True)
+    any_legal_dispute = models.CharField(max_length=5, default='no', blank=True, null=True)
     dispute_details = models.TextField(blank=True, null=True)  
-    government_tax = models.CharField(max_length=5, default='no',blank=True,null=True)
+    government_tax = models.CharField(max_length=5, default='no', blank=True, null=True)
     pending_tax_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    sanctioning_authority =  models.TextField(blank=True, null=True)
+    sanctioning_authority = models.TextField(blank=True, null=True)
 
     ################### Pricing Details ##############################
-
-    selling_price = models.DecimalField(max_digits=15, decimal_places=2)
+    selling_price = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     price_per_sqft = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) 
-    price_negotiable = models.CharField(max_length=5, default='yes')
+    price_negotiable = models.CharField(max_length=5, default='yes', blank=True, null=True)
 
-    ############# Ameneties and Facilities Section ############################ 
-
+    ############# Amenities and Facilities Section ############################ 
     nearby_facilities = models.TextField(blank=True, null=True) 
     amenities = models.TextField(blank=True, null=True)
     property_summary = models.TextField(blank=True, null=True)
@@ -1754,36 +1756,40 @@ class ResaleResidentialProperty(models.Model):
     user_description = models.TextField(blank=True, null=True)
     
     ################ Location Details Section #############################
-
-    city = models.CharField(max_length=100,blank=True,null=True)
-    locality = models.CharField(max_length=150,blank=True,null=True)
+    city = models.CharField(max_length=100, blank=True, null=True)
+    locality = models.CharField(max_length=150, blank=True, null=True)
     building_name = models.CharField(max_length=200, blank=True, null=True)
     property_landmark = models.CharField(max_length=200, blank=True, null=True)
     state = models.CharField(max_length=200, blank=True, null=True)
+    google_maps_link = models.CharField(max_length=200, blank=True, null=True)
+    pincode = models.CharField(max_length=200, blank=True, null=True)
+    latitude = models.CharField(max_length=200, blank=True, null=True)
+    longitude = models.CharField(max_length=200, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     
     ############## Property Images Docs and Videos Section ###########################
-
     floor_plan = models.ImageField(upload_to='properties/floor_plans/', null=True, blank=True) 
+    video_option = models.CharField(max_length=200, blank=True, null=True)
     property_video = models.FileField(upload_to='properties/videos/', null=True, blank=True)
+    property_video_link = models.CharField(max_length=200, blank=True, null=True)
     listed_elsewhere = models.CharField(max_length=150, blank=True, null=True)
     portal_name = models.CharField(max_length=150, blank=True, null=True)
 
     ############## Listing Uploaded By Section ############################
-
     uploaded_by_name = models.CharField(max_length=150, blank=True, null=True)
     uploaded_by_email = models.EmailField(blank=True, null=True)
     uploaded_by_contact = models.CharField(max_length=30, blank=True, null=True)
     uploaded_by_role = models.CharField(max_length=50, blank=True, null=True)
     upload_file_name = models.CharField(max_length=255, blank=True, null=True)
 
-    ############### Timestamp and other dettails ###########################
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    ############### Timestamp and other details ###########################
     is_deleted = models.BooleanField(default=False)
+    is_duplicate = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.CharField(max_length=150, null=True, blank=True)
+    deleted_by = models.CharField(max_length=150, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    listing_status = models.CharField(max_length=150, blank=True, null=True)
+    approval_status = models.CharField(max_length=150, blank=True, null=True)
 
     class Meta:
         verbose_name = 'Resale Residential Property'
@@ -1793,43 +1799,68 @@ class ResaleResidentialProperty(models.Model):
     def __str__(self):
         return f"{self.property_title or 'Property Block'} ({self.id})"
 
-   
+    # ═══════════════════════════════════════
+    # HELPER: CLEAN TEXT FIELDS
+    # ═══════════════════════════════════════
+    def _clean_text_field(self, value):
+        """Cleans list-like strings and returns a comma-separated string."""
+        if not value:
+            return ""
+        if isinstance(value, list):
+            return ", ".join(str(item).strip() for item in value if item)
+        if isinstance(value, str):
+            cleaned = value.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
+            if "," in cleaned:
+                return ", ".join(item.strip() for item in cleaned.split(",") if item.strip())
+            return cleaned.strip()
+        return str(value).strip()
 
+    from decimal import Decimal, InvalidOperation
 
+    def _fmt_amount(self, value):   
+        """Return the numeric value formatted with exactly 2 decimal places,
+        no thousands separators — matches how it's stored in the DB."""
+        if value is None or value == "":
+            return "0.00"
+        try:
+            return f"{Decimal(str(value)):.2f}"
+        except (InvalidOperation, ValueError, TypeError):
+            return str(value)
 
-        # ═══════════════════════════════════════
+    # ═══════════════════════════════════════
     # AUTO DESCRIPTION GENERATOR
     # ═══════════════════════════════════════
     def generate_auto_descriptions(self):
-        # Safely fetch variables with defaults
-        bhk_str = str(self.bhk).upper() if self.bhk else ""
-        p_type = str(self.property_type).capitalize() if self.property_type else "Property"
-        furnish = str(self.furnishing_type).lower() if self.furnishing_type else "well-maintained"
-        loc = str(self.locality).strip() if self.locality else "a prime location"
+        """Generates property summary and detailed description based on field data."""
+        
+        bhk_str = str(self.bhk) if self.bhk else ""
+        p_type = str(self.property_type) if self.property_type else "Property"
+        furnish = str(self.furnishing_status) if self.furnishing_status else "well-maintained"
+        loc = str(self.locality) if self.locality else "a prime location"
         city_str = f", {self.city}" if self.city else ""
         
-        try: price_val = int(float(str(self.expected_price or 0).strip()))
-        except: price_val = 0
+        try: 
+            price_val = self.selling_price or 0
+        except:
+            price_val = 0
 
         # -----------------------------------
-        # 1. SUMMARY TEXT (Always Regenerates)
+        # 1. SUMMARY TEXT
         # -----------------------------------
         summary = f"A premium {furnish} {bhk_str} {p_type} is available for sale in {loc}{city_str}. "
         
         if price_val > 0:
-            summary += f"Priced competitively at ₹{price_val:,}. "
+            summary += f"Priced competitively at ₹{self._fmt_amount(price_val)}. "
             
         if self.builtup_area:
-            area = str(self.builtup_area).rstrip('0').rstrip('.') if '.' in str(self.builtup_area) else str(self.builtup_area)
-            summary += f"It offers a spacious built-up area of {area} sq.ft. "
+            summary += f"It offers a spacious built-up area of {self._fmt_amount(self.builtup_area)} sq.ft. "
             
         summary += f"Set in a {self.society_type or 'secure'} environment, this home is ideal for families looking for comfort and convenience."
         
-        # Overwrite the field
         self.property_summary = summary.strip()
 
         # -----------------------------------
-        # 2. LONG DESCRIPTION (Always Regenerates)
+        # 2. LONG DESCRIPTION
         # -----------------------------------
         bhk_title = f"{bhk_str} {p_type}".strip()
         long_desc = f"<p>Upgrade your lifestyle with this beautifully designed <strong>{furnish} {bhk_title}</strong> located in the highly sought-after neighborhood of <strong>{loc}{city_str}</strong>.</p>"
@@ -1841,24 +1872,23 @@ class ResaleResidentialProperty(models.Model):
         long_desc += "<h3>Property Highlights:</h3><ul>"
         
         if self.builtup_area:
-            area = str(self.builtup_area).rstrip('0').rstrip('.') if '.' in str(self.builtup_area) else str(self.builtup_area)
-            carpet_str = f" (Carpet Area: {self.carpet_area} sq.ft.)" if self.carpet_area else ""
-            long_desc += f"<li><strong>Space & Dimensions:</strong> Features a generous built-up area of {area} sq.ft.{carpet_str}.</li>"
+            carpet_str = f" (Carpet Area: {self._fmt_amount(self.carpet_area)} sq.ft.)" if self.carpet_area else ""
+            long_desc += f"<li><strong>Space & Dimensions:</strong> Features a generous built-up area of {self._fmt_amount(self.builtup_area)} sq.ft.{carpet_str}</li>"
             
         if price_val > 0:
             neg_str = " (Negotiable)" if str(self.price_negotiable).lower() == 'yes' else ""
-            long_desc += f"<li><strong>Pricing:</strong> Offered at ₹{price_val:,}{neg_str}.</li>"
+            long_desc += f"<li><strong>Pricing:</strong> Offered at ₹{self._fmt_amount(price_val)}{neg_str}</li>"
             
-        long_desc += f"<li><strong>Condition & Age:</strong> The property is {furnish} and falls under the '{self.age_of_property or 'Standard'}' age bracket.</li>"
+        long_desc += f"<li><strong>Condition & Age:</strong> The property is {furnish} and falls under the '{self.property_age or 'Standard'}' age bracket.</li>"
         
-        if self.floor_no is not None and self.total_floors:
+        if hasattr(self, 'floor_no') and self.floor_no is not None and self.total_floors:
             long_desc += f"<li><strong>Floor Details:</strong> Comfortably positioned on floor {self.floor_no} of a {self.total_floors}-story building.</li>"
             
         if self.facing_direction:
-            long_desc += f"<li><strong>Vastu & Orientation:</strong> {self.facing_direction.capitalize()}-facing property, ensuring excellent natural light and ventilation.</li>"
+            long_desc += f"<li><strong>Vastu & Orientation:</strong> {self.facing_direction}-facing property, ensuring excellent natural light and ventilation.</li>"
             
-        if self.ownership_type:
-            long_desc += f"<li><strong>Ownership:</strong> {self.ownership_type.capitalize()} ownership title, ensuring a smooth transfer process.</li>"
+        if self.ownership_status:
+            long_desc += f"<li><strong>Ownership:</strong> {self.ownership_status} ownership title, ensuring a smooth transfer process.</li>"
             
         long_desc += "</ul>"
 
@@ -1871,57 +1901,49 @@ class ResaleResidentialProperty(models.Model):
                 long_desc += f"<li><strong>Balconies:</strong> {self.balconies} spacious balcony(s) offering pleasant views.</li>"
             if self.covered_parking or self.open_parking:
                 park_str = []
-                if self.covered_parking: park_str.append(f"{self.covered_parking} covered")
-                if self.open_parking: park_str.append(f"{self.open_parking} open")
+                if self.covered_parking: 
+                    park_str.append(f"{self.covered_parking} covered")
+                if self.open_parking: 
+                    park_str.append(f"{self.open_parking} open")
                 long_desc += f"<li><strong>Parking:</strong> Includes {' and '.join(park_str)} dedicated parking spot(s).</li>"
             long_desc += "</ul>"
 
         # --- Section C: Amenities & Location ---
-        if self.amenities:
-            amenities_str = ""
-            if isinstance(self.amenities, list):
-                amenities_str = ", ".join(str(a) for a in self.amenities)
-            elif isinstance(self.amenities, str):
-                amenities_str = str(self.amenities).replace("[", "").replace("]", "").replace("'", "").replace('"', "")
-            if amenities_str.strip():
-                long_desc += f"<h3>Lifestyle Amenities:</h3><p>Residents enjoy exclusive access to top-tier community facilities including: <strong>{amenities_str}</strong>.</p>"
+        amenities_str = self._clean_text_field(self.amenities)
+        if amenities_str.strip():
+            long_desc += f"<h3>Lifestyle Amenities:</h3><p>Residents enjoy exclusive access to top-tier community facilities including: <strong>{amenities_str}</strong>.</p>"
 
-        if self.nearby_facilities:
-            fac_str = ""
-            if isinstance(self.nearby_facilities, list):
-                fac_str = ", ".join(str(f) for f in self.nearby_facilities)
-            elif isinstance(self.nearby_facilities, str):
-                fac_str = str(self.nearby_facilities).replace("[", "").replace("]", "").replace("'", "").replace('"', "")
-            if fac_str.strip():
-                long_desc += f"<h3>Location Advantages:</h3><p>Strategically located with seamless connectivity to major hubs, schools, hospitals, and: <strong>{fac_str}</strong>.</p>"
+        facilities_str = self._clean_text_field(self.nearby_facilities)
+        if facilities_str.strip():
+            long_desc += f"<h3>Location Advantages:</h3><p>Strategically located with seamless connectivity to major hubs, schools, hospitals, and: <strong>{facilities_str}</strong>.</p>"
 
         long_desc += "<p>Don't miss this opportunity to secure your dream home. Contact us today to schedule a site visit and discuss further details!</p>"
 
-        # Overwrite the field
         self.property_description = long_desc
 
     # ═══════════════════════════════════════
     # SAVE METHOD
     # ═══════════════════════════════════════
     def save(self, *args, **kwargs):
-        # 1. Price Per Sq.Ft calculation using Decimal fields to preserve accuracy
-        if self.expected_price and self.builtup_area:
+        # 1. Price Per Sq.Ft calculation using Decimal fields
+        if self.selling_price and self.builtup_area:
             try:
                 area = Decimal(str(self.builtup_area))
-                price = Decimal(str(self.expected_price))
+                price = Decimal(str(self.selling_price))
                 if area > 0:
                     self.price_per_sqft = (price / area).quantize(Decimal('0.01'))
-            except (ValueError, TypeError, KeyError):
+            except (ValueError, TypeError, Decimal.InvalidOperation):
                 pass
 
         # 2. Automated Title Generation
         if not self.property_title:
-            bhk_string = self.bhk.upper() if self.bhk else ""
-            type_string = self.property_type.capitalize() if self.property_type else "Property"
+            bhk_string = str(self.bhk).upper() if self.bhk else ""
+            type_string = str(self.property_type).capitalize() if self.property_type else "Property"
             project_context = f" in {self.building_name}" if self.building_name else ""
-            location_context = f" at {self.locality}, {self.city}" if self.locality and self.city else ""
+            location_context = f" at {self.locality}" if self.locality else ""
+            city_context = f", {self.city}" if self.city else ""
             
-            constructed_title = f"Spacious {bhk_string} {type_string}{project_context}{location_context}"
+            constructed_title = f"Spacious {bhk_string} {type_string}{project_context}{location_context}{city_context}"
             self.property_title = constructed_title.strip()
 
         # 3. Trigger Auto Description Generation BEFORE saving
@@ -1933,80 +1955,96 @@ class ResaleResidentialProperty(models.Model):
         # 5. Dynamic Automated FAQ Engine Execution
         self.generate_auto_faqs()
 
-        # 2. Automated Title Generation
-       
-
+    # ═══════════════════════════════════════
+    # AUTO FAQ GENERATOR
+    # ═══════════════════════════════════════
     def generate_auto_faqs(self):
         """Dynamic programmatic asset compliance engine for residential properties."""
+        from .models import ResaleResidentialFAQ
+
         self.faqs.all().delete()
         faq_pool = []
 
-        try: price_val = int(float(str(self.expected_price or 0).strip()))
-        except: price_val = 0
-        try: loan_val = int(float(str(self.loan_amount or 0).strip()))
-        except: loan_val = 0
-        try: tax_val = int(float(str(self.pending_tax_amount or 0).strip()))
-        except: tax_val = 0
-        try: per_sqft_val = int(float(str(self.price_per_sqft or 0).strip()))
-        except: per_sqft_val = 0
+        price_val = self.selling_price or 0
+        loan_val = self.loan_amount or 0
+        tax_val = self.pending_tax_amount or 0
+        per_sqft_val = self.price_per_sqft or 0
 
         # FAQ 1: Financial & Valuation Structure
         if price_val > 0:
-            loan_str = f" A lingering loan structure of ₹{loan_val:,} is declared against the property asset." if self.loan_on_property == 'yes' else " The property is declared free from active banking or mortgage encumbrances."
-            tax_str = f" Outstanding municipal tax dues total ₹{tax_val:,}." if self.government_tax_dues == 'yes' else " No pending sovereign tax liabilities are declared."
-            brokerage_str = f" Professional commission applies via a system format of {self.brokerage_percentage or self.manual_brokerage or 'standard terms'}." if self.brokerage == 'yes' else " The pricing model avoids active external brokerage terms."
+            loan_str = f" A lingering loan structure of ₹{self._fmt_amount(loan_val)} is declared against the property asset." if str(self.property_loan).lower() == 'yes' else " The property is declared free from active banking or mortgage encumbrances."
+            tax_str = f" Outstanding municipal tax dues total ₹{self._fmt_amount(tax_val)}." if str(self.government_tax).lower() == 'yes' else " No pending sovereign tax liabilities are declared."
+            
+            brokerage_val = self.brokerage_percentage if self.brokerage_percentage else self.manual_brokerage
+            brokerage_str = f" Professional commission applies via a system format of '{brokerage_val}'." if brokerage_val else " The pricing model avoids active external brokerage terms."
             
             faq_pool.append({
-                "q": f"What is the total acquisition cost, financial status, and transactional framework for this {self.bhk} residential layout?",
-                "a": f"The strategic market valuation is established at ₹{price_val:,}, arriving at an estimated valuation metric of ₹{per_sqft_val:,} per sq.ft. The asset ownership confirms that price flexibility is: '{self.price_negotiable or 'No'}'.{loan_str}{tax_str}{brokerage_str}"
+                "question": f"What is the total acquisition cost, financial status, and transactional framework for this {self.bhk or 'residential'} layout?",
+                "answer": f"The strategic market valuation is established at ₹{self._fmt_amount(price_val)}, arriving at an estimated valuation metric of ₹{self._fmt_amount(per_sqft_val)} per sq.ft. The asset ownership confirms that price flexibility is: '{self.price_negotiable or 'No'}'.{loan_str}{tax_str}{brokerage_str}"
             })
 
         # FAQ 2: Architectural Spatial Profile & Inventory
         if self.builtup_area:
-            plot_str = f" alongside an expansive baseline plot layout tracking at {self.plot_area} sq.ft." if self.plot_area else "."
+            plot_str = f" alongside an expansive baseline plot layout tracking at {self._fmt_amount(self.plot_area)} sq.ft." if self.plot_area else "."
             faq_pool.append({
-                "q": "What are the structural measurement specifications and architectural interior configuration summaries?",
-                "a": f"The space introduces a premium built-up area of {self.builtup_area} sq.ft. matched to a high-efficiency liveable carpet operational space of {self.carpet_area} sq.ft.{plot_str} Internal room configurations trace out a structural {self.bhk} asset layout completed with {self.bathrooms} master/guest bathrooms and {self.balconies} exterior ventilation balconies."
+                "question": "What are the structural measurement specifications and architectural interior configuration summaries?",
+                "answer": f"The space introduces a premium built-up area of {self._fmt_amount(self.builtup_area)} sq.ft. matched to a high-efficiency liveable carpet operational space of {self._fmt_amount(self.carpet_area)} sq.ft.{plot_str} Internal room configurations trace out a structural {self.bhk or 'spacious'} asset layout completed with {self.bathrooms or 0} master/guest bathrooms and {self.balconies or 0} exterior ventilation balconies."
             })
 
         # FAQ 3: Property Logistics, Elevation & Essential Utilities
+        floor_info = f"floor level {self.floor_no}" if hasattr(self, 'floor_no') and self.floor_no else "a premium floor level"
+        total_floors_info = f"{self.total_floors}" if self.total_floors else "multiple"
+        facing_info = f"'{self.facing_direction or 'Standard Orientation'}'"
+        water_info = f"'{self.water_type or 'Municipal/Borewell'}'"
+        society_info = f"'{self.society_type or 'Gated Community'}'"
+        
         faq_pool.append({
-            "q": "What structural tiering, property orientation, and primary utility access lines service this residence?",
-            "a": f"This residential inventory is positioned on floor level {self.floor_no} within a comprehensive residential tower footprint rising to a total height of {self.total_floors} levels. The architectural layout faces the '{self.facing_direction or 'Standard Orientation'}' compass line. Local utilities confirm an integrated '{self.water_type or 'Municipal/Borewell'}' water grid integration, set within a contextually secure '{self.society_type or 'Gated Community'}' community format."
+            "question": "What structural tiering, property orientation, and primary utility access lines service this residence?",
+            "answer": f"This residential inventory is positioned on {floor_info} within a comprehensive residential tower footprint rising to a total height of {total_floors_info} levels. The architectural layout faces the {facing_info} compass line. Local utilities confirm an integrated {water_info} water grid integration, set within a contextually secure {society_info} community format."
         })
 
         # FAQ 4: Legal Framework, Historical Tenure & Existing Occupations
-        dispute_str = f" Note: Structural tracking records details regarding legal contest/disputes: '{self.dispute_details}'." if self.any_legal_dispute == 'yes' else " The real estate title passes complete risk screening with zero pending disputes or litigations."
-        tenant_str = f" The asset currently houses sitting occupants under terms: {self.tenant_details or 'Standard Tenancy'}." if self.existing_tenants == 'yes' else " The block is offered entirely vacant for seamless operational transition."
+        dispute_str = f" Note: Structural tracking records details regarding legal contest/disputes: '{self.dispute_details}'." if str(self.any_legal_dispute).lower() == 'yes' else " The real estate title passes complete risk screening with zero pending disputes or litigations."
+        tenant_str = f" The asset currently houses sitting occupants under terms: {self.tenant_details or 'Standard Tenancy'}." if str(self.existing_tenants).lower() == 'yes' else " The block is offered entirely vacant for seamless operational transition."
         
         faq_pool.append({
-            "q": "What regulatory ownership conditions, legal checks, and occupational timelines govern this block?",
-            "a": f"The legal ownership profile functions under a standard '{self.ownership_type or 'Freehold'}' deed register configuration, split across a multi-party listing headcount of {self.num_owners or 1} registered owner(s). Structural asset age tracks at '{self.age_of_property or 'New'}', with operational possession availability starting on immediate terms.{dispute_str}{tenant_str}"
+            "question": "What regulatory ownership conditions, legal checks, and occupational timelines govern this block?",
+            "answer": f"The legal ownership profile functions under a standard '{self.ownership_status or 'Freehold'}' deed register configuration, split across a multi-party listing headcount of {self.no_of_owners or 1} registered owner(s). Structural asset age tracks at '{self.property_age or 'New'}', with operational possession availability starting on immediate terms.{dispute_str}{tenant_str}"
         })
 
         # FAQ 5: Parking Distribution & Community Infrastructure
         if self.covered_parking or self.open_parking:
             faq_pool.append({
-                "q": "What vehicle allocations and parking spaces are registered to this specific layout?",
-                "a": f"The residential tracking matrix assigns a dedicated vehicle storage allowance, separating space variables into {self.covered_parking} secure covered parking bays and {self.open_parking} open common parking zones."
+                "question": "What vehicle allocations and parking spaces are registered to this specific layout?",
+                "answer": f"The residential tracking matrix assigns a dedicated vehicle storage allowance, separating space variables into {self.covered_parking or 0} secure covered parking bays and {self.open_parking or 'shared'} open common parking zones."
             })
 
         # FAQ 6: Geo-Location Framework & Feature Index
+        amenities_str = self._clean_text_field(self.amenities) or "Standard Features"
+        facilities_str = self._clean_text_field(self.nearby_facilities) or "Standard Locality Connections"
+        
         faq_pool.append({
-            "q": "Where is this asset located and what auxiliary amenities map to this residential zone?",
-            "a": f"The real estate asset is situated within the corporate geographic coordinates of {self.locality}, {self.city}, cataloged inside the development project known as '{self.building_name or 'Independent Premium Block'}'. Full postal logistics resolve to: {self.complete_address}. Integrated lifestyle assets contain: {self.amenities or 'Standard Features'}, matching local connectivity points of: {self.nearby_facilities or 'Standard Locality Connections'}."
+            "question": "Where is this asset located and what auxiliary amenities map to this residential zone?",
+            "answer": f"The real estate asset is situated within the corporate geographic coordinates of {self.locality or 'Premium Locality'}, {self.city or 'Metropolitan City'}, cataloged inside the development project known as '{self.building_name or 'Independent Premium Block'}'. Full postal logistics resolve to: {self.address or 'Contact for details'}. Integrated lifestyle assets contain: {amenities_str}, matching local connectivity points of: {facilities_str}."
         })
 
         # FAQ 7: Registry Audit & Management Verification Profile
         faq_pool.append({
-            "q": "Who represents this asset registry listing and what operational metadata marks its entry?",
-            "a": f"The primary asset title holder is validated under the registration index of {self.owner_name} ({self.residential_status or 'Resident'}), accessible via verified contact metrics: {self.owner_contact} / {self.owner_email}. System auditing records confirm deployment management by {self.uploaded_by_name or 'System Desk'} acting in the corporate capacity of {self.uploaded_by_role or 'Listing Administrator'}, tracking under reference ID {self.id}."
+            "question": "Who represents this asset registry listing and what operational metadata marks its entry?",
+            "answer": f"The primary asset title holder is validated under the registration index of {self.listed_by_name or 'Property Owner'} ({self.occupancy_status or 'Resident'}), accessible via verified contact metrics: {self.listed_by_contact or 'Contact Agent'} / {self.listed_by_email or 'info@property.com'}. System auditing records confirm deployment management by {self.uploaded_by_name or 'System Desk'} acting in the corporate capacity of {self.uploaded_by_role or 'Listing Administrator'}, tracking under reference ID {self.id}."
         })
 
         for item in faq_pool:
-            ResaleResidentialFAQ.objects.create(property=self, question=item["q"], answer=item["a"])
+            ResaleResidentialFAQ.objects.create(
+                property=self, 
+                question=item["question"], 
+                answer=item["answer"]
+            )
 
 
+# ═══════════════════════════════════════
+# FAQ MODEL
+# ═══════════════════════════════════════
 class ResaleResidentialFAQ(models.Model):
     property = models.ForeignKey(ResaleResidentialProperty, on_delete=models.CASCADE, related_name='faqs')
     question = models.CharField(max_length=255)
@@ -2016,16 +2054,50 @@ class ResaleResidentialFAQ(models.Model):
         return f"FAQ for Residential Property: {self.property.id}"
 
 
+# ═══════════════════════════════════════
+# PROPERTY IMAGE MODEL
+# ═══════════════════════════════════════
 class ResalePropertyImage(models.Model):
-    property = models.ForeignKey(ResaleResidentialProperty, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='properties/images/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    CATEGORY_CHOICES = [
+        ('exterior', 'Exterior / Building'),
+        ('living',   'Living / Dining'),
+        ('bedroom',  'Bedroom'),
+        ('kitchen',  'Kitchen'),
+        ('bathroom', 'Bathroom'),
+        ('balcony',  'Balcony'),
+        ('others',   'Others'),
+    ]
+    property = models.ForeignKey(ResaleResidentialProperty, on_delete=models.CASCADE, related_name="images")
+    image = models.ImageField(upload_to="resale_rent/")
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='others')
+    sequence_order = models.PositiveIntegerField(default=0)
 
-    def __str__(self):
-        return f"Image attachment for Residential Property: {self.property.id}"
+    class Meta:
+        ordering = ["category", "sequence_order"]
 
 
-############## Models End for Resale Resindential  Property  model ############################ 
+class ResaleResidentialVideo(models.Model):
+    SOURCE_CHOICES = [('uploaded', 'Manually Uploaded'), ('auto', 'Auto Generated Slideshow'),('rm_assisted', 'RM Assisted Link'),]
+    property = models.ForeignKey(ResaleResidentialProperty, on_delete=models.CASCADE, related_name="video")
+    video = models.FileField(upload_to="residential_resale/videos/")
+    video_url = models.URLField(null=True, blank=True)
+    source = models.CharField(max_length=100, choices=SOURCE_CHOICES, default='auto')
+    video_status = models.CharField(max_length=255, blank=True, null=True,default="Pending")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def youtube_thumbnail(self):
+        import re
+        if self.source == 'rm_assisted' and self.video_url:
+            match = re.search(
+                r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/shorts/)([A-Za-z0-9_-]{6,})',
+                self.video_url
+            )
+            if match:
+                return f"https://img.youtube.com/vi/{match.group(1)}/hqdefault.jpg"
+        return None
+
+
+############## Models End for Resale Resindential Property  model ################
 
 
 
@@ -2065,6 +2137,10 @@ class CommercialResaleProperty(models.Model):
     listed_by_contact = models.CharField(max_length=255, blank=True, null=True)
     listed_by_role = models.CharField(max_length=255, blank=True, null=True)
 
+    property_unique_key = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    duplicate_count = models.PositiveIntegerField(default=0)
+    duplicate_group_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)   # <-- drives the brokerage label
+
     ############ Basic Information Section #############################
 
     property_title = models.CharField(max_length=255, blank=True, null=True)
@@ -2072,9 +2148,8 @@ class CommercialResaleProperty(models.Model):
     property_category = models.CharField(max_length=50,blank=True,null=True)  
     property_no = models.CharField(max_length=100, blank=True, null=True) 
     occupancy_status = models.CharField(max_length=50,blank=True,null=True)
-    location_hub = models.CharField(max_length=50, blank=True, null=True)
     zone_type = models.CharField(max_length=50,blank=True,null=True)
-    location_hub = models.CharField(max_length=50,blank=True,null=True)
+    location_hub = models.CharField(max_length=50, blank=True, null=True)
     property_condition = models.CharField(max_length=50,blank=True,null=True)
     property_age = models.CharField(max_length=50,blank=True,null=True)
     furnishing_status = models.CharField(max_length=50,blank=True,null=True)
@@ -2082,6 +2157,7 @@ class CommercialResaleProperty(models.Model):
 
     ################# Area Measurements Section ##############################
 
+    super_builtup_area = models.DecimalField(max_digits=12, decimal_places=2,blank=True,null=True)
     builtup_area = models.DecimalField(max_digits=12, decimal_places=2,blank=True,null=True)
     carpet_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     plot_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
@@ -2090,13 +2166,14 @@ class CommercialResaleProperty(models.Model):
 
     no_staircases = models.PositiveIntegerField(default=0)
     passenger_lifts = models.PositiveIntegerField(default=0, blank=True, null=True)
+    service_lifts = models.PositiveIntegerField(default=0, blank=True, null=True)
     num_cabins = models.PositiveIntegerField(default=0, blank=True, null=True)
     meeting_rooms = models.PositiveIntegerField(blank=True, null=True)
     min_seats = models.PositiveIntegerField(blank=True, null=True)
     max_seats = models.PositiveIntegerField(default=0)
     private_parking = models.PositiveIntegerField(default=0, blank=True, null=True)
     public_parking = models.PositiveIntegerField(default=0, blank=True, null=True)
-    public_parking = models.PositiveIntegerField(default=0, blank=True, null=True)
+
     brokerage_percentage = models.CharField(max_length=100, blank=True, null=True)
     manual_brokerage = models.PositiveIntegerField(default=0)
 
@@ -2139,13 +2216,18 @@ class CommercialResaleProperty(models.Model):
     address = models.TextField(blank=True,null=True)
     property_landmark = models.CharField(max_length=100,blank=True,null=True)
     state = models.CharField(max_length=100,blank=True,null=True)
+    google_maps_link = models.CharField(max_length=100,blank=True,null=True)
+    latitude = models.CharField(max_length=100,blank=True,null=True)
+    longitude = models.CharField(max_length=100,blank=True,null=True)
 
     ############# Property Images Docs and Videos Sections #########################
 
-    floor_plan = models.ImageField(upload_to='commercial/floor_plans/', null=True, blank=True)
-    property_video = models.FileField(upload_to='commercial/videos/', blank=True, null=True)
-    listed_elsewhere = models.CharField(max_length=100,blank=True,null=True)
-    portal_name = models.CharField(max_length=100,blank=True,null=True)
+    floor_plan = models.ImageField(upload_to='commercial/floor_plans/', null=True, blank=True) 
+    video_option = models.CharField(max_length=200, blank=True, null=True)
+    property_video = models.FileField(upload_to='properties/videos/', null=True, blank=True)
+    property_video_link = models.CharField(max_length=200, blank=True, null=True)
+    listed_elsewhere = models.CharField(max_length=150, blank=True, null=True)
+    portal_name = models.CharField(max_length=150, blank=True, null=True)
 
     ############# Listing Uploaded By Section ############################
 
@@ -2156,13 +2238,13 @@ class CommercialResaleProperty(models.Model):
 
     ############# Timestamp and other details section ##########################
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
+    is_duplicate = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
-    upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    listing_status = models.CharField(max_length=150, blank=True, null=True)
+    approval_status = models.CharField(max_length=150, blank=True, null=True)
 
     class Meta:
         verbose_name = "Commercial Property"

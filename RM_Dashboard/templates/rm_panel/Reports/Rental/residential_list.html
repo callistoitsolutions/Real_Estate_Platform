@@ -778,7 +778,6 @@
         <div class="kpi-label">Rejected</div>
         <div class="kpi-desc c-down">Needs correction</div>
     </div>
-<<<<<<< HEAD
     <div class="kpi-card b-pink">
         <span class="badge-tag tag-new">NEW</span>
         <div class="kpi-icon ic-pink"><i class="fas fa-clone"></i></div>
@@ -793,9 +792,6 @@
         <div class="kpi-label">Unique Properties</div>
         <div class="kpi-desc c-up">No duplicate match</div>
     </div>
-=======
-   
->>>>>>> a758223 (changes made by bhumala 16-july-2026)
 </div>
 
     
@@ -924,7 +920,6 @@
         {% endfor %}
     </select>
 </div>
-<<<<<<< HEAD
 
 <div class="search-group">
     <label>LISTED BY ROLE</label>
@@ -986,54 +981,6 @@
         <option value="unique_only" {% if duplicate_query == 'unique_only' %}selected{% endif %}>Unique Only</option>
     </select>
 </div>
-=======
-
-<div class="search-group">
-    <label>LISTED BY ROLE</label>
-    <select name="listed_by" class="filter-input" onchange="this.form.submit()">
-        <option value="All Roles">All Roles</option>
-        {% for role in unique_listed_roles %}
-            <option value="{{ role }}" {% if listed_by_query == role %}selected{% endif %}>{{ role }}</option>
-        {% endfor %}
-    </select>
-</div>
-
-
-
-<div class="search-group">
-    <label>BUDGET</label>
-    <select name="budget" class="filter-input" onchange="this.form.submit()">
-        <option value="All Budgets">All Budgets</option>
-        <option value="under_10k" {% if budget_query == 'under_10k' %}selected{% endif %}>Under ₹10,000</option>
-        <option value="10k_25k" {% if budget_query == '10k_25k' %}selected{% endif %}>₹10,000 - ₹25,000</option>
-        <option value="25k_50k" {% if budget_query == '25k_50k' %}selected{% endif %}>₹25,000 - ₹50,000</option>
-        <option value="above_50k" {% if budget_query == 'above_50k' %}selected{% endif %}>Above ₹50,000</option>
-    </select>
-</div>
-
-
-<div class="search-group">
-    <label>LISTING STATUS</label>
-    <select name="listing_status" class="filter-input" onchange="this.form.submit()">
-        <option value="All Status">All Status</option>
-        {% for ls in unique_listing_status %}
-            <option value="{{ ls }}" {% if listing_status_query == ls %}selected{% endif %}>{{ ls }}</option>
-        {% endfor %}
-    </select>
-</div>
-
-<div class="search-group">
-    <label>APPROVAL STATUS</label>
-    <select name="approval_status" class="filter-input" onchange="this.form.submit()">
-        <option value="All Approval">All Approval</option>
-        {% for a in unique_approval_status %}
-            <option value="{{ a }}" {% if approval_status_query == a %}selected{% endif %}>{{ a }}</option>
-        {% endfor %}
-    </select>
-</div>
-
-
->>>>>>> a758223 (changes made by bhumala 16-july-2026)
 
     <div class="search-actions" style="margin-top:auto; padding-bottom:2px;">
         <button type="submit" style="display:none;"></button>
@@ -1083,13 +1030,9 @@
 {% if approval_status_query and approval_status_query != 'All Approval' %}
     <span class="active-tag">Approval: {{ approval_status_query }} <i class="fas fa-times" onclick="clearFilterSelect('approval_status')"></i></span>
 {% endif %}
-<<<<<<< HEAD
 {% if duplicate_query and duplicate_query != 'All' %}
     <span class="active-tag">Duplicates: {{ duplicate_query }} <i class="fas fa-times" onclick="clearFilterSelect('duplicate')"></i></span>
 {% endif %}
-=======
-
->>>>>>> a758223 (changes made by bhumala 16-july-2026)
         </div>
     </div>
 </form>
@@ -1161,21 +1104,12 @@
                 <th>Property Id</th>
                 <th>Images</th>
                 
-<<<<<<< HEAD
               
               
                 
                 <!-- NEW: Duplicate Tracking -->
               
                 <th>Listed By Type</th>
-=======
-              
-              
-                
-                <!-- NEW: Duplicate Tracking -->
-              
-              
->>>>>>> a758223 (changes made by bhumala 16-july-2026)
                 <th>Listed By Id</th>
                 <th>Listed By Name</th>
                 <th>Listed By Email</th>
@@ -1340,11 +1274,7 @@
   
 
     <!-- Listed By Details -->
-<<<<<<< HEAD
     <td>{{ prop.listed_by_type|default:"—" }}</td>
-=======
-    
->>>>>>> a758223 (changes made by bhumala 16-july-2026)
     <td>{{ prop.listed_by_id|default:"—" }}</td>
     <td>{{ prop.listed_by_name|default:"—" }}</td>
     <td>{{ prop.listed_by_email|default:"—" }}</td>
@@ -1491,11 +1421,7 @@
     <td style="position:sticky;right:0;background:white;z-index:1;">
         <div style="display:flex;gap:8px;">
             <button class="btn-action btn-view"
-<<<<<<< HEAD
-                    onclick="window.location.href='{% url 'rental_residential_view' prop.id %}'">
-=======
                     onclick="window.location.href='{% url 'rental_residential_view_rm' prop.id %}'">
->>>>>>> a758223 (changes made by bhumala 16-july-2026)
                 <i class="fas fa-eye"></i>
             </button>
 
@@ -2155,11 +2081,7 @@ async function submitImport() {
 
     try {
         // 2. Fetch data from backend
-<<<<<<< HEAD
-        const response = await fetch("{% url 'import_residential_excel' %}", {
-=======
         const response = await fetch("{% url 'import_residential_excel_rm' %}", {
->>>>>>> a758223 (changes made by bhumala 16-july-2026)
             method: 'POST',
             headers: { 'X-CSRFToken': '{{ csrf_token }}' },
             body: formData

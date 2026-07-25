@@ -79,6 +79,8 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
+from openpyxl.styles import Font, PatternFill, Side, Border, Alignment, Protection
+from Admin_App.models import *
 
 ########### Crime Officer Views#######
 
@@ -2649,7 +2651,7 @@ def commercial_list(request):
     affordable_properties_count = all_props.filter(expected_rent__lt=25000).count()
     short_lease_count           = all_props.filter(lockin_period__icontains='6').count()
     long_lease_count            = all_props.filter(lockin_period__icontains='12').count()
-    with_owner_count            = all_props.exclude(owner_name__isnull=True).exclude(owner_name='').count()
+    with_owner_count            = all_props.exclude(owne__isnull=True).exclude(owner_name='').count()
     city_count                  = (all_props.exclude(city__isnull=True).exclude(city='')
                                    .values('city').distinct().count())
     try:
@@ -3679,6 +3681,98 @@ def Add_RM(request):
 
 ########### Views start for data upload functtionality via excel ##############
 
+RM_HEADER_ALIASES = {
+    # Added the exact headers from your uploaded file
+    'name': ('rm name', 'name'),
+    'email': ('rm email (login id)', 'rm email', 'email address', 'email'),
+    'phone': ('phone', 'phone number', 'mobile'),
+    'state': ('state',),
+    'city': ('city',),
+    'address': ('address',),
+    'password': ('password',),
+    'role': ('role',),
+    'register_date': ('register date',),
+    'register_time': ('register time',),
+    'user_id': ('user id',),
+}
+
+def _normalize_rm_header(value):
+    if value is None:
+        return ''
+    # The .replace('*', '') strips out the asterisks before comparing!
+    return str(value).replace('*', '').strip().lower()
+
+
+def _detect_rm_excel_layout(sheet):
+    """Detect header row and column map for template or list-export Excel files."""
+    for row_idx in range(1, 8):
+        row_values = [cell.value for cell in sheet[row_idx]]
+        normalized = [_normalize_rm_header(v) for v in row_values]
+
+        col_map = {}
+        for col_idx, header in enumerate(normalized):
+            if not header:
+                continue
+            for field, aliases in RM_HEADER_ALIASES.items():
+                if header in aliases:
+                    col_map[field] = col_idx
+                    break
+
+        if 'name' in col_map and ('phone' in col_map or 'email' in col_map):
+            return row_idx, col_map
+
+    return None, None
+
+
+def _rm_cell_value(row, col_map, field):
+    idx = col_map.get(field)
+    if idx is None or idx >= len(row):
+        return None
+    return row[idx]
+
+
+def _parse_rm_register_datetime(register_date_value, register_time_value):
+    from datetime import time as dt_time
+
+    register_date = datetime.now().date()
+    register_time = datetime.now().time()
+
+    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
+        try:
+            if isinstance(register_date_value, (date, datetime)):
+                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
+            else:
+                date_str = str(register_date_value).strip()
+                if ',' in date_str:
+                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
+                elif '-' in date_str:
+                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                elif '/' in date_str:
+                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
+        except Exception:
+            pass
+
+    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
+        try:
+            if isinstance(register_time_value, dt_time):
+                register_time = register_time_value
+            else:
+                time_str = str(register_time_value).strip()
+                if ':' in time_str:
+                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
+                    try:
+                        register_time = datetime.strptime(time_str, '%I:%M').time()
+                    except Exception:
+                        try:
+                            register_time = datetime.strptime(time_str, '%H:%M').time()
+                        except Exception:
+                            pass
+        except Exception:
+            pass
+
+    return register_date, register_time
+
+
 @csrf_exempt
 def Rm_Data(request):
     if request.method == 'POST':
@@ -3696,41 +3790,73 @@ def Rm_Data(request):
             error_details = []
             
             FIXED_ROLE = "Relationship Manager"
+
+            header_row, col_map = _detect_rm_excel_layout(sheet)
+            if not col_map:
+                return JsonResponse({
+                    "status": "0",
+                    "msg": "Could not read Excel headers. Use the sample template or re-upload the exported RM list file.",
+                })
             
-            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+            # Force skip the very first row under the headers
+            
+            
+            for row_idx, row in enumerate(
+                sheet.iter_rows(min_row=header_row + 1, values_only=True),
+                start=header_row + 1,
+            ):
                 try:
                     # Skip empty rows
                     if not row or all(cell is None or str(cell).strip() == '' for cell in row):
                         continue
                     
+                    # ==========================================
+                    # 1. DYNAMIC EXTRACTION (Fixes the Column Mismatch!)
+                    # ==========================================
+                    user_name = _rm_cell_value(row, col_map, 'name')
+                    user_email = _rm_cell_value(row, col_map, 'email')
                     
-                    # Extract values with correct column indices
-                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
-                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
-                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
-                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
-                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    # ==========================================
+                    # 2. DUMMY DATA BLOCKER
+                    # ==========================================
+                    check_email = str(user_email).strip().lower() if user_email else ""
+                    if check_email in ['john.doe@example.com', 'sample@do-not-upload.com']:
+                        continue 
+
+                    # ==========================================
+                    # 3. STRICT ROLE VALIDATOR
+                    # ==========================================
+                    user_role_excel = _rm_cell_value(row, col_map, 'role')
+                    if user_role_excel and str(user_role_excel).strip() not in ['', '---', '-']:
+                        excel_role = str(user_role_excel).strip().title()
+                        if excel_role not in [FIXED_ROLE, "Rm", "Relationshipmanager"]:
+                            error_count += 1
+                            error_details.append(
+                                f"Row {row_idx}: Skipped {user_name or 'Unknown'}. You cannot upload role '{excel_role}'."
+                            )
+                            continue
+
+                    user_phone = _rm_cell_value(row, col_map, 'phone')
+                    user_state = _rm_cell_value(row, col_map, 'state')
+                    user_city = _rm_cell_value(row, col_map, 'city')
+                    user_address = _rm_cell_value(row, col_map, 'address')
+                    user_password = _rm_cell_value(row, col_map, 'password')
                     
-                    # Clean and validate user_name (from Name column - index 5)
+                    # Clean and validate user_name
                     if user_name and str(user_name).strip() not in ['', '---', '-']:
                         user_name = str(user_name).strip()
                     else:
                         user_name = None
                     
-                    # Clean and validate user_email (from Email column - index 6)
+                    # Clean and validate user_email
                     if user_email and str(user_email).strip() not in ['', '---', '-']:
                         user_email = str(user_email).strip()
                     else:
                         user_email = None
                     
-                    if not user_name or not user_phone:
+                    if not user_name or not user_phone or not user_email or not user_state or not user_city or not user_address:
                         error_count += 1
-                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
+                        error_details.append(f"Row {row_idx}: Missing Details (Name: {user_name}, Phone: {user_phone}, Email: {user_email}, State: {user_state}, City: {user_city}, Address: {user_address})")
                         continue
                     
                     # Clean phone
@@ -3739,68 +3865,38 @@ def Rm_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+
+                    # ==========================================
+                    # 4. SMART DUPLICATE CHECKER (Fixes the Email Crash!)
+                    # ==========================================
+                    # Make sure you have: from django.db.models import Q 
+                    # at the very top of your file!
+                    from django.db.models import Q 
                     
-                    # Register date: Today's date as default
-                    register_date = datetime.now().date()
-                    register_time = datetime.now().time()
+                    user_query = Q(user_phone=user_phone)
+                    if user_email:
+                        user_query |= Q(user_email__iexact=user_email)
                     
-                    # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_date_value, (date, datetime)):
-                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
-                            else:
-                                date_str = str(register_date_value).strip()
-                                if ',' in date_str:
-                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
-                                elif '-' in date_str:
-                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                                elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
-                        except:
-                            pass
-                    
-                    # If time provided in Excel, try to parse it
-                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_time_value, time):
-                                register_time = register_time_value
-                            else:
-                                time_str = str(register_time_value).strip()
-                                if ':' in time_str:
-                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
-                                    try:
-                                        register_time = datetime.strptime(time_str, '%I:%M').time()
-                                    except:
-                                        try:
-                                            register_time = datetime.strptime(time_str, '%H:%M').time()
-                                        except:
-                                            pass
-                        except:
-                            pass
-                    
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    existing_user = User_Details.objects.filter(user_query, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
+                        # --- UPDATE MODE ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
-                        existing_user.user_role = FIXED_ROLE
                         existing_user.user_state = user_state
                         existing_user.user_city = user_city
                         existing_user.user_address = user_address
-                        existing_user.user_password = user_password
-                        existing_user.user_register_date = register_date
-                        existing_user.user_register_time = register_time
+                        if user_password and user_password != 'default123':
+                            existing_user.user_password = user_password
                         existing_user.save()
                         
                         success_count += 1
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
+                        # --- CREATE MODE ---
                         new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
@@ -3810,15 +3906,13 @@ def Rm_Data(request):
                             user_city=user_city,
                             user_address=user_address,
                             user_password=user_password,
-                            user_register_date=register_date,
-                            user_register_time=register_time
+                            user_register_date=datetime.today(),
+                            user_register_time=datetime.now()
                         )
                         
-                        # Generate USER_ID: EF-{ID}-{YY}
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        new_user.user_id = user_id
+                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -3828,18 +3922,155 @@ def Rm_Data(request):
                     error_details.append(f"Row {row_idx}: {str(e)}")
                     print(f"Error at row {row_idx}: {str(e)}")
             
-            return JsonResponse({
-                "status": "1",
-                "msg": f"Successfully imported {success_count} Relationship Managers. Failed: {error_count}",
-                "success_count": success_count,
-                "error_count": error_count,
-                "error_details": error_details[:10]
-            })
+            # ==========================================
+            # SMART FINAL RESPONSE
+            # ==========================================
+            if success_count == 0 and error_count > 0:
+                # 1. Total Failure (No rows saved)
+                # Combine the first few errors into a readable string
+                error_text = " | ".join(error_details[:3])
+                return JsonResponse({
+                    "status": "0", # Send an error status to trigger the frontend error alert!
+                    "msg": f"Import failed! {error_text}",
+                    "error_details": error_details
+                })
+                
+            elif success_count > 0 and error_count > 0:
+                # 2. Partial Success (Some saved, some failed)
+                error_text = " | ".join(error_details[:3])
+                return JsonResponse({
+                    "status": "1", 
+                    "msg": f"Imported {success_count} RMs. Skipped {error_count} rows. Details: {error_text}",
+                    "error_details": error_details
+                })
+                
+            else:
+                # 3. Total Success (Everything saved perfectly)
+                return JsonResponse({
+                    "status": "1",
+                    "msg": f"Successfully imported {success_count} Relationship Managers!",
+                    "error_details": []
+                })
             
         except Exception as e:
             return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
     
     return JsonResponse({"status": "0", "msg": "Invalid request method"})
+
+
+############ Views start for download sample excel for rm #####################
+
+def download_rm_sample_excel(request):
+    """Download sample Excel template matching add_rm.html form label sequence."""
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return redirect('login')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "RM Template"
+
+    sections = [
+        ("Step 1: Personal Information", 1, 3),
+        ("Step 2: Location Details", 4, 6),
+        ("Step 3: Account Security", 7, 8),
+    ]
+    headers = [
+        "Name *", "Email Address *", "Phone Number *",
+        "State *", "City *", "Address *",
+        "Password *", "Role",
+    ]
+    sample_row = [
+        "(DELETE THIS ROW) John Doe", 
+        "sample@do-not-upload.com", 
+        "0000000000",
+        "Maharashtra", 
+        "Mumbai", 
+        "123 Sample Street",
+        "password123",  
+        "Relationship Manager",
+    ]
+
+    title_font = Font(name="Segoe UI", size=12, bold=True, color="FFFFFF")
+    section_font = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+    header_font = Font(name="Segoe UI", size=10, bold=True, color="1E293B")
+    sample_font = Font(name="Segoe UI", size=10, color="1E3A5F")
+    title_fill = PatternFill(start_color="667EEA", end_color="667EEA", fill_type="solid")
+    section_fill = PatternFill(start_color="764BA2", end_color="764BA2", fill_type="solid")
+    header_fill = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
+    sample_fill = PatternFill(start_color="EFF6FF", end_color="EFF6FF", fill_type="solid")
+    thin_border = Side(border_style="thin", color="CBD5E1")
+    cell_border = Border(left=thin_border, right=thin_border, top=thin_border, bottom=thin_border)
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    title_cell = ws.cell(row=1, column=1, value="RM Import Template")
+    title_cell.font = title_font
+    title_cell.fill = title_fill
+    title_cell.alignment = center_align
+    title_cell.border = cell_border
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(headers))
+    ws.row_dimensions[1].height = 28
+
+    for title, start_col, end_col in sections:
+        cell = ws.cell(row=2, column=start_col, value=title)
+        cell.font = section_font
+        cell.fill = section_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+        if start_col != end_col:
+            ws.merge_cells(start_row=2, start_column=start_col, end_row=2, end_column=end_col)
+            for col in range(start_col + 1, end_col + 1):
+                ws.cell(row=2, column=col).fill = section_fill
+                ws.cell(row=2, column=col).border = cell_border
+    ws.row_dimensions[2].height = 28
+
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=3, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[3].height = 32
+
+    for col_idx, value in enumerate(sample_row, start=1):
+        cell = ws.cell(row=4, column=col_idx, value=value)
+        cell.font = sample_font
+        cell.fill = sample_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[4].height = 24
+
+    column_widths = [18, 24, 16, 14, 14, 28, 16, 18, 18, 22]
+    for idx, width in enumerate(column_widths, start=1):
+        ws.column_dimensions[get_column_letter(idx)].width = width
+
+    # ==========================================
+    # NEW: SHEET PROTECTION (READ-ONLY ROWS 1-4)
+    # ==========================================
+    # 1. Turn on sheet protection with a password so testers can't easily unprotect it
+    ws.protection.sheet = True
+    ws.protection.password = "admin123" 
+
+    # 2. Excel locks ALL cells by default. We must UNLOCK rows 5 to 5000 
+    # so users can actually type their data in those empty rows.
+    unlocked = Protection(locked=False)
+    for row in range(5, 5000):
+        for col in range(1, len(headers) + 1):
+            ws.cell(row=row, column=col).protection = unlocked
+    # ==========================================
+
+    ws.freeze_panes = "A5"
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="RM_Import_Template.xlsx"'
+    wb.save(response)
+    return response
+
+
+############## Views end for download sample excel for rm #####################
+
 
 ########## Views end for data upload functionality via excel #######################
 
@@ -3909,7 +4140,13 @@ def User_Ajax(request):
         elif User_Details.objects.filter(user_email=data['user_email']).exists():
             return JsonResponse({"status":"0", "msg" : f"User with this email address already exists"})
         else:
-            User_Details.objects.create(**data)
+            current_year = datetime.now().year
+            year_suffix = str(current_year)[-2:]
+            new_user = User_Details.objects.create(**data)
+            user_id = f"EF-{new_user.id}-{year_suffix}"
+            new_user.user_id = user_id
+            new_user.save()
+
             return JsonResponse({"status":"1", "msg" : f"User Details added successfully"})
 
     # UPDATE MODE
@@ -4057,6 +4294,58 @@ def Add_Landlord(request):
 
 ########### Views start for upload landlord data functionality via excel ###############
 
+LANDLORD_HEADER_ALIASES = {
+    # Added the exact headers from your uploaded file
+    'name': ('landlord name', 'name'),
+    'email': ('landlord email (login id)', 'landlord email', 'email address', 'email'),
+    'phone': ('phone', 'phone number', 'mobile'),
+    'state': ('state',),
+    'city': ('city',),
+    'address': ('address',),
+    'password': ('password',),
+    'role': ('role',),
+    'register_date': ('register date',),
+    'register_time': ('register time',),
+    'user_id': ('user id',),
+}
+
+def _normalize_landlord_header(value):
+    if value is None:
+        return ''
+    # The .replace('*', '') strips out the asterisks before comparing!
+    return str(value).replace('*', '').strip().lower()
+
+
+def _detect_landlord_excel_layout(sheet):
+    """Detect header row and column map for template or list-export Excel files."""
+    for row_idx in range(1, 8):
+        row_values = [cell.value for cell in sheet[row_idx]]
+        normalized = [_normalize_landlord_header(v) for v in row_values]
+
+        col_map = {}
+        for col_idx, header in enumerate(normalized):
+            if not header:
+                continue
+            for field, aliases in LANDLORD_HEADER_ALIASES.items():
+                if header in aliases:
+                    col_map[field] = col_idx
+                    break
+
+        if 'name' in col_map and ('phone' in col_map or 'email' in col_map):
+            return row_idx, col_map
+
+    return None, None
+
+
+def _landlord_cell_value(row, col_map, field):
+    idx = col_map.get(field)
+    if idx is None or idx >= len(row):
+        return None
+    return row[idx]
+
+
+
+
 @csrf_exempt
 def Landlord_Data(request):
     if request.method == 'POST':
@@ -4074,41 +4363,73 @@ def Landlord_Data(request):
             error_details = []
             
             FIXED_ROLE = "Landlord"
+
+            header_row, col_map = _detect_landlord_excel_layout(sheet)
+            if not col_map:
+                return JsonResponse({
+                    "status": "0",
+                    "msg": "Could not read Excel headers. Use the sample template or re-upload the exported Landlord list file.",
+                })
             
-            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+            # Force skip the very first row under the headers
+            
+            
+            for row_idx, row in enumerate(
+                sheet.iter_rows(min_row=header_row + 1, values_only=True),
+                start=header_row + 1,
+            ):
                 try:
                     # Skip empty rows
                     if not row or all(cell is None or str(cell).strip() == '' for cell in row):
                         continue
-                
                     
-                    # Extract values with correct column indices
-                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
-                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
-                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
-                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
-                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    # ==========================================
+                    # 1. DYNAMIC EXTRACTION (Fixes the Column Mismatch!)
+                    # ==========================================
+                    user_name = _landlord_cell_value(row, col_map, 'name')
+                    user_email = _landlord_cell_value(row, col_map, 'email')
                     
-                    # Clean and validate user_name (from Name column - index 5)
+                    # ==========================================
+                    # 2. DUMMY DATA BLOCKER
+                    # ==========================================
+                    check_email = str(user_email).strip().lower() if user_email else ""
+                    if check_email in ['john.doe@example.com', 'sample@do-not-upload.com']:
+                        continue 
+
+                    # ==========================================
+                    # 3. STRICT ROLE VALIDATOR
+                    # ==========================================
+                    user_role_excel = _landlord_cell_value(row, col_map, 'role')
+                    if user_role_excel and str(user_role_excel).strip() not in ['', '---', '-']:
+                        excel_role = str(user_role_excel).strip().title()
+                        if excel_role not in [FIXED_ROLE,  "landlord"]:
+                            error_count += 1
+                            error_details.append(
+                                f"Row {row_idx}: Skipped {user_name or 'Unknown'}. You cannot upload role '{excel_role}'."
+                            )
+                            continue
+
+                    user_phone = _landlord_cell_value(row, col_map, 'phone')
+                    user_state = _landlord_cell_value(row, col_map, 'state')
+                    user_city = _landlord_cell_value(row, col_map, 'city')
+                    user_address = _landlord_cell_value(row, col_map, 'address')
+                    user_password = _landlord_cell_value(row, col_map, 'password')
+                    
+                    # Clean and validate user_name
                     if user_name and str(user_name).strip() not in ['', '---', '-']:
                         user_name = str(user_name).strip()
                     else:
                         user_name = None
                     
-                    # Clean and validate user_email (from Email column - index 6)
+                    # Clean and validate user_email
                     if user_email and str(user_email).strip() not in ['', '---', '-']:
                         user_email = str(user_email).strip()
                     else:
                         user_email = None
                     
-                    if not user_name or not user_phone:
+                    if not user_name or not user_phone or not user_email or not user_state or not user_city or not user_address:
                         error_count += 1
-                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
+                        error_details.append(f"Row {row_idx}: Missing Details (Name: {user_name}, Phone: {user_phone}, Email: {user_email}, State: {user_state}, City: {user_city}, Address: {user_address})")
                         continue
                     
                     # Clean phone
@@ -4117,68 +4438,38 @@ def Landlord_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+
+                    # ==========================================
+                    # 4. SMART DUPLICATE CHECKER (Fixes the Email Crash!)
+                    # ==========================================
+                    # Make sure you have: from django.db.models import Q 
+                    # at the very top of your file!
+                    from django.db.models import Q 
                     
-                    # Register date: Today's date as default
-                    register_date = datetime.now().date()
-                    register_time = datetime.now().time()
+                    user_query = Q(user_phone=user_phone)
+                    if user_email:
+                        user_query |= Q(user_email__iexact=user_email)
                     
-                    # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_date_value, (date, datetime)):
-                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
-                            else:
-                                date_str = str(register_date_value).strip()
-                                if ',' in date_str:
-                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
-                                elif '-' in date_str:
-                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                                elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
-                        except:
-                            pass
-                    
-                    # If time provided in Excel, try to parse it
-                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_time_value, time):
-                                register_time = register_time_value
-                            else:
-                                time_str = str(register_time_value).strip()
-                                if ':' in time_str:
-                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
-                                    try:
-                                        register_time = datetime.strptime(time_str, '%I:%M').time()
-                                    except:
-                                        try:
-                                            register_time = datetime.strptime(time_str, '%H:%M').time()
-                                        except:
-                                            pass
-                        except:
-                            pass
-                    
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    existing_user = User_Details.objects.filter(user_query, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
+                        # --- UPDATE MODE ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
-                        existing_user.user_role = FIXED_ROLE
                         existing_user.user_state = user_state
                         existing_user.user_city = user_city
                         existing_user.user_address = user_address
-                        existing_user.user_password = user_password
-                        existing_user.user_register_date = register_date
-                        existing_user.user_register_time = register_time
+                        if user_password and user_password != 'default123':
+                            existing_user.user_password = user_password
                         existing_user.save()
                         
                         success_count += 1
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
+                        # --- CREATE MODE ---
                         new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
@@ -4188,15 +4479,13 @@ def Landlord_Data(request):
                             user_city=user_city,
                             user_address=user_address,
                             user_password=user_password,
-                            user_register_date=register_date,
-                            user_register_time=register_time
+                            user_register_date=datetime.today(),
+                            user_register_time=datetime.now()
                         )
                         
-                        # Generate USER_ID: EF-{ID}-{YY}
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        new_user.user_id = user_id
+                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -4206,13 +4495,35 @@ def Landlord_Data(request):
                     error_details.append(f"Row {row_idx}: {str(e)}")
                     print(f"Error at row {row_idx}: {str(e)}")
             
-            return JsonResponse({
-                "status": "1",
-                "msg": f"Successfully imported {success_count} Landlords. Failed: {error_count}",
-                "success_count": success_count,
-                "error_count": error_count,
-                "error_details": error_details[:10]
-            })
+            # ==========================================
+            # SMART FINAL RESPONSE
+            # ==========================================
+            if success_count == 0 and error_count > 0:
+                # 1. Total Failure (No rows saved)
+                # Combine the first few errors into a readable string
+                error_text = " | ".join(error_details[:3])
+                return JsonResponse({
+                    "status": "0", # Send an error status to trigger the frontend error alert!
+                    "msg": f"Import failed! {error_text}",
+                    "error_details": error_details
+                })
+                
+            elif success_count > 0 and error_count > 0:
+                # 2. Partial Success (Some saved, some failed)
+                error_text = " | ".join(error_details[:3])
+                return JsonResponse({
+                    "status": "1", 
+                    "msg": f"Imported {success_count} Landlords. Skipped {error_count} rows. Details: {error_text}",
+                    "error_details": error_details
+                })
+                
+            else:
+                # 3. Total Success (Everything saved perfectly)
+                return JsonResponse({
+                    "status": "1",
+                    "msg": f"Successfully imported {success_count} Landlords!",
+                    "error_details": []
+                })
             
         except Exception as e:
             return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
@@ -4220,6 +4531,127 @@ def Landlord_Data(request):
     return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 ############ Views end for upload landlord data functionality via excel #######
+
+
+########### Viewss start for download sample data for landlord ##################
+
+def download_landlord_sample_excel(request):
+    """Download sample Excel template matching add_rm.html form label sequence."""
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return redirect('login')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Landlord Template"
+
+    sections = [
+        ("Step 1: Personal Information", 1, 3),
+        ("Step 2: Location Details", 4, 6),
+        ("Step 3: Account Security", 7, 8),
+    ]
+    headers = [
+        "Name *", "Email Address *", "Phone Number *",
+        "State *", "City *", "Address *",
+        "Password *", "Role",
+    ]
+    sample_row = [
+        "(DELETE THIS ROW) John Doe", 
+        "sample@do-not-upload.com", 
+        "0000000000",
+        "Maharashtra", 
+        "Mumbai", 
+        "123 Sample Street",
+        "password123",  
+        "Landlord",
+    ]
+
+    title_font = Font(name="Segoe UI", size=12, bold=True, color="FFFFFF")
+    section_font = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+    # Swapped dark blue-grays for neutral charcoal/dark grays for readability
+    header_font = Font(name="Segoe UI", size=10, bold=True, color="1F2937") 
+    sample_font = Font(name="Segoe UI", size=10, color="374151") 
+    
+    # Switched to Emerald Green and Deep Teal for the Landlord theme
+    title_fill = PatternFill(start_color="059669", end_color="059669", fill_type="solid") 
+    section_fill = PatternFill(start_color="0F766E", end_color="0F766E", fill_type="solid") 
+    
+    # Softened the header and sample row backgrounds to a very clean light gray
+    header_fill = PatternFill(start_color="F3F4F6", end_color="F3F4F6", fill_type="solid")
+    sample_fill = PatternFill(start_color="F9FAFB", end_color="F9FAFB", fill_type="solid") 
+    
+    # Adjusted the border to a standard soft gray to match the new fills
+    thin_border = Side(border_style="thin", color="D1D5DB") 
+    
+    cell_border = Border(left=thin_border, right=thin_border, top=thin_border, bottom=thin_border)
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    title_cell = ws.cell(row=1, column=1, value="Landlord Import Template")
+    title_cell.font = title_font
+    title_cell.fill = title_fill
+    title_cell.alignment = center_align
+    title_cell.border = cell_border
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(headers))
+    ws.row_dimensions[1].height = 28
+
+    for title, start_col, end_col in sections:
+        cell = ws.cell(row=2, column=start_col, value=title)
+        cell.font = section_font
+        cell.fill = section_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+        if start_col != end_col:
+            ws.merge_cells(start_row=2, start_column=start_col, end_row=2, end_column=end_col)
+            for col in range(start_col + 1, end_col + 1):
+                ws.cell(row=2, column=col).fill = section_fill
+                ws.cell(row=2, column=col).border = cell_border
+    ws.row_dimensions[2].height = 28
+
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=3, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[3].height = 32
+
+    for col_idx, value in enumerate(sample_row, start=1):
+        cell = ws.cell(row=4, column=col_idx, value=value)
+        cell.font = sample_font
+        cell.fill = sample_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[4].height = 24
+
+    column_widths = [18, 24, 16, 14, 14, 28, 16, 18, 18, 22]
+    for idx, width in enumerate(column_widths, start=1):
+        ws.column_dimensions[get_column_letter(idx)].width = width
+
+    # ==========================================
+    # NEW: SHEET PROTECTION (READ-ONLY ROWS 1-4)
+    # ==========================================
+    # 1. Turn on sheet protection with a password so testers can't easily unprotect it
+    ws.protection.sheet = True
+    ws.protection.password = "admin123" 
+
+    # 2. Excel locks ALL cells by default. We must UNLOCK rows 5 to 5000 
+    # so users can actually type their data in those empty rows.
+    unlocked = Protection(locked=False)
+    for row in range(5, 5000):
+        for col in range(1, len(headers) + 1):
+            ws.cell(row=row, column=col).protection = unlocked
+    # ==========================================
+
+    ws.freeze_panes = "A5"
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="Landlord_Import_Template.xlsx"'
+    wb.save(response)
+    return response
+
+########### Views end for download sample data excel for landlord ###################
 
 
 ############ Views start for delete landlord details ########################
@@ -4312,6 +4744,58 @@ def Add_Tenant(request):
 
 ########## Views start for upload tenant data functionality via excel ##############
 
+TENANT_HEADER_ALIASES = {
+    # Added the exact headers from your uploaded file
+    'name': ('tenant name', 'name'),
+    'email': ('tenant email (login id)', 'tenant email', 'email address', 'email'),
+    'phone': ('phone', 'phone number', 'mobile'),
+    'state': ('state',),
+    'city': ('city',),
+    'address': ('address',),
+    'password': ('password',),
+    'role': ('role',),
+    'register_date': ('register date',),
+    'register_time': ('register time',),
+    'user_id': ('user id',),
+}
+
+def _normalize_tenant_header(value):
+    if value is None:
+        return ''
+    # The .replace('*', '') strips out the asterisks before comparing!
+    return str(value).replace('*', '').strip().lower()
+
+
+def _detect_tenant_excel_layout(sheet):
+    """Detect header row and column map for template or list-export Excel files."""
+    for row_idx in range(1, 8):
+        row_values = [cell.value for cell in sheet[row_idx]]
+        normalized = [_normalize_tenant_header(v) for v in row_values]
+
+        col_map = {}
+        for col_idx, header in enumerate(normalized):
+            if not header:
+                continue
+            for field, aliases in TENANT_HEADER_ALIASES.items():
+                if header in aliases:
+                    col_map[field] = col_idx
+                    break
+
+        if 'name' in col_map and ('phone' in col_map or 'email' in col_map):
+            return row_idx, col_map
+
+    return None, None
+
+
+def _tenant_cell_value(row, col_map, field):
+    idx = col_map.get(field)
+    if idx is None or idx >= len(row):
+        return None
+    return row[idx]
+
+
+
+
 @csrf_exempt
 def Tenant_Data(request):
     if request.method == 'POST':
@@ -4329,41 +4813,73 @@ def Tenant_Data(request):
             error_details = []
             
             FIXED_ROLE = "Tenant"
+
+            header_row, col_map = _detect_tenant_excel_layout(sheet)
+            if not col_map:
+                return JsonResponse({
+                    "status": "0",
+                    "msg": "Could not read Excel headers. Use the sample template or re-upload the exported Tenant list file.",
+                })
             
-            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+            # Force skip the very first row under the headers
+            
+            
+            for row_idx, row in enumerate(
+                sheet.iter_rows(min_row=header_row + 1, values_only=True),
+                start=header_row + 1,
+            ):
                 try:
                     # Skip empty rows
                     if not row or all(cell is None or str(cell).strip() == '' for cell in row):
                         continue
-                
                     
-                    # Extract values with correct column indices
-                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
-                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
-                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
-                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
-                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    # ==========================================
+                    # 1. DYNAMIC EXTRACTION (Fixes the Column Mismatch!)
+                    # ==========================================
+                    user_name = _tenant_cell_value(row, col_map, 'name')
+                    user_email = _tenant_cell_value(row, col_map, 'email')
                     
-                    # Clean and validate user_name (from Name column - index 5)
+                    # ==========================================
+                    # 2. DUMMY DATA BLOCKER
+                    # ==========================================
+                    check_email = str(user_email).strip().lower() if user_email else ""
+                    if check_email in ['john.doe@example.com', 'sample@do-not-upload.com']:
+                        continue 
+
+                    # ==========================================
+                    # 3. STRICT ROLE VALIDATOR
+                    # ==========================================
+                    user_role_excel = _tenant_cell_value(row, col_map, 'role')
+                    if user_role_excel and str(user_role_excel).strip() not in ['', '---', '-']:
+                        excel_role = str(user_role_excel).strip().title()
+                        if excel_role not in [FIXED_ROLE,  "tenant"]:
+                            error_count += 1
+                            error_details.append(
+                                f"Row {row_idx}: Skipped {user_name or 'Unknown'}. You cannot upload role '{excel_role}'."
+                            )
+                            continue
+
+                    user_phone = _tenant_cell_value(row, col_map, 'phone')
+                    user_state = _tenant_cell_value(row, col_map, 'state')
+                    user_city = _tenant_cell_value(row, col_map, 'city')
+                    user_address = _tenant_cell_value(row, col_map, 'address')
+                    user_password = _tenant_cell_value(row, col_map, 'password')
+                    
+                    # Clean and validate user_name
                     if user_name and str(user_name).strip() not in ['', '---', '-']:
                         user_name = str(user_name).strip()
                     else:
                         user_name = None
                     
-                    # Clean and validate user_email (from Email column - index 6)
+                    # Clean and validate user_email
                     if user_email and str(user_email).strip() not in ['', '---', '-']:
                         user_email = str(user_email).strip()
                     else:
                         user_email = None
                     
-                    if not user_name or not user_phone:
+                    if not user_name or not user_phone or not user_email or not user_state or not user_city or not user_address:
                         error_count += 1
-                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
+                        error_details.append(f"Row {row_idx}: Missing Details (Name: {user_name}, Phone: {user_phone}, Email: {user_email}, State: {user_state}, City: {user_city}, Address: {user_address})")
                         continue
                     
                     # Clean phone
@@ -4372,68 +4888,38 @@ def Tenant_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+
+                    # ==========================================
+                    # 4. SMART DUPLICATE CHECKER (Fixes the Email Crash!)
+                    # ==========================================
+                    # Make sure you have: from django.db.models import Q 
+                    # at the very top of your file!
+                    from django.db.models import Q 
                     
-                    # Register date: Today's date as default
-                    register_date = datetime.now().date()
-                    register_time = datetime.now().time()
+                    user_query = Q(user_phone=user_phone)
+                    if user_email:
+                        user_query |= Q(user_email__iexact=user_email)
                     
-                    # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_date_value, (date, datetime)):
-                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
-                            else:
-                                date_str = str(register_date_value).strip()
-                                if ',' in date_str:
-                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
-                                elif '-' in date_str:
-                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                                elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
-                        except:
-                            pass
-                    
-                    # If time provided in Excel, try to parse it
-                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_time_value, time):
-                                register_time = register_time_value
-                            else:
-                                time_str = str(register_time_value).strip()
-                                if ':' in time_str:
-                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
-                                    try:
-                                        register_time = datetime.strptime(time_str, '%I:%M').time()
-                                    except:
-                                        try:
-                                            register_time = datetime.strptime(time_str, '%H:%M').time()
-                                        except:
-                                            pass
-                        except:
-                            pass
-                    
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    existing_user = User_Details.objects.filter(user_query, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
+                        # --- UPDATE MODE ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
-                        existing_user.user_role = FIXED_ROLE
                         existing_user.user_state = user_state
                         existing_user.user_city = user_city
                         existing_user.user_address = user_address
-                        existing_user.user_password = user_password
-                        existing_user.user_register_date = register_date
-                        existing_user.user_register_time = register_time
+                        if user_password and user_password != 'default123':
+                            existing_user.user_password = user_password
                         existing_user.save()
                         
                         success_count += 1
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
+                        # --- CREATE MODE ---
                         new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
@@ -4443,15 +4929,13 @@ def Tenant_Data(request):
                             user_city=user_city,
                             user_address=user_address,
                             user_password=user_password,
-                            user_register_date=register_date,
-                            user_register_time=register_time
+                            user_register_date=datetime.today(),
+                            user_register_time=datetime.now()
                         )
                         
-                        # Generate USER_ID: EF-{ID}-{YY}
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        new_user.user_id = user_id
+                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -4461,13 +4945,35 @@ def Tenant_Data(request):
                     error_details.append(f"Row {row_idx}: {str(e)}")
                     print(f"Error at row {row_idx}: {str(e)}")
             
-            return JsonResponse({
-                "status": "1",
-                "msg": f"Successfully imported {success_count} Tenants. Failed: {error_count}",
-                "success_count": success_count,
-                "error_count": error_count,
-                "error_details": error_details[:10]
-            })
+            # ==========================================
+            # SMART FINAL RESPONSE
+            # ==========================================
+            if success_count == 0 and error_count > 0:
+                # 1. Total Failure (No rows saved)
+                # Combine the first few errors into a readable string
+                error_text = " | ".join(error_details[:3])
+                return JsonResponse({
+                    "status": "0", # Send an error status to trigger the frontend error alert!
+                    "msg": f"Import failed! {error_text}",
+                    "error_details": error_details
+                })
+                
+            elif success_count > 0 and error_count > 0:
+                # 2. Partial Success (Some saved, some failed)
+                error_text = " | ".join(error_details[:3])
+                return JsonResponse({
+                    "status": "1", 
+                    "msg": f"Imported {success_count} Tenants. Skipped {error_count} rows. Details: {error_text}",
+                    "error_details": error_details
+                })
+                
+            else:
+                # 3. Total Success (Everything saved perfectly)
+                return JsonResponse({
+                    "status": "1",
+                    "msg": f"Successfully imported {success_count} Tenants!",
+                    "error_details": []
+                })
             
         except Exception as e:
             return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
@@ -4475,6 +4981,129 @@ def Tenant_Data(request):
     return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 ######### Views end for upload tenant data functionality via excel ####################
+
+
+######### Views start for download sample excel for tenant ######################
+
+def download_tenant_sample_excel(request):
+    """Download sample Excel template matching add_tenant.html form label sequence."""
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return redirect('login')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Tenant Template"
+
+    sections = [
+        ("Step 1: Personal Information", 1, 3),
+        ("Step 2: Location Details", 4, 6),
+        ("Step 3: Account Security", 7, 8),
+    ]
+    headers = [
+        "Name *", "Email Address *", "Phone Number *",
+        "State *", "City *", "Address *",
+        "Password *", "Role",
+    ]
+    sample_row = [
+        "(DELETE THIS ROW) John Doe", 
+        "sample@do-not-upload.com", 
+        "0000000000",
+        "Maharashtra", 
+        "Mumbai", 
+        "123 Sample Street",
+        "password123",  
+        "Tenant"
+    ]
+
+    title_font = Font(name="Segoe UI", size=12, bold=True, color="FFFFFF")
+    section_font = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+    
+    # Kept the clean neutral charcoal/dark grays for high readability
+    header_font = Font(name="Segoe UI", size=10, bold=True, color="1F2937") 
+    sample_font = Font(name="Segoe UI", size=10, color="374151") 
+    
+    # Switched to Ocean Blue and Deep Slate for the Tenant theme
+    title_fill = PatternFill(start_color="0284C7", end_color="0284C7", fill_type="solid") # Ocean Blue
+    section_fill = PatternFill(start_color="0F172A", end_color="0F172A", fill_type="solid") # Deep Slate Navy
+    
+    # Softened the header and sample row backgrounds with a very subtle icy-blue tint
+    header_fill = PatternFill(start_color="F0F9FF", end_color="F0F9FF", fill_type="solid") 
+    sample_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid") 
+    
+    # Adjusted the border to a standard soft gray
+    thin_border = Side(border_style="thin", color="CBD5E1") 
+    
+    cell_border = Border(left=thin_border, right=thin_border, top=thin_border, bottom=thin_border)
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    # Title generation logic
+    title_cell = ws.cell(row=1, column=1, value="Tenant Import Template")
+    title_cell.font = title_font
+    title_cell.fill = title_fill
+    title_cell.alignment = center_align
+    title_cell.border = cell_border
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(headers))
+    ws.row_dimensions[1].height = 28
+
+    for title, start_col, end_col in sections:
+        cell = ws.cell(row=2, column=start_col, value=title)
+        cell.font = section_font
+        cell.fill = section_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+        if start_col != end_col:
+            ws.merge_cells(start_row=2, start_column=start_col, end_row=2, end_column=end_col)
+            for col in range(start_col + 1, end_col + 1):
+                ws.cell(row=2, column=col).fill = section_fill
+                ws.cell(row=2, column=col).border = cell_border
+    ws.row_dimensions[2].height = 28
+
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=3, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[3].height = 32
+
+    for col_idx, value in enumerate(sample_row, start=1):
+        cell = ws.cell(row=4, column=col_idx, value=value)
+        cell.font = sample_font
+        cell.fill = sample_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[4].height = 24
+
+    column_widths = [18, 24, 16, 14, 14, 28, 16, 18, 18, 22]
+    for idx, width in enumerate(column_widths, start=1):
+        ws.column_dimensions[get_column_letter(idx)].width = width
+
+    # ==========================================
+    # NEW: SHEET PROTECTION (READ-ONLY ROWS 1-4)
+    # ==========================================
+    # 1. Turn on sheet protection with a password so testers can't easily unprotect it
+    ws.protection.sheet = True
+    ws.protection.password = "admin123" 
+
+    # 2. Excel locks ALL cells by default. We must UNLOCK rows 5 to 5000 
+    # so users can actually type their data in those empty rows.
+    unlocked = Protection(locked=False)
+    for row in range(5, 5000):
+        for col in range(1, len(headers) + 1):
+            ws.cell(row=row, column=col).protection = unlocked
+    # ==========================================
+
+    ws.freeze_panes = "A5"
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="Tenant_Import_Template.xlsx"'
+    wb.save(response)
+    return response
+
+########### Views end for download sample excel for tenant #####################
 
 
 ########### Views start for delete tenant details #######################
@@ -4563,6 +5192,58 @@ def Add_Buyer(request):
 
 ############# Views start for buyer data functionality via excel ####################
 
+BUYER_HEADER_ALIASES = {
+    # Added the exact headers from your uploaded file
+    'name': ('buyer name', 'name'),
+    'email': ('buyer email (login id)', 'buyer email', 'email address', 'email'),
+    'phone': ('phone', 'phone number', 'mobile'),
+    'state': ('state',),
+    'city': ('city',),
+    'address': ('address',),
+    'password': ('password',),
+    'role': ('role',),
+    'register_date': ('register date',),
+    'register_time': ('register time',),
+    'user_id': ('user id',),
+}
+
+def _normalize_buyer_header(value):
+    if value is None:
+        return ''
+    # The .replace('*', '') strips out the asterisks before comparing!
+    return str(value).replace('*', '').strip().lower()
+
+
+def _detect_buyer_excel_layout(sheet):
+    """Detect header row and column map for template or list-export Excel files."""
+    for row_idx in range(1, 8):
+        row_values = [cell.value for cell in sheet[row_idx]]
+        normalized = [_normalize_tenant_header(v) for v in row_values]
+
+        col_map = {}
+        for col_idx, header in enumerate(normalized):
+            if not header:
+                continue
+            for field, aliases in TENANT_HEADER_ALIASES.items():
+                if header in aliases:
+                    col_map[field] = col_idx
+                    break
+
+        if 'name' in col_map and ('phone' in col_map or 'email' in col_map):
+            return row_idx, col_map
+
+    return None, None
+
+
+def _buyer_cell_value(row, col_map, field):
+    idx = col_map.get(field)
+    if idx is None or idx >= len(row):
+        return None
+    return row[idx]
+
+
+
+
 @csrf_exempt
 def Buyer_Data(request):
     if request.method == 'POST':
@@ -4580,41 +5261,73 @@ def Buyer_Data(request):
             error_details = []
             
             FIXED_ROLE = "Buyer"
+
+            header_row, col_map = _detect_buyer_excel_layout(sheet)
+            if not col_map:
+                return JsonResponse({
+                    "status": "0",
+                    "msg": "Could not read Excel headers. Use the sample template or re-upload the exported Buyer list file.",
+                })
             
-            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+            # Force skip the very first row under the headers
+            
+            
+            for row_idx, row in enumerate(
+                sheet.iter_rows(min_row=header_row + 1, values_only=True),
+                start=header_row + 1,
+            ):
                 try:
                     # Skip empty rows
                     if not row or all(cell is None or str(cell).strip() == '' for cell in row):
                         continue
-                
                     
-                    # Extract values with correct column indices
-                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name (CORRECT)
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email (CORRECT)
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    user_state = row[9] if len(row) > 9 else None  # Column 9: State
-                    user_city = row[10] if len(row) > 10 else None  # Column 10: City
-                    user_address = row[11] if len(row) > 11 else None  # Column 11: Address
-                    register_date_value = row[12] if len(row) > 12 else None  # Column 12: Register Date
-                    register_time_value = row[13] if len(row) > 13 else None  # Column 13: Register Time
+                    # ==========================================
+                    # 1. DYNAMIC EXTRACTION (Fixes the Column Mismatch!)
+                    # ==========================================
+                    user_name = _buyer_cell_value(row, col_map, 'name')
+                    user_email = _buyer_cell_value(row, col_map, 'email')
                     
-                    # Clean and validate user_name (from Name column - index 5)
+                    # ==========================================
+                    # 2. DUMMY DATA BLOCKER
+                    # ==========================================
+                    check_email = str(user_email).strip().lower() if user_email else ""
+                    if check_email in ['john.doe@example.com', 'sample@do-not-upload.com']:
+                        continue 
+
+                    # ==========================================
+                    # 3. STRICT ROLE VALIDATOR
+                    # ==========================================
+                    user_role_excel = _buyer_cell_value(row, col_map, 'role')
+                    if user_role_excel and str(user_role_excel).strip() not in ['', '---', '-']:
+                        excel_role = str(user_role_excel).strip().title()
+                        if excel_role not in [FIXED_ROLE,  "buyer"]:
+                            error_count += 1
+                            error_details.append(
+                                f"Row {row_idx}: Skipped {user_name or 'Unknown'}. You cannot upload role '{excel_role}'."
+                            )
+                            continue
+
+                    user_phone = _buyer_cell_value(row, col_map, 'phone')
+                    user_state = _buyer_cell_value(row, col_map, 'state')
+                    user_city = _buyer_cell_value(row, col_map, 'city')
+                    user_address = _buyer_cell_value(row, col_map, 'address')
+                    user_password = _buyer_cell_value(row, col_map, 'password')
+                    
+                    # Clean and validate user_name
                     if user_name and str(user_name).strip() not in ['', '---', '-']:
                         user_name = str(user_name).strip()
                     else:
                         user_name = None
                     
-                    # Clean and validate user_email (from Email column - index 6)
+                    # Clean and validate user_email
                     if user_email and str(user_email).strip() not in ['', '---', '-']:
                         user_email = str(user_email).strip()
                     else:
                         user_email = None
                     
-                    if not user_name or not user_phone:
+                    if not user_name or not user_phone or not user_email or not user_state or not user_city or not user_address:
                         error_count += 1
-                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
+                        error_details.append(f"Row {row_idx}: Missing Details (Name: {user_name}, Phone: {user_phone}, Email: {user_email}, State: {user_state}, City: {user_city}, Address: {user_address})")
                         continue
                     
                     # Clean phone
@@ -4623,68 +5336,38 @@ def Buyer_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
+
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+
+                    # ==========================================
+                    # 4. SMART DUPLICATE CHECKER (Fixes the Email Crash!)
+                    # ==========================================
+                    # Make sure you have: from django.db.models import Q 
+                    # at the very top of your file!
+                    from django.db.models import Q 
                     
-                    # Register date: Today's date as default
-                    register_date = datetime.now().date()
-                    register_time = datetime.now().time()
+                    user_query = Q(user_phone=user_phone)
+                    if user_email:
+                        user_query |= Q(user_email__iexact=user_email)
                     
-                    # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_date_value, (date, datetime)):
-                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
-                            else:
-                                date_str = str(register_date_value).strip()
-                                if ',' in date_str:
-                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
-                                elif '-' in date_str:
-                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                                elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
-                        except:
-                            pass
-                    
-                    # If time provided in Excel, try to parse it
-                    if register_time_value and str(register_time_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_time_value, time):
-                                register_time = register_time_value
-                            else:
-                                time_str = str(register_time_value).strip()
-                                if ':' in time_str:
-                                    time_str = time_str.replace('a.m.', '').replace('p.m.', '').replace('AM', '').replace('PM', '').strip()
-                                    try:
-                                        register_time = datetime.strptime(time_str, '%I:%M').time()
-                                    except:
-                                        try:
-                                            register_time = datetime.strptime(time_str, '%H:%M').time()
-                                        except:
-                                            pass
-                        except:
-                            pass
-                    
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    existing_user = User_Details.objects.filter(user_query, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
+                        # --- UPDATE MODE ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
-                        existing_user.user_role = FIXED_ROLE
                         existing_user.user_state = user_state
                         existing_user.user_city = user_city
                         existing_user.user_address = user_address
-                        existing_user.user_password = user_password
-                        existing_user.user_register_date = register_date
-                        existing_user.user_register_time = register_time
+                        if user_password and user_password != 'default123':
+                            existing_user.user_password = user_password
                         existing_user.save()
                         
                         success_count += 1
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
+                        # --- CREATE MODE ---
                         new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
@@ -4694,15 +5377,13 @@ def Buyer_Data(request):
                             user_city=user_city,
                             user_address=user_address,
                             user_password=user_password,
-                            user_register_date=register_date,
-                            user_register_time=register_time
+                            user_register_date=datetime.today(),
+                            user_register_time=datetime.now()
                         )
                         
-                        # Generate USER_ID: EF-{ID}-{YY}
                         current_year = datetime.now().year
                         year_suffix = str(current_year)[-2:]
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        new_user.user_id = user_id
+                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -4712,13 +5393,35 @@ def Buyer_Data(request):
                     error_details.append(f"Row {row_idx}: {str(e)}")
                     print(f"Error at row {row_idx}: {str(e)}")
             
-            return JsonResponse({
-                "status": "1",
-                "msg": f"Successfully imported {success_count} Buyers. Failed: {error_count}",
-                "success_count": success_count,
-                "error_count": error_count,
-                "error_details": error_details[:10]
-            })
+            # ==========================================
+            # SMART FINAL RESPONSE
+            # ==========================================
+            if success_count == 0 and error_count > 0:
+                # 1. Total Failure (No rows saved)
+                # Combine the first few errors into a readable string
+                error_text = " | ".join(error_details[:3])
+                return JsonResponse({
+                    "status": "0", # Send an error status to trigger the frontend error alert!
+                    "msg": f"Import failed! {error_text}",
+                    "error_details": error_details
+                })
+                
+            elif success_count > 0 and error_count > 0:
+                # 2. Partial Success (Some saved, some failed)
+                error_text = " | ".join(error_details[:3])
+                return JsonResponse({
+                    "status": "1", 
+                    "msg": f"Imported {success_count} Buyers. Skipped {error_count} rows. Details: {error_text}",
+                    "error_details": error_details
+                })
+                
+            else:
+                # 3. Total Success (Everything saved perfectly)
+                return JsonResponse({
+                    "status": "1",
+                    "msg": f"Successfully imported {success_count} Buyers!",
+                    "error_details": []
+                })
             
         except Exception as e:
             return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
@@ -4727,6 +5430,129 @@ def Buyer_Data(request):
 
 
 ######### Views end for buyer data functionality via excel ###########################
+
+
+############ Views start for download sample excel for buyer ######################
+
+def download_buyer_sample_excel(request):
+    """Download sample Excel template matching add_buyer.html form label sequence."""
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return redirect('login')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Buyer Template"
+
+    sections = [
+        ("Step 1: Personal Information", 1, 3),
+        ("Step 2: Location Details", 4, 6),
+        ("Step 3: Account Security", 7, 8),
+    ]
+    headers = [
+        "Name *", "Email Address *", "Phone Number *",
+        "State *", "City *", "Address *",
+        "Password *", "Role",
+    ]
+    sample_row = [
+        "(DELETE THIS ROW) John Doe", 
+        "sample@do-not-upload.com", 
+        "0000000000",
+        "Maharashtra", 
+        "Mumbai", 
+        "123 Sample Street",
+        "password123",  
+        "Buyer"
+    ]
+
+    title_font = Font(name="Segoe UI", size=12, bold=True, color="FFFFFF")
+    section_font = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+    
+    # Neutral charcoal/dark grays for high readability
+    header_font = Font(name="Segoe UI", size=10, bold=True, color="1F2937") 
+    sample_font = Font(name="Segoe UI", size=10, color="374151") 
+    
+    # Switched to Sunset Orange and Deep Terracotta for the Buyer theme
+    title_fill = PatternFill(start_color="EA580C", end_color="EA580C", fill_type="solid") # Sunset Orange
+    section_fill = PatternFill(start_color="7C2D12", end_color="7C2D12", fill_type="solid") # Deep Terracotta
+    
+    # Softened the header and sample row backgrounds with a very warm, subtle peach tint
+    header_fill = PatternFill(start_color="FFEDD5", end_color="FFEDD5", fill_type="solid") 
+    sample_fill = PatternFill(start_color="FFF7ED", end_color="FFF7ED", fill_type="solid") 
+    
+    # Adjusted the border to a standard soft gray
+    thin_border = Side(border_style="thin", color="CBD5E1") 
+    
+    cell_border = Border(left=thin_border, right=thin_border, top=thin_border, bottom=thin_border)
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    # Title generation logic
+    title_cell = ws.cell(row=1, column=1, value="Buyer Import Template")
+    title_cell.font = title_font
+    title_cell.fill = title_fill
+    title_cell.alignment = center_align
+    title_cell.border = cell_border
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(headers))
+    ws.row_dimensions[1].height = 28
+
+    for title, start_col, end_col in sections:
+        cell = ws.cell(row=2, column=start_col, value=title)
+        cell.font = section_font
+        cell.fill = section_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+        if start_col != end_col:
+            ws.merge_cells(start_row=2, start_column=start_col, end_row=2, end_column=end_col)
+            for col in range(start_col + 1, end_col + 1):
+                ws.cell(row=2, column=col).fill = section_fill
+                ws.cell(row=2, column=col).border = cell_border
+    ws.row_dimensions[2].height = 28
+
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=3, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[3].height = 32
+
+    for col_idx, value in enumerate(sample_row, start=1):
+        cell = ws.cell(row=4, column=col_idx, value=value)
+        cell.font = sample_font
+        cell.fill = sample_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[4].height = 24
+
+    column_widths = [18, 24, 16, 14, 14, 28, 16, 18, 18, 22]
+    for idx, width in enumerate(column_widths, start=1):
+        ws.column_dimensions[get_column_letter(idx)].width = width
+
+    # ==========================================
+    # NEW: SHEET PROTECTION (READ-ONLY ROWS 1-4)
+    # ==========================================
+    # 1. Turn on sheet protection with a password so testers can't easily unprotect it
+    ws.protection.sheet = True
+    ws.protection.password = "admin123" 
+
+    # 2. Excel locks ALL cells by default. We must UNLOCK rows 5 to 5000 
+    # so users can actually type their data in those empty rows.
+    unlocked = Protection(locked=False)
+    for row in range(5, 5000):
+        for col in range(1, len(headers) + 1):
+            ws.cell(row=row, column=col).protection = unlocked
+    # ==========================================
+
+    ws.freeze_panes = "A5"
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="Buyer_Import_Template.xlsx"'
+    wb.save(response)
+    return response
+
+########### Views end for download sample excel for buyer ####################
 
 
 ############ Views start for delete buyer details #######################
@@ -4817,6 +5643,60 @@ def Add_Agent(request):
 
 ########## Views start for upload agent data functionality via excel ###############
 
+AGENT_HEADER_ALIASES = {
+    # Added the exact headers from your uploaded file
+    'name': ('agent name', 'name'),
+    'email': ('agent email (login id)', 'agent email', 'email address', 'email'),
+    'phone': ('phone', 'phone number', 'mobile'),
+    'agency_name': ('agency name'),
+    'state': ('state',),
+    'city': ('city',),
+    'address': ('address',),
+    'password': ('password',),
+    'license_number': ('license number',),
+    'role': ('role',),
+    'register_date': ('register date',),
+    'register_time': ('register time',),
+    'user_id': ('user id',),
+}
+
+def _normalize_agent_header(value):
+    if value is None:
+        return ''
+    # The .replace('*', '') strips out the asterisks before comparing!
+    return str(value).replace('*', '').strip().lower()
+
+
+def _detect_agent_excel_layout(sheet):
+    """Detect header row and column map for template or list-export Excel files."""
+    for row_idx in range(1, 8):
+        row_values = [cell.value for cell in sheet[row_idx]]
+        normalized = [_normalize_agent_header(v) for v in row_values]
+
+        col_map = {}
+        for col_idx, header in enumerate(normalized):
+            if not header:
+                continue
+            for field, aliases in AGENT_HEADER_ALIASES.items():
+                if header in aliases:
+                    col_map[field] = col_idx
+                    break
+
+        if 'name' in col_map and ('phone' in col_map or 'email' in col_map):
+            return row_idx, col_map
+
+    return None, None
+
+
+def _agent_cell_value(row, col_map, field):
+    idx = col_map.get(field)
+    if idx is None or idx >= len(row):
+        return None
+    return row[idx]
+
+
+
+
 @csrf_exempt
 def Agent_Data(request):
     if request.method == 'POST':
@@ -4834,61 +5714,75 @@ def Agent_Data(request):
             error_details = []
             
             FIXED_ROLE = "Agent"
+
+            header_row, col_map = _detect_agent_excel_layout(sheet)
+            if not col_map:
+                return JsonResponse({
+                    "status": "0",
+                    "msg": "Could not read Excel headers. Use the sample template or re-upload the exported Agent list file.",
+                })
             
-            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+            # Force skip the very first row under the headers
+            
+            
+            for row_idx, row in enumerate(
+                sheet.iter_rows(min_row=header_row + 1, values_only=True),
+                start=header_row + 1,
+            ):
                 try:
                     # Skip empty rows
                     if not row or all(cell is None or str(cell).strip() == '' for cell in row):
                         continue
                     
-                    # ================================================================
-                    # COLUMN MAPPING (Based on your Agents Report structure)
-                    # ================================================================
-                    # Column 0: Actions (empty)
-                    # Column 1: Sr. No.
-                    # Column 2: Profile
-                    # Column 3: User Id
-                    # Column 4: Role (contains "Agent")
-                    # Column 5: Name (contains "Anita Chacko")
-                    # Column 6: Email Address (contains "anita.chacko@example.com")
-                    # Column 7: Phone Number
-                    # Column 8: Password
-                    # Column 9: Agency Name
-                    # Column 10: License Number
-                    # Column 11: State
-                    # Column 12: City
-                    # Column 13: Address
-                    # Column 14: Register Date
-                    # ================================================================
+                    # ==========================================
+                    # 1. DYNAMIC EXTRACTION (Fixes the Column Mismatch!)
+                    # ==========================================
+                    user_name = _agent_cell_value(row, col_map, 'name')
+                    user_email = _agent_cell_value(row, col_map, 'email')
                     
-                    # Extract values with correct column indices
-                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    agency_name = row[9] if len(row) > 9 else None  # Column 9: Agency Name
-                    license_number = row[10] if len(row) > 10 else None  # Column 10: License Number
-                    user_state = row[11] if len(row) > 11 else None  # Column 11: State
-                    user_city = row[12] if len(row) > 12 else None  # Column 12: City
-                    user_address = row[13] if len(row) > 13 else None  # Column 13: Address
-                    register_date_value = row[14] if len(row) > 14 else None  # Column 14: Register Date
+                    # ==========================================
+                    # 2. DUMMY DATA BLOCKER
+                    # ==========================================
+                    check_email = str(user_email).strip().lower() if user_email else ""
+                    if check_email in ['john.doe@example.com', 'sample@do-not-upload.com']:
+                        continue 
+
+                    # ==========================================
+                    # 3. STRICT ROLE VALIDATOR
+                    # ==========================================
+                    user_role_excel = _agent_cell_value(row, col_map, 'role')
+                    if user_role_excel and str(user_role_excel).strip() not in ['', '---', '-']:
+                        excel_role = str(user_role_excel).strip().title()
+                        if excel_role not in [FIXED_ROLE,  "agent"]:
+                            error_count += 1
+                            error_details.append(
+                                f"Row {row_idx}: Skipped {user_name or 'Unknown'}. You cannot upload role '{excel_role}'."
+                            )
+                            continue
+
+                    user_phone = _agent_cell_value(row, col_map, 'phone')
+                    user_agency_name = _agent_cell_value(row, col_map, 'agency_name')
+                    user_state = _agent_cell_value(row, col_map, 'state')
+                    user_city = _agent_cell_value(row, col_map, 'city')
+                    user_address = _agent_cell_value(row, col_map, 'address')
+                    user_password = _agent_cell_value(row, col_map, 'password')
+                    user_license_number = _agent_cell_value(row, col_map, 'license_number')
                     
-                    # Clean and validate user_name (from Name column - index 5)
+                    # Clean and validate user_name
                     if user_name and str(user_name).strip() not in ['', '---', '-']:
                         user_name = str(user_name).strip()
                     else:
                         user_name = None
                     
-                    # Clean and validate user_email (from Email column - index 6)
+                    # Clean and validate user_email
                     if user_email and str(user_email).strip() not in ['', '---', '-']:
                         user_email = str(user_email).strip()
                     else:
                         user_email = None
                     
-                    if not user_name or not user_phone:
+                    if not user_name or not user_phone or not user_email or not user_state or not user_city or not user_address:
                         error_count += 1
-                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
+                        error_details.append(f"Row {row_idx}: Missing Details (Name: {user_name}, Phone: {user_phone}, Email: {user_email}, State: {user_state}, City: {user_city}, Address: {user_address})")
                         continue
                     
                     # Clean phone
@@ -4897,76 +5791,58 @@ def Agent_Data(request):
                     # Clean other fields
                     user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    agency_name = str(agency_name).strip() if agency_name and str(agency_name) != '---' else None
-                    license_number = str(license_number).strip() if license_number and str(license_number) != '---' else None
+
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+
+                    # ==========================================
+                    # 4. SMART DUPLICATE CHECKER (Fixes the Email Crash!)
+                    # ==========================================
+                    # Make sure you have: from django.db.models import Q 
+                    # at the very top of your file!
+                    from django.db.models import Q 
                     
-                    # Register date: Today's date as default
-                    register_date = datetime.now().date()
+                    user_query = Q(user_phone=user_phone)
+                    if user_email:
+                        user_query |= Q(user_email__iexact=user_email)
                     
-                    # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_date_value, (date, datetime)):
-                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
-                            else:
-                                date_str = str(register_date_value).strip()
-                                if ',' in date_str:
-                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
-                                elif '-' in date_str:
-                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                                elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
-                        except:
-                            pass  # Keep today's date if parsing fails
-                    
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    existing_user = User_Details.objects.filter(user_query, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
+                        # --- UPDATE MODE ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
-                        existing_user.user_role = FIXED_ROLE
-                        existing_user.user_agency_name = agency_name
-                        existing_user.user_license_number = license_number
+                        existing_user.user_agency_name = user_agency_name
                         existing_user.user_state = user_state
                         existing_user.user_city = user_city
                         existing_user.user_address = user_address
-                        existing_user.user_password = user_password
-                        existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        if user_password and user_password != 'default123':
+                            existing_user.user_password = user_password
+                        existing_user.user_license_number = user_license_number
                         existing_user.save()
                         
                         success_count += 1
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
+                        # --- CREATE MODE ---
                         new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
+                            user_agency_name=user_agency_name,
                             user_role=FIXED_ROLE,
-                            user_agency_name=agency_name,
-                            user_license_number=license_number,
                             user_state=user_state,
                             user_city=user_city,
                             user_address=user_address,
                             user_password=user_password,
-                            user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_license_number=user_license_number,
+                            user_register_date=datetime.today(),
+                            user_register_time=datetime.now()
                         )
                         
-                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
                         current_year = datetime.now().year
-                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
-                        
-                        # Format: EF-{user.id}-{YY}
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        
-                        # Update the user with the generated user_id
-                        new_user.user_id = user_id
+                        year_suffix = str(current_year)[-2:]
+                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -4976,13 +5852,35 @@ def Agent_Data(request):
                     error_details.append(f"Row {row_idx}: {str(e)}")
                     print(f"Error at row {row_idx}: {str(e)}")
             
-            return JsonResponse({
-                "status": "1",
-                "msg": f"Successfully imported {success_count} Agents. Failed: {error_count}",
-                "success_count": success_count,
-                "error_count": error_count,
-                "error_details": error_details[:10]  # Limit to first 10 errors for response
-            })
+            # ==========================================
+            # SMART FINAL RESPONSE
+            # ==========================================
+            if success_count == 0 and error_count > 0:
+                # 1. Total Failure (No rows saved)
+                # Combine the first few errors into a readable string
+                error_text = " | ".join(error_details[:3])
+                return JsonResponse({
+                    "status": "0", # Send an error status to trigger the frontend error alert!
+                    "msg": f"Import failed! {error_text}",
+                    "error_details": error_details
+                })
+                
+            elif success_count > 0 and error_count > 0:
+                # 2. Partial Success (Some saved, some failed)
+                error_text = " | ".join(error_details[:3])
+                return JsonResponse({
+                    "status": "1", 
+                    "msg": f"Imported {success_count} Agents. Skipped {error_count} rows. Details: {error_text}",
+                    "error_details": error_details
+                })
+                
+            else:
+                # 3. Total Success (Everything saved perfectly)
+                return JsonResponse({
+                    "status": "1",
+                    "msg": f"Successfully imported {success_count} Agents!",
+                    "error_details": []
+                })
             
         except Exception as e:
             return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
@@ -4990,6 +5888,140 @@ def Agent_Data(request):
     return JsonResponse({"status": "0", "msg": "Invalid request method"})
 
 ########### Views end for upload agent data functionaity via excel #####################
+
+
+############ Views start for download sample excel for agent #####################
+
+def download_agent_sample_excel(request):
+    """Download sample Excel template matching add_buyer.html form label sequence."""
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return redirect('login')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Agent Template"
+
+    sections = [
+        ("Step 1: Personal Information", 1, 4),
+        ("Step 2: Location Details", 5, 7),
+        ("Step 3: Account Security", 8, 10),
+    ]
+    headers = [
+        "Name *", "Email Address *", "Phone Number *","Agency Name",
+        "State *", "City *", "Address *",
+        "Password *","License Number *", "Role",
+    ]
+    sample_row = [
+        "(DELETE THIS ROW) John Doe", 
+        "sample@do-not-upload.com", 
+        "0000000000",
+        "XYZ Agency",
+        "Maharashtra", 
+        "Mumbai", 
+        "123 Sample Street",
+        "password123",  
+        "LIC123",  
+        "Agent"
+    ]
+
+    title_font = Font(name="Segoe UI", size=12, bold=True, color="FFFFFF")
+    section_font = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+    
+    # Neutral charcoal/dark grays for high readability
+    header_font = Font(name="Segoe UI", size=10, bold=True, color="1F2937") 
+    sample_font = Font(name="Segoe UI", size=10, color="374151") 
+    
+    # Switched to Ruby Red and Deep Maroon for the Agent theme
+    title_fill = PatternFill(start_color="E11D48", end_color="E11D48", fill_type="solid") # Ruby Red
+    section_fill = PatternFill(start_color="881337", end_color="881337", fill_type="solid") # Deep Maroon
+    
+    # Softened the header and sample row backgrounds with a very clean, crisp blush/rose tint
+    header_fill = PatternFill(start_color="FFF1F2", end_color="FFF1F2", fill_type="solid") 
+    sample_fill = PatternFill(start_color="FFE4E6", end_color="FFE4E6", fill_type="solid") 
+    
+    # Adjusted the border to a standard soft gray
+    thin_border = Side(border_style="thin", color="CBD5E1") 
+    
+    cell_border = Border(left=thin_border, right=thin_border, top=thin_border, bottom=thin_border)
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    # Title generation logic
+    title_cell = ws.cell(row=1, column=1, value="Agent Import Template")
+    title_cell.font = title_font
+    title_cell.fill = title_fill
+    title_cell.alignment = center_align
+    title_cell.border = cell_border
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(headers))
+    ws.row_dimensions[1].height = 28
+
+    # Title generation logic
+    title_cell = ws.cell(row=1, column=1, value="Agent Import Template")
+    title_cell.font = title_font
+    title_cell.fill = title_fill
+    title_cell.alignment = center_align
+    title_cell.border = cell_border
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(headers))
+    ws.row_dimensions[1].height = 28
+
+    for title, start_col, end_col in sections:
+        cell = ws.cell(row=2, column=start_col, value=title)
+        cell.font = section_font
+        cell.fill = section_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+        if start_col != end_col:
+            ws.merge_cells(start_row=2, start_column=start_col, end_row=2, end_column=end_col)
+            for col in range(start_col + 1, end_col + 1):
+                ws.cell(row=2, column=col).fill = section_fill
+                ws.cell(row=2, column=col).border = cell_border
+    ws.row_dimensions[2].height = 28
+
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=3, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[3].height = 32
+
+    for col_idx, value in enumerate(sample_row, start=1):
+        cell = ws.cell(row=4, column=col_idx, value=value)
+        cell.font = sample_font
+        cell.fill = sample_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[4].height = 24
+
+    column_widths = [18, 24, 16, 14, 14, 28, 16, 18, 18, 22]
+    for idx, width in enumerate(column_widths, start=1):
+        ws.column_dimensions[get_column_letter(idx)].width = width
+
+    # ==========================================
+    # NEW: SHEET PROTECTION (READ-ONLY ROWS 1-4)
+    # ==========================================
+    # 1. Turn on sheet protection with a password so testers can't easily unprotect it
+    ws.protection.sheet = True
+    ws.protection.password = "admin123" 
+
+    # 2. Excel locks ALL cells by default. We must UNLOCK rows 5 to 5000 
+    # so users can actually type their data in those empty rows.
+    unlocked = Protection(locked=False)
+    for row in range(5, 5000):
+        for col in range(1, len(headers) + 1):
+            ws.cell(row=row, column=col).protection = unlocked
+    # ==========================================
+
+    ws.freeze_panes = "A5"
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="Agent_Import_Template.xlsx"'
+    wb.save(response)
+    return response
+
+########## Views end for download sample excel for agent ############################
 
 
 ############# Views start for delete agent ##############################
@@ -5081,6 +6113,56 @@ def Add_Agency(request):
 
 ########## Views start for upload agency data functionality via excel #################
 
+AGENCY_HEADER_ALIASES = {
+    # FIXED: Added commas to single-item tuples so Python reads them correctly!
+    'name': ('name',),
+    'email': ('agency email (login id)', 'agency email', 'email address', 'email'),
+    'phone': ('phone', 'phone number', 'mobile'),
+    'state': ('state',),
+    'city': ('city',),
+    'address': ('address',),
+    'password': ('password',),
+    'agency_name': ('agency name',), 
+    'license_number': ('license number',),
+    'role': ('role',),
+    'register_date': ('register date',),
+    'register_time': ('register time',),
+    'user_id': ('user id',),
+}
+
+def _normalize_agency_header(value):
+    if value is None:
+        return ''
+    # The .replace('*', '') strips out the asterisks before comparing!
+    return str(value).replace('*', '').strip().lower()
+
+def _detect_agency_excel_layout(sheet):
+    """Detect header row and column map for template or list-export Excel files."""
+    for row_idx in range(1, 8):
+        row_values = [cell.value for cell in sheet[row_idx]]
+        normalized = [_normalize_agency_header(v) for v in row_values]
+
+        col_map = {}
+        for col_idx, header in enumerate(normalized):
+            if not header:
+                continue
+            for field, aliases in AGENCY_HEADER_ALIASES.items():
+                if header in aliases:
+                    col_map[field] = col_idx
+                    break
+
+        if 'name' in col_map and ('phone' in col_map or 'email' in col_map):
+            return row_idx, col_map
+
+    return None, None
+
+def _agency_cell_value(row, col_map, field):
+    idx = col_map.get(field)
+    if idx is None or idx >= len(row):
+        return None
+    return row[idx]
+
+
 @csrf_exempt
 def Agency_Data(request):
     if request.method == 'POST':
@@ -5098,139 +6180,130 @@ def Agency_Data(request):
             error_details = []
             
             FIXED_ROLE = "Agency/Builder"
+
+            header_row, col_map = _detect_agency_excel_layout(sheet)
+            if not col_map:
+                return JsonResponse({
+                    "status": "0",
+                    "msg": "Could not read Excel headers. Use the sample template or re-upload the exported Agency/Builder list file.",
+                })
             
-            for row_idx, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+            for row_idx, row in enumerate(
+                sheet.iter_rows(min_row=header_row + 1, values_only=True),
+                start=header_row + 1,
+            ):
                 try:
                     # Skip empty rows
                     if not row or all(cell is None or str(cell).strip() == '' for cell in row):
                         continue
                     
-                    # ================================================================
-                    # COLUMN MAPPING (Based on your Agents Report structure)
-                    # ================================================================
-                    # Column 0: Actions (empty)
-                    # Column 1: Sr. No.
-                    # Column 2: Profile
-                    # Column 3: User Id
-                    # Column 4: Role (contains "Agent")
-                    # Column 5: Name (contains "Anita Chacko")
-                    # Column 6: Email Address (contains "anita.chacko@example.com")
-                    # Column 7: Phone Number
-                    # Column 8: Password
-                    # Column 9: Agency Name
-                    # Column 10: License Number
-                    # Column 11: State
-                    # Column 12: City
-                    # Column 13: Address
-                    # Column 14: Register Date
-                    # ================================================================
+                    # ==========================================
+                    # 1. DYNAMIC EXTRACTION
+                    # ==========================================
+                    user_name = _agency_cell_value(row, col_map, 'name')
+                    user_email = _agency_cell_value(row, col_map, 'email')
                     
-                    # Extract values with correct column indices
-                    user_role = row[4] if len(row) > 4 else None  # Column 4: Role
-                    user_name = row[5] if len(row) > 5 else None  # Column 5: Name
-                    user_email = row[6] if len(row) > 6 else None  # Column 6: Email
-                    user_phone = row[7] if len(row) > 7 else None  # Column 7: Phone
-                    user_password = row[8] if len(row) > 8 else None  # Column 8: Password
-                    agency_name = row[9] if len(row) > 9 else None  # Column 9: Agency Name
-                    license_number = row[10] if len(row) > 10 else None  # Column 10: License Number
-                    user_state = row[11] if len(row) > 11 else None  # Column 11: State
-                    user_city = row[12] if len(row) > 12 else None  # Column 12: City
-                    user_address = row[13] if len(row) > 13 else None  # Column 13: Address
-                    register_date_value = row[14] if len(row) > 14 else None  # Column 14: Register Date
+                    # ==========================================
+                    # 2. DUMMY DATA BLOCKER
+                    # ==========================================
+                    check_email = str(user_email).strip().lower() if user_email else ""
+                    if check_email in ['john.doe@example.com', 'sample@do-not-upload.com']:
+                        continue 
+
+                    # ==========================================
+                    # 3. STRICT ROLE VALIDATOR
+                    # ==========================================
+                    user_role_excel = _agency_cell_value(row, col_map, 'role')
+                    if user_role_excel and str(user_role_excel).strip() not in ['', '---', '-']:
+                        excel_role = str(user_role_excel).strip().title()
+                        if excel_role not in [FIXED_ROLE, "Agency/Builder"]:
+                            error_count += 1
+                            error_details.append(
+                                f"Row {row_idx}: Skipped {user_name or 'Unknown'}. You cannot upload role '{excel_role}'."
+                            )
+                            continue
+
+                    user_phone = _agency_cell_value(row, col_map, 'phone')
+                    user_state = _agency_cell_value(row, col_map, 'state')
+                    user_city = _agency_cell_value(row, col_map, 'city')
+                    user_address = _agency_cell_value(row, col_map, 'address')
+                    user_password = _agency_cell_value(row, col_map, 'password')
+                    user_agency_name = _agency_cell_value(row, col_map, 'agency_name')
+                    user_license_number = _agency_cell_value(row, col_map, 'license_number')
                     
-                    # Clean and validate user_name (from Name column - index 5)
+                    # Clean and validate user_name
                     if user_name and str(user_name).strip() not in ['', '---', '-']:
                         user_name = str(user_name).strip()
                     else:
                         user_name = None
                     
-                    # Clean and validate user_email (from Email column - index 6)
+                    # Clean and validate user_email
                     if user_email and str(user_email).strip() not in ['', '---', '-']:
                         user_email = str(user_email).strip()
                     else:
                         user_email = None
                     
-                    if not user_name or not user_phone:
+                    # FIXED: Added agency_name and license_number to the missing details check
+                    if not user_name or not user_phone or not user_email or not user_state or not user_city or not user_address or not user_agency_name or not user_license_number:
                         error_count += 1
-                        error_details.append(f"Row {row_idx}: Missing Name or Phone (Name: {user_name}, Phone: {user_phone})")
+                        error_details.append(f"Row {row_idx}: Missing Details (Name: {user_name}, Phone: {user_phone}, Email: {user_email}, Agency: {user_agency_name}, License: {user_license_number})")
                         continue
                     
                     # Clean phone
                     user_phone = str(int(user_phone)) if isinstance(user_phone, (int, float)) else str(user_phone).replace('-', '').strip()
                     
                     # Clean other fields
-                    user_name = str(user_name).strip()
                     user_password = str(int(user_password)) if isinstance(user_password, (int, float)) else str(user_password).split('.')[0].strip() if user_password else 'default123'
-                    agency_name = str(agency_name).strip() if agency_name and str(agency_name) != '---' else None
-                    license_number = str(license_number).strip() if license_number and str(license_number) != '---' else None
                     user_state = str(user_state).strip() if user_state and str(user_state) != '---' else None
                     user_city = str(user_city).strip() if user_city and str(user_city) != '---' else None
                     user_address = str(user_address).strip() if user_address and str(user_address) != '---' else None
+                    user_agency_name = str(user_agency_name).strip() if user_agency_name and str(user_agency_name) != '---' else None
+                    user_license_number = str(user_license_number).strip() if user_license_number and str(user_license_number) != '---' else None
+
+                    # ==========================================
+                    # 4. SMART DUPLICATE CHECKER (Email OR Phone)
+                    # ==========================================
+                    user_query = Q(user_phone=user_phone)
+                    if user_email:
+                        user_query |= Q(user_email__iexact=user_email)
                     
-                    # Register date: Today's date as default
-                    register_date = datetime.now().date()
-                    
-                    # If date provided in Excel, try to parse it
-                    if register_date_value and str(register_date_value).strip() not in ['', '---', '-']:
-                        try:
-                            if isinstance(register_date_value, (date, datetime)):
-                                register_date = register_date_value.date() if isinstance(register_date_value, datetime) else register_date_value
-                            else:
-                                date_str = str(register_date_value).strip()
-                                if ',' in date_str:
-                                    register_date = datetime.strptime(date_str, '%B %d, %Y').date()
-                                elif '-' in date_str:
-                                    register_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                                elif '/' in date_str:
-                                    register_date = datetime.strptime(date_str, '%m/%d/%Y').date()
-                        except:
-                            pass  # Keep today's date if parsing fails
-                    
-                    # Check if user exists by phone number and role
-                    existing_user = User_Details.objects.filter(user_phone=user_phone, user_role=FIXED_ROLE).first()
+                    existing_user = User_Details.objects.filter(user_query, user_role=FIXED_ROLE).first()
                     
                     if existing_user:
-                        # --- UPDATE MODE: DO NOT CHANGE user_id ---
+                        # --- UPDATE MODE ---
                         existing_user.user_name = user_name
                         existing_user.user_email = user_email
-                        existing_user.user_role = FIXED_ROLE
-                        existing_user.user_agency_name = agency_name
-                        existing_user.user_license_number = license_number
+                        existing_user.user_phone = user_phone
                         existing_user.user_state = user_state
                         existing_user.user_city = user_city
                         existing_user.user_address = user_address
-                        existing_user.user_password = user_password
-                        existing_user.user_register_date = register_date
-                        existing_user.user_register_time = datetime.now().time()
+                        if user_password and user_password != 'default123':
+                            existing_user.user_password = user_password
+                        existing_user.user_agency_name = user_agency_name
+                        existing_user.user_license_number = user_license_number
                         existing_user.save()
                         
                         success_count += 1
                     else:
-                        # --- CREATE MODE: GENERATE USER_ID ---
+                        # --- CREATE MODE ---
                         new_user = User_Details.objects.create(
                             user_name=user_name,
                             user_email=user_email,
                             user_phone=user_phone,
                             user_role=FIXED_ROLE,
-                            user_agency_name=agency_name,
-                            user_license_number=license_number,
                             user_state=user_state,
                             user_city=user_city,
                             user_address=user_address,
                             user_password=user_password,
-                            user_register_date=register_date,
-                            user_register_time=datetime.now().time()
+                            user_agency_name=user_agency_name,
+                            user_license_number=user_license_number,
+                            user_register_date=datetime.today(),
+                            user_register_time=datetime.now()
                         )
                         
-                        # --- GENERATE USER_ID WITH FORMAT: EF-{ID}-{YY} ---
                         current_year = datetime.now().year
-                        year_suffix = str(current_year)[-2:]  # Get last 2 digits of year (e.g., 26 for 2026)
-                        
-                        # Format: EF-{user.id}-{YY}
-                        user_id = f"EF-{new_user.id}-{year_suffix}"
-                        
-                        # Update the user with the generated user_id
-                        new_user.user_id = user_id
+                        year_suffix = str(current_year)[-2:]
+                        new_user.user_id = f"EF-{new_user.id}-{year_suffix}"
                         new_user.save()
                         
                         success_count += 1
@@ -5240,13 +6313,34 @@ def Agency_Data(request):
                     error_details.append(f"Row {row_idx}: {str(e)}")
                     print(f"Error at row {row_idx}: {str(e)}")
             
-            return JsonResponse({
-                "status": "1",
-                "msg": f"Successfully imported {success_count} Agencies/Builders. Failed: {error_count}",
-                "success_count": success_count,
-                "error_count": error_count,
-                "error_details": error_details[:10]  # Limit to first 10 errors for response
-            })
+            # ==========================================
+            # SMART FINAL RESPONSE
+            # ==========================================
+            if success_count == 0 and error_count > 0:
+                # 1. Total Failure (No rows saved)
+                error_text = " | ".join(error_details[:3])
+                return JsonResponse({
+                    "status": "0", 
+                    "msg": f"Import failed! {error_text}",
+                    "error_details": error_details
+                })
+                
+            elif success_count > 0 and error_count > 0:
+                # 2. Partial Success (Some saved, some failed)
+                error_text = " | ".join(error_details[:3])
+                return JsonResponse({
+                    "status": "1", 
+                    "msg": f"Imported {success_count} Agencies. Skipped {error_count} rows. Details: {error_text}",
+                    "error_details": error_details
+                })
+                
+            else:
+                # 3. Total Success (Everything saved perfectly)
+                return JsonResponse({
+                    "status": "1",
+                    "msg": f"Successfully imported {success_count} Agencies!",
+                    "error_details": []
+                })
             
         except Exception as e:
             return JsonResponse({"status": "0", "msg": f"Error: {str(e)}"})
@@ -5255,6 +6349,140 @@ def Agency_Data(request):
 
 
 ############# Views end for upload agency data functionality via excel ##################
+
+
+######### Views start for download sample excel for agency/builder #################
+
+def download_agency_sample_excel(request):
+    """Download sample Excel template matching add_buyer.html form label sequence."""
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return redirect('login')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Agency Template"
+
+    sections = [
+        ("Step 1: Personal Information", 1, 3),
+        ("Step 2: Location Details", 4, 6),
+        ("Step 3: Account Security", 7, 10),
+    ]
+    headers = [
+        "Name *", "Email Address *", "Phone Number *",
+        "State *", "City *", "Address *",
+        "Password *","Agency Name *","License Number *", "Role",
+    ]
+    sample_row = [
+        "(DELETE THIS ROW) John Doe", 
+        "sample@do-not-upload.com", 
+        "0000000000",
+        "Maharashtra", 
+        "Mumbai", 
+        "123 Sample Street",
+        "password123",  
+        "XYZ Agency",  
+        "LIC123",  
+        "Agency/Builder (write this exactly same to same)"
+    ]
+
+    title_font = Font(name="Segoe UI", size=12, bold=True, color="FFFFFF")
+    section_font = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+    
+    # Neutral charcoal/dark grays for high readability
+    header_font = Font(name="Segoe UI", size=10, bold=True, color="1F2937") 
+    sample_font = Font(name="Segoe UI", size=10, color="374151") 
+    
+    # Switched to Premium Gold and Deep Bronze for the Agency theme
+    title_fill = PatternFill(start_color="D97706", end_color="D97706", fill_type="solid") # Golden Amber
+    section_fill = PatternFill(start_color="78350F", end_color="78350F", fill_type="solid") # Deep Bronze
+    
+    # Softened the header and sample row backgrounds with a clean, subtle ivory/cream tint
+    header_fill = PatternFill(start_color="FFFBEB", end_color="FFFBEB", fill_type="solid") 
+    sample_fill = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid") 
+    
+    # Adjusted the border to a standard soft gray
+    thin_border = Side(border_style="thin", color="CBD5E1") 
+    
+    cell_border = Border(left=thin_border, right=thin_border, top=thin_border, bottom=thin_border)
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    # Title generation logic
+    title_cell = ws.cell(row=1, column=1, value="Agency Import Template")
+    title_cell.font = title_font
+    title_cell.fill = title_fill
+    title_cell.alignment = center_align
+    title_cell.border = cell_border
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(headers))
+    ws.row_dimensions[1].height = 28
+
+    # Title generation logic
+    title_cell = ws.cell(row=1, column=1, value="Agency Import Template")
+    title_cell.font = title_font
+    title_cell.fill = title_fill
+    title_cell.alignment = center_align
+    title_cell.border = cell_border
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(headers))
+    ws.row_dimensions[1].height = 28
+
+    for title, start_col, end_col in sections:
+        cell = ws.cell(row=2, column=start_col, value=title)
+        cell.font = section_font
+        cell.fill = section_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+        if start_col != end_col:
+            ws.merge_cells(start_row=2, start_column=start_col, end_row=2, end_column=end_col)
+            for col in range(start_col + 1, end_col + 1):
+                ws.cell(row=2, column=col).fill = section_fill
+                ws.cell(row=2, column=col).border = cell_border
+    ws.row_dimensions[2].height = 28
+
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=3, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[3].height = 32
+
+    for col_idx, value in enumerate(sample_row, start=1):
+        cell = ws.cell(row=4, column=col_idx, value=value)
+        cell.font = sample_font
+        cell.fill = sample_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[4].height = 24
+
+    column_widths = [18, 24, 16, 14, 14, 28, 16, 18, 18, 22]
+    for idx, width in enumerate(column_widths, start=1):
+        ws.column_dimensions[get_column_letter(idx)].width = width
+
+    # ==========================================
+    # NEW: SHEET PROTECTION (READ-ONLY ROWS 1-4)
+    # ==========================================
+    # 1. Turn on sheet protection with a password so testers can't easily unprotect it
+    ws.protection.sheet = True
+    ws.protection.password = "admin123" 
+
+    # 2. Excel locks ALL cells by default. We must UNLOCK rows 5 to 5000 
+    # so users can actually type their data in those empty rows.
+    unlocked = Protection(locked=False)
+    for row in range(5, 5000):
+        for col in range(1, len(headers) + 1):
+            ws.cell(row=row, column=col).protection = unlocked
+    # ==========================================
+
+    ws.freeze_panes = "A5"
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="Agency_Import_Template.xlsx"'
+    wb.save(response)
+    return response
+
+############# Views end for download sample excel for agency/builder ##################
 
 
 ############## Views start for delete agency ###########################
@@ -5570,6 +6798,142 @@ def Vendor_Data(request):
 
 
 ############ Views end for upload vendor data functionality via excel #################
+
+
+########### Views start for download sample excel for vendor ####################
+
+def download_vendor_sample_excel(request):
+    """Download sample Excel template matching add_buyer.html form label sequence."""
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return redirect('login')
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Vendor Template"
+
+    sections = [
+        ("Step 1: Identity Information", 1, 4),
+        ("Step 2: Location Details", 5, 7),
+        ("Step 3: Professional Details", 8, 11),
+        ("Step 3: Operational Areas", 11, 12),
+    ]
+    headers = [
+        "Name *", "Email Address *", "Phone Number *","Password *",
+        "State *", "City *", "Address *",
+        "Service Type *","Company Name *","PAN Number *", "Role",
+        "Operational Scope","Selected Regions",
+    ]
+    sample_row = [
+        "(DELETE THIS ROW) John Doe", 
+        "sample@do-not-upload.com", 
+        "0000000000",
+        "Maharashtra", 
+        "Mumbai", 
+        "123 Sample Street",
+        "password123",  
+        "XYZ Agency",  
+        "LIC123",  
+        "Agency/Builder (write this exactly same to same)"
+    ]
+
+    title_font = Font(name="Segoe UI", size=12, bold=True, color="FFFFFF")
+    section_font = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+    
+    # Neutral charcoal/dark grays for high readability
+    header_font = Font(name="Segoe UI", size=10, bold=True, color="1F2937") 
+    sample_font = Font(name="Segoe UI", size=10, color="374151") 
+    
+    # Switched to Premium Gold and Deep Bronze for the Agency theme
+    title_fill = PatternFill(start_color="D97706", end_color="D97706", fill_type="solid") # Golden Amber
+    section_fill = PatternFill(start_color="78350F", end_color="78350F", fill_type="solid") # Deep Bronze
+    
+    # Softened the header and sample row backgrounds with a clean, subtle ivory/cream tint
+    header_fill = PatternFill(start_color="FFFBEB", end_color="FFFBEB", fill_type="solid") 
+    sample_fill = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid") 
+    
+    # Adjusted the border to a standard soft gray
+    thin_border = Side(border_style="thin", color="CBD5E1") 
+    
+    cell_border = Border(left=thin_border, right=thin_border, top=thin_border, bottom=thin_border)
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    # Title generation logic
+    title_cell = ws.cell(row=1, column=1, value="Agency Import Template")
+    title_cell.font = title_font
+    title_cell.fill = title_fill
+    title_cell.alignment = center_align
+    title_cell.border = cell_border
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(headers))
+    ws.row_dimensions[1].height = 28
+
+    # Title generation logic
+    title_cell = ws.cell(row=1, column=1, value="Agency Import Template")
+    title_cell.font = title_font
+    title_cell.fill = title_fill
+    title_cell.alignment = center_align
+    title_cell.border = cell_border
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=len(headers))
+    ws.row_dimensions[1].height = 28
+
+    for title, start_col, end_col in sections:
+        cell = ws.cell(row=2, column=start_col, value=title)
+        cell.font = section_font
+        cell.fill = section_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+        if start_col != end_col:
+            ws.merge_cells(start_row=2, start_column=start_col, end_row=2, end_column=end_col)
+            for col in range(start_col + 1, end_col + 1):
+                ws.cell(row=2, column=col).fill = section_fill
+                ws.cell(row=2, column=col).border = cell_border
+    ws.row_dimensions[2].height = 28
+
+    for col_idx, header in enumerate(headers, start=1):
+        cell = ws.cell(row=3, column=col_idx, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[3].height = 32
+
+    for col_idx, value in enumerate(sample_row, start=1):
+        cell = ws.cell(row=4, column=col_idx, value=value)
+        cell.font = sample_font
+        cell.fill = sample_fill
+        cell.alignment = center_align
+        cell.border = cell_border
+    ws.row_dimensions[4].height = 24
+
+    column_widths = [18, 24, 16, 14, 14, 28, 16, 18, 18, 22]
+    for idx, width in enumerate(column_widths, start=1):
+        ws.column_dimensions[get_column_letter(idx)].width = width
+
+    # ==========================================
+    # NEW: SHEET PROTECTION (READ-ONLY ROWS 1-4)
+    # ==========================================
+    # 1. Turn on sheet protection with a password so testers can't easily unprotect it
+    ws.protection.sheet = True
+    ws.protection.password = "admin123" 
+
+    # 2. Excel locks ALL cells by default. We must UNLOCK rows 5 to 5000 
+    # so users can actually type their data in those empty rows.
+    unlocked = Protection(locked=False)
+    for row in range(5, 5000):
+        for col in range(1, len(headers) + 1):
+            ws.cell(row=row, column=col).protection = unlocked
+    # ==========================================
+
+    ws.freeze_panes = "A5"
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="Agency_Import_Template.xlsx"'
+    wb.save(response)
+    return response
+
+############# Views end for download sample excel for vendor #########################
 
 
 ########## Views start for delete vendor ##########################
@@ -6296,14 +7660,23 @@ import re
 def generate_property_fingerprint(property_no, building_name, locality, pincode=""):
     """
     Generates a normalized SHA-256 hash unique key based on physical location.
-    Strips spaces and special characters for consistent matching.
+    Filters out empty values to prevent false duplicate collisions.
     """
     def clean_text(val):
         if not val:
             return ""
         return re.sub(r'[^a-zA-Z0-9]', '', str(val)).upper()
 
-    raw_string = f"{clean_text(property_no)}_{clean_text(building_name)}_{clean_text(locality)}_{clean_text(pincode)}"
+    # Clean individual components
+    c_prop = clean_text(property_no)
+    c_bldg = clean_text(building_name)
+    c_loc = clean_text(locality)
+    c_pin = clean_text(pincode)
+
+    # Filter out empty components so optional fields don't cause false hash collisions
+    components = [c for c in [c_prop, c_bldg, c_loc, c_pin] if c]
+    
+    raw_string = "_".join(components)
     return hashlib.sha256(raw_string.encode('utf-8')).hexdigest()
 
 
@@ -11630,7 +13003,7 @@ def pg_bulk_delete(request):
         if count == 0:
             return JsonResponse({'status': 'success', 'message': 'No matching active records found to process.'})
 
-        # 🚀 FIX: Convert to Soft Delete so records actually land in your Global Recycle Bin
+        #  FIX: Convert to Soft Delete so records actually land in your Global Recycle Bin
         target_props.update(
             is_deleted=True,
             deleted_at=timezone.now(),
@@ -15320,6 +16693,349 @@ def resale_residential_add(request):
     return render(request, 'admin_user/Reports/Resale/residential_resale_list.html', context)
 
 
+############## Views start for ajax for add/edit residential #######################
+
+
+@csrf_exempt
+def Resale_Resident_Ajax(request):
+    if request.method == 'POST':
+        data = request.POST.dict()
+        
+        # ============================================================
+        # 1. DETERMINE UPDATE OR CREATE VIA 'property_id'
+        # ============================================================
+        property_id = data.get('property_id', '').strip()
+        is_update = bool(property_id)
+        
+        is_dup_flag = False
+        dup_group_id = None
+        total_dup_count = 1
+
+        input_listed_by_type = data.get('listed_by_type', 'self')
+        input_listed_by_id = data.get('listed_by_id', '').strip()
+        input_listed_by_name = data.get('listed_by_name', '').strip()
+        input_listed_by_email = data.get('listed_by_email', '').strip()
+        input_listed_by_contact = data.get('listed_by_contact', '').strip()
+
+        if not is_update:
+            # Clean up keys for creation
+            data.pop("id", None)
+            data.pop("property_id", None)
+            
+            # ============================================================
+            # 2. DUPLICATE CHECK WITH FINGERPRINT (ONLY ON CREATE)
+            # ============================================================
+            input_property_no = (request.POST.get('property_no') or '').strip()
+            input_building_name = (request.POST.get('building_name') or '').strip()
+            input_locality = (request.POST.get('locality') or request.POST.get('locality') or '').strip()
+            input_pincode = (request.POST.get('pincode') or '').strip()
+            
+            fingerprint_key = generate_property_fingerprint(
+                input_property_no, input_building_name, input_locality, input_pincode
+            )
+      
+            direct_duplicates = ResaleResidentialProperty.objects.filter(
+                is_deleted=False,
+                property_no__iexact=input_property_no,
+                locality__iexact=input_locality
+            )
+            
+            if input_building_name:
+                direct_duplicates = direct_duplicates.filter(building_name__iexact=input_building_name)
+            
+            existing_duplicates = (
+                ResaleResidentialProperty.objects.filter(id=fingerprint_key, is_deleted=False) | direct_duplicates
+            ).distinct()
+            
+            dup_group_id = fingerprint_key
+            
+            if existing_duplicates.exists():
+                for existing_prop in existing_duplicates:
+                    same_id = (existing_prop.listed_by_id and input_listed_by_id and existing_prop.listed_by_id.strip() == input_listed_by_id)
+                    same_email = (existing_prop.listed_by_email and input_listed_by_email and existing_prop.listed_by_email.strip().lower() == input_listed_by_email)
+                    same_contact = (existing_prop.listed_by_contact and input_listed_by_contact and existing_prop.listed_by_contact.strip() == input_listed_by_contact)
+                    
+                    if same_id or same_email or same_contact:
+                        error_message = f"Duplicate Blocked: This property (Unit {input_property_no}) is already listed by/for {existing_prop.listed_by_name or 'this user'}."
+                        return JsonResponse({
+                            "status": "0",
+                            "status_code": "duplicate_hard_block",
+                            "msg": error_message,
+                            "duplicate_property_id": existing_prop.id,
+                            "existing_property": {
+                                "id": existing_prop.id,
+                                "property_no": existing_prop.property_no,
+                                "building_name": existing_prop.building_name,
+                                "locality": existing_prop.locality,
+                                "city": existing_prop.city,
+                                "state": existing_prop.state,
+                                "listed_by_name": existing_prop.listed_by_name,
+                                "listed_by_id": existing_prop.listed_by_id,
+                                "listed_by_email": existing_prop.listed_by_email,
+                                "listed_by_contact": existing_prop.listed_by_contact
+                            },
+                        }, status=409)  
+
+            is_dup_flag = True
+            total_dup_count = existing_duplicates.count() + 1
+            existing_duplicates.update(is_duplicate=True)
+            
+            data['is_duplicate'] = is_dup_flag
+        else:
+            # Clean up keys for update so setattr doesn't crash
+            data.pop("id", None)
+            data.pop("property_id", None)
+            
+        # ============================================================
+        # 3. HANDLE AMENITIES & FACILITIES (JSON to String)
+        # ============================================================
+        amenities_str = data.get('amenities', '[]')
+        facilities_str = data.get('nearby_facilities', '[]')
+        
+        try:
+            amenities_list = json.loads(amenities_str) if amenities_str else []
+            data['amenities'] = ', '.join(amenities_list) if amenities_list else ''
+        except:
+            data['amenities'] = ''
+        
+        try:
+            facilities_list = json.loads(facilities_str) if facilities_str else []
+            data['nearby_facilities'] = ', '.join(facilities_list) if facilities_list else ''
+        except:
+            data['nearby_facilities'] = ''
+        
+        # ============================================================
+        # 4. CONVERT NUMERIC FIELDS
+        # ============================================================
+        numeric_fields = [
+            'super_builtup_area', 'builtup_area', 'carpet_area', 'plot_area', 
+            'total_floors', 'bathrooms', 'balconies', 
+            'covered_parking', 'selling_price', 'loan_amount', 
+            'pending_tax_amount', 'manual_brokerage', 'price_per_sqft',
+            'latitude', 'longitude'
+        ]
+   
+        for field in numeric_fields:
+            if data.get(field) and str(data.get(field)).strip() != '':
+                try:
+                    data[field] = float(data[field]) if '.' in str(data[field]) else int(data[field])
+                except:
+                    data[field] = None
+            else:
+                data[field] = None
+        
+        # ============================================================
+        # 5. CONVERT BOOLEAN/CHOICE FIELDS
+        # ============================================================
+        data['property_loan'] = 'yes' if data.get('property_loan') in ['yes', 'Yes', 'true', '1', True, 'on'] else 'no'
+        data['existing_tenants'] = 'yes' if data.get('existing_tenants') in ['yes', 'Yes', 'true', '1', True, 'on'] else 'no'
+        data['any_legal_dispute'] = 'yes' if data.get('any_legal_dispute') in ['yes', 'Yes', 'true', '1', True, 'on'] else 'no'
+        data['government_tax'] = 'yes' if data.get('government_tax') in ['yes', 'Yes', 'true', '1', True, 'on'] else 'no'
+        data['price_negotiable'] = 'yes' if data.get('price_negotiable') in ['yes', 'Yes', 'true', '1', True, 'on'] else 'no'
+        data['open_parking'] = 'Yes' if data.get('open_parking') in ['Yes', 'yes', 'true', '1', True, 'on'] else 'No'
+        data['listed_elsewhere'] = 'Yes' if data.get('listed_elsewhere') in ['Yes', 'yes', 'true', '1', True, 'on'] else 'No'
+
+        # Extract video option before saving property
+        video_option = data.get('video_option')
+
+        # CLEANUP: Remove array/file keys from the 'data' dictionary 
+        # so they don't break the ORM unpack (**data) or setattr loop below
+        keys_to_remove = [k for k in data.keys() if k.endswith('[]') or k.startswith('property_images') or k == 'deleted_images']
+        for k in keys_to_remove:
+            data.pop(k, None)
+        
+        # ============================================================
+        # 6. CREATE OR UPDATE PROPERTY FIRST
+        # ============================================================
+        if is_update:
+            try:
+                property_obj = ResaleResidentialProperty.objects.get(id=property_id)
+                # Dynamically set all processed fields to the existing object
+                for key, value in data.items():
+                    setattr(property_obj, key, value)
+                property_obj.save()
+            except ResaleResidentialProperty.DoesNotExist:
+                return JsonResponse({
+                    "status": "0",
+                    "status_code": "error",
+                    "msg": "Property not found for update"
+                }, status=404)
+        else:
+            property_obj = ResaleResidentialProperty.objects.create(**data)
+
+        # ============================================================
+        # 6.5. HANDLE DELETED IMAGES (DURING UPDATE)
+        # ============================================================
+        if is_update:
+            deleted_image_ids = request.POST.getlist('deleted_images[]')
+            if deleted_image_ids:
+                images_to_delete = ResalePropertyImage.objects.filter(id__in=deleted_image_ids, property=property_obj)
+                for img in images_to_delete:
+                    if img.image:
+                        img.image.delete(save=False) # Delete physical file safely
+                    img.delete() # Delete DB record
+                    
+        # ============================================================
+        # 7. HANDLE IMAGES MULTI-UPLOAD LOGIC (CATEGORY WISE)
+        # ============================================================
+        IMAGE_CATEGORY_FIELDS = {
+            'exterior': 'property_images_exterior[]',
+            'living':   'property_images_living[]',
+            'bedroom':  'property_images_bedroom[]',
+            'kitchen':  'property_images_kitchen[]',
+            'bathroom': 'property_images_bathroom[]',
+            'balcony':  'property_images_balcony[]',
+            'others':   'property_images_others[]',
+        }
+
+        has_categorized_images = any(request.FILES.getlist(field_name) for field_name in IMAGE_CATEGORY_FIELDS.values())
+        
+        if has_categorized_images:
+            saved_count = 0
+            for category, field_name in IMAGE_CATEGORY_FIELDS.items():
+                cat_images = request.FILES.getlist(field_name)
+                for cat_index, img in enumerate(cat_images):
+                    if saved_count >= 20:
+                        break
+                    
+                    try:
+                        ResalePropertyImage.objects.create(
+                            property=property_obj,
+                            image=img,
+                            category=category,
+                            sequence_order=cat_index
+                        )
+                    except TypeError:
+                        ResalePropertyImage.objects.create(
+                            property=property_obj,
+                            image=img
+                        )
+                    saved_count += 1
+        else:
+            images = request.FILES.getlist('property_images')
+            if images:
+                for image in images:
+                    ResalePropertyImage.objects.create(property=property_obj, image=image)
+            else:
+                single_image = request.FILES.get('property_images')
+                if single_image:
+                    ResalePropertyImage.objects.create(property=property_obj, image=single_image)
+        
+        # ============================================================
+        # 8 & 9. HANDLE FLOOR PLAN AND VIDEO
+        # ============================================================
+        floor_plan = request.FILES.get('floor_plan')
+        if floor_plan:
+            property_obj.floor_plan = floor_plan
+            
+        uploaded_video = request.FILES.get('property_video')
+
+        CATEGORY_ORDER = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others']
+        saved_images = list(ResalePropertyImage.objects.filter(property=property_obj))
+        
+        try:
+            saved_images.sort(key=lambda img: (CATEGORY_ORDER.index(img.category), img.sequence_order))
+        except (ValueError, AttributeError):
+            pass 
+            
+        image_paths = [img.image.path for img in saved_images if img.image]
+
+        if len(image_paths) >= 3:
+            from Admin_App.utils import generate_property_slideshow
+            output_relative_path = f"residential_resale/videos/auto_{property_obj.id}.mp4"
+            try:
+                result_path = generate_property_slideshow(image_paths, output_relative_path)
+                if result_path:
+                    ResaleResidentialVideo.objects.update_or_create(
+                        property=property_obj,
+                        source='auto',
+                        defaults={
+                            'video': result_path,
+                            'video_status': 'Done',
+                            'video_url': None
+                        }
+                    )
+            except Exception as video_err:
+                import traceback
+                traceback.print_exc()
+        
+        property_video_link = data.get('property_video_link', '')
+
+        # ============================================================
+        # FIX: CORRECT VIDEO UPDATE LOGIC
+        # ============================================================
+        if video_option == 'upload':
+            if uploaded_video:  # Only update if a NEW file was actually uploaded
+                if uploaded_video.size > 20 * 1024 * 1024:
+                    ResaleResidentialVideo.objects.update_or_create(
+                        property=property_obj,
+                        source='uploaded',
+                        defaults={
+                            'video': None,
+                            'video_status': 'Pending',
+                            'video_url': None
+                        }
+                    )
+                else:
+                    ResaleResidentialVideo.objects.update_or_create(
+                        property=property_obj,
+                        source='uploaded',
+                        defaults={
+                            'video': uploaded_video,
+                            'video_status': 'Done',
+                            'video_url': None
+                        }
+                    )
+
+        elif video_option == 'rm_assisted':
+            ResaleResidentialVideo.objects.update_or_create(
+                property=property_obj,
+                source='rm_assisted',
+                defaults={
+                    'video': None,
+                    'video_url': property_video_link,
+                    'video_status': 'Done'
+                }
+            )
+        
+        # ============================================================
+        # 10. GENERATE AUTO DESCRIPTIONS & FAQS
+        # ============================================================
+        if hasattr(property_obj, 'generate_auto_descriptions'):
+            property_obj.generate_auto_descriptions()
+            
+        property_obj.save()  # Ensure Video & Floor Plan attachments get explicitly saved
+        
+        if hasattr(property_obj, 'generate_auto_faqs'):
+            property_obj.generate_auto_faqs()
+        
+        if is_update:
+            success_msg = "Resale Residential Property Updated Successfully"
+        else:
+            success_msg = "Resale Residential Property Created Successfully"
+            if is_dup_flag:
+                success_msg = f"Property Created Successfully (Note: Similar property exists. This has been flagged as a potential duplicate. Duplicate Group ID: {dup_group_id})"
+        
+        return JsonResponse({
+            "status": "1",
+            "status_code": "success",
+            "msg": success_msg,
+            "property_id": property_obj.id,
+            "property_title": getattr(property_obj, 'property_title', ''),
+            "is_duplicate": is_dup_flag,
+            "duplicate_group_id": dup_group_id,
+            "duplicate_count": total_dup_count,
+        })
+    
+    return JsonResponse({
+        "status": "0",
+        "status_code": "error",
+        "msg": "Invalid request"
+    }, status=400)
+
+############ Views end for ajax for add/edit residential #############################
+
+
 
 def residential_resale_list(request):
     session_id = request.session.get('Admin_id')
@@ -15328,152 +17044,152 @@ def residential_resale_list(request):
 
     admin_obj = Admin_Login.objects.get(id=session_id)
 
-    # # ── Fetch ALL properties (used for KPI stats & chart data) ───────────────
-    # all_properties = (
-    #     ResaleResidentialProperty.objects
-    #     .prefetch_related('images')
-    #     .order_by('-created_at')
-    # )
+    # ── Fetch ALL properties (used for KPI stats & chart data) ───────────────
+    all_properties = (
+        ResaleResidentialProperty.objects
+        .prefetch_related('images')
+        .order_by('-created_at')
+    )
 
-    # # ── Read query params ────────────────────────────────────────────────────
-    # search_query    = request.GET.get('search', '').strip()
-    # prop_type       = request.GET.get('prop_type', '').strip()
-    # bhk_filter      = request.GET.get('bhk', '').strip()
-    # furnish         = request.GET.get('furnish', '').strip()
+    # ── Read query params ────────────────────────────────────────────────────
+    search_query    = request.GET.get('search', '').strip()
+    prop_type       = request.GET.get('prop_type', '').strip()
+    bhk_filter      = request.GET.get('bhk', '').strip()
+    furnish         = request.GET.get('furnish', '').strip()
     # zone_filter     = request.GET.get('zone', '').strip()
-    # ownership       = request.GET.get('ownership', '').strip()
-    # negotiable      = request.GET.get('negotiable', '').strip()
-    # from_date       = request.GET.get('from_date', '').strip()
-    # to_date         = request.GET.get('to_date', '').strip()
+    ownership       = request.GET.get('ownership', '').strip()
+    negotiable      = request.GET.get('negotiable', '').strip()
+    from_date       = request.GET.get('from_date', '').strip()
+    to_date         = request.GET.get('to_date', '').strip()
 
-    # # ── Apply filters ────────────────────────────────────────────────────────
-    # properties = all_properties
+    # ── Apply filters ────────────────────────────────────────────────────────
+    properties = all_properties
 
-    # if search_query:
-    #     properties = properties.filter(
-    #         Q(property_title__icontains=search_query)  |
-    #         Q(city__icontains=search_query)           |
-    #         Q(locality__icontains=search_query)       |
-    #         Q(owner_name__icontains=search_query)     |
-    #         Q(bhk__icontains=search_query)            |
-    #         Q(building_name__icontains=search_query)
-    #     )
+    if search_query:
+        properties = properties.filter(
+            Q(property_title__icontains=search_query)  |
+            Q(city__icontains=search_query)           |
+            Q(locality__icontains=search_query)       |
+            Q(listed_by_name__icontains=search_query)     |
+            Q(bhk__icontains=search_query)            |
+            Q(building_name__icontains=search_query)
+        )
 
-    # if prop_type:
-    #     properties = properties.filter(property_type=prop_type)
+    if prop_type:
+        properties = properties.filter(property_type=prop_type)
 
-    # if bhk_filter:
-    #     properties = properties.filter(bhk=bhk_filter)
+    if bhk_filter:
+        properties = properties.filter(bhk=bhk_filter)
 
-    # if furnish:
-    #     properties = properties.filter(furnishing_type=furnish)
+    if furnish:
+        properties = properties.filter(furnishing_status=furnish)
 
     # if zone_filter:
     #     properties = properties.filter(zone=zone_filter)
 
-    # if ownership:
-    #     properties = properties.filter(ownership_type=ownership)
+    if ownership:
+        properties = properties.filter(ownership_status=ownership)
 
-    # if negotiable:
-    #     properties = properties.filter(price_negotiable=negotiable) # Synced field name
+    if negotiable:
+        properties = properties.filter(price_negotiable=negotiable)
 
-    # if from_date:
-    #     properties = properties.filter(created_at__date__gte=from_date)
+    if from_date:
+        properties = properties.filter(created_at__date__gte=from_date)
 
-    # if to_date:
-    #     properties = properties.filter(created_at__date__lte=to_date)
+    if to_date:
+        properties = properties.filter(created_at__date__lte=to_date)
 
-    # # ── Thumbnail + helper attributes for each filtered property ─────────────
-    # for prop in properties:
-    #     prop.thumbnail = prop.images.first()
+    # ── Thumbnail + helper attributes for each filtered property ─────────────
+    for prop in properties:
+        prop.thumbnail = prop.images.first()
 
-    #     prop.nearby_facilities_list = (
-    #         [f.strip() for f in prop.nearby_facilities.split(',')]
-    #         if prop.nearby_facilities else []
-    #     )
-    #     prop.amenities_list = (
-    #         [a.strip() for a in prop.amenities.split(',')]
-    #         if prop.amenities else []
-    #     )
-    #     prop.image_count = prop.images.count()
-    #     prop.image_urls  = [img.image.url for img in prop.images.all()]
+        prop.nearby_facilities_list = (
+            [f.strip() for f in prop.nearby_facilities.split(',')]
+            if prop.nearby_facilities else []
+        )
+        prop.amenities_list = (
+            [a.strip() for a in prop.amenities.split(',')]
+            if prop.amenities else []
+        )
+        prop.image_count = prop.images.count()
+        prop.image_urls  = [img.image.url for img in prop.images.all()]
 
-    # # ════════════════════════════════════════════════════════════════════════
-    # # KPI STATS (Calculated using correct DB layout keys)
-    # # ════════════════════════════════════════════════════════════════════════
-    # total_count = all_properties.count()
+    # ════════════════════════════════════════════════════════════════════════
+    # KPI STATS (Calculated using exact form model keys: selling_price, furnishing_status, etc.)
+    # ════════════════════════════════════════════════════════════════════════
+    total_count = all_properties.count()
 
-    # # ── Row 1 — Inventory ────────────────────────────────────────────────────
-    # total_negotiable  = all_properties.filter(price_negotiable='yes').count() # Synced
-    # total_furnished   = all_properties.filter(furnishing_type='fully').count()
-    # total_freehold    = all_properties.filter(ownership_type='freehold').count()
-    # total_with_images = all_properties.filter(images__isnull=False).distinct().count()
+    # ── Row 1 — Inventory ────────────────────────────────────────────────────
+    total_negotiable  = all_properties.filter(price_negotiable='yes').count()
+    total_furnished   = all_properties.filter(furnishing_status='fully').count()
+    total_freehold    = all_properties.filter(ownership_status='Self Owned').count()
+    total_with_images = all_properties.filter(images__isnull=False).distinct().count()
 
-    # def pct(part, whole):
-    #     return round(part / whole * 100) if whole else 0
+    def pct(part, whole):
+        return round(part / whole * 100) if whole else 0
 
-    # negotiable_pct = pct(total_negotiable,  total_count)
-    # furnished_pct  = pct(total_furnished,   total_count)
-    # freehold_pct   = pct(total_freehold,    total_count)
-    # images_pct     = pct(total_with_images, total_count)
+    negotiable_pct = pct(total_negotiable,  total_count)
+    furnished_pct  = pct(total_furnished,    total_count)
+    freehold_pct   = pct(total_freehold,     total_count)
+    images_pct     = pct(total_with_images, total_count)
 
-    # # ── Row 2 — Pricing ──────────────────────────────────────────────────────
-    # price_agg = all_properties.aggregate(
-    #     avg      = Avg('expected_price'),
-    #     max_val  = Max('expected_price'),
-    #     min_val  = Min('expected_price'),
-    #     avg_sqft = Avg('price_per_sqft'),
-    #     avg_area = Avg('builtup_area'),
-    # )
-    # avg_price      = price_agg['avg']
-    # max_price      = price_agg['max_val']
-    # min_price      = price_agg['min_val']
-    # avg_price_sqft = price_agg['avg_sqft']
-    # avg_builtup    = price_agg['avg_area']
-    # total_with_loan = all_properties.filter(loan_on_property='yes').count() # Synced
+    # ── Row 2 — Pricing (Using selling_price instead of expected_price) ───────
+    price_agg = all_properties.aggregate(
+        avg      = Avg('selling_price'),
+        max_val  = Max('selling_price'),
+        min_val  = Min('selling_price'),
+        avg_sqft = Avg('price_per_sqft'),
+        avg_area = Avg('builtup_area'),
+    )
+    avg_price      = price_agg['avg']
+    max_price      = price_agg['max_val']
+    min_price      = price_agg['min_val']
+    avg_price_sqft = price_agg['avg_sqft']
+    avg_builtup    = price_agg['avg_area']
+    total_with_loan = all_properties.filter(property_loan='yes').count()
 
-    # # ── Row 3 — Legal & Status ───────────────────────────────────────────────
-    # no_dispute_count  = all_properties.filter(any_legal_dispute='no').count() # Synced
-    # dispute_count     = all_properties.filter(any_legal_dispute='yes').count() # Synced
-    # tax_pending_count = all_properties.filter(government_tax_dues='yes').count() # Synced
-    # tenant_occupied   = all_properties.filter(existing_tenants='yes').count() # Synced
-    # premium_count     = all_properties.filter(expected_price__gte=10000000).count()   # >= 1 Cr
+    # ── Row 3 — Legal & Status (Using government_tax instead of government_tax_dues) ───
+    no_dispute_count  = all_properties.filter(any_legal_dispute='no').count()
+    dispute_count     = all_properties.filter(any_legal_dispute='yes').count()
+    tax_pending_count = all_properties.filter(government_tax='yes').count()
+    tenant_occupied   = all_properties.filter(existing_tenants='yes').count()
+    premium_count     = all_properties.filter(selling_price__gte=10000000).count()    # >= 1 Cr
 
-    # # ── Row 4 — Listing Quality ──────────────────────────────────────────────
-    # with_video_count = (
-    #     all_properties
-    #     .exclude(property_video__isnull=True)
-    #     .exclude(property_video='')
-    #     .count()
-    # )
-    # with_floor_plan = (
-    #     all_properties
-    #     .exclude(floor_plan__isnull=True)
-    #     .exclude(floor_plan='')
-    #     .count()
-    # )
-    # with_owner_count = (
-    #     all_properties
-    #     .exclude(owner_name__isnull=True)
-    #     .exclude(owner_name='')
-    #     .count()
-    # )
-    # budget_count = all_properties.filter(expected_price__lt=3000000).count()          # < 30 L
+    # ── Row 4 — Listing Quality ──────────────────────────────────────────────
+    with_video_count = (
+        all_properties
+        .exclude(property_video__isnull=True)
+        .exclude(property_video='')
+        .count()
+    )
+    with_floor_plan = (
+        all_properties
+        .exclude(floor_plan__isnull=True)
+        .exclude(floor_plan='')
+        .count()
+    )
+    with_owner_count = (
+        all_properties
+        .exclude(listed_by_name__isnull=True)
+        .exclude(listed_by_name='')
+        .count()
+    )
+    budget_count = all_properties.filter(selling_price__lt=3000000).count()            # < 30 L
 
-    # # ── Charts ───────────────────────────────────────────────────────────────
-    # property_type_counts = dict(
-    #     all_properties.values('property_type')
-    #     .annotate(count=Count('id'))
-    #     .values_list('property_type', 'count')
-    # )
-    # bhk_counts = dict(
-    #     all_properties.values('bhk')
-    #     .annotate(count=Count('id'))
-    #     .values_list('bhk', 'count')
-    # )
-    # fully_furnished = all_properties.filter(furnishing_type='fully').count()
-    # semi_furnished  = all_properties.filter(furnishing_type='semi').count()
-    # unfurnished     = all_properties.filter(furnishing_type='unfurnished').count()
+    # ── Charts ───────────────────────────────────────────────────────────────
+    property_type_counts = dict(
+        all_properties.values('property_type')
+        .annotate(count=Count('id'))
+        .values_list('property_type', 'count')
+    )
+    bhk_counts = dict(
+        all_properties.values('bhk')
+        .annotate(count=Count('id'))
+        .values_list('bhk', 'count')
+    )
+    fully_furnished = all_properties.filter(furnishing_status='fully').count()
+    semi_furnished  = all_properties.filter(furnishing_status='semi').count()
+    unfurnished     = all_properties.filter(furnishing_status='unfurnished').count()
 
     # zone_counts = dict(
     #     all_properties.values('zone')
@@ -15481,101 +17197,101 @@ def residential_resale_list(request):
     #     .values_list('zone', 'count')
     # )
 
-    # # ── Unique values for Select2 searchable dropdowns ───────────────────────
-    # unique_prop_types  = list(
-    #     all_properties.values_list('property_type', flat=True)
-    #     .distinct().order_by('property_type')
-    # )
-    # unique_bhk_values  = list(
-    #     all_properties.values_list('bhk', flat=True)
-    #     .distinct().order_by('bhk')
-    # )
+    # ── Unique values for Select2 searchable dropdowns ───────────────────────
+    unique_prop_types  = list(
+        all_properties.values_list('property_type', flat=True)
+        .distinct().order_by('property_type')
+    )
+    unique_bhk_values  = list(
+        all_properties.values_list('bhk', flat=True)
+        .distinct().order_by('bhk')
+    )
     # unique_zones       = list(
     #     all_properties.values_list('zone', flat=True)
     #     .distinct().order_by('zone')
     # )
-    # unique_cities      = list(
-    #     all_properties.values_list('city', flat=True)
-    #     .distinct().order_by('city')
-    # )
+    unique_cities      = list(
+        all_properties.values_list('city', flat=True)
+        .distinct().order_by('city')
+    )
 
-    # try:
-    #     uploaded_files = (
-    #         all_properties
-    #         .exclude(upload_file_name__isnull=True)
-    #         .exclude(upload_file_name='')
-    #         .values_list('upload_file_name', flat=True)
-    #         .distinct()
-    #     )
-    # except Exception:
-    #     uploaded_files = []
+    try:
+        uploaded_files = (
+            all_properties
+            .exclude(upload_file_name__isnull=True)
+            .exclude(upload_file_name='')
+            .values_list('upload_file_name', flat=True)
+            .distinct()
+        )
+    except Exception:
+        uploaded_files = []
 
     # ── Context ──────────────────────────────────────────────────────────────
     context = {
         'admin_obj'  : admin_obj,
-        # 'properties' : properties,
+        'properties' : properties,
 
-        # # Counts
-        # 'filtered_count' : properties.count(),
-        # 'total_count'    : total_count,
+        # Counts
+        'filtered_count' : properties.count(),
+        'total_count'    : total_count,
 
-        # # Active search params
-        # 'search_query'   : search_query,
-        # 'prop_type_query': prop_type,
-        # 'bhk_query'      : bhk_filter,
-        # 'furnish_query'  : furnish,
-        # 'zone_query'     : zone_filter,
-        # 'ownership_query': ownership,
-        # 'negotiable_query': negotiable,
-        # 'from_date'      : from_date,
-        # 'to_date'        : to_date,
+        # Active search params
+        'search_query'   : search_query,
+        'prop_type_query': prop_type,
+        'bhk_query'      : bhk_filter,
+        'furnish_query'  : furnish,
+        
+        'ownership_query': ownership,
+        'negotiable_query': negotiable,
+        'from_date'      : from_date,
+        'to_date'        : to_date,
 
-        # # Row 1 — Inventory
-        # 'total_negotiable' : total_negotiable,
-        # 'total_furnished'  : total_furnished,
-        # 'total_freehold'   : total_freehold,
-        # 'total_with_images': total_with_images,
-        # 'negotiable_pct'   : negotiable_pct,
-        # 'furnished_pct'    : furnished_pct,
-        # 'freehold_pct'     : freehold_pct,
-        # 'images_pct'       : images_pct,
+        # Row 1 — Inventory
+        'total_negotiable' : total_negotiable,
+        'total_furnished'  : total_furnished,
+        'total_freehold'   : total_freehold,
+        'total_with_images': total_with_images,
+        'negotiable_pct'   : negotiable_pct,
+        'furnished_pct'    : furnished_pct,
+        'freehold_pct'     : freehold_pct,
+        'images_pct'       : images_pct,
 
-        # # Row 2 — Pricing
-        # 'avg_price'       : avg_price,
-        # 'max_price'       : max_price,
-        # 'min_price'       : min_price,
-        # 'avg_price_sqft'  : avg_price_sqft,
-        # 'total_with_loan' : total_with_loan,
+        # Row 2 — Pricing
+        'avg_price'       : avg_price,
+        'max_price'       : max_price,
+        'min_price'       : min_price,
+        'avg_price_sqft'  : avg_price_sqft,
+        'total_with_loan' : total_with_loan,
 
-        # # Row 3 — Legal
-        # 'no_dispute_count' : no_dispute_count,
-        # 'dispute_count'    : dispute_count,
-        # 'tax_pending_count': tax_pending_count,
-        # 'tenant_occupied'  : tenant_occupied,
-        # 'avg_builtup'      : avg_builtup,
-        # 'premium_count'    : premium_count,
+        # Row 3 — Legal
+        'no_dispute_count' : no_dispute_count,
+        'dispute_count'    : dispute_count,
+        'tax_pending_count': tax_pending_count,
+        'tenant_occupied'  : tenant_occupied,
+        'avg_builtup'      : avg_builtup,
+        'premium_count'    : premium_count,
 
-        # # Row 4 — Quality
-        # 'with_video_count': with_video_count,
-        # 'with_floor_plan' : with_floor_plan,
-        # 'with_owner_count': with_owner_count,
-        # 'budget_count'    : budget_count,
+        # Row 4 — Quality
+        'with_video_count': with_video_count,
+        'with_floor_plan' : with_floor_plan,
+        'with_owner_count': with_owner_count,
+        'budget_count'    : budget_count,
 
-        # # Charts
-        # 'property_type_counts': property_type_counts,
-        # 'bhk_counts'          : bhk_counts,
-        # 'fully_furnished'     : fully_furnished,
-        # 'semi_furnished'      : semi_furnished,
-        # 'unfurnished'         : unfurnished,
-        # 'zone_counts'         : zone_counts,
+        # Charts
+        'property_type_counts': property_type_counts,
+        'bhk_counts'          : bhk_counts,
+        'fully_furnished'     : fully_furnished,
+        'semi_furnished'      : semi_furnished,
+        'unfurnished'         : unfurnished,
+        
 
-        # # Select2 unique options
-        # 'unique_prop_types' : unique_prop_types,
-        # 'unique_bhk_values' : unique_bhk_values,
-        # 'unique_zones'      : unique_zones,
-        # 'unique_cities'     : unique_cities,
+        # Select2 unique options
+        'unique_prop_types' : unique_prop_types,
+        'unique_bhk_values' : unique_bhk_values,
 
-        # 'uploaded_files': uploaded_files,
+        'unique_cities'     : unique_cities,
+
+        'uploaded_files': uploaded_files,
     }
 
     return render(request, 'admin_user/Reports/Resale/residential_resale_list.html', context)
@@ -15677,10 +17393,10 @@ def resale_residential_edit(request, id):
         prop.complete_address = request.POST.get('complete_address')
 
         # Owner Contact Info
-        prop.owner_name         = request.POST.get('owner_name')
-        prop.owner_contact      = request.POST.get('owner_contact')
-        prop.owner_email        = request.POST.get('owner_email')
-        prop.owner_role         = request.POST.get('owner_role')
+        prop.listed_by_name         = request.POST.get('listed_by_name')
+        prop.listed_by_phone      = request.POST.get('listed_by_phone')
+        prop.listed_by_email        = request.POST.get('listed_by_email')
+        prop.listed_by_role         = request.POST.get('listed_by_role')
         prop.residential_status = request.POST.get('residential_status')
 
         # File Upload Fields
@@ -15713,13 +17429,33 @@ def resale_residential_edit(request, id):
     prop_amenities_list = [a.strip() for a in prop.amenities.split(',')] if prop.amenities else []
     existing_images = prop.images.all()
 
+    videos_qs = prop.video.all().order_by('-created_at')
+
+    uploaded_video = videos_qs.filter(source='uploaded').first()
+    auto_video     = videos_qs.filter(source='auto').first()
+    rm_video       = videos_qs.filter(source='rm_assisted').first()
+
+    # "video_option" only decides which radio button + wrapper is active by default —
+    # it doesn't hide the other saved videos, those show in their own tabs regardless.
+    latest_video = videos_qs.first()
+    video_option_map = {'uploaded': 'upload', 'auto': 'auto', 'rm_assisted': 'rm_assisted'}
+    video_option = video_option_map.get(latest_video.source, 'upload') if latest_video else 'upload'
+    
+    user_obj = User_Details.objects.all()
+
+
     context = {
         "prop": prop,
         "prop_facilities_list": prop_facilities_list,
         "prop_amenities_list": prop_amenities_list,
         "existing_images": existing_images,
+        "categories_tuple" : ResalePropertyImage.CATEGORY_CHOICES,
         "admin_obj": uploader['admin_obj'],
-        "user_obj": uploader['user_obj'],
+        "user_obj":user_obj,
+        'uploaded_video': uploaded_video,
+        'auto_video': auto_video,
+        'rm_video': rm_video,
+        'video_option': video_option,
     }
     return render(request, 'admin_user/Reports/Resale/residential_resale_edit.html', context)
 
@@ -16102,6 +17838,7 @@ def generate_row_hash(row_values):
 
 
 
+
 def resale_residential_import_excel(request):
     session_id = request.session.get('Admin_id')
     if not session_id:
@@ -16134,217 +17871,545 @@ def resale_residential_import_excel(request):
         wb = openpyxl.load_workbook(excel_file, data_only=True)
         ws = wb.active
 
-        # Strict sequential sequence mapping array matching your database schema layout
-        expected_headers = [
-            'property_title', 'property_type', 'zone', 'society_type', 'water_type', 'furnishing_type', 
-            'age_of_property', 'facing_direction', 'bhk', 'bathrooms', 'balconies', 
-            'covered_parking', 'open_parking', 'builtup_area', 'carpet_area', 'plot_area', 
-            'floor_no', 'total_floors', 'ownership_type', 'num_owners', 'loan_on_property', 
-            'loan_amount', 'existing_tenants', 'tenant_details', 'any_legal_dispute', 
-            'dispute_details', 'government_tax_dues', 'pending_tax_amount', 'expected_price', 
-            'price_per_sqft', 'price_negotiable', 'brokerage', 'brokerage_percentage', 
-            'manual_brokerage', 'property_description', 'nearby_facilities', 'amenities', 
-            'city', 'locality', 'building_name', 'complete_address', 'owner_name', 
-            'owner_contact', 'owner_email', 'owner_role', 'residential_status'
-        ]
+        def normalize_header(h):
+            if not h: return ""
+            s = str(h).lower().strip().replace('\n', ' ')
+            s = re.sub(r'\(.*?\)', '', s).replace('*', '').strip()
+            return s
 
-        # FIXED: Look at Row 2 (ws[2]) for headers because Row 1 contains the merged Section titles!
-        file_headers = [str(cell.value).strip().lower() for cell in ws[2] if cell.value is not None]
+        # Master mapping alias list matching BOTH Export and Template files
+        HEADER_MAP_ALIASES = {
+            'property id': 'id',
+            'listing status': 'listing_status',
+            'approval status': 'approval_status',
+            'listed by type': 'listed_by_type',
+            'assigned to': 'assigned_to',
+            'listed by id': 'listed_by_id',
+            'listed by name': 'listed_by_name',
+            'listed by email': 'listed_by_email',
+            'listed by contact': 'listed_by_contact',
+            'listed by role': 'listed_by_role',
+            'property title': 'property_title',
+            'property type': 'property_type',
+            'flat/house/unit no': 'property_no',
+            'flat/house no/unit no': 'property_no', 
+            'society type': 'society_type',
+            'tower/wing number': 'wing_no',
+            'floor no': 'floor_no',
+            'water type': 'water_type',
+            'furnishing status': 'furnishing_status',
+            'age of property': 'property_age',
+            'facing direction': 'facing_direction',
+            'occupancy status': 'occupancy_status',
+            'bhk': 'bhk',
+            'super built-up area': 'super_builtup_area',
+            'built-up area': 'builtup_area',
+            'carpet area': 'carpet_area',
+            'plot area': 'plot_area',
+            'building configuration': 'building_configuration',
+            'total floors constructed': 'total_floors',
+            'bathrooms': 'bathrooms',
+            'balconies': 'balconies',
+            'covered parking': 'covered_parking',
+            'open parking available?': 'open_parking',
+            'no. of owners': 'no_of_owners',
+            'ownership status': 'ownership_status',
+            'ownership document type': 'ownership_document_type',
+            'title clarity status': 'title_clarity_status',
+            'encumbrance status': 'encumbrance_status',
+            'loan on property?': 'property_loan',
+            'loan amount': 'loan_amount',
+            'existing tenants?': 'existing_tenants',
+            'tenant details': 'tenant_details',
+            'any legal dispute?': 'any_legal_dispute',
+            'dispute details': 'dispute_details',
+            'government tax dues?': 'government_tax',
+            'pending tax amount': 'pending_tax_amount',
+            'sanctioning / approving authority': 'sanctioning_authority',
+            'selling price': 'selling_price',
+            'price per sq.ft': 'price_per_sqft',
+            'selling price negotiable?': 'price_negotiable',
+            'brokerage': 'brokerage_percentage',
+            'enter fixed brokerage': 'manual_brokerage',
+            'fixed brokerage amount': 'manual_brokerage', 
+            'city': 'city',
+            'locality': 'locality',
+            'building/society name': 'building_name',
+            'complete address': 'address',
+            'pincode': 'pincode',  # <--- NEW FIELD ADDED HERE
+            'property landmark': 'property_landmark',
+            'state': 'state',
+            'google maps link': 'google_maps_link',
+            'latitude': 'latitude',
+            'longitude': 'longitude',
+            'amenities': 'amenities',
+            'nearby facilities': 'nearby_facilities',
+            'property description': 'user_description', 
+            'is property already listed elsewhere?': 'listed_elsewhere',
+            'listed elsewhere?': 'listed_elsewhere', 
+            'portal name': 'portal_name'
+        }
 
-        missing_fields = [f for f in expected_headers if f not in file_headers]
-        if missing_fields:
+        # DYNAMIC HEADER DETECTION (Handles both Templates & Exports)
+        row1_vals = [normalize_header(cell.value) for cell in ws[1]]
+        row2_vals = [normalize_header(cell.value) for cell in ws[2]] if ws.max_row >= 2 else []
+
+        r1_matches = sum(1 for h in row1_vals if h in HEADER_MAP_ALIASES)
+        r2_matches = sum(1 for h in row2_vals if h in HEADER_MAP_ALIASES)
+
+        if r1_matches > r2_matches and r1_matches > 5:
+            target_headers = row1_vals
+            data_min_row = 2
+        else:
+            target_headers = row2_vals
+            data_min_row = 3
+
+        col_map = {}
+        for idx, norm_header in enumerate(target_headers):
+            if norm_header in HEADER_MAP_ALIASES:
+                col_map[HEADER_MAP_ALIASES[norm_header]] = idx
+
+        required_keys = ['property_type', 'property_no', 'selling_price', 'locality']
+        missing_keys = [k for k in required_keys if k not in col_map]
+        if missing_keys:
             return JsonResponse({
                 'status': 'error',
-                'message': f'Required column headers missing in Row 2: {", ".join(missing_fields)}'
+                'message': f'Required core columns missing or misnamed in headers: {", ".join(missing_keys)}'
             })
 
-        # FIXED: Map column indexes based on Row 2 fields
-        header_map = {str(cell.value).strip().lower(): idx for idx, cell in enumerate(ws[2]) if cell.value is not None}
-
-        file_signature_match = ResaleResidentialProperty.objects.filter(
-            uploaded_by_email=current_uploader_email,
-            upload_file_name=file_name_string
-        ).exists()
-
+        # =========================================================
+        # ROW TRACKING LOG
+        # =========================================================
         imported = 0
         skipped = 0
         duplicate_records_skipped = 0
+        unregistered_users_skipped = 0
+        unregistered_identifiers = set()
+        row_log = []
 
-        # FIXED: Changed min_row=3 because actual row property details start on Row 3
-        for row_idx, row in enumerate(ws.iter_rows(min_row=3, values_only=True), start=3):
+        STATUS_COLORS = {
+            'imported':     '#16a34a',  # green
+            'duplicate':    '#d97706',  # amber
+            'unregistered': '#dc2626',  # red
+            'error':        '#dc2626',  # red
+            'blank':        '#9ca3af',  # gray
+        }
+
+        def log_line(status_key, icon, row_idx, text):
+            color = STATUS_COLORS.get(status_key, '#374151')
+            return (row_idx, f"<span style='color:{color};'>{icon} <strong>Row {row_idx}:</strong> {text}</span>")
+
+        for row_idx, row in enumerate(ws.iter_rows(min_row=data_min_row, values_only=True), start=data_min_row):
             if not any(row):
+                row_log.append(log_line('blank', '◻', row_idx, "Skipped (blank row)."))
                 continue
 
             try:
-                # Direct safe indexing assignment through map positions
-                p_title      = row[header_map['property_title']]
-                p_type       = row[header_map['property_type']]
-                zone         = row[header_map['zone']]
-                soc_type     = row[header_map['society_type']]
-                wat_type     = row[header_map['water_type']]
-                furnish      = row[header_map['furnishing_type']]
-                age          = row[header_map['age_of_property']]
-                facing_dir   = row[header_map['facing_direction']]
-                bhk          = row[header_map['bhk']]
-                baths        = row[header_map['bathrooms']]
-                balconies    = row[header_map['balconies']]
-                cov_parking  = row[header_map['covered_parking']]
-                op_parking   = row[header_map['open_parking']]
-                builtup      = row[header_map['builtup_area']]
-                carpet       = row[header_map['carpet_area']]
-                plot         = row[header_map['plot_area']]
-                floor_no     = row[header_map['floor_no']]
-                tot_floors   = row[header_map['total_floors']]
-                ownership    = row[header_map['ownership_type']]
-                num_owners   = row[header_map['num_owners']]
-                loan_on_prop = row[header_map['loan_on_property']]
-                loan_amt     = row[header_map['loan_amount']]
-                tenants      = row[header_map['existing_tenants']]
-                ten_details  = row[header_map['tenant_details']]
-                dispute      = row[header_map['any_legal_dispute']]
-                disp_details = row[header_map['dispute_details']]
-                tax_dues     = row[header_map['government_tax_dues']]
-                tax_amt      = row[header_map['pending_tax_amount']]
-                price        = row[header_map['expected_price']]
-                price_sqft   = row[header_map['price_per_sqft']]
-                negotiable   = row[header_map['price_negotiable']]
-                brokerage    = row[header_map['brokerage']]
-                brok_pct     = row[header_map['brokerage_percentage']]
-                man_brok     = row[header_map['manual_brokerage']]
-                description  = row[header_map['property_description']]
-                facilities   = row[header_map['nearby_facilities']]
-                amenities    = row[header_map['amenities']]
-                city         = row[header_map['city']]
-                locality     = row[header_map['locality']]
-                bld_name     = row[header_map['building_name']]
-                address      = row[header_map['complete_address']]
-                own_name     = row[header_map['owner_name']]
-                own_cont     = row[header_map['owner_contact']]
-                own_email    = row[header_map['owner_email']]
-                own_role     = row[header_map['owner_role']]
-                res_status   = row[header_map['residential_status']]
+                def get_val(key, default=''):
+                    if key in col_map:
+                        v = row[col_map[key]]
+                        if isinstance(v, float) and v.is_integer():
+                            v = int(v) 
+                        return str(v).strip() if v is not None and str(v).strip().lower() != 'none' else default
+                    return default
+                
+                r_id             = get_val('id', None)
+                l_type           = get_val('listed_by_type')
+                l_assigned       = get_val('assigned_to')
+                l_id             = get_val('listed_by_id')
+                l_name           = get_val('listed_by_name')
+                l_email          = get_val('listed_by_email')
+                l_cont           = get_val('listed_by_contact')
+                l_role           = get_val('listed_by_role')
+                
+                p_title          = get_val('property_title')
+                p_type           = get_val('property_type')
+                p_no             = get_val('property_no')
+                soc_type         = get_val('society_type')
+                wing             = get_val('wing_no')
+                wat_type         = get_val('water_type')
+                furn             = get_val('furnishing_status')
+                p_age            = get_val('property_age')
+                face             = get_val('facing_direction')
+                occ              = get_val('occupancy_status')
+                fl_no            = get_val('floor_no')
+                
+                bhk              = get_val('bhk')
+                sb_area          = get_val('super_builtup_area')
+                b_area           = get_val('builtup_area')
+                c_area           = get_val('carpet_area')
+                plot             = get_val('plot_area')
+                bldg_cfg         = get_val('building_configuration')
+                tot_fl           = get_val('total_floors')
+                baths            = get_val('bathrooms')
+                balcs            = get_val('balconies')
+                cov_pk           = get_val('covered_parking')
+                opn_pk           = get_val('open_parking')
+                
+                own_no           = get_val('no_of_owners')
+                own_stat         = get_val('ownership_status')
+                own_doc          = get_val('ownership_document_type')
+                tit_clar         = get_val('title_clarity_status')
+                encum            = get_val('encumbrance_status')
+                p_loan           = get_val('property_loan', 'no').lower()
+                loan_amt         = get_val('loan_amount')
+                ex_ten           = get_val('existing_tenants', 'no').lower()
+                ten_det          = get_val('tenant_details')
+                legal_disp       = get_val('any_legal_dispute', 'no').lower()
+                disp_det         = get_val('dispute_details')
+                gov_tax          = get_val('government_tax', 'no').lower()
+                tax_amt          = get_val('pending_tax_amount')
+                sanc_auth        = get_val('sanctioning_authority')
+                
+                s_price          = get_val('selling_price')
+                p_sqft           = get_val('price_per_sqft')
+                neg              = get_val('price_negotiable', 'yes').lower()
+                brok             = get_val('brokerage_percentage')
+                man_brok         = get_val('manual_brokerage')
+                
+                city             = get_val('city')
+                local            = get_val('locality')
+                bldg_nm          = get_val('building_name')
+                address          = get_val('address')
+                pin_code         = get_val('pincode')  # <--- NEW DATA EXTRACTION
+                landmark         = get_val('property_landmark')
+                state            = get_val('state')
+                g_link           = get_val('google_maps_link')
+                lat              = get_val('latitude')
+                lng              = get_val('longitude')
+                
+                facils           = get_val('nearby_facilities')
+                amens            = get_val('amenities')
+                usr_desc         = get_val('user_description')
+                
+                l_else           = get_val('listed_elsewhere')
+                portal           = get_val('portal_name')
+                l_stat           = get_val('listing_status', 'Draft')
+                app_stat         = get_val('approval_status', 'Pending')
 
-                # Strict mandatory field checks
-                if not all([p_type, bhk, builtup, price, city, locality, address, own_name, own_cont, own_email]):
+                if not all([p_type, p_no, bhk, s_price, city, local]):
                     skipped += 1
+                    row_log.append(log_line('error', '✖', row_idx, "Skipped (Missing mandatory fields: Type, Unit No, BHK, Price, City, Locality)."))
                     continue
 
-                # Fallback decimal casting wrappers to isolate data type validation anomalies
-                try: builtup_val = float(builtup)
-                except (ValueError, TypeError): builtup_val = 0.0
+                if l_id or l_email or l_cont or l_role:
+                    is_registered = False
+                    try:
+                        if l_id and User_Details.objects.filter(user_id=l_id).exists():
+                            is_registered = True
+                        elif l_email and User_Details.objects.filter(user_email=l_email).exists():
+                            is_registered = True
+                        elif l_cont and User_Details.objects.filter(user_phone=l_cont).exists():
+                            is_registered = True
+                        elif l_role and User_Details.objects.filter(user_role=l_role).exists():
+                            is_registered = True
+                    except Exception:
+                        pass 
 
-                try: carpet_val = float(carpet) if carpet else 0.0
-                except (ValueError, TypeError): carpet_val = 0.0
+                    if not is_registered:
+                        try:
+                            if l_id and Admin_Login.objects.filter(id=l_id).exists():
+                                is_registered = True
+                        except ValueError:
+                            pass 
+                        try:
+                            if not is_registered and l_email and Admin_Login.objects.filter(email=l_email).exists():
+                                is_registered = True
+                        except Exception: pass
+                        try:
+                            if not is_registered and l_cont and Admin_Login.objects.filter(phone=l_cont).exists():
+                                is_registered = True
+                        except Exception: pass
+                        try:
+                            if not is_registered and l_role and Admin_Login.objects.filter(role=l_role).exists():
+                                is_registered = True
+                        except Exception: pass
 
-                try: price_val = float(price)
-                except (ValueError, TypeError): price_val = 0.0
+                    if not is_registered:
+                        unregistered_users_skipped += 1
+                        bad_identifier = str(l_id or l_email or l_name or l_cont or l_role)
+                        unregistered_identifiers.add(bad_identifier)
+                        row_log.append(log_line('unregistered', '✖', row_idx, f"Skipped (Unregistered User: {bad_identifier})."))
+                        continue
 
-                try: plot_val = float(plot) if plot else None
-                except (ValueError, TypeError): plot_val = None
+                try: sb_val = Decimal(str(sb_area)) if sb_area else None
+                except Exception: sb_val = None
+                try: b_val = Decimal(str(b_area)) if b_area else 0.0
+                except Exception: b_val = 0.0
+                try: c_val = Decimal(str(c_area)) if c_area else 0.0
+                except Exception: c_val = 0.0
+                try: p_val = Decimal(str(plot)) if plot else None
+                except Exception: p_val = None
+                try: price_val = Decimal(str(s_price))
+                except Exception: price_val = 0.0
+                try: p_sqft_val = Decimal(str(p_sqft)) if p_sqft else None
+                except Exception: p_sqft_val = None
+                try: loan_val = Decimal(str(loan_amt)) if loan_amt else None
+                except Exception: loan_val = None
+                try: tax_val = Decimal(str(tax_amt)) if tax_amt else None
+                except Exception: tax_val = None
+                try: m_brok_val = int(float(man_brok)) if man_brok else 0
+                except Exception: m_brok_val = 0
+                try: fn_val = int(float(fl_no)) if fl_no else 1
+                except Exception: fn_val = 1
+                try: tf_val = int(float(tot_fl)) if tot_fl else 1
+                except Exception: tf_val = 1
+                try: baths_val = int(float(baths)) if baths else 0
+                except Exception: baths_val = 0
+                try: balcs_val = int(float(balcs)) if balcs else 0
+                except Exception: balcs_val = 0
+                try: c_pk_val = int(float(cov_pk)) if cov_pk else 0
+                except Exception: c_pk_val = 0
 
-                try: loan_val = float(loan_amt) if loan_amt else None
-                except (ValueError, TypeError): loan_val = None
-
-                try: tax_val = float(tax_amt) if tax_amt else None
-                except (ValueError, TypeError): tax_val = None
-
-                try: price_sqft_val = float(price_sqft) if price_sqft else None
-                except (ValueError, TypeError): price_sqft_val = None
-
-                # Duplication guard trace
-                is_row_duplicate = ResaleResidentialProperty.objects.filter(
-                    property_type=str(p_type).strip().lower(),
-                    bhk=str(bhk).strip().lower(),
-                    builtup_area=builtup_val,
-                    expected_price=price_val,
-                    locality=str(locality).strip(),
-                    owner_contact=str(own_cont).strip()
-                ).exists()
-
-                if is_row_duplicate:
-                    duplicate_records_skipped += 1
-                    continue
-
-                # Build instance model properties matching your structural database schema constraints
-                prop = ResaleResidentialProperty(
-                    property_title=str(p_title).strip() if p_title and str(p_title).strip().lower() != 'auto generated by system' else None,
-                    property_type=str(p_type).strip().lower(),
-                    zone=str(zone).strip().lower() if zone else '',
-                    society_type=str(soc_type).strip().lower() if soc_type else '',
-                    water_type=str(wat_type).strip().lower() if wat_type else '',
-                    furnishing_type=str(furnish).strip().lower() if furnish else '',
-                    age_of_property=str(age).strip() if age else '',
-                    facing_direction=str(facing_dir).strip() if facing_dir else '',
-                    bhk=str(bhk).strip().lower(),
-                    bathrooms=int(baths) if baths else 1,
-                    balconies=int(balconies) if balconies else 0,
-                    covered_parking=int(cov_parking) if cov_parking else 0,
-                    open_parking=int(op_parking) if op_parking else 0,
-                    builtup_area=builtup_val,
-                    carpet_area=carpet_val,
-                    plot_area=plot_val,
-                    floor_no=int(floor_no) if floor_no else 0,
-                    total_floors=int(tot_floors) if tot_floors else 1,
-                    ownership_type=str(ownership).strip().lower() if ownership else 'freehold',
-                    num_owners=str(num_owners).strip() if num_owners else '1',
-                    loan_on_property=str(loan_on_prop).strip().lower() if loan_on_prop else 'no',
-                    loan_amount=loan_val,
-                    existing_tenants=str(tenants).strip().lower() if tenants else 'no',
-                    tenant_details=str(ten_details).strip() if ten_details else None,
-                    any_legal_dispute=str(dispute).strip().lower() if dispute else 'no',
-                    dispute_details=str(disp_details).strip() if disp_details else None,
-                    government_tax_dues=str(tax_dues).strip().lower() if tax_dues else 'no',
-                    pending_tax_amount=tax_val,
-                    expected_price=price_val,
-                    price_per_sqft=price_sqft_val,
-                    price_negotiable=str(negotiable).strip().lower() if negotiable else 'yes',
-                    brokerage=str(brokerage).strip() if brokerage else None,
-                    brokerage_percentage=str(brok_pct).strip() if brok_pct else None,
-                    manual_brokerage=str(man_brok).strip() if man_brok else None,
-                    property_description=str(description).strip() if description else '',
-                    nearby_facilities=str(facilities).strip() if facilities else '',
-                    amenities=str(amenities).strip() if amenities else '',
-                    city=str(city).strip(),
-                    locality=str(locality).strip(),
-                    building_name=str(bld_name).strip() if bld_name else None,
-                    complete_address=str(address).strip(),
-                    owner_name=str(own_name).strip(),
-                    owner_contact=str(own_cont).strip(),
-                    owner_email=str(own_email).strip(),
-                    owner_role=str(own_role).strip() if own_role else 'Owner',
-                    residential_status=str(res_status).strip().lower() if res_status else 'resident',
-                    
-                    # Systemic session context metadata strings
-                    uploaded_by_name=current_uploader_name,
-                    uploaded_by_email=current_uploader_email,
-                    uploaded_by_contact=current_uploader_contact,
-                    uploaded_by_role=current_uploader_role,
-                    upload_file_name=file_name_string
+                # =========================================================
+                # BULLETPROOF DUPLICATION ENGINE
+                # =========================================================
+                duplicate_query = ResaleResidentialProperty.objects.filter(
+                    property_type__iexact=str(p_type).strip(),
+                    bhk__iexact=str(bhk).strip(),
+                    property_no__iexact=str(p_no).strip(),
+                    locality__iexact=str(local).strip(),
+                    city__iexact=str(city).strip()
                 )
+
+                user_q = Q()
+                if l_id: user_q |= Q(listed_by_id=l_id)
+                if l_email: user_q |= Q(listed_by_email=l_email)
+                if l_cont: user_q |= Q(listed_by_contact=l_cont)
+                
+                if user_q:
+                    duplicate_query = duplicate_query.filter(user_q)
+                elif l_name:
+                    duplicate_query = duplicate_query.filter(listed_by_name__iexact=str(l_name).strip())
+
+                is_row_duplicate = duplicate_query.exists()
+                is_update = False
+
+                if r_id and ResaleResidentialProperty.objects.filter(id=r_id).exists():
+                    existing_prop = ResaleResidentialProperty.objects.get(id=r_id)
+
+                    # String Field comparisons
+                    field_checks = [
+                        ('property_type', p_type),
+                        ('property_no', p_no),
+                        ('bhk', bhk),
+                        ('city', city),
+                        ('locality', local),
+                        ('property_title', p_title),
+                        ('address', address),
+                        ('pincode', pin_code),  # <--- NEW FIELD CHECK FOR UPDATES
+                        ('building_name', bldg_nm),
+                        ('listing_status', l_stat),
+                        ('approval_status', app_stat),
+                    ]
+                    
+                    is_unchanged = True
+                    for field_name, new_val in field_checks:
+                        old_val = getattr(existing_prop, field_name, None)
+                        old_cmp = '' if old_val is None else str(old_val).strip().lower()
+                        new_cmp = '' if new_val is None else str(new_val).strip().lower()
+                        if old_cmp != new_cmp:
+                            is_unchanged = False
+                            break
+
+                    # Precise Decimal Field comparisons
+                    if is_unchanged:
+                        num_checks = [
+                            ('selling_price', price_val),
+                            ('super_builtup_area', sb_val),
+                            ('builtup_area', b_val),
+                            ('carpet_area', c_val),
+                            ('plot_area', p_val),
+                        ]
+                        for field_name, new_val in num_checks:
+                            old_val = getattr(existing_prop, field_name, 0)
+                            old_cmp = float(old_val) if old_val else 0.0
+                            new_cmp = float(new_val) if new_val else 0.0
+                            if old_cmp != new_cmp:
+                                is_unchanged = False
+                                break
+
+                    if is_unchanged:
+                        duplicate_records_skipped += 1
+                        row_log.append(log_line('duplicate', '⚠', row_idx, f"Skipped (This record is already safely stored in your DB. ID: {r_id})."))
+                        continue
+
+                    prop = existing_prop
+                    is_update = True
+                elif is_row_duplicate:
+                    duplicate_records_skipped += 1
+                    row_log.append(log_line('duplicate', '⚠', row_idx, "Skipped (This exact property is already stored for this user)."))
+                    continue
+                else:
+                    prop = ResaleResidentialProperty()
+
+                # Write values to DB Model
+                prop.listing_type = "Resale"
+                prop.category = "Residential"
+                prop.listing_status = l_stat
+                prop.approval_status = app_stat
+                
+                prop.listed_by_type = l_type
+                prop.assigned_to = l_assigned
+                prop.listed_by_id = l_id
+                prop.listed_by_name = l_name
+                prop.listed_by_email = l_email
+                prop.listed_by_contact = l_cont
+                prop.listed_by_role = l_role
+                
+                prop.property_title = p_title
+                prop.property_type = p_type
+                prop.property_no = p_no
+                prop.society_type = soc_type
+                prop.wing_no = wing
+                prop.floor_no = fn_val
+                prop.water_type = wat_type
+                prop.furnishing_status = furn
+                prop.property_age = p_age
+                prop.facing_direction = face
+                prop.occupancy_status = occ
+                
+                prop.bhk = bhk
+                prop.super_builtup_area = sb_val
+                prop.builtup_area = b_val
+                prop.carpet_area = c_val
+                prop.plot_area = p_val
+                prop.building_configuration = bldg_cfg
+                prop.total_floors = tf_val
+                prop.bathrooms = baths_val
+                prop.balconies = balcs_val
+                prop.covered_parking = c_pk_val
+                prop.open_parking = opn_pk
+                
+                prop.no_of_owners = own_no
+                prop.ownership_status = own_stat
+                prop.ownership_document_type = own_doc
+                prop.title_clarity_status = tit_clar
+                prop.encumbrance_status = encum
+                prop.property_loan = p_loan
+                prop.loan_amount = loan_val
+                prop.existing_tenants = ex_ten
+                prop.tenant_details = ten_det
+                prop.any_legal_dispute = legal_disp
+                prop.dispute_details = disp_det
+                prop.government_tax = gov_tax
+                prop.pending_tax_amount = tax_val
+                prop.sanctioning_authority = sanc_auth
+                
+                prop.selling_price = price_val
+                prop.price_per_sqft = p_sqft_val
+                prop.price_negotiable = neg
+                prop.brokerage_percentage = brok
+                prop.manual_brokerage = m_brok_val
+                
+                prop.city = city
+                prop.locality = local
+                prop.building_name = bldg_nm
+                prop.address = address
+                prop.pincode = pin_code  # <--- NEW FIELD DB ASSIGNMENT
+                prop.property_landmark = landmark
+                prop.state = state
+                prop.google_maps_link = g_link
+                prop.latitude = lat
+                prop.longitude = lng
+                
+                prop.nearby_facilities = facils
+                prop.amenities = amens
+                prop.user_description = usr_desc
+                
+                prop.listed_elsewhere = l_else
+                prop.portal_name = portal
+                
+                prop.uploaded_by_name = current_uploader_name
+                prop.uploaded_by_email = current_uploader_email
+                prop.uploaded_by_contact = current_uploader_contact
+                prop.uploaded_by_role = current_uploader_role
+                prop.upload_file_name = file_name_string
 
                 prop.save()
                 imported += 1
+                
+                if is_update:
+                    row_log.append(log_line('imported', '✔', row_idx, f"Successfully Updated (existing record ID: {r_id})."))
+                else:
+                    row_log.append(log_line('imported', '✔', row_idx, "Successfully Imported."))
 
             except Exception as e:
                 skipped += 1
+                row_log.append(log_line('error', '✖', row_idx, f"Skipped (Bad data / processing error: {str(e)})."))
                 continue
 
-        if imported == 0 and file_signature_match:
+        # =========================================================
+        # BUILD THE COLORED, ORDERED, ROW-BY-ROW MESSAGE
+        # =========================================================
+        row_log.sort(key=lambda x: x[0])  
+        total_rows_scanned = len(row_log)
+        summary_line = (
+            f"<div style='color:#4b5563; font-style:italic; margin-bottom:8px;'>"
+            f"Scanned {total_rows_scanned} data row(s) starting at row {data_min_row}.</div>"
+            if total_rows_scanned else ""
+        )
+        row_details_html = summary_line + "<br>".join(status_line for _, status_line in row_log)
+
+        SCROLL_BOX_STYLE = (
+            "text-align:left; background:#f9fafb; padding:10px; "
+            "border-radius:8px; line-height:1.6; max-height:250px; "
+            "overflow-y:auto;"
+        )
+        scrollable_details = f"<div style='{SCROLL_BOX_STYLE}'>{row_details_html}</div>"
+
+        # =========================================================
+        # RESPONSE HANDLING 
+        # =========================================================
+        if imported == 0 and unregistered_users_skipped > 0:
+            names = ", ".join(list(unregistered_identifiers)[:3])
             return JsonResponse({
-                'status': 'duplicate', 
-                'message': f'The file "{file_name_string}" was already processed by your user account context. No new records have been appended.'
+                'status': 'error',
+                'skipped': skipped,
+                'duplicates': duplicate_records_skipped,
+                'unregistered_skipped': unregistered_users_skipped,
+                'message': (
+                    f"Skipped {unregistered_users_skipped} row(s) because the Listed By user "
+                    f"({names}) is not registered in the system. No records were imported.<br><br>"
+                    f"{scrollable_details}"
+                )
             })
+
+        if imported == 0 and duplicate_records_skipped > 0:
+            return JsonResponse({
+                'status': 'duplicate',
+                'skipped': skipped,
+                'duplicates': duplicate_records_skipped,
+                'unregistered_skipped': unregistered_users_skipped,
+                'message': (
+                    f"All rows were skipped because these identical properties "
+                    f"are already safely stored in your system. No new records were imported.<br><br>"
+                    f"{scrollable_details}"
+                )
+            })
+
+        if imported == 0:
+            return JsonResponse({
+                'status': 'error',
+                'skipped': skipped,
+                'duplicates': duplicate_records_skipped,
+                'unregistered_skipped': unregistered_users_skipped,
+                'message': f"No records were imported from this file.<br><br>{scrollable_details}"
+            })
+
+        msg = f"Successfully imported/updated {imported} record(s).<br><br>{scrollable_details}"
 
         return JsonResponse({
             'status': 'success',
             'imported': imported,
             'skipped': skipped,
-            'duplicates': duplicate_records_skipped
+            'duplicates': duplicate_records_skipped,
+            'unregistered_skipped': unregistered_users_skipped,
+            'message': msg
         })
 
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Process Error: {str(e)}'})
-
 
 
 
@@ -16380,38 +18445,97 @@ def resale_residential_sample_excel(request):
     center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
     left_align = Alignment(horizontal="left", vertical="center", wrap_text=True)
 
-    # ── HARDCODED HORIZONTAL BLOCKS (Synchronized with DB layout) ──────────
-    # Arranged precisely sequentially side-by-side matching your database model structure
+    # ── HORIZONTAL BLOCKS — headers use the EXACT label text from the ──────
+    # resale listing form, grouped into the form's own sections, so the
+    # template reads exactly like the form admins already fill in.
     sections_config = [
         {
-            "title": "STEP 1: BASIC INFO & CONFIGURATION",
+            "title": "LISTED BY",
             "fields": [
-                ('property_title', 'Auto Generated By System'), ('property_type', 'apartment'), ('zone', 'north'), ('society_type', 'gated community'),
-                ('water_type', 'municipal'), ('furnishing_type', 'semi-furnished'), ('age_of_property', '1-3 years'),
-                ('facing_direction', 'North-East'), ('bhk', '3 BHK'), ('bathrooms', 2), ('balconies', 1),
-                ('covered_parking', 1), ('open_parking', 0), ('builtup_area', 1450.00), ('carpet_area', 1120.00),
-                ('plot_area', ''), ('floor_no', 4), ('total_floors', 12)
+                ('Listed By Type (Self/Other) *', 'Self'),
+                ('Listed By Id', ''), ('Listed By Name', 'Rahul Sharma'),
+                ('Listed By Email', 'rahul.sharma@example.com'), ('Listed By Contact', '9876543210'),
+                ('Listed By Role *', 'Owner')
             ]
         },
         {
-            "title": "STEP 2: LEGAL & PRICING DETAILS",
+            "title": "BASIC INFORMATION",
             "fields": [
-                ('ownership_type', 'freehold'), ('num_owners', '1'), ('loan_on_property', 'no'),
-                ('loan_amount', ''), ('existing_tenants', 'no'), ('tenant_details', ''),
-                ('any_legal_dispute', 'no'), ('dispute_details', ''), ('government_tax_dues', 'no'),
-                ('pending_tax_amount', ''), ('expected_price', 7500000.00), ('price_per_sqft', 5172.41),
-                ('price_negotiable', 'yes'), ('brokerage', 'no'), ('brokerage_percentage', ''),
-                ('manual_brokerage', ''), ('property_description', 'Spacious apartment layout.')
+                ('Property Type *', 'Apartment'), ('Flat/House/Unit No *', 'B-402'),
+                ('Society Type *', 'Gated Community'), ('Tower/Wing Number', 'A Wing'),
+                ('Water Type *', 'Municipal Corporation Supply'), ('Furnishing Status *', 'Semi-Furnished'),
+                ('Age of Property (Years) *', '1-3 Years'), ('Facing Direction *', 'North-East'),
+                ('Occupancy Status', 'Vacant (Ready for Possession)')
             ]
         },
         {
-            "title": "STEP 3: AMENITIES & LOCATION",
+            "title": "PROPERTY DETAILS",
             "fields": [
-                ('nearby_facilities', 'School, Metro'), ('amenities', 'Lift, Security, Gym'), ('city', 'Nagpur'),
-                ('locality', 'Dharampeth'), ('building_name', 'Sunshine Towers'),
-                ('complete_address', 'Flat 402, Sunshine Towers, Dharampeth, Nagpur'), ('owner_name', 'Rahul Sharma'),
-                ('owner_contact', '9876543210'), ('owner_email', 'rahul.sharma@example.com'),
-                ('owner_role', 'Owner'), ('residential_status', 'resident')
+                ('BHK *', '3 BHK'), ('Super Built-up Area (sq.ft) *', 1600.00),
+                ('Built-up Area (sq.ft) *', 1450.00), ('Carpet Area (sq.ft) *', 1120.00),
+                ('Plot Area (sq.ft)', ''), ('Building Configuration', 'G+12'),
+                ('Total Floors Constructed *', 12), ('Bathrooms *', 2), ('Balconies', 1),
+                ('Covered Parking', 1), ('Open Parking Available? *', 'No')
+            ]
+        },
+        {
+            "title": "OWNERSHIP & LEGAL DETAILS",
+            "fields": [
+                ('No. of Owners *', 'Single Owner'), ('Ownership Status', 'Sole Owner (Owned by One Person)'),
+                ('Ownership Document Type', 'Sale Deed'), ('Title Clarity Status', 'Clear Title'),
+                ('Encumbrance Status', 'Clear / No Encumbrance'), ('Loan on Property? *', 'No'),
+                ('Loan Amount (Rs.)', ''), ('Existing Tenants? *', 'No'), ('Tenant Details', ''),
+                ('Any Legal Dispute? *', 'No'), ('Dispute Details', ''), ('Government Tax Dues? *', 'No'),
+                ('Pending Tax Amount (Rs.)', ''), ('Sanctioning / Approving Authority', 'PMRDA')
+            ]
+        },
+        {
+            "title": "PRICING & BROKERAGE DETAILS",
+            "fields": [
+                ('Selling Price (Rs.) *', 7500000.00), ('Brokerage *', '1% of sale value'),
+                ('Fixed Brokerage Amount', ''), ('Selling Price Negotiable?', 'Yes')
+            ]
+        },
+        {
+            "title": "PROPERTY LOCATION DETAILS",
+            "fields": [
+                ('City *', 'Nagpur'), ('Locality *', 'Dharampeth'), ('Building/Society Name', 'Sunshine Towers'),
+                ('Complete Address *', 'Flat 402, Sunshine Towers, Dharampeth, Nagpur'),
+                ('Pincode *', 440024),
+                ('Property Landmark', 'Near Metro Station'), ('State *', 'Maharashtra'),
+                ('Google Maps Link', 'https://maps.google.com/?q=21.1458,79.0882'),
+                ('Latitude', '21.1458'), ('Longitude', '79.0882')
+            ]
+        },
+        {
+            "title": "AMENITIES & FEATURES",
+            "fields": [
+                ('Amenities (comma-separated)', 'Lift, Security, Gym')
+            ]
+        },
+        {
+            "title": "NEARBY FACILITIES",
+            "fields": [
+                ('Nearby Facilities (comma-separated)', 'School, Metro')
+            ]
+        },
+        {
+            "title": "PROPERTY DESCRIPTION",
+            "fields": [
+                ('Property Description', 'Spacious apartment layout.')
+            ]
+        },
+        {
+            "title": "MEDIA & LISTING STATUS",
+            "fields": [
+                ('Listed Elsewhere? *', 'No'), ('Portal Name', '')
+            ]
+        },
+        {
+            "title": "PROPERTY UPLOADED BY (AUTO GENERATED)",
+            "fields": [
+                ('Uploaded By Name (Auto)', 'Rahul Sharma'), ('Uploaded By Email (Auto)', 'rahul.sharma@example.com'),
+                ('Uploaded By Contact (Auto)', '9876543210'), ('Uploaded By Role (Auto)', 'Owner')
             ]
         }
     ]
@@ -16440,12 +18564,12 @@ def resale_residential_sample_excel(request):
         current_col += sec_length
     ws.row_dimensions[1].height = 30
 
-    # ── GENERATE ROW 2 & 3: DB FIELD HEADERS & SAMPLE DATA ────────────────
+    # ── GENERATE ROW 2 & 3: FORM LABELS & SAMPLE DATA ─────────────────────
     current_col = 1
     for sec in sections_config:
-        for field_name, sample_val in sec["fields"]:
-            # Row 2: Database Headers
-            header_cell = ws.cell(row=2, column=current_col, value=field_name)
+        for label, sample_val in sec["fields"]:
+            # Row 2: exact label text as shown on the resale listing form
+            header_cell = ws.cell(row=2, column=current_col, value=label)
             header_cell.font = header_font
             header_cell.fill = header_fill
             header_cell.alignment = center_align
@@ -16456,6 +18580,13 @@ def resale_residential_sample_excel(request):
             data_cell.font = data_font
             data_cell.alignment = center_align if isinstance(sample_val, (int, float)) else left_align
             data_cell.border = cell_border
+
+            # Keep decimals exact (e.g. 1450.00, 7500000.00) — no thousands
+            # separators, no dropped trailing zeros, matching how it's stored in the DB.
+            if isinstance(sample_val, float):
+                data_cell.number_format = '0.00'
+            elif isinstance(sample_val, int):
+                data_cell.number_format = '0'
             
             current_col += 1
             
@@ -16482,108 +18613,123 @@ def resale_residential_sample_excel(request):
 
 
 # ── MASTER DATA CONFIGURATION MATRIX (DEFINED ONCE) ──────────────────
+# Field keys, labels, and required (*) markers all verified directly
+# against the resale listing form (residential_resale.html) — a field
+# only carries '*' in its label if the form itself marks it required.
 EXPORT_COLUMNS_BLUEPRINT = [
-    # System Control Section
-    {'field': 'property_id', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
-    {'field': 'property_title', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
-    
-    # Step 1 Section
-    {'field': 'property_type', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'zone', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'society_type', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'water_type', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'furnishing_type', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'age_of_property', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'facing_direction', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'bhk', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'bathrooms', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'balconies', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'covered_parking', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'open_parking', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'builtup_area', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'carpet_area', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'plot_area', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'floor_no', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    {'field': 'total_floors', 'section_name': 'STEP 1: BASIC INFO & CONFIGURATION'},
-    
-    # Step 2 Section
-    {'field': 'ownership_type', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'num_owners', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'loan_on_property', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'loan_amount', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'existing_tenants', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'tenant_details', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'any_legal_dispute', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'dispute_details', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'government_tax_dues', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'pending_tax_amount', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'expected_price', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'price_per_sqft', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'price_negotiable', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'brokerage', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'brokerage_percentage', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'manual_brokerage', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    {'field': 'property_description', 'section_name': 'STEP 2: LEGAL & PRICING DETAILS'},
-    
-    # Step 3 Section
-    {'field': 'nearby_facilities', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
-    {'field': 'amenities', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
-    {'field': 'city', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
-    {'field': 'locality', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
-    {'field': 'building_name', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
-    {'field': 'complete_address', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
-    {'field': 'owner_name', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
-    {'field': 'owner_contact', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
-    {'field': 'owner_email', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
-    {'field': 'owner_role', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
-    {'field': 'residential_status', 'section_name': 'STEP 3: AMENITIES & LOCATION'},
+    # System Control & Identification (system/auto fields — never required on the form)
+    {'field': 'id', 'label': 'Property ID', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
+    {'field': 'property_unique_key', 'label': 'Property Unique Key', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
+    {'field': 'property_title', 'label': 'Property Title (Auto-generated)', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
+    {'field': 'listing_type', 'label': 'Listing Type', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
+    {'field': 'category', 'label': 'Category', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
+    {'field': 'listing_status', 'label': 'Listing Status', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
+    {'field': 'approval_status', 'label': 'Approval Status', 'section_name': 'SYSTEM CONTROL & IDENTIFICATION'},
 
-    # Step 4 Auditing Meta
-    {'field': 'uploaded_by_name', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
-    {'field': 'uploaded_by_email', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
-    {'field': 'uploaded_by_contact', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
-    {'field': 'uploaded_by_role', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
-    {'field': 'upload_file_name', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
-    {'field': 'created_at', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
-    {'field': 'updated_at', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
-    {'field': 'is_deleted', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
-    {'field': 'deleted_at', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'},
-    {'field': 'deleted_by', 'section_name': 'STEP 4: PHOTOS & PUBLISH SYSTEM'}
+    # Listed By
+    {'field': 'listed_by_type', 'label': 'Listed By Type (Self/Other) *', 'section_name': 'LISTED BY'},
+    {'field': 'assigned_to', 'label': 'Assigned To (Team Member)', 'section_name': 'LISTED BY'},
+    {'field': 'listed_by_id', 'label': 'Listed By Id', 'section_name': 'LISTED BY'},
+    {'field': 'listed_by_name', 'label': 'Listed By Name', 'section_name': 'LISTED BY'},
+    {'field': 'listed_by_email', 'label': 'Listed By Email', 'section_name': 'LISTED BY'},
+    {'field': 'listed_by_contact', 'label': 'Listed By Contact', 'section_name': 'LISTED BY'},
+    {'field': 'listed_by_role', 'label': 'Listed By Role', 'section_name': 'LISTED BY'},
+
+    # Basic Information
+    {'field': 'property_type', 'label': 'Property Type*', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'property_no', 'label': 'Flat/House No/Unit No*', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'society_type', 'label': 'Society Type*', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'wing_no', 'label': 'Tower/Wing Number', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'floor_no', 'label': 'Floor No', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'water_type', 'label': 'Water Type*', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'furnishing_status', 'label': 'Furnishing Status*', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'property_age', 'label': 'Age of Property*', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'facing_direction', 'label': 'Facing Direction*', 'section_name': 'BASIC INFORMATION'},
+    {'field': 'occupancy_status', 'label': 'Occupancy Status', 'section_name': 'BASIC INFORMATION'},
+
+    # Property Details
+    {'field': 'bhk', 'label': 'BHK*', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'super_builtup_area', 'label': 'Super Built-up Area (sq.ft)*', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'builtup_area', 'label': 'Built-up Area (sq.ft)*', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'carpet_area', 'label': 'Carpet Area (sq.ft)*', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'plot_area', 'label': 'Plot Area (sq.ft)', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'building_configuration', 'label': 'Building Configuration', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'total_floors', 'label': 'Total Floors Constructed*', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'bathrooms', 'label': 'Bathrooms*', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'balconies', 'label': 'Balconies', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'covered_parking', 'label': 'Covered Parking', 'section_name': 'PROPERTY DETAILS'},
+    {'field': 'open_parking', 'label': 'Open Parking Available?', 'section_name': 'PROPERTY DETAILS'},
+
+    # Ownership & Legal Details
+    {'field': 'no_of_owners', 'label': 'No. of Owners*', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'ownership_status', 'label': 'Ownership Status', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'ownership_document_type', 'label': 'Ownership Document Type', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'title_clarity_status', 'label': 'Title Clarity Status', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'encumbrance_status', 'label': 'Encumbrance Status', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'property_loan', 'label': 'Loan on Property?*', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'loan_amount', 'label': 'Loan Amount (₹)', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'existing_tenants', 'label': 'Existing Tenants?*', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'tenant_details', 'label': 'Tenant Details', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'any_legal_dispute', 'label': 'Any Legal Dispute?*', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'dispute_details', 'label': 'Dispute Details', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'government_tax', 'label': 'Government Tax Dues?*', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'pending_tax_amount', 'label': 'Pending Tax Amount (₹)', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+    {'field': 'sanctioning_authority', 'label': 'Sanctioning / Approving Authority', 'section_name': 'OWNERSHIP & LEGAL DETAILS'},
+
+    # Pricing & Brokerage Details
+    {'field': 'selling_price', 'label': 'Selling Price*', 'section_name': 'PRICING & BROKERAGE DETAILS'},
+    {'field': 'price_per_sqft', 'label': 'Price per Sq.ft (Auto)', 'section_name': 'PRICING & BROKERAGE DETAILS'},
+    {'field': 'price_negotiable', 'label': 'Selling Price Negotiable?', 'section_name': 'PRICING & BROKERAGE DETAILS'},
+    {'field': 'brokerage_percentage', 'label': 'Brokerage*', 'section_name': 'PRICING & BROKERAGE DETAILS'},
+    {'field': 'manual_brokerage', 'label': 'Enter Fixed Brokerage', 'section_name': 'PRICING & BROKERAGE DETAILS'},
+
+    # Property Location Details
+    {'field': 'city', 'label': 'City*', 'section_name': 'PROPERTY LOCATION DETAILS'},
+    {'field': 'locality', 'label': 'Locality*', 'section_name': 'PROPERTY LOCATION DETAILS'},
+    {'field': 'building_name', 'label': 'Building/Society Name', 'section_name': 'PROPERTY LOCATION DETAILS'},
+    {'field': 'address', 'label': 'Complete Address*', 'section_name': 'PROPERTY LOCATION DETAILS'},
+    {'field': 'pincode', 'label': 'Pincode*', 'section_name': 'PROPERTY LOCATION DETAILS'},
+    {'field': 'property_landmark', 'label': 'Property Landmark', 'section_name': 'PROPERTY LOCATION DETAILS'},
+    {'field': 'state', 'label': 'State*', 'section_name': 'PROPERTY LOCATION DETAILS'},
+    {'field': 'google_maps_link', 'label': 'Google Maps Link(Recommended)', 'section_name': 'PROPERTY LOCATION DETAILS'},
+    {'field': 'latitude', 'label': 'Latitude', 'section_name': 'PROPERTY LOCATION DETAILS'},
+    {'field': 'longitude', 'label': 'Longitude', 'section_name': 'PROPERTY LOCATION DETAILS'},
+
+    # Amenities & Features
+    {'field': 'amenities', 'label': 'Amenities', 'section_name': 'AMENITIES & FEATURES'},
+
+    # Nearby Facilities
+    {'field': 'nearby_facilities', 'label': 'Nearby Facilities', 'section_name': 'NEARBY FACILITIES'},
+
+    # Property Description
+    {'field': 'property_summary', 'label': 'Property Summary (Auto)', 'section_name': 'PROPERTY DESCRIPTION'},
+    {'field': 'property_description', 'label': 'Property Description (Auto)', 'section_name': 'PROPERTY DESCRIPTION'},
+    {'field': 'user_description', 'label': 'Property Description', 'section_name': 'PROPERTY DESCRIPTION'},
+
+    # Media & Listing Status
+    {'field': 'floor_plan', 'label': 'Floor Plan', 'section_name': 'MEDIA & LISTING STATUS'},
+    {'field': 'listed_elsewhere', 'label': 'Is Property Already Listed Elsewhere?', 'section_name': 'MEDIA & LISTING STATUS'},
+    {'field': 'portal_name', 'label': 'Portal Name', 'section_name': 'MEDIA & LISTING STATUS'},
+
+    # Property Uploaded By (Auto Generated)
+    {'field': 'uploaded_by_name', 'label': 'Uploaded By Name (Auto)', 'section_name': 'PROPERTY UPLOADED BY (AUTO GENERATED)'},
+    {'field': 'uploaded_by_email', 'label': 'Uploaded By Email (Auto)', 'section_name': 'PROPERTY UPLOADED BY (AUTO GENERATED)'},
+    {'field': 'uploaded_by_contact', 'label': 'Uploaded By Contact (Auto)', 'section_name': 'PROPERTY UPLOADED BY (AUTO GENERATED)'},
+    {'field': 'uploaded_by_role', 'label': 'Uploaded By Role (Auto)', 'section_name': 'PROPERTY UPLOADED BY (AUTO GENERATED)'},
+    {'field': 'upload_file_name', 'label': 'Upload File Name', 'section_name': 'PROPERTY UPLOADED BY (AUTO GENERATED)'},
+
+    # Audit & System Meta (never required on the form — all system-generated)
+    {'field': 'is_duplicate', 'label': 'Is Duplicate?', 'section_name': 'AUDIT & SYSTEM META'},
+    {'field': 'duplicate_count', 'label': 'Duplicate Count', 'section_name': 'AUDIT & SYSTEM META'},
+    {'field': 'duplicate_group_id', 'label': 'Duplicate Group ID', 'section_name': 'AUDIT & SYSTEM META'},
+    {'field': 'created_at', 'label': 'Created At (Auto)', 'section_name': 'AUDIT & SYSTEM META'},
+    {'field': 'created_by', 'label': 'Created By', 'section_name': 'AUDIT & SYSTEM META'},
+    {'field': 'updated_at', 'label': 'Updated At (Auto)', 'section_name': 'AUDIT & SYSTEM META'},
+    {'field': 'updated_by', 'label': 'Updated By', 'section_name': 'AUDIT & SYSTEM META'},
+    {'field': 'is_deleted', 'label': 'Is Deleted?', 'section_name': 'AUDIT & SYSTEM META'},
+    {'field': 'deleted_at', 'label': 'Deleted At', 'section_name': 'AUDIT & SYSTEM META'},
+    {'field': 'deleted_by', 'label': 'Deleted By', 'section_name': 'AUDIT & SYSTEM META'},
 ]
-
-
-def export_resale_csv(request):
-    """
-    Exports all Resale Residential properties to CSV pulling directly from the master matrix sequence.
-    """
-    uploader = _get_uploader(request)
-    if uploader is None:
-        return redirect('login')
-
-    response = HttpResponse(content_type='text/csv; charset=utf-8')
-    response['Content-Disposition'] = 'attachment; filename="resale_residential_complete_database.csv"'
-
-    writer = csv.writer(response)
-    
-    # Extract headers straight out of the master dictionary array
-    headers = [item['field'] for item in EXPORT_COLUMNS_BLUEPRINT]
-    writer.writerow(headers)
-
-    queryset = ResaleResidentialProperty.objects.all()
-    for prop in queryset:
-        row = []
-        for item in EXPORT_COLUMNS_BLUEPRINT:
-            val = getattr(prop, item['field'], '')
-            if val is None:
-                val = ''
-            elif isinstance(val, Decimal):
-                val = float(val)
-            elif hasattr(val, 'strftime'):
-                val = val.strftime('%Y-%m-%d %H:%M:%S')
-            row.append(val)
-        writer.writerow(row)
-
-    return response
 
 
 def export_resale_excel(request):
@@ -16600,11 +18746,23 @@ def export_resale_excel(request):
     ws.views.sheetView[0].showGridLines = True
 
     # ── SYSTEM PALETTE CONFIGURATIONS ──
-    sys_control_fill = PatternFill(start_color="1F2937", end_color="1F2937", fill_type="solid") # Dark Slate
-    step1_fill = PatternFill(start_color="374151", end_color="374151", fill_type="solid")       # Dark Gray
-    step2_fill = PatternFill(start_color="764BA2", end_color="764BA2", fill_type="solid")       # Deep Purple
-    step3_fill = PatternFill(start_color="0F172A", end_color="0F172A", fill_type="solid")       # Slate Midnight
-    meta_audit_fill = PatternFill(start_color="4B5563", end_color="4B5563", fill_type="solid")    # Mid Gray
+    section_fill_map = {
+        'SYSTEM CONTROL & IDENTIFICATION': PatternFill(start_color="1F2937", end_color="1F2937", fill_type="solid"),  # Dark Slate
+        'LISTED BY': PatternFill(start_color="374151", end_color="374151", fill_type="solid"),                        # Dark Gray
+        'BASIC INFORMATION': PatternFill(start_color="2563EB", end_color="2563EB", fill_type="solid"),                # Blue
+        'PROPERTY DETAILS': PatternFill(start_color="0891B2", end_color="0891B2", fill_type="solid"),                 # Cyan
+        'OWNERSHIP & LEGAL DETAILS': PatternFill(start_color="764BA2", end_color="764BA2", fill_type="solid"),        # Deep Purple
+        'PRICING & BROKERAGE DETAILS': PatternFill(start_color="B45309", end_color="B45309", fill_type="solid"),      # Amber/Brown
+        'PROPERTY LOCATION DETAILS': PatternFill(start_color="0F172A", end_color="0F172A", fill_type="solid"),        # Slate Midnight
+        'AMENITIES & FEATURES': PatternFill(start_color="15803D", end_color="15803D", fill_type="solid"),             # Green
+        'NEARBY FACILITIES': PatternFill(start_color="166534", end_color="166534", fill_type="solid"),                # Dark Green
+        'PROPERTY DESCRIPTION': PatternFill(start_color="475569", end_color="475569", fill_type="solid"),             # Slate
+        'MEDIA & LISTING STATUS': PatternFill(start_color="9D174D", end_color="9D174D", fill_type="solid"),           # Maroon
+        'PROPERTY UPLOADED BY (AUTO GENERATED)': PatternFill(start_color="4B5563", end_color="4B5563", fill_type="solid"),  # Mid Gray
+        'AUDIT & SYSTEM META': PatternFill(start_color="4B5563", end_color="4B5563", fill_type="solid"),              # Mid Gray
+    }
+    default_section_fill = PatternFill(start_color="4B5563", end_color="4B5563", fill_type="solid")
+    meta_audit_fill = PatternFill(start_color="4B5563", end_color="4B5563", fill_type="solid")
 
     zebra_even_fill = PatternFill(start_color="F9FAFB", end_color="F9FAFB", fill_type="solid")
     white_fill = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
@@ -16626,21 +18784,11 @@ def export_resale_excel(request):
         cell_step.font = font_step_title
         cell_step.alignment = center_alignment
         cell_step.border = grid_border
-        
-        # Style sections dynamically based on identity mapping
-        if "SYSTEM CONTROL" in column_meta['section_name']:
-            cell_step.fill = sys_control_fill
-        elif "STEP 1" in column_meta['section_name']:
-            cell_step.fill = step1_fill
-        elif "STEP 2" in column_meta['section_name']:
-            cell_step.fill = step2_fill
-        elif "STEP 3" in column_meta['section_name']:
-            cell_step.fill = step3_fill
-        else:
-            cell_step.fill = meta_audit_fill
+        cell_step.fill = section_fill_map.get(column_meta['section_name'], default_section_fill)
 
-        # Render Row 2 Property Column Names
-        cell_field = ws.cell(row=2, column=col_idx, value=column_meta['field'])
+        # Row 2: human-readable label, exact form wording, '*' only where
+        # the form itself marks the field required.
+        cell_field = ws.cell(row=2, column=col_idx, value=column_meta['label'])
         cell_field.font = font_db_field
         cell_field.alignment = left_alignment
         cell_field.fill = meta_audit_fill

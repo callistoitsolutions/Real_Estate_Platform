@@ -1556,7 +1556,9 @@ def residential_rm(request):
 def rental_residential_view_rm(request, pk):
    
 
-    session_user_id = request.session.get('User_id')
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
 
     admin_obj = None
@@ -1569,10 +1571,9 @@ def rental_residential_view_rm(request, pk):
         user_obj = User_Details.objects.filter(id=user_id).first()
 
     #  2. UPDATED SECURITY CHECK
-    # If they are an Admin, we only care that they have an impersonate_id.
-    # We don't care if their standard 'User_id' is missing.
-    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
-    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+    
+    is_valid_rm = (user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (admin_id == "Admin" and 'impersonate_id' in request.session)
 
     if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
@@ -1589,220 +1590,11 @@ def rental_residential_view_rm(request, pk):
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
 
-    if request.method == 'POST':
-        try:
-            # ---------- SAFE TYPE CONVERSIONS ----------
-            def to_int(val):
-                try:
-                    return int(val) if val else None
-                except:
-                    return None
-
-            def to_decimal(val):
-                try:
-                    return float(val) if val else None
-                except:
-                    return None
-
-            # ---------- DATE PARSING ----------
-            date_val = request.POST.get('available_from')
-            if date_val:
-                try:
-                    available_from = datetime.strptime(date_val, "%Y-%m-%d").date()
-                except:
-                    available_from = None
-            else:
-                available_from = None
-
-            # ---------- AMENITIES & FACILITIES ----------
-            amenities = ",".join(request.POST.getlist('amenities[]'))
-            facilities = ",".join(request.POST.getlist('nearby_facilities[]')) or ",".join(request.POST.getlist('facilities[]'))
-
-            # ---------- UPLOADER IDENTIFICATION (Who submitted the HTML form) ----------
-            if admin_obj:
-                uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
-                uploader_email = getattr(admin_obj, 'email', '')
-                uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
-                uploader_role = "Admin"
-                uploader_id = f"ADMIN_{admin_id}"
-            elif user_obj:
-                uploader_name = user_obj.user_name
-                uploader_email = user_obj.user_email
-                uploader_contact = user_obj.user_phone
-                uploader_role = "User"
-                uploader_id = f"USER_{user_id}"
-            else:
-                uploader_name, uploader_email, uploader_contact, uploader_role, uploader_id = "", "", "", "", ""
-
-            # ---------- LISTED BY IDENTIFICATION (Who owns/manages the listing) ----------
-            input_listed_by_id = (request.POST.get('listed_by_id') or uploader_id).strip()
-            input_listed_by_name = (request.POST.get('listed_by_name') or uploader_name).strip()
-            input_listed_by_email = (request.POST.get('listed_by_email') or uploader_email).strip().lower()
-            input_listed_by_contact = (request.POST.get('listed_by_contact') or uploader_contact).strip()
-            input_listed_by_role = (request.POST.get('listed_by_role') or uploader_role).strip()
-
-            # ==========================================================
-            # DUPLICATE DETECTION ENGINE (Checking LISTED BY, not UPLOADED BY)
-            # ==========================================================
-            input_property_no = (request.POST.get('property_no') or '').strip()
-            input_building_name = (request.POST.get('building_name') or '').strip()
-            input_locality = (request.POST.get('locality_area') or request.POST.get('locality') or '').strip()
-            input_pincode = (request.POST.get('pincode') or '').strip()
-
-            fingerprint_key = generate_property_fingerprint(
-                input_property_no, 
-                input_building_name, 
-                input_locality, 
-                input_pincode
-            )
-
-            # 1. Direct Case-Insensitive Query for same unit in same locality/building
-            direct_duplicates = RentalResidentialProperty.objects.filter(
-                is_deleted=False,
-                property_no__iexact=input_property_no,
-                locality_area__iexact=input_locality
-            )
-            if input_building_name:
-                direct_duplicates = direct_duplicates.filter(building_name__iexact=input_building_name)
-
-            # Combine fingerprint match OR direct field match
-            existing_duplicates = (
-                RentalResidentialProperty.objects.filter(property_unique_key=fingerprint_key, is_deleted=False) | direct_duplicates
-            ).distinct()
-
-            is_dup_flag = False
-            dup_group_id = fingerprint_key
-            total_dup_count = 1
-
-            if existing_duplicates.exists():
-                # Level 1: Hard Block if LISTED BY the exact same person (ID, Email, OR Phone match)
-                for existing_prop in existing_duplicates:
-                    same_id = (existing_prop.listed_by_id and input_listed_by_id and 
-                               existing_prop.listed_by_id.strip() == input_listed_by_id)
-                    
-                    same_email = (existing_prop.listed_by_email and input_listed_by_email and 
-                                  existing_prop.listed_by_email.strip().lower() == input_listed_by_email)
-                    
-                    same_contact = (existing_prop.listed_by_contact and input_listed_by_contact and 
-                                    existing_prop.listed_by_contact.strip() == input_listed_by_contact)
-                    
-                    if same_id or same_email or same_contact:
-                        # INSTANT REJECTION: Same agent/owner cannot list the same property twice
-                        messages.error(
-                            request, 
-                            f"Duplicate Blocked: This property (Unit {input_property_no}) is already listed by/for {input_listed_by_name or 'this user'}. Please edit the existing listing instead."
-                        )
-                        return redirect('residential')
-
-                # Level 2: Different Agent/User listing the exact same physical unit -> Allow save & Flag
-                is_dup_flag = True
-                total_dup_count = existing_duplicates.count() + 1
-                existing_duplicates.update(
-                    is_duplicate=True, 
-                    duplicate_count=total_dup_count,
-                    duplicate_group_id=dup_group_id
-                )
-
-            # ---------- CREATE DATABASE OBJECT ----------
-            prop = RentalResidentialProperty.objects.create(
-                property_unique_key=fingerprint_key,
-                is_duplicate=is_dup_flag,
-                duplicate_count=total_dup_count,
-                duplicate_group_id=dup_group_id if is_dup_flag else None,
-
-                listing_type="Rental",
-                category="Residential",
-
-                listed_by_type=request.POST.get('listed_by_type'),
-                assigned_to=request.POST.get('assigned_to'),
-                listed_by_id=input_listed_by_id,
-                listed_by_name=input_listed_by_name,
-                listed_by_email=input_listed_by_email,
-                listed_by_contact=input_listed_by_contact,
-                listed_by_role=input_listed_by_role,
-
-                property_title=request.POST.get('property_title'),
-                property_type=request.POST.get('property_type'),
-                property_no=input_property_no,
-                bhk_type=request.POST.get('bhk_type'),
-                renting_option=request.POST.get('renting_option'),
-                built_up_area=to_decimal(request.POST.get('built_up_area')),
-                bathrooms=to_int(request.POST.get('bathrooms')),
-                balconies=to_int(request.POST.get('balconies')),
-                building_configuration=request.POST.get('building_configuration'),
-                total_floors=to_int(request.POST.get('total_floors')),
-                facing_direction=request.POST.get('facing_direction', request.POST.get('facing')),
-                furnishing_status=request.POST.get('furnishing_status'),
-                available_for=request.POST.get('available_for'),
-
-                carpet_area=to_decimal(request.POST.get('carpet_area')),
-                city_zone=request.POST.get('city_zone', request.POST.get('zone')),
-                ownership_type=request.POST.get('ownership_type'),
-                property_condition=request.POST.get('property_condition', request.POST.get('construction_status')),
-                property_age=request.POST.get('property_age'),
-                wing_number=request.POST.get('wing_number'),
-                building_name=input_building_name,
-
-                availability_status=request.POST.get('availability_status', request.POST.get('possession_status')),
-                available_from=available_from,
-                lease_duration=request.POST.get('lease_duration'),
-                brokerage_percentage=request.POST.get('brokerage_percentage', request.POST.get('brokerage')),
-                manual_brokerage=request.POST.get('manual_brokerage'),
-
-                monthly_rent=to_int(request.POST.get('monthly_rent')),
-                advance_rent_month=request.POST.get('advance_rent_month'),
-                advance_rent_amount=to_int(request.POST.get('advance_rent_amount')),
-                security_deposit_type=request.POST.get('security_deposit_type'),
-                security_deposit_amount=to_int(request.POST.get('security_deposit_amount', request.POST.get('security_deposit'))),
-                maintenance_type=request.POST.get('maintenance_type'),
-                monthy_maintenance_amount=to_int(request.POST.get('monthy_maintenance_amount', request.POST.get('maintenance_amount'))),
-                total_move_in_cost=to_int(request.POST.get('total_move_in_cost')),
-
-                address=request.POST.get('address'),
-                city=request.POST.get('city'),
-                locality_area=input_locality,
-                property_landmark=request.POST.get('property_landmark'),
-                state=request.POST.get('state'),
-                pincode=input_pincode,
-                main_road_connectivity=request.POST.get('main_road_connectivity', request.POST.get('road_connectivity')),
-                google_maps_link=request.POST.get('google_maps_link'),
-                latitude=request.POST.get('latitude'),
-                longitude=request.POST.get('longitude'),
-
-                amenities=amenities,
-                nearby_facilities=facilities,
-
-                user_description=request.POST.get('user_description'),
-                description=request.POST.get('description'),
-                rent_residential_desc=request.POST.get('rent_residential_desc'),
-
-                listed_elsewhere=request.POST.get('listed_elsewhere', 'No'),
-                portal_name=request.POST.get('portal_name'),
-
-                uploaded_by_name=uploader_name,
-                uploaded_by_email=uploader_email,
-                uploaded_by_contact=uploader_contact,
-                uploaded_by_role=uploader_role,
-                upload_file_name=None
-            )
-
-            # ---------- IMAGES MULTI-UPLOAD LOGIC ----------
-            images = request.FILES.getlist('property_images[]')
-            for index, img in enumerate(images[:10]):
-                RentalResidentialImage.objects.create(
-                    property=prop, 
-                    image=img,
-                    sequence_order=index
-                )
-
-            messages.success(request, "Property Added Successfully ")
-            
-            return redirect('residential_rm_list')
-
-        except Exception as e:
-            print("ERROR DETECTED:", str(e))
-            messages.error(request, f"Error while saving listing: {str(e)}")
-            return redirect('residential_rm')
+     # Prefetch core and related assets for the current listing
+    prop = get_object_or_404(
+        RentalResidentialProperty.objects.prefetch_related('images', 'faqs'), 
+        pk=pk
+    )
     
     # Context cross-linking: Pull the latest uploaded properties along with their dynamic FAQs
     latest_properties = RentalResidentialProperty.objects.filter(
@@ -1816,6 +1608,7 @@ def rental_residential_view_rm(request, pk):
     
     # FIX APPLIED HERE: Changed prop.facilities to prop.nearby_facilities to match the updated model
     facilities_list = [x.strip() for x in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+
 
     context = {
         'property': prop,
