@@ -31,6 +31,12 @@ urlpatterns = [
 
      ############ urls for Rental Residential Listing ############################
 
+    ############ urls for Rental Residential Agency Listing Excel Upload & Dowload URLS  ############################
+
+    path('download-residential-template-agency/',views.download_residential_template_agency, name='download_residential_template_agency'),
+    path('import-residential-excel-agency/', views.import_residential_excel_agency, name='import_residential_excel_agency'),
+     
+
     path('commercial_agency',views.commercial_agency,name="commercial_agency"),
     path('commercial_list_agency',views.commercial_list_agency,name="commercial_list_agency"),
 
@@ -47,6 +53,9 @@ urlpatterns = [
     path('residential_resale_agency',views.residential_resale_agency,name="residential_resale_agency"),
 
     ############ urls for view resale residential form ########################
+
+
+    
 
     path('residential_resale_agency_view/<str:id>',views.residential_resale_agency_view,name="residential_resale_agency_view"),
 

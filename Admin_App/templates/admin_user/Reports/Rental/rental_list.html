@@ -1103,6 +1103,8 @@
                 <th>Approval Status</th>
                 <th>Property Id</th>
                 <th>Images</th>
+
+                     <th>Video</th>
                 
               
               
@@ -1178,7 +1180,7 @@
                 <th>UB Email</th>
                 <th>UB Contact</th>
                 <th>UB Role</th>
-                <th>Upload File Name</th>
+                <th>Data Uploaded Via</th>
                 <th>Created At</th>
 
                   <th>Property Unique Key</th>
@@ -1279,6 +1281,62 @@
         </div>
     </td>
 
+ <td>
+    {% if prop.video and prop.video.source == 'rm_assisted' and prop.video.video_url %}
+        <div style="position:relative; width:70px; height:50px; cursor:pointer; border-radius:8px; overflow:hidden; border:1px solid #ddd;"
+             onclick="openLinkVideoModal('{{ prop.video.video_url }}')">
+            
+            {% if prop.video.youtube_thumbnail %}
+                <img src="{{ prop.video.youtube_thumbnail }}" style="width:100%; height:100%; object-fit:cover;">
+            {% else %}
+                <!-- Dynamic Platform Styling for FB, Insta, Vimeo, etc. -->
+                {% with platform=prop.video.get_platform_type %}
+                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+                    {% if platform == 'instagram' %}background:linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+                    {% elif platform == 'facebook' %}background:#1877F2;
+                    {% elif platform == 'vimeo' %}background:#1AB7EA;
+                    {% elif platform == 'gdrive' %}background:#0F9D58;
+                    {% else %}background:#1e293b;{% endif %}">
+                    
+                    {% if platform == 'instagram' %}<i class="fab fa-instagram" style="color:#fff; font-size:20px;"></i>
+                    {% elif platform == 'facebook' %}<i class="fab fa-facebook-f" style="color:#fff; font-size:20px;"></i>
+                    {% elif platform == 'vimeo' %}<i class="fab fa-vimeo-v" style="color:#fff; font-size:20px;"></i>
+                    {% elif platform == 'gdrive' %}<i class="fab fa-google-drive" style="color:#fff; font-size:20px;"></i>
+                    {% else %}<i class="fas fa-link" style="color:#fff; font-size:18px;"></i>{% endif %}
+                </div>
+                {% endwith %}
+            {% endif %}
+
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%;
+                        background:rgba(0,0,0,0.25); display:flex; align-items:center; justify-content:center;">
+                <i class="fas fa-external-link-alt" style="color:#fff; font-size:14px; text-shadow:0 1px 3px rgba(0,0,0,0.8);"></i>
+            </div>
+            <span style="position:absolute; bottom:2px; right:2px; background:rgba(0,0,0,0.7); color:#fff;
+                         font-size:8px; font-weight:700; padding:1px 4px; border-radius:4px; text-transform:uppercase;">
+                {{ prop.video.get_platform_type }}
+            </span>
+        </div>
+
+    {% elif prop.video and prop.video.video %}
+        <div style="position:relative; width:70px; height:50px; cursor:pointer; border-radius:8px; overflow:hidden; border:1px solid #ddd;"
+             onclick="openVideoModal('video-modal-{{ prop.id }}')">
+            <video style="width:100%; height:100%; object-fit:cover;" muted>
+                <source src="{{ prop.video.video.url }}#t=0.5" type="video/mp4">
+            </video>
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%;
+                        background:rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center;">
+                <i class="fas fa-play-circle" style="color:#fff; font-size:22px;"></i>
+            </div>
+            {% if prop.video.source == 'auto' %}
+                <span style="position:absolute; bottom:2px; right:2px; background:rgba(0,0,0,0.7); color:#fff;
+                             font-size:8px; font-weight:700; padding:1px 4px; border-radius:4px;">AUTO</span>
+            {% endif %}
+        </div>
+
+    {% else %}
+        <span style="color:#94a3b8; font-size:0.8rem;">No video</span>
+    {% endif %}
+</td>
     <!-- NEW: Listing Metadata -->
     
 
@@ -1621,6 +1679,23 @@
     </div>
 </div>
 
+
+{% for prop in residential_list %}
+    {% if prop.video %}
+    <div id="video-modal-{{ prop.id }}" class="property-image-modal">
+        <div class="modal-content" style="max-width:700px;">
+            <span class="close-modal" onclick="closeVideoModal('video-modal-{{ prop.id }}')">&times;</span>
+            <h3 style="margin-top:0; margin-bottom:15px; text-align:center;">Property Video</h3>
+            <video controls style="width:100%; max-height:60vh; border-radius:8px;">
+                <source src="{{ prop.video.video.url }}" type="video/mp4">
+            </video>
+            {% if prop.video.source == 'auto' %}
+                <p style="text-align:center; font-size:12px; color:#94a3b8; margin-top:8px;">Auto-generated walkthrough</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
 <div class="modal fade" id="bulkDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -1684,6 +1759,40 @@
             </div>
         </div>
     </div>
+</div>
+
+<div class="modal fade" id="linkVideoModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px; overflow:hidden; border:none; background:#0f172a;">
+      <div class="modal-header" style="background:var(--primary-gradient); color:#fff; border:none;">
+        <h6 class="modal-title" style="font-weight:700;"><i class="fas fa-video me-2"></i>External Video Preview</h6>
+        <button type="button" class="close" data-dismiss="modal" onclick="document.getElementById('linkVideoFrame').src=''" style="color:white; opacity:1; background:none; border:none; font-size:22px;">&times;</button>
+      </div>
+      <div class="modal-body p-0" style="position:relative; background:#000; min-height:350px; display:flex; flex-direction:column; justify-content:center;">
+        
+        <!-- Iframe Container -->
+        <div style="aspect-ratio:16/9; width:100%; position:relative;">
+            <iframe id="linkVideoFrame" style="width:100%; height:100%; border:0; position:absolute; top:0; left:0; z-index:2;" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+            
+            <!-- Fallback background if platform blocks iframe -->
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#94a3b8; z-index:1; padding:20px; text-align:center;">
+                <i class="fas fa-shield-alt" style="font-size:3rem; margin-bottom:12px; color:#475569;"></i>
+                <p style="font-size:14px; margin-bottom:6px; color:#e2e8f0; font-weight:600;">Loading Preview...</p>
+                <p style="font-size:12px; max-width:400px; margin-bottom:15px;">If the video does not load automatically, the social media platform (Facebook/Instagram) has blocked inline embedding.</p>
+                <a id="linkVideoDirectBtn" href="#" target="_blank" class="btn btn-sm btn-primary" style="background:#3b82f6; border:none; padding:8px 16px; font-weight:600; border-radius:6px;">
+                    <i class="fas fa-external-link-alt me-1"></i> Open Video Directly in New Tab
+                </a>
+            </div>
+        </div>
+
+        <div class="text-center py-2" style="background:#1e293b; border-top:1px solid #334155; z-index:3;">
+          <a id="linkVideoFallback" href="#" target="_blank" style="color:#60a5fa; font-size:0.85rem; font-weight:600; text-decoration:none;">
+            <i class="fas fa-external-link-alt me-1"></i> Having trouble viewing? Click here to open source URL
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
@@ -2069,6 +2178,73 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = "hidden"; 
     }
 
+
+
+function toEmbedUrl(url) {
+    if (!url) return '';
+    
+    // 1. YouTube
+    var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
+    if (yt) {
+        var origin = encodeURIComponent(window.location.origin);
+        return 'https://www.youtube.com/embed/' + yt[1] + '?rel=0&modestbranding=1&autoplay=1&origin=' + origin;
+    }
+
+    // 2. Vimeo
+    var vimeo = url.match(/vimeo\.com\/(?:video\/|)(\d+)/i);
+    if (vimeo) {
+        return 'https://player.vimeo.com/video/' + vimeo[1] + '?autoplay=1';
+    }
+
+    // 3. Instagram (Reels/Posts embed format)
+    if (url.indexOf('instagram.com') !== -1 || url.indexOf('instagr.am') !== -1) {
+        // Remove trailing slashes and query parameters, then append /embed/
+        var cleanInsta = url.split('?')[0].replace(/\/$/, '');
+        return cleanInsta + '/embed/';
+    }
+
+    // 4. Facebook (Use Facebook Video Plugin Embed URL)
+    if (url.indexOf('facebook.com') !== -1 || url.indexOf('fb.watch') !== -1) {
+        return 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(url) + '&show_text=0&autoplay=1';
+    }
+
+    // 5. Google Drive Video (Convert view link to preview link)
+    var gdrive = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+    if (gdrive) {
+        return 'https://drive.google.com/file/d/' + gdrive[1] + '/preview';
+    }
+
+    // 6. Return original URL for standard MP4 links or external embeds
+    return url;
+}
+
+function openLinkVideoModal(url) {
+    if (!url) return;
+    
+    var embedUrl = toEmbedUrl(url);
+    
+    // Set iframe source
+    document.getElementById('linkVideoFrame').src = embedUrl;
+    
+    // Set fallback buttons to the original raw URL
+    document.getElementById('linkVideoFallback').href = url;
+    var directBtn = document.getElementById('linkVideoDirectBtn');
+    if (directBtn) directBtn.href = url;
+    
+    // Show Modal
+    $('#linkVideoModal').modal('show');
+}
+
+// Clean up iframe audio/video playback when the modal is closed by clicking outside or pressing Escape
+$('#linkVideoModal').on('hidden.bs.modal', function () {
+    document.getElementById('linkVideoFrame').src = '';
+});
+
+function openLinkVideoModal(url) {
+    document.getElementById('linkVideoFrame').src = toEmbedUrl(url);
+    document.getElementById('linkVideoFallback').href = url;
+    $('#linkVideoModal').modal('show');
+}
     function closeImageModal(modalId) {
         var modal = document.getElementById(modalId);
         if (modal) {
@@ -2076,6 +2252,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.overflow = "auto"; 
         }
     }
+
+    
 
     window.onclick = function(event) {
         if (event.target.classList.contains('property-image-modal')) {
@@ -2293,6 +2471,8 @@ async function submitImport() {
     };
 
 
+
+    
 
     
 </script>

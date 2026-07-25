@@ -44,19 +44,34 @@ admin.site.register(Subscription_Details)
 admin.site.register(RentalResidentialProperty)
 
 
+########### Register  RentalResidentialVideo Table/Modal ###############
+
+admin.site.register(RentalResidentialVideo)
+
+
 ########### Register  CommercialRentalProperty Table/Modal ###############
 
 admin.site.register(CommercialRentalProperty)
 
-########### Register  CommercialRentalImageProperty Table/Modal ###############
+########### Register  PGRentalProperty Table/Modal ###############
 
 
 admin.site.register(PGColivingProperty)
+
+
+########### Register  PGRentalVideoProperty Table/Modal ###############
+
+
+admin.site.register(PGColivingVideo)
 
 ########### Register  CommercialRentalImageProperty Table/Modal ###############
 
 
 admin.site.register(CommercialRentalPropertyImage)
+
+########### Register ResaleResidentialProperty Table/Modal ###############
+
+admin.site.register(CommercialRentalVideo)
 
 ########### Register ResaleResidentialProperty Table/Modal ###############
 

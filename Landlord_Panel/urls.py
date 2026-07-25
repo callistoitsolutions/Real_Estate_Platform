@@ -21,6 +21,12 @@ urlpatterns = [
 
     ######## urls for rental forms for landlord ########################
 
+
+   ######## urls for rental residential listing upload & download excel  for landlord ########################
+
+    path('download-residential-template-landlord/', views.download_residential_template_landlord, name='download_residential_template_landlord'),
+    path('import-residential-excel-landlord/', views.import_residential_excel_landlord, name='import_residential_excel_landlord'),
+
     path('residential_landlord',views.residential_landlord,name="residential_landlord"),
 
     ############ urls for edit rental forms for landlord #################

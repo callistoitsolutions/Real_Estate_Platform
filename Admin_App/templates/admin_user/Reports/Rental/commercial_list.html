@@ -475,11 +475,7 @@
        <div class="table-responsive">
 
      <div style="display:flex; gap:10px;">
-    <button type="button" 
-            onclick="forceExport('csv')" 
-            class="btn btn-primary btn-sm" style="height:38px; background-color: #3b82f6; border: none;">
-        <i class="fas fa-file-csv"></i> Download CSV
-    </button>
+  
     
     <button type="button" 
             onclick="forceExport('excel')" 
@@ -487,236 +483,538 @@
         <i class="fas fa-file-excel"></i> Download Excel
     </button>
 </div>
-    <table class="properties-table" id="commercialTable">
-        <thead>
-            <tr>
-                <th>Sr.No</th>
-                <th>Property ID</th>
-                <th>Property Title</th>
-                <th>Images</th>
-             
-                <th>Video</th>
-                <th>Property Type</th>
+
+
+
+
+<table class="properties-table" id="commercialTable">
+    <thead>
+        <tr>
+
+            
+            <th>Sr.No</th>
+            <th>Listing Status</th>
+                <th>Approval Status</th>
+            <th>Property ID</th>
+              <th>Images</th>
+              
+              <!-- 🔴 OLD SINGLE HEADER: -->
+<!-- <th>Video</th> -->
+
+<!-- 🟢 REPLACE WITH 3 SEPARATE HEADERS: -->
+<th>Uploaded Video</th>
+<th>Auto Slideshow</th>
+<th>RM Video Link</th>
+                <th>Listed By Type</th>
+            <th>Listed By Name</th>
+            <th>Listed By Contact</th>
+            <th>Listed By Email</th>
+            <th>Listed By Role</th>
+            <th>Property Title</th>
+          
+           
+            <th>Property Type</th>
+            <th>Building / Project Name</th>
+            <th> Tower/Wing Number</th>
+           <th> Shop No/Godown/Unit No</th>
+            <th>Availability Status</th>
+              <th>Available From</th>
+            <th>  Age of Property(In Years)</th>
+            <th>Zone Type</th>
+
+             <th>Ownership Type</th>
                 <th>Property Condition</th>
-                <th>City</th>
-                <th>Area / Locality</th>
-                <th>Property Address</th>
-                <th>Building / Project Name</th>
-                <th>Possession Status</th>
-                <th>Available From</th>
-                <th>Age of Property</th>
-                <th>Zone Type</th>
-                <th>Location Hub</th>
-                <th>Ownership Type</th>
-                <th>Construction Status</th>
-                <th>Built-up Area (sqft)</th>
-                <th>Carpet Area (sqft)</th>
-                <th>Expected Rent</th>
-                <th>Security Deposit</th>
-                <th>Maintenance Charges</th>
-                <th>Negotiable</th>
-                <th>Brokerage</th>
-                <th>Brokerage %</th>
-                <th>Manual Brokerage</th>
-                <th>DG/UPS</th>
-                <th>Electricity</th>
-                <th>Water</th>
-                <th>Lock-in (Months)</th>
-                <th>Rent Increase %</th>
-                <th>Total Floors</th>
-                <th>Your Floor</th>
-                <th>Staircases</th>
-                <th>Passenger Lifts</th>
-                <th>Service Lifts</th>
-                <th>Private Parking</th>
-                <th>Min Seats</th>
-                <th>Max Seats</th>
-                <th>Cabins</th>
-                <th>Meeting Rooms</th>
-                <th>Private Washroom</th>
-                <th>Public Washroom</th>
-                <th>Flooring Type</th>
-                <th>Amenities</th>
-                <th>Nearby Facilities</th>
-                <th>Property Summary</th>
-                <th>Property Description</th>
-                  <th>User Property Description</th>
-                <th>Owner Name</th>
-                <th>Contact Number</th>
-                <th>Email Address</th>
-                <th>Alt. Contact</th>
-                <th>UB Name</th>
-                <th>UB Email</th>
-                <th>UB Contact</th>
-                <th>UB Role</th>
-                <th>Data Uploaded Via</th>
-                <th>Created At</th>
-                <th style="position:sticky;right:0;background:#f8fafc;z-index:2;">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for prop in page_obj %}
-            <tr id="row-{{ prop.id }}">
-                <td>{{ forloop.counter0|add:page_obj.start_index }}</td>
-                <td><strong>{{ prop.id|default:"—" }}</strong></td>
-                <td>{{ prop.property_title|truncatechars:35|default:"—" }}</td>
+
+                  <th>Built-up Area (sqft)</th>
+                              <th>Carpet Area (sqft)</th>
+                                <th>Property Address</th>
+                                <th>Area / Locality</th>
+                                <th> Property Landmark</th>
+         
+            <th>City</th>
+            <th> State </th>
+          
+         
+           
+          
+          
+            <th>Location Hub</th>
+            <th> Pincode</th>
+
+              <th> Google Maps Link</th>
+
+              <th>Latitude</th>
+                <th> Longitude</th>
+           
+ <th>DG & UPS Included?</th>
+            <th>
+Electricity Included?</th>
+            <th>Water Included?</th>
+          
+            <th>Building Configuration</th>
+            <th>Total Floors Constructed</th>
+            <th>Staircases</th>
+            <th>Passenger Lifts</th>
+            <th>Service Lifts</th>
+            <th>Private Parking</th>
+            <th>Minimum Seats Occupancy</th>
+            <th>Maximum Seats Occupancy</th>
+            <th>Cabins</th>
+            <th>Meeting Rooms</th>
+            <th>Private Washroom</th>
+            <th>Public Washroom</th>
+            <th>Flooring Type</th>
+
+            <th>Monthly Rent</th>
+              <th>Brokerage Type</th>
+           <th> Brokerage / Service Fee</th>
+            <th>Manual Brokerage</th>
+            <th>Advance Rent </th>
+            <th>Advance Rent Amount</th>
+            <th>Refundable Security Deposit</th>
+            <th>Refundable Security Deposit Amount</th>
+            <th>Maintenance Type</th>
+            <th>Monthly Maintenance Amount</th>
+            <th>Total Move-in Cost</th>
+            <th>Negotiable</th>
+          
+           
+            <th>Lock-in (Months)</th>
+            <th>Rent Increase (%/year)</th>
+            
+            <th>Amenities</th>
+            <th>Nearby Facilities</th>
+            <th>Property Summary</th>
+            <th>Property Description</th>
+            <th>User Property Description</th>
+
+            <th>Listed Elsewhere</th>
+                <th>Portal Name</th>
+           
+            <th>UB Name</th>
+            <th>UB Email</th>
+            <th>UB Contact</th>
+            <th>UB Role</th>
+            <th>Data Uploaded Via</th>
+            <th>Created At</th>
+             <th>Property Unique Key</th>
+                <th>Duplicate Count</th>
+                <th>Duplicate Group ID</th>
+                <th>Is Duplicate</th>
                 
-        <td>
-    <div style="display:flex;gap:4px;flex-wrap:wrap;min-width:100px">
+                
+                <!-- NEW: Deletion Tracking -->
+                <th>Is Deleted</th>
+                <th>Deleted At</th>
+                <th>Deleted By</th>
+            <th style="position:sticky;right:0;background:#f8fafc;z-index:2;">Actions</th>
+        </tr>
+    </thead>
 
-    {% if prop.images.all %}
 
-        <div style="display:flex;cursor:pointer;position:relative"
-             onclick="previewGallery([{% for img in prop.images.all %}'{{ img.image.url }}'{% if not forloop.last %},{% endif %}{% endfor %}],'{{ prop.building_name|escapejs|default:"Property" }}')">
 
-            {% for img in prop.images.all|slice:":3" %}
-                <img src="{{ img.image.url }}"
-                     class="property-image"
-                     style="width:40px;height:40px;object-fit:cover;border-radius:50%;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,.1);{% if not forloop.first %}margin-left:-15px;{% endif %}position:relative;z-index:{{ forloop.revcounter }}"
-                     title="Click to view all images">
-            {% endfor %}
+    <tbody>
+    {% for prop in page_obj %}
+        <tr id="row-{{ prop.id }}">
+            
+            <!-- 1. Sr.No -->
+            <td style="font-weight:700;color:#1e293b;">{{ forloop.counter0|add:page_obj.start_index }}</td>
 
-            {% if prop.images.count > 3 %}
-                <div style="
-                    width:40px;
-                    height:40px;
-                    border-radius:50%;
-                    background:#f1f5f9;
-                    color:#475569;
-                    font-size:.75rem;
-                    font-weight:bold;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    border:2px solid white;
-                    margin-left:-15px;
-                    position:relative;
-                    z-index:0;
-                    box-shadow:0 2px 4px rgba(0,0,0,.1)">
-                    +{{ prop.images.count|add:"-3" }}
+            <!-- 2. Listing Status -->
+            <td>
+                {% if prop.listing_status == "Active" %}
+                    <span class="badge bg-success">Active</span>
+                {% elif prop.listing_status == "Inactive" %}
+                    <span class="badge bg-secondary">Inactive</span>
+                {% elif prop.listing_status == "Sold" %}
+                    <span class="badge bg-primary">Sold</span>
+                {% elif prop.listing_status == "Rented" %}
+                    <span class="badge bg-info text-dark">Rented</span>
+                {% else %}
+                    <span class="badge bg-light text-dark">N/A</span>
+                {% endif %}
+            </td>
+            
+            <!-- 3. Approval Status -->
+            <td>
+                {% if prop.approval_status == "Pending" %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                {% elif prop.approval_status == "Approved" %}
+                    <span class="badge bg-success">Approved</span>
+                {% elif prop.approval_status == "Rejected" %}
+                    <span class="badge bg-danger">Rejected</span>
+                {% else %}
+                    <span class="badge bg-light text-dark">N/A</span>
+                {% endif %}
+            </td>
+
+            <!-- 4. Property ID -->
+            <td>
+                <strong>{{ prop.id|default:"—" }}</strong>
+                
+            </td>
+
+            <!-- 5. Images -->
+            <td>
+                <div style="display:flex;align-items:center;gap:8px;cursor:pointer;"
+                     onclick="openImageModal('modal-{{ prop.id }}')">
+                    {% if prop.images.all %}
+                        <div style="position:relative;width:50px;height:50px;min-width:50px;">
+                            {% with first_img=prop.images.all|first %}
+                                <img src="{{ first_img.image.url }}" alt="Property Image" style="width:100%;height:100%;object-fit:cover;border-radius:8px;border:1px solid #ddd;">
+                            {% endwith %}
+                            {% if prop.images.count > 1 %}
+                            <div style="position:absolute; bottom:-4px; right:-4px; background:#000; color:#fff; padding:2px 6px; border-radius:10px; font-size:11px; font-weight:600;">
+                                +{{ prop.images.count|add:"-1" }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div style="width:50px; height:50px; border-radius:8px; background:linear-gradient(135deg,#f8fafc,#e2e8f0); border:1px solid #cbd5e1; position:relative; overflow:hidden; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                            <i class="fas fa-building" style="font-size:18px;color:#2563eb;margin-bottom:2px;"></i>
+                            <span style="font-size:6px;font-weight:700;color:#1e293b;letter-spacing:.3px;line-height:1;">EstateFlow</span>
+                        </div>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </td>
 
-        </div>
-
-    {% else %}
-
-        <div style="
-            width:50px;
-            height:50px;
-            border-radius:50%;
-            background:linear-gradient(135deg,#1e3a8a,#2563eb);
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            justify-content:center;
-            color:white;
-            box-shadow:0 2px 6px rgba(0,0,0,.15);">
-
-            <i class="fas fa-building" style="font-size:16px;"></i>
-
-            <span style="
-                font-size:6px;
-                font-weight:700;
-                line-height:1;
-                margin-top:2px;">
-                EstateFlow
+           <!-- ================= 6A. UPLOADED VIDEO ================= -->
+<!-- ================= 6A. UPLOADED VIDEO ================= -->
+<td>
+    {% if prop.uploaded_video %}
+        {% if prop.uploaded_video.video %}
+            <div style="position:relative; width:75px; height:50px; cursor:pointer; border-radius:8px; overflow:hidden; border:2px solid #3b82f6;" 
+                onclick="openVideoModal('{{ prop.uploaded_video.video.url }}', 'Uploaded Walkthrough Video')" title="Watch Uploaded Video">
+                <video style="width:100%; height:100%; object-fit:cover;" muted>
+                    <source src="{{ prop.uploaded_video.video.url }}#t=0.5" type="video/mp4">
+                </video>
+                <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center;">
+                    <i class="fas fa-play-circle" style="color:#fff; font-size:20px;"></i>
+                </div>
+            </div>
+        {% else %}
+            <span class="badge bg-warning text-dark" style="font-size:0.75rem;" title="File > 20MB sent to RM">
+                <i class="fas fa-clock me-1"></i> Pending RM
             </span>
-
-        </div>
-
+        {% endif %}
+    {% else %}
+        <span style="color:#cbd5e1; font-size:0.8rem;">—</span>
     {% endif %}
-
-    </div>
 </td>
-               
+
+<!-- ================= 6B. AUTO-GENERATED SLIDESHOW ================= -->
+<td>
+    {% if prop.auto_video %}
+        {% if prop.auto_video.video %}
+            <div style="position:relative; width:75px; height:50px; cursor:pointer; border-radius:8px; overflow:hidden; border:2px solid #8b5cf6;" 
+                <div style="position:relative; width:75px; height:50px; cursor:pointer; border-radius:8px; overflow:hidden; border:2px solid #8b5cf6;" 
+                 onclick="openVideoModal('{{ prop.auto_video.video.url }}', 'Auto-Generated Slideshow')" title="Watch Auto-Generated Slideshow">
+                <video style="width:100%; height:100%; object-fit:cover;" muted>
+                    <source src="{{ prop.auto_video.video.url }}#t=0.5" type="video/mp4">
+                </video>
+                <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center;">
+                    <i class="fas fa-magic" style="color:#fff; font-size:18px;"></i>
+                </div>
+            </div>
+        {% else %}
+            <span class="badge bg-secondary" style="font-size:0.75rem;">Generating...</span>
+        {% endif %}
+    {% else %}
+        <span style="color:#cbd5e1; font-size:0.8rem;">—</span>
+    {% endif %}
+</td>
+
+<!-- ================= 6C. RM ASSISTED EXTERNAL LINK ================= -->
+<td>
+    {% if prop.rm_video %}
+        {% if prop.rm_video.video_url %}
+            {% if prop.rm_video.youtube_thumbnail %}
+                <div style="position:relative; width:75px; height:50px; cursor:pointer; border-radius:8px; overflow:hidden; border:2px solid #ef4444;" 
+                     onclick="window.open('{{ prop.rm_video.video_url }}', '_blank')" title="Watch on YouTube">
+                    <img src="{{ prop.rm_video.youtube_thumbnail }}" style="width:100%; height:100%; object-fit:cover;">
+                    <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center;">
+                        <i class="fab fa-youtube" style="color:#ff0000; font-size:22px; background:#fff; border-radius:50%; padding:2px;"></i>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{{ prop.rm_video.video_url }}" target="_blank" class="btn btn-sm btn-outline-danger" style="font-size:0.75rem; padding:4px 8px; border-radius:6px; white-space:nowrap;">
+                    <i class="fas fa-external-link-alt me-1"></i> Open Link
+                </a>
+            {% endif %}
+        {% else %}
+            <span class="badge bg-info text-dark" style="font-size:0.75rem;">Link Pending</span>
+        {% endif %}
+    {% else %}
+        <span style="color:#cbd5e1; font-size:0.8rem;">—</span>
+    {% endif %}
+</td>
+
+            <!-- 7. Listed By Type -->
+            <td><span class="badge bg-primary">{{ prop.listed_by_type|default:"Self" }}</span></td>
+            <!-- 8. Listed By Name -->
+            <td>{{ prop.listed_by_name|default:"—" }}</td>
+            <!-- 9. Listed By Contact -->
+            <td>{{ prop.listed_by_contact|default:"—" }}</td>
+            <!-- 10. Listed By Email -->
+            <td>{{ prop.listed_by_email|default:"—" }}</td>
+            <!-- 11. Listed By Role -->
+            <td>{{ prop.listed_by_role|default:"—" }}</td>
+
+            <!-- 12. Property Title -->
+            <td style="font-weight:600;color:#0f172a;">{{ prop.property_title|truncatechars:35|default:"—" }}</td>
+            <!-- 13. Property Type -->
+            <td><span class="badge bg-secondary text-capitalize">{{ prop.property_type|default:"—" }}</span></td>
+            <!-- 14. Building / Project Name -->
+            <td>{{ prop.building_name|default:"—" }}</td>
+            <!-- 15. Tower/Wing Number -->
+            <td>{{ prop.wing_number|default:"—" }}</td>
+            <!-- 16. Shop No/Godown/Unit No -->
+            <td>{{ prop.property_no|default:"—" }}</td>
+            <!-- 17. Availability Status -->
+            <td>{{ prop.availability_status|default:"—" }}</td>
+            <!-- 18. Available From -->
+            <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
+            <!-- 19. Age of Property -->
+            <td>{{ prop.property_age|default:"—" }} Years</td>
+            <!-- 20. Zone Type -->
+            <td>{{ prop.zone_type|default:"—" }}</td>
+            <!-- 21. Ownership Type -->
+            <td>{{ prop.ownership_type|default:"—" }}</td>
+            <!-- 22. Property Condition -->
+            <td><span class="badge bg-light text-dark text-capitalize">{{ prop.property_condition|default:"—" }}</span></td>
+            <!-- 23. Built-up Area -->
+            <td>{{ prop.builtup_area|default:"—" }} sq.ft</td>
+            <!-- 24. Carpet Area -->
+            <td>{{ prop.carpet_area|default:"—" }}{% if prop.carpet_area %} sq.ft{% endif %}</td>
+
+            <!-- 25. Property Address -->
+            <td>{{ prop.address|truncatechars:40|default:"—" }}</td>
+            <!-- 26. Area / Locality -->
+            <td>{{ prop.locality|default:"—" }}</td>
+            <!-- 27. Property Landmark -->
+            <td>{{ prop.property_landmark|default:"—" }}</td>
+            <!-- 28. City -->
+            <td>{{ prop.city|default:"—" }}</td>
+            <!-- 29. State -->
+            <td>{{ prop.state|default:"—" }}</td>
+            <!-- 30. Location Hub -->
+            <td>{{ prop.location_hub|default:"—" }}</td>
+            <!-- 31. Pincode -->
+            <td>{{ prop.pincode|default:"—" }}</td>
+            <!-- 32. Google Maps Link -->
+            <td>
+                {% if prop.google_maps_link %}
+                    <a href="{{ prop.google_maps_link }}" target="_blank" style="color:#2563eb;"><i class="fas fa-map-marker-alt"></i> View</a>
+                {% else %}—{% endif %}
+            </td>
+            <!-- 33. Latitude -->
+            <td>{{ prop.latitude|default:"—" }}</td>
+            <!-- 34. Longitude -->
+            <td>{{ prop.longitude|default:"—" }}</td>
+
+            <!-- 35. DG & UPS Included? -->
+            <td>{% if prop.dg_ups_included %}✔ Yes{% else %}✘ No{% endif %}</td>
+            <!-- 36. Electricity Included? -->
+            <td>{% if prop.electricity_included %}✔ Yes{% else %}✘ No{% endif %}</td>
+            <!-- 37. Water Included? -->
+            <td>{% if prop.water_included %}✔ Yes{% else %}✘ No{% endif %}</td>
+
+            <!-- 38. Building Configuration -->
+            <td>{{ prop.building_configuration|default:"—" }}</td>
+            <!-- 39. Total Floors Constructed -->
+            <td>{{ prop.total_floors|default:"—" }}</td>
+            <!-- 40. Staircases -->
+            <td>{{ prop.staircases|default:"—" }}</td>
+            <!-- 41. Passenger Lifts -->
+            <td>{{ prop.passenger_lifts|default:"0" }}</td>
+            <!-- 42. Service Lifts -->
+            <td>{{ prop.service_lifts|default:"0" }}</td>
+            <!-- 43. Private Parking -->
+            <td>{{ prop.private_parking|default:"0" }}</td>
+            <!-- 44. Minimum Seats Occupancy -->
+            <td>{{ prop.min_seats|default:"—" }}</td>
+            <!-- 45. Maximum Seats Occupancy -->
+            <td>{{ prop.max_seats|default:"—" }}</td>
+            <!-- 46. Cabins -->
+            <td>{{ prop.cabins|default:"—" }}</td>
+            <!-- 47. Meeting Rooms -->
+            <td>{{ prop.meeting_rooms|default:"—" }}</td>
+            <!-- 48. Private Washroom -->
+            <td>{{ prop.private_washroom|default:"0" }}</td>
+            <!-- 49. Public Washroom -->
+            <td>{{ prop.public_washroom|default:"0" }}</td>
+            <!-- 50. Flooring Type -->
+            <td>{{ prop.flooring_type|default:"—" }}</td>
+
+            <!-- 51. Monthly Rent -->
+            <td style="font-weight:700;color:#16a34a;">{% if prop.monthly_rent %}₹{{ prop.monthly_rent }}{% else %}—{% endif %}</td>
+
+            
                 <td>
-                    {% if prop.video %}
-                        <button class="btn btn-sm btn-outline-danger" onclick="previewMedia('video','{{ prop.video.url }}','Property Video')">
-                            <i class="fas fa-play-circle"></i> Play
-                        </button>
-                    {% else %}<span style="color:#999;font-size:.8rem">—</span>{% endif %}
-                </td>
+                {% if prop.brokerage_percentage %}
+                    <div style="font-size:11px;color:#64748b;font-weight:600;">{{ prop.get_brokerage_label }}</div>
+                  
+                {% else %}
+                    —
+                {% endif %}
+            </td>
 
-                <td><span class="badge bg-secondary text-capitalize">{{ prop.property_type }}</span></td>
-                <td><span class="badge bg-light text-dark text-capitalize">{{ prop.property_condition }}</span></td>
-                <td>{{ prop.city }}</td>
-                <td>{{ prop.area_locality }}</td>
-                <td>{{ prop.property_address|truncatechars:40 }}</td>
-                <td>{{ prop.building_name }}</td>
-                <td>{{ prop.possession_status }}</td>
-                <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
-                <td>{{ prop.age_of_property }} Years</td>
-                <td>{{ prop.zone_type|default:"—" }}</td>
-                <td>{{ prop.location_hub|default:"—" }}</td>
-                <td>{{ prop.ownership_type }}</td>
-                <td>{{ prop.construction_status|default:"—" }}</td>
 
-                <td>{{ prop.builtup_area }} sq.ft</td>
-                <td>{{ prop.carpet_area|default:"—" }}{% if prop.carpet_area %} sq.ft{% endif %}</td>
-                <td><strong>₹{{ prop.expected_rent }}</strong></td>
-                <td>{% if prop.security_deposit %}₹{{ prop.security_deposit }}{% else %}—{% endif %}</td>
-                <td>{% if prop.maintenance_charges %}₹{{ prop.maintenance_charges }}{% else %}—{% endif %}</td>
-                <td>{{ prop.negotiable|default:"No" }}</td>
-                <td>{{ prop.brokerage|default:"—" }}</td>
-                <td>{{ prop.brokerage_percentage|default:"—" }}</td>
-                <td>{{ prop.manual_brokerage|default:"—" }}</td>
-                <td>{% if prop.dg_ups_included %}✔ Yes{% else %}✘ No{% endif %}</td>
-                <td>{% if prop.electricity_included %}✔ Yes{% else %}✘ No{% endif %}</td>
-                <td>{% if prop.water_included %}✔ Yes{% else %}✘ No{% endif %}</td>
-                <td>{{ prop.lockin_period|default:"—" }}</td>
-                <td>{{ prop.rent_increase|default:"—" }}{% if prop.rent_increase %}%{% endif %}</td>
-                <td>{{ prop.total_floors|default:"—" }}</td>
-                <td>{{ prop.your_floor|default:"—" }}</td>
-                <td>{{ prop.staircases|default:"—" }}</td>
-                <td>{{ prop.passenger_lifts|default:"0" }}</td>
-                <td>{{ prop.service_lifts|default:"0" }}</td>
-                <td>{{ prop.private_parking|default:"0" }}</td>
-                <td>{{ prop.min_seats|default:"—" }}</td>
-                <td>{{ prop.max_seats|default:"—" }}</td>
-                <td>{{ prop.cabins|default:"—" }}</td>
-                <td>{{ prop.meeting_rooms|default:"—" }}</td>
-                <td>{{ prop.private_washroom|default:"0" }}</td>
-                <td>{{ prop.public_washroom|default:"0" }}</td>
-                <td>{{ prop.flooring_type|default:"—" }}</td>
+             <td>
+                {% if prop.brokerage_percentage %}
+             
+                  <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_brokerage_amount|floatformat:"0" }}</div>
+                 <div style="font-size:11px;color:#64748b;margin-top:2px;">({{ prop.get_brokerage_display_value }})</div>
+                  
+                {% else %}
+                    —
+                {% endif %}
+            </td>
 
-                <td>{% if prop.amenities %}{{ prop.amenities|join:", " }}{% else %}—{% endif %}</td>
-                <td>{% if prop.nearby_facilities %}{{ prop.nearby_facilities|join:", " }}{% else %}—{% endif %}</td>
-                <td>{{ prop.property_summary|striptags|truncatechars:40|default:"—" }}</td>
-                <td>{{ prop.property_description|striptags|truncatechars:40|default:"—" }}</td>
-                 <td>{{ prop.user_description|striptags|truncatechars:40|default:"—" }}</td>
+            <!-- 60. Brokerage Terms (Styled with Label and Brackets) -->
+            
 
-                <td>{{ prop.owner_name }}</td>
-                <td>{{ prop.contact_number }}</td>
-                <td>{{ prop.email }}</td>
-                <td>{{ prop.alternate_contact|default:"—" }}</td>
-                <td>{{ prop.uploaded_by_name|default:"—" }}</td>
-                <td>{{ prop.uploaded_by_email|default:"—" }}</td>
-                <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
-                <td>{{ prop.uploaded_by_role|default:"—" }}</td>
-                <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI Listing Form" }}</small></td>
-                <td>{{ prop.created_at|date:"d M Y H:i" }}</td>
-                
-                <td style="position:sticky;right:0;background:white;z-index:1;">
-                    <div style="display:flex;gap:5px">
-                        <a class="btn-action btn-view" title="View" href="{% url 'commercial_view' prop.id %}"><i class="fas fa-eye"></i></a>
-                        <a class="btn-action btn-edit" title="Edit" href="{% url 'commercial_edit' prop.id %}"><i class="fas fa-edit"></i></a>
-                        <button type="button" class="btn-action btn-delete" title="Delete" onclick="deleteCommercial({{ prop.id }})"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="61" style="text-align:center;padding:40px">
-                    <div style="color:#64748b;font-size:1.1rem">
-                        <i class="fas fa-folder-open mb-2" style="font-size:2rem"></i><br>
-                        No matching commercial properties found.
-                    </div>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            <!-- 61. Manual Brokerage -->
+            <td>{% if prop.manual_brokerage %}₹{{ prop.manual_brokerage }}{% else %}—{% endif %}</td>
+
+            
+            <!-- 52. Advance Rent (Type) -->
+              <td>
+                {% if prop.get_advance_rent_amount %}
+                    <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_advance_rent_amount|floatformat:"0" }}</div>
+                    {% if prop.advanced_rent_type != "Fixed Amount" and prop.advanced_rent_type != "No Advance" %}
+                        <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                            ({{ prop.advanced_rent_type }})
+                        </div>
+                    {% elif prop.advanced_rent_type == "Fixed Amount" %}
+                        <div style="font-size:11px;color:#2563eb;margin-top:2px;">(Manual Fixed)</div>
+                    {% endif %}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+            
+            <!-- 53. Advance Rent Amount (Styled with Brackets) -->
+            <td>
+               
+                    <div style="font-weight:600;color:#1e293b;">{{ prop.advance_rent_amount|floatformat:"0"|default:"—"  }}</div>
+                    
+              
+            </td>
+
+    <td>
+                {% if prop.get_security_deposit_amount %}
+                    <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_security_deposit_amount|floatformat:"0" }}</div>
+                    {% if prop.security_deposit_type != "Fixed Amount" and prop.security_deposit_type != "No Deposit" %}
+                        <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                            ({{ prop.security_deposit_type }})
+                        </div>
+                    {% elif prop.security_deposit_type == "Fixed Amount" %}
+                        <div style="font-size:11px;color:#2563eb;margin-top:2px;">(Manual Fixed)</div>
+                    {% endif %}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+
+            
+            <!-- 55. Refundable Security Deposit Amount (Styled with Brackets) -->
+            <td>
+               
+                    <div style="font-weight:600;color:#1e293b;">{{ prop.security_deposit_amount|floatformat:"0" }}</div>
+                 
+            </td>
+
+            <!-- 56. Maintenance Type -->
+            <td>{{ prop.maintenance_type|default:"—" }}</td>
+            
+            <!-- 57. Monthly Maintenance Amount -->
+            <td>{% if prop.maintenance_charges %}₹{{ prop.maintenance_charges }}{% else %}—{% endif %}</td>
+            
+            <!-- 58. Total Move-in Cost -->
+            <td style="font-weight:700;color:#2563eb;">{% if prop.total_move_in_cost %}₹{{ prop.total_move_in_cost }}{% else %}—{% endif %}</td>
+            
+            <!-- 59. Negotiable -->
+            <td>{{ prop.negotiable|default:"Yes" }}</td>
+
+            <!-- 62. Lock-in (Months) -->
+            <td>{{ prop.lockin_period|default:"—" }}</td>
+            <!-- 63. Rent Increase (%/year) -->
+            <td>{{ prop.rent_increase|default:"—" }}{% if prop.rent_increase %}%{% endif %}</td>
+            
+            <!-- 64. Amenities -->
+            <td>{% if prop.amenities %}{{ prop.amenities }}{% else %}—{% endif %}</td>
+            <!-- 65. Nearby Facilities -->
+            <td>{% if prop.nearby_facilities %}{{ prop.nearby_facilities }}{% else %}—{% endif %}</td>
+            <!-- 66. Property Summary -->
+            <td>{{ prop.property_summary|striptags|truncatechars:40|default:"—" }}</td>
+            <!-- 67. Property Description -->
+            <td>{{ prop.property_description|striptags|truncatechars:40|default:"—" }}</td>
+            <!-- 68. User Property Description -->
+            <td>{{ prop.user_description|striptags|truncatechars:40|default:"—" }}</td>
+
+            <!-- 69. Listed Elsewhere -->
+            <td>{{ prop.listed_elsewhere|default:"—" }}</td>
+            <!-- 70. Portal Name -->
+            <td>{{ prop.portal_name|default:"—" }}</td>
+            <!-- 71. UB Name -->
+            <td>{{ prop.uploaded_by_name|default:"—" }}</td>
+            <!-- 72. UB Email -->
+            <td>{{ prop.uploaded_by_email|default:"—" }}</td>
+            <!-- 73. UB Contact -->
+            <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
+            <!-- 74. UB Role -->
+            <td>{{ prop.uploaded_by_role|default:"—" }}</td>
+            <!-- 75. Data Uploaded Via -->
+            <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI Listing Form" }}</small></td>
+            <!-- 76. Created At -->
+            <td>{{ prop.created_at|date:"d M Y H:i" }}</td>
+
+            <!-- 77. Property Unique Key -->
+            <td><code style="font-size:11px;background:#f1f5f9;padding:2px 4px;border-radius:4px;">{{ prop.property_unique_key|default:"—" }}</code></td>
+            <!-- 78. Duplicate Count -->
+            <td>
+                {% if prop.duplicate_count > 1 %}
+                    <span class="badge bg-warning text-dark" style="font-weight:700;">{{ prop.duplicate_count }}</span>
+                {% else %}
+                    {{ prop.duplicate_count|default:"1" }}
+                {% endif %}
+            </td>
+            <!-- 79. Duplicate Group ID -->
+            <td>{{ prop.duplicate_group_id|default:"—" }}</td>
+            <!-- 80. Is Duplicate -->
+            <td>{% if prop.is_duplicate %}<span class="badge bg-danger">Yes</span>{% else %}<span class="badge bg-light text-dark">No</span>{% endif %}</td>
+            
+            <!-- 81. Is Deleted -->
+            <td>{% if prop.is_deleted %}<span class="badge bg-danger">Deleted</span>{% else %}<span class="badge bg-success">Active</span>{% endif %}</td>
+            <!-- 82. Deleted At -->
+            <td>{{ prop.deleted_at|date:"d M Y H:i"|default:"—" }}</td>
+            <!-- 83. Deleted By -->
+            <td>{{ prop.deleted_by|default:"—" }}</td>
+
+            <!-- 84. Actions -->
+            <td style="position:sticky;right:0;background:white;z-index:1;">
+                <div style="display:flex;gap:8px;">
+                    <button class="btn-action btn-view" onclick="window.location.href='{% url 'commercial_view' prop.id %}'"><i class="fas fa-eye"></i></button>
+                    <button class="btn-action btn-edit" onclick="window.location.href='{% url 'commercial_edit' prop.id %}'"><i class="fas fa-edit"></i></button>
+                    <button class="btn-action btn-delete" onclick="deleteCommercial('{{ prop.id }}')"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="84">
+                <div class="empty-state" style="text-align:center;padding:40px;color:#718096;">
+                    <i class="fas fa-building" style="font-size:3rem;color:#cbd5e0;margin-bottom:15px;display:block;"></i>
+                    No commercial properties found.
+                </div>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+
 </div>
 
         <!-- ═══ PAGINATION ═══ -->
@@ -1138,6 +1436,9 @@
     // ─────────────────────────────────────────────────
     // 7.  IMPORT EXCEL (Updated with SweetAlert Validation)
     // ─────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────
+    // 7.  IMPORT EXCEL (Updated with SweetAlert Validation)
+    // ─────────────────────────────────────────────────
     function handleCommercialFileSelect(input) {
         if (input.files && input.files[0]) showCommercialFilePreview(input.files[0]);
     }
@@ -1172,7 +1473,7 @@
         if (resultDiv) resultDiv.style.display = 'none';
     }
     
-  function submitCommercialImport() {
+    function submitCommercialImport() {
         var fileInput = document.getElementById('commercial_file');
         if (!fileInput.files || !fileInput.files[0]) { 
             Swal.fire('No File','Please select an Excel file.','warning'); 
@@ -1186,7 +1487,6 @@
         
         // 1. BULLETPROOF MODAL CLOSE: Safely hides the modal in Bootstrap 4 or 5 without crashing
         try {
-            // Find the built-in closing "×" or "Close" button inside this specific modal and click it
             var closeBtn = modalEl.querySelector('[data-dismiss="modal"], [data-bs-dismiss="modal"], .close');
             if (closeBtn) {
                 closeBtn.click();
@@ -1225,11 +1525,25 @@
                     window.location.reload(); 
                 });
             } else {
-                // Catches Missing Columns, Missing Data, and Duplicate Files!
+                // Construct a detailed error message
+                let detailedMessage = data.message;
+                
+                // If the backend sent specific row errors, append them to the popup!
+                if (data.errors && data.errors.length > 0) {
+                    detailedMessage += "\n\n--- Error Details ---\n" + data.errors.join("\n");
+                } 
+                else if (data.row_errors && data.row_errors.length > 0) {
+                    detailedMessage += "\n\n--- Missing Fields ---\n";
+                    data.row_errors.forEach(err => {
+                        detailedMessage += `Row ${err.row}: Missing ${err.missing_fields.join(", ")}\n`;
+                    });
+                }
+
+                // Show the full detailed message
                 Swal.fire({
                     icon: "error",
-                    title: "Upload Rejected",
-                    text: data.message,
+                    title: "Upload Rejected or Partially Skipped",
+                    text: detailedMessage,
                     customClass: {
                         popup: 'format-pre' 
                     }
@@ -1249,7 +1563,7 @@
                                 modalInstance.show();
                             }
                         } else {
-                            // Raw CSS/HTML layout fallback if Bootstrap scripts are completely locked
+                            // Raw CSS/HTML layout fallback
                             modalEl.classList.add('show');
                             modalEl.style.display = 'block';
                             var backdrop = document.createElement('div');
@@ -1303,6 +1617,29 @@
         showGalleryModal(Swal.getTitle().textContent);
     }
 
+    // ─────────────────────────────────────────────────
+    // VIDEO PREVIEW MODAL (Uploaded + Auto-Generated)
+    // ─────────────────────────────────────────────────
+    function openVideoModal(videoUrl, title) {
+        if (!videoUrl) {
+            Swal.fire('No Video', 'This video is not available yet.', 'info');
+            return;
+        }
+        Swal.fire({
+            title: title || 'Video Preview',
+            html: '<video src="' + videoUrl + '" controls autoplay playsinline ' +
+                  'style="width:100%;max-height:70vh;border-radius:8px;background:#000;outline:none;"></video>',
+            width: '720px',
+            showCloseButton: true,
+            showConfirmButton: false,
+            padding: '1.5em',
+            background: '#fff',
+            didClose: function () {
+                var vids = document.querySelectorAll('.swal2-html-container video');
+                vids.forEach(function (v) { v.pause(); });
+            }
+        });
+    }
     
 
 

@@ -27,6 +27,169 @@
     min-height: 100vh;
   }
 
+
+
+ 
+/*
+================================================================
+ REPLACE THE ENTIRE BLOCK in your <style> tag that currently
+ runs from:
+     /* ================= IMPROVED IMAGE UPLOAD UX (UI ONLY) ================= *\/
+ down to:
+     .img-total-summary .total-count { font-size: 1.05rem; }
+
+ ...with EVERYTHING below. This restores the base rules that
+ got deleted (display:none/active toggle, preview grid, etc.)
+ AND keeps the new styling (numbered badges, cover-photo tag,
+ guide banner). Nothing from your JS or HTML needs to change.
+================================================================
+*/
+
+/* ================= PROPERTY IMAGE CATEGORY UPLOAD — BASE + IMPROVED UX ================= */
+
+.img-upload-guide {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    border: 2px dashed #a5b4fc; border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px;
+}
+.guide-step { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 190px; }
+.guide-step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--primary-gradient); color: #fff;
+    font-weight: 800; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 3px 8px rgba(102,126,234,0.35);
+}
+.guide-step-text { font-size: 0.78rem; color: #3730a3; line-height: 1.35; }
+.guide-step-text strong { display: block; font-size: 0.85rem; color: #1e1b4b; }
+.guide-arrow { color: #a5b4fc; font-size: 1rem; display: none; }
+@media (min-width: 900px) { .guide-arrow { display: block; } }
+
+/* --- tabs container --- */
+.img-cat-tabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+    counter-reset: catstep;
+}
+
+/* --- base tab card (this was accidentally deleted — restored) --- */
+.img-cat-tab {
+    position: relative;
+    border: 2px solid #e9ecef; background: #fff; border-radius: 14px;
+    padding: 18px 14px 14px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
+    cursor: pointer;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    transition: all 0.25s ease;
+    counter-increment: catstep;
+}
+.img-cat-tab i { font-size: 1.3rem; color: #94a3b8; }
+.img-cat-tab .cat-count {
+    background: #f1f5f9; color: #64748b; border-radius: 20px;
+    padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
+    align-self: flex-end; margin-top: -4px;
+}
+.img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
+.img-cat-tab.active i { color: #fff; }
+.img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+.img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
+
+/* order badge, top-left corner of every card */
+.img-cat-tab::before {
+    content: counter(catstep);
+    position: absolute; top: -8px; left: -8px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #fff; border: 2px solid #cbd5e0; color: #64748b;
+    font-size: 0.68rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+.img-cat-tab.active::before { border-color: #667eea; color: #667eea; }
+.img-cat-tab.has-images::before {
+    content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900;
+    background: #38ef7d; border-color: #38ef7d; color: #fff;
+}
+
+/* cover-photo flag on the first two tiles (Exterior, Reception) */
+.img-cat-tab:nth-child(1)::after,
+.img-cat-tab:nth-child(2)::after {
+    content: "★ Becomes Cover Photo";
+    font-size: 0.62rem; font-weight: 700; color: #b45309;
+    background: #fef3c7; padding: 2px 9px; border-radius: 20px;
+    align-self: flex-start; margin-top: 2px;
+}
+.img-cat-tab.active:nth-child(1)::after,
+.img-cat-tab.active:nth-child(2)::after { color: #fff; background: rgba(255,255,255,0.25); }
+
+/* --- panel show/hide — THIS WAS THE MISSING RULE CAUSING THE BROKEN LOOK --- */
+.img-cat-panel { display: none; }
+.img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+/* --- upload dropzone (restored + enhanced) --- */
+.img-cat-upload-area {
+    border: 3px dashed #cbd5e0; border-radius: 15px; padding: 36px 20px;
+    text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+}
+.img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
+.img-cat-upload-area .upload-icon {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: #eef2ff; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+}
+.img-cat-upload-area .upload-icon i { font-size: 1.6rem; color: #667eea; margin: 0; }
+.img-cat-upload-area .upload-text { font-size: 1.05rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+.img-cat-upload-area .upload-subtext {
+    display: inline-block; margin-top: 8px; padding: 4px 12px;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; color: #475569;
+    font-size: 0.82rem;
+}
+
+/* --- preview grid (restored — this was also missing) --- */
+.img-cat-preview {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px; margin-top: 18px;
+}
+.img-cat-preview-item {
+    position: relative; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
+}
+.img-cat-preview-item.dragging { opacity: 0.4; }
+.img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.img-cat-preview-item .img-index-badge {
+    position: absolute; top: 8px; left: 8px; background: rgba(15,23,42,0.85); color: #fff;
+    font-size: 0.7rem; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+}
+.img-cat-preview-item .cover-badge {
+    position: absolute; bottom: 8px; left: 8px;
+    background: linear-gradient(135deg,#f6d365,#fda085); color: #3b2a00;
+    font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 20px;
+    display: flex; align-items: center; gap: 4px;
+}
+.img-cat-preview-item .remove-image {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+    background: #e74c3c; color: #fff; border: none; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
+}
+.img-cat-preview-item .remove-image:hover { background: #c0392b; }
+
+/* --- total summary bar (restored + enhanced) --- */
+.img-total-summary {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 16px;
+    padding: 16px 22px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+}
+.img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 1.05rem; }
+.img-total-summary .total-count span { color: #667eea; }
+.img-total-summary .min-warning { font-size: 0.8rem; color: #e74c3c; font-weight: 600; }
+.img-total-summary .min-ok { font-size: 0.8rem; color: #10b981; font-weight: 600; }
+
+  
+
+
+
+
   .page-wrap {
     display: grid;
     grid-template-columns: 1fr 320px;
@@ -340,14 +503,74 @@
   }
 
   /* Sidebar */
+ 
+  /* 1. Fixed Sticky Sidebar in Grid */
   .preview-sidebar {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    position: -webkit-sticky;
     position: sticky;
     top: 90px;
+    align-self: start;
+    height: fit-content;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
   }
 
+  /* 2. New Banner & Constant Black Back Button (No Hover Effect) */
+  .property-banner-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 28px 35px;
+    color: white;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.25);
+  }
+
+  .banner-text h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #ffffff;
+  }
+
+  .banner-text p {
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+  }
+
+  .btn-back-banner {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    padding: 12px 22px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .btn-back-banner:hover,
+  .btn-back-banner:active,
+  .btn-back-banner:focus {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    transform: none !important;
+  }
   .preview-card {
     background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
     border-radius: 16px;
@@ -764,15 +987,18 @@
 
     <div>
       <div class="form-container">
-        <div class="form-header">
-          <div class="form-title">
-            <i class="fas fa-building" style="color: #667eea;"></i> Post Your Commercial Rental
-          </div>
-          <button class="btn-back" onclick="history.back();">
-            <i class="fas fa-arrow-left"></i> Back to List
-          </button>
+        
+        <!-- Place this right above <div class="form-container"> -->
+      <div class="property-banner-header">
+          <button type="button" class="btn-back-banner" onclick="history.back();">
+          <i class="fas fa-arrow-left"></i> Back to List
+        </button>
+        <div class="banner-text">
+          <h1>Post Your Commercial Rental Property</h1>
+          <p>List your property in 4 simple steps and connect with genuine tenants instantly.</p>
         </div>
-
+      
+      </div>
         <div class="stepper" id="stepper">
           <div class="step-item">
             <div class="step-circle active" id="sc1">1</div>
@@ -795,8 +1021,7 @@
           </div>
         </div>
 
-        <form method="POST" enctype="multipart/form-data" action="{% url 'commercial_rental_add' %}"
-          id="commercialForm">
+        <form method="POST" enctype="multipart/form-data" action="{% url 'commercial_rental_add' %}" id="commercialForm" novalidate>
           {% csrf_token %}
 
           <div class="step-content active" id="step1">
@@ -959,7 +1184,7 @@
 
       <div class="col-md-6 mb-3">
         <label class="form-label">Tower/Wing Number </label>
-        <input type="number" class="form-control" name="wing_number" id="wing_number" placeholder="Enter Tower/Wing Number">
+        <input type="text" class="form-control" name="wing_number" id="wing_number" placeholder="Enter Tower/Wing Number">
       </div>
 
       <div class="col-md-6 mb-3">
@@ -999,7 +1224,7 @@
       </div>
 
       <div class="col-md-6 mb-3">
-        <label class="form-label">Age of Property <span class="required">*</span></label>
+        <label class="form-label">Age of Property(In Years) <span class="required">*</span></label>
         <input type="number" class="form-control" name="property_age" id="property_age" placeholder="Enter property age in years (e.g., 5)">
       </div>
 
@@ -1083,22 +1308,7 @@
         <input type="number" class="form-control" name="carpet_area" id="carpet_area" placeholder="e.g. 1200">
       </div>
 
-      <div class="col-md-6 mb-3" id="brokerageSection">
-        <label class="form-label" id="brokerageLabel">Brokerage <span class="required">*</span></label>
-        <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
-          <option value="">Select</option>
-          <option value="No Brokerage">No Brokerage</option>
-          <option value="15 Days Rent">15 Days Rent</option>
-          <option value="1 Month Rent" selected>1 Month Rent</option>
-          <option value="Fixed Amount">Fixed Amount</option>
-          <option value="Negotiable">Negotiable</option>
-        </select>
-      </div>
-
-      <div class="col-md-6 mb-3" id="manualBrokerage" style="display:none;">
-        <label class="form-label">Enter Fixed Brokerage</label>
-        <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. Fixed Amount">
-      </div>
+     
 
     </div>
   </div>
@@ -1179,28 +1389,33 @@
         </div>
       </div>
 
+     
       <div class="col-md-6 mb-3">
         <label class="form-label">Location Hub</label>
        <select class="form-select" name="location_hub" id="location_hub">
-    <option value="">Select Location Hub</option>
+          <option value="">Select Location Hub</option>
+          <option value="business_district">Business District (CBD)</option>
+          <option value="it_park">IT / Technology Park</option>
+          <option value="corporate_hub">Corporate Hub</option>
+          <option value="commercial_complex">Commercial Complex</option>
+          <option value="shopping_mall">Shopping Mall</option>
+          <option value="high_street">High Street Market</option>
+          <option value="market_area">Market Area</option>
+          <option value="industrial_estate">Industrial Estate</option>
+          <option value="logistics_hub">Logistics / Warehouse Hub</option>
+          <option value="sez">Special Economic Zone (SEZ)</option>
+          <option value="transport_hub">Transport Hub</option>
+          <option value="airport_corridor">Airport Corridor</option>
+          <option value="metro_corridor">Metro Corridor</option>
+          <option value="mixed_use_development">Mixed Use Development</option>
+          <option value="standalone">Standalone Property</option>
+       </select>
+      </div>
 
-    <option value="business_district">Business District (CBD)</option>
-    <option value="it_park">IT / Technology Park</option>
-    <option value="corporate_hub">Corporate Hub</option>
-    <option value="commercial_complex">Commercial Complex</option>
-    <option value="shopping_mall">Shopping Mall</option>
-    <option value="high_street">High Street Market</option>
-    <option value="market_area">Market Area</option>
-    <option value="industrial_estate">Industrial Estate</option>
-    <option value="logistics_hub">Logistics / Warehouse Hub</option>
-    <option value="sez">Special Economic Zone (SEZ)</option>
-    <option value="transport_hub">Transport Hub</option>
-    <option value="airport_corridor">Airport Corridor</option>
-    <option value="metro_corridor">Metro Corridor</option>
-    <option value="mixed_use_development">Mixed Use Development</option>
-    <option value="standalone">Standalone Property</option>
-   
-</select>
+      <!-- ADDED PINCODE FIELD HERE -->
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Pincode<span class="required-star" style="color:red;">*</span></label>
+        <input type="number" class="form-control" name="pincode" id="pincode" placeholder="e.g. 411014" maxlength="6" required>
       </div>
 
 
@@ -1230,7 +1445,7 @@
            
             <div class="step-nav">
               <div></div>
-              <button type="button" class="btn-next" onclick="goToStep(2)">Next <i
+              <button type="button" class="btn-next" onclick="goToStep(2)">Move To Next Page <i
                   class="fas fa-arrow-right"></i></button>
             </div>
           </div>
@@ -1269,13 +1484,13 @@
    <div class="col-md-4 mb-3">
         <div class="form-group">
             <label class="form-label">
-                Building Configuration <span style="color: red;"class="required">*</span>
+                Building Configuration
             </label>
             <input type="text" class="form-control"
                    id="building_configuration"
                    name="building_configuration"
                    placeholder="e.g., G, G+1, G+2, G+3"
-                   required>
+                   >
         </div>
     </div>
                                  <div class="col-md-4 mb-3">
@@ -1381,12 +1596,29 @@
                   <div class="row">
                     
                     <div class="col-md-4 mb-3">
-                      <label class="form-label">Monthly Rent (mo) <span class="required">*</span></label>
+                      <label class="form-label">Monthly Rent<span class="required">*</span></label>
                       <input type="number" class="form-control" name="monthly_rent" id="monthly_rent" placeholder="e.g. 75000" required>
                     </div>
 
+
+                     <div class="col-md-4 mb-3" id="brokerageSection">
+        <label class="form-label" id="brokerageLabel">Brokerage <span class="required">*</span></label>
+        <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
+          <option value="">Select</option>
+          <option value="No Brokerage">No Brokerage</option>
+          <option value="15 Days Rent">15 Days Rent</option>
+          <option value="1 Month Rent" selected>1 Month Rent</option>
+          <option value="Fixed Amount">Fixed Amount</option>
+          <option value="Negotiable">Negotiable</option>
+        </select>
+      </div>
+
+      <div class="col-md-4 mb-3" id="manualBrokerage" style="display:none;">
+        <label class="form-label">Enter Fixed Brokerage</label>
+        <input type="text" class="form-control" name="manual_brokerage" placeholder="e.g. Fixed Amount">
+      </div>
                     <div class="col-md-4 mb-3">
-                      <label class="form-label">Advanced Rent <span style="color:red;">*</span></label>
+                      <label class="form-label">Advanced Rent Month <span style="color:red;">*</span></label>
                       <select class="form-select" name="advanced_rent_type" id="advanced_rent_type" required>
                         <option value="No Advance">No Advance</option>
                         <option value="1 Month Rent" selected>1 Month Rent</option>                
@@ -1429,14 +1661,14 @@
                     </div>
 
                     <div class="col-md-4 mb-3" id="security_deposit_amount_container" style="display: none;">
-                      <label class="form-label">Deposit Amount</label>
+                      <label class="form-label">Refundable Security Deposit Amount</label>
                       <input type="number" class="form-control" name="security_deposit_amount" id="security_deposit_amount" placeholder="e.g. 250000">
                     </div>
 
                     
 
                    <div class="col-md-4 mb-3">
-  <label class="form-label">Maintenance Charges</label>
+  <label class="form-label">Maintenance Type</label>
   <!-- ADDED flex-wrap so they stack if space gets too tight -->
   <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
     
@@ -1499,8 +1731,8 @@
 
             <div class="step-nav">
               <button type="button" class="btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i>
-                Back</button>
-              <button type="button" class="btn-next" onclick="goToStep(3)">Next <i
+                Previous Page</button>
+              <button type="button" class="btn-next" onclick="goToStep(3)">Move To Next Page <i
                   class="fas fa-arrow-right"></i></button>
             </div>
           </div>
@@ -1618,39 +1850,261 @@
 
             <div class="step-nav">
               <button type="button" class="btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i>
-                Back</button>
-              <button type="button" class="btn-next" onclick="goToStep(4)">Next <i
+                Previous Page</button>
+              <button type="button" class="btn-next" onclick="goToStep(4)">Move To Next Page <i
                   class="fas fa-arrow-right"></i></button>
             </div>
           </div>
 
           <div class="step-content" id="step4">
-            <div class="form-section">
-              <div class="section-header"><i class="fa-solid fa-images"></i> Media</div>
-              <div class="section-body">
-                <div class="row">
-                  <div class="col-md-12 mb-3">
-                    <label class="form-label"><i class="fa-solid fa-camera"></i> Upload Property Images <span
-                        class="required">*</span></label>
-                    <div class="image-upload-area" id="uploadArea">
-                      <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" hidden>
-                      <i class="fas fa-cloud-upload-alt" style="font-size:3rem;color:#667eea;"></i>
-                      <div class="upload-text" style="font-weight:600; font-size:1.1rem; margin-top:10px;">Click or Drag
-                        Images Here</div>
-                      <div class="upload-subtext" style="color:#64748b; font-size:0.9rem;">Upload up to 10 images (JPG,
-                        PNG). <br><strong>Tip:</strong> Drag & Drop preview images to arrange their sequence.</div>
-                    </div>
+          <!-- ================= PROPERTY IMAGES (COMMERCIAL CATEGORIES) ================= -->
+<div class="form-section">
+    <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
+    <div class="section-body">
 
-                    <div id="imageCount" style="font-weight: 600; color: #64748b; margin-top: 15px; text-align: right;">
-                      0 out of 10 images selected</div>
-                    <div class="image-preview" id="imagePreview"></div>
-                  </div>
+      <div class="img-upload-guide">
+    <div class="guide-step">
+        <div class="guide-step-num">1</div>
+        <div class="guide-step-text">
+            <strong>Pick a category</strong>
+            Tap a tile below (Exterior, Reception, Workspace...)
+        </div>
+    </div>
+    <i class="fas fa-arrow-right guide-arrow"></i>
+    <div class="guide-step">
+        <div class="guide-step-num">2</div>
+        <div class="guide-step-text">
+            <strong>Upload matching photos</strong>
+            Click or drag images into that category only
+        </div>
+    </div>
+    <i class="fas fa-arrow-right guide-arrow"></i>
+    <div class="guide-step">
+        <div class="guide-step-num">3</div>
+        <div class="guide-step-text">
+            <strong>Set your cover photo</strong>
+            Drag to reorder — the 1st photo in Exterior/Reception is used as the cover
+        </div>
+    </div>
+</div>
+        <div class="img-total-summary">
+            <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/30</div>
+            <div id="imgMinNotice" class="min-warning"><i class="fas fa-exclamation-circle"></i> Add at least 3 images to publish</div>
+        </div>
 
-                  <div class="col-md-6 mb-3"><label class="form-label"><i class="fa-solid fa-video"></i>
-                      Video</label><input type="file" class="form-control" name="video" accept="video/*"></div>
+        <div class="img-cat-tabs" id="imgCatTabs">
+            <div class="img-cat-tab active" data-cat="exterior"><i class="fas fa-building"></i> Building Exterior <span class="cat-count" id="count-exterior">0</span></div>
+            <div class="img-cat-tab" data-cat="reception"><i class="fas fa-door-open"></i> Reception / Lobby <span class="cat-count" id="count-reception">0</span></div>
+            <div class="img-cat-tab" data-cat="workspace"><i class="fas fa-briefcase"></i> Office Workspace <span class="cat-count" id="count-workspace">0</span></div>
+            <div class="img-cat-tab" data-cat="cabins"><i class="fas fa-user-tie"></i> Cabins / Manager Rooms <span class="cat-count" id="count-cabins">0</span></div>
+            <div class="img-cat-tab" data-cat="meeting_room"><i class="fas fa-handshake"></i> Meeting / Conference Room <span class="cat-count" id="count-meeting_room">0</span></div>
+            <div class="img-cat-tab" data-cat="shop_showroom"><i class="fas fa-store"></i> Shop / Showroom Area <span class="cat-count" id="count-shop_showroom">0</span></div>
+            <div class="img-cat-tab" data-cat="warehouse"><i class="fas fa-boxes-stacked"></i> Warehouse / Storage <span class="cat-count" id="count-warehouse">0</span></div>
+            <div class="img-cat-tab" data-cat="pantry"><i class="fas fa-utensils"></i> Pantry / Cafeteria <span class="cat-count" id="count-pantry">0</span></div>
+            <div class="img-cat-tab" data-cat="washroom"><i class="fas fa-restroom"></i> Washroom <span class="cat-count" id="count-washroom">0</span></div>
+            <div class="img-cat-tab" data-cat="parking"><i class="fas fa-square-parking"></i> Parking <span class="cat-count" id="count-parking">0</span></div>
+            <div class="img-cat-tab" data-cat="amenities"><i class="fas fa-tree"></i> Common Amenities <span class="cat-count" id="count-amenities">0</span></div>
+            <div class="img-cat-tab" data-cat="floor_plan"><i class="fas fa-ruler-combined"></i> Floor Plan <span class="cat-count" id="count-floor_plan">0</span></div>
+        </div>
+
+        <div class="img-cat-panels">
+
+            <div class="img-cat-panel active" data-cat-panel="exterior">
+                <input type="file" class="img-cat-input" id="imgInput-exterior" name="property_images_exterior[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="exterior">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Building Exterior Photos Here</div>
+                    <div class="upload-subtext">Front elevation, entrance, building signage — up to 5 images</div>
                 </div>
-              </div>
+                <div class="img-cat-preview" id="imgPreview-exterior"></div>
             </div>
+
+            <div class="img-cat-panel" data-cat-panel="reception">
+                <input type="file" class="img-cat-input" id="imgInput-reception" name="property_images_reception[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="reception">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Reception / Lobby Photos Here</div>
+                    <div class="upload-subtext">Reception desk, waiting area — up to 4 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-reception"></div>
+            </div>
+
+            <div class="img-cat-panel" data-cat-panel="workspace">
+                <input type="file" class="img-cat-input" id="imgInput-workspace" name="property_images_workspace[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="workspace">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Office Workspace Photos Here</div>
+                    <div class="upload-subtext">Open office, cabins, workstations — up to 6 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-workspace"></div>
+            </div>
+
+            <div class="img-cat-panel" data-cat-panel="cabins">
+                <input type="file" class="img-cat-input" id="imgInput-cabins" name="property_images_cabins[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="cabins">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Cabins / Manager Room Photos Here</div>
+                    <div class="upload-subtext">Private cabins, executive rooms — up to 4 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-cabins"></div>
+            </div>
+
+            <div class="img-cat-panel" data-cat-panel="meeting_room">
+                <input type="file" class="img-cat-input" id="imgInput-meeting_room" name="property_images_meeting_room[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="meeting_room">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Meeting / Conference Room Photos Here</div>
+                    <div class="upload-subtext">Conference table, presentation room — up to 4 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-meeting_room"></div>
+            </div>
+
+            <div class="img-cat-panel" data-cat-panel="shop_showroom">
+                <input type="file" class="img-cat-input" id="imgInput-shop_showroom" name="property_images_shop_showroom[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="shop_showroom">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Shop / Showroom Photos Here</div>
+                    <div class="upload-subtext">Display area, retail space — up to 5 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-shop_showroom"></div>
+            </div>
+
+            <div class="img-cat-panel" data-cat-panel="warehouse">
+                <input type="file" class="img-cat-input" id="imgInput-warehouse" name="property_images_warehouse[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="warehouse">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Warehouse / Storage Photos Here</div>
+                    <div class="upload-subtext">Storage racks, loading area — up to 5 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-warehouse"></div>
+            </div>
+
+            <div class="img-cat-panel" data-cat-panel="pantry">
+                <input type="file" class="img-cat-input" id="imgInput-pantry" name="property_images_pantry[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="pantry">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Pantry / Cafeteria Photos Here</div>
+                    <div class="upload-subtext">Pantry, dining area — up to 3 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-pantry"></div>
+            </div>
+
+            <div class="img-cat-panel" data-cat-panel="washroom">
+                <input type="file" class="img-cat-input" id="imgInput-washroom" name="property_images_washroom[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="washroom">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Washroom Photos Here</div>
+                    <div class="upload-subtext">Staff/customer washrooms — up to 3 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-washroom"></div>
+            </div>
+
+            <div class="img-cat-panel" data-cat-panel="parking">
+                <input type="file" class="img-cat-input" id="imgInput-parking" name="property_images_parking[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="parking">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Parking Photos Here</div>
+                    <div class="upload-subtext">Basement/open parking — up to 3 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-parking"></div>
+            </div>
+
+            <div class="img-cat-panel" data-cat-panel="amenities">
+                <input type="file" class="img-cat-input" id="imgInput-amenities" name="property_images_amenities[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="amenities">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Common Amenities Photos Here</div>
+                    <div class="upload-subtext">Lift, lobby, security, cafeteria, gym — up to 5 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-amenities"></div>
+            </div>
+
+            <div class="img-cat-panel" data-cat-panel="floor_plan">
+                <input type="file" class="img-cat-input" id="imgInput-floor_plan" name="property_images_floor_plan[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="floor_plan">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Floor Plan Images Here</div>
+                    <div class="upload-subtext">Office/shop layout diagrams — up to 3 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-floor_plan"></div>
+            </div>
+
+        </div>
+
+        <div style="font-size:0.8rem; color:#64748b; margin-top:6px;">
+            <i class="fas fa-arrows-alt"></i> Drag thumbnails within a category to reorder. The first image under <strong>Building Exterior</strong> or <strong>Reception / Lobby</strong> is used as the cover photo.
+        </div>
+    </div>
+</div>
+
+<!-- ================= PROPERTY WALKTHROUGH VIDEO ================= -->
+
+<!-- ================= PROPERTY WALKTHROUGH VIDEO ================= -->
+<div class="form-section">
+    <div class="section-header"><i class="fas fa-video"></i> Property Video</div>
+    <div class="section-body">
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label class="form-label d-block">Video Option</label>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="video_option" id="video_upload" value="upload" checked>
+                    <label class="form-check-label" for="video_upload">Upload Property Video</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="video_option" id="video_auto" value="auto">
+                    <label class="form-check-label" for="video_auto">Auto-Generate Slideshow from Photos</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="video_option" id="video_rm" value="rm_assisted">
+                    <label class="form-check-label" for="video_rm">Video is Large — Share with Our RM</label>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" name="video_source" id="video_source" value="upload">
+
+        <div id="videoUploadWrapper">
+            <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+            <div class="image-upload-area" id="videoUploadArea">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size:2.2rem;color:#667eea;"></i></div>
+                <div class="upload-text">Click to Upload Complete Office/Shop Walkthrough</div>
+                <div class="upload-subtext">MP4/MOV, max 60 seconds, up to 20MB</div>
+            </div>
+            <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px;"></video>
+        </div>
+
+        <div id="videoAutoWrapper" style="display:none;">
+            <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom: 15px;">
+                <i class="fas fa-magic me-2" style="color:#667eea;"></i>
+                We'll auto-create a walkthrough video from your uploaded photos (min. 3 needed).
+            </div>
+            
+            <!-- Live Slideshow Canvas Preview Container -->
+            <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
+                <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
+                <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:1px solid #cbd5e1; background:#000;"></canvas>
+            </div>
+
+            <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:12px; font-weight:600;">
+                <i class="fas fa-exclamation-circle me-1"></i> Please upload at least 3 property images above to preview the auto-slideshow.
+            </div>
+        </div>
+
+        <div id="videoRMWrapper" style="display:none;">
+            <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom:15px;">
+                <i class="fas fa-headset me-2" style="color:#667eea;"></i>
+                Share the video directly with your RM (WhatsApp / email). Once they publish it on our
+                YouTube / Instagram / Facebook channel, paste the public link below.
+            </div>
+            <label class="form-label">Published Video Link</label>
+            <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="Paste YouTube / Instagram / Facebook link">
+            <button type="button" class="btn-reset mt-2" id="previewRMLinkBtn"><i class="fas fa-eye me-1"></i> Preview Link</button>
+            <div id="rmVideoFrame" style="display:none; margin-top:15px; border-radius:12px; overflow:hidden; aspect-ratio:16/9;">
+                <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
@@ -1680,11 +2134,13 @@
                             <div class="form-group">
                                 <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes">
+                                    <!-- ADDED: onchange="togglePortalField()" -->
+                                    <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes" onchange="togglePortalField()">
                                     <label class="form-check-label" for="listed_yes">Yes</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" checked>
+                                    <!-- ADDED: onchange="togglePortalField()" -->
+                                    <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" checked onchange="togglePortalField()">
                                     <label class="form-check-label" for="listed_no">No</label>
                                 </div>
                             </div>
@@ -1769,8 +2225,8 @@
 
       <div class="checklist-card">
         <div style="font-size:.9rem; font-weight:800; color:#2c3e50; margin-bottom:15px;">📋 Listing Checklist</div>
-        <div class="cl-item" id="cl-basic"><i class="fas fa-circle"></i> Basic details verified</div>
-        <div class="cl-item" id="cl-price"><i class="fas fa-circle"></i> Rent entered</div>
+        <div class="cl-item" id="cl-basic"><i class="fas fa-circle"></i> Basic Information</div>
+        <div class="cl-item" id="cl-price"><i class="fas fa-circle"></i> Pricing Details</div>
         <div class="cl-item" id="cl-desc"><i class="fas fa-circle"></i> Description added</div>
         <div class="cl-item" id="cl-photos"><i class="fas fa-circle"></i> Photos uploaded</div>
       </div>
@@ -1806,6 +2262,107 @@
 
 
 <script>
+
+
+
+  // ============================================================
+// AUTO MOVE-IN COST CALCULATOR (COMMERCIAL PROPERTY)
+// ============================================================
+document.addEventListener("DOMContentLoaded", function () {
+
+    function calculateCommercialMoveInCost() {
+        // 1. Base Rent
+        let monthlyRent = parseFloat(document.getElementById("monthly_rent")?.value) || 0;
+
+        // 2. Advance Rent Calculation
+        let advance = 0;
+        let advanceType = document.getElementById("advanced_rent_type")?.value || "";
+
+        if (advanceType === "Fixed Amount") {
+            advance = parseFloat(document.getElementById("advanced_rent_amount")?.value) || 0;
+        } else if (advanceType !== "No Advance" && advanceType !== "") {
+            let monthsMatch = advanceType.match(/(\d+)/);
+            let months = monthsMatch ? parseFloat(monthsMatch[1]) : 0;
+            advance = monthlyRent * months;
+        }
+
+        // 3. Refundable Security Deposit Calculation
+        let deposit = 0;
+        let depositType = document.getElementById("security_deposit_type")?.value || "";
+
+        if (depositType === "Fixed Amount") {
+            deposit = parseFloat(document.getElementById("security_deposit_amount")?.value) || 0;
+        } else if (depositType !== "No Deposit" && depositType !== "") {
+            let monthsMatch = depositType.match(/(\d+)/);
+            let months = monthsMatch ? parseFloat(monthsMatch[1]) : 0;
+            deposit = monthlyRent * months;
+        }
+
+        // 4. Brokerage Calculation
+        let brokerage = 0;
+        let brokerageType = document.getElementById("brokeragePercentage")?.value || "";
+
+        switch (brokerageType) {
+            case "15 Days Rent":
+                brokerage = monthlyRent / 2;
+                break;
+            case "1 Month Rent":
+                brokerage = monthlyRent;
+                break;
+            case "Fixed Amount":
+                brokerage = parseFloat(document.querySelector("[name='manual_brokerage']")?.value) || 0;
+                break;
+            case "No Brokerage":
+            case "Negotiable":
+            default:
+                brokerage = 0;
+                break;
+        }
+
+        // 5. Maintenance Charges Calculation
+        let maintenance = 0;
+        let maintRadio = document.querySelector("input[name='maintenance_type']:checked")?.value;
+
+        if (maintRadio === "Excluding") {
+            maintenance = parseFloat(document.getElementById("maintenance_charges")?.value) || 0;
+        }
+
+        // 6. Calculate Grand Total
+        let totalMoveInCost = advance + deposit + brokerage + maintenance;
+
+        // 7. Update Output
+        let totalInput = document.getElementById("total_move_in_cost");
+        if (totalInput) {
+            totalInput.value = Math.round(totalMoveInCost);
+        }
+    }
+
+    // Attach Input and Change Event Listeners
+    const eventTargets = [
+        "#monthly_rent",
+        "#advanced_rent_type",
+        "#advanced_rent_amount",
+        "#security_deposit_type",
+        "#security_deposit_amount",
+        "#brokeragePercentage",
+        "[name='manual_brokerage']",
+        "#maintenance_charges",
+        "input[name='maintenance_type']"
+    ];
+
+    document.querySelectorAll(eventTargets.join(",")).forEach(function (element) {
+        if (!element) return;
+        element.addEventListener("input", calculateCommercialMoveInCost);
+        element.addEventListener("change", calculateCommercialMoveInCost);
+    });
+
+    // Run once initially to populate fields on page load or edit view
+    calculateCommercialMoveInCost();
+});
+
+
+
+
 
   document.addEventListener("DOMContentLoaded", function () {
   
@@ -2174,35 +2731,34 @@
       updateDisplay(section);
     });
 
-    window.openModal = function (section) {
-      currentSection = section;
-      $('#modalTitle').text(`Select ${section.charAt(0).toUpperCase() + section.slice(1)}`);
+  window.openModal = function (section) {
+  currentSection = section;
+  $('#modalTitle').text(`Select ${section.charAt(0).toUpperCase() + section.slice(1)}`);
+  const container = $('#modalItemsList').empty();
+  $(`.${section}-checkbox`).each(function () {
+    const val = this.value;
+    const icon = $(this).data('icon');
+    const $col = $('<div class="col-md-4 col-sm-6 mb-2"></div>');
+    const $check = $('<div class="form-check"></div>');
+    const $input = $('<input type="checkbox" class="form-check-input modal-item-checkbox">')
+      .val(val).attr('data-icon', icon).prop('checked', this.checked);
+    const $label = $('<label class="form-check-label"></label>')
+      .append($('<i></i>').addClass(icon)).append(' ' + val);
+    $check.append($input, $label);
+    $col.append($check);
+    container.append($col);
+  });
+  updateModalCount();
+  $('#itemsModal').modal('show');
+};
 
-      const container = $('#modalItemsList').empty();
-      $(`.${section}-checkbox`).each(function () {
-        container.append(`
-        <div class="col-md-4 col-sm-6 mb-2">
-          <div class="form-check">
-            <input class="form-check-input modal-item-checkbox" type="checkbox" 
-                   value="${this.value}" data-icon="${$(this).data('icon')}"
-                   ${this.checked ? 'checked' : ''}>
-            <label class="form-check-label"><i class="${$(this).data('icon')}"></i> ${this.value}</label>
-          </div>
-        </div>
-      `);
-      });
+window.removeItem = function (section, name) {
+  $(`.${section}-checkbox`).filter(function () { return this.value === name; })
+    .prop('checked', false);
+  updateDisplay(section);
+};
 
-      updateModalCount();
-      $('#itemsModal').modal('show');
-    };
-
-    window.removeItem = function (section, name) {
-      const items = $(`.${section}-checkbox`).filter(function () {
-        return this.value === name;
-      });
-      items.prop('checked', false);
-      updateDisplay(section);
-    };
+    
 
     window.clearAll = function () {
       if (!currentSection) return;
@@ -2224,17 +2780,19 @@
       if (count === 0) {
         display.html(`<p class="text-muted text-center m-0">No ${section} selected</p>`);
       } else {
+       
+
         checked.each(function () {
-          display.append(`
-          <span class="item-tag">
-            <i class="${$(this).data('icon')}"></i>
-            ${this.value}
-            <span class="remove-btn" onclick="removeItem('${section}', '${this.value}')">
-              <i class="fas fa-times-circle"></i>
-            </span>
-          </span>
-        `);
-        });
+  const val = this.value;
+  const icon = $(this).data('icon');
+  const $tag = $('<span class="item-tag"></span>');
+  $tag.append($('<i></i>').addClass(icon));
+  $tag.append(' ' + val + ' ');
+  const $remove = $('<span class="remove-btn"></span>').append($('<i class="fas fa-times-circle"></i>'));
+  $remove.on('click', function () { removeItem(section, val); });
+  $tag.append($remove);
+  display.append($tag);
+});
       }
     }
 
@@ -2264,21 +2822,15 @@
 
 <script>
   // --- CKEDITOR INIT ---
-  window.onload = function () {
-    if (typeof CKEDITOR !== 'undefined') {
-      if (CKEDITOR.instances.property_description) {
-        CKEDITOR.instances.property_description.destroy();
-      }
-      CKEDITOR.replace('property_description');
-    }
-  };
-
+  
   // --- MULTI-STEP LOGIC ---
-  let currentStep = 1;
+ let currentStep = 1;
   function goToStep(n) {
     if (n > currentStep && !validateStep(currentStep)) return false;
+    
     document.getElementById('step' + currentStep).classList.remove('active');
     document.getElementById('step' + n).classList.add('active');
+    
     for (let i = 1; i <= 4; i++) {
       const sc = document.getElementById('sc' + i), sl = document.getElementById('sl' + i), line = document.getElementById('line' + i);
       if (i < n) { sc.className = 'step-circle done'; sl.className = 'step-label done'; sc.innerHTML = '<i class="fas fa-check"></i>'; if (line) line.className = 'step-line done'; }
@@ -2288,16 +2840,44 @@
     currentStep = n;
     if (n === 3) generateAIDetails(false);
 
-    document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Scroll to banner on Next/Prev click
+    const scrollTarget = document.querySelector('.property-banner-header') || document.querySelector('.form-container');
+    if (scrollTarget) {
+      scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   function validateStep(step) {
     let isValid = true;
+    let firstInvalidField = null;
+
     document.getElementById('step' + step).querySelectorAll('[required]').forEach(f => {
       f.classList.remove('validation-error');
-      if (!f.value.trim()) { f.classList.add('validation-error'); isValid = false; }
+      if (!f.value.trim()) { 
+        f.classList.add('validation-error'); 
+        isValid = false; 
+        if (!firstInvalidField) {
+          firstInvalidField = f;
+        }
+      }
     });
-    if (!isValid) Swal.fire('Incomplete', 'Please fill required fields.', 'warning');
+
+    if (!isValid) {
+      // Direct redirect and focus on the exact unfilled field
+      if (firstInvalidField) {
+        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => { 
+          firstInvalidField.focus(); 
+        }, 300);
+      }
+      
+      Swal.fire({
+        icon: 'warning',
+        title: 'Incomplete Details',
+        text: 'Please fill in all mandatory required fields (*) before proceeding.',
+        confirmButtonColor: '#667eea'
+      });
+    }
     return isValid;
   }
 
@@ -2363,15 +2943,8 @@
     if (amenitiesList.length > 0) longDesc += `<h3>Facilities & Amenities:</h3><p>The building provides excellent amenities to support your daily operations, including: <strong>${amenitiesList.join(', ')}</strong>.</p>`;
     longDesc += `<p>Don't miss out on this fantastic opportunity to establish your business in a thriving hub. Contact us today to schedule a site visit or to discuss further details.</p>`;
 
-    if (typeof CKEDITOR !== 'undefined' && CKEDITOR.instances.property_description) {
-      const currentData = CKEDITOR.instances.property_description.getData().trim();
-      if (force || currentData === '') CKEDITOR.instances.property_description.setData(longDesc);
-    } else {
-      const descField = document.querySelector('textarea[name="property_description"]');
-      if (descField && (force || descField.value.trim() === '')) {
-        descField.value = longDesc.replace(/<[^>]*>?/gm, '\n').replace(/\n\n+/g, '\n').trim();
-      }
-    }
+    const descField = document.querySelector('input[name="property_description"]');
+if (descField) descField.value = longDesc;
     updatePreview();
   }
 
@@ -2418,105 +2991,48 @@
     document.getElementById('brokerageSection').style.display = this.value === 'Yes' ? 'block' : 'none';
     if (this.value !== 'Yes') document.getElementById('manualBrokerage').style.display = 'none';
   });
-  document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
+
+
+  
+
+document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
     document.getElementById('manualBrokerage').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
   });
 
-  // --- NEW: DRAG AND DROP IMAGE SEQUENCE ARRANGEMENT ---
-  const uploadArea = document.getElementById("uploadArea"), imageInput = document.getElementById("imageInput"), preview = document.getElementById("imagePreview");
-  let selectedFiles = [];
-  let dragStartIndex;
-
-  uploadArea.addEventListener("click", () => imageInput.click());
-  uploadArea.addEventListener("dragover", (e) => { e.preventDefault(); uploadArea.style.borderColor = '#667eea'; });
-  uploadArea.addEventListener("dragleave", () => { uploadArea.style.borderColor = '#cbd5e0'; });
-  uploadArea.addEventListener("drop", (e) => { e.preventDefault(); uploadArea.style.borderColor = '#cbd5e0'; handleFiles(e.dataTransfer.files); });
-  imageInput.addEventListener("change", function () { handleFiles(this.files); });
-
-  function handleFiles(files) {
-    Array.from(files).forEach(f => { if (f.type.startsWith('image/') && selectedFiles.length < 10) selectedFiles.push(f); });
-    if (files.length > 0 && selectedFiles.length >= 10) Swal.fire('Limit Reached', 'You can only upload up to 10 images.', 'warning');
-    renderImagePreview();
+  // ============================================================
+  // Bulletproof Portal Field Toggle
+  // ============================================================
+  function togglePortalField() {
+      var yesRadio = document.getElementById('listed_yes');
+      var portalField = document.getElementById('portalField');
+      var portalInput = document.getElementById('portal_name');
+      
+      if (!portalField || !yesRadio) return;
+      
+      if (yesRadio.checked) {
+          portalField.style.display = 'block';
+          if (portalInput) setTimeout(function() { portalInput.focus(); }, 100);
+      } else {
+          portalField.style.display = 'none';
+          if (portalInput) portalInput.value = ''; // Automatically clear text
+      }
   }
 
-  function renderImagePreview() {
-    const dt = new DataTransfer();
-    selectedFiles.forEach(f => dt.items.add(f));
-    imageInput.files = dt.files;
-
-    preview.innerHTML = "";
-    selectedFiles.forEach((f, index) => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        // Create draggable preview items
-        preview.innerHTML += `
-      <div class="preview-item" draggable="true" data-index="${index}" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)" ondragenter="e.preventDefault()">
-        <img src="${e.target.result}">
-        <div class="drag-handle-overlay">Move</div>
-        <button type="button" class="remove-image" onclick="removeImage('${f.name}')"><i class="fas fa-times"></i></button>
-      </div>`;
-      };
-      reader.readAsDataURL(f);
-    });
-
-    // Update Checklist and Tracker Text
-    document.getElementById('imageCount').textContent = `${selectedFiles.length} out of 10 images selected`;
-    document.getElementById('cl-photos').style.color = selectedFiles.length > 0 ? '#10b981' : '#cbd5e0';
-    document.getElementById('cl-photos').querySelector('i').style.color = selectedFiles.length > 0 ? '#10b981' : '#cbd5e0';
-  }
-
-  function removeImage(fname) {
-    selectedFiles = selectedFiles.filter(f => f.name !== fname);
-    renderImagePreview();
-  }
-
-  // Drag and Drop Logic
-  function dragStart(e) {
-    dragStartIndex = +e.target.closest('.preview-item').getAttribute('data-index');
-  }
-  function dragOver(e) { e.preventDefault(); }
-  function dragDrop(e) {
-    const dragEndIndex = +e.target.closest('.preview-item').getAttribute('data-index');
-    swapItems(dragStartIndex, dragEndIndex);
-  }
-  function swapItems(fromIndex, toIndex) {
-    const itemOne = selectedFiles[fromIndex];
-    selectedFiles.splice(fromIndex, 1);
-    selectedFiles.splice(toIndex, 0, itemOne);
-    renderImagePreview();
-  }
+  // Run once on page load to set the initial state
+  document.addEventListener('DOMContentLoaded', function() {
+      togglePortalField();
+  });
 
 
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Get the radio buttons and the hidden portal input field
-    var yesRadio = document.getElementById('listed_yes');
-    var noRadio = document.getElementById('listed_no');
-    var portalField = document.getElementById('portalField');
-    
-    // 2. Create a function that checks if "Yes" is selected
-    function togglePortalField() {
-        if (portalField) {
-            // If yes is checked, show it ('block'). If not, hide it ('none').
-            portalField.style.display = yesRadio.checked ? 'block' : 'none';
-        }
-    }
-    
-    // 3. Attach the function to run whenever the user clicks either radio button
-    if (yesRadio) yesRadio.addEventListener('change', togglePortalField);
-    if (noRadio) noRadio.addEventListener('change', togglePortalField);
-    
-    // 4. Run it once immediately when the page loads to set the initial state
-    togglePortalField();
-});
-  // --- NEW: SUBMIT WITH CONFIRMATION ALERT ---
+ 
+  // ============================================================
+  // SUBMIT WITH CONFIRMATION ALERT, LOADING SPINNER & FULL MEDIA SYNC
+  // ============================================================
   const form = document.getElementById("commercialForm");
   form.addEventListener("submit", function (e) {
-    e.preventDefault();
+    e.preventDefault(); 
     if (!validateStep(4)) return;
 
-    // Fire SweetAlert before submission
     Swal.fire({
       title: 'Submit Listing?',
       text: "Are you sure you want to save and list this commercial property?",
@@ -2528,14 +3044,610 @@ document.addEventListener('DOMContentLoaded', function() {
     }).then((result) => {
       if (result.isConfirmed) {
 
-        if (typeof CKEDITOR !== 'undefined') { for (instance in CKEDITOR.instances) CKEDITOR.instances[instance].updateElement(); }
+        // 1. SHOW LOADING SPINNER IMMEDIATELY
+        Swal.fire({
+          title: 'Publishing Property...',
+          text: 'Uploading images and video files. Please wait...',
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
 
-        fetch(form.action, { method: "POST", body: new FormData(form), headers: { "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value } })
-          .then(res => res.json()).then(data => {
-            if (data.status === "success") { Swal.fire({ icon: "success", title: "Success!", text: data.message }).then(() => { form.reset(); window.location.reload(); }); }
-            else Swal.fire("Error", data.message, "error");
-          }).catch(() => Swal.fire("Error", "Server error", "error"));
+        // 2. Sync CKEditor instances
+        if (typeof CKEDITOR !== 'undefined') { 
+            for (var instance in CKEDITOR.instances) {
+                CKEDITOR.instances[instance].updateElement(); 
+            }
+        }
+
+        // 3. CRITICAL FIX: Sync image arrays into HTML input files BEFORE creating FormData
+        if (typeof IMG_CATEGORIES !== 'undefined' && typeof syncCategoryInput === 'function') {
+            IMG_CATEGORIES.forEach(function (cat) {
+                syncCategoryInput(cat);
+            });
+        }
+
+        // 4. Build FormData payload
+        var formData = new FormData(form);
+
+        fetch(form.action, { 
+            method: "POST", 
+            body: formData, 
+            headers: { "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value } 
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.status === "success") {
+              // 5. Replace Loading Spinner with Success Alert
+              Swal.fire({
+                icon: "success",
+                title: "Listing Published!",
+                text: data.message,
+                confirmButtonColor: '#10b981'
+              }).then(() => {
+                form.reset();
+                window.location.href = "{% url 'commercial_list' %}"; 
+              });
+            } else if (data.status === "error") {
+              let isDuplicate = data.message.includes("Duplicate Blocked");
+              Swal.fire({
+                icon: isDuplicate ? "warning" : "error",
+                title: isDuplicate ? "Duplicate Property Detected" : "Submission Failed",
+                text: data.message,
+                confirmButtonColor: '#667eea'
+              });
+            }
+          })
+          .catch((error) => {
+            console.error("Fetch Error:", error);
+            Swal.fire("Error", "Submit failed: " + error.message, "error");
+          });
       }
     });
   });
+
+
+
+
+
 </script>   
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var builtUpInput = document.getElementById('builtup_area');
+    var carpetInput = document.getElementById('carpet_area');
+
+    if (!builtUpInput || !carpetInput) return;
+
+    function validateCarpetArea() {
+        var builtUp = parseFloat(builtUpInput.value) || 0;
+        var carpet = parseFloat(carpetInput.value) || 0;
+
+        if (carpet > 0 && builtUp > 0 && carpet > builtUp) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Carpet Area',
+                text: 'Carpet Area (' + carpet + ' sq.ft) cannot be greater than Built-up Area (' + builtUp + ' sq.ft). Please correct it.',
+                confirmButtonColor: '#667eea'
+            });
+            carpetInput.value = '';
+            carpetInput.classList.add('is-invalid');
+            carpetInput.focus();
+        } else {
+            carpetInput.classList.remove('is-invalid');
+        }
+    }
+
+    carpetInput.addEventListener('blur', validateCarpetArea);
+    carpetInput.addEventListener('input', function () {
+        carpetInput.classList.remove('is-invalid');
+    });
+
+    // Also re-check carpet area if built-up area is edited afterward
+    builtUpInput.addEventListener('blur', function () {
+        if (carpetInput.value) validateCarpetArea();
+    });
+});
+
+
+
+// ================= COMMERCIAL IMAGE CATEGORY UPLOAD LOGIC =================
+// Replaces the residential IMG_CATEGORIES block. Delete the old one
+// (the block that had 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony')
+// and use this instead.
+
+const IMG_CATEGORIES = [
+    'exterior', 'reception', 'workspace', 'cabins', 'meeting_room',
+    'shop_showroom', 'warehouse', 'pantry', 'washroom', 'parking',
+    'amenities', 'floor_plan'
+];
+
+const IMG_CATEGORY_LIMITS = {
+    exterior: 5, reception: 4, workspace: 6, cabins: 4, meeting_room: 4,
+    shop_showroom: 5, warehouse: 5, pantry: 3, washroom: 3, parking: 3,
+    amenities: 5, floor_plan: 3
+};
+
+const IMG_TOTAL_LIMIT = 30;
+const IMG_MIN_REQUIRED = 3;
+
+const catFiles = {};
+IMG_CATEGORIES.forEach(function (c) { catFiles[c] = []; });
+
+function totalImageCount() {
+    return IMG_CATEGORIES.reduce(function (sum, c) { return sum + catFiles[c].length; }, 0);
+}
+
+function syncCategoryInput(cat) {
+    var dt = new DataTransfer();
+    catFiles[cat].forEach(function (file) { dt.items.add(file); });
+    document.getElementById('imgInput-' + cat).files = dt.files;
+}
+
+function renderCategory(cat) {
+    var preview = document.getElementById('imgPreview-' + cat);
+    preview.innerHTML = '';
+    catFiles[cat].forEach(function (file) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var div = document.createElement('div');
+            div.className = 'preview-item';
+            div.innerHTML = '<img src="' + e.target.result + '"><button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\',\'' + file.name.replace(/'/g, "\\'") + '\')">✖</button>';
+            preview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+    document.getElementById('count-' + cat).innerText = catFiles[cat].length;
+
+    var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+    if (tab) tab.classList.toggle('has-images', catFiles[cat].length > 0);
+}
+
+
+function renderAllCategories() {
+    IMG_CATEGORIES.forEach(renderCategory);
+    var total = totalImageCount();
+    document.getElementById('imgTotalCount').innerText = total;
+
+    var notice = document.getElementById('imgMinNotice');
+    if (notice) {
+        if (total >= IMG_MIN_REQUIRED) {
+            notice.className = 'min-ok';
+            notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + total + ' images added.';
+        } else {
+            notice.className = 'min-warning';
+            notice.innerHTML = '<i class="fas fa-exclamation-circle"></i> Add at least ' + IMG_MIN_REQUIRED + ' images to publish';
+        }
+    }
+
+    // === NEW: TURNS "Photos uploaded" CHECKLIST ITEM GREEN ===
+    var clPhotos = document.getElementById('cl-photos');
+    if (clPhotos) {
+        var hasPhotos = total > 0;
+        clPhotos.style.color = hasPhotos ? '#10b981' : '#cbd5e0';
+        var icon = clPhotos.querySelector('i');
+        if (icon) icon.style.color = hasPhotos ? '#10b981' : '#cbd5e0';
+    }
+
+    if (typeof updatePreview === 'function') updatePreview();
+}
+
+function handleCatFiles(cat, files) {
+    var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
+    var limit = IMG_CATEGORY_LIMITS[cat] || 5;
+
+    if (catFiles[cat].length + incoming.length > limit) {
+        Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
+        incoming = incoming.slice(0, Math.max(0, limit - catFiles[cat].length));
+    }
+    if (totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+        Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all categories.', 'warning');
+        incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - totalImageCount()));
+    }
+
+    catFiles[cat] = catFiles[cat].concat(incoming);
+    syncCategoryInput(cat);
+    renderAllCategories();
+}
+
+window.removeCatImage = function (cat, fileName) {
+    catFiles[cat] = catFiles[cat].filter(function (f) { return f.name !== fileName; });
+    syncCategoryInput(cat);
+    renderAllCategories();
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
+            document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
+            this.classList.add('active');
+            document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]').classList.add('active');
+        });
+    });
+
+    IMG_CATEGORIES.forEach(function (cat) {
+        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+        var input = document.getElementById('imgInput-' + cat);
+        if (!zone || !input) return;
+
+        zone.addEventListener('click', function () { input.click(); });
+        input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
+        zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
+        zone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            handleCatFiles(cat, e.dataTransfer.files);
+        });
+    });
+
+    renderAllCategories();
+});
+
+
+
+
+// ================= COMMERCIAL VIDEO OPTION TOGGLE & SLIDESHOW ENGINE =================
+
+
+// ================= COMMERCIAL VIDEO OPTION TOGGLE & CINEMATIC SLIDESHOW ENGINE =================
+document.addEventListener('DOMContentLoaded', function () {
+    // ── 1. DOM ELEMENTS ──
+    var uploadRadio      = document.getElementById('video_upload');
+    var autoRadio        = document.getElementById('video_auto');
+    var rmRadio          = document.getElementById('video_rm');
+    var uploadWrapper    = document.getElementById('videoUploadWrapper');
+    var autoWrapper      = document.getElementById('videoAutoWrapper');
+    var rmWrapper        = document.getElementById('videoRMWrapper');
+    var videoInput       = document.getElementById('videoInput');
+    var videoArea        = document.getElementById('videoUploadArea');
+    var videoPreview     = document.getElementById('videoPreview');
+    var videoSourceField = document.getElementById('video_source');
+
+    // Canvas slideshow variables
+    var slideshowInterval = null;
+    var canvas = document.getElementById('slideshowCanvas');
+    var ctx = canvas ? canvas.getContext('2d') : null;
+
+    // ── 2. IMAGE COLLECTOR FUNCTION ──
+    function getUploadedImages(callback) {
+        var sources = [];
+
+        // Check window.catFiles (Categorized Image Uploads)
+        if (window.catFiles) {
+            Object.keys(window.catFiles).forEach(function (cat) {
+                if (Array.isArray(window.catFiles[cat])) {
+                    window.catFiles[cat].forEach(function (file) {
+                        if (file instanceof File && file.type.startsWith('image/')) {
+                            sources.push({ type: 'file', data: file });
+                        }
+                    });
+                }
+            });
+        }
+
+        // Check standard file inputs
+        var fileInputs = document.querySelectorAll('input[type="file"]:not(#videoInput)');
+        fileInputs.forEach(function (input) {
+            if (input.files && input.files.length > 0) {
+                Array.from(input.files).forEach(function (file) {
+                    if (file.type.startsWith('image/')) {
+                        sources.push({ type: 'file', data: file });
+                    }
+                });
+            }
+        });
+
+        // Check existing rendered image elements
+        var previewImgs = document.querySelectorAll('.img-cat-preview img, .existing-img-item img, #imagePreview img, #existingImagePreview img');
+        previewImgs.forEach(function (img) {
+            if (img.src && !img.src.includes('placeholder') && !img.src.startsWith('data:video')) {
+                sources.push({ type: 'url', data: img.src });
+            }
+        });
+
+        // Deduplicate sources
+        var uniqueSources = [];
+        var seen = new Set();
+        sources.forEach(function (s) {
+            var key = s.type === 'file' ? s.data.name + s.data.size : s.data;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueSources.push(s);
+            }
+        });
+
+        if (uniqueSources.length === 0) {
+            callback([]);
+            return;
+        }
+
+        var loadedImages = [];
+        var processed = 0;
+
+        uniqueSources.forEach(function (srcObj) {
+            var img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function () {
+                loadedImages.push(img);
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+            img.onerror = function () {
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+
+            img.src = srcObj.type === 'file' ? URL.createObjectURL(srcObj.data) : srcObj.data;
+        });
+    }
+
+    // ── 3. AUTO SLIDESHOW CONTROLLER ──
+    function startAutoSlideshowPreview() {
+        stopAutoSlideshowPreview();
+        var container = document.getElementById('autoSlideshowPreviewContainer');
+        var warning = document.getElementById('autoSlideshowWarning');
+
+        getUploadedImages(function (images) {
+            if (images.length < 3) {
+                if (container) container.style.display = 'none';
+                if (warning) {
+                    warning.style.display = 'block';
+                    warning.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i> Please upload at least 3 property images above to preview the auto-slideshow.';
+                }
+                return;
+            }
+            if (warning) warning.style.display = 'none';
+            if (container) container.style.display = 'block';
+            runCanvasAnimation(images);
+        });
+    }
+
+    // ── 4. CINEMATIC CANVAS ANIMATION ENGINE (Ken Burns Zoom + Left-to-Right Pan) ──
+    function runCanvasAnimation(images) {
+        if (!ctx || !canvas || images.length === 0) return;
+
+        var durationPerSlide = 3500; // 3.5s per photo
+        var fadeDuration = 800;      // 0.8s smooth transition
+        var startTime = null;
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var elapsed = timestamp - startTime;
+
+            var progress = (elapsed % durationPerSlide) / durationPerSlide;
+            var index = Math.floor(elapsed / durationPerSlide) % images.length;
+            var nextIndex = (index + 1) % images.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            var slideTime = elapsed % durationPerSlide;
+            var isFading = slideTime > (durationPerSlide - fadeDuration);
+            var fadeOpacity = isFading ? (slideTime - (durationPerSlide - fadeDuration)) / fadeDuration : 0;
+
+            // 1. Draw current image with Zoom + Pan
+            drawCinematicFrame(images[index], progress, 1.0);
+
+            // 2. Crossfade next image
+            if (isFading) {
+                drawCinematicFrame(images[nextIndex], 0, fadeOpacity);
+            }
+
+            slideshowInterval = requestAnimationFrame(animate);
+        }
+
+        function drawCinematicFrame(img, progress, opacity) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+
+            // Dark background fill
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Zoom scale (1.0 -> 1.08)
+            var scale = 1.0 + (progress * 0.08);
+
+            var hRatio = canvas.width / img.width;
+            var vRatio = canvas.height / img.height;
+            var ratio  = Math.max(hRatio, vRatio) * scale;
+
+            var baseShiftX = (canvas.width - img.width * ratio) / 2;
+            var centerShiftY = (canvas.height - img.height * ratio) / 2;
+
+            // Left-to-Right Pan Offset
+            var panOffsetX = (progress - 0.5) * (canvas.width * 0.04);
+            var centerShiftX = baseShiftX + panOffsetX;
+
+            ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+            ctx.restore();
+        }
+
+        stopAutoSlideshowPreview();
+        slideshowInterval = requestAnimationFrame(animate);
+    }
+
+    function stopAutoSlideshowPreview() {
+        if (slideshowInterval) {
+            cancelAnimationFrame(slideshowInterval);
+            slideshowInterval = null;
+        }
+    }
+
+    // ── 5. TOGGLE PANELS & RADIO OPTIONS ──
+    function toggleVideoOption() {
+        if (uploadWrapper) uploadWrapper.style.display = uploadRadio && uploadRadio.checked ? 'block' : 'none';
+        if (autoWrapper)   autoWrapper.style.display   = autoRadio && autoRadio.checked   ? 'block' : 'none';
+        if (rmWrapper)     rmWrapper.style.display     = rmRadio && rmRadio.checked     ? 'block' : 'none';
+
+        if (videoSourceField) {
+            videoSourceField.value = uploadRadio && uploadRadio.checked ? 'upload' : (autoRadio && autoRadio.checked ? 'auto' : 'rm_assisted');
+        }
+
+        if (autoRadio && autoRadio.checked) {
+            startAutoSlideshowPreview();
+        } else {
+            stopAutoSlideshowPreview();
+        }
+
+        if (rmRadio && rmRadio.checked) {
+            renderVideoPreview();
+        }
+
+        if (videoPreview) {
+            if (!uploadRadio.checked) {
+                videoPreview.style.display = 'none';
+            } else if (videoInput && videoInput.files.length > 0) {
+                videoPreview.style.display = 'block';
+            }
+        }
+    }
+
+    if (uploadRadio) uploadRadio.addEventListener('change', toggleVideoOption);
+    if (autoRadio)   autoRadio.addEventListener('change', toggleVideoOption);
+    if (rmRadio)     rmRadio.addEventListener('change', toggleVideoOption);
+
+    // Refresh slideshow dynamically if new images are uploaded while 'auto' option is selected
+    document.addEventListener('change', function (e) {
+        if (e.target && e.target.type === 'file' && e.target.id !== 'videoInput') {
+            if (autoRadio && autoRadio.checked) {
+                setTimeout(startAutoSlideshowPreview, 300);
+            }
+        }
+    });
+
+    // ── 6. DIRECT VIDEO UPLOAD + SIZE CHECK (20MB) ──
+    if (videoArea && videoInput) {
+        videoArea.addEventListener('click', function () { videoInput.click(); });
+    }
+
+    if (videoInput) {
+        videoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
+            var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
+            var companyWhatsAppNumber = "917057205423";
+            var rawMessage = "Hello Team,\n\nI am trying to upload a video for my commercial rental property listing, but the file size exceeds the 20MB limit.\n\n" +
+                             "📌 *Property Details:*\n" +
+                             "• *Title:* " + propTitle + "\n" +
+                             "• *Listed By:* " + listedByName + "\n" +
+                             "• *Video File Name:* " + file.name + "\n" +
+                             "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
+                             "Please assist me in publishing this video for my listing.";
+
+            var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
+
+            if (file.size > 20 * 1024 * 1024) {
+                videoInput.value = '';
+
+                if (videoPreview) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                    videoPreview.style.display = 'none';
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Video File Too Large',
+                    text: 'This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.',
+                    showCancelButton: true,
+                    confirmButtonColor: '#25D366',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fab fa-whatsapp me-1"></i> Share',
+                    cancelButtonText: 'Okay',
+                    allowOutsideClick: false
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.open(whatsappUrl, '_blank');
+                        if (rmRadio) rmRadio.checked = true;
+                        toggleVideoOption();
+                        var linkField = document.getElementById('property_video_link');
+                        if (linkField) linkField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+                return;
+            }
+
+            if (videoPreview) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    }
+
+    // ── 7. EXTERNAL VIDEO LINK EMBED PREVIEW ──
+    function renderVideoPreview() {
+        var linkInput = document.getElementById('property_video_link');
+        var frame = document.getElementById('rmVideoFrame');
+        if (!linkInput || !frame) return;
+
+        var url = linkInput.value.trim();
+        if (!url) {
+            frame.style.display = 'none';
+            return;
+        }
+
+        if (url.includes('wa.me') || url.includes('whatsapp.com')) {
+            frame.innerHTML = '<div style="padding:20px; text-align:center; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px;">' +
+                              '  <i class="fab fa-whatsapp" style="font-size:2rem; color:#16a34a; margin-bottom:8px;"></i>' +
+                              '  <p style="margin:0; font-size:13px; font-weight:600; color:#15803d;">WhatsApp Link Detected</p>' +
+                              '  <p style="margin:4px 0 12px; font-size:11px; color:#4b5563;">WhatsApp chat links cannot be played inside an iframe.</p>' +
+                              '  <a href="' + url + '" target="_blank" class="btn btn-sm btn-success" style="font-size:12px;"><i class="fas fa-external-link-alt me-1"></i> Open in WhatsApp</a>' +
+                              '</div>';
+            frame.style.display = 'block';
+            return;
+        }
+
+        frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:350px; border:0; border-radius:8px;" ' +
+                          'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" ' +
+                          'referrerpolicy="strict-origin-when-cross-origin" allowtransparency="true" allowfullscreen></iframe>';
+        var embedIframe = document.getElementById('rmVideoEmbed');
+
+        var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        if (ytMatch) {
+            embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1] + '?enablejsapi=1';
+            frame.style.display = 'block';
+            return;
+        }
+
+        var instaMatch = url.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
+        if (instaMatch) {
+            embedIframe.src = 'https://www.instagram.com/p/' + instaMatch[1] + '/embed/';
+            frame.style.display = 'block';
+            return;
+        }
+
+        if (url.includes('facebook.com') || url.includes('fb.watch')) {
+            embedIframe.src = 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(url) + '&show_text=false';
+            frame.style.display = 'block';
+            return;
+        }
+
+        embedIframe.src = url;
+        frame.style.display = 'block';
+    }
+
+    var linkInputEl = document.getElementById('property_video_link');
+    if (linkInputEl) {
+        linkInputEl.addEventListener('input', renderVideoPreview);
+        linkInputEl.addEventListener('paste', function () { setTimeout(renderVideoPreview, 100); });
+    }
+
+    var previewBtn = document.getElementById('previewRMLinkBtn');
+    if (previewBtn) {
+        previewBtn.addEventListener('click', renderVideoPreview);
+    }
+
+    // Initialize state on page load
+    toggleVideoOption();
+});
+</script>
