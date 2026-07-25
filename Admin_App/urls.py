@@ -578,7 +578,7 @@ urlpatterns = [
 #########################START URL SECTION OF COMMERICIAL RENTAL LISTING##############################
    
     path('Admin_App/commercial/import-excel/', views.import_commercial_rental_excel, name='import_commercial_rental_excel'),
-    path('Admin_App/commercial/download-template/', views.download_commercial_rental12__template, name='download_commercial_rental12__template'),
+    path('Admin_App/commercial/download-template/', views.download_commercial_rental12_template, name='download_commercial_rental12__template'),
     
     path('commercial/list/',           views.commercial_list,   name='commercial_list'),
     path('commercial_reports',           views.commercial_reports,   name='commercial_reports'),
@@ -621,11 +621,11 @@ urlpatterns = [
 
 
   
-    # 1. Route to render the HTML Edit Form Page interface (GET request)
-    path('Admin_App/pg/edit/page/<str:property_id>/', views.pg_edit_page, name='pg_edit_page'),
+   
 
     # 2. Route to process the Form save transaction data (POST request)
-    path('Admin_App/pg/edit/save/<str:property_id>/', views.pg_edit, name='pg_edit'),
+  
+    path('Admin_App/pg/edit/<str:pk>/', views.pg_edit, name='pg_edit'),
 
     
      ##############################END URL SECTION RENTAL PG_COLIVING LISTING#####################

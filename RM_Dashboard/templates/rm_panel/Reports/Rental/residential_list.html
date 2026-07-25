@@ -1030,9 +1030,6 @@
 {% if approval_status_query and approval_status_query != 'All Approval' %}
     <span class="active-tag">Approval: {{ approval_status_query }} <i class="fas fa-times" onclick="clearFilterSelect('approval_status')"></i></span>
 {% endif %}
-{% if duplicate_query and duplicate_query != 'All' %}
-    <span class="active-tag">Duplicates: {{ duplicate_query }} <i class="fas fa-times" onclick="clearFilterSelect('duplicate')"></i></span>
-{% endif %}
         </div>
     </div>
 </form>
@@ -1109,7 +1106,7 @@
                 
                 <!-- NEW: Duplicate Tracking -->
               
-                <th>Listed By Type</th>
+                <th hidden>Listed By Type</th>
                 <th>Listed By Id</th>
                 <th>Listed By Name</th>
                 <th>Listed By Email</th>
@@ -1274,7 +1271,7 @@
   
 
     <!-- Listed By Details -->
-    <td>{{ prop.listed_by_type|default:"—" }}</td>
+    <td hidden>{{ prop.listed_by_type|default:"—" }}</td>
     <td>{{ prop.listed_by_id|default:"—" }}</td>
     <td>{{ prop.listed_by_name|default:"—" }}</td>
     <td>{{ prop.listed_by_email|default:"—" }}</td>

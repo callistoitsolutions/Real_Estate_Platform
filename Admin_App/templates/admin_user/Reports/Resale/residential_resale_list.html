@@ -1476,12 +1476,16 @@ function resetDropzone() {
     }
 }
 
-    function Import_Resale_Data(_this) {
+   
+
+
+function Import_Resale_Data(_this) {
     var resale_file = $("#resale_file")[0].files;
     if (resale_file.length == 0) {
         Swal.fire('Warning', 'Please select an Excel file to upload.', 'warning');
         return;
     }
+    
     var fd = new FormData();
     fd.append('excel_file', resale_file[0]);
     $(_this).prop("disabled", true).html(`<span class="spinner-border spinner-border-sm"></span> Importing...`);
@@ -1495,29 +1499,63 @@ function resetDropzone() {
         headers: { 'X-CSRFToken': '{{ csrf_token }}' },
         success: function (response) {
             $(_this).prop("disabled", false).html(`Import Data`);
-            if (response.status === 'success') {
+            
+            // Check if backend reports true success with actual records created/updated, or partial errors
+            const createdCount = response.created || response.imported || 0;
+            const updatedCount = response.updated || 0;
+            const skippedCount = response.skipped || 0;
+
+            if (response.status === 'success' && (createdCount > 0 || updatedCount > 0)) {
+                let statsHtml = `<div style="display:flex; justify-content:center; gap:8px; margin-top:12px; flex-wrap:wrap;">`;
+                if (createdCount > 0) statsHtml += `<span style="background:#10b981; color:white; padding:4px 10px; border-radius:15px; font-size:12px; font-weight:600;">${createdCount} Created</span>`;
+                if (updatedCount > 0) statsHtml += `<span style="background:#3b82f6; color:white; padding:4px 10px; border-radius:15px; font-size:12px; font-weight:600;">${updatedCount} Updated</span>`;
+                if (skippedCount > 0) statsHtml += `<span style="background:#f59e0b; color:white; padding:4px 10px; border-radius:15px; font-size:12px; font-weight:600;">${skippedCount} Skipped</span>`;
+                statsHtml += `</div>`;
+
                 Swal.fire({
                     icon: 'success',
-                    title: 'Import Successful!',
-                    html: `<div><strong>${response.imported} record(s) imported.</strong></div><br>${response.message || ''}`
+                    title: 'Import Process Complete!',
+                    html: `<div style="font-size:14px; color:#374151;">${response.message || ''}</div>` + statsHtml,
+                    confirmButtonColor: '#667eea'
                 }).then(() => {
                     window.location.reload();
                 });
             } else {
+                // If 0 records were imported or status is partial_error/error
+                let errorDetails = '';
+                if (response.errors && response.errors.length > 0) {
+                    errorDetails = `<div style="text-align: left; font-size: 12px; max-height: 140px; overflow-y: auto; background: #FEF2F2; color: #DC2626; padding: 10px; border-radius: 6px; border: 1px solid #FCA5A5; margin-top: 12px;">
+                                    <ul style="margin:0; padding-left:18px;">`;
+                    response.errors.slice(0, 6).forEach(err => { errorDetails += `<li>${err}</li>`; });
+                    errorDetails += `</ul></div>`;
+                }
+
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Import Error',
-                    html: response.message || 'Failed to process file.'
+                    icon: 'warning',
+                    title: 'No Records Imported',
+                    html: `<p style="font-size:13px; color:#4b5563; margin-bottom:0;">The file was processed, but 0 records were saved due to missing fields or rule violations.</p>` + errorDetails,
+                    confirmButtonColor: '#f59e0b',
+                    width: '520px'
                 });
             }
         },
-        error: function () {
+        error: function (xhr) {
             $(_this).prop("disabled", false).html(`Import Data`);
-            Swal.fire('Error', 'Server processing error occurred.', 'error');
+            let errorMsg = 'Server processing error occurred.';
+            try {
+                let jsonRes = JSON.parse(xhr.responseText);
+                if (jsonRes.message) errorMsg = jsonRes.message;
+            } catch(e) {}
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Import Denied',
+                html: `<div style="font-size:13px; color:#dc2626;">${errorMsg}</div>`,
+                confirmButtonColor: '#ef4444'
+            });
         }
     });
 }
-
     // Bulk Delete Logic
     function toggleDeleteInputs() {
         const type = document.getElementById('deleteType').value;

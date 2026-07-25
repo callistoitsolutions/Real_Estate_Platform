@@ -68,6 +68,35 @@
     .remove-image { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; background: #e74c3c; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; z-index: 10;}
     .remove-image:hover { background: #c0392b; transform: scale(1.1); }
 
+    /* Category Image Tab Upload CSS */
+    .img-cat-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .img-cat-tab { border: 2px solid #e9ecef; background: #fff; border-radius: 12px; padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: #4a5568; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.25s ease; white-space: nowrap; }
+    .img-cat-tab i { font-size: 0.95rem; color: #94a3b8; }
+    .img-cat-tab .cat-count { background: #f1f5f9; color: #64748b; border-radius: 20px; padding: 1px 9px; font-size: 0.72rem; font-weight: 700; }
+    .img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
+    .img-cat-tab.active i { color: #fff; }
+    .img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+    .img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
+
+    .img-cat-panel { display: none; }
+    .img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+    .img-cat-upload-area { border: 3px dashed #cbd5e0; border-radius: 15px; padding: 28px 20px; text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease; }
+    .img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
+    .img-cat-upload-area .upload-icon i { font-size: 2.2rem; color: #667eea; }
+    .img-cat-upload-area .upload-text { font-size: 1rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+    .img-cat-upload-area .upload-subtext { font-size: 0.82rem; color: #718096; margin-top: 4px; }
+
+    .img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+    .img-cat-preview-item { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); aspect-ratio: 1; cursor: grab; border: 2px solid transparent; }
+    .img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .img-total-summary { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+    .img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 0.95rem; }
+    .img-total-summary .total-count span { color: #667eea; }
+    .img-total-summary .min-warning { font-size: 0.8rem; color: #e74c3c; font-weight: 600; }
+    .img-total-summary .min-ok { font-size: 0.8rem; color: #10b981; font-weight: 600; }
+
     /* Search Select Dropdown (Listed By - Other) */
     .search-select { position: relative; width: 100%; font-size: 0.95rem; }
     .search-select.open { z-index: 1050 !important; }
@@ -89,47 +118,17 @@
     .search-select-no-results { padding: 16px; text-align: center; color: #94a3b8; font-size: 0.85rem; }
     .search-select.validation-error .search-select-control { border-color: #e74c3c !important; background: #fff5f5 !important; }
 
-    /* Amenities / Facilities modal-picker (matches Add form) */
+    /* Amenities / Facilities modal-picker */
     .selected-items-display { padding: 12px; background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 8px; min-height: 50px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
     .item-tag { background: white; border: 1px solid #dee2e6; border-radius: 20px; padding: 4px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 5px; }
     .item-tag .remove-btn { cursor: pointer; color: #dc3545; margin-left: 4px; font-size: 12px; }
 
-    .checklist-card {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    }
-
-    .checklist-title {
-        font-size: 0.9rem;
-        font-weight: 800;
-        color: #2d3748;
-        margin-bottom: 15px;
-    }
-
-    .checklist-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 8px 0;
-        font-size: 0.85rem;
-        color: #718096;
-    }
-
-    .checklist-item i {
-        font-size: 0.8rem;
-        width: 18px;
-    }
-
-    .checklist-item.done {
-        color: #11998e;
-    }
-
-    .checklist-item.done i {
-        color: #11998e;
-    }
-
+    .checklist-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); }
+    .checklist-title { font-size: 0.9rem; font-weight: 800; color: #2d3748; margin-bottom: 15px; }
+    .checklist-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 0.85rem; color: #718096; }
+    .checklist-item i { font-size: 0.8rem; width: 18px; }
+    .checklist-item.done { color: #11998e; }
+    .checklist-item.done i { color: #11998e; }
 </style>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -159,6 +158,7 @@
             <form method="POST" enctype="multipart/form-data" id="rentalEditForm" action="{% url 'rental_residential_edit' property.id %}" novalidate>
                 {% csrf_token %}
 
+                <!-- ================= STEP 1 ================= -->
                 <div class="step-content active" id="step1">
 
                     <div class="form-section">
@@ -185,13 +185,13 @@
                                         <input type="hidden" id="selfUserEmail" value="{{ admin_obj.email }}">
                                         <input type="hidden" id="selfUserPhone" value="{{ admin_obj.phone }}">
 
-                                        <div id="listedByOtherWrapper" style="{% if prop.listed_by_type != 'other' %}display:none;{% endif %}">
+                                        <div id="listedByOtherWrapper" style="{% if property.listed_by_type != 'other' %}display:none;{% endif %}">
                                             <div class="search-select" id="assignedToSearchSelect">
                                                 <div class="search-select-control" id="assignedToControl" tabindex="0">
                                                     <span class="search-select-value ss-placeholder" id="assignedToValueLabel" style="color:black;">
-                                                        {% if prop.listed_by_id %}
+                                                        {% if property.listed_by_id %}
                                                             {% for user in user_obj %}
-                                                                {% if property.listed_by_id  == user.user_id %}
+                                                                {% if property.listed_by_id == user.user_id %}
                                                                     {{ user.user_id }} - {{ user.user_name }} - {{ user.user_role }} - {{ user.user_phone }}
                                                                 {% endif %}
                                                             {% endfor %}
@@ -208,7 +208,7 @@
                                                         {% for group in grouped_users %}
                                                         <div class="search-select-group-label">{{ group.grouper|upper }} ({{ group.list|length }})</div>
                                                         {% for user in group.list %}
-                                                        <div class="search-select-option {% if property.listed_by_id  == user.user_id %}selected{% endif %}"
+                                                        <div class="search-select-option {% if property.listed_by_id == user.user_id %}selected{% endif %}"
                                                             data-value="{{ user.id }}-{{user.user_role}}"
                                                             data-name="{{ user.user_name }}"
                                                             data-role="{{ user.user_role }}"
@@ -225,10 +225,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- Real <select> (like the Add form) so a value is actually submitted with the POST.
-                                             Kept hidden; the search-select box above drives it via JS.
-                                             data-initial carries the property's saved value since Django can't mark
-                                             "selected" here without server-side string concatenation of id+role. -->
                                         <select id="assigned_to" name="assigned_to" data-initial="{{ property.assigned_to|default:'' }}" style="display:none;">
                                             <option value="">-- Select Team Member --</option>
                                             {% regroup user_obj by user_role as grouped_users %}
@@ -255,7 +251,7 @@
                                 <div class="col-md-3"><div class="form-group"><label class="form-label"> User/Admin Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" value="{{ property.listed_by_name|default:'' }}" readonly style="background-color:#e9ecef;"></div></div>
                                 <div class="col-md-3"><div class="form-group"><label class="form-label"> User/Admin Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email" value="{{ property.listed_by_email|default:'' }}" readonly style="background-color:#e9ecef;"></div></div>
                                 <div class="col-md-3"><div class="form-group"><label class="form-label"> User/Admin Contact</label><input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" value="{{ property.listed_by_contact|default:'' }}" readonly style="background-color:#e9ecef;"></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"> User/Admin Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" value="{{ property.listed_by_role|default:'' }}" readonly style="background-color:#e9ecef;"></div></div>
+                                <div class="col-md-3 mt-2"><div class="form-group"><label class="form-label"> User/Admin Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" value="{{ property.listed_by_role|default:'' }}" readonly style="background-color:#e9ecef;"></div></div>
                             </div>
                         </div>
                     </div>
@@ -264,7 +260,7 @@
                         <div class="section-header"><i class="fas fa-info-circle"></i> Basic Information</div>
                         <div class="section-body">
                             <div class="row">
-                                <div class="col-md-6"><div class="form-group"><label class="form-label">Property Title (Auto-Generated)</label><input type="text" class="form-control" name="property_title" value="{{ property.property_title|default:'' }}" readonly style="background-color:#f8f9fa; color:#6c757d; cursor:not-allowed;"></div></div>
+                                <div class="col-md-12"><div class="form-group"><label class="form-label">Property Title (Auto-Generated)</label><input type="text" class="form-control" name="property_title" value="{{ property.property_title|default:'' }}" readonly style="background-color:#f8f9fa; color:black; cursor:not-allowed;"></div></div>
                                 <div class="col-md-6"><div class="form-group"><label class="form-label"><i class="fas fa-home"></i> Property Type <span class="required-star">*</span></label>
                                     <select class="form-select form-control" name="property_type" id="property_type" required>
                                         <option value="">Select Property Type</option>
@@ -289,7 +285,7 @@
                                         <option value="Townhouse" {% if property.property_type == 'Townhouse' %}selected{% endif %}>Townhouse</option>
                                     </select>
                                 </div></div>
-                                <div class="col-md-4"><div class="form-group">
+                                <div class="col-md-6"><div class="form-group">
                                     <label class="form-label"><i class="fas fa-door-open"></i> Flat No/House No/Unit No <span class="required-star">*</span></label>
                                     <input type="text" class="form-control" name="property_no" id="property_no" value="{{ property.property_no|default:'' }}" required>
                                     <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block; font-weight:bold;">
@@ -297,34 +293,34 @@
                                     </span>
                                 </div></div>
 
-                                
-                                <div class="col-md-4">
-    <div class="form-group">
-        <label class="form-label">
-            <i class="fas fa-bed"></i> BHK Type
-            <span class="required-star">*</span>
-        </label>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-bed"></i> BHK Type <span class="required-star">*</span></label>
+                                        <select class="form-select form-control" name="bhk_type" id="bhk_type" required>
+                                            <option value="">Select BHK</option>
+                                            <option value="1 RK" {% if property.bhk_type == '1 RK' %}selected{% endif %}>1 RK</option>
+                                            <option value="1 BHK" {% if property.bhk_type == '1 BHK' %}selected{% endif %}>1 BHK</option>
+                                            <option value="2 BHK" {% if property.bhk_type == '2 BHK' %}selected{% endif %}>2 BHK</option>
+                                            <option value="3 BHK" {% if property.bhk_type == '3 BHK' %}selected{% endif %}>3 BHK</option>
+                                            <option value="4 BHK" {% if property.bhk_type == '4 BHK' %}selected{% endif %}>4 BHK</option>
+                                            <option value="5+ BHK" {% if property.bhk_type == '5+ BHK' %}selected{% endif %}>5+ BHK</option>
+                                        </select>
+                                    </div>
+                                </div>
 
-        <select class="form-select form-control" name="bhk_type" id="bhk_type" required>
-            <option value="">Select BHK</option>
-            <option value="1 RK" {% if property.bhk_type == '1 RK' %}selected{% endif %}>1 RK</option>
-            <option value="1 BHK" {% if property.bhk_type == '1 BHK' %}selected{% endif %}>1 BHK</option>
-            <option value="2 BHK" {% if property.bhk_type == '2 BHK' %}selected{% endif %}>2 BHK</option>
-            <option value="3 BHK" {% if property.bhk_type == '3 BHK' %}selected{% endif %}>3 BHK</option>
-            <option value="4 BHK" {% if property.bhk_type == '4 BHK' %}selected{% endif %}>4 BHK</option>
-            <option value="5+ BHK" {% if property.bhk_type == '5+ BHK' %}selected{% endif %}>5+ BHK</option>
-        </select>
-    </div>
-</div>
-                                   <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-key"></i> Renting Option <span class="required-star">*</span></label><select class="form-select form-control" name="renting_option" id="renting_option" required>
-                                    <option value="">Select Option</option>
-                                    <option value="Full Property" {% if property.renting_option == 'Full Property' %}selected{% endif %}>Full Property</option>
-                                    <option value="Single Room" {% if property.renting_option == 'Single Room' %}selected{% endif %}>Single Room</option>
-                                    <option value="Shared Room" {% if property.renting_option == 'Shared Room' %}selected{% endif %}>Shared Room</option>
-                                </select></div></div>
-                              
-
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label"><i class="fas fa-key"></i> Renting Option <span class="required-star">*</span></label>
+                                        <select class="form-select form-control" name="renting_option" id="renting_option" required>
+                                            <option value="">Select Option</option>
+                                            <option value="Full Property" {% if property.renting_option == 'Full Property' %}selected{% endif %}>Full Property</option>
+                                            <option value="Single Room" {% if property.renting_option == 'Single Room' %}selected{% endif %}>Single Room</option>
+                                            <option value="Shared Room" {% if property.renting_option == 'Shared Room' %}selected{% endif %}>Shared Room</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
+
                             <div class="row mt-2">
                                 <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-expand"></i> Built-up Area (sq.ft) <span class="required-star">*</span></label><input type="number" class="form-control" name="built_up_area" id="built_up_area" value="{{ property.built_up_area|default:'' }}" required></div></div>
                                 <div class="col-md-4"><div class="form-group"><label class="form-label"><i class="fas fa-bath"></i> Bathrooms <span class="required-star">*</span></label><input type="number" class="form-control" name="bathrooms" id="bathrooms" value="{{ property.bathrooms|default:'' }}" required></div></div>
@@ -358,7 +354,7 @@
                                 <div class="col-md-6"><div class="form-group"><label class="form-label"><i class="fas fa-user-tie"></i> Available For <span class="required-star">*</span></label><select class="form-select form-control" name="available_for" id="available_for" required>
                                     <option value="">Select Option</option>
                                     <option value="Family" {% if property.available_for == 'Family' %}selected{% endif %}>Family</option>
-                                    <option value="Bachelor" {% if property.available_for == 'Bachelor' %}selected{% endif %}>Bachelor</option>
+                                    <option value="Bachelors" {% if property.available_for == 'Bachelors' %}selected{% endif %}>Bachelors</option>
                                     <option value="Both" {% if property.available_for == 'Both' %}selected{% endif %}>Both</option>
                                 </select></div></div>
                             </div>
@@ -432,7 +428,6 @@
                                     <option value="1 Year" {% if property.lease_duration == '1 Year' %}selected{% endif %}>1 Year</option>
                                     <option value="2 Years" {% if property.lease_duration == '2 Years' %}selected{% endif %}>2 Years</option>
                                 </select></div></div>
-                                
                             </div>
                         </div>
                     </div>
@@ -443,6 +438,7 @@
                     </div>
                 </div>
 
+                <!-- ================= STEP 2 ================= -->
                 <div class="step-content" id="step2">
 
                     <div class="form-section">
@@ -466,7 +462,6 @@
                                     <label class="form-label">Enter Fixed Brokerage</label>
                                     <input type="text" class="form-control" name="manual_brokerage" value="{{ property.manual_brokerage|default:'' }}" placeholder="e.g. Fixed Amount">
                                 </div>
-
 
                                 <div class="col-md-6"><div class="form-group"><label class="form-label">Advance Rent Month</label>
                                     <select class="form-select form-control" id="advance_rent_month" name="advance_rent_month">
@@ -565,7 +560,6 @@
                                         <option value="West Bengal" {% if property.state == 'West Bengal' %}selected{% endif %}>West Bengal</option>
                                         <option value="Rajasthan" {% if property.state == 'Rajasthan' %}selected{% endif %}>Rajasthan</option>
                                         <option value="Punjab" {% if property.state == 'Punjab' %}selected{% endif %}>Punjab</option>
-                                        <!-- Add remaining states as needed; value falls back to plain text if not listed above -->
                                         {% if property.state and property.state not in "Maharashtra,Delhi,Karnataka,Gujarat,Uttar Pradesh,Tamil Nadu,Telangana,West Bengal,Rajasthan,Punjab" %}
                                         <option value="{{ property.state }}" selected>{{ property.state }}</option>
                                         {% endif %}
@@ -598,6 +592,7 @@
                     </div>
                 </div>
 
+                <!-- ================= STEP 3 ================= -->
                 <div class="step-content" id="step3">
 
                     <div class="form-section">
@@ -672,41 +667,284 @@
                     </div>
                 </div>
 
+                <!-- ================= STEP 4 ================= -->
                 <div class="step-content" id="step4">
 
+                    <!-- ================= CATEGORIZED PROPERTY IMAGES ================= -->
                     <div class="form-section">
                         <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
                         <div class="section-body">
-                            <label class="form-label">Current Images <span style="font-weight:400; font-size:0.8rem; color:#718096;">(drag to reorder, ✖ to remove)</span></label>
-                            <div class="image-preview" id="existingImagesContainer" style="margin-bottom: 25px;">
-                                {% for img in property.images.all %}
-                                    <div class="preview-item existing-item" data-image-id="{{ img.id }}" draggable="true">
-                                        <img src="{{ img.image.url }}">
-                                        <div class="existing-image-badge">Saved Image</div>
-                                        <button type="button" class="remove-image" onclick="removeExistingImage({{ img.id }}, this, event)">✖</button>
+
+                            <div class="img-total-summary">
+                                <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/20</div>
+                                <div id="imgMinNotice" class="min-warning"><i class="fas fa-exclamation-circle"></i> Add at least 3 images to publish</div>
+                            </div>
+
+                            <!-- Category Tabs -->
+                            <div class="img-cat-tabs" id="imgCatTabs">
+                                <div class="img-cat-tab active" data-cat="exterior"><i class="fas fa-building"></i> Exterior / Building <span class="cat-count" id="count-exterior">0</span></div>
+                                <div class="img-cat-tab" data-cat="living"><i class="fas fa-couch"></i> Living / Dining <span class="cat-count" id="count-living">0</span></div>
+                                <div class="img-cat-tab" data-cat="bedroom"><i class="fas fa-bed"></i> Bedroom <span class="cat-count" id="count-bedroom">0</span></div>
+                                <div class="img-cat-tab" data-cat="kitchen"><i class="fas fa-utensils"></i> Kitchen <span class="cat-count" id="count-kitchen">0</span></div>
+                                <div class="img-cat-tab" data-cat="bathroom"><i class="fas fa-bath"></i> Bathroom <span class="cat-count" id="count-bathroom">0</span></div>
+                                <div class="img-cat-tab" data-cat="balcony"><i class="fas fa-tree"></i> Balcony <span class="cat-count" id="count-balcony">0</span></div>
+                                <div class="img-cat-tab" data-cat="others"><i class="fas fa-ellipsis-h"></i> Others <span class="cat-count" id="count-others">0</span></div>
+                            </div>
+
+                            <div class="img-cat-panels">
+                                <!-- 1. EXTERIOR -->
+                                <div class="img-cat-panel active" data-cat-panel="exterior">
+                                    {% with existing=images_by_category.exterior %}
+                                    {% if existing %}
+                                    <div class="img-cat-preview" style="margin-bottom:14px;">
+                                        {% for img in existing %}
+                                        <div class="img-cat-preview-item">
+                                            <img src="{{ img.image.url }}">
+                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
+                                            </label>
+                                        </div>
+                                        {% endfor %}
                                     </div>
-                                {% empty %}
-                                    <span id="noExistingImagesMsg" style="color: #718096; font-size: 0.9rem; font-style: italic;">No images uploaded yet.</span>
-                                {% endfor %}
+                                    {% endif %}
+                                    {% endwith %}
+                                    <input type="file" class="img-cat-input" id="imgInput-exterior" name="property_images_exterior[]" accept="image/*" multiple style="display:none;">
+                                    <div class="img-cat-upload-area" data-cat="exterior">
+                                        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="upload-text">Click or Drag Exterior / Building Photos Here</div>
+                                        <div class="upload-subtext">Front view, entrance, society/building — up to 5 images</div>
+                                    </div>
+                                    <div class="img-cat-preview" id="imgPreview-exterior"></div>
+                                </div>
+
+                                <!-- 2. LIVING -->
+                                <div class="img-cat-panel" data-cat-panel="living">
+                                    {% with existing=images_by_category.living %}
+                                    {% if existing %}
+                                    <div class="img-cat-preview" style="margin-bottom:14px;">
+                                        {% for img in existing %}
+                                        <div class="img-cat-preview-item">
+                                            <img src="{{ img.image.url }}">
+                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    {% endwith %}
+                                    <input type="file" class="img-cat-input" id="imgInput-living" name="property_images_living[]" accept="image/*" multiple style="display:none;">
+                                    <div class="img-cat-upload-area" data-cat="living">
+                                        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="upload-text">Click or Drag Living / Dining Room Photos Here</div>
+                                        <div class="upload-subtext">Up to 5 images</div>
+                                    </div>
+                                    <div class="img-cat-preview" id="imgPreview-living"></div>
+                                </div>
+
+                                <!-- 3. BEDROOM -->
+                                <div class="img-cat-panel" data-cat-panel="bedroom">
+                                    {% with existing=images_by_category.bedroom %}
+                                    {% if existing %}
+                                    <div class="img-cat-preview" style="margin-bottom:14px;">
+                                        {% for img in existing %}
+                                        <div class="img-cat-preview-item">
+                                            <img src="{{ img.image.url }}">
+                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    {% endwith %}
+                                    <input type="file" class="img-cat-input" id="imgInput-bedroom" name="property_images_bedroom[]" accept="image/*" multiple style="display:none;">
+                                    <div class="img-cat-upload-area" data-cat="bedroom">
+                                        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="upload-text">Click or Drag Bedroom Photos Here</div>
+                                        <div class="upload-subtext">All bedrooms together — up to 6 images</div>
+                                    </div>
+                                    <div class="img-cat-preview" id="imgPreview-bedroom"></div>
+                                </div>
+
+                                <!-- 4. KITCHEN -->
+                                <div class="img-cat-panel" data-cat-panel="kitchen">
+                                    {% with existing=images_by_category.kitchen %}
+                                    {% if existing %}
+                                    <div class="img-cat-preview" style="margin-bottom:14px;">
+                                        {% for img in existing %}
+                                        <div class="img-cat-preview-item">
+                                            <img src="{{ img.image.url }}">
+                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    {% endwith %}
+                                    <input type="file" class="img-cat-input" id="imgInput-kitchen" name="property_images_kitchen[]" accept="image/*" multiple style="display:none;">
+                                    <div class="img-cat-upload-area" data-cat="kitchen">
+                                        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="upload-text">Click or Drag Kitchen Photos Here</div>
+                                        <div class="upload-subtext">Up to 4 images</div>
+                                    </div>
+                                    <div class="img-cat-preview" id="imgPreview-kitchen"></div>
+                                </div>
+
+                                <!-- 5. BATHROOM -->
+                                <div class="img-cat-panel" data-cat-panel="bathroom">
+                                    {% with existing=images_by_category.bathroom %}
+                                    {% if existing %}
+                                    <div class="img-cat-preview" style="margin-bottom:14px;">
+                                        {% for img in existing %}
+                                        <div class="img-cat-preview-item">
+                                            <img src="{{ img.image.url }}">
+                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    {% endwith %}
+                                    <input type="file" class="img-cat-input" id="imgInput-bathroom" name="property_images_bathroom[]" accept="image/*" multiple style="display:none;">
+                                    <div class="img-cat-upload-area" data-cat="bathroom">
+                                        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="upload-text">Click or Drag Bathroom Photos Here</div>
+                                        <div class="upload-subtext">Up to 4 images</div>
+                                    </div>
+                                    <div class="img-cat-preview" id="imgPreview-bathroom"></div>
+                                </div>
+
+                                <!-- 6. BALCONY -->
+                                <div class="img-cat-panel" data-cat-panel="balcony">
+                                    {% with existing=images_by_category.balcony %}
+                                    {% if existing %}
+                                    <div class="img-cat-preview" style="margin-bottom:14px;">
+                                        {% for img in existing %}
+                                        <div class="img-cat-preview-item">
+                                            <img src="{{ img.image.url }}">
+                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    {% endwith %}
+                                    <input type="file" class="img-cat-input" id="imgInput-balcony" name="property_images_balcony[]" accept="image/*" multiple style="display:none;">
+                                    <div class="img-cat-upload-area" data-cat="balcony">
+                                        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="upload-text">Click or Drag Balcony / View Photos Here</div>
+                                        <div class="upload-subtext">Up to 3 images</div>
+                                    </div>
+                                    <div class="img-cat-preview" id="imgPreview-balcony"></div>
+                                </div>
+
+                                <!-- 7. OTHERS -->
+                                <div class="img-cat-panel" data-cat-panel="others">
+                                    {% with existing=images_by_category.others %}
+                                    {% if existing %}
+                                    <div class="img-cat-preview" style="margin-bottom:14px;">
+                                        {% for img in existing %}
+                                        <div class="img-cat-preview-item">
+                                            <img src="{{ img.image.url }}">
+                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    {% endwith %}
+                                    <input type="file" class="img-cat-input" id="imgInput-others" name="property_images_others[]" accept="image/*" multiple style="display:none;">
+                                    <div class="img-cat-upload-area" data-cat="others">
+                                        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <div class="upload-text">Click or Drag Other Photos Here</div>
+                                        <div class="upload-subtext">Parking, terrace, amenities etc. — up to 5 images</div>
+                                    </div>
+                                    <div class="img-cat-preview" id="imgPreview-others"></div>
+                                </div>
                             </div>
 
-                            <!-- Tracks ids removed by the user this session -->
-                            <input type="hidden" name="delete_image_ids" id="deleteImageIds" value="">
-                            <!-- Tracks the display order of the remaining saved images -->
-                            <input type="hidden" name="existing_image_order" id="existingImageOrder"
-                                   value="{% for img in property.images.all %}{{ img.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
-
-                            <label class="form-label">Upload Additional Images</label>
-                            <div class="image-upload-area" id="uploadArea">
-                                <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display: none;">
-                                <i class="fas fa-cloud-upload-alt" style="font-size:3rem; color:#667eea; margin-bottom: 10px;"></i>
-                                <div style="font-weight: 600; color: #4a5568; font-size: 1.1rem;">Click or Drag Images Here</div>
-                                <div style="font-size: 0.9rem; color: #718096;">Upload high-quality images (JPG, PNG). Max 10 images total (saved + new). <br><strong id="imageCountText" style="color:#667eea; font-size:1.05rem;">0/10 Uploaded</strong></div>
-                            </div>
-                            <div class="image-preview" id="imagePreview"></div>
                         </div>
                     </div>
 
+                    <!-- ================= PROPERTY WALKTHROUGH VIDEO ================= -->
+                    <div class="form-section">
+                        <div class="section-header"><i class="fas fa-video"></i> Property Video</div>
+                        <div class="section-body">
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label class="form-label d-block">Video Option</label>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="video_option" id="video_upload" value="upload" {% if uploaded_video and uploaded_video.video %}checked{% endif %}>
+                                        <label class="form-check-label" for="video_upload">Upload Property Video</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="video_option" id="video_auto" value="auto" {% if not uploaded_video.video and not rm_video.video_url %}checked{% endif %}>
+                                        <label class="form-check-label" for="video_auto">Auto-Generate Slideshow from Photos</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="video_option" id="video_rm" value="rm_assisted" {% if rm_video and rm_video.video_url %}checked{% endif %}>
+                                        <label class="form-check-label" for="video_rm">Video is Large — Share with Our RM</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="video_source" id="video_source" value="upload">
+
+                            <div id="videoUploadWrapper">
+                                {% if uploaded_video and uploaded_video.video %}
+                                <div style="margin-bottom:12px;">
+                                    <label class="form-label">Current Uploaded Video</label>
+                                    <video src="{{ uploaded_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
+                                </div>
+                                {% endif %}
+                                <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+                                <div class="image-upload-area" id="videoUploadArea">
+                                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size:2.2rem;color:#667eea;"></i></div>
+                                    <div class="upload-text">Click to Replace Uploaded Video</div>
+                                    <div class="upload-subtext">MP4/MOV, max 60 seconds, up to 20MB</div>
+                                </div>
+                                <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px;"></video>
+                            </div>
+
+                            <div id="videoAutoWrapper" style="display:none;">
+                                {% if auto_video and auto_video.video %}
+                                <div style="margin-bottom:12px;">
+                                    <label class="form-label">Current Auto-Generated Slideshow</label>
+                                    <video src="{{ auto_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
+                                </div>
+                                {% endif %}
+
+                                <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center; margin-bottom:15px;">
+                                    <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
+                                    <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:1px solid #cbd5e1; background:#000;"></canvas>
+                                </div>
+
+                                <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:12px; font-weight:600;">
+                                    <i class="fas fa-exclamation-circle me-1"></i> Please upload or keep at least 3 images to preview the auto-slideshow.
+                                </div>
+
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" name="regenerate_slideshow" id="regenerate_slideshow">
+                                    <label class="form-check-label" for="regenerate_slideshow">Regenerate slideshow using current photos</label>
+                                </div>
+                            </div>
+
+                            <div id="videoRMWrapper" style="display:none;">
+                                <label class="form-label">Published Video Link</label>
+                                <input type="url" class="form-control" id="property_video_link" name="property_video_link" value="{{ rm_video.video_url|default:'' }}" placeholder="Paste YouTube / Instagram / Facebook link">
+                                <button type="button" class="btn-reset mt-2" id="previewRMLinkBtn"><i class="fas fa-eye me-1"></i> Preview Link</button>
+                                <div id="rmVideoFrame" style="display:none; margin-top:15px; border-radius:12px; overflow:hidden; aspect-ratio:16/9;">
+                                    <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= LISTED ELSEWHERE ================= -->
                     <div class="form-section">
                         <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
                             <div class="row">
@@ -727,6 +965,7 @@
                         </div>
                     </div>
 
+                    <!-- ================= STATUS & APPROVAL ================= -->
                     <div class="form-section">
                         <div class="section-header"><i class="fas fa-check-double"></i> Listing Status & Approval</div>
                         <div class="section-body">
@@ -758,8 +997,9 @@
                         </div>
                     </div>
 
+                    <!-- ================= UPLOADED BY ================= -->
                     <div class="form-section">
-                        <div class="section-header"><i class="fas fa-upload"></i>Property Uploaded By</div>
+                        <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
                         <div class="section-body">
                             <div class="row">
                                 <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" value="{{ property.uploaded_by_name|default:admin_obj.name }}" disabled></div></div>
@@ -779,6 +1019,7 @@
             </form>
         </div>
 
+        <!-- Sticky Sidebar Area -->
         <div class="preview-sidebar">
             <div style="background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); border-radius: 16px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin-bottom: 20px;">
                 <div style="font-size: 0.8rem; font-weight: 700; color: rgba(255, 255, 255, 0.6); margin-bottom: 15px;"><i class="fas fa-eye"></i> Live Preview</div>
@@ -810,7 +1051,6 @@
 
         </div>
 
-        
     </div>
 </div>
 
@@ -842,7 +1082,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-
 $("#Rent").addClass("active");
 
 function updateBrokerageLabel(role) {
@@ -899,9 +1138,6 @@ function Change_Fields() {
 
         var hiddenSelect = document.getElementById('assigned_to');
         if (hiddenSelect) hiddenSelect.required = true;
-        // Note: unlike the Add form, we deliberately do NOT clear listed_by_* fields here —
-        // this is an edit screen and those fields already hold the saved values until the
-        // user actually picks a different team member from the dropdown below.
     }
 }
 
@@ -923,13 +1159,10 @@ function Change_Fields() {
     var groupLabels = Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-group-label'));
     var highlightedIndex = -1;
 
-    // Restore the value this property was saved with (the <select> has no server-rendered
-    // "selected" option since Django templates can't easily concatenate id+role inline).
     if (hiddenSelect.dataset.initial) {
         hiddenSelect.value = hiddenSelect.dataset.initial;
     }
 
-    // Pre-select if editing a property already assigned to someone
     if (hiddenSelect.value) {
         options.forEach(function (opt) {
             if (opt.getAttribute('data-value') === hiddenSelect.value) {
@@ -1042,7 +1275,6 @@ $(document).ready(function () {
     updatePreview();
     initBrokerage();
 
-    // Amenities / Facilities modal (same behavior as the Add form)
     var currentSection = null;
     ['amenities', 'facilities'].forEach(function (section) { updateDisplay(section); });
 
@@ -1131,8 +1363,6 @@ function validateStep(stepIndex) {
         }
     });
     return isValid;
-
-    
 }
 
 function goToStep(n) {
@@ -1176,7 +1406,6 @@ function updatePreview() {
     document.getElementById('previewArea').innerText = area || '0';
     document.getElementById('previewPrice').innerText = price ? '₹ ' + Number(price).toLocaleString('en-IN') + ' / mo' : '₹ 0 / mo';
     document.getElementById('previewLocation').innerText = [loc, city].filter(Boolean).join(', ') || 'City, Locality';
-    
 }
 
 document.querySelectorAll('input, select, textarea').forEach(el => {
@@ -1186,22 +1415,21 @@ document.querySelectorAll('input, select, textarea').forEach(el => {
 });
 
 function updateChecklist() {
-        setCheck('cl-type', !!document.getElementById('property_type')?.value);
-        setCheck('cl-bhk', !!document.getElementById('bhk_type')?.value);
-        setCheck('cl-area', !!document.getElementById('built_up_area')?.value);
-        setCheck('cl-price', !!document.getElementById('monthly_rent')?.value);
-        setCheck('cl-location', !!document.getElementById('city')?.value && !!document.getElementById('locality_area')?.value);
-        setCheck('cl-owner', !!document.getElementById('listed_by_name')?.value);
-    }
+    setCheck('cl-type', !!document.getElementById('property_type')?.value);
+    setCheck('cl-bhk', !!document.getElementById('bhk_type')?.value);
+    setCheck('cl-area', !!document.getElementById('built_up_area')?.value);
+    setCheck('cl-price', !!document.getElementById('monthly_rent')?.value);
+    setCheck('cl-location', !!document.getElementById('city')?.value && !!document.getElementById('locality_area')?.value);
+    setCheck('cl-owner', !!document.getElementById('listed_by_name')?.value);
+}
 
-    function setCheck(id, done) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.className = 'checklist-item' + (done ? ' done' : '');
-        el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
-    }
+function setCheck(id, done) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'checklist-item' + (done ? ' done' : '');
+    el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+}
 
-// --- BROKERAGE / ADVANCE / DEPOSIT / MAINTENANCE TOGGLES ---
 function initBrokerage() {
     document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
         document.getElementById('manualBrokerage').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
@@ -1226,176 +1454,142 @@ function initBrokerage() {
     });
 }
 
-// --- EXISTING (SAVED) IMAGE MANAGEMENT ---
-const existingImagesContainer = document.getElementById('existingImagesContainer');
-const deleteImageIdsInput = document.getElementById('deleteImageIds');
-const existingImageOrderInput = document.getElementById('existingImageOrder');
-let deletedExistingIds = [];
+// --- CATEGORIZED IMAGE UPLOAD ENGINE ---
+const IMG_CATEGORIES = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others'];
+const IMG_CATEGORY_LIMITS = { exterior: 5, living: 5, bedroom: 6, kitchen: 4, bathroom: 4, balcony: 3, others: 5 };
+const IMG_TOTAL_LIMIT = 20;
 
-function existingCount() {
-    return existingImagesContainer ? existingImagesContainer.querySelectorAll('.existing-item').length : 0;
+const EXISTING_IMG_COUNTS = {
+  exterior: {{ images_by_category.exterior|length|default:0 }},
+  living: {{ images_by_category.living|length|default:0 }},
+  bedroom: {{ images_by_category.bedroom|length|default:0 }},
+  kitchen: {{ images_by_category.kitchen|length|default:0 }},
+  bathroom: {{ images_by_category.bathroom|length|default:0 }},
+  balcony: {{ images_by_category.balcony|length|default:0 }},
+  others: {{ images_by_category.others|length|default:0 }}
+};
+
+const catFiles = {};
+IMG_CATEGORIES.forEach(function (c) { catFiles[c] = []; });
+
+function existingTotalCount() {
+    return IMG_CATEGORIES.reduce(function (sum, c) { return sum + (EXISTING_IMG_COUNTS[c] || 0); }, 0);
 }
 
-function syncExistingImageOrder() {
-    if (!existingImageOrderInput || !existingImagesContainer) return;
-    const ids = Array.prototype.slice.call(existingImagesContainer.querySelectorAll('.existing-item'))
-        .map(el => el.dataset.imageId);
-    existingImageOrderInput.value = ids.join(',');
+function totalImageCount() {
+    return IMG_CATEGORIES.reduce(function (sum, c) { return sum + catFiles[c].length; }, 0);
 }
 
-function removeExistingImage(imageId, btn, event) {
-    event.stopPropagation();
-    deletedExistingIds.push(String(imageId));
-    if (deleteImageIdsInput) deleteImageIdsInput.value = deletedExistingIds.join(',');
 
-    const item = existingImagesContainer.querySelector('.existing-item[data-image-id="' + imageId + '"]');
-    if (item) item.remove();
 
-    if (existingCount() === 0 && existingImagesContainer && !existingImagesContainer.querySelector('#noExistingImagesMsg')) {
-        const msg = document.createElement('span');
-        msg.id = 'noExistingImagesMsg';
-        msg.style.cssText = 'color: #718096; font-size: 0.9rem; font-style: italic;';
-        msg.innerText = 'No images uploaded yet.';
-        existingImagesContainer.appendChild(msg);
-    }
 
-    syncExistingImageOrder();
-    updateImageCounts();
-}
-
-let draggedExistingId = null;
-if (existingImagesContainer) {
-    Array.prototype.slice.call(existingImagesContainer.querySelectorAll('.existing-item')).forEach(bindExistingDrag);
-}
-
-function bindExistingDrag(el) {
-    el.addEventListener('dragstart', function () { draggedExistingId = this.dataset.imageId; this.style.opacity = '0.5'; });
-    el.addEventListener('dragend', function () { this.style.opacity = '1'; });
-    el.addEventListener('dragover', function (e) { e.preventDefault(); });
-    el.addEventListener('dragenter', function () { this.classList.add('drag-over'); });
-    el.addEventListener('dragleave', function () { this.classList.remove('drag-over'); });
-    el.addEventListener('drop', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.classList.remove('drag-over');
-        const targetId = this.dataset.imageId;
-        if (draggedExistingId && draggedExistingId !== targetId) {
-            const draggedEl = existingImagesContainer.querySelector('.existing-item[data-image-id="' + draggedExistingId + '"]');
-            const targetEl = this;
-            if (draggedEl && targetEl) {
-                const items = Array.prototype.slice.call(existingImagesContainer.querySelectorAll('.existing-item'));
-                const draggedIndex = items.indexOf(draggedEl);
-                const targetIndex = items.indexOf(targetEl);
-                if (draggedIndex < targetIndex) {
-                    targetEl.after(draggedEl);
-                } else {
-                    targetEl.before(draggedEl);
-                }
-                syncExistingImageOrder();
-            }
-        }
+function renderCategory(cat) {
+    var preview = document.getElementById('imgPreview-' + cat);
+    if (!preview) return;
+    preview.innerHTML = '';
+    catFiles[cat].forEach(function (file) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var div = document.createElement('div');
+            div.className = 'img-cat-preview-item';
+            div.innerHTML = '<img src="' + e.target.result + '"><button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\',\'' + file.name.replace(/'/g, "\\'") + '\')">✖</button>';
+            preview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
     });
+    var newCount = catFiles[cat].length;
+    var savedCount = EXISTING_IMG_COUNTS[cat] || 0;
+    var countEl = document.getElementById('count-' + cat);
+    if (countEl) countEl.innerText = savedCount + newCount;
+
+    var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+    if (tab) tab.classList.toggle('has-images', (savedCount + newCount) > 0);
 }
 
-// --- DRAG & DROP IMAGE UPLOAD (new files) ---
-const uploadArea = document.getElementById('uploadArea');
-const imageInput = document.getElementById('imageInput');
-const imagePreview = document.getElementById('imagePreview');
-const imageCountText = document.getElementById('imageCountText');
-let selectedFiles = [];
+function renderAllCategories() {
+    IMG_CATEGORIES.forEach(renderCategory);
+    var total = existingTotalCount() + totalImageCount();
+    var totalEl = document.getElementById('imgTotalCount');
+    if (totalEl) totalEl.innerText = total;
 
-if (uploadArea) {
-    uploadArea.addEventListener('click', () => imageInput.click());
-    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-    uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
-    uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-    imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
-}
-
-function updateImageCounts() {
-    if (!imageCountText) return;
-    const savedCount = existingCount();
-    const total = savedCount + selectedFiles.length;
-    imageCountText.innerText = `${total}/10 Uploaded (${savedCount} saved + ${selectedFiles.length} new)`;
-}
-
-function handleFiles(files) {
-    const fileArray = Array.from(files);
-    const savedCount = existingCount();
-    if (savedCount + selectedFiles.length + fileArray.length > 10) {
-        Swal.fire('Limit Exceeded', `Maximum 10 images allowed in total. You currently have ${savedCount} saved image(s) and ${selectedFiles.length} newly selected — remove some before adding more.`, 'warning');
-        return;
+    var notice = document.getElementById('imgMinNotice');
+    if (notice) {
+        if (total >= 3) {
+            notice.className = 'min-ok';
+            notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + total + ' images on this listing.';
+        } else {
+            notice.className = 'min-warning';
+            notice.innerHTML = '<i class="fas fa-exclamation-circle"></i> Add at least 3 images to publish';
+        }
     }
-    fileArray.forEach(file => { if (file.type.startsWith('image/')) selectedFiles.push(file); });
-    syncFileInputAndRender();
 }
 
-function syncFileInputAndRender() {
-    const dt = new DataTransfer();
-    selectedFiles.forEach(file => dt.items.add(file));
-    imageInput.files = dt.files;
-    updateImageCounts();
-    imagePreview.innerHTML = "";
-    selectedFiles.forEach(file => displayImage(file));
-}
+function handleCatFiles(cat, files) {
+    var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
+    var limit = IMG_CATEGORY_LIMITS[cat] || 5;
+    var alreadyStored = EXISTING_IMG_COUNTS[cat] || 0;
 
-// Initialize the counter on page load to reflect any pre-existing saved images
-updateImageCounts();
-
-function displayImage(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const div = document.createElement('div');
-        div.className = 'preview-item';
-        div.draggable = true;
-        div.dataset.fileName = file.name;
-        div.innerHTML = `<img src="${e.target.result}"><button type="button" class="remove-image" onclick="removeImage('${file.name}', this, event)">✖</button>`;
-        div.addEventListener('dragstart', handleDragStart);
-        div.addEventListener('dragover', handleDragOver);
-        div.addEventListener('dragenter', handleDragEnter);
-        div.addEventListener('dragleave', handleDragLeave);
-        div.addEventListener('drop', handleDrop);
-        imagePreview.appendChild(div);
-    };
-    reader.readAsDataURL(file);
-}
-
-function removeImage(fileName, btn, event) {
-    event.stopPropagation();
-    selectedFiles = selectedFiles.filter(file => file.name !== fileName);
-    syncFileInputAndRender();
-}
-
-let draggedItemName = null;
-function handleDragStart(e) { draggedItemName = this.dataset.fileName; e.dataTransfer.effectAllowed = 'move'; this.style.opacity = '0.5'; }
-function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; return false; }
-function handleDragEnter(e) { this.classList.add('drag-over'); }
-function handleDragLeave(e) { this.classList.remove('drag-over'); }
-function handleDrop(e) {
-    e.stopPropagation();
-    this.classList.remove('drag-over');
-    const targetItemName = this.dataset.fileName;
-    if (draggedItemName !== targetItemName) {
-        const draggedIndex = selectedFiles.findIndex(f => f.name === draggedItemName);
-        const targetIndex = selectedFiles.findIndex(f => f.name === targetItemName);
-        const [movedItem] = selectedFiles.splice(draggedIndex, 1);
-        selectedFiles.splice(targetIndex, 0, movedItem);
-        syncFileInputAndRender();
+    if (alreadyStored + catFiles[cat].length + incoming.length > limit) {
+        Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
+        incoming = incoming.slice(0, Math.max(0, limit - alreadyStored - catFiles[cat].length));
     }
-    return false;
+    if (existingTotalCount() + totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+        Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all categories.', 'warning');
+        incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - existingTotalCount() - totalImageCount()));
+    }
+
+    catFiles[cat] = catFiles[cat].concat(incoming);
+    syncCategoryInput(cat);
+    renderAllCategories();
 }
 
-// --- FORM SUBMISSION VIA AJAX ---
-// --- FORM SUBMISSION VIA AJAX & CHANGE TRACKING ---
+window.removeCatImage = function (cat, fileName) {
+    catFiles[cat] = catFiles[cat].filter(function (f) { return f.name !== fileName; });
+    syncCategoryInput(cat);
+    renderAllCategories();
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
+            document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
+            this.classList.add('active');
+            var panel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
+            if (panel) panel.classList.add('active');
+        });
+    });
+
+    IMG_CATEGORIES.forEach(function (cat) {
+        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+        var input = document.getElementById('imgInput-' + cat);
+        if (!zone || !input) return;
+
+        zone.addEventListener('click', function () { input.click(); });
+        input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
+        zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
+        zone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            handleCatFiles(cat, e.dataTransfer.files);
+        });
+    });
+
+    renderAllCategories();
+});
+</script>
+
+<script>
+// --- FORM CHANGE TRACKER & SUBMIT LISTENER ---
 const form = document.getElementById('rentalEditForm');
 let initialFormValues = {};
 
-// 1. Capture initial values when the page loads
 function captureInitialValues() {
     if (!form) return;
     const inputs = form.querySelectorAll('input, select, textarea');
     inputs.forEach(input => {
-        // Skip file inputs, hidden inputs, readonly, and disabled fields
         if (input.name && input.type !== 'file' && input.type !== 'hidden' && !input.readOnly && !input.disabled) {
             if (input.type === 'checkbox' || input.type === 'radio') {
                 if (input.checked) {
@@ -1407,22 +1601,13 @@ function captureInitialValues() {
             }
         }
     });
-    
-    // Initialize empty arrays for unchecked checkboxes/radios so they can be compared later
+
     const checkRadios = form.querySelectorAll('input[type="checkbox"], input[type="radio"]');
     checkRadios.forEach(input => {
-         if (input.name && !initialFormValues[input.name]) {
-             initialFormValues[input.name] = [];
-         }
+        if (input.name && !initialFormValues[input.name]) initialFormValues[input.name] = [];
     });
 }
 
-// Trigger initial capture on load
-$(document).ready(function() {
-    captureInitialValues();
-});
-
-// 2. Generate HTML list of changed fields
 function getChangedFieldsHtml() {
     let currentValues = {};
     let changedFieldsHtml = [];
@@ -1440,10 +1625,10 @@ function getChangedFieldsHtml() {
             }
         }
     });
-    
+
     const checkRadios = form.querySelectorAll('input[type="checkbox"], input[type="radio"]');
     checkRadios.forEach(input => {
-         if (input.name && !currentValues[input.name]) currentValues[input.name] = [];
+        if (input.name && !currentValues[input.name]) currentValues[input.name] = [];
     });
 
     let allKeys = new Set([...Object.keys(initialFormValues), ...Object.keys(currentValues)]);
@@ -1451,7 +1636,6 @@ function getChangedFieldsHtml() {
     allKeys.forEach(key => {
         let initial = initialFormValues[key];
         let current = currentValues[key];
-        // Format the key to look like a readable label
         let displayKey = key.replace(/\[\]/g, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
         if (Array.isArray(initial) || Array.isArray(current)) {
@@ -1475,240 +1659,451 @@ function getChangedFieldsHtml() {
         }
     });
 
-    // Check for Image additions/removals based on your existing drag/drop variables
-    if (typeof selectedFiles !== 'undefined' && selectedFiles.length > 0) {
-        changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#11998e;"><i class="fas fa-images"></i> <b>Images</b>:</span> ${selectedFiles.length} newly added</li>`);
-    }
-    if (typeof deletedExistingIds !== 'undefined' && deletedExistingIds.length > 0) {
-        changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#e74c3c;"><i class="fas fa-trash-alt"></i> <b>Images</b>:</span> ${deletedExistingIds.length} removed</li>`);
-    }
-
     return changedFieldsHtml;
 }
 
-// 3. Updated Submit Listener
-if (form) {
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
+document.addEventListener('DOMContentLoaded', function () {
+    captureInitialValues();
 
-        for (let i = 1; i <= totalSteps; i++) {
-            if (!validateStep(i)) {
-                goToStep(i);
-                Swal.fire({ icon: 'warning', title: 'Incomplete Details', text: 'Please review all steps and fill out highlighted required fields.' });
-                return;
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            for (let i = 1; i <= totalSteps; i++) {
+                if (!validateStep(i)) {
+                    goToStep(i);
+                    Swal.fire({ icon: 'warning', title: 'Incomplete Details', text: 'Please review all steps and fill out highlighted required fields.' });
+                    return;
+                }
             }
-        }
 
-        // Generate the visual alert HTML based on changes
-        let changedFields = getChangedFieldsHtml();
-        let alertHtml = `<div style="font-size: 1rem; color: #4a5568; margin-bottom: 15px;">Are you sure you want to save these changes?</div>`;
-        
-        if (changedFields.length > 0) {
-            alertHtml += `<div style="text-align: left; max-height: 250px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.9rem;">
-                            <strong style="color: #2d3748; display: block; margin-bottom: 10px;"><i class="fas fa-clipboard-list"></i> Modifications Detected:</strong>
-                            <ul style="margin: 0; padding-left: 20px; list-style-type: none;">
-                                ${changedFields.join('')}
-                            </ul>
-                          </div>`;
-        } else {
-            alertHtml += `<div style="background: #f8f9fa; padding: 15px; border-radius: 12px; color: #718096; font-size: 0.95rem;">
-                            <i class="fas fa-info-circle"></i> No modifications detected.
-                          </div>`;
-        }
+            // Sync category image array before sending
+            
 
-        Swal.fire({
-            title: 'Update Property?',
-            html: alertHtml, // Use HTML instead of text
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#667eea',
-            cancelButtonColor: '#e74c3c',
-            confirmButtonText: 'Yes, update it!',
-            width: '600px' // Slightly wider to fit the list nicely
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({ title: 'Updating...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            let changedFields = getChangedFieldsHtml();
+            let alertHtml = `<div style="font-size: 1rem; color: #4a5568; margin-bottom: 15px;">Are you sure you want to save these changes?</div>`;
 
-                fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        Swal.fire({ icon: 'success', title: 'Updated!', text: data.message })
-                        .then(() => { if (data.redirect_url) window.location.href = data.redirect_url; });
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'Update Failed', text: data.message });
-                    }
-                })
-                .catch(error => { Swal.fire({ icon: 'error', title: 'Error', text: 'Server connection failed.' }); });
+            if (changedFields.length > 0) {
+                alertHtml += `<div style="text-align: left; max-height: 250px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.9rem;">
+                                <strong style="color: #2d3748; display: block; margin-bottom: 10px;"><i class="fas fa-clipboard-list"></i> Modifications Detected:</strong>
+                                <ul style="margin: 0; padding-left: 20px; list-style-type: none;">
+                                    ${changedFields.join('')}
+                                </ul>
+                              </div>`;
+            } else {
+                alertHtml += `<div style="background: #f8f9fa; padding: 15px; border-radius: 12px; color: #718096; font-size: 0.95rem;">
+                                <i class="fas fa-info-circle"></i> No modifications detected.
+                              </div>`;
             }
+
+            Swal.fire({
+                title: 'Update Property?',
+                html: alertHtml,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#667eea',
+                cancelButtonColor: '#e74c3c',
+                confirmButtonText: 'Yes, update it!',
+                width: '600px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: 'Updating...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
+                    fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire({ icon: 'success', title: 'Updated!', text: data.message })
+                            .then(() => { if (data.redirect_url) window.location.href = data.redirect_url; });
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Update Failed', text: data.message });
+                        }
+                    })
+                    .catch(error => { Swal.fire({ icon: 'error', title: 'Error', text: 'Server connection failed.' }); });
+                }
+            });
         });
-    });
-}
+    }
+});
 </script>
 
 <script>
-
-    document.addEventListener("DOMContentLoaded", function () {
-
+// --- AUTO MOVE-IN COST CALCULATOR ---
+document.addEventListener("DOMContentLoaded", function () {
     function calculateMoveInCost() {
-
-        // -------------------------
-        // Monthly Rent
-        // -------------------------
-
-        let monthlyRent =
-            parseFloat(document.getElementById("monthly_rent")?.value) || 0;
-
-
-        // -------------------------
-        // Advance Rent
-        // -------------------------
-
+        let monthlyRent = parseFloat(document.getElementById("monthly_rent")?.value) || 0;
         let advance = 0;
-
-        let advanceType =
-            document.getElementById("advance_rent_month")?.value;
+        let advanceType = document.getElementById("advance_rent_month")?.value;
 
         if (advanceType === "fixed") {
-
-            advance =
-                parseFloat(document.getElementById("advance_rent_amount")?.value) || 0;
-
+            advance = parseFloat(document.getElementById("advance_rent_amount")?.value) || 0;
         } else {
-
             let months = parseFloat(advanceType) || 0;
-
             advance = monthlyRent * months;
         }
 
-
-        // -------------------------
-        // Security Deposit
-        // -------------------------
-
         let deposit = 0;
-
-        let depositType =
-            document.getElementById("security_deposit_type")?.value;
+        let depositType = document.getElementById("security_deposit_type")?.value;
 
         if (depositType === "fixed") {
-
-            deposit =
-                parseFloat(document.getElementById("security_deposit_amount")?.value) || 0;
-
+            deposit = parseFloat(document.getElementById("security_deposit_amount")?.value) || 0;
         } else {
-
             let months = parseFloat(depositType) || 0;
-
             deposit = monthlyRent * months;
-
         }
-
-
-        // -------------------------
-        // Brokerage
-        // -------------------------
 
         let brokerage = 0;
-
-        let brokerageType =
-            document.getElementById("brokeragePercentage")?.value;
-            console.log(brokerageType)
+        let brokerageType = document.getElementById("brokeragePercentage")?.value;
 
         switch (brokerageType) {
-
-            case "No Brokerage":
-
-                brokerage = 0;
-                break;
-
-            case "15 Days Rent":
-
-                brokerage = monthlyRent / 2;
-                break;
-
-            case "1 Month Rent":
-
-                brokerage = monthlyRent;
-                break;
-
-            case "2 Months Rent":
-
-                brokerage = monthlyRent * 2;
-                break;
-
-            case "Fixed Amount":
-
-                brokerage =
-                    parseFloat(document.querySelector("[name='manual_brokerage']")?.value) || 0;
-
-                break;
-
-            default:
-
-                brokerage = 0;
-
+            case "15 Days Rent": brokerage = monthlyRent / 2; break;
+            case "1 Month Rent": brokerage = monthlyRent; break;
+            case "2 Months Rent": brokerage = monthlyRent * 2; break;
+            case "Fixed Amount": brokerage = parseFloat(document.querySelector("[name='manual_brokerage']")?.value) || 0; break;
+            default: brokerage = 0;
         }
-
-
-        // -------------------------
-        // Maintenance
-        // -------------------------
 
         let maintenance = 0;
-
         if (document.getElementById("maintenance_extra")?.checked) {
-
-            maintenance =
-                parseFloat(document.getElementById("monthy_maintenance_amount")?.value) || 0;
-
+            maintenance = parseFloat(document.getElementById("monthy_maintenance_amount")?.value) || 0;
         }
 
-
-        // -------------------------
-        // Total
-        // -------------------------
-
-        let total =
-            advance +
-            deposit +
-            brokerage +
-            maintenance;
-
-
-        document.getElementById("total_move_in_cost").value =
-            Math.round(total);
-
+        let total = advance + deposit + brokerage + maintenance;
+        let totalInput = document.getElementById("total_move_in_cost");
+        if (totalInput) totalInput.value = Math.round(total);
     }
 
-
-    // -------------------------
-    // Auto Calculate
-    // -------------------------
-
     document.querySelectorAll(
-        "#monthly_rent," +
-        "#advance_rent_month," +
-        "#advance_rent_amount," +
-        "#security_deposit_type," +
-        "#security_deposit_amount," +
-        "#brokeragePercentage," +
-        "#monthy_maintenance_amount," +
-        "#maintenance_included," +
-        "#maintenance_extra," +
-        "[name='manual_brokerage']"
+        "#monthly_rent, #advance_rent_month, #advance_rent_amount, #security_deposit_type, #security_deposit_amount, #brokeragePercentage, #monthy_maintenance_amount, #maintenance_included, #maintenance_extra, [name='manual_brokerage']"
     ).forEach(function (element) {
-
         if (!element) return;
-
         element.addEventListener("input", calculateMoveInCost);
         element.addEventListener("change", calculateMoveInCost);
-
     });
 
-
     calculateMoveInCost();
-
 });
+</script>
 
+<script>
+// --- CARPET AREA VALIDATION ---
+document.addEventListener('DOMContentLoaded', function () {
+    var builtUpInput = document.getElementById('built_up_area');
+    var carpetInput = document.getElementById('carpet_area');
+
+    if (!builtUpInput || !carpetInput) return;
+
+    function validateCarpetArea() {
+        var builtUp = parseFloat(builtUpInput.value) || 0;
+        var carpet = parseFloat(carpetInput.value) || 0;
+
+        if (carpet > 0 && builtUp > 0 && carpet > builtUp) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Carpet Area',
+                text: 'Carpet Area (' + carpet + ' sq.ft) cannot be greater than Built-up Area (' + builtUp + ' sq.ft). Please correct it.',
+                confirmButtonColor: '#667eea'
+            });
+            carpetInput.value = '';
+            carpetInput.classList.add('is-invalid');
+            carpetInput.focus();
+        } else {
+            carpetInput.classList.remove('is-invalid');
+        }
+    }
+
+    carpetInput.addEventListener('blur', validateCarpetArea);
+    carpetInput.addEventListener('input', function () { carpetInput.classList.remove('is-invalid'); });
+    builtUpInput.addEventListener('blur', function () { if (carpetInput.value) validateCarpetArea(); });
+});
+</script>
+
+<script>
+// --- VIDEO OPTION & CANVAS SLIDESHOW PREVIEW ---
+
+
+
+
+// ============================================================
+// RESIDENTIAL PROPERTY VIDEO & WHATSAPP RM SHARE ENGINE
+// ============================================================
+document.addEventListener('DOMContentLoaded', function () {
+    var uploadRadio      = document.getElementById('video_upload');
+    var autoRadio        = document.getElementById('video_auto');
+    var rmRadio          = document.getElementById('video_rm');
+    var uploadWrapper    = document.getElementById('videoUploadWrapper');
+    var autoWrapper      = document.getElementById('videoAutoWrapper');
+    var rmWrapper        = document.getElementById('videoRMWrapper');
+    var videoInput       = document.getElementById('videoInput');
+    var videoArea        = document.getElementById('videoUploadArea');
+    var videoPreview     = document.getElementById('videoPreview');
+    var videoSourceField = document.getElementById('video_source');
+
+    var slideshowInterval = null;
+    var canvas = document.getElementById('slideshowCanvas');
+    var ctx = canvas ? canvas.getContext('2d') : null;
+
+    // Collect images from file uploads & existing HTML preview tags
+    function getUploadedImages(callback) {
+        var sources = [];
+
+        if (window.catFiles) {
+            Object.keys(window.catFiles).forEach(function (cat) {
+                if (Array.isArray(window.catFiles[cat])) {
+                    window.catFiles[cat].forEach(function (file) {
+                        if (file instanceof File && file.type.startsWith('image/')) {
+                            sources.push({ type: 'file', data: file });
+                        }
+                    });
+                }
+            });
+        }
+
+        var fileInputs = document.querySelectorAll('input[type="file"]:not(#videoInput)');
+        fileInputs.forEach(function (input) {
+            if (input.files && input.files.length > 0) {
+                Array.from(input.files).forEach(function (file) {
+                    if (file.type.startsWith('image/')) {
+                        sources.push({ type: 'file', data: file });
+                    }
+                });
+            }
+        });
+
+        var previewImgs = document.querySelectorAll('.img-cat-preview img, .existing-item img, #imagePreview img, #existingImagesContainer img');
+        previewImgs.forEach(function (img) {
+            if (img.src && !img.src.includes('placeholder') && !img.src.startsWith('data:video')) {
+                sources.push({ type: 'url', data: img.src });
+            }
+        });
+
+        var uniqueSources = [];
+        var seen = new Set();
+        sources.forEach(function (s) {
+            var key = s.type === 'file' ? s.data.name + s.data.size : s.data;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueSources.push(s);
+            }
+        });
+
+        if (uniqueSources.length === 0) {
+            callback([]);
+            return;
+        }
+
+        var loadedImages = [];
+        var processed = 0;
+
+        uniqueSources.forEach(function (srcObj) {
+            var img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function () {
+                loadedImages.push(img);
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+            img.onerror = function () {
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+
+            img.src = srcObj.type === 'file' ? URL.createObjectURL(srcObj.data) : srcObj.data;
+        });
+    }
+
+    function startAutoSlideshowPreview() {
+        stopAutoSlideshowPreview();
+        var container = document.getElementById('autoSlideshowPreviewContainer');
+        var warning = document.getElementById('autoSlideshowWarning');
+
+        getUploadedImages(function (images) {
+            if (images.length < 3) {
+                if (container) container.style.display = 'none';
+                if (warning) warning.style.display = 'block';
+                return;
+            }
+            if (warning) warning.style.display = 'none';
+            if (container) container.style.display = 'block';
+            runCanvasAnimation(images);
+        });
+    }
+
+    function runCanvasAnimation(images) {
+        if (!ctx || !canvas || images.length === 0) return;
+
+        var durationPerSlide = 3500;
+        var fadeDuration = 800;
+        var startTime = null;
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var elapsed = timestamp - startTime;
+
+            var progress = (elapsed % durationPerSlide) / durationPerSlide;
+            var index = Math.floor(elapsed / durationPerSlide) % images.length;
+            var nextIndex = (index + 1) % images.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            var slideTime = elapsed % durationPerSlide;
+            var isFading = slideTime > (durationPerSlide - fadeDuration);
+            var fadeOpacity = isFading ? (slideTime - (durationPerSlide - fadeDuration)) / fadeDuration : 0;
+
+            drawCinematicFrame(images[index], progress, 1.0);
+            if (isFading) {
+                drawCinematicFrame(images[nextIndex], 0, fadeOpacity);
+            }
+
+            slideshowInterval = requestAnimationFrame(animate);
+        }
+
+        function drawCinematicFrame(img, progress, opacity) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            var scale = 1.0 + (progress * 0.08);
+            var hRatio = canvas.width / img.width;
+            var vRatio = canvas.height / img.height;
+            var ratio  = Math.max(hRatio, vRatio) * scale;
+
+            var baseShiftX = (canvas.width - img.width * ratio) / 2;
+            var centerShiftY = (canvas.height - img.height * ratio) / 2;
+
+            var panOffsetX = (progress - 0.5) * (canvas.width * 0.04);
+            var centerShiftX = baseShiftX + panOffsetX;
+
+            ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+            ctx.restore();
+        }
+
+        stopAutoSlideshowPreview();
+        slideshowInterval = requestAnimationFrame(animate);
+    }
+
+    function stopAutoSlideshowPreview() {
+        if (slideshowInterval) {
+            cancelAnimationFrame(slideshowInterval);
+            slideshowInterval = null;
+        }
+    }
+
+    function toggleVideoOption() {
+        if (uploadWrapper) uploadWrapper.style.display = uploadRadio && uploadRadio.checked ? 'block' : 'none';
+        if (autoWrapper)   autoWrapper.style.display   = autoRadio && autoRadio.checked   ? 'block' : 'none';
+        if (rmWrapper)     rmWrapper.style.display     = rmRadio && rmRadio.checked     ? 'block' : 'none';
+
+        if (videoSourceField) {
+            videoSourceField.value = uploadRadio && uploadRadio.checked ? 'upload' : (autoRadio && autoRadio.checked ? 'auto' : 'rm_assisted');
+        }
+
+        if (autoRadio && autoRadio.checked) startAutoSlideshowPreview();
+        else stopAutoSlideshowPreview();
+
+        if (rmRadio && rmRadio.checked) renderVideoPreview();
+    }
+
+    if (uploadRadio) uploadRadio.addEventListener('change', toggleVideoOption);
+    if (autoRadio)   autoRadio.addEventListener('change', toggleVideoOption);
+    if (rmRadio)     rmRadio.addEventListener('change', toggleVideoOption);
+
+    if (videoArea && videoInput) {
+        videoArea.addEventListener('click', function () { videoInput.click(); });
+    }
+
+    // ============================================================
+    // DIRECT VIDEO UPLOAD + WHATSAPP SHARE MODAL (20MB OVERFLOW)
+    // ============================================================
+    if (videoInput) {
+        videoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
+            var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
+            var companyWhatsAppNumber = "917057205423";
+
+            var rawMessage = "Hello Team,\n\nI am trying to upload a video for my residential rental property listing, but the file size exceeds the 20MB limit.\n\n" +
+                             "📌 *Property Details:*\n" +
+                             "• *Title:* " + propTitle + "\n" +
+                             "• *Listed By:* " + listedByName + "\n" +
+                             "• *Video File Name:* " + file.name + "\n" +
+                             "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
+                             "Please assist me in publishing this video for my listing.";
+
+            var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
+
+            if (file.size > 20 * 1024 * 1024) {
+                videoInput.value = '';
+
+                if (videoPreview) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                    videoPreview.style.display = 'none';
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Video File Too Large',
+                    text: 'This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.',
+                    showCancelButton: true,
+                    confirmButtonColor: '#25D366',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fab fa-whatsapp me-1"></i> Share',
+                    cancelButtonText: 'Okay',
+                    allowOutsideClick: false
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.open(whatsappUrl, '_blank');
+                        if (rmRadio) rmRadio.checked = true;
+                        toggleVideoOption();
+                        var linkField = document.getElementById('property_video_link') || document.getElementById('propertyVideoLink');
+                        if (linkField) linkField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+                return;
+            }
+
+            if (videoPreview) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    }
+
+    function renderVideoPreview() {
+        var linkInput = document.getElementById('property_video_link') || document.getElementById('propertyVideoLink');
+        var frame = document.getElementById('rmVideoFrame');
+        if (!linkInput || !frame) return;
+
+        var url = linkInput.value.trim();
+        if (!url) { frame.style.display = 'none'; return; }
+
+        frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:350px; border:0; border-radius:8px;" allowfullscreen></iframe>';
+        var embedIframe = document.getElementById('rmVideoEmbed');
+
+        var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        if (ytMatch) {
+            embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1];
+            frame.style.display = 'block';
+            return;
+        }
+
+        embedIframe.src = url;
+        frame.style.display = 'block';
+    }
+
+    var linkInputEl = document.getElementById('property_video_link') || document.getElementById('propertyVideoLink');
+    if (linkInputEl) linkInputEl.addEventListener('input', renderVideoPreview);
+
+    var previewBtn = document.getElementById('previewRMLinkBtn');
+    if (previewBtn) previewBtn.addEventListener('click', renderVideoPreview);
+
+    toggleVideoOption();
+});
 </script>

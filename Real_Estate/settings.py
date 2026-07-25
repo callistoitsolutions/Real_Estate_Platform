@@ -62,8 +62,12 @@ INSTALLED_APPS = [
     'Main_App',
     
    
-    'rest_framework'
+    'rest_framework',
+
+  
+    'django.contrib.humanize',
 ]
+
 
 FINANCE = {
   'DEFAULT_TDS_PERCENT': 10.0,
@@ -138,6 +142,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                
             ],
         },
     },

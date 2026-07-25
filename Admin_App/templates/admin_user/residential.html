@@ -70,7 +70,76 @@
         min-width: 0;
     }
 
-    /* Page Wrapper with Grid for Preview */
+
+
+
+    .img-cat-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .img-cat-tab {
+        border: 2px solid #e9ecef; background: #fff; border-radius: 12px;
+        padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
+        cursor: pointer; display: flex; align-items: center; gap: 8px;
+        transition: all 0.25s ease; white-space: nowrap;
+    }
+    .img-cat-tab i { font-size: 0.95rem; color: #94a3b8; }
+    .img-cat-tab .cat-count {
+        background: #f1f5f9; color: #64748b; border-radius: 20px;
+        padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
+    }
+    .img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
+    .img-cat-tab.active i { color: #fff; }
+    .img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+    .img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
+
+    .img-cat-panel { display: none; }
+    .img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+    .img-cat-upload-area {
+        border: 3px dashed #cbd5e0; border-radius: 15px; padding: 28px 20px;
+        text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+    }
+    .img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
+    .img-cat-upload-area .upload-icon i { font-size: 2.2rem; color: #667eea; }
+    .img-cat-upload-area .upload-text { font-size: 1rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+    .img-cat-upload-area .upload-subtext { font-size: 0.82rem; color: #718096; margin-top: 4px; }
+
+    .img-cat-preview {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 14px; margin-top: 18px;
+    }
+    .img-cat-preview-item {
+        position: relative; border-radius: 12px; overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1); aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
+    }
+    .img-cat-preview-item.dragging { opacity: 0.4; }
+    .img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .img-cat-preview-item .img-index-badge {
+        position: absolute; top: 8px; left: 8px; background: rgba(15,23,42,0.85); color: #fff;
+        font-size: 0.7rem; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+    }
+    .img-cat-preview-item .cover-badge {
+        position: absolute; bottom: 8px; left: 8px;
+        background: linear-gradient(135deg,#f6d365,#fda085); color: #3b2a00;
+        font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 20px;
+        display: flex; align-items: center; gap: 4px;
+    }
+    .img-cat-preview-item .remove-image {
+        position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+        background: #e74c3c; color: #fff; border: none; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
+    }
+    .img-cat-preview-item .remove-image:hover { background: #c0392b; }
+
+    .img-total-summary {
+        display: flex; justify-content: space-between; align-items: center;
+        background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px;
+        padding: 14px 18px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+    }
+    .img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 0.95rem; }
+    .img-total-summary .total-count span { color: #667eea; }
+    .img-total-summary .min-warning { font-size: 0.8rem; color: #e74c3c; font-weight: 600; }
+    .img-total-summary .min-ok { font-size: 0.8rem; color: #10b981; font-weight: 600; }
+
+/* Page Wrapper with Grid for Preview */
     .page-wrapper {
         display: flex;
         flex-direction: column;
@@ -371,8 +440,8 @@
                                 <div class="row mt-2">
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label class="form-label">Building Configuration <span style="color: red;" class="required">*</span></label>
-                                            <input type="text" class="form-control" id="building_configuration" name="building_configuration" placeholder="e.g., G, G+1, G+2, G+3" required>
+                                            <label class="form-label">Building Configuration</label>
+                                            <input type="text" class="form-control" id="building_configuration" name="building_configuration" placeholder="e.g., G, G+1, G+2, G+3">
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -398,7 +467,7 @@
                                 </div>
                                 <div class="row mt-2">
                                     <div class="col-md-6"><div class="form-group"><label class="form-label"><i class="fas fa-warehouse"></i> Furnishing Status <span class="required-star">*</span></label><select class="form-select form-control" name="furnishing_status" id="furnishing_status" required><option value="">Select Status</option><option value="Fully Furnished">Fully Furnished</option><option value="Semi Furnished">Semi Furnished</option><option value="Unfurnished">Unfurnished</option></select></div></div>
-                                    <div class="col-md-6"><div class="form-group"><label class="form-label"><i class="fas fa-user-tie"></i> Available For <span class="required-star">*</span></label><select class="form-select form-control" name="available_for" id="available_for" required><option value="">Select Option</option><option value="Family">Family</option><option value="Bachelor">Bachelor</option><option value="Both">Both</option></select></div></div>
+                                    <div class="col-md-6"><div class="form-group"><label class="form-label"><i class="fas fa-user-tie"></i> Available For <span class="required-star">*</span></label><select class="form-select form-control" name="available_for" id="available_for" required><option value="">Select Option</option><option value="Family">Family</option><option value="Bachelors">Bachelors</option><option value="Both">Both</option></select></div></div>
                                 </div>
                             </div>
                         </div>
@@ -432,7 +501,7 @@
                                     <div class="col-md-6"><div class="form-group"><label class="form-label">Property Condition</label><select class="form-select form-control" name="property_condition" id="property_condition"><option value="">Select</option><option value="Brand New">Brand New</option><option value="Less than 1 Year Old">Less than 1 Year Old</option><option value="Well Maintained">Well Maintained</option><option value="Recently Renovated">Recently Renovated</option><option value="Needs Renovation">Needs Renovation</option></select></div></div>
                                 </div>
                                 <div class="row mt-2">
-                                    <div class="col-md-6"><div class="form-group"><label class="form-label">Property Age</label><input type="number" class="form-control" name="property_age" id="property_age" placeholder="Enter property age in years (e.g., 5)"></div></div>
+                                    <div class="col-md-6"><div class="form-group"><label class="form-label">Property Age(In Years)</label><input type="number" class="form-control" name="property_age" id="property_age" placeholder="Enter property age in years (e.g., 5)"></div></div>
                                     <div class="col-md-6"><div class="form-group"><label class="form-label">Tower/Wing Number</label><input type="text" class="form-control" name="wing_number" id="wing_number" placeholder="e.g., A Wing"></div></div>
                                 </div>
                                 <div class="row mt-2">
@@ -454,7 +523,7 @@
                             </div>
                         </div>
                         <div class="form-footer" style="justify-content: flex-end;">
-                            <button type="button" class="btn-submit btn-next">Next Step <i class="fas fa-arrow-right"></i></button>
+                            <button type="button" class="btn-submit btn-next">Move To Next Page <i class="fas fa-arrow-right"></i></button>
                         </div>
 
                     </div>
@@ -658,7 +727,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-6"><div class="form-group"><label class="form-label">Pincode <span class="required-star">*</span></label><input type="text" class="form-control" name="pincode" id="pincode" placeholder="e.g., 440010" required></div></div>
+                                    <div class="col-md-6"><div class="form-group"><label class="form-label">Pincode <span class="required-star">*</span></label><input type="number" class="form-control" name="pincode" id="pincode" placeholder="e.g., 440010" required></div></div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="form-label"><i class="fas fa-road"></i> Main Road Connectivity</label>
@@ -692,8 +761,8 @@
                             </div>
                         </div>
                         <div class="form-footer">
-                            <button type="button" class="btn-reset btn-prev"><i class="fas fa-arrow-left"></i> Previous</button>
-                            <button type="button" class="btn-submit btn-next">Next Step <i class="fas fa-arrow-right"></i></button>
+                            <button type="button" class="btn-reset btn-prev"><i class="fas fa-arrow-left"></i> Previous Page</button>
+                            <button type="button" class="btn-submit btn-next">Move to Next Page  <i class="fas fa-arrow-right"></i></button>
                         </div>
 
                     </div>
@@ -768,26 +837,175 @@
                             </div>
                         </div>
                         <div class="form-footer">
-                            <button type="button" class="btn-reset btn-prev"><i class="fas fa-arrow-left"></i> Previous</button>
-                            <button type="button" class="btn-submit btn-next">Next Step <i class="fas fa-arrow-right"></i></button>
+                            <button type="button" class="btn-reset btn-prev"><i class="fas fa-arrow-left"></i> Previous Page</button>
+                            <button type="button" class="btn-submit btn-next">Move to Next Page <i class="fas fa-arrow-right"></i></button>
                         </div>
 
                     </div>
                     <div class="form-step" id="step-4">
 
-                        <div class="form-section">
-                            <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
-                            <div class="section-body">
-                                <div class="image-upload-area" id="uploadArea">
-                                    <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
-                                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size:3rem; color:#667eea;"></i></div>
-                                    <div class="upload-text">Click or Drag Images Here</div>
-                                    <div class="upload-subtext">Maximum 10 images allowed (JPG, PNG) <br><strong id="imageCountText" style="color:#667eea; font-size:1.05rem;">0/10 Uploaded</strong></div>
-                                    <div style="font-size:0.8rem; color:#64748b; margin-top:10px;"><i class="fas fa-arrows-alt"></i> Drag and drop images to rearrange their sequence</div>
-                                </div>
-                                <div class="image-preview" id="imagePreview"></div>
-                            </div>
-                        </div>
+                      
+
+ <div class="form-section">
+    <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
+    <div class="section-body">
+
+        <div class="img-total-summary">
+            <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/20</div>
+            <div id="imgMinNotice" class="min-warning"><i class="fas fa-exclamation-circle"></i> Add at least 3 images (across any rooms) to publish</div>
+        </div>
+
+        <div class="img-cat-tabs" id="imgCatTabs">
+            <div class="img-cat-tab active" data-cat="exterior"><i class="fas fa-building"></i> Exterior / Building <span class="cat-count" id="count-exterior">0</span></div>
+            <div class="img-cat-tab" data-cat="living"><i class="fas fa-couch"></i> Living / Dining <span class="cat-count" id="count-living">0</span></div>
+            <div class="img-cat-tab" data-cat="bedroom"><i class="fas fa-bed"></i> Bedroom <span class="cat-count" id="count-bedroom">0</span></div>
+            <div class="img-cat-tab" data-cat="kitchen"><i class="fas fa-utensils"></i> Kitchen <span class="cat-count" id="count-kitchen">0</span></div>
+            <div class="img-cat-tab" data-cat="bathroom"><i class="fas fa-bath"></i> Bathroom <span class="cat-count" id="count-bathroom">0</span></div>
+            <div class="img-cat-tab" data-cat="balcony"><i class="fas fa-tree"></i> Balcony <span class="cat-count" id="count-balcony">0</span></div>
+            <div class="img-cat-tab" data-cat="others"><i class="fas fa-ellipsis-h"></i> Others <span class="cat-count" id="count-others">0</span></div>
+        </div>
+
+        <div class="img-cat-panels">
+            <div class="img-cat-panel active" data-cat-panel="exterior">
+                <input type="file" class="img-cat-input" id="imgInput-exterior" name="property_images_exterior[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="exterior">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Exterior / Building Photos Here</div>
+                    <div class="upload-subtext">Front view, entrance, society/building — up to 5 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-exterior"></div>
+            </div>
+            <div class="img-cat-panel" data-cat-panel="living">
+                <input type="file" class="img-cat-input" id="imgInput-living" name="property_images_living[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="living">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Living / Dining Room Photos Here</div>
+                    <div class="upload-subtext">Up to 5 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-living"></div>
+            </div>
+            <div class="img-cat-panel" data-cat-panel="bedroom">
+                <input type="file" class="img-cat-input" id="imgInput-bedroom" name="property_images_bedroom[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="bedroom">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Bedroom Photos Here</div>
+                    <div class="upload-subtext">All bedrooms together — up to 6 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-bedroom"></div>
+            </div>
+            <div class="img-cat-panel" data-cat-panel="kitchen">
+                <input type="file" class="img-cat-input" id="imgInput-kitchen" name="property_images_kitchen[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="kitchen">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Kitchen Photos Here</div>
+                    <div class="upload-subtext">Up to 4 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-kitchen"></div>
+            </div>
+            <div class="img-cat-panel" data-cat-panel="bathroom">
+                <input type="file" class="img-cat-input" id="imgInput-bathroom" name="property_images_bathroom[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="bathroom">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Bathroom Photos Here</div>
+                    <div class="upload-subtext">Up to 4 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-bathroom"></div>
+            </div>
+            <div class="img-cat-panel" data-cat-panel="balcony">
+                <input type="file" class="img-cat-input" id="imgInput-balcony" name="property_images_balcony[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="balcony">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Balcony / View Photos Here</div>
+                    <div class="upload-subtext">Up to 3 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-balcony"></div>
+            </div>
+            <div class="img-cat-panel" data-cat-panel="others">
+                <input type="file" class="img-cat-input" id="imgInput-others" name="property_images_others[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="others">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="upload-text">Click or Drag Other Photos Here</div>
+                    <div class="upload-subtext">Parking, terrace, amenities etc. — up to 5 images</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-others"></div>
+            </div>
+        </div>
+
+        <div style="font-size:0.8rem; color:#64748b; margin-top:6px;">
+            <i class="fas fa-arrows-alt"></i> Drag thumbnails within a category to reorder. The very first image under
+            <strong>Exterior / Building</strong> or <strong>Living / Dining</strong> (whichever has an image first) is used as the cover photo.
+        </div>
+    </div>
+</div>
+
+
+<!-- ================= PROPERTY WALKTHROUGH VIDEO ================= -->
+<div class="form-section">
+    <div class="section-header"><i class="fas fa-video"></i> Property Video</div>
+    <div class="section-body">
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label class="form-label d-block">Video Option</label>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="video_option" id="video_upload" value="upload" checked>
+                    <label class="form-check-label" for="video_upload">Upload Property Video</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="video_option" id="video_auto" value="auto">
+                    <label class="form-check-label" for="video_auto">Auto-Generate Slideshow from Photos</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="video_option" id="video_rm" value="rm_assisted">
+                    <label class="form-check-label" for="video_rm">Video is Large — Share with Our RM</label>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div id="videoUploadWrapper">
+            <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+            <div class="image-upload-area" id="videoUploadArea">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size:2.2rem;color:#667eea;"></i></div>
+                <div class="upload-text">Click to Upload Residential Walkthrough</div>
+                <div class="upload-subtext">MP4/MOV, max 60 seconds, up to 20MB</div>
+            </div>
+            <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px;"></video>
+        </div>
+
+        <div id="videoAutoWrapper" style="display:none;">
+            <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom: 15px;">
+                <i class="fas fa-magic me-2" style="color:#667eea;"></i>
+                We'll auto-create a walkthrough video from your uploaded photos (min. 3 needed).
+            </div>
+            
+            <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
+                <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
+                <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:1px solid #cbd5e1; background:#000;"></canvas>
+            </div>
+
+            <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:12px; font-weight:600;">
+                <i class="fas fa-exclamation-circle me-1"></i> Please upload at least 3 property images above to preview the auto-slideshow.
+            </div>
+        </div>
+
+        <div id="videoRMWrapper" style="display:none;">
+            <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom:15px;">
+                <i class="fas fa-headset me-2" style="color:#667eea;"></i>
+                Share the video directly with your RM. Once published, paste the link below.
+            </div>
+            <label class="form-label">Published Video Link</label>
+            <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="Paste YouTube / Instagram / Facebook link">
+            <button type="button" class="btn-reset mt-2" id="previewRMLinkBtn"><i class="fas fa-eye me-1"></i> Preview Link</button>
+            <div id="rmVideoFrame" style="display:none; margin-top:15px; border-radius:12px; overflow:hidden; aspect-ratio:16/9;">
+                <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+       
 
                         <div class="form-section">
                             <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
@@ -1204,6 +1422,8 @@ $(document).ready(function () {
         }
     });
 
+
+    
     $('#multiStepForm').off('submit').on('submit', function (e) {
     e.preventDefault();
 
@@ -1222,6 +1442,12 @@ $(document).ready(function () {
             }
         }
 
+
+        if (typeof IMG_CATEGORIES !== 'undefined' && typeof syncCategoryInput === 'function') {
+            IMG_CATEGORIES.forEach(function (cat) { 
+                syncCategoryInput(cat); 
+            });
+        }
         var propNo = $('#property_no').val() || '';
         var locality = $('#locality_area').val() || $('#locality').val() || '';
         
@@ -1272,79 +1498,250 @@ window.onload = function () {
 
 $("#Rent").addClass("active");
 
-var uploadArea     = document.getElementById('uploadArea');
-var imageInput     = document.getElementById('imageInput');
-var imagePreview   = document.getElementById('imagePreview');
-var imageCountText = document.getElementById('imageCountText');
-var selectedFiles  = [];
 
-if (uploadArea) {
-    uploadArea.addEventListener('click',     function () { imageInput.click(); });
-    uploadArea.addEventListener('dragover',  function (e) { e.preventDefault(); uploadArea.classList.add('dragover'); });
-    uploadArea.addEventListener('dragleave', function ()  { uploadArea.classList.remove('dragover'); });
-    uploadArea.addEventListener('drop',      function (e) { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-    imageInput.addEventListener('change',    function (e) { handleFiles(e.target.files); });
+
+const IMG_CATEGORIES = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others'];
+const IMG_CATEGORY_LIMITS = { exterior: 5, living: 5, bedroom: 6, kitchen: 4, bathroom: 4, balcony: 3, others: 5 };
+const IMG_TOTAL_LIMIT = 20;
+const IMG_MIN_REQUIRED = 3;
+
+const catFiles = {};
+IMG_CATEGORIES.forEach(function (c) { catFiles[c] = []; });
+
+function totalImageCount() {
+    return IMG_CATEGORIES.reduce(function (sum, c) { return sum + catFiles[c].length; }, 0);
 }
 
-function handleFiles(files) {
-    var fileArray = Array.from(files);
-    if (selectedFiles.length + fileArray.length > 10) { Swal.fire('Limit Exceeded', 'Maximum 10 images allowed.', 'warning'); return; }
-    fileArray.forEach(function (file) { if (file.type.startsWith('image/')) selectedFiles.push(file); });
-    syncFileInputAndRender();
-}
-
-function syncFileInputAndRender() {
-    var dt = new DataTransfer();
-    selectedFiles.forEach(function (file) { dt.items.add(file); });
-    imageInput.files = dt.files;
-    imageCountText.innerText = selectedFiles.length + '/10 Uploaded';
-    imagePreview.innerHTML = "";
-    selectedFiles.forEach(function (file) { displayImage(file); });
-    updatePreview();
-}
-
-function displayImage(file) {
-    var reader = new FileReader();
-    reader.onload = function (e) {
-        var div = document.createElement('div');
-        div.className = 'preview-item';
-        div.draggable = true;
-        div.dataset.fileName = file.name;
-        div.innerHTML = '<img src="' + e.target.result + '"><button type="button" class="remove-image" onclick="removeImage(\'' + file.name + '\', this, event)">✖</button>';
-        div.addEventListener('dragstart',  handleDragStart);
-        div.addEventListener('dragover',   handleDragOver);
-        div.addEventListener('dragenter',  handleDragEnter);
-        div.addEventListener('dragleave',  handleDragLeave);
-        div.addEventListener('drop',       handleDrop);
-        imagePreview.appendChild(div);
-    };
-    reader.readAsDataURL(file);
-}
-
-function removeImage(fileName, btn, event) {
-    event.stopPropagation();
-    selectedFiles = selectedFiles.filter(function (f) { return f.name !== fileName; });
-    syncFileInputAndRender();
-}
-
-var draggedItemName = null;
-function handleDragStart(e) { draggedItemName = this.dataset.fileName; e.dataTransfer.effectAllowed = 'move'; this.style.opacity = '0.5'; }
-function handleDragOver(e)  { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; return false; }
-function handleDragEnter()  { this.classList.add('drag-over'); }
-function handleDragLeave()  { this.classList.remove('drag-over'); }
-function handleDrop(e) {
-    e.stopPropagation();
-    this.classList.remove('drag-over');
-    var targetItemName = this.dataset.fileName;
-    if (draggedItemName !== targetItemName) {
-        var draggedIndex = selectedFiles.findIndex(function (f) { return f.name === draggedItemName; });
-        var targetIndex  = selectedFiles.findIndex(function (f) { return f.name === targetItemName; });
-        var movedItem    = selectedFiles.splice(draggedIndex, 1)[0];
-        selectedFiles.splice(targetIndex, 0, movedItem);
-        syncFileInputAndRender();
+function findCoverCategory() {
+    var priority = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others'];
+    for (var i = 0; i < priority.length; i++) {
+        if (catFiles[priority[i]].length > 0) return priority[i];
     }
-    return false;
+    return null;
 }
+
+function syncCategoryInput(cat) {
+    var dt = new DataTransfer();
+    catFiles[cat].forEach(function (file) { dt.items.add(file); });
+    document.getElementById('imgInput-' + cat).files = dt.files;
+}
+
+function renderCategory(cat) {
+    var preview = document.getElementById('imgPreview-' + cat);
+    preview.innerHTML = '';
+    var coverCat = findCoverCategory();
+
+    catFiles[cat].forEach(function (file, idx) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var div = document.createElement('div');
+            div.className = 'img-cat-preview-item';
+            div.draggable = true;
+            div.dataset.fileName = file.name;
+            div.dataset.cat = cat;
+
+            var isCover = (cat === coverCat && idx === 0);
+            div.innerHTML =
+                '<img src="' + e.target.result + '">' +
+                '<span class="img-index-badge">Image ' + (idx + 1) + '</span>' +
+                (isCover ? '<span class="cover-badge"><i class="fas fa-star"></i> Cover Photo</span>' : '') +
+                '<button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\', \'' + file.name.replace(/'/g, "\\'") + '\', event)">✖</button>';
+
+            div.addEventListener('dragstart', handleCatDragStart);
+            div.addEventListener('dragover', handleCatDragOver);
+            div.addEventListener('drop', handleCatDrop);
+            div.addEventListener('dragend', function () { div.classList.remove('dragging'); });
+
+            preview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    document.getElementById('count-' + cat).innerText = catFiles[cat].length;
+
+    var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+    if (tab) tab.classList.toggle('has-images', catFiles[cat].length > 0);
+}
+
+
+
+function renderAllCategories() {
+    IMG_CATEGORIES.forEach(renderCategory);
+    var total = totalImageCount();
+    document.getElementById('imgTotalCount').innerText = total;
+    var notice = document.getElementById('imgMinNotice');
+    if (total >= IMG_MIN_REQUIRED) {
+        notice.className = 'min-ok';
+        notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + total + ' images added.';
+    } else {
+        notice.className = 'min-warning';
+        notice.innerHTML = '<i class="fas fa-exclamation-circle"></i> Add at least ' + IMG_MIN_REQUIRED + ' images (across any rooms) to publish';
+    }
+    if (typeof updatePreview === 'function') updatePreview();
+    if (document.getElementById('video_auto')?.checked) startAutoSlideshow();
+}
+
+function handleCatFiles(cat, files) {
+    var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
+    var limit = IMG_CATEGORY_LIMITS[cat] || 5;
+
+    if (catFiles[cat].length + incoming.length > limit) {
+        Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
+        incoming = incoming.slice(0, Math.max(0, limit - catFiles[cat].length));
+    }
+    if (totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+        Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all rooms.', 'warning');
+        incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - totalImageCount()));
+    }
+
+    catFiles[cat] = catFiles[cat].concat(incoming);
+    syncCategoryInput(cat);
+    renderAllCategories();
+}
+
+window.removeCatImage = function (cat, fileName, evt) {
+    if (evt) evt.stopPropagation();
+    catFiles[cat] = catFiles[cat].filter(function (f) { return f.name !== fileName; });
+    syncCategoryInput(cat);
+    renderAllCategories();
+};
+
+var draggedCatFileName = null, draggedCatName = null;
+function handleCatDragStart(e) {
+    draggedCatFileName = this.dataset.fileName;
+    draggedCatName = this.dataset.cat;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+function handleCatDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function handleCatDrop(e) {
+    e.preventDefault();
+    var targetCat = this.dataset.cat;
+    var targetFileName = this.dataset.fileName;
+    if (targetCat !== draggedCatName || targetFileName === draggedCatFileName) return;
+
+    var arr = catFiles[targetCat];
+    var fromIdx = arr.findIndex(function (f) { return f.name === draggedCatFileName; });
+    var toIdx = arr.findIndex(function (f) { return f.name === targetFileName; });
+    if (fromIdx === -1 || toIdx === -1) return;
+
+    var moved = arr.splice(fromIdx, 1)[0];
+    arr.splice(toIdx, 0, moved);
+    syncCategoryInput(targetCat);
+    renderAllCategories();
+}
+
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
+            document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
+            this.classList.add('active');
+            document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]').classList.add('active');
+        });
+    });
+
+    IMG_CATEGORIES.forEach(function (cat) {
+        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+        var input = document.getElementById('imgInput-' + cat);
+
+        zone.addEventListener('click', function () { input.click(); });
+        input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
+
+        zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
+        zone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            handleCatFiles(cat, e.dataTransfer.files);
+        });
+    });
+
+    renderAllCategories();
+});
+
+
+var autoSlideshowTimer = null;
+var autoSlideshowIndex = 0;
+
+function collectAllImagesInOrder() {
+    var order = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others'];
+    var files = [];
+    order.forEach(function (cat) { files = files.concat(catFiles[cat]); });
+    return files;
+}
+
+function startAutoSlideshow() {
+    var files = collectAllImagesInOrder();
+    var box = document.getElementById('autoSlideshowBox');
+    var empty = document.getElementById('autoSlideshowEmpty');
+    var img = document.getElementById('autoSlideshowImg');
+    var counter = document.getElementById('autoSlideshowCounter');
+
+    clearInterval(autoSlideshowTimer);
+
+    if (files.length < 3) {
+        box.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+    }
+
+    box.style.display = 'block';
+    empty.style.display = 'none';
+    autoSlideshowIndex = 0;
+
+    function showFrame(i) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            img.style.opacity = 0;
+            setTimeout(function () {
+                img.src = e.target.result;
+                img.style.opacity = 1;
+            }, 150);
+        };
+        reader.readAsDataURL(files[i]);
+        counter.textContent = (i + 1) + ' / ' + files.length;
+    }
+
+    showFrame(0);
+    autoSlideshowTimer = setInterval(function () {
+        autoSlideshowIndex = (autoSlideshowIndex + 1) % files.length;
+        showFrame(autoSlideshowIndex);
+    }, 2000);
+}
+
+function stopAutoSlideshow() {
+    clearInterval(autoSlideshowTimer);
+}
+
+
+   
+    function loadInstagramEmbed() {
+    if (window.instgrm) { window.instgrm.Embeds.process(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://www.instagram.com/embed.js';
+    s.async = true;
+    document.body.appendChild(s);
+}
+
+function loadFacebookSDK(callback) {
+    if (window.FB) { callback(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0';
+    s.async = true;
+    s.onload = callback;
+    document.body.appendChild(s);
+}
+
+
+
+    toggleVideoOption();
+
+
 
 document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
     document.getElementById('manualBrokerage').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
@@ -1434,7 +1831,7 @@ function updatePreview() {
     document.getElementById('chk-basic').style.color = (type && bhk && area)           ? colorSuccess : colorPending;
     document.getElementById('chk-price').style.color = (price && deposit)              ? colorSuccess : colorPending;
     document.getElementById('chk-loc').style.color   = (city && loc && address)        ? colorSuccess : colorPending;
-    document.getElementById('chk-img').style.color   = (selectedFiles.length >= 3)     ? colorSuccess : colorPending;
+    document.getElementById('chk-img').style.color   = (totalImageCount() >= 3)        ? colorSuccess : colorPending;
     document.getElementById('chk-desc').style.color  = (desc.length > 20)              ? colorSuccess : colorPending;
 }
 
@@ -1665,5 +2062,330 @@ document.addEventListener('DOMContentLoaded', function () {
     calculateMoveInCost();
 
 });
+
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var builtUpInput = document.getElementById('built_up_area');
+    var carpetInput = document.getElementById('carpet_area');
+
+    if (!builtUpInput || !carpetInput) return;
+
+    function validateCarpetArea() {
+        var builtUp = parseFloat(builtUpInput.value) || 0;
+        var carpet = parseFloat(carpetInput.value) || 0;
+
+        if (carpet > 0 && builtUp > 0 && carpet > builtUp) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Invalid Carpet Area',
+                text: 'Carpet Area (' + carpet + ' sq.ft) cannot be greater than Built-up Area (' + builtUp + ' sq.ft). Please correct it.',
+                confirmButtonColor: '#667eea'
+            });
+            carpetInput.value = '';
+            carpetInput.classList.add('is-invalid');
+            carpetInput.focus();
+        } else {
+            carpetInput.classList.remove('is-invalid');
+        }
+    }
+
+    carpetInput.addEventListener('blur', validateCarpetArea);
+    carpetInput.addEventListener('input', function () {
+        carpetInput.classList.remove('is-invalid');
+    });
+
+    // Also re-check carpet area if built-up area is edited afterward
+    builtUpInput.addEventListener('blur', function () {
+        if (carpetInput.value) validateCarpetArea();
+    });
+});
+</script>
+
+
+<script>
+
+ 
+// ============================================================
+// FINAL UNIFIED RESIDENTIAL VIDEO ENGINE & CATEGORY IMAGE SYNC
+// ============================================================
+document.addEventListener('DOMContentLoaded', function () {
+    var uploadRadio      = document.getElementById('video_upload');
+    var autoRadio        = document.getElementById('video_auto');
+    var rmRadio          = document.getElementById('video_rm');
+    var uploadWrapper    = document.getElementById('videoUploadWrapper');
+    var autoWrapper      = document.getElementById('videoAutoWrapper');
+    var rmWrapper        = document.getElementById('videoRMWrapper');
+    var videoInput       = document.getElementById('videoInput');
+    var videoArea        = document.getElementById('videoUploadArea');
+    var videoPreview     = document.getElementById('videoPreview');
+   
+
+    var slideshowInterval = null;
+    var canvas = document.getElementById('slideshowCanvas');
+    var ctx = canvas ? canvas.getContext('2d') : null;
+
+    // Collect all uploaded files from category arrays
+    function getUploadedImages(callback) {
+        var sources = [];
+
+        if (window.catFiles) {
+            Object.keys(window.catFiles).forEach(function (cat) {
+                if (Array.isArray(window.catFiles[cat])) {
+                    window.catFiles[cat].forEach(function (file) {
+                        if (file instanceof File && file.type.startsWith('image/')) {
+                            sources.push({ type: 'file', data: file });
+                        }
+                    });
+                }
+            });
+        }
+
+        var fileInputs = document.querySelectorAll('input[type="file"]:not(#videoInput)');
+        fileInputs.forEach(function (input) {
+            if (input.files && input.files.length > 0) {
+                Array.from(input.files).forEach(function (file) {
+                    if (file.type.startsWith('image/')) {
+                        sources.push({ type: 'file', data: file });
+                    }
+                });
+            }
+        });
+
+        var previewImgs = document.querySelectorAll('.img-cat-preview img');
+        previewImgs.forEach(function (img) {
+            if (img.src && !img.src.includes('placeholder') && !img.src.startsWith('data:video')) {
+                sources.push({ type: 'url', data: img.src });
+            }
+        });
+
+        var uniqueSources = [];
+        var seen = new Set();
+        sources.forEach(function (s) {
+            var key = s.type === 'file' ? s.data.name + s.data.size : s.data;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueSources.push(s);
+            }
+        });
+
+        if (uniqueSources.length === 0) {
+            callback([]);
+            return;
+        }
+
+        var loadedImages = [];
+        var processed = 0;
+
+        uniqueSources.forEach(function (srcObj) {
+            var img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function () {
+                loadedImages.push(img);
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+            img.onerror = function () {
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+
+            img.src = srcObj.type === 'file' ? URL.createObjectURL(srcObj.data) : srcObj.data;
+        });
+    }
+
+    function startAutoSlideshowPreview() {
+        stopAutoSlideshowPreview();
+        var container = document.getElementById('autoSlideshowPreviewContainer');
+        var warning = document.getElementById('autoSlideshowWarning');
+
+        getUploadedImages(function (images) {
+            if (images.length < 3) {
+                if (container) container.style.display = 'none';
+                if (warning) warning.style.display = 'block';
+                return;
+            }
+            if (warning) warning.style.display = 'none';
+            if (container) container.style.display = 'block';
+            runCanvasAnimation(images);
+        });
+    }
+
+    function runCanvasAnimation(images) {
+        if (!ctx || !canvas || images.length === 0) return;
+
+        var durationPerSlide = 3500;
+        var fadeDuration = 800;
+        var startTime = null;
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var elapsed = timestamp - startTime;
+
+            var progress = (elapsed % durationPerSlide) / durationPerSlide;
+            var index = Math.floor(elapsed / durationPerSlide) % images.length;
+            var nextIndex = (index + 1) % images.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            var slideTime = elapsed % durationPerSlide;
+            var isFading = slideTime > (durationPerSlide - fadeDuration);
+            var fadeOpacity = isFading ? (slideTime - (durationPerSlide - fadeDuration)) / fadeDuration : 0;
+
+            drawCinematicFrame(images[index], progress, 1.0);
+            if (isFading) {
+                drawCinematicFrame(images[nextIndex], 0, fadeOpacity);
+            }
+
+            slideshowInterval = requestAnimationFrame(animate);
+        }
+
+        function drawCinematicFrame(img, progress, opacity) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            var scale = 1.0 + (progress * 0.08);
+            var hRatio = canvas.width / img.width;
+            var vRatio = canvas.height / img.height;
+            var ratio  = Math.max(hRatio, vRatio) * scale;
+
+            var baseShiftX = (canvas.width - img.width * ratio) / 2;
+            var centerShiftY = (canvas.height - img.height * ratio) / 2;
+
+            var panOffsetX = (progress - 0.5) * (canvas.width * 0.04);
+            var centerShiftX = baseShiftX + panOffsetX;
+
+            ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+            ctx.restore();
+        }
+
+        stopAutoSlideshowPreview();
+        slideshowInterval = requestAnimationFrame(animate);
+    }
+
+    function stopAutoSlideshowPreview() {
+        if (slideshowInterval) {
+            cancelAnimationFrame(slideshowInterval);
+            slideshowInterval = null;
+        }
+    }
+
+    function toggleVideoOption() {
+        if (uploadWrapper) uploadWrapper.style.display = uploadRadio && uploadRadio.checked ? 'block' : 'none';
+        if (autoWrapper)   autoWrapper.style.display   = autoRadio && autoRadio.checked   ? 'block' : 'none';
+        if (rmWrapper)     rmWrapper.style.display     = rmRadio && rmRadio.checked     ? 'block' : 'none';
+
+       
+
+        if (autoRadio && autoRadio.checked) startAutoSlideshowPreview();
+        else stopAutoSlideshowPreview();
+
+        if (rmRadio && rmRadio.checked) renderVideoPreview();
+    }
+
+    if (uploadRadio) uploadRadio.addEventListener('change', toggleVideoOption);
+    if (autoRadio)   autoRadio.addEventListener('change', toggleVideoOption);
+    if (rmRadio)     rmRadio.addEventListener('change', toggleVideoOption);
+
+    if (videoArea && videoInput) {
+        videoArea.addEventListener('click', function () { videoInput.click(); });
+    }
+
+    // DIRECT VIDEO UPLOAD + WHATSAPP SHARE MODAL (20MB OVERFLOW)
+    if (videoInput) {
+        videoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
+            var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
+            var companyWhatsAppNumber = "917057205423";
+
+            var rawMessage = "Hello Team,\n\nI am trying to upload a video for my residential rental property listing, but the file size exceeds the 20MB limit.\n\n" +
+                             "📌 *Property Details:*\n" +
+                             "• *Title:* " + propTitle + "\n" +
+                             "• *Listed By:* " + listedByName + "\n" +
+                             "• *Video File Name:* " + file.name + "\n" +
+                             "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
+                             "Please assist me in publishing this video for my listing.";
+
+            var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
+
+            if (file.size > 20 * 1024 * 1024) {
+                videoInput.value = '';
+
+                if (videoPreview) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                    videoPreview.style.display = 'none';
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Video File Too Large',
+                    text: 'This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.',
+                    showCancelButton: true,
+                    confirmButtonColor: '#25D366',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fab fa-whatsapp me-1"></i> Share',
+                    cancelButtonText: 'Okay',
+                    allowOutsideClick: false
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.open(whatsappUrl, '_blank');
+                        if (rmRadio) rmRadio.checked = true;
+                        toggleVideoOption();
+                        var linkField = document.getElementById('property_video_link') || document.getElementById('propertyVideoLink');
+                        if (linkField) linkField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+                return;
+            }
+
+            if (videoPreview) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    }
+
+    function renderVideoPreview() {
+        var linkInput = document.getElementById('property_video_link') || document.getElementById('propertyVideoLink');
+        var frame = document.getElementById('rmVideoFrame');
+        if (!linkInput || !frame) return;
+
+        var url = linkInput.value.trim();
+        if (!url) { frame.style.display = 'none'; return; }
+
+        frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:350px; border:0; border-radius:8px;" allowfullscreen></iframe>';
+        var embedIframe = document.getElementById('rmVideoEmbed');
+
+        var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        if (ytMatch) {
+            embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1];
+            frame.style.display = 'block';
+            return;
+        }
+
+        embedIframe.src = url;
+        frame.style.display = 'block';
+    }
+
+    var linkInputEl = document.getElementById('property_video_link') || document.getElementById('propertyVideoLink');
+    if (linkInputEl) linkInputEl.addEventListener('input', renderVideoPreview);
+
+    var previewBtn = document.getElementById('previewRMLinkBtn');
+    if (previewBtn) previewBtn.addEventListener('click', renderVideoPreview);
+
+    toggleVideoOption();
+});
+
+
 
 </script>

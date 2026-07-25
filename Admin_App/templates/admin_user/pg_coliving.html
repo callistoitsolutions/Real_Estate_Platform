@@ -1076,79 +1076,114 @@
     min-width: 150px;
   }
 
-  .image-upload-area {
-    border: 3px dashed #cbd5e0;
-    border-radius: 15px;
-    padding: 40px;
-    text-align: center;
-    background: #f8f9fa;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
 
-  .image-upload-area:hover {
-    border-color: #667eea;
-    background: #f0f4ff;
-    transform: scale(1.02);
-  }
 
-  .image-upload-area.dragover {
-    border-color: #667eea;
-    background: #e6f0ff;
-  }
-
-  .upload-text {
-    font-size: 1.1rem;
-    color: #4a5568;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-
-  .upload-subtext {
-    font-size: 0.9rem;
-    color: #718096;
-  }
-
-  .image-preview {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-    margin-top: 20px;
-  }
-
-  .preview-item {
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    aspect-ratio: 1;
-  }
-
-  .preview-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .remove-image {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 30px;
-    height: 30px;
-    background: #e74c3c;
+/* ============================================================
+     NEW HEADER BANNER & BACK BUTTON STYLES
+     ============================================================ */
+  .property-banner-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 20px 30px;
     color: white;
-    border: none;
-    border-radius: 50%;
+    margin-bottom: 24px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.25);
+    /* Removed position: sticky, top, and z-index so it scrolls normally */
+    position: relative; 
   }
+  .banner-text h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #ffffff;
+  }
+
+  .banner-text p {
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+  }
+
+  .btn-back-banner {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    padding: 12px 22px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* ============================================================
+     CATEGORY-WISE IMAGE TABS & PREVIEW PANELS
+     ============================================================ */
+  .img-cat-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+  .img-cat-tab {
+      border: 2px solid #e9ecef; background: #fff; border-radius: 12px;
+      padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: all 0.25s ease; white-space: nowrap;
+  }
+  .img-cat-tab i { font-size: 0.95rem; color: #94a3b8; }
+  .img-cat-tab .cat-count {
+      background: #f1f5f9; color: #64748b; border-radius: 20px;
+      padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
+  }
+  .img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
+  .img-cat-tab.active i { color: #fff; }
+  .img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+  .img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
+
+  .img-cat-panel { display: none; }
+  .img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+  .img-cat-upload-area {
+      border: 3px dashed #cbd5e0; border-radius: 15px; padding: 28px 20px;
+      text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+  }
+  .img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
+  .img-cat-upload-area .upload-icon i { font-size: 2.2rem; color: #667eea; }
+  .img-cat-upload-area .upload-text { font-size: 1rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+  .img-cat-upload-area .upload-subtext { font-size: 0.82rem; color: #718096; margin-top: 4px; }
+
+  .img-cat-preview {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 14px; margin-top: 18px;
+  }
+  .img-cat-preview-item {
+      position: relative; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
+  }
+  .img-cat-preview-item.dragging { opacity: 0.4; }
+  .img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .img-cat-preview-item .remove-image {
+      position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+      background: #e74c3c; color: #fff; border: none; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
+  }
+  .img-cat-preview-item .remove-image:hover { background: #c0392b; }
+
+  .img-total-summary {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px;
+      padding: 14px 18px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+  }
+  .img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 0.95rem; }
+  .img-total-summary .min-warning { font-size: 0.8rem; color: #e74c3c; font-weight: 600; }
+  .img-total-summary .min-ok { font-size: 0.8rem; color: #10b981; font-weight: 600; }
 
   .remove-image:hover {
     background: #c0392b;
@@ -1694,15 +1729,19 @@
         </div>
       </div>
 
-      <div class="form-container">
-       <div class="form-header">
-          <div class="form-title">
-            <i class="fas fa-bed" style="color: #667eea;"></i> List Your PG or Co-living Space
-          </div>
-          <button type="button" class="btn-back" onclick="history.back();">
-            <i class="fas fa-arrow-left"></i> Back to List
-          </button>
+     <!-- Sticky Banner Header (Outside Form Container) -->
+      <div class="property-banner-header">
+          <button type="button" class="btn-back-banner" onclick="history.back();">
+          <i class="fas fa-arrow-left"></i> Back to List
+        </button>
+        <div class="banner-text">
+          <h1>Post Your PG or Co-living Space</h1>
+          <p>List your accommodation in 4 simple steps and connect with genuine tenants instantly.</p>
         </div>
+       
+      </div>
+
+      <div class="form-container">
 
         <form method="POST" enctype="multipart/form-data" id="pgForm" action="{% url 'add_pg' %}">
           {% csrf_token %}
@@ -1878,6 +1917,15 @@ document.getElementById('city').addEventListener('input', function () {
                     
                   </div>
 
+                   <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Pincode <span class="required">*</span></label>
+                      <input type="number" class="form-control" id="pincode" name="pincode"
+                        placeholder="e.g.,440083" required>
+                    </div>
+
+                    
+                  </div>
 
 
                   <div class="col-md-6">
@@ -2111,7 +2159,7 @@ document.getElementById('city').addEventListener('input', function () {
             <div class="step-nav">
               <div></div>
               <button type="button" class="btn btn-pr" onclick="goToStep(2)">
-                Next — Rooms & Pricing <i class="fas fa-arrow-right"></i>
+               Move To Next Page <i class="fas fa-arrow-right"></i>
               </button>
             </div>
           </div>
@@ -2179,6 +2227,9 @@ document.getElementById('city').addEventListener('input', function () {
                           </select>
                         </div>
                       </div>
+
+
+                      
                     </div>
 
                     <div class="row mt-2">
@@ -2216,7 +2267,7 @@ document.getElementById('city').addEventListener('input', function () {
                     <div class="row mt-2" id="security_deposit_div" style="display:none;">
                       <div class="col-md-6">
                         <div class="form-group">
-                          <label class="form-label">Security Deposit Amount</label>
+                          <label class="form-label">Refundable Security Deposit Amount</label>
                           <div class="input-group">
                             <input type="number" class="form-control" name="security_deposit_amount" id="security_deposit_amount" placeholder="e.g., 10000">
                           </div>
@@ -2274,10 +2325,10 @@ document.getElementById('city').addEventListener('input', function () {
 
             <div class="step-nav">
               <button type="button" class="btn btn-sec" onclick="goToStep(1)">
-                <i class="fas fa-arrow-left"></i> Back
+                <i class="fas fa-arrow-left"></i> Previous Page
               </button>
               <button type="button" class="btn btn-pr" onclick="goToStep(3)">
-                Next — Amenities & Rules <i class="fas fa-arrow-right"></i>
+                Move To Next Pages <i class="fas fa-arrow-right"></i>
               </button>
             </div>
           </div>
@@ -2480,56 +2531,249 @@ document.getElementById('city').addEventListener('input', function () {
 
             <div class="step-nav">
               <button type="button" class="btn btn-sec" onclick="goToStep(2)">
-                <i class="fas fa-arrow-left"></i> Back
+                <i class="fas fa-arrow-left"></i> Previous Page
               </button>
               <button type="button" class="btn btn-pr" onclick="goToStep(4)">
-                Next — Photos & Contact Details <i class="fas fa-arrow-right"></i>
+             Move To Next Page <i class="fas fa-arrow-right"></i>
               </button>
             </div>
           </div>
 
+       
+
           <div class="step-content" id="step4">
+            <!-- ================= CATEGORY-WISE PG IMAGES ================= -->
             <div class="form-section">
-              <div class="section-header">
-                <i class="fa-solid fa-images"></i>
-                Step 4 — Media
-              </div>
+              <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
               <div class="section-body">
-                <div class="row mt-3">
-                  <div class="col-md-12">
-                    
-                    <div class="form-group">
-  <label class="form-label">
-    <i class="fa-solid fa-camera"></i> Upload Property Images
-  </label>
-  <p class="text-muted small">Listings with high-res property images convert at a 5x faster baseline rate. Add at least 3 photos.</p>
-  <div class="image-upload-area" id="uploadArea">
-    <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
-    <div class="upload-icon" style="font-size:2.5rem;margin-bottom:10px;">📷</div>
-    <div class="upload-text">Click or Drag/Drop Images Directly Here</div>
-    <div class="upload-subtext">Upload standard asset sets between 3 and 10 dynamic images (JPG, PNG)</div>
-    
-    <div style="font-size:0.8rem; color:#64748b; margin-top:10px;">
-        <i class="fas fa-arrows-alt"></i> Drag and drop images below to rearrange their sequence
-    </div>
-  </div>
-  <div class="image-preview" id="imagePreview"></div>
-</div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">
-                        <i class="fa-solid fa-video"></i> Upload Video
-                      </label>
-                      <p class="text-muted small">Virtual tours capture attention. (Optional, MP4/WebM allowed)</p>
-                      <div class="image-upload-area" style="padding:40px; background:#f0f4ff; border-color:#667eea; border-style:dashed;">
-                        <input type="file" class="form-control" id="video" name="video" accept="video/*" style="border:none; background:transparent;">
-                      </div>
+                <div class="img-total-summary">
+                  <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/30</div>
+                  <div id="imgMinNotice" class="min-warning"><i class="fas fa-exclamation-circle"></i> Add at least 3 images to publish</div>
+                </div>
+
+                <div class="img-cat-tabs" id="imgCatTabs">
+                  <div class="img-cat-tab active" data-cat="exterior"><i class="fas fa-building"></i> Building Exterior <span class="cat-count" id="count-exterior">0</span></div>
+                  <div class="img-cat-tab" data-cat="single_room"><i class="fas fa-bed"></i> Single Occupancy <span class="cat-count" id="count-single_room">0</span></div>
+                  <div class="img-cat-tab" data-cat="double_room"><i class="fas fa-user-friends"></i> Double Sharing <span class="cat-count" id="count-double_room">0</span></div>
+                  <div class="img-cat-tab" data-cat="multi_room"><i class="fas fa-users"></i> Triple / Multi Sharing <span class="cat-count" id="count-multi_room">0</span></div>
+                  <div class="img-cat-tab" data-cat="lounge"><i class="fas fa-couch"></i> Common Lounge <span class="cat-count" id="count-lounge">0</span></div>
+                  <div class="img-cat-tab" data-cat="kitchen"><i class="fas fa-utensils"></i> Shared Kitchen <span class="cat-count" id="count-kitchen">0</span></div>
+                  <div class="img-cat-tab" data-cat="dining"><i class="fas fa-chair"></i> Dining Area <span class="cat-count" id="count-dining">0</span></div>
+                  <div class="img-cat-tab" data-cat="washroom"><i class="fas fa-restroom"></i> Bathroom / Washroom <span class="cat-count" id="count-washroom">0</span></div>
+                  <div class="img-cat-tab" data-cat="laundry"><i class="fas fa-tshirt"></i> Laundry Area <span class="cat-count" id="count-laundry">0</span></div>
+                  <div class="img-cat-tab" data-cat="parking"><i class="fas fa-square-parking"></i> Parking <span class="cat-count" id="count-parking">0</span></div>
+                  <div class="img-cat-tab" data-cat="amenities"><i class="fas fa-dumbbell"></i> Common Amenities <span class="cat-count" id="count-amenities">0</span></div>
+                  <div class="img-cat-tab" data-cat="floor_plan"><i class="fas fa-ruler-combined"></i> Floor Plan <span class="cat-count" id="count-floor_plan">0</span></div>
+                </div>
+
+                <div class="img-cat-panels">
+                  <!-- Exterior -->
+                  <div class="img-cat-panel active" data-cat-panel="exterior">
+                    <input type="file" class="img-cat-input" id="imgInput-exterior" name="property_images_exterior[]" accept="image/*" multiple style="display:none;">
+                    <div class="img-cat-upload-area" data-cat="exterior">
+                      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                      <div class="upload-text">Click or Drag PG Exterior Photos Here</div>
+                      <div class="upload-subtext">Building front, entrance, name board — up to 5 images</div>
                     </div>
+                    <div class="img-cat-preview" id="imgPreview-exterior"></div>
                   </div>
+
+                  <!-- Single Room -->
+                  <div class="img-cat-panel" data-cat-panel="single_room">
+                    <input type="file" class="img-cat-input" id="imgInput-single_room" name="property_images_single_room[]" accept="image/*" multiple style="display:none;">
+                    <div class="img-cat-upload-area" data-cat="single_room">
+                      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                      <div class="upload-text">Click or Drag Single Occupancy Room Photos Here</div>
+                      <div class="upload-subtext">Single bed room, wardrobe, study table — up to 4 images</div>
+                    </div>
+                    <div class="img-cat-preview" id="imgPreview-single_room"></div>
+                  </div>
+
+                  <!-- Double Room -->
+                  <div class="img-cat-panel" data-cat-panel="double_room">
+                    <input type="file" class="img-cat-input" id="imgInput-double_room" name="property_images_double_room[]" accept="image/*" multiple style="display:none;">
+                    <div class="img-cat-upload-area" data-cat="double_room">
+                      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                      <div class="upload-text">Click or Drag Double Sharing Room Photos Here</div>
+                      <div class="upload-subtext">Two-bed room setups, spacing — up to 5 images</div>
+                    </div>
+                    <div class="img-cat-preview" id="imgPreview-double_room"></div>
+                  </div>
+
+                  <!-- Multi Room -->
+                  <div class="img-cat-panel" data-cat-panel="multi_room">
+                    <input type="file" class="img-cat-input" id="imgInput-multi_room" name="property_images_multi_room[]" accept="image/*" multiple style="display:none;">
+                    <div class="img-cat-upload-area" data-cat="multi_room">
+                      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                      <div class="upload-text">Click or Drag Triple / Multi Sharing Room Photos Here</div>
+                      <div class="upload-subtext">Three or more beds, bunk beds, storage — up to 5 images</div>
+                    </div>
+                    <div class="img-cat-preview" id="imgPreview-multi_room"></div>
+                  </div>
+
+                  <!-- Lounge -->
+                  <div class="img-cat-panel" data-cat-panel="lounge">
+                    <input type="file" class="img-cat-input" id="imgInput-lounge" name="property_images_lounge[]" accept="image/*" multiple style="display:none;">
+                    <div class="img-cat-upload-area" data-cat="lounge">
+                      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                      <div class="upload-text">Click or Drag Common Lounge Photos Here</div>
+                      <div class="upload-subtext">TV room, seating area, study room — up to 4 images</div>
+                    </div>
+                    <div class="img-cat-preview" id="imgPreview-lounge"></div>
+                  </div>
+
+                  <!-- Kitchen -->
+                  <div class="img-cat-panel" data-cat-panel="kitchen">
+                    <input type="file" class="img-cat-input" id="imgInput-kitchen" name="property_images_kitchen[]" accept="image/*" multiple style="display:none;">
+                    <div class="img-cat-upload-area" data-cat="kitchen">
+                      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                      <div class="upload-text">Click or Drag Shared Kitchen Photos Here</div>
+                      <div class="upload-subtext">Kitchen, pantry, induction/cooking area — up to 3 images</div>
+                    </div>
+                    <div class="img-cat-preview" id="imgPreview-kitchen"></div>
+                  </div>
+
+                  <!-- Dining -->
+                  <div class="img-cat-panel" data-cat-panel="dining">
+                    <input type="file" class="img-cat-input" id="imgInput-dining" name="property_images_dining[]" accept="image/*" multiple style="display:none;">
+                    <div class="img-cat-upload-area" data-cat="dining">
+                      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                      <div class="upload-text">Click or Drag Dining Area Photos Here</div>
+                      <div class="upload-subtext">Dining hall, cafeteria seating — up to 3 images</div>
+                    </div>
+                    <div class="img-cat-preview" id="imgPreview-dining"></div>
+                  </div>
+
+                  <!-- Washroom -->
+                  <div class="img-cat-panel" data-cat-panel="washroom">
+                    <input type="file" class="img-cat-input" id="imgInput-washroom" name="property_images_washroom[]" accept="image/*" multiple style="display:none;">
+                    <div class="img-cat-upload-area" data-cat="washroom">
+                      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                      <div class="upload-text">Click or Drag Bathroom / Washroom Photos Here</div>
+                      <div class="upload-subtext">Attached or common bathrooms, geyser — up to 4 images</div>
+                    </div>
+                    <div class="img-cat-preview" id="imgPreview-washroom"></div>
+                  </div>
+
+                  <!-- Laundry -->
+                  <div class="img-cat-panel" data-cat-panel="laundry">
+                    <input type="file" class="img-cat-input" id="imgInput-laundry" name="property_images_laundry[]" accept="image/*" multiple style="display:none;">
+                    <div class="img-cat-upload-area" data-cat="laundry">
+                      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                      <div class="upload-text">Click or Drag Laundry Area Photos Here</div>
+                      <div class="upload-subtext">Washing machines, drying space — up to 3 images</div>
+                    </div>
+                    <div class="img-cat-preview" id="imgPreview-laundry"></div>
+                  </div>
+
+                  <!-- Parking -->
+                  <div class="img-cat-panel" data-cat-panel="parking">
+                    <input type="file" class="img-cat-input" id="imgInput-parking" name="property_images_parking[]" accept="image/*" multiple style="display:none;">
+                    <div class="img-cat-upload-area" data-cat="parking">
+                      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                      <div class="upload-text">Click or Drag Parking Photos Here</div>
+                      <div class="upload-subtext">Two-wheeler / four-wheeler parking — up to 3 images</div>
+                    </div>
+                    <div class="img-cat-preview" id="imgPreview-parking"></div>
+                  </div>
+
+                  <!-- Amenities -->
+                  <div class="img-cat-panel" data-cat-panel="amenities">
+                    <input type="file" class="img-cat-input" id="imgInput-amenities" name="property_images_amenities[]" accept="image/*" multiple style="display:none;">
+                    <div class="img-cat-upload-area" data-cat="amenities">
+                      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                      <div class="upload-text">Click or Drag Common Amenities Photos Here</div>
+                      <div class="upload-subtext">Gym, Wi-Fi setup, indoor games, rooftop — up to 5 images</div>
+                    </div>
+                    <div class="img-cat-preview" id="imgPreview-amenities"></div>
+                  </div>
+
+                  <!-- Floor Plan -->
+                  <div class="img-cat-panel" data-cat-panel="floor_plan">
+                    <input type="file" class="img-cat-input" id="imgInput-floor_plan" name="property_images_floor_plan[]" accept="image/*" multiple style="display:none;">
+                    <div class="img-cat-upload-area" data-cat="floor_plan">
+                      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                      <div class="upload-text">Click or Drag Floor Plan Images Here</div>
+                      <div class="upload-subtext">Room layout or building plan diagrams — up to 3 images</div>
+                    </div>
+                    <div class="img-cat-preview" id="imgPreview-floor_plan"></div>
+                  </div>
+                </div>
+
+                <div style="font-size:0.8rem; color:#64748b; margin-top:6px;">
+                  <i class="fas fa-arrows-alt"></i> Drag thumbnails within a category to reorder. The first image under <strong>Building Exterior</strong> or <strong>Single Occupancy</strong> is used as the cover photo.
                 </div>
               </div>
             </div>
+
+            <!-- ================= PROPERTY WALKTHROUGH VIDEO ================= -->
+          
+            <div class="form-section">
+  <div class="section-header"><i class="fas fa-video"></i> Property Walkthrough Video</div>
+  <div class="section-body">
+   
+    <div class="row mb-3">
+      <div class="col-md-12">
+        <label class="form-label d-block">Video Option</label>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input video-option-radio" type="radio" name="video_option" id="video_upload" value="upload" checked>
+          <label class="form-check-label" for="video_upload">Upload Property Video</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input video-option-radio" type="radio" name="video_option" id="video_auto" value="auto">
+          <label class="form-check-label" for="video_auto">Auto-Generate Slideshow from Photos</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input video-option-radio" type="radio" name="video_option" id="video_rm" value="rm_assisted">
+          <label class="form-check-label" for="video_rm">Video is Large — Share with Our RM</label>
+        </div>
+      </div>
+    </div>
+
+   
+
+    <div id="videoUploadWrapper">
+      <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+      <div class="image-upload-area" id="videoUploadArea">
+        <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size:2.2rem;color:#667eea;"></i></div>
+        <div class="upload-text">Click to Upload Complete PG Walkthrough Video</div>
+        <div class="upload-subtext">MP4/MOV, max 60 seconds, up to 50MB</div>
+      </div>
+      <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px;"></video>
+    </div>
+
+    <div id="videoAutoWrapper" style="display:none;">
+      <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom: 15px;">
+        <i class="fas fa-magic me-2" style="color:#667eea;"></i>
+        We'll auto-create a walkthrough video from your uploaded photos (min. 3 needed).
+      </div>
+
+      <!-- Live Slideshow Canvas Preview Container -->
+      <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
+        <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
+        <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:1px solid #cbd5e1; background:#000;"></canvas>
+      </div>
+
+      <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:12px; font-weight:600;">
+        <i class="fas fa-exclamation-circle me-1"></i> Please upload at least 3 property images above to preview the auto-slideshow.
+      </div>
+    </div>
+
+    <div id="videoRMWrapper" style="display:none;">
+      <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom:15px;">
+        <i class="fas fa-headset me-2" style="color:#667eea;"></i>
+        Share the video directly with your RM (WhatsApp / email). Once they publish it on our
+        YouTube / Instagram / Facebook channel, paste the public link below.
+      </div>
+      <label class="form-label">Published Video Link</label>
+      <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="Paste YouTube / Instagram / Facebook link">
+      <button type="button" class="btn-reset mt-2" id="previewRMLinkBtn"><i class="fas fa-eye me-1"></i> Preview Link</button>
+      <div id="rmVideoFrame" style="display:none; margin-top:15px; border-radius:12px; overflow:hidden; aspect-ratio:16/9;">
+        <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+</div>
 
             <div class="form-section">
               <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
@@ -2611,7 +2855,7 @@ document.getElementById('city').addEventListener('input', function () {
 
     <div class="preview-sidebar">
       <div class="preview-card">
-        <div class="pc-head"><i class="fas fa-eye"></i> Portal Display Card — Live Preview</div>
+        <div class="pc-head"><i class="fas fa-eye"></i> Live Preview</div>
         <div class="pc-mock">
           <div class="pcm-img">
             🏠
@@ -2631,20 +2875,28 @@ document.getElementById('city').addEventListener('input', function () {
             </div>
           </div>
         </div>
-        <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-top:12px;text-align:center;">Card presentation
-          rendered automatically using input forms matrix</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,.5);margin-top:12px;text-align:center;"></div>
       </div>
 
+      
       <div class="checklist-card">
-        <div class="cl-title">📋 Listing Checklist Requirements</div>
-        <div class="cl-item" id="cl-pgname"><i class="fas fa-circle"></i> Calculated Title Name Verified</div>
-        <div class="cl-item" id="cl-location"><i class="fas fa-circle"></i> Locality parameters linked</div>
-        <div class="cl-item" id="cl-beds"><i class="fas fa-circle"></i> Capacity counts filled</div>
-        <div class="cl-item" id="cl-rooms"><i class="fas fa-circle"></i> Room child lines verified</div>
-        <div class="cl-item" id="cl-amenities"><i class="fas fa-circle"></i> Selected internal amenities</div>
-        <div class="cl-item" id="cl-facilities"><i class="fas fa-circle"></i> Selected local infrastructures</div>
-        <div class="cl-item" id="cl-owner"><i class="fas fa-circle"></i> Valid contact profile mapped</div>
-        <div class="cl-item" id="cl-photos"><i class="fas fa-circle"></i> Portfolio image attachments verified</div>
+        <div class="cl-title">📋 Listing Checklist</div>
+        
+        <!-- Step 1: Basic Info -->
+        <div class="cl-item" id="cl-pgname"><i class="fas fa-circle"></i> Basic details & title verified</div>
+        <div class="cl-item" id="cl-location"><i class="fas fa-circle"></i> Location & address details added</div>
+        
+        <!-- Step 2: Rooms & Pricing -->
+        <div class="cl-item" id="cl-beds"><i class="fas fa-circle"></i> Room capacity & beds configured</div>
+        <div class="cl-item" id="cl-rooms"><i class="fas fa-circle"></i> Room rent & pricing entered</div>
+        
+        <!-- Step 3: Amenities & Rules -->
+        <div class="cl-item" id="cl-amenities"><i class="fas fa-circle"></i> PG rules & amenities selected</div>
+        <div class="cl-item" id="cl-facilities"><i class="fas fa-circle"></i> Nearby facilities & description added</div>
+        
+        <!-- Step 4: Photos & Contact -->
+        <div class="cl-item" id="cl-photos"><i class="fas fa-circle"></i> Property photos & media uploaded</div>
+        <div class="cl-item" id="cl-owner"><i class="fas fa-circle"></i> Lister profile & contact verified</div>
       </div>
     </div>
   </div>
@@ -2919,14 +3171,18 @@ document.getElementById('city').addEventListener('input', function () {
     });
   });
 
+
+
   let currentStep = 1;
   let roomCount = 1;
   let selectedFiles = [];
 
   function goToStep(n) {
     if (n > currentStep && !validateStep(currentStep)) return;
+    
     document.getElementById('step' + currentStep).classList.remove('active');
     document.getElementById('step' + n).classList.add('active');
+    
     for (let i = 1; i <= 4; i++) {
       const sc = document.getElementById('sc' + i), sl = document.getElementById('sl' + i), line = document.getElementById('line' + i);
       if (sc) sc.className = 'step-circle'; if (sl) sl.className = 'step-label'; if (line) line.className = 'step-line';
@@ -2935,11 +3191,18 @@ document.getElementById('city').addEventListener('input', function () {
       else { if (sc) sc.textContent = i; }
     }
     currentStep = n;
-    document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // SCROLL TO TOP: Targets the banner first, falls back to form container
+    const scrollTarget = document.querySelector('.property-banner-header') || document.querySelector('.form-container');
+    if (scrollTarget) {
+      scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   function validateStep(step) {
     let isValid = true;
+    let firstInvalidField = null; // Variable to track the exact missing field
+    
     const stepEl = document.getElementById('step' + step);
     if (!stepEl) return true;
 
@@ -2954,21 +3217,43 @@ document.getElementById('city').addEventListener('input', function () {
       if (!field.value || field.value.trim() === '') {
         field.classList.add('is-invalid');
         isValid = false;
-        if(field.id === 'assigned_to') {
+        
+        // Capture the first empty field for auto-scrolling
+        if (!firstInvalidField) {
+            if (field.id === 'assigned_to') {
+                document.getElementById('assignedToSearchSelect').classList.add('is-invalid');
+                firstInvalidField = document.getElementById('assignedToSearchSelect');
+            } else {
+                firstInvalidField = field;
+            }
+        } else if (field.id === 'assigned_to') {
             document.getElementById('assignedToSearchSelect').classList.add('is-invalid');
         }
       }
     });
 
+    // Special validation for PG Pill Buttons (Boys/Girls/Coliving)
     if (step === 1) {
       const pgFor = document.getElementById('pg_for').value;
       if (!pgFor) {
-        document.getElementById('pg_forGroup').classList.add('is-invalid-group');
+        const pgGroup = document.getElementById('pg_forGroup');
+        pgGroup.classList.add('is-invalid-group');
         isValid = false;
+        if (!firstInvalidField) firstInvalidField = pgGroup;
       }
     }
 
     if (!isValid) {
+      // SCROLL TO MISSING FIELD: Smoothly slides up/down to the exact missing input
+      if (firstInvalidField) {
+        firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => { 
+          if (typeof firstInvalidField.focus === 'function') {
+              firstInvalidField.focus(); 
+          }
+        }, 300);
+      }
+
       Swal.fire({
         icon: 'error',
         title: 'Incomplete Details',
@@ -2981,7 +3266,6 @@ document.getElementById('city').addEventListener('input', function () {
     if (step === 2) { setCheck('cl-rooms', true); }
     return true;
   }
-
   document.querySelectorAll('.pill-btn').forEach(btn => {
     btn.addEventListener('click', function (e) {
       e.preventDefault();
@@ -3231,145 +3515,588 @@ function calculateAutoTitle() {
     }
   });
 
- // ── IMAGE UPLOAD & SEQUENCING ──────────────────────────────────────────
-  const uploadArea = document.getElementById('uploadArea');
-  const imageInput = document.getElementById('imageInput');
-  const imagePreview = document.getElementById('imagePreview');
-  let draggedItemName = null; // Tracks the image being dragged
+ 
 
-  uploadArea.addEventListener('click', () => imageInput.click());
-  uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-  uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-  uploadArea.addEventListener('drop', (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-  imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
+  // ================= CATEGORY-WISE PG IMAGE UPLOAD LOGIC =================
+const IMG_CATEGORIES = [
+    'exterior', 'single_room', 'double_room', 'multi_room', 'lounge',
+    'kitchen', 'dining', 'washroom', 'laundry', 'parking', 'amenities', 'floor_plan'
+];
 
-  function handleFiles(files) {
-    const arr = Array.from(files);
-    if (selectedFiles.length + arr.length > 10) { 
-        Swal.fire({ icon: 'warning', title: 'Limit Exceeded!', text: 'Maximum 10 images allowed.', confirmButtonColor: '#667eea' }); 
-        return; 
-    }
-    arr.forEach(file => { 
-        if (file.type.startsWith('image/')) { 
-            selectedFiles.push(file); 
-        } 
+const IMG_CATEGORY_LIMITS = {
+    exterior: 5, single_room: 4, double_room: 5, multi_room: 5, lounge: 4,
+    kitchen: 3, dining: 3, washroom: 4, laundry: 3, parking: 3, amenities: 5, floor_plan: 3
+};
+
+const IMG_TOTAL_LIMIT = 30;
+const IMG_MIN_REQUIRED = 3;
+const catFiles = {};
+IMG_CATEGORIES.forEach(function (c) { catFiles[c] = []; });
+
+function totalImageCount() {
+    return IMG_CATEGORIES.reduce(function (sum, c) { return sum + catFiles[c].length; }, 0);
+}
+
+function syncCategoryInput(cat) {
+    var dt = new DataTransfer();
+    catFiles[cat].forEach(function (file) { dt.items.add(file); });
+    document.getElementById('imgInput-' + cat).files = dt.files;
+}
+
+function renderCategory(cat) {
+    var preview = document.getElementById('imgPreview-' + cat);
+    if(!preview) return;
+    preview.innerHTML = '';
+    catFiles[cat].forEach(function (file) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var div = document.createElement('div');
+            div.className = 'img-cat-preview-item';
+            div.innerHTML = '<img src="' + e.target.result + '"><button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\',\'' + file.name.replace(/'/g, "\\'") + '\')">✖</button>';
+            preview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
     });
-    syncFileInputAndRender();
-  }
+    const countEl = document.getElementById('count-' + cat);
+    if(countEl) countEl.innerText = catFiles[cat].length;
 
-  // Master function to sync the files array to the input and redraw the UI
-  function syncFileInputAndRender() {
-    const dt = new DataTransfer();
-    selectedFiles.forEach(f => dt.items.add(f));
-    imageInput.files = dt.files;
+    var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+    if (tab) tab.classList.toggle('has-images', catFiles[cat].length > 0);
+}
 
-    imagePreview.innerHTML = "";
-    if (selectedFiles.length > 0) {
-        imagePreview.style.display = 'grid';
-        selectedFiles.forEach(file => displayImagePreviewElement(file));
-    } else {
-        imagePreview.style.display = 'none';
+function renderAllCategories() {
+    IMG_CATEGORIES.forEach(renderCategory);
+    var total = totalImageCount();
+    const totalEl = document.getElementById('imgTotalCount');
+    if(totalEl) totalEl.innerText = total;
+
+    var notice = document.getElementById('imgMinNotice');
+    if (notice) {
+        if (total >= IMG_MIN_REQUIRED) {
+            notice.className = 'min-ok';
+            notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + total + ' images added.';
+        } else {
+            notice.className = 'min-warning';
+            notice.innerHTML = '<i class="fas fa-exclamation-circle"></i> Add at least ' + IMG_MIN_REQUIRED + ' images to publish';
+        }
     }
-    setCheck('cl-photos', selectedFiles.length >= 3);
-  }
 
-  function displayImagePreviewElement(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const item = document.createElement('div');
-      item.className = 'preview-item';
-      item.draggable = true; // Make element draggable
-      item.dataset.fileName = file.name;
-      item.innerHTML = `
-        <img src="${e.target.result}" alt="preview">
-        <button type="button" class="remove-image" onclick="removeImageFromQueue(event, '${file.name}')">
-          <i class="fas fa-times"></i>
-        </button>`;
-      
-      // Attach Drag and Drop Event Listeners
-      item.addEventListener('dragstart', handleDragStart);
-      item.addEventListener('dragover', handleDragOver);
-      item.addEventListener('dragenter', handleDragEnter);
-      item.addEventListener('dragleave', handleDragLeave);
-      item.addEventListener('drop', handleDrop);
-
-      imagePreview.appendChild(item);
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function removeImageFromQueue(event, name) {
-    event.stopPropagation(); // Prevents click from triggering drag
-    selectedFiles = selectedFiles.filter(f => f.name !== name);
-    syncFileInputAndRender();
-  }
-
-  // ── DRAG AND DROP HANDLERS ──────────────────────────────────────────────
-  function handleDragStart(e) {
-    draggedItemName = this.dataset.fileName;
-    e.dataTransfer.effectAllowed = 'move';
-    setTimeout(() => this.style.opacity = '0.5', 0);
-  }
-  function handleDragOver(e) {
-    e.preventDefault(); 
-    e.dataTransfer.dropEffect = 'move';
-    return false;
-  }
-  function handleDragEnter(e) {
-    this.classList.add('drag-over');
-  }
-  function handleDragLeave(e) {
-    this.classList.remove('drag-over');
-  }
-  function handleDrop(e) {
-    e.stopPropagation();
-    this.classList.remove('drag-over');
-    const targetItemName = this.dataset.fileName;
-    
-    if (draggedItemName !== targetItemName) {
-      // Find indices in our file array
-      const draggedIndex = selectedFiles.findIndex(f => f.name === draggedItemName);
-      const targetIndex  = selectedFiles.findIndex(f => f.name === targetItemName);
-      
-      // Reorder the array
-      const movedItem = selectedFiles.splice(draggedIndex, 1)[0];
-      selectedFiles.splice(targetIndex, 0, movedItem);
-      
-      // Update UI and Input Files
-      syncFileInputAndRender();
+    // Update Sidebar Checklist Item
+    var clPhotos = document.getElementById('cl-photos');
+    if (clPhotos) {
+        var hasPhotos = total >= IMG_MIN_REQUIRED;
+        clPhotos.className = 'cl-item' + (hasPhotos ? ' done' : '');
+        var icon = clPhotos.querySelector('i');
+        if (icon) icon.className = 'fas ' + (hasPhotos ? 'fa-check-circle' : 'fa-circle');
     }
-    return false;
-  }
+}
 
-  ['city', 'locality', 'property_title', 'room_rent', 'building_name'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', updatePreview);
-  });
-  document.addEventListener('input', function (e) { if (e.target.name === 'room_beds') updatePreview(); });
-  document.querySelector('select[name="furnishing_status"]').addEventListener('change', updatePreview);
-  const ownerNameEl = document.getElementById('ownerName');
-  if (ownerNameEl) { ownerNameEl.addEventListener('input', function () { setCheck('cl-owner', !!this.value.trim()); }); }
+function handleCatFiles(cat, files) {
+    var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
+    var limit = IMG_CATEGORY_LIMITS[cat] || 5;
 
-  $(document).ready(function () {
-    function updateAmenityCount() { const n = $('input[name="amenities[]"]:checked').length; $('#amenityCounter').val(n); setCheck('cl-amenities', n > 0); }
-    function updateFacilityCount() { const n = $('input[name="facilities[]"]:checked').length; $('#facilityCounter').val(n); setCheck('cl-facilities', n > 0); }
-    $(document).on('change', 'input[name="amenities[]"]', updateAmenityCount);
-    $(document).on('change', 'input[name="facilities[]"]', updateFacilityCount);
-    updateAmenityCount(); updateFacilityCount(); toggleGlobalRemoveButtonsState(); updatePreview();
-  });
+    if (catFiles[cat].length + incoming.length > limit) {
+        Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
+        incoming = incoming.slice(0, Math.max(0, limit - catFiles[cat].length));
+    }
+    if (totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+        Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all categories.', 'warning');
+        incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - totalImageCount()));
+    }
 
-  document.getElementById('pgForm').addEventListener('submit', function (e) {
+    catFiles[cat] = catFiles[cat].concat(incoming);
+    syncCategoryInput(cat);
+    renderAllCategories();
+}
+
+window.removeCatImage = function (cat, fileName) {
+    catFiles[cat] = catFiles[cat].filter(function (f) { return f.name !== fileName; });
+    syncCategoryInput(cat);
+    renderAllCategories();
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            var cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
+            document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
+            this.classList.add('active');
+            var targetPanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
+            if(targetPanel) targetPanel.classList.add('active');
+        });
+    });
+
+    IMG_CATEGORIES.forEach(function (cat) {
+        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+        var input = document.getElementById('imgInput-' + cat);
+        if (!zone || !input) return;
+
+        zone.addEventListener('click', function () { input.click(); });
+        input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
+        zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
+        zone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            handleCatFiles(cat, e.dataTransfer.files);
+        });
+    });
+
+    renderAllCategories();
+});
+
+
+
+
+// ================= PG VIDEO OPTION TOGGLE & CINEMATIC SLIDESHOW ENGINE =================
+// (mirrors the commercial form's video engine — same IDs, so no other
+// markup changes needed beyond the HTML block replaced above)
+document.addEventListener('DOMContentLoaded', function () {
+    // ── 1. DOM ELEMENTS ──
+    var uploadRadio      = document.getElementById('video_upload');
+    var autoRadio        = document.getElementById('video_auto');
+    var rmRadio          = document.getElementById('video_rm');
+    var uploadWrapper    = document.getElementById('videoUploadWrapper');
+    var autoWrapper      = document.getElementById('videoAutoWrapper');
+    var rmWrapper        = document.getElementById('videoRMWrapper');
+    var videoInput       = document.getElementById('videoInput');
+    var videoArea        = document.getElementById('videoUploadArea');
+    var videoPreview     = document.getElementById('videoPreview');
+    var videoSourceField = document.getElementById('video_source');
+
+    if (!uploadRadio || !autoRadio || !rmRadio) return;
+
+    // Canvas slideshow variables
+    var slideshowInterval = null;
+    var canvas = document.getElementById('slideshowCanvas');
+    var ctx = canvas ? canvas.getContext('2d') : null;
+
+    // ── 2. IMAGE COLLECTOR FUNCTION ──
+    // Reuses the PG form's own catFiles object (populated by the
+    // category-wise image uploader already on the page).
+    function getUploadedImages(callback) {
+        var sources = [];
+
+        if (window.catFiles) {
+            Object.keys(window.catFiles).forEach(function (cat) {
+                if (Array.isArray(window.catFiles[cat])) {
+                    window.catFiles[cat].forEach(function (file) {
+                        if (file instanceof File && file.type.startsWith('image/')) {
+                            sources.push({ type: 'file', data: file });
+                        }
+                    });
+                }
+            });
+        }
+
+        var fileInputs = document.querySelectorAll('input[type="file"]:not(#videoInput)');
+        fileInputs.forEach(function (input) {
+            if (input.files && input.files.length > 0) {
+                Array.from(input.files).forEach(function (file) {
+                    if (file.type.startsWith('image/')) {
+                        sources.push({ type: 'file', data: file });
+                    }
+                });
+            }
+        });
+
+        var previewImgs = document.querySelectorAll('.img-cat-preview img');
+        previewImgs.forEach(function (img) {
+            if (img.src && !img.src.includes('placeholder') && !img.src.startsWith('data:video')) {
+                sources.push({ type: 'url', data: img.src });
+            }
+        });
+
+        var uniqueSources = [];
+        var seen = new Set();
+        sources.forEach(function (s) {
+            var key = s.type === 'file' ? s.data.name + s.data.size : s.data;
+            if (!seen.has(key)) {
+                seen.add(key);
+                uniqueSources.push(s);
+            }
+        });
+
+        if (uniqueSources.length === 0) {
+            callback([]);
+            return;
+        }
+
+        var loadedImages = [];
+        var processed = 0;
+
+        uniqueSources.forEach(function (srcObj) {
+            var img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function () {
+                loadedImages.push(img);
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+            img.onerror = function () {
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+            img.src = srcObj.type === 'file' ? URL.createObjectURL(srcObj.data) : srcObj.data;
+        });
+    }
+
+    // ── 3. AUTO SLIDESHOW CONTROLLER ──
+    function startAutoSlideshowPreview() {
+        stopAutoSlideshowPreview();
+        var container = document.getElementById('autoSlideshowPreviewContainer');
+        var warning = document.getElementById('autoSlideshowWarning');
+
+        getUploadedImages(function (images) {
+            if (images.length < 3) {
+                if (container) container.style.display = 'none';
+                if (warning) {
+                    warning.style.display = 'block';
+                    warning.innerHTML = '<i class="fas fa-exclamation-circle me-1"></i> Please upload at least 3 property images above to preview the auto-slideshow.';
+                }
+                return;
+            }
+            if (warning) warning.style.display = 'none';
+            if (container) container.style.display = 'block';
+            runCanvasAnimation(images);
+        });
+    }
+
+    // ── 4. CINEMATIC CANVAS ANIMATION ENGINE (Ken Burns Zoom + Left-to-Right Pan) ──
+    function runCanvasAnimation(images) {
+        if (!ctx || !canvas || images.length === 0) return;
+
+        var durationPerSlide = 3500;
+        var fadeDuration = 800;
+        var startTime = null;
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var elapsed = timestamp - startTime;
+
+            var progress = (elapsed % durationPerSlide) / durationPerSlide;
+            var index = Math.floor(elapsed / durationPerSlide) % images.length;
+            var nextIndex = (index + 1) % images.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            var slideTime = elapsed % durationPerSlide;
+            var isFading = slideTime > (durationPerSlide - fadeDuration);
+            var fadeOpacity = isFading ? (slideTime - (durationPerSlide - fadeDuration)) / fadeDuration : 0;
+
+            drawCinematicFrame(images[index], progress, 1.0);
+            if (isFading) {
+                drawCinematicFrame(images[nextIndex], 0, fadeOpacity);
+            }
+
+            slideshowInterval = requestAnimationFrame(animate);
+        }
+
+        function drawCinematicFrame(img, progress, opacity) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            var scale = 1.0 + (progress * 0.08);
+            var hRatio = canvas.width / img.width;
+            var vRatio = canvas.height / img.height;
+            var ratio  = Math.max(hRatio, vRatio) * scale;
+
+            var baseShiftX = (canvas.width - img.width * ratio) / 2;
+            var centerShiftY = (canvas.height - img.height * ratio) / 2;
+            var panOffsetX = (progress - 0.5) * (canvas.width * 0.04);
+            var centerShiftX = baseShiftX + panOffsetX;
+
+            ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+            ctx.restore();
+        }
+
+        stopAutoSlideshowPreview();
+        slideshowInterval = requestAnimationFrame(animate);
+    }
+
+    function stopAutoSlideshowPreview() {
+        if (slideshowInterval) {
+            cancelAnimationFrame(slideshowInterval);
+            slideshowInterval = null;
+        }
+    }
+
+    // ── 5. TOGGLE PANELS & RADIO OPTIONS ──
+    function toggleVideoOption() {
+        if (uploadWrapper) uploadWrapper.style.display = uploadRadio.checked ? 'block' : 'none';
+        if (autoWrapper)   autoWrapper.style.display   = autoRadio.checked   ? 'block' : 'none';
+        if (rmWrapper)     rmWrapper.style.display     = rmRadio.checked    ? 'block' : 'none';
+
+        if (videoSourceField) {
+            videoSourceField.value = uploadRadio.checked ? 'upload' : (autoRadio.checked ? 'auto' : 'rm_assisted');
+        }
+
+        if (autoRadio.checked) {
+            startAutoSlideshowPreview();
+        } else {
+            stopAutoSlideshowPreview();
+        }
+
+        if (rmRadio.checked) {
+            renderVideoPreview();
+        }
+
+        if (videoPreview) {
+            if (!uploadRadio.checked) {
+                videoPreview.style.display = 'none';
+            } else if (videoInput && videoInput.files.length > 0) {
+                videoPreview.style.display = 'block';
+            }
+        }
+    }
+
+    uploadRadio.addEventListener('change', toggleVideoOption);
+    autoRadio.addEventListener('change', toggleVideoOption);
+    rmRadio.addEventListener('change', toggleVideoOption);
+
+    document.addEventListener('change', function (e) {
+        if (e.target && e.target.type === 'file' && e.target.id !== 'videoInput') {
+            if (autoRadio.checked) {
+                setTimeout(startAutoSlideshowPreview, 300);
+            }
+        }
+    });
+
+    // ── 6. DIRECT VIDEO UPLOAD + SIZE CHECK (50MB, matching PG's earlier limit) ──
+    if (videoArea && videoInput) {
+        videoArea.addEventListener('click', function () { videoInput.click(); });
+    }
+
+    if (videoInput) {
+        videoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
+            var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
+            // TODO: replace with your actual support WhatsApp number
+            var companyWhatsAppNumber = "917057205423";
+            var rawMessage = "Hello Team,\n\nI am trying to upload a video for my PG / Co-living listing, but the file size exceeds the 50MB limit.\n\n" +
+                             "📌 *Property Details:*\n" +
+                             "• *Title:* " + propTitle + "\n" +
+                             "• *Listed By:* " + listedByName + "\n" +
+                             "• *Video File Name:* " + file.name + "\n" +
+                             "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
+                             "Please assist me in publishing this video for my listing.";
+
+            var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
+
+            if (file.size > 50 * 1024 * 1024) {
+                videoInput.value = '';
+
+                if (videoPreview) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                    videoPreview.style.display = 'none';
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Video File Too Large',
+                    text: 'This video exceeds the maximum 50MB allowed size. Please share the video with our Relationship Manager.',
+                    showCancelButton: true,
+                    confirmButtonColor: '#25D366',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fab fa-whatsapp me-1"></i> Share',
+                    cancelButtonText: 'Okay',
+                    allowOutsideClick: false
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.open(whatsappUrl, '_blank');
+                        rmRadio.checked = true;
+                        toggleVideoOption();
+                        var linkField = document.getElementById('property_video_link');
+                        if (linkField) linkField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+                return;
+            }
+
+            if (videoPreview) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    }
+
+    // ── 7. EXTERNAL VIDEO LINK EMBED PREVIEW ──
+    function renderVideoPreview() {
+        var linkInput = document.getElementById('property_video_link');
+        var frame = document.getElementById('rmVideoFrame');
+        if (!linkInput || !frame) return;
+
+        var url = linkInput.value.trim();
+        if (!url) {
+            frame.style.display = 'none';
+            return;
+        }
+
+        if (url.includes('wa.me') || url.includes('whatsapp.com')) {
+            frame.innerHTML = '<div style="padding:20px; text-align:center; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px;">' +
+                              '  <i class="fab fa-whatsapp" style="font-size:2rem; color:#16a34a; margin-bottom:8px;"></i>' +
+                              '  <p style="margin:0; font-size:13px; font-weight:600; color:#15803d;">WhatsApp Link Detected</p>' +
+                              '  <p style="margin:4px 0 12px; font-size:11px; color:#4b5563;">WhatsApp chat links cannot be played inside an iframe.</p>' +
+                              '  <a href="' + url + '" target="_blank" class="btn btn-sm btn-success" style="font-size:12px;"><i class="fas fa-external-link-alt me-1"></i> Open in WhatsApp</a>' +
+                              '</div>';
+            frame.style.display = 'block';
+            return;
+        }
+
+        frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:350px; border:0; border-radius:8px;" ' +
+                          'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" ' +
+                          'referrerpolicy="strict-origin-when-cross-origin" allowtransparency="true" allowfullscreen></iframe>';
+        var embedIframe = document.getElementById('rmVideoEmbed');
+
+        var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        if (ytMatch) {
+            embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1] + '?enablejsapi=1';
+            frame.style.display = 'block';
+            return;
+        }
+
+        var instaMatch = url.match(/instagram\.com\/(?:p|reel|tv)\/([A-Za-z0-9_-]+)/);
+        if (instaMatch) {
+            embedIframe.src = 'https://www.instagram.com/p/' + instaMatch[1] + '/embed/';
+            frame.style.display = 'block';
+            return;
+        }
+
+        if (url.includes('facebook.com') || url.includes('fb.watch')) {
+            embedIframe.src = 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(url) + '&show_text=false';
+            frame.style.display = 'block';
+            return;
+        }
+
+        embedIframe.src = url;
+        frame.style.display = 'block';
+    }
+
+    var linkInputEl = document.getElementById('property_video_link');
+    if (linkInputEl) {
+        linkInputEl.addEventListener('input', renderVideoPreview);
+        linkInputEl.addEventListener('paste', function () { setTimeout(renderVideoPreview, 100); });
+    }
+
+    var previewBtn = document.getElementById('previewRMLinkBtn');
+    if (previewBtn) {
+        previewBtn.addEventListener('click', renderVideoPreview);
+    }
+
+    toggleVideoOption();
+});
+// ================= MISC UI UPDATES & FORM SUBMISSION =================
+['city', 'locality', 'property_title', 'room_rent', 'building_name'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updatePreview);
+});
+document.addEventListener('input', function (e) { if (e.target.name === 'room_beds') updatePreview(); });
+const furnSelect = document.querySelector('select[name="furnishing_status"]');
+if(furnSelect) furnSelect.addEventListener('change', updatePreview);
+const ownerNameEl = document.getElementById('ownerName');
+if (ownerNameEl) { ownerNameEl.addEventListener('input', function () { setCheck('cl-owner', !!this.value.trim()); }); }
+
+$(document).ready(function () {
+  function updateAmenityCount() { const n = $('input[name="amenities[]"]:checked').length; $('#amenityCounter').val(n); setCheck('cl-amenities', n > 0); }
+  function updateFacilityCount() { const n = $('input[name="facilities[]"]:checked').length; $('#facilityCounter').val(n); setCheck('cl-facilities', n > 0); }
+  $(document).on('change', 'input[name="amenities[]"]', updateAmenityCount);
+  $(document).on('change', 'input[name="facilities[]"]', updateFacilityCount);
+  updateAmenityCount(); updateFacilityCount(); toggleGlobalRemoveButtonsState(); updatePreview();
+});
+
+
+
+// ============================================================
+// SUBMIT WITH CONFIRMATION ALERT, LOADING SPINNER & FULL MEDIA SYNC
+// (mirrors commercial_rental_add's fetch/JSON handling)
+// ============================================================
+const pgForm = document.getElementById("pgForm");
+pgForm.addEventListener("submit", function (e) {
     e.preventDefault();
-    if (selectedFiles.length < 3) { Swal.fire({ icon: 'error', title: 'Images Required!', text: 'Upload at least 3 property images.', confirmButtonColor: '#667eea' }); return; }
-    Swal.fire({ icon: 'success', title: '🎉 Ready to Submit!', html: `<div style="text-align:center;font-size:.95rem;font-weight:700;">Listing is being saved...</div>`, confirmButtonColor: '#667eea', confirmButtonText: 'Confirm & Submit' }).then((result) => {
-      if(result.isConfirmed){
-        const dt = new DataTransfer();
-        selectedFiles.forEach(f => dt.items.add(f));
-        document.getElementById('imageInput').files = dt.files;
-        this.submit();
-      }
+
+    if (totalImageCount() < IMG_MIN_REQUIRED) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Images Required!',
+            text: `Please upload at least ${IMG_MIN_REQUIRED} photos across any category before submitting.`,
+            confirmButtonColor: '#667eea'
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Submit Listing?',
+        text: "Are you sure you want to save and list this PG / Co-living property?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#667eea',
+        cancelButtonColor: '#cbd5e0',
+        confirmButtonText: '<i class="fas fa-check"></i> Yes, Submit'
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            // 1. SHOW LOADING SPINNER IMMEDIATELY
+            Swal.fire({
+                title: 'Publishing Property...',
+                text: 'Uploading images and video files. Please wait...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            // 2. Sync category-wise image arrays into the real <input type="file"> elements
+            IMG_CATEGORIES.forEach(function (cat) {
+                syncCategoryInput(cat);
+            });
+
+            // 3. Build FormData payload and submit via fetch (so we get JSON back)
+            var formData = new FormData(pgForm);
+
+            fetch(pgForm.action, {
+                method: "POST",
+                body: formData,
+                headers: { "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Listing Published!",
+                            text: data.message,
+                            confirmButtonColor: '#10b981'
+                        }).then(() => {
+                            pgForm.reset();
+                            // TODO: replace with your actual PG listing page url name
+                            window.location.href = "{% url 'pg_list' %}";
+                        });
+                    } else if (data.status === "error") {
+                        let isDuplicate = data.message.includes("Duplicate Blocked");
+                        Swal.fire({
+                            icon: isDuplicate ? "warning" : "error",
+                            title: isDuplicate ? "Duplicate Property Detected" : "Submission Failed",
+                            text: data.message,
+                            confirmButtonColor: '#667eea'
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error("Fetch Error:", error);
+                    Swal.fire("Error", "Submit failed: " + error.message, "error");
+                });
+        }
     });
-  });
+});
 
   document.addEventListener('DOMContentLoaded', function() {
     var yesRadio = document.getElementById('listed_yes');

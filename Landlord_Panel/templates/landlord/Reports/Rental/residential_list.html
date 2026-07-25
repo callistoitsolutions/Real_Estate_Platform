@@ -1526,7 +1526,7 @@
                             Fill in the template and re-upload. Do not change column headers.
                         </p>
                     </div>
-                    <a href="{% url 'download_residential_template' %}"
+                    <a href="{% url 'download_residential_template_landlord' %}"
                        style="padding:7px 16px; background:#4F46E5; color:white; border-radius:6px;
                               text-decoration:none; font-size:12px; font-weight:600; white-space:nowrap;">
                         <i class="fas fa-download"></i> Export Rental Residential Property Data
@@ -1757,7 +1757,7 @@ function submitImport() {
         progress = Math.min(progress + 10, 85);
         document.getElementById('progress-bar').style.width = progress + '%';
     }, 200);
-    fetch("{% url 'import_residential_excel' %}", {
+    fetch("{% url 'import_residential_excel_landlord' %}", {
         method: 'POST',
         headers: { 'X-CSRFToken': '{{ csrf_token }}' },
         body: formData
@@ -2081,7 +2081,7 @@ async function submitImport() {
 
     try {
         // 2. Fetch data from backend
-        const response = await fetch("{% url 'import_residential_excel' %}", {
+        const response = await fetch("{% url 'import_residential_excel_landlord' %}", {
             method: 'POST',
             headers: { 'X-CSRFToken': '{{ csrf_token }}' },
             body: formData

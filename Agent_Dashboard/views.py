@@ -2094,35 +2094,7 @@ def _get_client_ip(request):
 
 
 
-# =====================================================================
-# CHANGES IN THIS FILE (vs your current agent view):
-#
-# 1. download_residential_template_agent()
-#       - The sample/example row (row 4) is now locked (read-only) in
-#         the actual xlsx via openpyxl cell + sheet protection.
-#       - Rows 5+ (every real data-entry cell) are explicitly unlocked
-#         so agents can still type into them once protection is on.
-#       - No password is set — this isn't a security control, it's a
-#         guardrail so nobody accidentally edits/uploads the example row.
-#
-# 2. import_residential_excel_agent()
-#       - New helper _is_sample_data_row(): if an uploaded row still
-#         matches the template's example data, the whole file is
-#         rejected with a clear message (mirrors your existing
-#         "Upload Denied" pattern for missing required fields).
-#       - New: for listed_by_type == "Other", the row is now checked
-#         against Admin_Login / User_Details, ported directly from the
-#         working logic in import_residential_excel(). If the person
-#         isn't registered, that ONE row is skipped and an alert is
-#         added to `errors` (partial_error), same as the reference
-#         file — it does NOT fail the whole upload, since that's the
-#         behavior you confirmed is correct in the second file.
-#       - listed_by_type == "Self" is untouched: still auto-filled from
-#         the logged-in agent's session, no registration lookup needed.
-#
-# Everything else (fingerprint dedup, coercion, audit log, response
-# shape) is unchanged from your current agent view.
-# =====================================================================
+
 
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, Protection
 from openpyxl.utils import get_column_letter
@@ -2130,17 +2102,17 @@ from openpyxl.comments import Comment
 from django.db.models import Q
 
 
+
+
+
+
+
+
+
 def _is_sample_data_row(obj_data, sample):
     """Detects a row that's still the unedited example data from the
     downloaded template (agent forgot to delete/replace it before
-    uploading). Compares every non-empty sample field against the
-    parsed row; if the overwhelming majority match, treat it as the
-    sample row rather than real data.
-
-    Threshold is 90% of the *non-empty sample fields that were checked*
-    on purpose — a couple of coincidental matches (e.g. city="Nagpur")
-    shouldn't false-positive, but leaving the row basically untouched
-    will."""
+    uploading)."""
     match_count = 0
     total_checked = 0
     for field, sample_val in sample.items():
@@ -2156,19 +2128,38 @@ def _is_sample_data_row(obj_data, sample):
     return (match_count / total_checked) >= 0.9
 
 
+def _identity_conflicts_with_session(obj_data, session_identity):
+    """Returns True only if the row EXPLICITLY names a different person
+    than whoever is logged in. Blank fields are fine (they just mean
+    "use my own info") — only a value that's typed in AND disagrees
+    with the session counts as a conflict."""
+    pairs = [
+        ('listed_by_email', 'email'),
+        ('listed_by_contact', 'contact'),
+        ('listed_by_name', 'name'),
+        ('listed_by_role', 'role'),
+    ]
+    for field, key in pairs:
+        row_val = str(obj_data.get(field, '')).strip()
+        if not row_val:
+            continue
+        session_val = str(session_identity.get(key, '')).strip()
+        if row_val.lower() != session_val.lower():
+            return True
+    return False
+
+
 # =====================================================================
-# DOWNLOAD TEMPLATE (agent) — sample row now locked/read-only
+# DOWNLOAD TEMPLATE (agent) — sample row locked/read-only
 # =====================================================================
 
 def download_residential_template_agent(request):
-    """Download the upload template — column headers are the same
-    human-readable labels used on the actual form, not raw field names.
-    Includes a live 'brokerage label preview' formula so staff can see
-    the label change instantly when they type a different role.
-
-    The example/sample row (row 4) is protected as read-only so it
-    can't be edited or mistaken for a real data row; data-entry rows
-    (5+) stay fully editable."""
+    """Download the upload template. The Listed By identity columns are
+    optional and auto-detected: leave them blank (or fill in your own
+    details exactly) to list under your own name. Typing someone else's
+    details will cause that row to be skipped on upload. The sample row
+    (row 4) is protected as read-only; data-entry rows (5+) stay fully
+    editable."""
 
     sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields = _residential_field_map()
     sample = _sample_row_data()
@@ -2200,9 +2191,7 @@ def download_residential_template_agent(request):
             sc.fill = PatternFill("solid", fgColor=SAMP_BG)
             sc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             sc.border = bdr
-            # Sample row is reference-only — lock it (default is already
-            # locked, but set explicitly so intent is obvious in code).
-            sc.protection = Protection(locked=True)
+            sc.protection = Protection(locked=True)  # sample row is reference-only
 
             ws.column_dimensions[get_column_letter(col)].width = max(18, len(label) // 2 + 6)
 
@@ -2211,29 +2200,20 @@ def download_residential_template_agent(request):
             if field == "brokerage_percentage":
                 brokerage_col = col
 
-            if field == "listed_by_id":
+            # NEW: identity is auto-detected, not enforced by typing "Self".
+            if field in ("listed_by_id", "listed_by_name", "listed_by_email", "listed_by_contact"):
                 ws.cell(row=2, column=col).comment = Comment(
-                    "Required ONLY if 'Listed By Type' = Self.\n"
-                    "If 'Listed By Type' = Self, leave this BLANK — it will\n"
-                    "be auto-filled from your logged-in agent profile.",
+                    "Leave BLANK to auto-list under your own logged-in profile.\n"
+                    "If you do fill it in, it must exactly match your own name/\n"
+                    "email/contact/role — a row naming a DIFFERENT person will be\n"
+                    "skipped on upload and flagged as an alert.",
                     "System"
                 )
-            if field == "listed_by_name":
+            if field == "listed_by_type":
                 ws.cell(row=2, column=col).comment = Comment(
-                    "Required ONLY if 'Listed By Type' = Self.\n"
-                    "Leave blank for Self — auto-filled from your session.",
-                    "System"
-                )
-            if field == "listed_by_email":
-                ws.cell(row=2, column=col).comment = Comment(
-                    "Required ONLY if 'Listed By Self' = Other.\n"
-                    "Leave blank for Self — auto-filled from your session.",
-                    "System"
-                )
-            if field == "listed_by_contact":
-                ws.cell(row=2, column=col).comment = Comment(
-                    "Required ONLY if 'Listed By Self' = Other.\n"
-                    "Leave blank for Self — auto-filled from your session.",
+                    "Optional / informational only. Whether a row is treated as\n"
+                    "'Self' is auto-detected from the identity fields, not from\n"
+                    "this column.",
                     "System"
                 )
 
@@ -2268,7 +2248,7 @@ def download_residential_template_agent(request):
     fcell.fill = PatternFill("solid", fgColor="FEF3C7")
     fcell.font = Font(bold=True, color="92400E", name="Arial", size=9)
     fcell.alignment = Alignment(horizontal="center", vertical="center")
-    fcell.protection = Protection(locked=True)  # this is a formula cell — never editable
+    fcell.protection = Protection(locked=True)
 
     if brokerage_col:
         note = (
@@ -2323,18 +2303,13 @@ def download_residential_template_agent(request):
         notes.cell(row=r, column=2, value=label).border = bdr
         notes.cell(row=r, column=3, value=f"=LOWER(TRIM(A{r}))")
 
-    # ---- NEW: lock the sample row, unlock every real data-entry cell ----
+    # ---- lock the sample row, unlock every real data-entry cell ----
     max_col = preview_col
-    MAX_DATA_ROWS = 1000  # generous ceiling for pasted-in rows
+    MAX_DATA_ROWS = 1000
 
-    # Row 4 (sample) stays locked — already set per-cell above, this is
-    # just a belt-and-suspenders sweep across the whole row/width.
     for c in range(1, max_col + 1):
         ws.cell(row=4, column=c).protection = Protection(locked=True)
 
-    # Rows 5+ must be explicitly unlocked, otherwise enabling sheet
-    # protection would lock EVERY cell by default and agents couldn't
-    # type anything in.
     for r in range(5, 5 + MAX_DATA_ROWS):
         for c in range(1, max_col + 1):
             ws.cell(row=r, column=c).protection = Protection(locked=False)
@@ -2347,8 +2322,6 @@ def download_residential_template_agent(request):
     ws.protection.deleteRows = False
     ws.protection.selectLockedCells = True
     ws.protection.selectUnlockedCells = True
-    # Intentionally no password — this is a guardrail against accidental
-    # edits/uploads of the sample row, not an access control.
 
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -2359,7 +2332,7 @@ def download_residential_template_agent(request):
 
 
 # =====================================================================
-# IMPORT (agent) — sample-row rejection + Listed By "Other" registration check
+# IMPORT (agent) — auto-detect Self by identity match, skip+alert on mismatch
 # =====================================================================
 
 @csrf_exempt
@@ -2374,6 +2347,8 @@ def import_residential_excel_agent(request):
     sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields = _residential_field_map()
     sample = _sample_row_data()
 
+    # Identity fields are NOT in this list anymore — they're auto-derived
+    # from the session / matched against it, never required as typed text.
     REQUIRED_FIELD_KEYS = [
         'property_type',
         'property_no',
@@ -2391,14 +2366,6 @@ def import_residential_excel_agent(request):
         'locality_area',
         'state',
         'pincode',
-        'listed_by_type',
-    ]
-
-    OTHER_ONLY_REQUIRED_FIELD_KEYS = [
-        'listed_by_name',
-        'listed_by_email',
-        'listed_by_contact',
-        'listed_by_role',
     ]
 
     def _field_label(field):
@@ -2411,7 +2378,7 @@ def import_residential_excel_agent(request):
             return True
         return False
 
-    # ---- 1. Uploader Identity (system audit trail) ----
+    # ---- 1. Uploader Identity (system audit trail — who UPLOADED the file) ----
     admin_id = request.session.get('Admin_id')
     user_id = request.session.get('User_id')
 
@@ -2435,7 +2402,10 @@ def import_residential_excel_agent(request):
         uploader_role = "User"
         user_identity = uploader_email or uploader_name
 
-    # ---- 1b. Current logged-in agent (for "Listed By = Self" auto-fill) ----
+    # ---- 1b. Determine WHO IS ACTUALLY LOGGED IN — this is the identity
+    # every row gets checked against. Covers three cases: a plain Agent
+    # session, an Admin impersonating an Agent, and a plain Admin session
+    # (Admin has full access and can upload under their own name too). ----
     session_user_id = request.session.get('User_id')
     session_admin_id = request.session.get('Admin_id')
     session_role = request.session.get('user_type')
@@ -2450,6 +2420,30 @@ def import_residential_excel_agent(request):
         agent_obj = User_Details.objects.filter(id=request.session.get('impersonate_id')).first()
     elif is_valid_agent:
         agent_obj = User_Details.objects.filter(id=session_user_id).first()
+
+    session_identity = None
+    if agent_obj:
+        session_identity = {
+            'id': agent_obj.user_id,
+            'name': agent_obj.user_name,
+            'email': agent_obj.user_email,
+            'contact': agent_obj.user_phone,
+            'role': agent_obj.user_role,
+        }
+    elif admin_obj:
+        session_identity = {
+            'id': str(admin_obj.id),
+            'name': uploader_name,
+            'email': uploader_email,
+            'contact': uploader_contact,
+            'role': "Admin",
+        }
+
+    if not session_identity:
+        return JsonResponse({
+            "status": "error",
+            "message": "No logged-in session found. This upload requires an active Agent or Admin session.",
+        }, status=400)
 
     # ---- 2. Parse Excel ----
     try:
@@ -2491,9 +2485,9 @@ def import_residential_excel_agent(request):
 
     parsed_rows = []
     skipped_empty_after_mapping = 0
-    required_field_errors = []      # any of these -> whole file rejected
-    listed_by_mismatch_errors = []  # these -> that ROW is skipped, upload continues
-    skipped_listed_by_mismatch = 0
+    required_field_errors = []      # missing required fields / sample row -> whole file rejected
+    identity_mismatch_errors = []   # row names a different person -> that row is skipped, upload continues
+    skipped_identity_mismatch = 0
 
     for row_idx, row in enumerate(ws.iter_rows(min_row=data_start_row, values_only=True), start=data_start_row):
         if all(v is None or str(v).strip() == "" for v in row):
@@ -2511,7 +2505,7 @@ def import_residential_excel_agent(request):
             skipped_empty_after_mapping += 1
             continue
 
-        # ---- NEW: reject the whole file if this is still the sample row ----
+        # ---- reject the whole file if this is still the sample row ----
         if _is_sample_data_row(obj_data, sample):
             required_field_errors.append({
                 "row": row_idx,
@@ -2558,22 +2552,9 @@ def import_residential_excel_agent(request):
                 except (TypeError, ValueError):
                     obj_data[f] = str(obj_data[f]).strip()
 
-        # ---- LISTED BY TYPE VALIDATION + CONDITIONAL REQUIRED FIELDS ----
-        listed_type_val = str(obj_data.get('listed_by_type', '')).strip().lower()
-
-        if listed_type_val not in ('self', 'other'):
-            required_field_errors.append({
-                "row": row_idx,
-                "missing_fields": ["Listed By Type must be exactly 'Self' or 'Other'"],
-            })
-            continue
-
-        required_keys_for_row = list(REQUIRED_FIELD_KEYS)
-        if listed_type_val != 'self':
-            required_keys_for_row += OTHER_ONLY_REQUIRED_FIELD_KEYS
-
+        # ---- Required property fields (unrelated to identity) ----
         missing_fields = [
-            _field_label(f) for f in required_keys_for_row if _is_missing(obj_data.get(f))
+            _field_label(f) for f in REQUIRED_FIELD_KEYS if _is_missing(obj_data.get(f))
         ]
         if missing_fields:
             required_field_errors.append({
@@ -2582,68 +2563,39 @@ def import_residential_excel_agent(request):
             })
             continue
 
-        # ---- NEW: for "Other", verify the person is actually registered ----
-        # Ported as-is from import_residential_excel(). "Self" is skipped
-        # here on purpose — it's auto-filled from the trusted session below
-        # and doesn't need a lookup.
-        if listed_type_val == 'other':
-            l_role = str(obj_data.get('listed_by_role', '')).strip().title()
-            l_email = str(obj_data.get('listed_by_email', '')).strip().lower()
-            l_contact = str(obj_data.get('listed_by_contact', '')).strip()
-            l_name = str(obj_data.get('listed_by_name', '')).strip()
-            l_id = str(obj_data.get('listed_by_id', '')).strip()
+        # ---- NEW: identity auto-detection ----
+        # Blank identity fields -> this row is automatically the logged-in
+        # user's own listing. Any filled-in field that DISAGREES with the
+        # logged-in identity means this row belongs to someone else -> skip
+        # it and alert, rather than silently overwriting or rejecting the
+        # whole file.
+        if _identity_conflicts_with_session(obj_data, session_identity):
+            l_role = str(obj_data.get('listed_by_role', '')).strip() or 'user'
+            searched_info = filter(None, [
+                str(obj_data.get('listed_by_name', '')).strip(),
+                str(obj_data.get('listed_by_email', '')).strip(),
+                str(obj_data.get('listed_by_contact', '')).strip(),
+                str(obj_data.get('listed_by_role', '')).strip(),
+            ])
+            identity = " + ".join(searched_info) or "Unknown"
+            identity_mismatch_errors.append({
+                "row": row_idx,
+                "errors": [
+                    f"Listed By {l_role} '{identity}' does not match your logged-in "
+                    f"profile. This upload only accepts your own listings — row skipped."
+                ],
+            })
+            skipped_identity_mismatch += 1
+            continue
 
-            row_errors = []
-            is_registered = False
-
-            if l_role.lower() == 'admin':
-                admin_query = Q()
-                if l_email:
-                    admin_query &= Q(email=l_email)
-                if l_contact:
-                    admin_query &= Q(phone=l_contact)
-                if l_name:
-                    admin_query &= Q(name__iexact=l_name)
-                if l_id and l_id.isdigit():
-                    admin_query &= Q(id=l_id)
-
-                if admin_query:
-                    is_registered = Admin_Login.objects.filter(admin_query).exists()
-            else:
-                user_query = Q()
-                if l_email:
-                    user_query &= Q(user_email=l_email)
-                if l_contact:
-                    user_query &= Q(user_phone=l_contact)
-                if l_name:
-                    user_query &= Q(user_name__iexact=l_name)
-                if l_id:
-                    user_query &= Q(user_id=l_id)
-
-                if user_query:
-                    if l_role:
-                        matched_user = User_Details.objects.filter(user_query, user_role__iexact=l_role).first()
-                    else:
-                        matched_user = User_Details.objects.filter(user_query).first()
-
-                    if matched_user:
-                        is_registered = True
-                        obj_data['assigned_to'] = f"{matched_user.id}-{matched_user.user_role}"
-                    else:
-                        is_registered = False
-
-            if not is_registered:
-                searched_info = filter(None, [l_id, l_name, l_email, l_contact, l_role])
-                identity = " + ".join(searched_info) or "Unknown"
-                row_errors.append(
-                    f"Listed By {l_role or 'user'} '{identity}' is not present in our records. "
-                    f"Please register this {l_role or 'user'} first, then re-upload this row."
-                )
-
-            if row_errors:
-                listed_by_mismatch_errors.append({"row": row_idx, "errors": row_errors})
-                skipped_listed_by_mismatch += 1
-                continue
+        # Match (or blank) -> auto-fill from the session, ignore whatever
+        # (if anything) was typed.
+        obj_data['listed_by_id'] = session_identity['id']
+        obj_data['listed_by_name'] = session_identity['name']
+        obj_data['listed_by_email'] = session_identity['email']
+        obj_data['listed_by_contact'] = session_identity['contact']
+        obj_data['listed_by_role'] = session_identity['role']
+        obj_data['listed_by_type'] = 'Self'
 
         parsed_rows.append({'row_idx': row_idx, 'data': obj_data})
 
@@ -2655,15 +2607,13 @@ def import_residential_excel_agent(request):
             "status": "error",
             "message": (
                 f"Upload Denied: {len(required_field_errors)} row(s) are missing mandatory fields "
-                "or still contain sample data. Please fill in every required column (as marked * on "
-                "the Add Listing form) and remove/replace any example rows, then re-upload. "
-                "No records were saved."
+                "or still contain sample data. Please fix these rows and re-upload. No records were saved."
             ),
             "row_errors": required_field_errors,
         }, status=400)
 
     # ---- Bail out if nothing usable was found ----
-    if not parsed_rows and not listed_by_mismatch_errors:
+    if not parsed_rows and not identity_mismatch_errors:
         return JsonResponse({
             "status": "error",
             "message": (
@@ -2683,30 +2633,13 @@ def import_residential_excel_agent(request):
 
     # ---- 4. Write to DB (fingerprint-based duplicate engine) ----
     created, updated, skipped, errors = (
-        0, 0, skipped_empty_after_mapping + skipped_listed_by_mismatch, []
+        0, 0, skipped_empty_after_mapping + skipped_identity_mismatch, []
     )
     duplicate_blocked_rows = []
 
     for item in parsed_rows:
         o_data = item['data']
         row_idx = item['row_idx']
-
-        listed_type = str(o_data.get('listed_by_type', '')).strip().lower()
-
-        if listed_type == 'self':
-            if not agent_obj:
-                errors.append(
-                    f"Row {row_idx}: 'Listed By Type' is Self but no logged-in "
-                    f"agent session was found. Row skipped."
-                )
-                skipped += 1
-                continue
-            o_data['listed_by_id'] = agent_obj.user_id
-            o_data['listed_by_name'] = agent_obj.user_name
-            o_data['listed_by_email'] = agent_obj.user_email
-            o_data['listed_by_contact'] = agent_obj.user_phone
-            o_data['listed_by_role'] = agent_obj.user_role
-        # 'other' -> already validated as registered above; keep sheet values.
 
         input_property_no = str(o_data.get('property_no', '')).strip()
         input_building_name = str(o_data.get('building_name', '')).strip()
@@ -2794,8 +2727,8 @@ def import_residential_excel_agent(request):
 
     errors.extend(duplicate_blocked_rows)
 
-    # NEW: fold Listed By "Other" registration mismatches into the alert list
-    for entry in listed_by_mismatch_errors:
+    # NEW: fold identity-mismatch rows into the alert list
+    for entry in identity_mismatch_errors:
         for msg in entry["errors"]:
             errors.append(f"Row {entry['row']}: {msg}")
 
@@ -2813,7 +2746,7 @@ def import_residential_excel_agent(request):
             "records_updated": updated,
             "records_skipped": skipped,
             "duplicates_blocked": len(duplicate_blocked_rows),
-            "listed_by_mismatches": len(listed_by_mismatch_errors),
+            "identity_mismatches": len(identity_mismatch_errors),
             "errors_encountered": len(errors),
         }),
         ip_address=_get_client_ip(request),
@@ -2825,13 +2758,12 @@ def import_residential_excel_agent(request):
         "message": f"{created} Created | {updated} Updated | {skipped} Skipped due to system rules.",
         "created": created, "updated": updated, "skipped": skipped,
         "duplicates_blocked": len(duplicate_blocked_rows),
-        "listed_by_mismatches": len(listed_by_mismatch_errors),
+        "identity_mismatches": len(identity_mismatch_errors),
         "error_count": len(errors), "errors": errors,
         "unmatched_headers": unmatched_headers,
         "header_row_detected": header_row,
         "data_start_row_used": data_start_row,
     })
-
 
 ########################Views ENDS For Rental residential listing dowload and import ####################################
 

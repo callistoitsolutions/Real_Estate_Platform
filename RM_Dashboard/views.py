@@ -1561,15 +1561,6 @@ def rental_residential_view_rm(request, pk):
     admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
 
-    admin_obj = None
-    user_obj = None
-
-    if admin_id:
-        admin_obj = Admin_Login.objects.filter(id=admin_id).first()
-
-    if user_id:
-        user_obj = User_Details.objects.filter(id=user_id).first()
-
     #  2. UPDATED SECURITY CHECK
     
     is_valid_rm = (user_id and logged_in_role == "Relationship Manager")
@@ -1582,15 +1573,17 @@ def rental_residential_view_rm(request, pk):
     if logged_in_role == "Admin":
         dashboard_user_id = request.session.get('impersonate_id')
     else:
-        dashboard_user_id = user_obj
+        dashboard_user_id = user_id
 
-    
-
-    user_role = user_obj.user_role
+    # 4. Data Fetching
+    user_obj = User_Details.objects.get(id=dashboard_user_id)
 
     enquiry_obj_rm = PropertyEnquiry.objects.filter(assigned_to__id=user_obj.id).count()
 
-     # Prefetch core and related assets for the current listing
+    user_role = user_obj.user_role
+
+    
+    # Prefetch core and related assets for the current listing
     prop = get_object_or_404(
         RentalResidentialProperty.objects.prefetch_related('images', 'faqs'), 
         pk=pk
@@ -1620,11 +1613,13 @@ def rental_residential_view_rm(request, pk):
         'user_obj': user_obj,
         'user_role' : user_role,
         'enquiry_obj_rm' :  enquiry_obj_rm,
-        
     }
-    return render(request,
-        'rm_panel/Reports/Rental/rental_residential_detail.html',
-        context)
+    return render(request, 'rm_panel/Reports/Rental/rental_residential_detail.html', context)
+
+
+
+
+
 
 
 
@@ -3681,19 +3676,97 @@ def _sample_row_data():
         "listed_elsewhere": "No", "portal_name": "",
     }
 
+
+
+
+def _normalize_label(raw):
+    if raw is None:
+        return ""
+    text = str(raw).replace("\u00a0", " ")           
+    text = text.replace(" *", "").strip()
+    text = re.sub(r"\s+", " ", text)                  
+    return text.lower()
+
+
+def _find_header_row(ws, label_to_field, max_scan_rows=6):
+    best_row, best_score = None, -1
+    for r in range(1, max_scan_rows + 1):
+        row_vals = [cell.value for cell in ws[r]]
+        score = sum(1 for v in row_vals if _normalize_label(v) in label_to_field)
+        if score > best_score:
+            best_row, best_score = r, score
+    return best_row, best_score
+
+
+
+
+def _get_client_ip(request):
+    """Helper to safely fetch client IP address reference."""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR', '127.0.0.1')
+
+
+
+
+
+
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, Protection
+from openpyxl.utils import get_column_letter
+from openpyxl.comments import Comment
+
+
+def _is_sample_data_row(obj_data, sample):
+    """Detects a row that's still the unedited example data from the
+    downloaded template (someone forgot to delete/replace it before
+    uploading)."""
+    match_count = 0
+    total_checked = 0
+    for field, sample_val in sample.items():
+        sample_val = str(sample_val).strip()
+        if not sample_val:
+            continue
+        total_checked += 1
+        row_val = str(obj_data.get(field, "")).strip()
+        if row_val == sample_val:
+            match_count += 1
+    if total_checked == 0:
+        return False
+    return (match_count / total_checked) >= 0.9
+
+
+def _identity_matches_session(obj_data, session_identity):
+    """Row is accepted ONLY if Listed By Name, Email, Contact, and Role
+    are all explicitly filled in AND match the logged-in RM exactly.
+    Blank no longer means "assume it's me" — it means "reject"."""
+    fields_to_check = [
+        ('listed_by_email', 'email'),
+        ('listed_by_contact', 'contact'),
+        ('listed_by_name', 'name'),
+        ('listed_by_role', 'role'),
+    ]
+    for field, key in fields_to_check:
+        row_val = str(obj_data.get(field, '')).strip()
+        if not row_val:
+            return False  # blank -> not a confirmed match
+        session_val = str(session_identity.get(key, '')).strip()
+        if row_val.lower() != session_val.lower():
+            return False
+    return True
+
+
 # =====================================================================
-# DOWNLOAD TEMPLATE
+# DOWNLOAD TEMPLATE (RM) — sample row locked/read-only, identity now mandatory
 # =====================================================================
 
 def download_residential_template_rm(request):
-    """Download the upload template — column headers are the same
-    human-readable labels used on the actual form, not raw field names.
-    Includes a live 'brokerage label preview' formula so staff can see
-    the label change instantly when they type a different role."""
-
-    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-    from openpyxl.utils import get_column_letter
-    from openpyxl.comments import Comment
+    """Download the upload template for Relationship Managers. Listed By
+    identity columns (name/email/contact/role) are now MANDATORY and
+    must exactly match your own registered RM profile — a row that's
+    blank or names someone else is skipped on upload. The sample row
+    (row 4) is protected as read-only; data-entry rows (5+) stay fully
+    editable."""
 
     sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields = _residential_field_map()
     sample = _sample_row_data()
@@ -3725,6 +3798,7 @@ def download_residential_template_rm(request):
             sc.fill = PatternFill("solid", fgColor=SAMP_BG)
             sc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             sc.border = bdr
+            sc.protection = Protection(locked=True)  # sample row is reference-only
 
             ws.column_dimensions[get_column_letter(col)].width = max(18, len(label) // 2 + 6)
 
@@ -3733,30 +3807,25 @@ def download_residential_template_rm(request):
             if field == "brokerage_percentage":
                 brokerage_col = col
 
-            # NEW: explain the Self/Other rule directly on the relevant columns
+            # NEW: these are now mandatory and must match the RM exactly.
+            if field in ("listed_by_name", "listed_by_email", "listed_by_contact", "listed_by_role"):
+                ws.cell(row=2, column=col).comment = Comment(
+                    "MANDATORY. Must exactly match your own registered RM profile\n"
+                    "(name / email / contact / role). Leaving this blank, or entering\n"
+                    "a different person's details, will cause the row to be SKIPPED\n"
+                    "on upload and flagged as an alert.",
+                    "System"
+                )
             if field == "listed_by_id":
                 ws.cell(row=2, column=col).comment = Comment(
-                    "Required ONLY if 'Listed By Type' = Self.\n"
-                    "If 'Listed By Type' = Self, leave this BLANK — it will\n"
-                    "be auto-filled from your logged-in agent profile.",
+                    "Optional — your Listed By ID is confirmed from your session once\n"
+                    "the name/email/contact/role above match your profile.",
                     "System"
                 )
-            if field == "listed_by_name":
+            if field == "listed_by_type":
                 ws.cell(row=2, column=col).comment = Comment(
-                    "Required ONLY if 'Listed By Type' = Self.\n"
-                    "Leave blank for Self — auto-filled from your session.",
-                    "System"
-                )
-            if field == "listed_by_email":
-                ws.cell(row=2, column=col).comment = Comment(
-                    "Required ONLY if 'Listed By Self' = Other.\n"
-                    "Leave blank for Self — auto-filled from your session.",
-                    "System"
-                )
-            if field == "listed_by_contact":
-                ws.cell(row=2, column=col).comment = Comment(
-                    "Required ONLY if 'Listed By Self' = Other.\n"
-                    "Leave blank for Self — auto-filled from your session.",
+                    "Informational only. Every accepted row is treated as your own\n"
+                    "(Self) listing once the identity fields are verified.",
                     "System"
                 )
 
@@ -3791,6 +3860,7 @@ def download_residential_template_rm(request):
     fcell.fill = PatternFill("solid", fgColor="FEF3C7")
     fcell.font = Font(bold=True, color="92400E", name="Arial", size=9)
     fcell.alignment = Alignment(horizontal="center", vertical="center")
+    fcell.protection = Protection(locked=True)
 
     if brokerage_col:
         note = (
@@ -3845,6 +3915,26 @@ def download_residential_template_rm(request):
         notes.cell(row=r, column=2, value=label).border = bdr
         notes.cell(row=r, column=3, value=f"=LOWER(TRIM(A{r}))")
 
+    # ---- lock the sample row, unlock every real data-entry cell ----
+    max_col = preview_col
+    MAX_DATA_ROWS = 1000
+
+    for c in range(1, max_col + 1):
+        ws.cell(row=4, column=c).protection = Protection(locked=True)
+
+    for r in range(5, 5 + MAX_DATA_ROWS):
+        for c in range(1, max_col + 1):
+            ws.cell(row=r, column=c).protection = Protection(locked=False)
+
+    ws.protection.sheet = True
+    ws.protection.formatCells = False
+    ws.protection.formatColumns = False
+    ws.protection.formatRows = False
+    ws.protection.insertRows = False
+    ws.protection.deleteRows = False
+    ws.protection.selectLockedCells = True
+    ws.protection.selectUnlockedCells = True
+
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
@@ -3853,38 +3943,9 @@ def download_residential_template_rm(request):
     return response
 
 
-
-
-
-
-
-def _normalize_label(raw):
-    if raw is None:
-        return ""
-    text = str(raw).replace("\u00a0", " ")           
-    text = text.replace(" *", "").strip()
-    text = re.sub(r"\s+", " ", text)                  
-    return text.lower()
-
-
-def _find_header_row(ws, label_to_field, max_scan_rows=6):
-    best_row, best_score = None, -1
-    for r in range(1, max_scan_rows + 1):
-        row_vals = [cell.value for cell in ws[r]]
-        score = sum(1 for v in row_vals if _normalize_label(v) in label_to_field)
-        if score > best_score:
-            best_row, best_score = r, score
-    return best_row, best_score
-
-
-
-
-def _get_client_ip(request):
-    """Helper to safely fetch client IP address reference."""
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        return x_forwarded_for.split(',')[0].strip()
-    return request.META.get('REMOTE_ADDR', '127.0.0.1')
+# =====================================================================
+# IMPORT (RM) — explicit identity MATCH required, else skip + alert
+# =====================================================================
 
 @csrf_exempt
 @require_POST
@@ -3896,13 +3957,10 @@ def import_residential_excel_rm(request):
         return JsonResponse({"status": "error", "message": "Only .xlsx files allowed."}, status=400)
 
     sections, field_to_label, label_to_field, system_injected, helper_only_labels, decimal_fields, int_fields = _residential_field_map()
+    sample = _sample_row_data()
 
-    # -------------------------------------------------------------------
-    # REQUIRED FIELDS - must mirror the `required` inputs in the Add form.
-    # listed_by_type is ALWAYS required. The 4 identity fields
-    # (name/email/contact/role) are only required when Listed By Type = Other
-    # — when Self, they're auto-filled from the logged-in agent's session.
-    # -------------------------------------------------------------------
+    # Property fields only — identity fields are validated separately
+    # via _identity_matches_session, not as a plain "missing field".
     REQUIRED_FIELD_KEYS = [
         'property_type',
         'property_no',
@@ -3920,22 +3978,12 @@ def import_residential_excel_rm(request):
         'locality_area',
         'state',
         'pincode',
-        'listed_by_type',
-    ]
-
-    OTHER_ONLY_REQUIRED_FIELD_KEYS = [
-        'listed_by_name',
-        'listed_by_email',
-        'listed_by_contact',
-        'listed_by_role',
     ]
 
     def _field_label(field):
         return field_to_label.get(field) or field.replace('_', ' ').title()
 
     def _is_missing(val):
-        """Treat None / empty-string as missing. Does NOT treat 0 / '0' as missing,
-        so numeric fields like bathrooms=0 aren't incorrectly flagged."""
         if val is None:
             return True
         if isinstance(val, str) and val.strip() == "":
@@ -3944,46 +3992,62 @@ def import_residential_excel_rm(request):
 
     # ---- 1. Uploader Identity (system audit trail — who UPLOADED the file) ----
     admin_id = request.session.get('Admin_id')
-    user_id = request.session.get('User_id')
-
     admin_obj = Admin_Login.objects.filter(id=admin_id).first() if admin_id else None
-    user_obj = User_Details.objects.filter(id=user_id).first() if user_id else None
 
     uploader_name = uploader_email = uploader_contact = ""
     uploader_role = "Automated Engine"
     user_identity = "Automated Engine"
 
-    if admin_obj:
+    # ---- 2. SECURITY CHECK (exactly as provided) ----
+    session_user_id = request.session.get('User_id')
+    logged_in_role = request.session.get('user_type')
+
+    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+
+    if not is_valid_rm and not is_valid_admin:
+        return JsonResponse({"status": "error", "message": "Not authorized. Please log in again."}, status=403)
+
+    # ---- 3. The ID Swap ----
+    if logged_in_role == "Admin":
+        dashboard_user_id = request.session.get('impersonate_id')
+    else:
+        dashboard_user_id = session_user_id
+
+    # ---- 4. Data Fetching: the RM whose listings this upload belongs to ----
+    try:
+        rm_obj = User_Details.objects.get(id=dashboard_user_id)
+    except User_Details.DoesNotExist:
+        return JsonResponse({
+            "status": "error",
+            "message": "Could not find the Relationship Manager profile for this session.",
+        }, status=400)
+
+    # Uploader identity for the audit log: Admin if impersonating, else the RM themself.
+    if logged_in_role == "Admin" and admin_obj:
         uploader_name = getattr(admin_obj, 'name', '') or getattr(admin_obj, 'username', '')
         uploader_email = getattr(admin_obj, 'email', '')
         uploader_contact = getattr(admin_obj, 'phone', '') or getattr(admin_obj, 'mobile', '')
         uploader_role = "Admin"
         user_identity = uploader_email or uploader_name
-    elif user_obj:
-        uploader_name = user_obj.user_name
-        uploader_email = user_obj.user_email
-        uploader_contact = user_obj.user_phone
+    else:
+        uploader_name = rm_obj.user_name
+        uploader_email = rm_obj.user_email
+        uploader_contact = rm_obj.user_phone
         uploader_role = "User"
         user_identity = uploader_email or uploader_name
 
-    # ---- 1b. Determine the CURRENT LOGGED-IN AGENT (for "Listed By = Self" auto-fill) ----
-    # Mirrors the exact same session/impersonation logic as rental_list_agent().
-    session_user_id = request.session.get('User_id')
-    session_admin_id = request.session.get('Admin_id')
-    session_role = request.session.get('user_type')
+    # This is the identity every row's Listed By fields must MATCH —
+    # always the RM (rm_obj), never the impersonating admin.
+    session_identity = {
+        'id': rm_obj.user_id,
+        'name': rm_obj.user_name,
+        'email': rm_obj.user_email,
+        'contact': rm_obj.user_phone,
+        'role': rm_obj.user_role,
+    }
 
-    is_valid_agent = (session_user_id and session_role == "Agent")
-    is_valid_admin_impersonating = (
-        session_admin_id and session_role == "Admin" and 'impersonate_id' in request.session
-    )
-
-    agent_obj = None
-    if is_valid_admin_impersonating:
-        agent_obj = User_Details.objects.filter(id=request.session.get('impersonate_id')).first()
-    elif is_valid_agent:
-        agent_obj = User_Details.objects.filter(id=session_user_id).first()
-
-    # ---- 2. Parse Excel ----
+    # ---- 5. Parse Excel ----
     try:
         wb = openpyxl.load_workbook(excel_file, data_only=True)
         ws = wb["Rental Residential"] if "Rental Residential" in wb.sheetnames else wb.active
@@ -4023,7 +4087,9 @@ def import_residential_excel_rm(request):
 
     parsed_rows = []
     skipped_empty_after_mapping = 0
-    required_field_errors = []  # collected across ALL rows before we decide to accept/reject the file
+    required_field_errors = []      # missing required property fields / sample row -> whole file rejected
+    identity_mismatch_errors = []   # identity blank or wrong -> that row is skipped, upload continues
+    skipped_identity_mismatch = 0
 
     for row_idx, row in enumerate(ws.iter_rows(min_row=data_start_row, values_only=True), start=data_start_row):
         if all(v is None or str(v).strip() == "" for v in row):
@@ -4039,6 +4105,18 @@ def import_residential_excel_rm(request):
 
         if not obj_data:
             skipped_empty_after_mapping += 1
+            continue
+
+        # ---- reject the whole file if this is still the sample row ----
+        if _is_sample_data_row(obj_data, sample):
+            required_field_errors.append({
+                "row": row_idx,
+                "missing_fields": [
+                    "This row still contains the example/sample data from the "
+                    "downloaded template. Replace it with your actual property "
+                    "details (or delete the row) before uploading."
+                ],
+            })
             continue
 
         # ---- Type Coercion (unchanged) ----
@@ -4076,49 +4154,62 @@ def import_residential_excel_rm(request):
                 except (TypeError, ValueError):
                     obj_data[f] = str(obj_data[f]).strip()
 
-        # ---- LISTED BY TYPE VALIDATION + CONDITIONAL REQUIRED FIELDS (new) ----
-        listed_type_val = str(obj_data.get('listed_by_type', '')).strip().lower()
-
-        if listed_type_val not in ('self', 'other'):
-            required_field_errors.append({
-                "row": row_idx,
-                "missing_fields": ["Listed By Type must be exactly 'Self' or 'Other'"],
-            })
-            continue
-
-        required_keys_for_row = list(REQUIRED_FIELD_KEYS)
-        if listed_type_val != 'self':
-            required_keys_for_row += OTHER_ONLY_REQUIRED_FIELD_KEYS
-
+        # ---- Required property fields (unrelated to identity) ----
         missing_fields = [
-            _field_label(f) for f in required_keys_for_row if _is_missing(obj_data.get(f))
+            _field_label(f) for f in REQUIRED_FIELD_KEYS if _is_missing(obj_data.get(f))
         ]
         if missing_fields:
             required_field_errors.append({
                 "row": row_idx,
                 "missing_fields": missing_fields,
             })
-            # Don't add to parsed_rows yet — we may reject the whole file below.
             continue
+
+        # ---- Identity MUST explicitly match — blank or wrong -> skip + alert ----
+        if not _identity_matches_session(obj_data, session_identity):
+            typed_name = str(obj_data.get('listed_by_name', '')).strip()
+            typed_email = str(obj_data.get('listed_by_email', '')).strip()
+            typed_contact = str(obj_data.get('listed_by_contact', '')).strip()
+            typed_role = str(obj_data.get('listed_by_role', '')).strip()
+
+            if not any([typed_name, typed_email, typed_contact, typed_role]):
+                reason = "Listed By details (name/email/contact/role) are blank."
+            else:
+                identity = " + ".join(filter(None, [typed_name, typed_email, typed_contact, typed_role])) or "Unknown"
+                reason = f"Listed By '{identity}' does not match your logged-in RM profile."
+
+            identity_mismatch_errors.append({
+                "row": row_idx,
+                "errors": [f"{reason} Row skipped — this upload only accepts your own listings."],
+            })
+            skipped_identity_mismatch += 1
+            continue
+
+        # Verified match -> lock in the canonical session values and mark Self.
+        obj_data['listed_by_id'] = session_identity['id']
+        obj_data['listed_by_name'] = session_identity['name']
+        obj_data['listed_by_email'] = session_identity['email']
+        obj_data['listed_by_contact'] = session_identity['contact']
+        obj_data['listed_by_role'] = session_identity['role']
+        obj_data['listed_by_type'] = 'Self'
 
         parsed_rows.append({'row_idx': row_idx, 'data': obj_data})
 
     wb.close()
 
-    # ---- Bail out if any row failed required-field validation ----
+    # ---- Bail out if any row failed required-field / sample-row validation ----
     if required_field_errors:
         return JsonResponse({
             "status": "error",
             "message": (
-                f"Upload Denied: {len(required_field_errors)} row(s) are missing mandatory fields. "
-                "Please fill in every required column (as marked * on the Add Listing form) for "
-                "all rows and re-upload the file. No records were saved."
+                f"Upload Denied: {len(required_field_errors)} row(s) are missing mandatory fields "
+                "or still contain sample data. Please fix these rows and re-upload. No records were saved."
             ),
             "row_errors": required_field_errors,
         }, status=400)
 
     # ---- Bail out if nothing usable was found ----
-    if not parsed_rows:
+    if not parsed_rows and not identity_mismatch_errors:
         return JsonResponse({
             "status": "error",
             "message": (
@@ -4131,36 +4222,20 @@ def import_residential_excel_rm(request):
             "data_start_row_assumed": data_start_row,
         }, status=400)
 
-    # ---- 3. Whole-file duplicate check (unchanged) ----
+    # ---- 6. Whole-file duplicate check (unchanged) ----
     file_name_exists = RentalResidentialProperty.objects.filter(
         upload_file_name=excel_file.name
     ).exists()
 
-    # ---- 4. Write to DB (fingerprint-based duplicate engine) ----
-    created, updated, skipped, errors = 0, 0, skipped_empty_after_mapping, []
+    # ---- 7. Write to DB (fingerprint-based duplicate engine) ----
+    created, updated, skipped, errors = (
+        0, 0, skipped_empty_after_mapping + skipped_identity_mismatch, []
+    )
     duplicate_blocked_rows = []
 
     for item in parsed_rows:
         o_data = item['data']
         row_idx = item['row_idx']
-
-        # ---- SELF vs OTHER: auto-fill Listed By fields from session ----
-        listed_type = str(o_data.get('listed_by_type', '')).strip().lower()
-
-        if listed_type == 'self':
-            if not agent_obj:
-                errors.append(
-                    f"Row {row_idx}: 'Listed By Type' is Self but no logged-in "
-                    f"agent session was found. Row skipped."
-                )
-                skipped += 1
-                continue
-            o_data['listed_by_id'] = agent_obj.user_id
-            o_data['listed_by_name'] = agent_obj.user_name
-            o_data['listed_by_email'] = agent_obj.user_email
-            o_data['listed_by_contact'] = agent_obj.user_phone
-            o_data['listed_by_role'] = agent_obj.user_role
-        # else 'other' -> keep the values already typed in the sheet (already validated above)
 
         input_property_no = str(o_data.get('property_no', '')).strip()
         input_building_name = str(o_data.get('building_name', '')).strip()
@@ -4248,7 +4323,11 @@ def import_residential_excel_rm(request):
 
     errors.extend(duplicate_blocked_rows)
 
-    # ---- 5. Audit Log ----
+    for entry in identity_mismatch_errors:
+        for msg in entry["errors"]:
+            errors.append(f"Row {entry['row']}: {msg}")
+
+    # ---- 8. Audit Log ----
     RentalActivityLog.objects.create(
         user_identity=user_identity,
         user_role=uploader_role,
@@ -4262,6 +4341,7 @@ def import_residential_excel_rm(request):
             "records_updated": updated,
             "records_skipped": skipped,
             "duplicates_blocked": len(duplicate_blocked_rows),
+            "identity_mismatches": len(identity_mismatch_errors),
             "errors_encountered": len(errors),
         }),
         ip_address=_get_client_ip(request),
@@ -4273,6 +4353,7 @@ def import_residential_excel_rm(request):
         "message": f"{created} Created | {updated} Updated | {skipped} Skipped due to system rules.",
         "created": created, "updated": updated, "skipped": skipped,
         "duplicates_blocked": len(duplicate_blocked_rows),
+        "identity_mismatches": len(identity_mismatch_errors),
         "error_count": len(errors), "errors": errors,
         "unmatched_headers": unmatched_headers,
         "header_row_detected": header_row,
