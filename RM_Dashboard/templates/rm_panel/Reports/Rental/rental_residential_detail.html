@@ -1482,6 +1482,9 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+
+$("#Rent").addClass("active");
+
 document.addEventListener("DOMContentLoaded", function () {
 
 
@@ -1501,10 +1504,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     updateActiveNav();
 
-    // 👇 ADD THE NEW JS RIGHT HERE 👇
+    //  ADD THE NEW JS RIGHT HERE 
     // ============================
     // 4. HORIZONTAL SCROLL FIX FOR NAV
     // ============================
+
     const navTabs = document.getElementById('propNavTabs');
     if (navTabs) {
         navTabs.addEventListener('wheel', function(e) {
@@ -1514,7 +1518,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-    // 👆 END OF NEW JS 👆
+    //  END OF NEW JS 
 
 }); // <-- This is the closing bracket for your DOMContentLoaded function
 

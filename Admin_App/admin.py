@@ -76,6 +76,9 @@ admin.site.register(CommercialRentalVideo)
 ########### Register ResaleResidentialProperty Table/Modal ###############
 
 admin.site.register(ResaleResidentialProperty)
+admin.site.register(ResaleResidentialFAQ)
+admin.site.register(ResalePropertyImage)
+admin.site.register(ResaleResidentialVideo)
 
 
 ########### Register CommercialResaleProperty Table/Modal ###############

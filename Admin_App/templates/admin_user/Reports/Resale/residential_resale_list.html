@@ -709,6 +709,7 @@
                         <th>Property Landmark</th>
                         <th>State</th>
                         <th>Complete Address</th>
+                        <th>Pincode</th>
                         <th>Google Maps Link</th>
                         <th>Latitude</th>
                         <th>Longitude</th>
@@ -913,6 +914,7 @@
                         <td>
                             <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="{{ prop.address }}">{{ prop.address|default:"—" }}</div>
                         </td>
+                        <td>{{ prop.pincode|default:"—" }}</td>
                         <td>
                             {% if prop.google_maps_link %}
                                 <a href="{{ prop.google_maps_link }}" target="_blank" class="btn btn-sm btn-outline-info" style="padding: 2px 8px; font-size: 11px;"><i class="fas fa-map-marker-alt"></i> Map</a>

@@ -1554,14 +1554,17 @@ def residential_rm(request):
 
 
 def rental_residential_view_rm(request, pk):
-    session_user_id = request.session.get('User_id')
+   
+
+    # 1. Retrieve identity from browser session
+    user_id = request.session.get('User_id')
+    admin_id = request.session.get('Admin_id') 
     logged_in_role = request.session.get('user_type')
 
     #  2. UPDATED SECURITY CHECK
-    # If they are an Admin, we only care that they have an impersonate_id.
-    # We don't care if their standard 'User_id' is missing.
-    is_valid_rm = (session_user_id and logged_in_role == "Relationship Manager")
-    is_valid_admin = (logged_in_role == "Admin" and 'impersonate_id' in request.session)
+    
+    is_valid_rm = (user_id and logged_in_role == "Relationship Manager")
+    is_valid_admin = (admin_id == "Admin" and 'impersonate_id' in request.session)
 
     if not is_valid_rm and not is_valid_admin:
         return redirect('login') 
@@ -1570,7 +1573,7 @@ def rental_residential_view_rm(request, pk):
     if logged_in_role == "Admin":
         dashboard_user_id = request.session.get('impersonate_id')
     else:
-        dashboard_user_id = session_user_id
+        dashboard_user_id = user_id
 
     # 4. Data Fetching
     user_obj = User_Details.objects.get(id=dashboard_user_id)
@@ -1598,6 +1601,7 @@ def rental_residential_view_rm(request, pk):
     
     # FIX APPLIED HERE: Changed prop.facilities to prop.nearby_facilities to match the updated model
     facilities_list = [x.strip() for x in prop.nearby_facilities.split(',')] if prop.nearby_facilities else []
+
 
     context = {
         'property': prop,

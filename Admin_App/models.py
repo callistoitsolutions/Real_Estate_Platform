@@ -2214,6 +2214,7 @@ class ResaleResidentialProperty(models.Model):
     property_landmark = models.CharField(max_length=200, blank=True, null=True)
     state = models.CharField(max_length=200, blank=True, null=True)
     google_maps_link = models.CharField(max_length=200, blank=True, null=True)
+    pincode = models.CharField(max_length=200, blank=True, null=True)
     latitude = models.CharField(max_length=200, blank=True, null=True)
     longitude = models.CharField(max_length=200, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
@@ -2548,7 +2549,7 @@ class ResaleResidentialVideo(models.Model):
         return None
 
 
-############## Models End for Resale Resindential  Property  model ############################ 
+############## Models End for Resale Resindential Property  model ################
 
 
 
@@ -2588,6 +2589,10 @@ class CommercialResaleProperty(models.Model):
     listed_by_contact = models.CharField(max_length=255, blank=True, null=True)
     listed_by_role = models.CharField(max_length=255, blank=True, null=True)
 
+    property_unique_key = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    duplicate_count = models.PositiveIntegerField(default=0)
+    duplicate_group_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)   # <-- drives the brokerage label
+
     ############ Basic Information Section #############################
 
     property_title = models.CharField(max_length=255, blank=True, null=True)
@@ -2595,9 +2600,8 @@ class CommercialResaleProperty(models.Model):
     property_category = models.CharField(max_length=50,blank=True,null=True)  
     property_no = models.CharField(max_length=100, blank=True, null=True) 
     occupancy_status = models.CharField(max_length=50,blank=True,null=True)
-    location_hub = models.CharField(max_length=50, blank=True, null=True)
     zone_type = models.CharField(max_length=50,blank=True,null=True)
-    location_hub = models.CharField(max_length=50,blank=True,null=True)
+    location_hub = models.CharField(max_length=50, blank=True, null=True)
     property_condition = models.CharField(max_length=50,blank=True,null=True)
     property_age = models.CharField(max_length=50,blank=True,null=True)
     furnishing_status = models.CharField(max_length=50,blank=True,null=True)
@@ -2605,6 +2609,7 @@ class CommercialResaleProperty(models.Model):
 
     ################# Area Measurements Section ##############################
 
+    super_builtup_area = models.DecimalField(max_digits=12, decimal_places=2,blank=True,null=True)
     builtup_area = models.DecimalField(max_digits=12, decimal_places=2,blank=True,null=True)
     carpet_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     plot_area = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
@@ -2613,13 +2618,14 @@ class CommercialResaleProperty(models.Model):
 
     no_staircases = models.PositiveIntegerField(default=0)
     passenger_lifts = models.PositiveIntegerField(default=0, blank=True, null=True)
+    service_lifts = models.PositiveIntegerField(default=0, blank=True, null=True)
     num_cabins = models.PositiveIntegerField(default=0, blank=True, null=True)
     meeting_rooms = models.PositiveIntegerField(blank=True, null=True)
     min_seats = models.PositiveIntegerField(blank=True, null=True)
     max_seats = models.PositiveIntegerField(default=0)
     private_parking = models.PositiveIntegerField(default=0, blank=True, null=True)
     public_parking = models.PositiveIntegerField(default=0, blank=True, null=True)
-    public_parking = models.PositiveIntegerField(default=0, blank=True, null=True)
+
     brokerage_percentage = models.CharField(max_length=100, blank=True, null=True)
     manual_brokerage = models.PositiveIntegerField(default=0)
 
@@ -2662,13 +2668,18 @@ class CommercialResaleProperty(models.Model):
     address = models.TextField(blank=True,null=True)
     property_landmark = models.CharField(max_length=100,blank=True,null=True)
     state = models.CharField(max_length=100,blank=True,null=True)
+    google_maps_link = models.CharField(max_length=100,blank=True,null=True)
+    latitude = models.CharField(max_length=100,blank=True,null=True)
+    longitude = models.CharField(max_length=100,blank=True,null=True)
 
     ############# Property Images Docs and Videos Sections #########################
 
-    floor_plan = models.ImageField(upload_to='commercial/floor_plans/', null=True, blank=True)
-    property_video = models.FileField(upload_to='commercial/videos/', blank=True, null=True)
-    listed_elsewhere = models.CharField(max_length=100,blank=True,null=True)
-    portal_name = models.CharField(max_length=100,blank=True,null=True)
+    floor_plan = models.ImageField(upload_to='commercial/floor_plans/', null=True, blank=True) 
+    video_option = models.CharField(max_length=200, blank=True, null=True)
+    property_video = models.FileField(upload_to='properties/videos/', null=True, blank=True)
+    property_video_link = models.CharField(max_length=200, blank=True, null=True)
+    listed_elsewhere = models.CharField(max_length=150, blank=True, null=True)
+    portal_name = models.CharField(max_length=150, blank=True, null=True)
 
     ############# Listing Uploaded By Section ############################
 
@@ -2679,13 +2690,13 @@ class CommercialResaleProperty(models.Model):
 
     ############# Timestamp and other details section ##########################
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
+    is_duplicate = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
-    upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    listing_status = models.CharField(max_length=150, blank=True, null=True)
+    approval_status = models.CharField(max_length=150, blank=True, null=True)
 
     class Meta:
         verbose_name = "Commercial Property"

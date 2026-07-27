@@ -259,6 +259,10 @@ urlpatterns = [
 
     path('Rm_Data',views.Rm_Data,name="Rm_Data"),
 
+    ########### urls for download sample excel for rm ###################
+    
+    path('download-rm-sample-excel/', views.download_rm_sample_excel, name='download_rm_sample_excel'),
+
     ######### urls for delete rm details #########################
 
     path('Delete_RM',views.Delete_RM,name='Delete_RM'),
@@ -289,6 +293,10 @@ urlpatterns = [
 
     path('Landlord_Data',views.Landlord_Data,name="Landlord_Data"),
 
+    ########### urls for download sample excel for landlord ###################
+    
+    path('download-landlord-sample-excel/', views.download_landlord_sample_excel, name='download_landlord_sample_excel'),
+
     ########### urls for delete landlord details #################
 
     path('Delete_Landlord',views.Delete_Landlord,name='Delete_Landlord'),
@@ -308,6 +316,10 @@ urlpatterns = [
     ############ urls for upload tenant data functionality via excel ##############
 
     path('Tenant_Data',views.Tenant_Data,name="Tenant_Data"),
+
+    ########### urls for download sample excel for tenant ###################
+    
+    path('download-tenant-sample-excel/', views.download_tenant_sample_excel, name='download_tenant_sample_excel'),
 
     ########### urls for delete tenant details ############################
 
@@ -329,6 +341,10 @@ urlpatterns = [
 
     path('Buyer_Data',views.Buyer_Data,name="Buyer_Data"),
 
+    ########### urls for download sample excel for buyer ###################
+    
+    path('download-buyer-sample-excel/', views.download_buyer_sample_excel, name='download_buyer_sample_excel'),
+
     ############# urls for delete buyer details #########################
 
     path('Delete_Buyer',views.Delete_Buyer,name='Delete_Buyer'),
@@ -348,6 +364,10 @@ urlpatterns = [
     ######### urls for upload agent data functionality via excel ################
 
     path('Agent_Data',views.Agent_Data,name="Agent_Data"),
+
+    ########### urls for download sample excel for agent ###################
+    
+    path('download-agent-sample-excel/', views.download_agent_sample_excel, name='download_agent_sample_excel'),
 
     ######### urls for delete agent ########################
 
@@ -370,6 +390,10 @@ urlpatterns = [
 
     path('Agency_Data',views.Agency_Data,name="Agency_Data"),
 
+    ########### urls for download sample excel for agency/builder ###################
+    
+    path('download-agency-sample-excel/', views.download_agency_sample_excel, name='download_agency_sample_excel'),
+
     ########### urls for delete agency ################################
 
     path('Delete_Agency',views.Delete_Agency,name='Delete_Agency'),
@@ -389,6 +413,10 @@ urlpatterns = [
     ########## urls for upload vendor data functionality via excel ###################
 
     path('Vendor_Data',views.Vendor_Data,name="Vendor_Data"),
+
+    ########### urls for download sample excel for vendor ###################
+    
+    path('download-vendor-sample-excel/', views.download_vendor_sample_excel, name='download_vendor_sample_excel'),
 
     ############ urls for delete vendor #########################
 
@@ -610,6 +638,11 @@ urlpatterns = [
 
    
     path('resale_residential_add',  views.resale_residential_add,    name='resale_residential_add'),
+
+    ######## urls for ajax for add/edit resale residential ################
+
+    path('Resale_Resident_Ajax',  views.Resale_Resident_Ajax,    name='Resale_Resident_Ajax'),
+    
   #  path('resale_residential_list',            views.resale_residential_list,   name='resale_residential_list'),
     path('resale_residential_view/<str:pk>/',   views.resale_residential_view,   name='resale_residential_view'),
     path('resale_residential_delete/<str:pk>/', views.resale_residential_delete, name='resale_residential_delete'),
@@ -626,7 +659,6 @@ urlpatterns = [
     path('resale/sample-excel/',     views.resale_residential_sample_excel,  name='resale_residential_sample_excel'),
 
 
-    path('export_resale_csv/', views.export_resale_csv, name='export_resale_csv'),
     path('export_resale_excel/', views.export_resale_excel, name='export_resale_excel'),
 
     
