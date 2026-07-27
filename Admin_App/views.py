@@ -2358,6 +2358,7 @@ def export_commercial_rent(request):
 
 from django.db.models.functions import TruncMonth
 
+
 def commercial_list(request):
     session_id = request.session.get('Admin_id')
     if not session_id:
@@ -2368,18 +2369,20 @@ def commercial_list(request):
     except Admin_Login.DoesNotExist:
         return render(request, 'home_page/Adminlogin.html')
 
-    print(">>> COMMERCIAL LIST VIEW IS RUNNING! <<<")
-
     # ── 1. GET ALL SEARCH PARAMS ──
-    search_query    = request.GET.get('search', '').strip()
-    prop_type_query = request.GET.get('property_type', '').strip()
-    city_query      = request.GET.get('city', '').strip()
-    zone_query      = request.GET.get('zone_type', '').strip()
-    possession_query= request.GET.get('possession', '').strip()
-    listed_by_query = request.GET.get('listed_by', '').strip()
-    budget_query    = request.GET.get('budget', '').strip()
-    from_date       = request.GET.get('from_date', '').strip()
-    to_date         = request.GET.get('to_date', '').strip()
+    search_query        = request.GET.get('search', '').strip()
+    prop_type_query      = request.GET.get('property_type', '').strip()
+    city_query           = request.GET.get('city', '').strip()
+    zone_query           = request.GET.get('zone_type', '').strip()
+    possession_query     = request.GET.get('possession', '').strip()
+    listed_by_query      = request.GET.get('listed_by', '').strip()
+    uploaded_by_query    = request.GET.get('uploaded_by', '').strip()
+    budget_query         = request.GET.get('budget', '').strip()
+    listing_status_query = request.GET.get('listing_status', '').strip()
+    approval_status_query = request.GET.get('approval_status', '').strip()
+    duplicate_query      = request.GET.get('duplicate', '').strip()
+    from_date            = request.GET.get('from_date', '').strip()
+    to_date              = request.GET.get('to_date', '').strip()
 
     # ── Base queryset ──
     try:
@@ -2388,13 +2391,34 @@ def commercial_list(request):
         properties = CommercialRentalProperty.objects.all().order_by('-id')
 
     # ── 2. APPLY FILTERS ──
+    # NOTE: search now checks across every meaningful text/identifier field,
+    # not just title/city/locality/owner name.
     if search_query:
         properties = properties.filter(
+            Q(id__icontains=search_query) |
+            Q(property_unique_key__icontains=search_query) |
             Q(property_title__icontains=search_query) |
             Q(building_name__icontains=search_query) |
+            Q(property_no__icontains=search_query) |
+            Q(wing_number__icontains=search_query) |
             Q(city__icontains=search_query) |
+            Q(state__icontains=search_query) |
             Q(locality__icontains=search_query) |
-            Q(listed_by_name__icontains=search_query)
+            Q(address__icontains=search_query) |
+            Q(pincode__icontains=search_query) |
+            Q(property_type__icontains=search_query) |
+            Q(zone_type__icontains=search_query) |
+            Q(availability_status__icontains=search_query) |
+            Q(listed_by_name__icontains=search_query) |
+            Q(listed_by_contact__icontains=search_query) |
+            Q(listed_by_email__icontains=search_query) |
+            Q(listed_by_role__icontains=search_query) |
+            Q(uploaded_by_name__icontains=search_query) |
+            Q(uploaded_by_email__icontains=search_query) |
+            Q(uploaded_by_contact__icontains=search_query) |
+            Q(uploaded_by_role__icontains=search_query) |
+            Q(listing_status__icontains=search_query) |
+            Q(approval_status__icontains=search_query)
         )
 
     if prop_type_query and prop_type_query != 'All Types':
@@ -2407,6 +2431,18 @@ def commercial_list(request):
         properties = properties.filter(availability_status__icontains=possession_query)
     if listed_by_query and listed_by_query != 'All Roles':
         properties = properties.filter(listed_by_role__icontains=listed_by_query)
+    if uploaded_by_query and uploaded_by_query != 'All Roles':
+        properties = properties.filter(uploaded_by_role__icontains=uploaded_by_query)
+
+    if listing_status_query and listing_status_query != 'All Status':
+        properties = properties.filter(listing_status__iexact=listing_status_query)
+    if approval_status_query and approval_status_query != 'All Approval':
+        properties = properties.filter(approval_status__iexact=approval_status_query)
+
+    if duplicate_query == 'duplicates_only':
+        properties = properties.filter(is_duplicate=True)
+    elif duplicate_query == 'unique_only':
+        properties = properties.filter(is_duplicate=False)
 
     if from_date:
         try:
@@ -2430,205 +2466,23 @@ def commercial_list(request):
             properties = properties.filter(monthly_rent__gt=500000)
 
     properties = properties.prefetch_related(
-    Prefetch(
-        'walkthrough_video',
-        queryset=CommercialRentalVideo.objects.all(),
-        to_attr='all_videos'
+        Prefetch(
+            'walkthrough_video',
+            queryset=CommercialRentalVideo.objects.all(),
+            to_attr='all_videos'
+        )
     )
-)
-
-    # ── Exhaustive Field Definition for Exports ──
-    EXPORT_COLS = [
-        ("System Data", "id", False, "Database ID"),
-        ("System Data", "property_unique_key", False, "Duplicate Checker Key"),
-        ("System Data", "is_duplicate", False, "True/False"),
-        ("System Data", "property_title", False, "Auto Generated Title"),
-        
-        ("Basic Info", "property_type", True, "office-space / shop / warehouse / industrial / land"),
-        ("Basic Info", "property_condition", True, "bare-shell / warm-shell / fitted / furnished"),
-        ("Basic Info", "city", True, "City name"),
-        ("Basic Info", "locality", True, "Area/locality"),
-        ("Basic Info", "address", True, "Complete address"),
-        ("Basic Info", "building_name", True, "Building/project name"),
-        ("Basic Info", "wing_number", False, "Wing/Tower"),
-        ("Basic Info", "property_no", True, "Internal Unit No"),
-        ("Basic Info", "availability_status", True, "Available Status"),
-        ("Basic Info", "available_from", False, "YYYY-MM-DD"),
-        ("Basic Info", "property_age", True, "Age in Years"),
-        ("Basic Info", "zone_type", False, "industrial / commercial / mixed_use"),
-        ("Basic Info", "location_hub", False, "it_park / business_district"),
-        ("Basic Info", "ownership_type", True, "freehold / leasehold"),
-        
-        ("Area & Pricing", "builtup_area", True, "Number in sq.ft"),
-        ("Area & Pricing", "carpet_area", False, "Number in sq.ft"),
-        ("Area & Pricing", "monthly_rent", True, "Monthly rent in ₹"),
-        ("Area & Pricing", "advanced_rent_type", False, "Advance Type"),
-        ("Area & Pricing", "advanced_rent_amount", False, "Advance Amount"),
-        ("Area & Pricing", "security_deposit_type", False, "Deposit Type"),
-        ("Area & Pricing", "security_deposit_amount", False, "Deposit Amount"),
-        ("Area & Pricing", "maintenance_type", False, "Included/Extra"),
-        ("Area & Pricing", "maintenance_charges", False, "Monthly maintenance in ₹"),
-        ("Area & Pricing", "total_move_in_cost", False, "Total ₹"),
-        ("Area & Pricing", "negotiable", False, "Yes / No"),
-        ("Area & Pricing", "brokerage_percentage", False, "Brokerage Terms"),
-        ("Area & Pricing", "manual_brokerage", False, "Manual Amount"),
-        ("Area & Pricing", "dg_ups_included", False, "true / false"),
-        ("Area & Pricing", "electricity_included", False, "true / false"),
-        ("Area & Pricing", "water_included", False, "true / false"),
-        ("Area & Pricing", "lockin_period", False, "Lock-in months"),
-        ("Area & Pricing", "rent_increase", False, "% per year"),
-        
-        ("Building", "building_configuration", False, "e.g., G+3"),
-        ("Building", "total_floors", False, "Total floors"),
-        ("Building", "staircases", False, "Number of staircases"),
-        ("Building", "passenger_lifts", False, "Number (0 if none)"),
-        ("Building", "service_lifts", False, "Number (0 if none)"),
-        ("Building", "private_parking", False, "Private parking spots"),
-        ("Building", "min_seats", False, "Min seating"),
-        ("Building", "max_seats", False, "Max seating"),
-        ("Building", "cabins", False, "Number of cabins"),
-        ("Building", "meeting_rooms", False, "Number of meeting rooms"),
-        ("Building", "private_washroom", False, "Number (0 if none)"),
-        ("Building", "public_washroom", False, "Number (0 if none)"),
-        ("Building", "flooring_type", False, "marble / vitrified / granite / wooden / ceramic"),
-        
-        ("Amenities", "amenities", True, "Comma-separated"),
-        ("Amenities", "nearby_facilities", True, "Comma-separated"),
-        ("Amenities", "property_summary", False, "Short Summary"),
-        ("Amenities", "property_description", False, "Auto Generated Detailed description"),
-        ("Amenities", "user_description", False, "User Added Detailed description"),
-        
-        ("Media & Contact", "listed_by_type", True, "Self/Other"),
-        ("Media & Contact", "listed_by_name", True, "Full name"),
-        ("Media & Contact", "listed_by_contact", True, "Contact Number"),
-        ("Media & Contact", "listed_by_email", True, "Email"),
-        ("Media & Contact", "listed_by_role", True, "Role"),
-        
-        ("Uploader Tracking", "uploaded_by_name", False, "Auto-filled"),
-        ("Uploader Tracking", "uploaded_by_email", False, "Auto-filled"),
-        ("Uploader Tracking", "uploaded_by_contact", False, "Auto-filled"),
-        ("Uploader Tracking", "uploaded_by_role", False, "Auto-filled"),
-        
-        ("System Tracking", "created_at", False, "Datetime created"),
-        ("System Tracking", "is_deleted", False, "True/False"),
-        ("System Tracking", "upload_file_name", False, "Source Form"),
-    ]
 
     # ════════════════════════════════════════════════
-    # 🛑 ROBUST EXPORT LOGIC 🛑
+    # ⛔ EXCEL / CSV DOWNLOAD BLOCK REMOVED
+    # (the openpyxl / csv export code that used to live here has been
+    #  deleted per request — this view no longer serves file downloads)
     # ════════════════════════════════════════════════
-
-    # ── Excel Download ──
-    if request.GET.get('download') == 'excel':
-        try:
-            wb = openpyxl.Workbook()
-            ws = wb.active
-            ws.title = "Commercial Rental"
-
-            HDR_BG  = "667EEA"
-            REQ_BG  = "FEF3C7"
-            OPT_BG  = "F0FDF4"
-            thin = Side(style="thin", color="CBD5E1")
-            bdr  = Border(left=thin, right=thin, top=thin, bottom=thin)
-
-            # Row 1: Section Banners
-            sec_spans = OrderedDict()
-            for i, (sec, *_) in enumerate(EXPORT_COLS):
-                sec_spans.setdefault(sec, []).append(i + 1)
-
-            for sec, cols in sec_spans.items():
-                c = ws.cell(row=1, column=cols[0], value=f"📋 {sec}")
-                c.font      = Font(bold=True, color="FFFFFF", name="Arial", size=11)
-                c.fill      = PatternFill("solid", fgColor=HDR_BG)
-                c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-                c.border    = bdr
-                if len(cols) > 1:
-                    ws.merge_cells(start_row=1, start_column=cols[0], end_row=1, end_column=cols[-1])
-
-            # Rows 2 & 3: Labels and Hints
-            for ci, (sec, field, req, hint) in enumerate(EXPORT_COLS, 1):
-                lc = ws.cell(row=2, column=ci, value=field + (" *" if req else ""))
-                lc.font      = Font(bold=True, color="1E293B", name="Arial", size=9)
-                lc.fill      = PatternFill("solid", fgColor=REQ_BG if req else OPT_BG)
-                lc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-                lc.border    = bdr
-
-                hc = ws.cell(row=3, column=ci, value=hint)
-                hc.font      = Font(italic=True, color="64748B", name="Arial", size=8)
-                hc.fill      = PatternFill("solid", fgColor="FFFFFF")
-                hc.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-                hc.border    = bdr
-
-                ws.column_dimensions[get_column_letter(ci)].width = max(18, len(field) + 4)
-
-            # Rows 4+: Database Data Injection
-            for row_idx, prop in enumerate(properties, start=4):
-                for col_idx, (_, field_name, _, _) in enumerate(EXPORT_COLS, start=1):
-                    val = getattr(prop, field_name, "")
-                    
-                    if val is True: val = "Yes"
-                    elif val is False: val = "No"
-                    elif hasattr(val, 'strftime'): val = val.strftime('%Y-%m-%d %H:%M')
-                    elif isinstance(val, list): val = ", ".join(map(str, val))
-                    elif hasattr(val, 'url'): val = val.url if val else ""
-                    
-                    cell = ws.cell(row=row_idx, column=col_idx, value=str(val) if val is not None else "")
-                    cell.alignment = Alignment(vertical="center", wrap_text=True)
-                    cell.border = bdr
-
-            ws.row_dimensions[1].height = 28
-            ws.row_dimensions[2].height = 36
-            ws.row_dimensions[3].height = 42
-            ws.freeze_panes = "A4"
-
-            buf = io.BytesIO()
-            wb.save(buf)
-            buf.seek(0)
-            
-            response = HttpResponse(
-                buf.getvalue(),
-                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
-            response["Content-Disposition"] = 'attachment; filename="Commercial_Rental_Listing_Export.xlsx"'
-            return response
-
-        except Exception as e:
-            error_msg = f"ERROR GENERATING EXCEL:\n\n{str(e)}\n\n{traceback.format_exc()}"
-            print(error_msg)
-            return HttpResponse(f"<pre>{error_msg}</pre>", status=500)
-
-    # ── CSV Download ──
-    if request.GET.get('download') == 'csv':
-        try:
-            response = HttpResponse(content_type='text/csv')
-            response['Content-Disposition'] = 'attachment; filename="commercial_rental_properties.csv"'
-            writer = csv.writer(response)
-            
-            writer.writerow([field for _, field, _, _ in EXPORT_COLS])
-            
-            for prop in properties:
-                row_data = []
-                for _, field_name, _, _ in EXPORT_COLS:
-                    val = getattr(prop, field_name, "")
-                    if val is True: val = "Yes"
-                    elif val is False: val = "No"
-                    elif hasattr(val, 'strftime'): val = val.strftime('%Y-%m-%d %H:%M')
-                    elif isinstance(val, list): val = ", ".join(map(str, val))
-                    elif hasattr(val, 'url'): val = val.url if val else ""
-                    row_data.append(val if val is not None else "")
-                writer.writerow(row_data)
-            
-            return response
-            
-        except Exception as e:
-            error_msg = f"ERROR GENERATING CSV:\n\n{str(e)}\n\n{traceback.format_exc()}"
-            print(error_msg)
-            return HttpResponse(f"<pre>{error_msg}</pre>", status=500)
 
     # ── Pagination ──
-    paginator    = Paginator(properties, 10)
-    page_number  = request.GET.get('page', 1)
-    page_obj     = paginator.get_page(page_number)
+    paginator      = Paginator(properties, 10)
+    page_number    = request.GET.get('page', 1)
+    page_obj       = paginator.get_page(page_number)
     filtered_count = properties.count()
 
     for prop in page_obj:
@@ -2663,6 +2517,15 @@ def commercial_list(request):
     unique_roles = (all_props
         .exclude(listed_by_role__isnull=True).exclude(listed_by_role='')
         .values_list('listed_by_role', flat=True).distinct())
+    unique_uploaded_roles = (all_props
+        .exclude(uploaded_by_role__isnull=True).exclude(uploaded_by_role='')
+        .values_list('uploaded_by_role', flat=True).distinct())
+    unique_listing_status = (all_props
+        .exclude(listing_status__isnull=True).exclude(listing_status='')
+        .values_list('listing_status', flat=True).distinct())
+    unique_approval_status = (all_props
+        .exclude(approval_status__isnull=True).exclude(approval_status='')
+        .values_list('approval_status', flat=True).distinct())
 
     # ── Occupancy KPIs ──
     active_count   = all_props.exclude(availability_status__isnull=True).exclude(availability_status='').count()
@@ -2708,6 +2571,17 @@ def commercial_list(request):
     verified_pct = round((with_owner_count     / total_count * 100)) if total_count > 0 else 0
     image_pct    = round((with_images_count    / total_count * 100)) if total_count > 0 else 0
     premium_pct  = round((premium_properties_count / total_count * 100)) if total_count > 0 else 0
+
+    # ── NEW: Listing / Approval / Duplicate status KPIs ──
+    active_listing_count   = all_props.filter(listing_status__iexact='Active').count()
+    inactive_listing_count = all_props.filter(listing_status__iexact='Inactive').count()
+    sold_listing_count     = all_props.filter(listing_status__iexact='Sold').count()
+    rented_listing_count   = all_props.filter(listing_status__iexact='Rented').count()
+    pending_approval_count = all_props.filter(approval_status__iexact='Pending').count()
+    approved_count         = all_props.filter(approval_status__iexact='Approved').count()
+    rejected_count         = all_props.filter(approval_status__iexact='Rejected').count()
+    duplicate_properties_count = all_props.filter(is_duplicate=True).count()
+    unique_properties_count    = total_count - duplicate_properties_count
 
     # ── Uploaded file names (for bulk delete) ──
     try:
@@ -2759,22 +2633,29 @@ def commercial_list(request):
         'admin_obj': admin_obj,
         'page_obj': page_obj,
 
-        'search_query':     search_query,
-        'prop_type_query':  prop_type_query,
-        'city_query':       city_query,
-        'zone_query':       zone_query,
-        'possession_query': possession_query,
-        'listed_by_query':  listed_by_query,
-        'budget_query':     budget_query,
-        'from_date':        from_date,
-        'to_date':          to_date,
+        'search_query':          search_query,
+        'prop_type_query':       prop_type_query,
+        'city_query':            city_query,
+        'zone_query':            zone_query,
+        'possession_query':      possession_query,
+        'listed_by_query':       listed_by_query,
+        'uploaded_by_query':     uploaded_by_query,
+        'budget_query':          budget_query,
+        'listing_status_query':  listing_status_query,
+        'approval_status_query': approval_status_query,
+        'duplicate_query':       duplicate_query,
+        'from_date':             from_date,
+        'to_date':               to_date,
 
-        'unique_property_types': unique_property_types,
-        'unique_cities':         unique_cities,
-        'unique_zones':          unique_zones,
-        'unique_possession':     unique_possession,
-        'unique_roles':          unique_roles,
-        'uploaded_files':        uploaded_files,
+        'unique_property_types':  unique_property_types,
+        'unique_cities':          unique_cities,
+        'unique_zones':           unique_zones,
+        'unique_possession':      unique_possession,
+        'unique_roles':           unique_roles,
+        'unique_uploaded_roles':  unique_uploaded_roles,
+        'unique_listing_status':  unique_listing_status,
+        'unique_approval_status': unique_approval_status,
+        'uploaded_files':         uploaded_files,
 
         'filtered_count':            filtered_count,
         'total_count':               total_count,
@@ -2802,6 +2683,17 @@ def commercial_list(request):
         'image_pct':                 image_pct,
         'premium_pct':               premium_pct,
 
+        # NEW status KPIs
+        'active_listing_count':      active_listing_count,
+        'inactive_listing_count':    inactive_listing_count,
+        'sold_listing_count':        sold_listing_count,
+        'rented_listing_count':      rented_listing_count,
+        'pending_approval_count':    pending_approval_count,
+        'approved_count':            approved_count,
+        'rejected_count':            rejected_count,
+        'duplicate_properties_count': duplicate_properties_count,
+        'unique_properties_count':    unique_properties_count,
+
         'total_tenants':    total_tenants,
         'collection_rate':  collection_rate,
         'pending_payments': pending_payments,
@@ -2816,7 +2708,6 @@ def commercial_list(request):
         'monthly_revenue_json':   monthly_revenue_json,
     }
     return render(request, 'admin_user/Reports/Rental/commercial_list.html', context)
-
 
 
 
@@ -9355,10 +9246,12 @@ from collections import OrderedDict
 
 
 
-def _norm(value):
-    """Normalize any category string for safe comparison: lowercase + stripped."""
-    return (value or '').strip().lower()
 
+
+
+
+def _norm(val):
+    return val.strip().lower() if val else ''
 
 def rental_residential_view(request, pk):
     session_id = request.session.get('Admin_id')
@@ -9368,7 +9261,7 @@ def rental_residential_view(request, pk):
     admin_obj = Admin_Login.objects.get(id=session_id)
 
     prop = get_object_or_404(
-        RentalResidentialProperty.objects.prefetch_related('images', 'faqs'),
+        RentalResidentialProperty.objects.prefetch_related('images', 'faqs', 'video'),
         pk=pk
     )
 
@@ -9388,7 +9281,7 @@ def rental_residential_view(request, pk):
         'kitchen': 'Kitchen', 'bathroom': 'Bathroom', 'balcony': 'Balcony', 'others': 'Others',
     }
 
-    # ---------- IMAGES (sorted using NORMALIZED category so case/whitespace in the DB can't break ordering) ----------
+    # ---------- IMAGES ----------
     all_images = sorted(
         prop.images.all(),
         key=lambda img: (
@@ -9397,14 +9290,14 @@ def rental_residential_view(request, pk):
         )
     )
 
-    # ---------- GROUPED BY CATEGORY (normalized matching) ----------
+    # ---------- GROUPED BY CATEGORY ----------
     grouped_images = OrderedDict()
     for cat in CATEGORY_ORDER:
         cat_images = [img for img in all_images if _norm(img.category) == cat]
         if cat_images:
             grouped_images[cat] = {'label': CATEGORY_LABELS[cat], 'images': cat_images}
 
-    # ---------- DEDICATED THUMBNAIL SLOTS (normalized matching — THIS is what was silently failing before) ----------
+    # ---------- DEDICATED THUMBNAIL SLOTS ----------
     THUMB_PRIORITY = ['bathroom', 'living', 'bedroom', 'kitchen', 'balcony', 'others']
 
     def first_image_index(category):
@@ -9432,8 +9325,24 @@ def rental_residential_view(request, pk):
     thumb1_image = all_images[thumb1_idx] if thumb1_idx is not None else None
     thumb2_image = all_images[thumb2_idx] if thumb2_idx is not None else None
 
-    # ---------- VIDEO ----------
-    video_obj = RentalResidentialVideo.objects.filter(property=prop).first()
+    # ---------- VIDEO HIERARCHY ENGINE ----------
+    videos_queryset = prop.video.all() if hasattr(prop, 'video') else RentalResidentialVideo.objects.filter(property=prop)
+    rm_video = videos_queryset.filter(source='rm_assisted', video_url__isnull=False).exclude(video_url='').first()
+    manual_video = videos_queryset.filter(source='uploaded', video__isnull=False).first()
+    auto_video = videos_queryset.filter(source='auto', video__isnull=False).first()
+
+    selected_video = None
+    video_display_mode = None
+
+    if rm_video:
+        selected_video = rm_video
+        video_display_mode = 'rm_assisted'
+    elif manual_video:
+        selected_video = manual_video
+        video_display_mode = 'manual'
+    elif auto_video:
+        selected_video = auto_video
+        video_display_mode = 'auto'
 
     context = {
         'property': prop,
@@ -9443,14 +9352,13 @@ def rental_residential_view(request, pk):
         'thumb1_idx': thumb1_idx,
         'thumb2_image': thumb2_image,
         'thumb2_idx': thumb2_idx,
-        'video_obj': video_obj,
+        'selected_video': selected_video,
+        'video_display_mode': video_display_mode,
         'faqs': prop.faqs.all(),
         'amenities_list': amenities_list,
         'facilities_list': facilities_list,
         'latest_properties': latest_properties,
         'admin_obj': admin_obj,
-        # TEMP DEBUG — remove once confirmed. Shows raw category values as stored in DB.
-        'debug_categories': [(img.id, repr(img.category)) for img in all_images],
     }
     return render(request, 'admin_user/Reports/Rental/rental_residential_detail.html', context)
 
@@ -11926,28 +11834,52 @@ def pg_list(request):
     admin_obj = Admin_Login.objects.get(id=session_id)
 
     # ── READ FILTER STRINGS ──
-    search_query   = request.GET.get('search', '').strip()
-    pg_for_filter  = request.GET.get('pg_for', '').strip()
-    city_filter    = request.GET.get('city', '').strip()
-    furnish_filter = request.GET.get('furnish', '').strip()
-    meals_filter   = request.GET.get('meals', '').strip()
-    sharing_filter = request.GET.get('sharing', '').strip()
-    from_date      = request.GET.get('from_date', '').strip()
-    to_date        = request.GET.get('to_date', '').strip()
+    search_query          = request.GET.get('search', '').strip()
+    pg_for_filter          = request.GET.get('pg_for', '').strip()
+    city_filter            = request.GET.get('city', '').strip()
+    furnish_filter         = request.GET.get('furnish', '').strip()
+    meals_filter           = request.GET.get('meals', '').strip()
+    sharing_filter         = request.GET.get('sharing', '').strip()
+    listed_by_filter       = request.GET.get('listed_by', '').strip()
+    uploaded_by_filter     = request.GET.get('uploaded_by', '').strip()
+    listing_status_filter  = request.GET.get('listing_status', '').strip()
+    approval_status_filter = request.GET.get('approval_status', '').strip()
+    duplicate_filter       = request.GET.get('duplicate', '').strip()
+    from_date              = request.GET.get('from_date', '').strip()
+    to_date                = request.GET.get('to_date', '').strip()
 
     # ── FILTER SOFT DELETIONS ──
     all_props  = PGColivingProperty.objects.filter(is_deleted=False)
     properties = all_props.order_by('-created_at')
 
+    # NOTE: search now checks every meaningful text/identifier field,
+    # not just title/city/locality/owner name/contact/id.
     if search_query:
         properties = properties.filter(
-            Q(property_title__icontains=search_query) | 
-            Q(city__icontains=search_query) |
-            Q(locality__icontains=search_query) | 
+            Q(id__icontains=search_query) |
+            Q(property_unique_key__icontains=search_query) |
+            Q(property_title__icontains=search_query) |
             Q(building_name__icontains=search_query) |
-            Q(listed_by_name__icontains=search_query) | 
+            Q(property_no__icontains=search_query) |
+            Q(wing_number__icontains=search_query) |
+            Q(city__icontains=search_query) |
+            Q(state__icontains=search_query) |
+            Q(locality__icontains=search_query) |
+            Q(address__icontains=search_query) |
+            Q(pincode__icontains=search_query) |
+            Q(pg_for__icontains=search_query) |
+            Q(furnishing_status__icontains=search_query) |
+            Q(room_type__icontains=search_query) |
+            Q(listed_by_name__icontains=search_query) |
             Q(listed_by_contact__icontains=search_query) |
-            Q(id__icontains=search_query)
+            Q(listed_by_email__icontains=search_query) |
+            Q(listed_by_role__icontains=search_query) |
+            Q(uploaded_by_name__icontains=search_query) |
+            Q(uploaded_by_email__icontains=search_query) |
+            Q(uploaded_by_contact__icontains=search_query) |
+            Q(uploaded_by_role__icontains=search_query) |
+            Q(listing_status__icontains=search_query) |
+            Q(approval_status__icontains=search_query)
         )
     if pg_for_filter:
         properties = properties.filter(pg_for__iexact=pg_for_filter)
@@ -11961,14 +11893,53 @@ def pg_list(request):
         properties = properties.filter(meals_available=False)
     if sharing_filter:
         properties = properties.filter(room_type__iexact=sharing_filter)
+
+    if listed_by_filter and listed_by_filter != 'All Roles':
+        properties = properties.filter(listed_by_role__icontains=listed_by_filter)
+    if uploaded_by_filter and uploaded_by_filter != 'All Roles':
+        properties = properties.filter(uploaded_by_role__icontains=uploaded_by_filter)
+    if listing_status_filter and listing_status_filter != 'All Status':
+        properties = properties.filter(listing_status__iexact=listing_status_filter)
+    if approval_status_filter and approval_status_filter != 'All Approval':
+        properties = properties.filter(approval_status__iexact=approval_status_filter)
+
+    if duplicate_filter == 'duplicates_only':
+        properties = properties.filter(is_duplicate=True)
+    elif duplicate_filter == 'unique_only':
+        properties = properties.filter(is_duplicate=False)
+
     if from_date:
         properties = properties.filter(created_at__date__gte=from_date)
     if to_date:
         properties = properties.filter(created_at__date__lte=to_date)
 
+    # ── NEW: prefetch videos so uploaded_video / auto_video / rm_video
+    # actually exist on each row instead of being undefined in the template.
+    # PGColivingVideo.property has related_name="videos", so we prefetch
+    # 'videos' (not 'video') and stash the whole list on each row as
+    # `all_videos`, then split by `source` below. ──
+    properties = properties.prefetch_related(
+        Prefetch(
+            'videos',
+            queryset=PGColivingVideo.objects.all(),
+            to_attr='all_videos'
+        )
+    )
+
     # ── PAGINATION SYSTEM ──
     paginator = Paginator(properties, 10)
     page_obj  = paginator.get_page(request.GET.get('page', 1))
+
+    # ── NEW: split each property's prefetched videos into the 3 source
+    # buckets the template expects (mirrors commercial_list's pattern).
+    # This MUST run on page_obj (after pagination), not on the full
+    # `properties` queryset, so the prefetch is only evaluated for the
+    # 10 rows actually shown on this page. ──
+    for prop in page_obj:
+        videos_by_source = {v.source: v for v in prop.all_videos}
+        prop.uploaded_video = videos_by_source.get('uploaded')
+        prop.auto_video     = videos_by_source.get('auto')
+        prop.rm_video       = videos_by_source.get('rm_assisted')
 
     # ── SUMMARY CARD KPI AGGREGATIONS ──
     total_count    = properties.count()
@@ -12008,9 +11979,35 @@ def pg_list(request):
     except Exception:
         with_images_count = 0
 
+    # ── Listing / Approval / Duplicate status KPIs (unfiltered dataset) ──
+    active_listing_count   = all_props.filter(listing_status__iexact='Active').count()
+    inactive_listing_count = all_props.filter(listing_status__iexact='Inactive').count()
+    sold_listing_count     = all_props.filter(listing_status__iexact='Sold').count()
+    rented_listing_count   = all_props.filter(listing_status__iexact='Rented').count()
+    pending_approval_count = all_props.filter(approval_status__iexact='Pending').count()
+    approved_count         = all_props.filter(approval_status__iexact='Approved').count()
+    rejected_count         = all_props.filter(approval_status__iexact='Rejected').count()
+    all_props_total        = all_props.count()
+    duplicate_properties_count = all_props.filter(is_duplicate=True).count()
+    unique_properties_count    = all_props_total - duplicate_properties_count
+
     uploaded_files = PGColivingProperty.objects.filter(
         is_deleted=False, upload_file_name__isnull=False
     ).exclude(upload_file_name='').values_list('upload_file_name', flat=True).distinct().order_by('upload_file_name')
+
+    # ── Dropdown unique values (roles / statuses) ──
+    unique_roles = (all_props
+        .exclude(listed_by_role__isnull=True).exclude(listed_by_role='')
+        .values_list('listed_by_role', flat=True).distinct())
+    unique_uploaded_roles = (all_props
+        .exclude(uploaded_by_role__isnull=True).exclude(uploaded_by_role='')
+        .values_list('uploaded_by_role', flat=True).distinct())
+    unique_listing_status = (all_props
+        .exclude(listing_status__isnull=True).exclude(listing_status='')
+        .values_list('listing_status', flat=True).distinct())
+    unique_approval_status = (all_props
+        .exclude(approval_status__isnull=True).exclude(approval_status='')
+        .values_list('approval_status', flat=True).distinct())
 
     # ── CHARTS ──
     pg_for_qs     = properties.values('pg_for').annotate(c=Count('id')).order_by('-c')
@@ -12033,57 +12030,76 @@ def pg_list(request):
 
     return render(request, 'admin_user/Reports/Rental/pg_list.html', {
         'admin_obj': admin_obj,
-        'page_obj': page_obj, 
-        'search_query': search_query, 
+        'page_obj': page_obj,
+        'search_query': search_query,
         'pg_for_filter': pg_for_filter,
-        'city_filter': city_filter, 
-        'furnish_filter': furnish_filter, 
+        'city_filter': city_filter,
+        'furnish_filter': furnish_filter,
         'meals_filter': meals_filter,
-        'sharing_filter': sharing_filter, 
-        'from_date': from_date, 
-        'to_date': to_date, 
+        'sharing_filter': sharing_filter,
+        'listed_by_filter': listed_by_filter,
+        'uploaded_by_filter': uploaded_by_filter,
+        'listing_status_filter': listing_status_filter,
+        'approval_status_filter': approval_status_filter,
+        'duplicate_filter': duplicate_filter,
+        'from_date': from_date,
+        'to_date': to_date,
         'cities': cities,
-        'total_count': total_count, 
-        'city_count': city_count, 
+        'unique_roles': unique_roles,
+        'unique_uploaded_roles': unique_uploaded_roles,
+        'unique_listing_status': unique_listing_status,
+        'unique_approval_status': unique_approval_status,
+
+        'total_count': total_count,
+        'city_count': city_count,
         'boys_count': boys_count,
-        'girls_count': girls_count, 
-        'coliving_count': coliving_count, 
+        'girls_count': girls_count,
+        'coliving_count': coliving_count,
         'total_beds': total_beds,
-        'boys_pct': boys_pct, 
-        'girls_pct': girls_pct, 
+        'boys_pct': boys_pct,
+        'girls_pct': girls_pct,
         'coliving_pct': coliving_pct,
-        'avg_rent': rent_stats['avg_rent'] or 0, 
+        'avg_rent': rent_stats['avg_rent'] or 0,
         'max_rent': rent_stats['max_rent'] or 0,
-        'min_rent': rent_stats['min_rent'] or 0, 
+        'min_rent': rent_stats['min_rent'] or 0,
         'total_revenue': rent_stats['tot_rev'] or 0,
-        'total_deposit': rent_stats['tot_dep'] or 0, 
+        'total_deposit': rent_stats['tot_dep'] or 0,
         'avg_deposit': rent_stats['avg_dep'] or 0,
-        'meals_available_count': meals_available_count, 
+        'meals_available_count': meals_available_count,
         'meals_pct': meals_pct,
-        'furnished_count': furnished_count, 
+        'furnished_count': furnished_count,
         'furnished_pct': furnished_pct,
-        'single_room_count': single_room_count, 
+        'single_room_count': single_room_count,
         'shared_room_count': shared_room_count,
-        'non_veg_allowed': meals_available_count, 
+        'non_veg_allowed': meals_available_count,
         'with_images_count': with_images_count,
-        'anytime_entry': anytime_entry, 
+        'anytime_entry': anytime_entry,
         'visitors_allowed': visitors_allowed,
-        'premium_pg_count': premium_pg_count, 
+        'premium_pg_count': premium_pg_count,
         'budget_pg_count': budget_pg_count,
-        'with_owner_count': with_owner_count, 
+        'with_owner_count': with_owner_count,
         'uploaded_files': uploaded_files,
-        'pg_for_labels': pg_for_labels, 
+
+        # status KPIs
+        'active_listing_count': active_listing_count,
+        'inactive_listing_count': inactive_listing_count,
+        'sold_listing_count': sold_listing_count,
+        'rented_listing_count': rented_listing_count,
+        'pending_approval_count': pending_approval_count,
+        'approved_count': approved_count,
+        'rejected_count': rejected_count,
+        'duplicate_properties_count': duplicate_properties_count,
+        'unique_properties_count': unique_properties_count,
+
+        'pg_for_labels': pg_for_labels,
         'pg_for_data': pg_for_data,
-        'rent_range_labels': rent_range_labels, 
+        'rent_range_labels': rent_range_labels,
         'rent_range_data': rent_range_data,
-        'furnishing_labels': furnishing_labels, 
+        'furnishing_labels': furnishing_labels,
         'furnishing_data': furnishing_data,
-        'city_labels': city_labels, 
+        'city_labels': city_labels,
         'city_data': city_data,
     })
-
-
-
 
 def pg_reports(request):
     session_id = request.session.get('Admin_id')
@@ -13683,6 +13699,29 @@ def pg_edit(request, pk):
             pg.furnishing_status = request.POST.get('furnishing_status') or request.POST.get('furnishing_type') or pg.furnishing_status
             pg.best_suited_for = (request.POST.get('best_suited_for') or '').strip()
 
+            pg.wing_number = (request.POST.get('wing_number') or '').strip()
+            pg.property_landmark = (request.POST.get('property_landmark') or '').strip()
+            pg.pincode = (request.POST.get('pincode') or '').strip()
+            pg.state = (request.POST.get('state') or '').strip()
+            pg.google_maps_link = (request.POST.get('google_maps_link') or '').strip()
+            pg.latitude = (request.POST.get('latitude') or '').strip()
+            pg.longitude = (request.POST.get('longitude') or '').strip()
+
+            # Room type & pricing (Step 2)
+            pg.room_type = (request.POST.get('room_type') or pg.room_type or '').strip()
+            monthly_rent_val = _to_int_or_none(request.POST.get('room_rent') or request.POST.get('monthly_rent'))
+            if monthly_rent_val is not None:
+                pg.monthly_rent = monthly_rent_val
+            pg.advance_rent_month = (request.POST.get('advance_rent_month') or '').strip()
+            pg.advance_rent_amount = _to_int_or_none(request.POST.get('advance_rent_amount'))
+            pg.security_deposit_type = (request.POST.get('security_deposit_type') or '').strip()
+            pg.security_deposit_amount = _to_int_or_none(request.POST.get('security_deposit_amount'))
+            pg.maintenance_type = (request.POST.get('maintenance_type') or '').strip()
+            pg.maintenance_amount = _to_int_or_none(request.POST.get('maintenance_amount'))
+            pg.total_move_in_cost = _to_int_or_none(request.POST.get('total_move_in_cost'))
+            pg.brokerage_percentage = (request.POST.get('brokerage_percentage') or '').strip()
+            pg.manual_brokerage = (request.POST.get('manual_brokerage') or '').strip()
+
             meals_available = _to_bool(request.POST.get('meals_available'))
             pg.meals_available = meals_available
             pg.meal_offerings = (request.POST.get('meal_offerings') or '').strip() if meals_available else None
@@ -13701,6 +13740,18 @@ def pg_edit(request, pk):
 
             pg.property_managed_by = request.POST.get('property_managed_by', pg.property_managed_by)
             pg.manager_stays = _to_bool(request.POST.get('manager_stays'))
+            # Listed By
+            listed_by_type = request.POST.get('listed_by_type', 'self')
+            pg.listed_by_type = listed_by_type
+            pg.listed_by_id = (request.POST.get('listed_by_id') or '').strip()
+            pg.listed_by_name = (request.POST.get('listed_by_name') or '').strip()
+            pg.listed_by_email = (request.POST.get('listed_by_email') or '').strip()
+            pg.listed_by_contact = (request.POST.get('listed_by_contact') or '').strip()
+            pg.listed_by_role = (request.POST.get('listed_by_role') or '').strip()
+            if listed_by_type == 'other':
+                pg.assigned_to = (request.POST.get('assigned_to') or '').strip()
+            else:
+                pg.assigned_to = ''
 
             # Regulations
             pg.opposite_gender_visitors_allowed = "opposite_gender_visitors_allowed" in request.POST or "opposite_sex_allowed" in request.POST
@@ -13727,6 +13778,13 @@ def pg_edit(request, pk):
             pg.contact_number = request.POST.get("contact_number", "")
             pg.email = request.POST.get("email", "")
             pg.alternate_contact = request.POST.get("alternate_contact", "")
+            # Listed elsewhere / portal
+            pg.listed_elsewhere = (request.POST.get('listed_elsewhere') or '').strip()
+            pg.portal_name = (request.POST.get('portal_name') or '').strip()
+
+            # Listing status & approval status (new fields added to Step 4)
+            pg.listing_status = (request.POST.get('listing_status') or pg.listing_status or '').strip()
+            pg.approval_status = (request.POST.get('approval_status') or pg.approval_status or '').strip()
 
             pg.uploaded_by_name = admin_obj.name
             pg.uploaded_by_email = admin_obj.email
@@ -13790,7 +13848,7 @@ def pg_edit(request, pk):
 
             if video_option == 'upload' and uploaded_video and uploaded_video.size <= 50 * 1024 * 1024:
                 PGColivingVideo.objects.update_or_create(
-                    property=pg, source='uploaded', defaults={'video': uploaded_video, 'video_url': None}
+                    property=pg, source='upload', defaults={'video': uploaded_video, 'video_url': None}
                 )
             elif video_option == 'rm_assisted' and property_video_link:
                 PGColivingVideo.objects.update_or_create(
@@ -13899,36 +13957,65 @@ def pg_hard_delete(request, id):
 
 
 
-def pg_coliving_view(request, pk):
-    # session_id = request.session.get('Admin_id')
-    # admin_obj = Admin_Login.objects.get(id=session_id)
-    # ^ Replace with your standard auth logic
-    
-    pg = get_object_or_404(PGColivingProperty, pk=pk)
 
-    # 1. Safely query the new relational Room models
-    parsed_rooms = pg.rooms.all()
-    
-    # Calculate sidebar pricing metrics dynamically
-    rent_stats = parsed_rooms.aggregate(min_rent=Min('room_rent'), max_rent=Max('room_rent'))
-    starting_rent = rent_stats['min_rent'] or 0
+def pg_coliving_view(request, pk):
+    session_id = request.session.get('Admin_id')
+    if not session_id:
+        return render(request, 'home_page/Adminlogin.html')
+        
+    admin_obj = Admin_Login.objects.get(id=session_id)
+    pg = get_object_or_404(PGColivingProperty, pk=pk)
 
     # 2. Parse Comma-Separated Strings into Lists for HTML "Chips"
     def split_to_list(db_string):
         return [x.strip() for x in db_string.split(',') if x.strip()] if db_string else []
 
+    # --- CATEGORY-WISE IMAGE GROUPING ---
+    category_labels = dict(PGPropertyImage.CATEGORY_CHOICES)
+    images_queryset = pg.images.all()
+    
+    grouped_images = {}
+    for img in images_queryset:
+        cat_key = img.category
+        if cat_key not in grouped_images:
+            grouped_images[cat_key] = {
+                'label': category_labels.get(cat_key, cat_key.title()),
+                'images': []
+            }
+        grouped_images[cat_key]['images'].append(img)
+
+    # --- VIDEO HIERARCHY ENGINE ---
+    videos_queryset = pg.videos.all()
+    rm_video = videos_queryset.filter(source='rm_assisted', video_url__isnull=False).exclude(video_url='').first()
+    manual_video = videos_queryset.filter(source='uploaded', video__isnull=False).first()
+    auto_video = videos_queryset.filter(source='auto', video__isnull=False).first()
+
+    selected_video = None
+    video_display_mode = None
+
+    if rm_video:
+        selected_video = rm_video
+        video_display_mode = 'rm_assisted'
+    elif manual_video:
+        selected_video = manual_video
+        video_display_mode = 'manual'
+    elif auto_video:
+        selected_video = auto_video
+        video_display_mode = 'auto'
+
     context = {
-        # 'admin_obj': admin_obj,
+        'admin_obj': admin_obj,
         'pg': pg,
-        'parsed_rooms': parsed_rooms,
-        'starting_rent': starting_rent, # Passed to the sidebar
-        'pg_for_list': split_to_list(pg.pg_for),
-        'sharing_type_list': split_to_list(pg.sharing_type),
+        'starting_rent': pg.monthly_rent or 0,
+        'sharing_type_list': split_to_list(pg.room_type), # Mapped to flattened field
         'best_suited_list': split_to_list(pg.best_suited_for),
         'amenities_list': split_to_list(pg.amenities),
         'facilities_list': split_to_list(pg.nearby_facilities),
         'meal_offerings_list': split_to_list(pg.meal_offerings),
         'meal_speciality_list': split_to_list(pg.meal_speciality),
+        'grouped_images': grouped_images,
+        'selected_video': selected_video,
+        'video_display_mode': video_display_mode,
     }
 
     return render(request, "admin_user/Reports/Rental/pg_coliving_view.html", context)

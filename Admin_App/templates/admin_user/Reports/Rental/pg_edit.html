@@ -906,118 +906,186 @@ input:checked + .toggle-slider { background-color:#667eea; }
               <div class="section-header"><i class="fas fa-video"></i> Property Walkthrough Video</div>
               <div class="section-body">
                
-                {% with existing_video=pg.videos.last %}
-{% if existing_video %}
-<div class="alert alert-info" id="currentVideoBlock" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom:15px; position:relative;">
-  <button type="button" class="existing-img-remove-btn" style="top:10px; right:10px;" title="Remove this video" onclick="removeCurrentVideo()">
-    <i class="fas fa-times"></i>
-  </button>
-  <i class="fas fa-video me-2" style="color:#667eea;"></i>
-  Current video source: <strong>{{ existing_video.source }}</strong>
-  {% if existing_video.video %} — <a href="{{ existing_video.video.url }}" target="_blank">View current video</a>{% endif %}
-  {% if existing_video.video_url %} — <a href="{{ existing_video.video_url }}" target="_blank">View linked video</a>{% endif %}
-  <div style="font-size:.75rem;color:#64748b;margin-top:4px;">Selecting a new option below and submitting will add a new video record.</div>
-  <input type="checkbox" name="delete_current_video" id="delete_current_video" value="1" style="display:none;">
+              {% with existing_video=pg.videos.last %}
+
+<div class="row mb-3">
+  <div class="col-md-12">
+    <label class="form-label d-block">Video Option</label>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="video_option" id="video_upload" value="upload" {% if not existing_video or existing_video.source == 'upload' %}checked{% endif %}>
+      <label class="form-check-label" for="video_upload">Upload Property Video</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="video_option" id="video_auto" value="auto" {% if existing_video.source == 'auto' %}checked{% endif %}>
+      <label class="form-check-label" for="video_auto">Auto-Generate Slideshow from Photos</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="video_option" id="video_rm" value="rm_assisted" {% if existing_video.source == 'rm_assisted' %}checked{% endif %}>
+      <label class="form-check-label" for="video_rm">Video is Large — Share with Our RM</label>
+    </div>
+  </div>
 </div>
-{% endif %}
+
+<input type="hidden" name="video_source" id="video_source" value="upload">
+
+<div id="videoUploadWrapper">
+  {% if existing_video and existing_video.video and existing_video.source != 'auto' and existing_video.source != 'rm_assisted' %}
+  <div style="margin-bottom:12px; position:relative;" id="currentVideoBlock">
+    <label class="form-label">Current Uploaded Video</label>
+    <div style="position:relative;">
+      <video src="{{ existing_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
+      <button type="button" class="existing-img-remove-btn" style="top:32px; right:8px;" title="Remove this video" onclick="removeCurrentVideo('currentVideoBlock')">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <input type="checkbox" name="delete_current_video" id="delete_current_video" value="1" style="display:none;">
+  </div>
+  {% endif %}
+
+  <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+  <div class="image-upload-area" id="videoUploadArea">
+    <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size:2.2rem;color:#667eea;"></i></div>
+    <div class="upload-text">Click to Upload Complete PG Walkthrough Video</div>
+    <div class="upload-subtext">MP4/MOV, max 60 seconds, up to 50MB</div>
+  </div>
+  <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px;"></video>
+</div>
+
+<div id="videoAutoWrapper" style="display:none;">
+  {% if existing_video and existing_video.source == 'auto' and existing_video.video %}
+  <div style="margin-bottom:12px; position:relative;" id="currentAutoVideoBlock">
+    <label class="form-label">Current Auto-Generated Slideshow</label>
+    <div style="position:relative;">
+      <video src="{{ existing_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
+      <button type="button" class="existing-img-remove-btn" style="top:32px; right:8px;" title="Remove this video" onclick="removeCurrentVideo('currentAutoVideoBlock')">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <input type="checkbox" name="delete_current_video" id="delete_current_video" value="1" style="display:none;">
+  </div>
+  {% endif %}
+
+  <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom:15px;">
+    <i class="fas fa-magic me-2" style="color:#667eea;"></i>
+    We'll auto-create a walkthrough video from your uploaded photos (min. 3 needed).
+  </div>
+  <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
+    <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
+    <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:1px solid #cbd5e1; background:#000;"></canvas>
+  </div>
+  <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:12px; font-weight:600;">
+    <i class="fas fa-exclamation-circle me-1"></i> Please upload at least 3 property images above to preview the auto-slideshow.
+  </div>
+
+  <div class="form-check mt-2">
+    <input class="form-check-input" type="checkbox" name="regenerate_slideshow" id="regenerate_slideshow">
+    <label class="form-check-label" for="regenerate_slideshow">Regenerate slideshow using current photos</label>
+  </div>
+</div>
+
+<div id="videoRMWrapper" style="display:none;">
+  <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom:15px;">
+    <i class="fas fa-headset me-2" style="color:#667eea;"></i>
+    Share the video directly with your RM (WhatsApp / email). Once they publish it, paste the public link below.
+  </div>
+  <label class="form-label">Published Video Link</label>
+  <input type="url" class="form-control" id="property_video_link" name="property_video_link"
+         value="{% if existing_video.source == 'rm_assisted' %}{{ existing_video.video_url|default:'' }}{% endif %}"
+         placeholder="Paste YouTube / Instagram / Facebook link">
+  <button type="button" class="btn-sec mt-2" id="previewRMLinkBtn"><i class="fas fa-eye me-1"></i> Preview Link</button>
+  <div id="rmVideoFrame" style="display:none; margin-top:15px; border-radius:12px; overflow:hidden; aspect-ratio:16/9;">
+    <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+  </div>
+</div>
+
 {% endwith %}
-
-                <div class="row mb-3">
-                  <div class="col-md-12">
-                    <label class="form-label d-block">Video Option</label>
-                    <div class="form-check form-check-inline">
-                      <input class="form-check-input" type="radio" name="video_option" id="video_upload" value="upload" checked>
-                      <label class="form-check-label" for="video_upload">Upload Property Video</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                      <input class="form-check-input" type="radio" name="video_option" id="video_auto" value="auto">
-                      <label class="form-check-label" for="video_auto">Auto-Generate Slideshow from Photos</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                      <input class="form-check-input" type="radio" name="video_option" id="video_rm" value="rm_assisted">
-                      <label class="form-check-label" for="video_rm">Video is Large — Share with Our RM</label>
-                    </div>
-                  </div>
-                </div>
-
-                <input type="hidden" name="video_source" id="video_source" value="upload">
-
-                <div id="videoUploadWrapper">
-                  <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
-                  <div class="image-upload-area" id="videoUploadArea">
-                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size:2.2rem;color:#667eea;"></i></div>
-                    <div class="upload-text">Click to Upload Complete PG Walkthrough Video</div>
-                    <div class="upload-subtext">MP4/MOV, max 60 seconds, up to 50MB</div>
-                  </div>
-                  <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px;"></video>
-                </div>
-
-            <div id="videoAutoWrapper" style="display:none;">
-                  {% if existing_video and existing_video.source == 'auto' and existing_video.video %}
-                  <div style="margin-bottom:12px;">
-                    <label class="form-label">Current Auto-Generated Slideshow</label>
-                    <video src="{{ existing_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
-                  </div>
-                  {% endif %}
-
-                  <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom:15px;">
-                    <i class="fas fa-magic me-2" style="color:#667eea;"></i>
-                    We'll auto-create a walkthrough video from your uploaded photos (min. 3 needed).
-                  </div>
-                  <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
-                    <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
-                    <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:1px solid #cbd5e1; background:#000;"></canvas>
-                  </div>
-                  <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:12px; font-weight:600;">
-                    <i class="fas fa-exclamation-circle me-1"></i> Please upload at least 3 property images above to preview the auto-slideshow.
-                  </div>
-
-                  <div class="form-check mt-2">
-                    <input class="form-check-input" type="checkbox" name="regenerate_slideshow" id="regenerate_slideshow">
-                    <label class="form-check-label" for="regenerate_slideshow">Regenerate slideshow using current photos</label>
-                  </div>
-                </div>
-                <div id="videoRMWrapper" style="display:none;">
-                  <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom:15px;">
-                    <i class="fas fa-headset me-2" style="color:#667eea;"></i>
-                    Share the video directly with your RM (WhatsApp / email). Once they publish it, paste the public link below.
-                  </div>
-                  <label class="form-label">Published Video Link</label>
-                  <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="Paste YouTube / Instagram / Facebook link">
-                  <button type="button" class="btn-sec mt-2" id="previewRMLinkBtn"><i class="fas fa-eye me-1"></i> Preview Link</button>
-                  <div id="rmVideoFrame" style="display:none; margin-top:15px; border-radius:12px; overflow:hidden; aspect-ratio:16/9;">
-                    <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
-                  </div>
-                </div>
               </div>
             </div>
 
-            <div class="form-section">
-              <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
+            
+<div class="form-section">
+  <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
+    <div class="row">
+
+      <!-- Listed Elsewhere -->
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
+
+          <div class="form-check form-check-inline">
+            <input class="form-check-input"
+                   type="radio"
+                   name="listed_elsewhere"
+                   id="listed_yes"
+                   value="Yes"
+                   {% if pg.listed_elsewhere|default:'' == 'Yes' %}checked{% endif %}>
+            <label class="form-check-label" for="listed_yes">Yes</label>
+          </div>
+
+          <div class="form-check form-check-inline">
+            <input class="form-check-input"
+                   type="radio"
+                   name="listed_elsewhere"
+                   id="listed_no"
+                   value="No"
+                   {% if pg.listed_elsewhere|default:'' == 'No' %}checked{% endif %}>
+            <label class="form-check-label" for="listed_no">No</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Portal Name -->
+     <div class="col-md-6"
+           id="portalField"
+           style="display:{% if pg.listed_elsewhere|default:'' == 'Yes' %}block{% else %}none{% endif %};">
+
+        <div class="form-group">
+          <label class="form-label">Portal Name</label>
+
+          <input type="text"
+                 class="form-control"
+                 name="portal_name"
+                 id="portal_name"
+                 value="{{ pg.portal_name|default:'' }}"
+                 placeholder="Enter portal name">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+  <div class="form-section">
+              <div class="section-header"><i class="fas fa-check-double"></i> Listing Status & Approval</div>
+              <div class="section-body">
                 <div class="row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes" {% if pg.listed_elsewhere == 'Yes' %}checked{% endif %}>
-                        <label class="form-check-label" for="listed_yes">Yes</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" {% if pg.listed_elsewhere != 'Yes' %}checked{% endif %}>
-                        <label class="form-check-label" for="listed_no">No</label>
-                      </div>
+                      <label class="form-label"><i class="fas fa-toggle-on"></i> Listing Status</label>
+                      <select class="form-select form-control" name="listing_status" id="listing_status">
+                        <option value="">Select Status</option>
+                        <option value="Active" {% if pg.listing_status == 'Active' %}selected{% endif %}>Active</option>
+                        <option value="Inactive" {% if pg.listing_status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="Sold" {% if pg.listing_status == 'Sold' %}selected{% endif %}>Sold</option>
+                        <option value="Rented" {% if pg.listing_status == 'Rented' %}selected{% endif %}>Rented</option>
+                      </select>
                     </div>
                   </div>
-                  <div class="col-md-6" id="portalField" style="display:{% if pg.listed_elsewhere == 'Yes' %}block{% else %}none{% endif %};">
+                  <div class="col-md-6">
                     <div class="form-group">
-                      <label class="form-label">Portal Name</label>
-                      <input type="text" class="form-control" name="portal_name" id="portal_name" value="{{ pg.portal_name|default:'' }}">
+                      <label class="form-label"><i class="fas fa-clipboard-check"></i> Approval Status</label>
+                      <select class="form-select form-control" name="approval_status" id="approval_status">
+                        <option value="">Select Status</option>
+                        <option value="Pending" {% if pg.approval_status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Approved" {% if pg.approval_status == 'Approved' %}selected{% endif %}>Approved</option>
+                        <option value="Rejected" {% if pg.approval_status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                      </select>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-
             <div class="form-section">
               <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
               <div class="section-body">
@@ -1031,7 +1099,7 @@ input:checked + .toggle-slider { background-color:#667eea; }
             </div>
 
             <div class="step-nav">
-              <button type="button" class="btn-sec" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+              <button type="button" class="btn-sec" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Previous Page</button>
               <button type="submit" class="btn-pr" style="background:var(--success-gradient);"><i class="fas fa-save"></i> Update Listing</button>
             </div>
           </div>
@@ -1096,6 +1164,28 @@ input:checked + .toggle-slider { background-color:#667eea; }
 
 <script>
   // ---------- Listed By self/other toggle (same as add form) ----------
+  
+
+  // ---------- Listed By self/other toggle (same as add form) ----------
+  function updateBrokerageLabel(role) {
+    var labelElement = document.getElementById('brokerageLabel');
+    if (!labelElement) return;
+    
+    var normalizedRole = (role || "").trim().toLowerCase();
+    var labelText = "";
+    
+    switch (normalizedRole) {
+      case 'admin': labelText = "EstateFlow Service Fee"; break;
+      case 'relationship manager': labelText = "Service Fee"; break;
+      case 'landlord': labelText = "Tenant Service Fee"; break;
+      case 'agent': labelText = "Brokerage"; break;
+      case 'agency/builder':
+      case 'builder': labelText = "Service Fee"; break;
+      default: labelText = "Brokerage"; break;
+    }
+    labelElement.innerHTML = labelText + ' <span class="required">*</span>';
+  }
+
   function Change_Fields(){
     var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
     if (!checkedInput) return;
@@ -1121,12 +1211,54 @@ input:checked + .toggle-slider { background-color:#667eea; }
       if (targetEmail) targetEmail.value = admin_email;
       if (targetContact) targetContact.value = admin_phone;
       if (targetRole) targetRole.value = admin_role;
+      
+      updateBrokerageLabel(admin_role); // Added UI update
     } else {
       if (hiddenSelect) hiddenSelect.required = true;
       var otherWrapper = document.getElementById('listedByOtherWrapper');
       if (otherWrapper) otherWrapper.style.display = "block";
     }
   }
+
+ document.addEventListener('DOMContentLoaded', function() {
+    // 1. Set the Brokerage Label on load
+    var initialRole = document.getElementById('listed_by_role')?.value;
+    if(initialRole) {
+      updateBrokerageLabel(initialRole);
+    }
+
+    // 2. Pre-fill the custom dropdown if Listed By Other User
+    var listedByTypeOther = document.getElementById('listedByOther');
+    if (listedByTypeOther && listedByTypeOther.checked) {
+      var existingUid = document.getElementById('listed_by_id')?.value;
+      
+      if (existingUid) {
+        var options = document.querySelectorAll('.search-select-option');
+        for (var i = 0; i < options.length; i++) {
+          // Match the user ID from the input field to the data-uid in the dropdown
+          if (options[i].getAttribute('data-uid') === existingUid) {
+            
+            // Update the visual label text
+            var labelEl = document.getElementById('assignedToValueLabel');
+            if (labelEl) {
+              labelEl.textContent = options[i].textContent.trim();
+              labelEl.classList.remove('ss-placeholder');
+            }
+            
+            // Set the hidden select value so the form submits correctly
+            var hiddenSelect = document.getElementById('assigned_to');
+            if (hiddenSelect) {
+              hiddenSelect.value = options[i].getAttribute('data-value');
+            }
+            
+            // Mark option as selected visually
+            options[i].classList.add('selected');
+            break;
+          }
+        }
+      }
+    }
+  });
 
   // ---------- Pill buttons (pg_for / best_suited_for / meal_offerings / meal_speciality) ----------
   document.querySelectorAll('.pill-btn').forEach(btn => {
@@ -1200,13 +1332,14 @@ input:checked + .toggle-slider { background-color:#667eea; }
     renderAllCategories();
   }
 
-  function removeCurrentVideo() {
-    var checkbox = document.getElementById('delete_current_video');
-    if (checkbox) checkbox.checked = true;
-    var block = document.getElementById('currentVideoBlock');
-    if (block) block.style.display = 'none';
-  }
-
+ 
+  function removeCurrentVideo(blockId) {
+  blockId = blockId || 'currentVideoBlock';
+  var checkbox = document.getElementById('delete_current_video');
+  if (checkbox) checkbox.checked = true;
+  var block = document.getElementById(blockId);
+  if (block) block.style.display = 'none';
+}
 
   // ---------- Amenities / Facilities modal (same pattern as add form) ----------
   let currentSection = null;
@@ -1290,6 +1423,7 @@ input:checked + .toggle-slider { background-color:#667eea; }
   });
 
   // ---------- Step navigation ----------
+ // ---------- Step navigation ----------
   let currentStep = 1;
   function goToStep(n) {
     document.getElementById('step' + currentStep).classList.remove('active');
@@ -1302,7 +1436,13 @@ input:checked + .toggle-slider { background-color:#667eea; }
       else { sc.textContent = i; }
     }
     currentStep = n;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Smooth scroll specifically to the step progress bar or form container
+    const scrollTarget = document.querySelector('.stepper') || document.querySelector('.form-container');
+    if (scrollTarget) {
+      // offset a bit if you have a sticky topbar, otherwise 'start' works perfectly
+      scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
  // ---------- Category-wise image upload (matches commercial edit form's engine) ----------
@@ -1426,13 +1566,28 @@ window.removeCatImage = function (cat, fileName) {
 
   
 
-  function setCheck(id, ok) {
+ function setCheck(id, ok) {
     const el = document.getElementById(id);
     if (!el) return;
     el.className = 'cl-item' + (ok ? ' done' : '');
     const icon = el.querySelector('i');
     if (icon) icon.className = 'fas ' + (ok ? 'fa-check-circle' : 'fa-circle');
   }
+
+  function updatePgChecklist() {
+    setCheck('cl-pgname', !!(document.getElementById('property_no')?.value && document.getElementById('city')?.value));
+    setCheck('cl-location', !!(document.getElementById('locality')?.value && document.getElementById('address')?.value));
+    setCheck('cl-beds', !!(document.getElementById('room_type')?.value && document.getElementById('room_beds')?.value));
+    setCheck('cl-rooms', !!(document.getElementById('room_rent')?.value));
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('input, select, textarea').forEach(function (el) {
+      el.addEventListener('input', updatePgChecklist);
+      el.addEventListener('change', updatePgChecklist);
+    });
+    updatePgChecklist();
+  });
 
   // ---------- Video option engine (identical to add form's 3-option system) ----------
   document.addEventListener('DOMContentLoaded', function () {
@@ -1529,6 +1684,14 @@ window.removeCatImage = function (cat, fileName) {
     }
     function stopAutoSlideshowPreview() { if (slideshowInterval) { cancelAnimationFrame(slideshowInterval); slideshowInterval = null; } }
 
+
+    function removeCurrentVideo(blockId) {
+  blockId = blockId || 'currentVideoBlock';
+  var checkbox = document.getElementById('delete_current_video');
+  if (checkbox) checkbox.checked = true;
+  var block = document.getElementById(blockId);
+  if (block) block.style.display = 'none';
+}
     function toggleVideoOption() {
       uploadWrapper.style.display = uploadRadio.checked ? 'block' : 'none';
       autoWrapper.style.display = autoRadio.checked ? 'block' : 'none';
@@ -1661,6 +1824,9 @@ window.removeCatImage = function (cat, fileName) {
   });
 
   // Select a team member option
+  
+
+  // Select a team member option
   document.querySelectorAll('.search-select-option').forEach(opt => {
     opt.addEventListener('click', function () {
       const val = this.getAttribute('data-value');
@@ -1685,19 +1851,126 @@ window.removeCatImage = function (cat, fileName) {
       if (document.getElementById('listed_by_name')) document.getElementById('listed_by_name').value = name;
       if (document.getElementById('listed_by_contact')) document.getElementById('listed_by_contact').value = phone;
       if (document.getElementById('listed_by_role')) document.getElementById('listed_by_role').value = role;
+      
+      updateBrokerageLabel(role); // Added UI update
     });
   });
   // ---------- Submit (fetch/JSON, same pattern as add form) ----------
+
+
+  // ---------- Change Tracking Engine (same pattern as commercial edit form) ----------
+  let pgInitialFormValues = {};
+
+  function capturePgInitialValues() {
+    const editForm = document.getElementById('pgEditForm');
+    if (!editForm) return;
+    const inputs = editForm.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      if (input.name && input.type !== 'file' && input.type !== 'hidden' && !input.readOnly && !input.disabled) {
+        if (input.type === 'checkbox' || input.type === 'radio') {
+          if (input.checked) {
+            if (!pgInitialFormValues[input.name]) pgInitialFormValues[input.name] = [];
+            pgInitialFormValues[input.name].push(input.value);
+          }
+        } else {
+          pgInitialFormValues[input.name] = input.value;
+        }
+      }
+    });
+    const checkRadios = editForm.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+    checkRadios.forEach(input => {
+      if (input.name && !pgInitialFormValues[input.name]) pgInitialFormValues[input.name] = [];
+    });
+  }
+
+  function getPgChangedFieldsHtml() {
+    let currentValues = {};
+    let changedFieldsHtml = [];
+    const editForm = document.getElementById('pgEditForm');
+    if (!editForm) return [];
+
+    const inputs = editForm.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      if (input.name && input.type !== 'file' && input.type !== 'hidden' && !input.readOnly && !input.disabled) {
+        if (input.type === 'checkbox' || input.type === 'radio') {
+          if (input.checked) {
+            if (!currentValues[input.name]) currentValues[input.name] = [];
+            currentValues[input.name].push(input.value);
+          }
+        } else {
+          currentValues[input.name] = input.value;
+        }
+      }
+    });
+    const checkRadios = editForm.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+    checkRadios.forEach(input => {
+      if (input.name && !currentValues[input.name]) currentValues[input.name] = [];
+    });
+
+    let allKeys = new Set([...Object.keys(pgInitialFormValues), ...Object.keys(currentValues)]);
+
+    allKeys.forEach(key => {
+      let initial = pgInitialFormValues[key];
+      let current = currentValues[key];
+      let displayKey = key.replace(/\[\]/g, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+      if (Array.isArray(initial) || Array.isArray(current)) {
+        let initArr = initial || [];
+        let currArr = current || [];
+        if (initArr.sort().join(',') !== currArr.sort().join(',')) {
+          changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#f39c12;"><i class="fas fa-edit"></i> <b>${displayKey}</b>:</span> Modified to [${currArr.length > 0 ? currArr.join(', ') : 'None'}]</li>`);
+        }
+      } else {
+        initial = initial || "";
+        current = current || "";
+        if (initial !== current) {
+          if (initial === "" && current !== "") {
+            changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#11998e;"><i class="fas fa-plus-circle"></i> <b>${displayKey}</b>:</span> Newly added as <i>"${current}"</i></li>`);
+          } else if (initial !== "" && current === "") {
+            changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#e74c3c;"><i class="fas fa-minus-circle"></i> <b>${displayKey}</b>:</span> Removed (was <i>"${initial}"</i>)</li>`);
+          } else {
+            changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#f39c12;"><i class="fas fa-edit"></i> <b>${displayKey}</b>:</span> Modified from <i>"${initial}"</i> to <i>"${current}"</i></li>`);
+          }
+        }
+      }
+    });
+
+    return changedFieldsHtml;
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    capturePgInitialValues();
+  });
+
+  // ---------- Submit (fetch/JSON, with change-tracking confirmation) ----------
   document.getElementById('pgEditForm').addEventListener('submit', function (e) {
     e.preventDefault();
+
+    let changedFields = getPgChangedFieldsHtml();
+    let alertHtml = `<div style="font-size: 1rem; color: #4a5568; margin-bottom: 15px;">Update this PG / Co-living listing with the changes made?</div>`;
+
+    if (changedFields.length > 0) {
+      alertHtml += `<div style="text-align: left; max-height: 250px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.9rem;">
+                      <strong style="color: #2d3748; display: block; margin-bottom: 10px;"><i class="fas fa-clipboard-list"></i> Modifications Detected:</strong>
+                      <ul style="margin: 0; padding-left: 20px; list-style-type: none;">
+                          ${changedFields.join('')}
+                      </ul>
+                    </div>`;
+    } else {
+      alertHtml += `<div style="background: #f8f9fa; padding: 15px; border-radius: 12px; color: #718096; font-size: 0.95rem;">
+                      <i class="fas fa-info-circle"></i> No modifications detected.
+                    </div>`;
+    }
+
     Swal.fire({
       title: 'Save Changes?',
-      text: 'Update this PG / Co-living listing with the changes made?',
+      html: alertHtml,
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#667eea',
       cancelButtonColor: '#cbd5e0',
-      confirmButtonText: 'Yes, Save'
+      confirmButtonText: 'Yes, Save',
+      width: '600px'
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire({ title: 'Saving changes...', allowOutsideClick: false, allowEscapeKey: false, didOpen: () => Swal.showLoading() });
@@ -1726,4 +1999,104 @@ window.removeCatImage = function (cat, fileName) {
   });
 
   window.addEventListener('DOMContentLoaded', syncPillInputsValue);
+</script>
+
+
+<script>
+// ============================================================
+// AUTO MOVE-IN COST CALCULATOR (PG / CO-LIVING)
+// ============================================================
+function calculatePgMoveInCost() {
+    // 1. Base Rent Per Occupant
+    let monthlyRent = parseFloat(document.getElementById("room_rent")?.value) || 0;
+
+    // 2. Advance Rent Calculation (PG uses numeric values: "0".."11" or "fixed")
+    let advance = 0;
+    let advanceType = document.getElementById("advance_rent_month")?.value || "";
+
+    if (advanceType === "fixed") {
+        advance = parseFloat(document.getElementById("advance_rent_amount")?.value) || 0;
+    } else if (advanceType !== "" && advanceType !== "0") {
+        let months = parseFloat(advanceType) || 0;
+        advance = monthlyRent * months;
+    }
+
+    // 3. Refundable Security Deposit Calculation (same numeric pattern)
+    let deposit = 0;
+    let depositType = document.getElementById("security_deposit_type")?.value || "";
+
+    if (depositType === "fixed") {
+        deposit = parseFloat(document.getElementById("security_deposit_amount")?.value) || 0;
+    } else if (depositType !== "" && depositType !== "0") {
+        let months = parseFloat(depositType) || 0;
+        deposit = monthlyRent * months;
+    }
+
+    // 4. Brokerage Calculation
+    let brokerage = 0;
+    let brokerageType = document.getElementById("brokeragePercentage")?.value || "";
+
+    switch (brokerageType) {
+        case "15 Days Rent":
+            brokerage = monthlyRent / 2;
+            break;
+        case "1 Month Rent":
+            brokerage = monthlyRent;
+            break;
+        case "Fixed Amount":
+            brokerage = parseFloat(document.querySelector("[name='manual_brokerage']")?.value) || 0;
+            break;
+        case "No Brokerage":
+        case "Negotiable":
+        default:
+            brokerage = 0;
+            break;
+    }
+
+    // 5. Maintenance Charges Calculation
+    let maintenance = 0;
+    let maintRadio = document.querySelector("input[name='maintenance_type']:checked")?.value;
+
+    if (maintRadio === "Extra") {
+        maintenance = parseFloat(document.querySelector("[name='maintenance_amount']")?.value) || 0;
+    }
+
+    // 6. Calculate Grand Total
+    let totalMoveInCost = advance + deposit + brokerage + maintenance;
+
+    // 7. Update Output Field
+    let totalInput = document.getElementById("total_move_in_cost") || document.querySelector("[name='total_move_in_cost']");
+    if (totalInput) {
+        totalInput.value = Math.round(totalMoveInCost);
+    }
+}
+
+function initPgCalculator() {
+    const eventTargets = [
+        "#room_rent",
+        "#advance_rent_month",
+        "#advance_rent_amount",
+        "#security_deposit_type",
+        "#security_deposit_amount",
+        "#brokeragePercentage",
+        "[name='manual_brokerage']",
+        "[name='maintenance_amount']",
+        "input[name='maintenance_type']"
+    ];
+
+    document.querySelectorAll(eventTargets.join(",")).forEach(function (element) {
+        if (!element) return;
+        element.addEventListener("input", calculatePgMoveInCost);
+        element.addEventListener("change", calculatePgMoveInCost);
+    });
+
+    // Run once initially — populates the field on edit-page load with existing data
+    calculatePgMoveInCost();
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initPgCalculator);
+} else {
+    initPgCalculator();
+}
 </script>

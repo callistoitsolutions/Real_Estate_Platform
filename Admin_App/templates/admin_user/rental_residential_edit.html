@@ -68,6 +68,16 @@
     .remove-image { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; background: #e74c3c; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; z-index: 10;}
     .remove-image:hover { background: #c0392b; transform: scale(1.1); }
 
+    .existing-img-remove-btn {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+    background: #e74c3c; color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.8rem; z-index: 5;
+    border: none;
+}
+.existing-img-remove-btn input { display: none; }
+.existing-img-remove-btn:hover { background: #c0392b; }
+
     /* Category Image Tab Upload CSS */
     .img-cat-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
     .img-cat-tab { border: 2px solid #e9ecef; background: #fff; border-radius: 12px; padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: #4a5568; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.25s ease; white-space: nowrap; }
@@ -700,9 +710,11 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                           
+                                           <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -725,9 +737,11 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                            
+                                            <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -750,9 +764,10 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                           <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -775,9 +790,11 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                          
+                                            <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -800,9 +817,10 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                            <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -825,9 +843,10 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                          <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -850,9 +869,10 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                          <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -894,13 +914,19 @@
                             </div>
                             <input type="hidden" name="video_source" id="video_source" value="upload">
 
-                            <div id="videoUploadWrapper">
-                                {% if uploaded_video and uploaded_video.video %}
-                                <div style="margin-bottom:12px;">
-                                    <label class="form-label">Current Uploaded Video</label>
-                                    <video src="{{ uploaded_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
-                                </div>
-                                {% endif %}
+                          <div id="videoUploadWrapper">
+    {% if uploaded_video and uploaded_video.video %}
+    <div style="margin-bottom:12px; position:relative;" id="currentVideoBlock">
+        <label class="form-label">Current Uploaded Video</label>
+        <div style="position:relative;">
+            <video src="{{ uploaded_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
+            <button type="button" class="existing-img-remove-btn" style="top:32px; right:8px;" title="Remove this video" onclick="removeCurrentVideo()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <input type="checkbox" name="delete_current_video" id="delete_current_video" value="1" style="display:none;">
+    </div>
+    {% endif %}
                                 <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
                                 <div class="image-upload-area" id="videoUploadArea">
                                     <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size:2.2rem;color:#667eea;"></i></div>
@@ -1524,6 +1550,25 @@ function renderAllCategories() {
     }
 }
 
+function removeExistingImage(iconEl) {
+    var label = iconEl.closest('.existing-img-remove-btn');
+    var checkbox = label ? label.querySelector('input[type="checkbox"]') : null;
+    if (checkbox) checkbox.checked = true;
+
+    var tile = iconEl.closest('.img-cat-preview-item');
+    if (tile) tile.style.display = 'none';
+
+    var panel = iconEl.closest('.img-cat-panel');
+    if (panel) {
+        var cat = panel.getAttribute('data-cat-panel');
+        if (cat && EXISTING_IMG_COUNTS[cat] > 0) {
+            EXISTING_IMG_COUNTS[cat] = EXISTING_IMG_COUNTS[cat] - 1;
+        }
+    }
+    if (typeof renderAllCategories === 'function') {
+        renderAllCategories();
+    }
+}
 function handleCatFiles(cat, files) {
     var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
     var limit = IMG_CATEGORY_LIMITS[cat] || 5;
@@ -2106,4 +2151,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     toggleVideoOption();
 });
+function removeCurrentVideo() {
+    document.getElementById('delete_current_video').checked = true;
+    var block = document.getElementById('currentVideoBlock');
+    if (block) block.style.display = 'none';
+}
 </script>

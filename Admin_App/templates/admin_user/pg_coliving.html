@@ -4130,3 +4130,124 @@ pgForm.addEventListener("submit", function (e) {
     toggleMaintenanceField();
   });
 </script>
+
+<script>
+// ============================================================
+// AUTO MOVE-IN COST CALCULATOR (PG / CO-LIVING)
+// ============================================================
+function calculatePgMoveInCost() {
+    // 1. Base Rent Per Occupant
+    let monthlyRent = parseFloat(document.getElementById("room_rent")?.value) || 0;
+
+    // 2. Advance Rent Calculation (PG uses numeric values: "0".."11" or "fixed")
+    let advance = 0;
+    let advanceType = document.getElementById("advance_rent_month")?.value || "";
+
+    if (advanceType === "fixed") {
+        advance = parseFloat(document.getElementById("advance_rent_amount")?.value) || 0;
+    } else if (advanceType !== "" && advanceType !== "0") {
+        let months = parseFloat(advanceType) || 0;
+        advance = monthlyRent * months;
+    }
+
+    // 3. Refundable Security Deposit Calculation (same numeric pattern)
+    let deposit = 0;
+    let depositType = document.getElementById("security_deposit_type")?.value || "";
+
+    if (depositType === "fixed") {
+        deposit = parseFloat(document.getElementById("security_deposit_amount")?.value) || 0;
+    } else if (depositType !== "" && depositType !== "0") {
+        let months = parseFloat(depositType) || 0;
+        deposit = monthlyRent * months;
+    }
+
+    // 4. Brokerage Calculation
+    let brokerage = 0;
+    let brokerageType = document.getElementById("brokeragePercentage")?.value || "";
+
+    switch (brokerageType) {
+        case "15 Days Rent":
+            brokerage = monthlyRent / 2;
+            break;
+        case "1 Month Rent":
+            brokerage = monthlyRent;
+            break;
+        case "Fixed Amount":
+            brokerage = parseFloat(document.querySelector("[name='manual_brokerage']")?.value) || 0;
+            break;
+        case "No Brokerage":
+        case "Negotiable":
+        default:
+            brokerage = 0;
+            break;
+    }
+
+    // 5. Maintenance Charges Calculation
+    let maintenance = 0;
+    let maintRadio = document.querySelector("input[name='maintenance_type']:checked")?.value;
+
+    if (maintRadio === "Extra") {
+        maintenance = parseFloat(document.querySelector("[name='maintenance_amount']")?.value) || 0;
+    }
+
+    // 6. Calculate Grand Total
+    let totalMoveInCost = advance + deposit + brokerage + maintenance;
+
+    // 7. Update Output Field
+    let totalInput = document.getElementById("total_move_in_cost") || document.querySelector("[name='total_move_in_cost']");
+    if (totalInput) {
+        totalInput.value = Math.round(totalMoveInCost);
+    }
+}
+
+function initPgCalculator() {
+    const eventTargets = [
+        "#room_rent",
+        "#advance_rent_month",
+        "#advance_rent_amount",
+        "#security_deposit_type",
+        "#security_deposit_amount",
+        "#brokeragePercentage",
+        "[name='manual_brokerage']",
+        "[name='maintenance_amount']",
+        "input[name='maintenance_type']"
+    ];
+
+    document.querySelectorAll(eventTargets.join(",")).forEach(function (element) {
+        if (!element) return;
+        element.addEventListener("input", calculatePgMoveInCost);
+        element.addEventListener("change", calculatePgMoveInCost);
+    });
+
+    // Run once initially — populates the field on edit-page load with existing data
+    calculatePgMoveInCost();
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initPgCalculator);
+} else {
+    initPgCalculator();
+}
+
+// ============================================================
+  // BROKERAGE FIELD TOGGLE LOGIC
+  // ============================================================
+  document.addEventListener('DOMContentLoaded', function () {
+    const brokerageSelect = document.getElementById('brokeragePercentage');
+    const manualBrokerageDiv = document.getElementById('manualBrokerage');
+
+    function toggleManualBrokerage() {
+      if (manualBrokerageDiv && brokerageSelect) {
+        // Bootstrap rows use flexbox, so 'flex' is preferred over 'block'
+        manualBrokerageDiv.style.display = brokerageSelect.value === 'Fixed Amount' ? 'flex' : 'none';
+      }
+    }
+
+    if (brokerageSelect) {
+      brokerageSelect.addEventListener('change', toggleManualBrokerage);
+    }
+    
+    // Run once on load to ensure correct state if "Fixed Amount" is pre-selected
+    toggleManualBrokerage();
+  });
+</script>
