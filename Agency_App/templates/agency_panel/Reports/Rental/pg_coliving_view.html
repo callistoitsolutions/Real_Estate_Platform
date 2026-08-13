@@ -1,0 +1,1192 @@
+{% include "agency_panel/agency_header.html" %}
+{% load static %}
+{% load humanize %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #1a56db;
+        --primary-light: #ebf0ff;
+        --primary-dark: #1342b0;
+        --accent: #f97316;
+        --dark: #111827;
+        --mid: #374151;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --surface: #f9fafb;
+        --white: #ffffff;
+        --success: #10b981;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body, .main-content { font-family: 'DM Sans', sans-serif; background: #f3f4f8; color: var(--dark); }
+
+    /* ============ TOP BREADCRUMB BAR ============ */
+    .prop-topbar { background: var(--white); border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 0.8rem; color: var(--muted); position: sticky; top: 0; z-index: 1000; }
+    .prop-topbar a { color: var(--primary); text-decoration: none; }
+    .prop-id-badge { background: #f1f5ff; color: var(--primary); font-weight: 700; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; border: 1px solid #d1dcff; font-family: monospace; }
+    .prop-verified-badge { background: #ecfdf5; color: var(--success); font-weight: 600; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; border: 1px solid #a7f3d0; }
+    .badge-duplicate { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+
+    /* ============ HERO HEADER ============ */
+    .prop-hero-header { background: var(--white); padding: 20px 0 0; border-bottom: 1px solid var(--border); }
+    .prop-hero-header h1 { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--dark); margin: 0 0 6px; line-height: 1.3; }
+    .prop-hero-location { color: var(--muted); font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
+    .prop-hero-location i { color: var(--primary); }
+    .prop-hero-price-tag { font-size: 2rem; font-weight: 700; color: var(--dark); line-height: 1; }
+    .prop-hero-price-tag span { font-size: 0.9rem; color: var(--muted); font-weight: 400; }
+
+    /* ============ MEDIA GALLERY ============ */
+    .prop-gallery-grid { display: grid; grid-template-columns: 1.65fr 1fr; grid-template-rows: 1fr 1fr; gap: 6px; height: 420px; background: var(--dark); }
+    .prop-gallery-main { grid-row: 1 / 3; position: relative; overflow: hidden; background: #0d1117; cursor: pointer; }
+    .prop-gallery-thumb { position: relative; overflow: hidden; background: #1e2733; cursor: pointer; }
+    .prop-gallery-thumb img, .prop-gallery-main .walkthrough-slide img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+    .prop-gallery-thumb:hover img { transform: scale(1.05); }
+
+    .walkthrough-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.7s ease; display: none; }
+    .walkthrough-slide.active { display: block; opacity: 1; }
+    .gallery-hud { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px 16px 12px; display: flex; justify-content: space-between; align-items: flex-end; z-index: 10; }
+    .gallery-hud-left { display: flex; align-items: center; gap: 10px; }
+    .btn-play-pause { width: 34px; height: 34px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.75rem; backdrop-filter: blur(4px); transition: background 0.2s; }
+    .btn-play-pause:hover { background: rgba(255,255,255,0.25); }
+    .gallery-timer { color: rgba(255,255,255,0.7); font-size: 0.72rem; font-family: monospace; }
+    .gallery-badge-walkthrough { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: white; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.8px; padding: 4px 9px; border-radius: 4px; text-transform: uppercase; backdrop-filter: blur(4px); }
+
+    .thumb-more-overlay { position: absolute; inset: 0; background: rgba(17,24,39,0.7); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
+    .thumb-more-overlay:hover { background: rgba(17,24,39,0.85); }
+    .thumb-more-overlay span { color: white; font-size: 1.2rem; font-weight: 700; }
+    .thumb-more-overlay small { display: block; color: rgba(255,255,255,0.6); font-size: 0.7rem; margin-top: 2px; }
+
+    /* ============ STICKY NAV ============ */
+    .prop-sticky-nav { position: sticky; top: 44px; background: var(--white); border-bottom: 2px solid var(--border); z-index: 990; padding: 0; }
+    .prop-sticky-nav-inner { display: flex; gap: 0; overflow-x: auto; scrollbar-width: thin; padding-bottom: 5px; }
+    .prop-sticky-nav-inner::-webkit-scrollbar { height: 6px; }
+    .prop-sticky-nav-inner::-webkit-scrollbar-track { background: #f1f1f1; }
+    .prop-sticky-nav-inner::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .prop-nav-link { color: var(--muted); font-size: 0.8rem; font-weight: 600; text-decoration: none; padding: 14px 18px; border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+    .prop-nav-link:hover { color: var(--primary); background: var(--primary-light); }
+    .prop-nav-link.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
+
+    /* ============ LAYOUT ============ */
+    .prop-page-body { padding: 28px 0 60px; }
+    .prop-layout-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+    @media (max-width: 1100px) {
+        .prop-layout-grid { grid-template-columns: 1fr; }
+        .prop-gallery-grid { grid-template-columns: 1fr; height: 260px; }
+        .prop-gallery-thumb { display: none; }
+        .prop-gallery-main { grid-row: 1; }
+    }
+
+    /* ============ SECTIONS ============ */
+    .prop-section { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 20px; scroll-margin-top: 130px; box-shadow: var(--shadow-sm); }
+    .prop-section-title { font-size: 1rem; font-weight: 700; color: var(--dark); margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .prop-section-title .section-icon { width: 32px; height: 32px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 0.8rem; flex-shrink: 0; }
+
+    .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .spec-item { padding: 11px 12px; border-bottom: 1px solid #f3f4f6; display: flex; flex-direction: column; gap: 3px; }
+    .spec-item:nth-child(odd) { border-right: 1px solid #f3f4f6; }
+    .spec-item:last-child, .spec-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+    .spec-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .spec-value { font-size: 0.88rem; font-weight: 600; color: var(--dark); text-transform: capitalize; }
+    .spec-full { grid-column: 1 / -1; border-right: none !important; }
+
+    /* Highlight pricing row (same treatment as residential) */
+    .spec-item.highlight-price { background: linear-gradient(135deg, #f0f4ff, #e8eeff); border-radius: 8px; border: 1px solid #d1dcff !important; padding: 14px; }
+    .spec-item.highlight-price .spec-label { color: var(--primary); }
+    .spec-item.highlight-price .spec-value { font-size: 1.1rem; color: var(--primary); text-transform: none; }
+
+    /* Address box (same as residential) */
+    .address-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; font-size: 0.85rem; color: var(--mid); line-height: 1.6; border-left: 3px solid var(--primary); }
+
+    .room-wrap { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:15px; }
+    .room-card { background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; padding:15px; }
+    .room-card h4 { margin:0 0 10px 0; font-size:14px; font-weight:800; color:#0f172a; border-bottom:2px solid #e2e8f0; padding-bottom:8px;}
+    .room-row { display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px; }
+    .room-lbl { color:#64748b; font-weight:600; }
+    .room-val { color:#0f172a; font-weight:700; }
+
+    .amenity-pill { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); padding: 6px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; color: var(--mid); text-transform: capitalize; }
+    .amenity-pill.on { background:#F0FDF4; color:#16A34A; border:1px solid #bbf7d0; }
+    .amenity-pill.off { background:#fef2f2; color:#ef4444; border:1px solid #fecaca; }
+    .amenity-pill i { font-size: 0.68rem; }
+    
+    .desc-body { font-size: 0.88rem; line-height: 1.8; color: #4b5563; }
+    .desc-highlight { background: #f8f9ff; border-left: 3px solid var(--primary); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 14px 16px; margin-bottom: 16px; font-size: 0.88rem; color: var(--mid); line-height: 1.8; }
+    .sub-section-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-bottom: 12px; margin-top: 18px; }
+    .sub-section-label:first-child { margin-top: 0; }
+
+    /* Soft delete / duplicate status badges (same as residential) */
+    .badge-deleted { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; }
+    .badge-active { background: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 4px; font-size: 0.72rem; font-weight: 700; }
+
+    /* FAQ accordion */
+    .prop-faq .accordion-item { border: 1px solid var(--border); border-radius: var(--radius-sm) !important; margin-bottom: 10px; overflow: hidden; }
+    .prop-faq .accordion-button { font-weight: 600; font-size: 0.88rem; color: var(--dark); background: var(--white); padding: 14px 16px; box-shadow: none; }
+    .prop-faq .accordion-button:not(.collapsed) { background: #f5f7ff; color: var(--primary); border-bottom: 1px solid #e0e7ff; }
+    .prop-faq .accordion-body { font-size: 0.85rem; line-height: 1.75; color: var(--mid); background: var(--white); padding: 14px 16px; }
+
+    /* ============ SIDEBAR ============ */
+    .prop-sidebar { position: sticky; top: 130px; display: flex; flex-direction: column; gap: 16px; }
+    .sidebar-price-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+    .sidebar-price-header { background: linear-gradient(135deg, #1a56db, #3b82f6); padding: 20px 20px 16px; color: white; }
+    .sidebar-price-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.8; font-weight: 600; }
+    .sidebar-price-amount { font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin: 4px 0 0; }
+    .sidebar-price-amount span { font-size: 0.85rem; opacity: 0.7; font-weight: 400; }
+    .sidebar-price-body { padding: 16px 20px; }
+    .sidebar-mini-stat { text-align: center; padding: 10px 0; }
+    .sidebar-mini-stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; }
+    .sidebar-mini-stat-val { font-size: 0.95rem; font-weight: 700; color: var(--dark); margin-top: 3px; }
+
+    .sidebar-owner-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); }
+    .owner-avatar { width: 46px; height: 46px; background: linear-gradient(135deg, var(--primary), #6366f1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+    .owner-name { font-size: 0.9rem; font-weight: 700; color: var(--dark); }
+    .owner-email { font-size: 0.75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+    .sidebar-divider { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 600; margin-bottom: 10px; }
+
+    .owner-phone-masked { font-size: 0.82rem; color: var(--mid); font-weight: 500; font-family: monospace; }
+    .btn-reveal-phone { font-size: 0.73rem; color: var(--primary); border: 1px solid #d1dcff; background: var(--primary-light); padding: 2px 8px; border-radius: 4px; cursor: pointer; font-weight: 600; }
+    .btn-reveal-phone:hover { background: var(--primary); color: white; border-color: var(--primary); }
+    .btn-call-primary { display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #1a56db, #3b82f6); color: white; border: none; border-radius: var(--radius-sm); padding: 12px; font-size: 0.9rem; font-weight: 700; width: 100%; cursor: pointer; text-decoration: none; margin-top: 14px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(26,86,219,0.3); }
+    .btn-call-primary:hover { background: linear-gradient(135deg, #1342b0, #2563eb); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(26,86,219,0.4); color: white; }
+
+    .owner-info-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 0.8rem; }
+    .owner-info-row:last-child { border: none; padding-bottom: 0; }
+    .owner-info-row i { color: var(--muted); width: 14px; text-align: center; flex-shrink: 0; }
+
+    .prop-quick-stats { display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 0; border-top: 1px solid var(--border); margin-top: 12px; }
+    .quick-stat-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; color: var(--mid); }
+    .quick-stat-chip i { color: var(--primary); font-size: 0.72rem; }
+
+    .empty-state { text-align: center; padding: 24px; background: var(--surface); border-radius: var(--radius-sm); border: 1px dashed var(--border); }
+    .empty-state i { font-size: 1.5rem; color: #d1d5db; margin-bottom: 8px; display: block; }
+    .empty-state p { font-size: 0.8rem; color: var(--muted); margin: 0; }
+</style>
+
+<div class="main-content">
+
+    <!-- TOP BAR (now shows duplicate flag, same as residential) -->
+    <div class="prop-topbar">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="{% url 'pg_list_agency' %}"><i class="fas fa-building-user"></i> PG/Co-living Listings</a>
+                    <span class="text-muted">/</span>
+                    <span>{{ pg.property_title|truncatechars:40 }}</span>
+                    <span class="prop-id-badge">Property ID: {{ pg.id }}</span>
+                    <span class="prop-verified-badge"><i class="fas fa-circle-check"></i> System Verified</span>
+                    {% if pg.is_duplicate %}
+                    <span class="badge-duplicate"><i class="fas fa-clone"></i> Duplicate Flagged ({{ pg.duplicate_count }} linked)</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'pg_agency_edit' pg.id %}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" style="font-size:1.100rem; font-weight:600;">
+                        <i class="fas fa-edit"></i> Edit Record
+                    </a>
+                    <a href="{% url 'pg_list_agency' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:1.100rem; font-weight:600;">
+                        <i class="fas fa-arrow-left"></i> Back To Listing
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="prop-hero-header">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
+                <div style="flex: 1; min-width: 260px;">
+                    <h1>{{ pg.property_title }}</h1>
+                    <div class="prop-hero-location" style="font-size:20px; font-weight:700; color:black;">
+                        <i class="fas fa-location-dot"></i>
+                        {{ pg.locality }}, {{ pg.city }}
+                    </div>
+                </div>
+              
+                <div class="text-end">
+                    <div class="mb-1">
+                        <span class="badge bg-success px-3 py-2"><i class="fas fa-bed me-1"></i> Starting Room Rent</span>
+                    </div>
+                    <div class="prop-hero-price-tag">
+                        ₹{{ starting_rent|default:"0"|intcomma }} <span>/ mo</span>
+                    </div>
+                    
+                    <!-- Added Monthly Maintenance -->
+                    {% if pg.maintenance_type == 'Extra' and pg.maintenance_amount %}
+                    <div style="font-size:0.82rem; color: #64748b; margin-top:6px;">
+                        + <strong>₹{{ pg.maintenance_amount|default:"0"|intcomma }}</strong>
+                        <strong>Maintenance / mo</strong>
+                    </div>
+                    {% elif pg.maintenance_type == 'Included in Rent' %}
+                    <div style="font-size:0.82rem; color: #10b981; margin-top:6px; font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> Maintenance Included
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="prop-quick-stats">
+                <div class="quick-stat-chip"><i class="fas fa-bed"></i> {{ pg.total_beds|default:"0" }} Beds Total</div>
+                <div class="quick-stat-chip"><i class="fas fa-users"></i> {{ pg.pg_for|default:"Any"|title }} Allowed</div>
+                <div class="quick-stat-chip"><i class="fas fa-couch"></i> {{ pg.furnishing_status|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-utensils"></i> {% if pg.meals_available %}Meals Included{% else %}No Meals{% endif %}</div>
+                <div class="quick-stat-chip"><i class="fas fa-calendar-alt"></i> {{ pg.minimum_stay|default:"1" }} Month Stay</div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- GALLERY SECTION -->
+  <div style="background: #111827;">
+    <div class="container-fluid px-0">
+
+        <!-- 1. VIDEO PREVIEW SECTION (RM Assisted Link / Manual Upload / Backend Auto Video File) -->
+        {% if selected_video %}
+            {% if selected_video.source == 'rm_assisted' and selected_video.video_url %}
+            <div style="background:#000; position:relative; border-bottom: 2px solid #222; text-align:center;">
+                {% if selected_video.youtube_thumbnail %}
+                    <a href="{{ selected_video.video_url }}" target="_blank" style="display:block; position:relative;">
+                        <img src="{{ selected_video.youtube_thumbnail }}" alt="RM Video Thumbnail" style="width:100%; max-height:420px; object-fit:cover;">
+                        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4);">
+                            <i class="fab fa-youtube text-danger" style="font-size: 64px;"></i>
+                        </div>
+                    </a>
+                {% else %}
+                    <div class="p-4 text-white" style="max-width: 600px; margin: 0 auto;">
+                        <div class="p-4 rounded" style="background: #1f2937; border: 1px solid #374151;">
+                            <i class="fas fa-video fa-3x text-primary mb-2"></i>
+                            <h5 class="fw-bold mb-1">RM Assisted Video Link</h5>
+                            <p class="text-muted small text-truncate mb-3">{{ selected_video.video_url }}</p>
+                            <a href="{{ selected_video.video_url }}" target="_blank" class="btn btn-sm btn-primary px-4 py-2 fw-bold">
+                                <i class="fas fa-external-link-alt me-1"></i> Open Video Link
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+                <span style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,.75); color:#fff; font-size:.75rem; font-weight:600; padding:5px 12px; border-radius:20px; border:1px solid rgba(255,255,255,0.2);">
+                    <i class="fas fa-link me-1"></i> RM Assisted Link (Active)
+                </span>
+            </div>
+
+            {% elif selected_video.video %}
+            <div style="background:#000; position:relative; border-bottom: 2px solid #222;">
+                <video controls autoplay muted loop style="width:100%; max-height:420px; display:block; background:#000;"
+                       poster="{% if pg.images.all %}{{ pg.images.all.0.image.url }}{% endif %}">
+                    <source src="{{ selected_video.video.url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <span style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,.75); color:#fff; font-size:.75rem; font-weight:600; padding:5px 12px; border-radius:20px; border:1px solid rgba(255,255,255,0.2);">
+                    {% if selected_video.source == 'auto' %}
+                        <i class="fas fa-play-circle me-1"></i> AUTO-GENERATED SLIDESHOW VIDEO
+                    {% else %}
+                        <i class="fas fa-file-video me-1"></i> USER UPLOADED WALKTHROUGH
+                    {% endif %}
+                </span>
+            </div>
+            {% endif %}
+        {% endif %}
+
+        <!-- 2. AUTO SLIDESHOW & CATEGORY IMAGE GALLERY GRID (Always rendered below video) -->
+        <div class="prop-gallery-grid">
+            <div class="prop-gallery-main" id="galMain">
+                {% if pg.images.all %}
+                    {% for img in pg.images.all %}
+                    <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}" data-category="{{ img.category }}">
+                        <img src="{{ img.image.url }}" alt="Property view {{ forloop.counter }}" style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#photoLightboxStrip">
+                    </div>
+                    {% endfor %}
+                    <div class="gallery-hud">
+                        <div class="gallery-hud-left">
+                            <button class="btn-play-pause" id="playPauseBtn" type="button"><i class="fas fa-pause"></i></button>
+                            <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
+                        </div>
+                        <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> AUTO SLIDESHOW ({{ pg.images.all.count }} IMAGES)</span>
+                    </div>
+                {% else %}
+                    <div class="w-100 h-100 position-relative overflow-hidden">
+                        <div style="position:absolute; inset:0; background:linear-gradient(135deg,#1e3a8a,#2563eb,#1e40af); filter:blur(12px); transform:scale(1.2);"></div>
+                        <div style="position:absolute; inset:0; background:rgba(0,0,0,0.35);"></div>
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center position-relative text-center text-white">
+                            <div>
+                                <div style="width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,0.12); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; margin:auto;">
+                                    <i class="fas fa-building-user" style="font-size:60px;"></i>
+                                </div>
+                                <h2 style="margin-top:20px; font-weight:700; letter-spacing:1px;">EstateFlow</h2>
+                                <p style="color:rgba(255,255,255,0.8); margin-bottom:0;">Property Images Not Available</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="prop-gallery-thumb" style="background:#0d1117;" onclick="setSlide(1)" id="galThumb1">
+                {% if pg.images.count > 1 %}
+                    <img src="{{ pg.images.all.1.image.url }}" alt="Thumbnail 2">
+                {% else %}
+                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:linear-gradient(135deg,#1e3a8a,#2563eb);color:white;">
+                        <i class="fas fa-building-user mb-1"></i><span style="font-size:10px;font-weight:600;">EstateFlow</span>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="prop-gallery-thumb" style="background:#0d1117;" onclick="setSlide(2)" id="galThumb2">
+                {% if pg.images.count > 2 %}
+                    <img src="{{ pg.images.all.2.image.url }}" alt="Thumbnail 3">
+                    {% if pg.images.count > 3 %}
+                    <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoLightboxStrip">
+                        <div class="text-center"><span>+{{ pg.images.count|add:"-3" }}</span><small>More Photos</small></div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:linear-gradient(135deg,#1e3a8a,#2563eb);color:white;">
+                        <i class="fas fa-building-user mb-1"></i><span style="font-size:10px;font-weight:600;">EstateFlow</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Thumbnail Image Strip Bar -->
+    {% if pg.images.all %}
+    <div style="background:#0d1117;padding:8px 16px 12px;">
+        <div style="display: flex; gap: 6px; overflow-x: auto; padding: 6px 0 0; scrollbar-width: thin;" id="imageStrip">
+            {% for img in pg.images.all %}
+            <div style="flex-shrink:0;width:72px;height:54px;border-radius:5px;overflow:hidden;cursor:pointer;border:2px solid {% if forloop.first %}var(--primary){% else %}transparent{% endif %};" class="strip-thumb" data-slide="{{ forloop.counter0 }}" data-cat="{{ img.category }}" onclick="setSlide({{ forloop.counter0 }})">
+                <img src="{{ img.image.url }}" style="width:100%;height:100%;object-fit:cover;">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+  </div>
+
+    <!-- STICKY NAV — now matches residential's section order:
+         Listed By → Basic Info → Rooms & Rent → Rules → Food →
+         Pricing → Location → Amenities → Description →
+         Owner & Upload (with Duplication Engine) → FAQs -->
+    <div class="prop-sticky-nav">
+        <div class="container-fluid px-4">
+            <div class="prop-sticky-nav-inner" id="propNavTabs">
+                <a href="#sec-listed" class="prop-nav-link active" data-target="sec-listed"><i class="fas fa-user-tie"></i> Listed By</a>
+                <a href="#sec-basic" class="prop-nav-link" data-target="sec-basic"><i class="fas fa-layer-group"></i> Basic Information</a>
+                
+                <!-- Fixed ID Mapping -->
+                <a href="#sec-pricing" class="prop-nav-link" data-target="sec-pricing"><i class="fas fa-indian-rupee-sign"></i> Room Details & Pricing</a>
+                <a href="#sec-rules" class="prop-nav-link" data-target="sec-rules"><i class="fas fa-gavel"></i> PG Regulations</a>
+                <a href="#sec-amenities" class="prop-nav-link" data-target="sec-amenities"><i class="fas fa-wand-magic-sparkles"></i> Amenities & Nearby Facilities</a>
+                <a href="#sec-desc" class="prop-nav-link" data-target="sec-desc"><i class="fas fa-align-left"></i> Property Descriptions</a>
+                <a href="#sec-owner" class="prop-nav-link" data-target="sec-owner"><i class="fas fa-database"></i> Media & Upload Meta</a>
+                <a href="#sec-faqs" class="prop-nav-link" data-target="sec-faqs"><i class="fas fa-comments-question"></i> FAQs</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="prop-page-body">
+        <div class="container-fluid px-4">
+            <div class="prop-layout-grid">
+
+                <div>
+
+                    <!-- ══════════ NEW SECTION: LISTED BY (matches residential) ══════════ -->
+                    <div class="prop-section" id="sec-listed">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-user-tie"></i></div>
+                            Listed By
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Listed By Type</div>
+                                <div class="spec-value">
+                                    {% if pg.listed_by_type == 'self' %}Listed by Self
+                                    {% elif pg.listed_by_type == 'other' %}Listed for Other User
+                                    {% else %}{{ pg.listed_by_type|default:"—" }}{% endif %}
+                                </div>
+                            </div>
+
+                           
+
+                            <div class="spec-item">
+                                <div class="spec-label">Lister ID</div>
+                                <div class="spec-value">{{ pg.listed_by_id|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Lister Name</div>
+                                <div class="spec-value">{{ pg.listed_by_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Lister Email</div>
+                                <div class="spec-value" style="font-size:0.85rem;">{{ pg.listed_by_email|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Lister Contact</div>
+                                <div class="spec-value">{{ pg.listed_by_contact|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Lister Role</div>
+                                <div class="spec-value">{{ pg.listed_by_role|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prop-section" id="sec-basic">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-layer-group"></i></div>
+                            Basic Information
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Property Title</div>
+                                <div class="spec-value" style="font-family:monospace;">{{ pg.property_title }}</div>
+                            </div>
+
+                               <div class="spec-item">
+                                <div class="spec-label">Building / Project / Society Name</div>
+                                <div class="spec-value">{{ pg.building_name|default:"—" }}</div>
+                            </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">Property No/Unit No</div>
+                                <div class="spec-value">{{ pg.property_no|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">City</div>
+                                <div class="spec-value"> {{ pg.city }}</div>
+                            </div>
+
+                             <div class="spec-item">
+                                <div class="spec-label">Locality</div>
+                                <div class="spec-value">{{ pg.locality }}</div>
+                            </div>
+
+                             <div class="spec-item">
+                                <div class="spec-label">Property Address</div>
+                                <div class="spec-value">{{ pg.address }}</div>
+                            </div>
+
+
+                             <div class="spec-item spec-full">
+                                <div class="spec-label">Property Landmark</div>
+                                <div class="spec-value">{{ pg.property_landmark|default:"—" }}</div>
+                            </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">Pincode</div>
+                                <div class="spec-value" style="font-family:monospace;">{{ pg.pincode|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">State</div>
+                                <div class="spec-value">{{ pg.state|default:"—" }}</div>
+                            </div>
+                            
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Google Maps Link</div>
+                                <div class="spec-value">
+                                    {% if pg.google_maps_link %}
+                                    <a href="{{ pg.google_maps_link }}" target="_blank" style="color:var(--primary); text-decoration:underline;">View on Map <i class="fas fa-external-link-alt"></i></a>
+                                    {% else %}—{% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Latitude</div>
+                                <div class="spec-value">{{ pg.latitude|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Longitude</div>
+                                <div class="spec-value">{{ pg.longitude|default:"—" }}</div>
+                            </div>
+                         
+                            <div class="spec-item">
+                                <div class="spec-label">PG For</div>
+                                <div class="spec-value text-capitalize">{{ pg.pg_for }}</div>
+                            </div>
+
+                             <div class="spec-item">
+                                <div class="spec-label">Furnishing Status</div>
+                                <div class="spec-value text-capitalize">{{ pg.furnishing_type }}</div>
+                            </div>
+
+                              <div class="spec-item">
+                                <div class="spec-label">Best Suited For</div>
+                                <div class="spec-value text-capitalize">{{ pg.best_suited_for }}</div>
+                            </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">Meals Available</div>
+                                <div class="spec-value text-capitalize">{{ pg.meals_available}}</div>
+                            </div>
+
+
+                             <div class="spec-item">
+                                <div class="spec-label">Meal Offerings</div>
+                                <div class="d-flex flex-wrap gap-2 mb-4">
+                            {% for item in meal_offerings_list %}
+                                <span class="amenity-pill"><i class="fas fa-pizza-slice text-warning"></i> {{ item }}</span>
+                            {% endfor %}
+                        </div>
+                            </div>
+
+
+                            
+                             <div class="spec-item">
+                                <div class="spec-label">Meal Speciality</div>
+                                <div class="d-flex flex-wrap gap-2 mb-4">
+                            {% for item in meal_speciality_list %}
+                                <span class="amenity-pill"><i class="fas fa-leaf text-success"></i> {{ item }}</span>
+                            {% endfor %}
+                        </div>
+                            </div>
+                           
+
+                             <div class="spec-item">
+                                <div class="spec-label">Lock-in Period</div>
+                                <div class="spec-value">{{ pg.lockin_period|default:"0" }} Days</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Notice Period</div>
+                                <div class="spec-value">{{ pg.notice_period|default:"0" }} Days</div>
+                            </div>
+
+                             <div class="spec-item">
+                                <div class="spec-label">Minimum Stay</div>
+                                <div class="spec-value">{{ pg.minimum_stay }} Months</div>
+                            </div>
+
+
+                             <div class="spec-item">
+                                <div class="spec-label">Available From</div>
+                                <div class="spec-value"><i class="far fa-calendar-check text-muted me-1"></i>{{ pg.available_from|date:"d M Y" }}</div>
+                            </div>
+
+                             <div class="spec-grid mb-4">
+                           
+                           
+                           
+                            <div class="spec-item">
+                                <div class="spec-label">Managed By</div>
+                                <div class="spec-value">{{ pg.property_managed_by|title|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Manager Stays Here?</div>
+                                <div class="spec-value">{% if pg.manager_stays %}Yes{% else %}No{% endif %}</div>
+                            </div>
+                        </div>
+                             
+                        
+                            
+                           
+                            
+                        </div>
+                    </div>
+
+                  
+                   
+                   
+
+                    <!-- ══════════ NEW SECTION: PRICING (formatted like residential's Pricing Details) ══════════ -->
+                 
+                    <div class="prop-section" id="sec-pricing">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-indian-rupee-sign"></i></div>
+                           Room Details & Pricing
+                        </div>
+                        <div class="spec-grid">
+
+                            <!-- Starting / representative rent -->
+
+                             <div class="spec-item">
+                                <div class="spec-label">Room Type</div>
+                                <div class="spec-value">{{ pg.room_type|default:"-" }}</div>
+                            </div>
+                             <div class="spec-item">
+                                <div class="spec-label">Total Beds In Room</div>
+                                <div class="spec-value">{{ pg.total_beds|default:"-" }}</div>
+                            </div>
+                            <div class="spec-item highlight-price">
+                                <div class="spec-label">Rent Per Occupant (₹)</div>
+                                <div class="spec-value">₹{{ starting_rent|default:"0"|intcomma }} / mo</div>
+                            </div>
+
+                            <!-- Advance Rent -->
+                            <div class="spec-item" style="background: linear-gradient(135deg, #ded7e1, hsl(55, 9%, 74%)); border-color: rgb(153, 150, 146) !important;">
+                                <div class="spec-label">Advance Rent Month</div>
+                                <div class="spec-value">
+                                    {% if pg.advance_rent_month == 'fixed' %}
+                                        <div style="font-weight:700; color:#1e293b;">₹{{ pg.advance_rent_amount|floatformat:"0"|intcomma }}</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">(Fixed Amount)</div>
+
+                                   {% elif pg.advance_rent_month and pg.advance_rent_month != '0' %}
+                                        <div style="font-weight:700; color:#1e293b;">₹{{ pg.get_advance_rent_amount|floatformat:"0"|intcomma }}</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">({{ pg.advance_rent_month }} {% if pg.advance_rent_month != '1' %}{% endif %})</div>
+                                    {% else %}
+
+                                        <div style="font-weight:700; color:#1e293b;">—</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">(No Advance)</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Security Deposit -->
+                            <div class="spec-item highlight-price" style="background: linear-gradient(135deg, rgb(235, 250, 21), rgb(251, 236, 28)); border-color: #fed7aa !important;">
+                                <div class="spec-label" style="color:#ea580c;">Security Deposit</div>
+                                <div class="spec-value" style="color:#c2410c;">
+                                    {% if pg.security_deposit_type == 'fixed' %}
+                                        <div style="font-weight:700;">₹{{ pg.security_deposit_amount|floatformat:"0"|intcomma }}</div>
+                                        <div style="font-size:0.75rem; opacity:0.85; font-weight:500; margin-top:2px;">(Fixed Amount)</div>
+
+                                  {% elif pg.security_deposit_type and pg.security_deposit_type != '0' %}
+                                        <div style="font-weight:700;">₹{{ pg.get_security_deposit_amount|floatformat:"0"|intcomma }}</div>
+                                        
+                                        <div style="font-size:0.75rem; opacity:0.85; font-weight:500; margin-top:2px;">({{ pg.security_deposit_type }}{% if pg.security_deposit_type != '1' %}{% endif %})</div>
+                                    {% else %}
+                                        <div style="font-weight:700;">—</div>
+                                        <div style="font-size:0.75rem; opacity:0.85; font-weight:500; margin-top:2px;">(No Deposit)</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Brokerage -->
+                            <div class="spec-item">
+                                <div class="spec-label">Brokerage</div>
+                                <div class="spec-value">
+                                    {% if pg.brokerage_percentage == 'Fixed Amount' %}
+                                        <div style="font-weight:700; color:#1e293b;">₹{{ pg.manual_brokerage|floatformat:"0"|intcomma }}</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">(Fixed Amount)</div>
+                                    {% elif pg.brokerage_percentage == '1 Month Rent' %}
+                                        <div style="font-weight:700; color:#1e293b;">₹{{ starting_rent|floatformat:"0"|intcomma }}</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;"></div>
+
+                                    {% elif pg.brokerage_percentage == '15 Days Rent' %}
+                                        <div style="font-weight:700; color:#1e293b;">₹{{ pg.get_brokerage_amount|floatformat:"0"|intcomma }}</div>
+
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;"></div>
+                                    {% elif pg.brokerage_percentage == 'No Brokerage' %}
+                                        <div style="font-weight:700; color:#1e293b;">₹0</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">(No Brokerage)</div>
+                                    {% elif pg.brokerage_percentage == 'Negotiable' %}
+                                        <div style="font-weight:700; color:#1e293b;">—</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">(Negotiable)</div>
+                                    {% else %}
+                                        <div style="font-weight:700; color:#1e293b;">—</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Monthly Maintenance -->
+                            {% if pg.maintenance_type == 'Extra' %}
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Monthly Maintenance Amount</div>
+                                <div class="spec-value">₹{{ pg.maintenance_amount|default:"0"|intcomma }}/ mo</div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Total Move-in Cost -->
+                            <div class="spec-item spec-full" style="background:#f3f4f6;">
+                                <div class="spec-label" style="font-size:0.95rem; font-weight:600; color:#0f766e; margin-bottom:8px;">
+                                    Total Move In Cost (Per Occupant)
+                                </div>
+                                <div class="spec-value" style="font-size:2rem; font-weight:800; color:#0f766e; line-height:1.2;">
+                                    ₹{{ pg.total_move_in_cost|default:"0"|intcomma }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ══════════ NEW SECTION: LOCATION (matches residential) ══════════ -->
+                    
+                     <div class="prop-section" id="sec-rules">
+                        <div class="prop-section-title">
+                            <div class="section-icon" style="color:#ef4444; background:#fef2f2;"><i class="fas fa-gavel"></i></div>
+                          PG Regulations
+                        </div>
+                       
+
+                        <div class="sub-section-label">Property Restrictions</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% if pg.opposite_gender_visitors_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Opposite Gender Visitors Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Opposite Gender Visitors Allowed</span>{% endif %}
+                            {% if pg.visitors_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Visitors Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Visitors Allowed</span>{% endif %}
+                            {% if pg.parents_guardians_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Parents/Guardians Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Parents/Guardians Allowed</span>{% endif %}
+                            {% if pg.entry_24x7_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> 24x7 Entry Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No 24x7 Entry Allowed</span>{% endif %}
+                            {% if pg.curfew_time %}
+    <span class="amenity-pill off"><i class="fas fa-clock"></i> Curfew: {{ pg.curfew_time|time:"h:i A" }}</span>
+{% else %}
+    <span class="amenity-pill on"><i class="fas fa-clock"></i> No Curfew Time</span>
+{% endif %}
+     
+
+
+                                           {% if pg.smoking_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Smoking Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Smoking Allowed</span>{% endif %}
+                                                  {% if pg.alcohol_consumption_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Alcohol Consumption Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Alcohol Consumption Allowed</span>{% endif %}
+                            {% if pg.couples_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Couples Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Couples Allowed</span>{% endif %}
+                            {% if pg.pets_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Pets Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Pets Allowed</span>{% endif %}
+                            {% if pg.cooking_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Cooking Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Cooking Allowed</span>{% endif %}
+             
+                     
+                            {% if pg.police_verification_required %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Police Verification Required</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Police Verification Required</span>{% endif %}
+                        </div>
+                    </div>
+
+
+                    <div class="prop-section" id="sec-amenities">
+                        <div class="prop-section-title">
+                            <div class="section-icon" style="color:#06b6d4; background:#ecfeff;"><i class="fas fa-wand-magic-sparkles"></i></div>
+                             Amenities & Nearby Facilities
+                        </div>
+                        <div class="sub-section-label d-flex justify-content-between align-items-center">
+                            <span> Amenities</span>
+                            <span class="badge rounded-pill bg-success" style="font-size:13px;">{{ amenities_list|length }} Amenities</span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            {% for item in amenities_list %}
+                                <div class="amenity-pill on"><i class="fas fa-check-circle text-success"></i> {{ item }}</div>
+                            {% empty %}
+                                <div class="empty-state w-100"><p>No specific amenities listed.</p></div>
+                            {% endfor %}
+                        </div>
+                        <div class="sub-section-label d-flex justify-content-between align-items-center">
+                            <span>Nearby Facilities</span>
+                            <span class="badge rounded-pill bg-primary" style="font-size:13px;">{{ facilities_list|length }}Nearby Facilities</span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for item in facilities_list %}
+                                <div class="amenity-pill"><i class="fas fa-map-pin text-primary"></i> {{ item }}</div>
+                            {% empty %}
+                                <div class="empty-state w-100"><p>No nearby facilities markers toggled.</p></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+               
+                    <div class="prop-section" id="sec-desc">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-align-left"></i></div>
+                            Property Descriptions
+                        </div>
+                        <div class="desc-body">
+                            <div class="sub-section-label">User Provided Description</div>
+                            {% if pg.user_description %}
+                                <div class="desc-highlight">{{ pg.user_description|safe }}</div>
+                            {% else %}
+                                <p class="mb-4 text-muted">No custom description provided by user.</p>
+                            {% endif %}
+
+                            <div class="sub-section-label">Property Summary</div>
+                            {% if pg.property_summary %}
+                                <p class="mb-4">{{ pg.property_summary }}</p>
+                            {% else %}
+                                <p class="mb-4 text-muted">Not generated.</p>
+                            {% endif %}
+
+                            <div class="sub-section-label">Detailed Property Description</div>
+                            {% if pg.property_description %}
+                                <div class="desc-highlight">{{ pg.property_description|safe }}</div>
+                            {% else %}
+                                <p class="text-muted">Not generated.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- ══════════ UPDATED SECTION: MEDIA & UPLOAD META (renamed from "Owner & Upload",
+                         now Listing Portals + Uploader Meta + System Duplication Engine, same
+                         layout/order as residential; owner/manager contact info stays in the
+                         sidebar card only, to avoid duplicating it here) ══════════ -->
+                    <div class="prop-section" id="sec-owner">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-database"></i></div>
+                            Media & Upload Meta-Data
+                        </div>
+
+                        <div class="sub-section-label">Listing Portals</div>
+                        <div class="spec-grid mb-4">
+                            <div class="spec-item">
+                                <div class="spec-label">Is Property Already Listed Elsewhere?</div>
+                                <div class="spec-value">{{ pg.listed_elsewhere|default:"No" }}</div>
+                            </div>
+                            {% if pg.listed_elsewhere == 'Yes' %}
+                            <div class="spec-item">
+                                <div class="spec-label">Portal Name</div>
+                                <div class="spec-value">{{ pg.portal_name|default:"—" }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="sub-section-label">Property Uploaded By (System Meta)</div>
+                        <div class="spec-grid mb-4">
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Name</div>
+                                <div class="spec-value">{{ pg.uploaded_by_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Role</div>
+                                <div class="spec-value">{{ pg.uploaded_by_role|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Email</div>
+                                <div class="spec-value" style="font-size:0.82rem;">{{ pg.uploaded_by_email|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Contact</div>
+                                <div class="spec-value">{{ pg.uploaded_by_contact|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Data Uploaded Via</div>
+                                <div class="spec-value" style="font-size:0.8rem; color: var(--muted);">{{ pg.upload_file_name|default:"Direct Input Entry" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">System Record Creation Date</div>
+                                <div class="spec-value">{{ pg.created_at|date:"d M Y, h:i A" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Soft Delete Status</div>
+                                <div class="spec-value">
+                                    {% if pg.is_deleted %}
+                                        <span class="badge-deleted">True — Deleted</span>
+                                    {% else %}
+                                        <span class="badge-active">False — Active</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- NEW: SYSTEM DUPLICATION ENGINE SUB-SECTION (matches residential) -->
+                        <div class="sub-section-label">System Duplication Engine</div>
+                        <div class="spec-grid" style="background: #fdfdfd; border-radius: 8px;">
+                            <div class="spec-item">
+                                <div class="spec-label">Is Duplicate?</div>
+                                <div class="spec-value">
+                                    {% if pg.is_duplicate %}
+                                        <span class="text-danger fw-bold"><i class="fas fa-exclamation-circle"></i> Yes, Flagged</span>
+                                    {% else %}
+                                        <span class="text-success fw-bold"><i class="fas fa-check-circle"></i> Original</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Total Exact Matches</div>
+                                <div class="spec-value">{{ pg.duplicate_count|default:"1" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Property Fingerprint (SHA-256)</div>
+                                <div class="spec-value" style="font-family:monospace; font-size:0.75rem; word-break: break-all; color: var(--muted);">{{ pg.property_unique_key|default:"Not Generated" }}</div>
+                            </div>
+                            {% if pg.duplicate_group_id %}
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Duplicate Group ID</div>
+                                <div class="spec-value" style="font-family:monospace; font-size:0.75rem; word-break: break-all;">{{ pg.duplicate_group_id }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="prop-section" id="sec-faqs">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-comments-question"></i></div>
+                            Auto-Generated Property(FAQs)
+                        </div>
+                        <div class="accordion prop-faq" id="faqAccordion">
+                            {% for faq in pg.faqs.all %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="faqHead{{ faq.id }}">
+                                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faqBody{{ faq.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+                                            {{ faq.question }}
+                                        </button>
+                                    </h2>
+                                    <div id="faqBody{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">{{ faq.answer }}</div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="empty-state"><i class="fas fa-database"></i><p>No FAQ matrices cached for this entry.</p></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+          <div class="prop-sidebar">
+                    <!-- Price card -->
+                    <div class="sidebar-price-card">
+                        <div class="sidebar-price-header">
+                            <div class="sidebar-price-label">Starting Room Rent</div>
+                            <div class="sidebar-price-amount">
+                                ₹{{ starting_rent|default:"0"|intcomma }} <span>/ mo</span>
+                                
+                                {% if pg.advance_rent_month == 'fixed' %}
+                                    <span class="advance" style="font-size:12px; color:white; font-weight:bolder; display:block; margin-top:4px;">
+                                        (₹{{ pg.advance_rent_amount|floatformat:"0"|intcomma }} - Advance Fixed)
+                                    </span>
+
+                              {% elif pg.advance_rent_month and pg.advance_rent_month != '0' %}
+                                    <span class="advance" style="font-size:12px; color:white; font-weight:bolder; display:block; margin-top:4px;">
+                                        (₹{{ pg.get_advance_rent_amount|floatformat:"0"|intcomma }} - Advance {{ pg.advance_rent_month }}{% if pg.advance_rent_month != '1' %}{% endif %})
+                                    </span>
+
+                                {% else %}
+                                    <span class="advance" style="font-size:12px; color:white; font-weight:bolder; display:block; margin-top:4px;">(No Advance)</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="sidebar-price-body">
+                            <div class="row g-0">
+                                <!-- Deposit Valuation -->
+                                <div class="col-6 sidebar-mini-stat" style="border-right: 1px solid var(--border);">
+                                    <div class="sidebar-mini-stat-label">Security Deposit</div>
+                                    {% if pg.security_deposit_type == 'fixed' %}
+                                        <div class="sidebar-mini-stat-val">₹{{ pg.security_deposit_amount|floatformat:"0"|intcomma }}</div>
+                                        <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">(Fixed Amount)</div>
+
+                                    {% elif pg.security_deposit_type and pg.security_deposit_type != '0' %}
+                                        <div class="sidebar-mini-stat-val">₹{{ pg.get_security_deposit_amount|floatformat:"0"|intcomma }}</div>
+
+                                        <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">({{ pg.security_deposit_type }}{% if pg.security_deposit_type != '1' %}s{% endif %})</div>
+                                    {% else %}
+                                        <div class="sidebar-mini-stat-val">—</div>
+                                        <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">(No Deposit)</div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Maintenance Charge -->
+                                <div class="col-6 sidebar-mini-stat">
+                                    <div class="sidebar-mini-stat-label">Maintenance</div>
+                                    {% if pg.maintenance_type == 'Extra' %}
+                                        <div class="sidebar-mini-stat-val">₹{{ pg.maintenance_amount|default:"0"|intcomma }}/mo</div>
+                                        <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">(Extra)</div>
+                                    {% else %}
+                                        <div class="sidebar-mini-stat-val">Included</div>
+                                        <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">(In Rent)</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Owner Contact Card -->
+                    <div class="sidebar-owner-card">
+                        <div class="sidebar-divider">Listed By / Contact Info</div>
+                        <div class="d-flex align-items-center gap-12 mb-3" style="gap:12px;">
+                            <!-- Using slice to extract the first letter for the Avatar -->
+                            <div class="owner-avatar">{{ pg.listed_by_name|slice:":1"|upper|default:"U" }}</div>
+                            <div style="min-width:0;">
+                                <div class="owner-name">{{ pg.listed_by_name|default:"Undisclosed Identity" }}</div>
+                                <div class="owner-email"><i class="fas fa-envelope me-1"></i>{{ pg.listed_by_email|default:"No email logged" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="owner-info-row">
+                            <i class="fas fa-phone"></i>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="owner-phone-masked" id="sidebarPhone" data-phone="{{ pg.listed_by_contact|default:'' }}">
+                                    {% with phone=pg.listed_by_contact %}
+                                        {% if phone %}{{ phone|slice:":2" }}XXXXXX{{ phone|slice:"-2:" }}{% else %}Not available{% endif %}
+                                    {% endwith %}
+                                </span>
+                                {% if pg.listed_by_contact or pg.contact_number %}
+                                <button type="button" class="btn-reveal-phone" onclick="togglePhone('sidebarPhone', '{{ pg.listed_by_contact}}', this)" title="Show/Hide Number">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <a href="tel:{{ pg.listed_by_contact }}" class="btn-call-primary">
+                            <i class="fas fa-phone-volume"></i> Call Primary Number
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- LIGHTBOX MODAL WITH CATEGORY TABS -->
+<div class="modal fade" id="photoLightboxStrip" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content" style="background: #0d1117; color: white; border: 1px solid #1e2733;">
+            <div class="modal-header border-0" style="border-bottom: 1px solid #1e2733 !important;">
+                <h5 class="modal-title fw-bold" style="font-size:0.95rem;"><i class="fas fa-images me-2 text-primary"></i> PG Portfolio — {{ pg.images.count }} Views</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                {% if grouped_images %}
+                <div class="d-flex flex-wrap gap-2 mb-4" id="lightboxCategoryFilters">
+                    <button type="button" class="btn modal-cat-tab active-cat-btn" data-filter="all" style="background:#2563eb; color:#fff; font-size:.8rem; font-weight:600; border-radius:20px; padding:6px 14px;">All Photos ({{ pg.images.all|length }})</button>
+                    {% for cat_key, cat_data in grouped_images.items %}
+                    <button type="button" class="btn modal-cat-tab" data-filter="{{ cat_key }}" style="background:#1f2937; color:#cbd5e0; font-size:.8rem; font-weight:600; border-radius:20px; padding:6px 14px;">{{ cat_data.label }} ({{ cat_data.images|length }})</button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="row g-3" id="lightboxImagesGrid">
+                    {% for img in pg.images.all %}
+                        <div class="col-6 col-md-4 col-lg-3 modal-thumb-item" data-cat="{{ img.category }}">
+                            <div style="position:relative; border-radius:8px; overflow:hidden; background:#1e2733; border:1px solid #374151;">
+                                <img src="{{ img.image.url }}" style="width:100%; height:140px; object-fit:cover; cursor:pointer;"
+                                     onclick="setSlide({{ forloop.counter0 }}); var m = bootstrap.Modal.getInstance(document.getElementById('photoLightboxStrip')); if(m) m.hide();">
+                                <span style="position:absolute; bottom:6px; left:6px; background:rgba(0,0,0,0.75); color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; text-transform:uppercase;">
+                                    {{ img.get_category_display }}
+                                </span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Lightbox Category Filtering Script
+document.addEventListener("DOMContentLoaded", function () {
+    const filterButtons = document.querySelectorAll('#lightboxCategoryFilters .modal-cat-tab');
+    const imageItems = document.querySelectorAll('#lightboxImagesGrid .modal-thumb-item');
+
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            filterButtons.forEach(b => {
+                b.style.background = '#1f2937';
+                b.style.color = '#cbd5e0';
+            });
+            this.style.background = '#2563eb';
+            this.style.color = '#fff';
+
+            const selectedCat = this.getAttribute('data-filter');
+            imageItems.forEach(item => {
+                if (selectedCat === 'all' || item.getAttribute('data-cat') === selectedCat) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const slides = document.querySelectorAll('.walkthrough-slide');
+    const stripThumbs = document.querySelectorAll('.strip-thumb');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const galTimer = document.getElementById('galTimer');
+    const INTERVAL = 4000;
+
+    let currentSlide = 0, isPlaying = true, ticker = null, startTime = Date.now();
+    const totalDuration = slides.length * INTERVAL;
+
+    function fmt(ms) {
+        const s = Math.floor(ms / 1000), m = Math.floor(s / 60);
+        return `${String(m).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+    }
+
+    window.setSlide = function(idx) {
+        slides.forEach(s => s.classList.remove('active'));
+        stripThumbs.forEach(t => t.style.borderColor = 'transparent');
+        currentSlide = (idx + slides.length) % slides.length;
+        if (slides[currentSlide]) slides[currentSlide].classList.add('active');
+        const activeThumb = document.querySelector(`.strip-thumb[data-slide="${currentSlide}"]`);
+        if (activeThumb) activeThumb.style.borderColor = 'var(--primary)';
+        startTime = Date.now();
+    };
+
+    function tickTimer() {
+        if (!isPlaying || !galTimer) return;
+        const elapsed = (currentSlide * INTERVAL) + ((Date.now() - startTime) % INTERVAL);
+        galTimer.textContent = `${fmt(Math.min(elapsed, totalDuration))} / ${fmt(totalDuration)}`;
+        requestAnimationFrame(tickTimer);
+    }
+
+    function autoAdvance() { ticker = setInterval(() => setSlide(currentSlide + 1), INTERVAL); }
+
+    if (slides.length > 0) {
+        if (playPauseBtn) {
+            playPauseBtn.addEventListener('click', function () {
+                if (isPlaying) { clearInterval(ticker); isPlaying = false; this.innerHTML = '<i class="fas fa-play"></i>'; }
+                else { autoAdvance(); isPlaying = true; this.innerHTML = '<i class="fas fa-pause"></i>'; requestAnimationFrame(tickTimer); }
+            });
+        }
+        setSlide(0); autoAdvance(); requestAnimationFrame(tickTimer);
+    }
+
+    // Scroll Spy Nav
+    // Scroll Spy Nav
+    const navLinks = document.querySelectorAll('.prop-nav-link');
+    const sections = document.querySelectorAll('.prop-section[id]');
+    
+    function updateActiveNav() {
+        let activeId = null; 
+        const scrollPosition = window.scrollY;
+        
+        sections.forEach(sec => { 
+            // Calculate absolute top position of the section
+            const sectionTop = sec.getBoundingClientRect().top + window.scrollY;
+            // Add a buffer so it highlights slightly before it hits the exact top
+            if (scrollPosition >= sectionTop - 180) {
+                activeId = sec.id;
+            }
+        });
+        
+        if (activeId) {
+            navLinks.forEach(l => {
+                if (l.getAttribute('data-target') === activeId) {
+                    l.classList.add('active');
+                } else {
+                    l.classList.remove('active');
+                }
+            });
+        }
+    }
+    
+    window.addEventListener('scroll', updateActiveNav, { passive: true });
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault(); 
+            const target = document.getElementById(this.getAttribute('data-target'));
+            if (target) {
+                // Native smooth scroll (automatically respects your scroll-margin-top CSS)
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+    
+    updateActiveNav();
+
+    // Horizontal scroll fix for sticky nav (same as residential)
+    const navTabs = document.getElementById('propNavTabs');
+    if (navTabs) {
+        navTabs.addEventListener('wheel', function (e) {
+            if (e.deltaY !== 0) { e.preventDefault(); this.scrollLeft += e.deltaY; }
+        });
+    }
+});
+
+// Phone reveal/hide toggle (same behavior as residential's togglePhone)
+function togglePhone(elementId, phone, button) {
+    const el = document.getElementById(elementId);
+    if (!el || !phone) return;
+
+    const maskedPhone = phone.substring(0, 2) + "XXXXXX" + phone.substring(phone.length - 2);
+
+    if (el.textContent.trim() === maskedPhone) {
+        el.textContent = phone;
+        el.style.color = "#1a56db";
+        el.style.fontWeight = "700";
+        button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        button.title = "Hide Number";
+    } else {
+        el.textContent = maskedPhone;
+        el.style.color = "";
+        el.style.fontWeight = "";
+        button.innerHTML = '<i class="fas fa-eye"></i>';
+        button.title = "Show Number";
+    }
+}
+</script>

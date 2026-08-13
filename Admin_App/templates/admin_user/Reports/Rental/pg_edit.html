@@ -203,40 +203,122 @@ input:checked + .toggle-slider { background-color:#667eea; }
   .item-tag { background:white; border:1px solid #dee2e6; border-radius:20px; padding:4px 14px; font-size:13px; display:inline-flex; align-items:center; gap:5px; }
   .item-tag .remove-btn { cursor:pointer; color:#dc3545; margin-left:4px; font-size:12px; }
 
-  .img-cat-tabs { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px; }
-  .img-cat-tab { border:2px solid #e9ecef; background:#fff; border-radius:12px; padding:10px 16px; font-size:0.85rem; font-weight:600; color:#4a5568; cursor:pointer; display:flex; align-items:center; gap:8px; transition:all 0.25s ease; white-space:nowrap; }
-  .img-cat-tab .cat-count { background:#f1f5f9; color:#64748b; border-radius:20px; padding:1px 9px; font-size:0.72rem; font-weight:700; }
-  .img-cat-tab.active { background:var(--primary-gradient); border-color:transparent; color:#fff; }
-  .img-cat-tab.active .cat-count { background:rgba(255,255,255,0.25); color:#fff; }
-  .img-cat-tab.has-images:not(.active) { border-color:#38ef7d; }
-  .img-cat-panel { display:none; }
-  .img-cat-panel.active { display:block; }
-  .img-cat-upload-area { border:3px dashed #cbd5e0; border-radius:15px; padding:28px 20px; text-align:center; background:#f8f9fa; cursor:pointer; transition:all 0.3s ease; }
-  .img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color:#667eea; background:#f0f4ff; }
-  .img-cat-upload-area .upload-icon i { font-size:2.2rem; color:#667eea; }
-  .img-cat-upload-area .upload-text { font-size:1rem; font-weight:600; color:#4a5568; margin-top:6px; }
-  .img-cat-upload-area .upload-subtext { font-size:0.82rem; color:#718096; margin-top:4px; }
-  .img-cat-preview, .existing-img-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:14px; margin-top:18px; }
-  .img-cat-preview-item, .existing-img-item { position:relative; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1); aspect-ratio:1; border:2px solid transparent; }
-  .img-cat-preview-item img, .existing-img-item img { width:100%; height:100%; object-fit:cover; display:block; }
-  .remove-image { position:absolute; top:8px; right:8px; width:28px; height:28px; background:#e74c3c; color:#fff; border:none; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.8rem; }
   
- .existing-img-remove-btn {
-  position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
-  background: #e74c3c; color: #fff; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 0.8rem; z-index: 5; border: none;
+
+  /* ================= PROPERTY IMAGE CATEGORY UPLOAD — IMPROVED UX ================= */
+.img-upload-guide {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    border: 2px dashed #a5b4fc; border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px;
+}
+.guide-step { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 190px; }
+.guide-step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--primary-gradient); color: #fff;
+    font-weight: 800; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 3px 8px rgba(102,126,234,0.35);
+}
+.guide-step-text { font-size: 0.78rem; color: #3730a3; line-height: 1.35; }
+.guide-step-text strong { display: block; font-size: 0.85rem; color: #1e1b4b; }
+.guide-arrow { color: #a5b4fc; font-size: 1rem; display: none; }
+@media (min-width: 900px) { .guide-arrow { display: block; } }
+
+
+
+.img-cat-tabs {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 12px; margin-bottom: 20px; counter-reset: catstep;
+}
+
+.img-cat-tab {
+    position: relative; border: 2px solid #e9ecef; background: #fff; border-radius: 14px;
+    padding: 18px 14px 14px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
+    cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    transition: all 0.25s ease; counter-increment: catstep;
+}
+.img-cat-tab i { font-size: 1.3rem; color: #94a3b8; }
+.img-cat-tab .cat-count {
+    background: #f1f5f9; color: #64748b; border-radius: 20px;
+    padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
+    align-self: flex-end; margin-top: -4px;
+}
+.img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
+.img-cat-tab.active i { color: #fff; }
+.img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+.img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
+
+.img-cat-tab::before {
+    content: counter(catstep); position: absolute; top: -8px; left: -8px;
+    width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid #cbd5e0; color: #64748b;
+    font-size: 0.68rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+.img-cat-tab.active::before { border-color: #667eea; color: #667eea; }
+.img-cat-tab.has-images::before { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; background: #38ef7d; border-color: #38ef7d; color: #fff; }
+
+.img-cat-tab:nth-child(1)::after, .img-cat-tab:nth-child(2)::after {
+    content: "★ Becomes Cover Photo"; font-size: 0.62rem; font-weight: 700; color: #b45309;
+    background: #fef3c7; padding: 2px 9px; border-radius: 20px; align-self: flex-start; margin-top: 2px;
+}
+.img-cat-tab.active:nth-child(1)::after, .img-cat-tab.active:nth-child(2)::after { color: #fff; background: rgba(255,255,255,0.25); }
+
+.img-cat-panel { display: none; }
+.img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+.img-cat-upload-area {
+    border: 3px dashed #cbd5e0; border-radius: 15px; padding: 36px 20px;
+    text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+}
+.img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
+.img-cat-upload-area .upload-icon {
+    width: 60px; height: 60px; border-radius: 50%; background: #eef2ff;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+}
+.img-cat-upload-area .upload-icon i { font-size: 1.6rem; color: #667eea; margin: 0; }
+.img-cat-upload-area .upload-text { font-size: 1.05rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+.img-cat-upload-area .upload-subtext {
+    display: inline-block; margin-top: 8px; padding: 4px 12px; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 20px; color: #475569; font-size: 0.82rem;
+}
+
+.img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+.img-cat-preview-item {
+    position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
+}
+.img-cat-preview-item.dragging { opacity: 0.4; }
+.img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;}
+.img-cat-preview-item .cover-badge {
+    position: absolute; bottom: 8px; left: 8px; background: linear-gradient(135deg,#f6d365,#fda085); color: #3b2a00;
+    font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 4px;
+}
+.img-cat-preview-item .remove-image {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff;
+    border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
+}
+.img-cat-preview-item .remove-image:hover { background: #c0392b; }
+
+.existing-img-remove-btn {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+    background: #e74c3c; color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.8rem; z-index: 5; border: none;
 }
 .existing-img-remove-btn input { display: none; }
 .existing-img-remove-btn:hover { background: #c0392b; }
 
-  .img-total-summary { display:flex; justify-content:space-between; align-items:center; background:#f8f9fa; border:2px solid #e9ecef; border-radius:12px; padding:14px 18px; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
-  .img-total-summary .total-count { font-weight:700; color:#2d3748; font-size:0.95rem; }
-  .img-total-summary .min-warning { font-size:0.8rem; color:#e74c3c; font-weight:600; }
-  .img-total-summary .min-ok { font-size:0.8rem; color:#10b981; font-weight:600; }
+.img-total-summary {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 16px;
+    padding: 16px 22px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+}
+.img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 1.05rem; }
+.img-total-summary .min-ok { font-size: 0.85rem; color: #10b981; font-weight: 600; }
 
-  .image-upload-area { border:3px dashed #cbd5e0; border-radius:15px; padding:40px; text-align:center; background:#f8f9fa; cursor:pointer; transition:all 0.2s; }
-  .image-upload-area:hover { border-color:#667eea; background:#f0f4ff; }
+.image-upload-area { border:3px dashed #cbd5e0; border-radius:15px; padding:40px; text-align:center; background:#f8f9fa; cursor:pointer; transition:all 0.2s; }
+.image-upload-area:hover { border-color:#667eea; background:#f0f4ff; }
 
   .preview-sidebar { display:flex; flex-direction:column; gap:20px; position:sticky; top:20px; height:fit-content; }
   .preview-card { background:linear-gradient(180deg, #2c3e50 0%, #1a252f 100%); border-radius:16px; padding:20px; color:white; }
@@ -388,7 +470,13 @@ input:checked + .toggle-slider { background-color:#667eea; }
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-label">Property No/Unit No <span class="required">*</span></label>
-                      <input type="text" class="form-control" id="property_no" name="property_no" value="{{ pg.property_no|default:'' }}" required>
+                    
+                    
+                    <input type="text" class="form-control" id="property_no" name="property_no" value="{{ pg.property_no|default:'' }}" required>
+
+                    <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block; font-weight:bold;">
+                                            <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
+                                        </span>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -432,17 +520,58 @@ input:checked + .toggle-slider { background-color:#667eea; }
                       <input type="number" class="form-control" id="pincode" name="pincode" value="{{ pg.pincode|default:'' }}" required>
                     </div>
                   </div>
+                  
+
                   <div class="col-md-6">
-                    <div class="form-group">
-                      <label class="form-label">State <span class="required">*</span></label>
-                      <select class="form-select" name="state" id="state" required>
-                        <option value="">Select State</option>
-                        {% for s in state_choices %}
-                        <option value="{{ s }}" {% if pg.state == s %}selected{% endif %}>{{ s }}</option>
-                        {% endfor %}
-                      </select>
-                    </div>
-                  </div>
+    <div class="form-group">
+        <label class="form-label">
+            State <span class="required">*</span>
+        </label>
+        <select class="form-select form-control" name="state" id="state" required>
+            <option value="">Select State</option>
+
+            <!-- States -->
+            <option value="Andhra Pradesh" {% if pg.state == 'Andhra Pradesh' %}selected{% endif %}>Andhra Pradesh</option>
+            <option value="Arunachal Pradesh" {% if pg.state == 'Arunachal Pradesh' %}selected{% endif %}>Arunachal Pradesh</option>
+            <option value="Assam" {% if pg.state == 'Assam' %}selected{% endif %}>Assam</option>
+            <option value="Bihar" {% if pg.state == 'Bihar' %}selected{% endif %}>Bihar</option>
+            <option value="Chhattisgarh" {% if pg.state == 'Chhattisgarh' %}selected{% endif %}>Chhattisgarh</option>
+            <option value="Goa" {% if pg.state == 'Goa' %}selected{% endif %}>Goa</option>
+            <option value="Gujarat" {% if pg.state == 'Gujarat' %}selected{% endif %}>Gujarat</option>
+            <option value="Haryana" {% if pg.state == 'Haryana' %}selected{% endif %}>Haryana</option>
+            <option value="Himachal Pradesh" {% if pg.state == 'Himachal Pradesh' %}selected{% endif %}>Himachal Pradesh</option>
+            <option value="Jharkhand" {% if pg.state == 'Jharkhand' %}selected{% endif %}>Jharkhand</option>
+            <option value="Karnataka" {% if pg.state == 'Karnataka' %}selected{% endif %}>Karnataka</option>
+            <option value="Kerala" {% if pg.state == 'Kerala' %}selected{% endif %}>Kerala</option>
+            <option value="Madhya Pradesh" {% if pg.state == 'Madhya Pradesh' %}selected{% endif %}>Madhya Pradesh</option>
+            <option value="Maharashtra" {% if pg.state == 'Maharashtra' %}selected{% endif %}>Maharashtra</option>
+            <option value="Manipur" {% if pg.state == 'Manipur' %}selected{% endif %}>Manipur</option>
+            <option value="Meghalaya" {% if pg.state == 'Meghalaya' %}selected{% endif %}>Meghalaya</option>
+            <option value="Mizoram" {% if pg.state == 'Mizoram' %}selected{% endif %}>Mizoram</option>
+            <option value="Nagaland" {% if pg.state == 'Nagaland' %}selected{% endif %}>Nagaland</option>
+            <option value="Odisha" {% if pg.state == 'Odisha' %}selected{% endif %}>Odisha</option>
+            <option value="Punjab" {% if pg.state == 'Punjab' %}selected{% endif %}>Punjab</option>
+            <option value="Rajasthan" {% if pg.state == 'Rajasthan' %}selected{% endif %}>Rajasthan</option>
+            <option value="Sikkim" {% if pg.state == 'Sikkim' %}selected{% endif %}>Sikkim</option>
+            <option value="Tamil Nadu" {% if pg.state == 'Tamil Nadu' %}selected{% endif %}>Tamil Nadu</option>
+            <option value="Telangana" {% if pg.state == 'Telangana' %}selected{% endif %}>Telangana</option>
+            <option value="Tripura" {% if pg.state == 'Tripura' %}selected{% endif %}>Tripura</option>
+            <option value="Uttar Pradesh" {% if pg.state == 'Uttar Pradesh' %}selected{% endif %}>Uttar Pradesh</option>
+            <option value="Uttarakhand" {% if pg.state == 'Uttarakhand' %}selected{% endif %}>Uttarakhand</option>
+            <option value="West Bengal" {% if pg.state == 'West Bengal' %}selected{% endif %}>West Bengal</option>
+
+            <!-- Union Territories -->
+            <option value="Andaman and Nicobar Islands" {% if pg.state == 'Andaman and Nicobar Islands' %}selected{% endif %}>Andaman and Nicobar Islands</option>
+            <option value="Chandigarh" {% if pg.state == 'Chandigarh' %}selected{% endif %}>Chandigarh</option>
+            <option value="Dadra and Nagar Haveli and Daman and Diu" {% if pg.state == 'Dadra and Nagar Haveli and Daman and Diu' %}selected{% endif %}>Dadra and Nagar Haveli and Daman and Diu</option>
+            <option value="Delhi" {% if pg.state == 'Delhi' %}selected{% endif %}>Delhi</option>
+            <option value="Jammu and Kashmir" {% if pg.state == 'Jammu and Kashmir' %}selected{% endif %}>Jammu and Kashmir</option>
+            <option value="Ladakh" {% if pg.state == 'Ladakh' %}selected{% endif %}>Ladakh</option>
+            <option value="Lakshadweep" {% if pg.state == 'Lakshadweep' %}selected{% endif %}>Lakshadweep</option>
+            <option value="Puducherry" {% if pg.state == 'Puducherry' %}selected{% endif %}>Puducherry</option>
+        </select>
+    </div>
+</div>
 
                   <div class="col-md-6 mt-3">
                     <label class="form-label">Google Maps Link</label>
@@ -644,67 +773,73 @@ input:checked + .toggle-slider { background-color:#667eea; }
                     </div>
                   </div>
 
-                  <div class="row mt-2">
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label class="form-label">Rent Per Occupant (₹) <span class="required">*</span></label>
-                        <input type="number" class="form-control room-rent" id="room_rent" name="room_rent" value="{{ pg.monthly_rent|default:'' }}" min="0" required>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label class="form-label">Advance Rent Month</label>
-                        <select class="form-select" id="advance_rent_month" name="advance_rent_month">
-                          <option value="">Select</option>
-                          <option value="0" {% if pg.advance_rent_month == '0' %}selected{% endif %}>No Advance</option>
-                          <option value="1" {% if pg.advance_rent_month == '1' %}selected{% endif %}>1 Month Rent</option>
-                          <option value="2" {% if pg.advance_rent_month == '2' %}selected{% endif %}>2 Months Rent</option>
-                          <option value="3" {% if pg.advance_rent_month == '3' %}selected{% endif %}>3 Months Rent</option>
-                          <option value="4" {% if pg.advance_rent_month == '4' %}selected{% endif %}>4 Months Rent</option>
-                          <option value="5" {% if pg.advance_rent_month == '5' %}selected{% endif %}>5 Months Rent</option>
-                          <option value="6" {% if pg.advance_rent_month == '6' %}selected{% endif %}>6 Months Rent</option>
-                          <option value="7" {% if pg.advance_rent_month == '7' %}selected{% endif %}>7 Months Rent</option>
-                          <option value="8" {% if pg.advance_rent_month == '8' %}selected{% endif %}>8 Months Rent</option>
-                          <option value="9" {% if pg.advance_rent_month == '9' %}selected{% endif %}>9 Months Rent</option>
-                          <option value="10" {% if pg.advance_rent_month == '10' %}selected{% endif %}>10 Months Rent</option>
-                          <option value="11" {% if pg.advance_rent_month == '11' %}selected{% endif %}>11 Months Rent</option>
-                          <option value="fixed" {% if pg.advance_rent_month == 'fixed' %}selected{% endif %}>Fixed Amount</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
+                 
+
 
                   <div class="row mt-2">
-                    <div class="col-md-6" id="advance_amount_div" style="display:{% if pg.advance_rent_month == 'fixed' %}block{% else %}none{% endif %};">
-                      <div class="form-group">
-                        <label class="form-label">Advance Rent Amount</label>
-                        <input type="number" class="form-control" name="advance_rent_amount" id="advance_rent_amount" value="{{ pg.advance_rent_amount|default:'' }}">
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label class="form-label">Refundable Room Security Deposit (₹/Person) <span class="required">*</span></label>
-                        <select class="form-select" id="security_deposit_type" name="security_deposit_type" required>
-                          <option value="">Select</option>
-                          <option value="0" {% if pg.security_deposit_type == '0' %}selected{% endif %}>No Deposit</option>
-                          <option value="1" {% if pg.security_deposit_type == '1' %}selected{% endif %}>1 Month Rent</option>
-                          <option value="2" {% if pg.security_deposit_type == '2' %}selected{% endif %}>2 Months Rent</option>
-                          <option value="3" {% if pg.security_deposit_type == '3' %}selected{% endif %}>3 Months Rent</option>
-                          <option value="4" {% if pg.security_deposit_type == '4' %}selected{% endif %}>4 Months Rent</option>
-                          <option value="5" {% if pg.security_deposit_type == '5' %}selected{% endif %}>5 Months Rent</option>
-                          <option value="6" {% if pg.security_deposit_type == '6' %}selected{% endif %}>6 Months Rent</option>
-                          <option value="7" {% if pg.security_deposit_type == '7' %}selected{% endif %}>7 Months Rent</option>
-                          <option value="8" {% if pg.security_deposit_type == '8' %}selected{% endif %}>8 Months Rent</option>
-                          <option value="9" {% if pg.security_deposit_type == '9' %}selected{% endif %}>9 Months Rent</option>
-                          <option value="10" {% if pg.security_deposit_type == '10' %}selected{% endif %}>10 Months Rent</option>
-                          <option value="11" {% if pg.security_deposit_type == '11' %}selected{% endif %}>11 Months Rent</option>
-                          <option value="fixed" {% if pg.security_deposit_type == 'fixed' %}selected{% endif %}>Fixed Amount</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
+  <div class="col-md-6">
+    <div class="form-group">
+      <label class="form-label">Rent Per Occupant (₹) <span class="required">*</span></label>
+      <input type="number" class="form-control room-rent" id="room_rent" name="room_rent" value="{{ pg.monthly_rent|default:'' }}" min="0" required>
+    </div>
+  </div>
 
-                  <div class="row mt-2" id="security_deposit_div" style="display:{% if pg.security_deposit_type == 'fixed' %}block{% else %}none{% endif %};">
+  <div class="col-md-6">
+    <div class="form-group">
+      <label class="form-label">Advance Rent Month</label>
+      <select class="form-select" id="advance_rent_month" name="advance_rent_month">
+        <option value="">Select</option>
+        <option value="No Advance" {% if pg.advance_rent_month == "No Advance" %}selected{% endif %}>No Advance</option>
+        <option value="1 Month Rent" {% if pg.advance_rent_month == "1 Month Rent" %}selected{% endif %}>1 Month Rent</option>
+        <option value="2 Months Rent" {% if pg.advance_rent_month == "2 Months Rent" %}selected{% endif %}>2 Months Rent</option>
+        <option value="3 Months Rent" {% if pg.advance_rent_month == "3 Months Rent" %}selected{% endif %}>3 Months Rent</option>
+        <option value="4 Months Rent" {% if pg.advance_rent_month == "4 Months Rent" %}selected{% endif %}>4 Months Rent</option>
+        <option value="5 Months Rent" {% if pg.advance_rent_month == "5 Months Rent" %}selected{% endif %}>5 Months Rent</option>
+        <option value="6 Months Rent" {% if pg.advance_rent_month == "6 Months Rent" %}selected{% endif %}>6 Months Rent</option>
+        <option value="7 Months Rent" {% if pg.advance_rent_month == "7 Months Rent" %}selected{% endif %}>7 Months Rent</option>
+        <option value="8 Months Rent" {% if pg.advance_rent_month == "8 Months Rent" %}selected{% endif %}>8 Months Rent</option>
+        <option value="9 Months Rent" {% if pg.advance_rent_month == "9 Months Rent" %}selected{% endif %}>9 Months Rent</option>
+        <option value="10 Months Rent" {% if pg.advance_rent_month == "10 Months Rent" %}selected{% endif %}>10 Months Rent</option>
+        <option value="11 Months Rent" {% if pg.advance_rent_month == "11 Months Rent" %}selected{% endif %}>11 Months Rent</option>
+        <option value="Fixed Amount" {% if pg.advance_rent_month == "Fixed Amount" %}selected{% endif %}>Fixed Amount</option>
+      </select>
+    </div>
+  </div>
+</div><!-- ✅ ADD THIS closing div for the row -->
+
+<div class="row mt-2">
+  <div class="col-md-6" id="advance_amount_div" style="{% if pg.advance_rent_month != 'Fixed Amount' %}display:none;{% endif %}">
+    <div class="form-group">
+      <label class="form-label">Advance Rent Amount</label>
+      <input type="number" class="form-control" name="advance_rent_amount" id="advance_rent_amount" value="{{ pg.advance_rent_amount|default:'' }}">
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="form-group">
+      <label class="form-label">Refundable Room Security Deposit (₹/Person) <span class="required">*</span></label>
+      <select class="form-select" id="security_deposit_type" name="security_deposit_type" required>
+        <option value="">Select</option>
+        <option value="No Deposit" {% if pg.security_deposit_type == "No Deposit" %}selected{% endif %}>No Deposit</option>
+        <option value="1 Month Rent" {% if pg.security_deposit_type == "1 Month Rent" %}selected{% endif %}>1 Month Rent</option>
+        <option value="2 Months Rent" {% if pg.security_deposit_type == "2 Months Rent" %}selected{% endif %}>2 Months Rent</option>
+        <option value="3 Months Rent" {% if pg.security_deposit_type == "3 Months Rent" %}selected{% endif %}>3 Months Rent</option>
+        <option value="4 Months Rent" {% if pg.security_deposit_type == "4 Months Rent" %}selected{% endif %}>4 Months Rent</option>
+        <option value="5 Months Rent" {% if pg.security_deposit_type == "5 Months Rent" %}selected{% endif %}>5 Months Rent</option>
+        <option value="6 Months Rent" {% if pg.security_deposit_type == "6 Months Rent" %}selected{% endif %}>6 Months Rent</option>
+        <option value="7 Months Rent" {% if pg.security_deposit_type == "7 Months Rent" %}selected{% endif %}>7 Months Rent</option>
+        <option value="8 Months Rent" {% if pg.security_deposit_type == "8 Months Rent" %}selected{% endif %}>8 Months Rent</option>
+        <option value="9 Months Rent" {% if pg.security_deposit_type == "9 Months Rent" %}selected{% endif %}>9 Months Rent</option>
+        <option value="10 Months Rent" {% if pg.security_deposit_type == "10 Months Rent" %}selected{% endif %}>10 Months Rent</option>
+        <option value="11 Months Rent" {% if pg.security_deposit_type == "11 Months Rent" %}selected{% endif %}>11 Months Rent</option>
+        <option value="Fixed Amount" {% if pg.security_deposit_type == "Fixed Amount" %}selected{% endif %}>Fixed Amount</option>
+      </select>
+    </div>
+  </div>
+</div>
+                 
+
+       <div class="row mt-2" id="security_deposit_div" style="display:{% if pg.security_deposit_type == 'Fixed Amount' %}block{% else %}none{% endif %};">
                     <div class="col-md-6">
                       <div class="form-group">
                         <label class="form-label">Refundable Security Deposit Amount</label>
@@ -849,58 +984,280 @@ input:checked + .toggle-slider { background-color:#667eea; }
           <div class="step-content" id="step4">
 
       
-
-            <div class="form-section">
+<div class="form-section">
   <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
   <div class="section-body">
 
-    <div class="img-total-summary">
-      <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/30</div>
-      <div id="imgMinNotice" class="min-warning"><i class="fas fa-exclamation-circle"></i> Add at least 3 images to publish</div>
+    <div class="img-upload-guide">
+        <div class="guide-step">
+            <div class="guide-step-num">1</div>
+            <div class="guide-step-text">
+                <strong>Pick a category</strong>
+                Tap a tile below (Exterior, Single Room, etc.)
+            </div>
+        </div>
+        <i class="fas fa-arrow-right guide-arrow"></i>
+        <div class="guide-step">
+            <div class="guide-step-num">2</div>
+            <div class="guide-step-text">
+                <strong>Upload matching photos</strong>
+                Click or drag images into that category only
+            </div>
+        </div>
+        <i class="fas fa-arrow-right guide-arrow"></i>
+        <div class="guide-step">
+            <div class="guide-step-num">3</div>
+            <div class="guide-step-text">
+                <strong>Set your cover photo</strong>
+                Drag to reorder — the 1st photo in Exterior or Single Room is used as the cover
+            </div>
+        </div>
     </div>
 
+    <div class="img-total-summary">
+        <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/30</div>
+        <div id="imgMinNotice" class="min-ok"><i class="fas fa-info-circle"></i> Images are optional but recommended</div>
+    </div>
+
+    <!-- Hidden input container for deleted image IDs & sorting -->
+    <div id="deletedImagesContainer"></div>
+
+    <!-- Category Tabs -->
     <div class="img-cat-tabs" id="imgCatTabs">
-      {% for catdef in image_category_defs %}
-      <div class="img-cat-tab {% if forloop.first %}active{% endif %}" data-cat="{{ catdef.cat }}">
-        <i class="fas fa-image"></i> {{ catdef.label }} <span class="cat-count" id="count-{{ catdef.cat }}">{{ catdef.existing|length }}</span>
-      </div>
-      {% endfor %}
+        <div class="img-cat-tab active" data-cat="exterior"><i class="fas fa-building"></i> Building Exterior <span class="cat-count" id="count-exterior">0</span></div>
+        <div class="img-cat-tab" data-cat="single_room"><i class="fas fa-bed"></i> Single Occupancy <span class="cat-count" id="count-single_room">0</span></div>
+        <div class="img-cat-tab" data-cat="double_room"><i class="fas fa-user-friends"></i> Double Sharing <span class="cat-count" id="count-double_room">0</span></div>
+        <div class="img-cat-tab" data-cat="multi_room"><i class="fas fa-users"></i> Triple / Multi Sharing <span class="cat-count" id="count-multi_room">0</span></div>
+        <div class="img-cat-tab" data-cat="lounge"><i class="fas fa-couch"></i> Common Lounge <span class="cat-count" id="count-lounge">0</span></div>
+        <div class="img-cat-tab" data-cat="kitchen"><i class="fas fa-utensils"></i> Shared Kitchen <span class="cat-count" id="count-kitchen">0</span></div>
+        <div class="img-cat-tab" data-cat="dining"><i class="fas fa-chair"></i> Dining Area <span class="cat-count" id="count-dining">0</span></div>
+        <div class="img-cat-tab" data-cat="washroom"><i class="fas fa-restroom"></i> Bathroom / Washroom <span class="cat-count" id="count-washroom">0</span></div>
+        <div class="img-cat-tab" data-cat="laundry"><i class="fas fa-tshirt"></i> Laundry Area <span class="cat-count" id="count-laundry">0</span></div>
+        <div class="img-cat-tab" data-cat="parking"><i class="fas fa-square-parking"></i> Parking <span class="cat-count" id="count-parking">0</span></div>
+        <div class="img-cat-tab" data-cat="amenities"><i class="fas fa-tree"></i> Common Amenities <span class="cat-count" id="count-amenities">0</span></div>
+        <div class="img-cat-tab" data-cat="floor_plan"><i class="fas fa-ruler-combined"></i> Floor Plan <span class="cat-count" id="count-floor_plan">0</span></div>
     </div>
 
     <div class="img-cat-panels">
-      {% for catdef in image_category_defs %}
-      <div class="img-cat-panel {% if forloop.first %}active{% endif %}" data-cat-panel="{{ catdef.cat }}">
-
-        {% if catdef.existing %}
-        <div class="img-cat-preview" style="margin-bottom:14px;">
-          {% for img in catdef.existing %}
-          <div class="img-cat-preview-item">
-            <img src="{{ img.image.url }}">
-            <label class="existing-img-remove-btn" title="Remove this image">
-              <input type="checkbox" name="remove_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
-              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
-            </label>
-          </div>
-          {% endfor %}
+        <!-- 1. Exterior -->
+        <div class="img-cat-panel active" data-cat-panel="exterior">
+            <div class="img-cat-upload-area" data-cat="exterior">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Building Exterior Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-exterior">
+                {% for img in pg.images.all %}{% if img.category == 'exterior' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="exterior">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'exterior', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-exterior" name="property_images_exterior[]" accept="image/*" multiple style="display:none;">
         </div>
-        {% endif %}
 
-        <input type="file" class="img-cat-input" id="imgInput-{{ catdef.cat }}" name="property_images_{{ catdef.cat }}[]" accept="image/*" multiple style="display:none;">
-        <div class="img-cat-upload-area" data-cat="{{ catdef.cat }}">
-          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-          <div class="upload-text">Click or Drag {{ catdef.label }} Photos Here</div>
-          <div class="upload-subtext">{{ catdef.subtext }}</div>
+        <!-- 2. Single Room -->
+        <div class="img-cat-panel" data-cat-panel="single_room">
+            <div class="img-cat-upload-area" data-cat="single_room">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Single Occupancy Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-single_room">
+                {% for img in pg.images.all %}{% if img.category == 'single_room' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="single_room">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'single_room', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-single_room" name="property_images_single_room[]" accept="image/*" multiple style="display:none;">
         </div>
-        <div class="img-cat-preview" id="imgPreview-{{ catdef.cat }}"></div>
-      </div>
-      {% endfor %}
+
+        <!-- 3. Double Room -->
+        <div class="img-cat-panel" data-cat-panel="double_room">
+            <div class="img-cat-upload-area" data-cat="double_room">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Double Sharing Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-double_room">
+                {% for img in pg.images.all %}{% if img.category == 'double_room' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="double_room">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'double_room', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-double_room" name="property_images_double_room[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 4. Multi Room -->
+        <div class="img-cat-panel" data-cat-panel="multi_room">
+            <div class="img-cat-upload-area" data-cat="multi_room">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Triple/Multi Sharing Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-multi_room">
+                {% for img in pg.images.all %}{% if img.category == 'multi_room' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="multi_room">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'multi_room', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-multi_room" name="property_images_multi_room[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 5. Lounge -->
+        <div class="img-cat-panel" data-cat-panel="lounge">
+            <div class="img-cat-upload-area" data-cat="lounge">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Common Lounge Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-lounge">
+                {% for img in pg.images.all %}{% if img.category == 'lounge' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="lounge">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'lounge', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-lounge" name="property_images_lounge[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 6. Kitchen -->
+        <div class="img-cat-panel" data-cat-panel="kitchen">
+            <div class="img-cat-upload-area" data-cat="kitchen">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Shared Kitchen Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-kitchen">
+                {% for img in pg.images.all %}{% if img.category == 'kitchen' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="kitchen">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'kitchen', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-kitchen" name="property_images_kitchen[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 7. Dining -->
+        <div class="img-cat-panel" data-cat-panel="dining">
+            <div class="img-cat-upload-area" data-cat="dining">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Dining Area Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-dining">
+                {% for img in pg.images.all %}{% if img.category == 'dining' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="dining">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'dining', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-dining" name="property_images_dining[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 8. Washroom -->
+        <div class="img-cat-panel" data-cat-panel="washroom">
+            <div class="img-cat-upload-area" data-cat="washroom">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Bathroom / Washroom Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-washroom">
+                {% for img in pg.images.all %}{% if img.category == 'washroom' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="washroom">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'washroom', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-washroom" name="property_images_washroom[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 9. Laundry -->
+        <div class="img-cat-panel" data-cat-panel="laundry">
+            <div class="img-cat-upload-area" data-cat="laundry">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Laundry Area Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-laundry">
+                {% for img in pg.images.all %}{% if img.category == 'laundry' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="laundry">
+                    <img src="{{ img.image.url }}"><span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'laundry', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-laundry" name="property_images_laundry[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 10. Parking -->
+        <div class="img-cat-panel" data-cat-panel="parking">
+            <div class="img-cat-upload-area" data-cat="parking">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Parking Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-parking">
+                {% for img in pg.images.all %}{% if img.category == 'parking' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="parking">
+                    <img src="{{ img.image.url }}"><span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'parking', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-parking" name="property_images_parking[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 11. Amenities -->
+        <div class="img-cat-panel" data-cat-panel="amenities">
+            <div class="img-cat-upload-area" data-cat="amenities">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Common Amenities Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-amenities">
+                {% for img in pg.images.all %}{% if img.category == 'amenities' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="amenities">
+                    <img src="{{ img.image.url }}"><span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'amenities', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-amenities" name="property_images_amenities[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 12. Floor Plan -->
+        <div class="img-cat-panel" data-cat-panel="floor_plan">
+            <div class="img-cat-upload-area" data-cat="floor_plan">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Floor Plan Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-floor_plan">
+                {% for img in pg.images.all %}{% if img.category == 'floor_plan' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="floor_plan">
+                    <img src="{{ img.image.url }}"><span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'floor_plan', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-floor_plan" name="property_images_floor_plan[]" accept="image/*" multiple style="display:none;">
+        </div>
     </div>
 
     <div style="font-size:0.8rem; color:#64748b; margin-top:6px;">
-      <i class="fas fa-arrows-alt"></i> The first image under <strong>Building Exterior</strong> is used as the cover photo.
+      <i class="fas fa-arrows-alt"></i> Drag thumbnails within a category to reorder. The first image under <strong>Building Exterior</strong> or <strong>Single Occupancy</strong> acts as the cover photo.
     </div>
   </div>
 </div>
+
 
             <div class="form-section">
               <div class="section-header"><i class="fas fa-video"></i> Property Walkthrough Video</div>
@@ -1292,16 +1649,33 @@ input:checked + .toggle-slider { background-color:#667eea; }
     document.getElementById('mealSpeciality').style.display = show ? 'block' : 'none';
   });
 
+
+  
   document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
     document.getElementById('manualBrokerage').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+    // Clear the value if it is no longer fixed
+    if (this.value !== 'Fixed Amount') {
+        document.querySelector('input[name="manual_brokerage"]').value = '';
+    }
   });
 
   document.getElementById('advance_rent_month')?.addEventListener('change', function () {
-    document.getElementById('advance_amount_div').style.display = this.value === 'fixed' ? 'block' : 'none';
+    document.getElementById('advance_amount_div').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+    // Clear the value if it is no longer fixed
+    if (this.value !== 'Fixed Amount') {
+        document.getElementById('advance_rent_amount').value = '';
+    }
   });
+
   document.getElementById('security_deposit_type')?.addEventListener('change', function () {
-    document.getElementById('security_deposit_div').style.display = this.value === 'fixed' ? 'block' : 'none';
+    document.getElementById('security_deposit_div').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+    // Clear the value if it is no longer fixed
+    if (this.value !== 'Fixed Amount') {
+        document.getElementById('security_deposit_amount').value = '';
+    }
   });
+
+
   document.querySelectorAll('input[name="maintenance_type"]').forEach(r => {
     r.addEventListener('change', function () {
       document.getElementById('maintenanceAmountDiv').style.display = this.value === 'Extra' ? 'block' : 'none';
@@ -1446,123 +1820,305 @@ input:checked + .toggle-slider { background-color:#667eea; }
   }
 
  // ---------- Category-wise image upload (matches commercial edit form's engine) ----------
-const IMG_CATEGORIES = ['exterior','single_room','double_room','multi_room','lounge','kitchen','dining','washroom','laundry','parking','amenities','floor_plan'];
-const IMG_CATEGORY_LIMITS = { exterior:5, single_room:4, double_room:5, multi_room:5, lounge:4, kitchen:3, dining:3, washroom:4, laundry:3, parking:3, amenities:5, floor_plan:3 };
+
+
+ // ================= CATEGORY-WISE IMAGE UPLOAD LOGIC =================
+
+
+ // ================= CATEGORY-WISE IMAGE UPLOAD LOGIC =================
+
+
+ // ================= CATEGORY-WISE IMAGE UPLOAD LOGIC =================
+const IMG_CATEGORIES = ['exterior', 'single_room', 'double_room', 'multi_room', 'lounge', 'kitchen', 'dining', 'washroom', 'laundry', 'parking', 'amenities', 'floor_plan'];
+const IMG_CATEGORY_LIMITS = { exterior: 5, single_room: 4, double_room: 5, multi_room: 5, lounge: 4, kitchen: 3, dining: 3, washroom: 4, laundry: 3, parking: 3, amenities: 5, floor_plan: 3 };
 const IMG_TOTAL_LIMIT = 30;
-const IMG_MIN_REQUIRED = 3;
+const IMG_MIN_REQUIRED = 0; // Made optional
 
-// Images already saved in the DB per category — offsets the limits/totals so they
-// account for existing images too, not just newly picked files.
-const EXISTING_IMG_COUNTS = {
-  {% for catdef in image_category_defs %}"{{ catdef.cat }}": {{ catdef.existing|length }}{% if not forloop.last %},{% endif %}
-  {% endfor %}
-};
-
-const catFiles = {};
-IMG_CATEGORIES.forEach(c => catFiles[c] = []);
+window.catFiles = {};
+IMG_CATEGORIES.forEach(c => window.catFiles[c] = []);
+window.markedDeletionsQueue = [];
 
 function existingTotalCount() {
-  return IMG_CATEGORIES.reduce((sum, c) => sum + (EXISTING_IMG_COUNTS[c] || 0), 0);
+    let total = 0;
+    IMG_CATEGORIES.forEach(cat => {
+        const preview = document.getElementById('imgPreview-' + cat);
+        if (preview) {
+            total += preview.querySelectorAll('.existing-img-item').length;
+        }
+    });
+    return total;
 }
-function totalImageCount() { return IMG_CATEGORIES.reduce((sum, c) => sum + catFiles[c].length, 0); }
+
+function totalImageCount() {
+    return IMG_CATEGORIES.reduce((sum, c) => sum + window.catFiles[c].length, 0);
+}
 
 function syncCategoryInput(cat) {
-  const dt = new DataTransfer();
-  catFiles[cat].forEach(f => dt.items.add(f));
-  document.getElementById('imgInput-' + cat).files = dt.files;
+    const dt = new DataTransfer();
+    window.catFiles[cat].forEach(f => dt.items.add(f));
+    const inputEl = document.getElementById('imgInput-' + cat);
+    if (inputEl) inputEl.files = dt.files;
 }
 
 function renderCategory(cat) {
-  const preview = document.getElementById('imgPreview-' + cat);
-  if (!preview) return;
-  preview.innerHTML = '';
-  catFiles[cat].forEach(file => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const div = document.createElement('div');
-      div.className = 'img-cat-preview-item';
-      div.innerHTML = `<img src="${e.target.result}"><button type="button" class="remove-image" onclick="removeCatImage('${cat}','${file.name.replace(/'/g, "\\'")}')">✖</button>`;
-      preview.appendChild(div);
-    };
-    reader.readAsDataURL(file);
-  });
+    const preview = document.getElementById('imgPreview-' + cat);
+    if (!preview) return;
 
-  const newCount = catFiles[cat].length;
-  const savedCount = EXISTING_IMG_COUNTS[cat] || 0;
-  const countEl = document.getElementById('count-' + cat);
-  if (countEl) countEl.innerText = savedCount + newCount;
+    // Clean out only new files (leave existing ones intact)
+    preview.querySelectorAll('.new-file-item').forEach(el => el.remove());
 
-  const tab = document.querySelector(`.img-cat-tab[data-cat="${cat}"]`);
-  if (tab) tab.classList.toggle('has-images', (savedCount + newCount) > 0);
+    window.catFiles[cat].forEach((file, idx) => {
+        const div = document.createElement('div');
+        div.className = 'img-cat-preview-item new-file-item';
+        div.draggable = true;
+        div.dataset.fileName = file.name;
+        div.dataset.cat = cat;
+
+        div.innerHTML = `
+            <img src="">
+            <span class="img-index-badge">New</span>
+            <button type="button" class="remove-image" onclick="removeCatImage('${cat}', '${file.name.replace(/'/g, "\\'")}', event)"><i class="fas fa-times"></i></button>
+        `;
+
+        preview.appendChild(div);
+        attachDragEvents(div, cat);
+
+        const reader = new FileReader();
+        reader.onload = e => { div.querySelector('img').src = e.target.result; };
+        reader.readAsDataURL(file);
+    });
+
+    updateCoverPhotoAndLabels();
+
+    const newCount = window.catFiles[cat].length;
+    const savedCount = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
+    const countEl = document.getElementById('count-' + cat);
+    if (countEl) countEl.innerText = savedCount + newCount;
+
+    const tab = document.querySelector(`.img-cat-tab[data-cat="${cat}"]`);
+    if (tab) tab.classList.toggle('has-images', (savedCount + newCount) > 0);
 }
 
-function renderAllCategories() {
-  IMG_CATEGORIES.forEach(renderCategory);
-  const total = existingTotalCount() + totalImageCount();
-  document.getElementById('imgTotalCount').innerText = total;
+function updateCoverPhotoAndLabels() {
+    let hasCover = false;
+    let existingOrder = [];
 
-  const notice = document.getElementById('imgMinNotice');
-  if (notice) {
-    if (total >= IMG_MIN_REQUIRED) {
-      notice.className = 'min-ok';
-      notice.innerHTML = `<i class="fas fa-check-circle"></i> Great! ${total} images on this listing.`;
-    } else {
-      notice.className = 'min-warning';
-      notice.innerHTML = `<i class="fas fa-exclamation-circle"></i> Add at least ${IMG_MIN_REQUIRED} images to publish`;
+    IMG_CATEGORIES.forEach(cat => {
+        const container = document.getElementById('imgPreview-' + cat);
+        if (!container) return;
+        
+        const items = container.querySelectorAll('.img-cat-preview-item');
+        items.forEach((item, index) => {
+            if (item.classList.contains('existing-img-item')) {
+                existingOrder.push(item.id.replace('existing-img-', ''));
+            }
+
+            const oldCover = item.querySelector('.cover-badge');
+            if (oldCover) oldCover.remove();
+            
+            const idxBadge = item.querySelector('.img-index-badge');
+            if (idxBadge) {
+                idxBadge.innerHTML = (item.classList.contains('existing-img-item') ? 'Saved - ' : '') + 'Image ' + (index + 1);
+            }
+
+            if (!hasCover && (cat === 'exterior' || cat === 'single_room')) {
+                item.insertAdjacentHTML('beforeend', '<span class="cover-badge" style="position:absolute; bottom:8px; left:8px; background:linear-gradient(135deg,#f6d365,#fda085); color:#3b2a00; font-size:0.65rem; font-weight:800; padding:3px 9px; border-radius:20px; z-index:10;"><i class="fas fa-star"></i> Cover Photo</span>');
+                hasCover = true;
+            }
+        });
+    });
+    
+    let orderInput = document.getElementById('existing_images_order');
+    if (!orderInput) {
+        orderInput = document.createElement('input');
+        orderInput.type = 'hidden';
+        orderInput.name = 'existing_images_order';
+        orderInput.id = 'existing_images_order';
+        const deleteContainer = document.getElementById('deletedImagesContainer');
+        if (deleteContainer) deleteContainer.appendChild(orderInput);
     }
-  }
-  setCheck('cl-photos', total > 0);
+    orderInput.value = existingOrder.join(',');
+}
+
+function attachDragEvents(item, cat) {
+    item.addEventListener('dragstart', function (e) {
+        item.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        const container = item.parentNode;
+        const itemsArray = Array.from(container.querySelectorAll('.img-cat-preview-item'));
+        e.dataTransfer.setData('text/plain', itemsArray.indexOf(item));
+    });
+    item.addEventListener('dragend', function () {
+        item.classList.remove('dragging');
+        document.querySelectorAll('.img-cat-preview-item.drag-over').forEach(el => el.classList.remove('drag-over'));
+    });
+    item.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', function () {
+        item.classList.remove('drag-over');
+    });
+    item.addEventListener('drop', function (e) {
+        e.preventDefault();
+        item.classList.remove('drag-over');
+
+        const container = item.parentNode;
+        const draggedItem = container.querySelector('.dragging');
+        if (!draggedItem || draggedItem === item) return;
+
+        const itemsArray = Array.from(container.querySelectorAll('.img-cat-preview-item'));
+        const fromIndex = itemsArray.indexOf(draggedItem);
+        const toIndex = itemsArray.indexOf(item);
+
+        if (fromIndex < toIndex) {
+            container.insertBefore(draggedItem, item.nextSibling);
+        } else {
+            container.insertBefore(draggedItem, item);
+        }
+
+        syncCategoryInputFromDOM(cat);
+        updateCoverPhotoAndLabels();
+    });
+}
+
+function syncCategoryInputFromDOM(cat) {
+    const container = document.getElementById('imgPreview-' + cat);
+    if (!container || !window.catFiles[cat]) return;
+    
+    const newOrderFiles = [];
+    container.querySelectorAll('.new-file-item').forEach(el => {
+        const fName = el.dataset.fileName;
+        const fileObj = window.catFiles[cat].find(f => f.name === fName);
+        if(fileObj) newOrderFiles.push(fileObj);
+    });
+    
+    window.catFiles[cat] = newOrderFiles;
+    
+    const dt = new DataTransfer();
+    window.catFiles[cat].forEach(f => dt.items.add(f));
+    const inputEl = document.getElementById('imgInput-' + cat);
+    if (inputEl) inputEl.files = dt.files;
+}
+
+window.removeExistingCatImage = function(imageId, cat, evt) {
+    if (evt) evt.stopPropagation();
+
+    const el = document.getElementById('existing-img-' + imageId);
+    const container = document.getElementById('deletedImagesContainer');
+
+    if (el) {
+        el.remove();
+        if (!window.markedDeletionsQueue.includes(imageId)) {
+            window.markedDeletionsQueue.push(imageId);
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type  = 'hidden';
+            hiddenInput.name  = 'deleted_images[]';
+            hiddenInput.value = imageId;
+            if (container) container.appendChild(hiddenInput);
+        }
+    }
+    renderAllCategories();
+    updateCoverPhotoAndLabels();
+};
+
+window.removeCatImage = function (cat, fileName, evt) {
+    if (evt) evt.stopPropagation();
+    window.catFiles[cat] = window.catFiles[cat].filter(f => f.name !== fileName);
+    syncCategoryInput(cat);
+    renderCategory(cat);
+    renderAllCategories();
+    updateCoverPhotoAndLabels();
+};
+
+function renderAllCategories() {
+    let grandTotal = 0;
+
+    IMG_CATEGORIES.forEach(cat => {
+        const existingCount = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
+        const newCount = (window.catFiles && window.catFiles[cat]) ? window.catFiles[cat].length : 0;
+        
+        const catTotal = existingCount + newCount;
+        grandTotal += catTotal;
+
+        const countEl = document.getElementById('count-' + cat);
+        if (countEl) countEl.innerText = catTotal;
+
+        const tab = document.querySelector(`.img-cat-tab[data-cat="${cat}"]`);
+        if (tab) tab.classList.toggle('has-images', catTotal > 0);
+    });
+
+    const totalCountEl = document.getElementById('imgTotalCount');
+    if (totalCountEl) totalCountEl.innerText = grandTotal;
+
+    const notice = document.getElementById('imgMinNotice');
+    if (notice) {
+        if (grandTotal > 0) {
+            notice.className = 'min-ok';
+            notice.innerHTML = `<i class="fas fa-check-circle"></i> Great! ${grandTotal} images saved/selected.`;
+        } else {
+            notice.className = 'min-ok';
+            notice.innerHTML = `<i class="fas fa-info-circle"></i> Images are optional but recommended`;
+        }
+    }
+    setCheck('cl-photos', grandTotal > 0);
 }
 
 function handleCatFiles(cat, files) {
-  let incoming = Array.from(files).filter(f => f.type.startsWith('image/'));
-  const limit = IMG_CATEGORY_LIMITS[cat] || 5;
-  const alreadyStored = EXISTING_IMG_COUNTS[cat] || 0;
+    let incoming = Array.from(files).filter(f => f.type.startsWith('image/'));
+    const limit = IMG_CATEGORY_LIMITS[cat] || 6;
+    const existingCount = document.querySelectorAll(`#imgPreview-${cat} .existing-img-item`).length;
 
-  if (alreadyStored + catFiles[cat].length + incoming.length > limit) {
-    Swal.fire('Category Limit Reached', `Maximum ${limit} images allowed for this category (including already-saved images).`, 'warning');
-    incoming = incoming.slice(0, Math.max(0, limit - alreadyStored - catFiles[cat].length));
-  }
-  if (existingTotalCount() + totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
-    Swal.fire('Total Limit Reached', `Maximum ${IMG_TOTAL_LIMIT} images allowed across all categories.`, 'warning');
-    incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - existingTotalCount() - totalImageCount()));
-  }
+    if (existingCount + window.catFiles[cat].length + incoming.length > limit) {
+        Swal.fire('Category Limit Reached', `Maximum ${limit} images allowed for this category.`, 'warning');
+        incoming = incoming.slice(0, Math.max(0, limit - (existingCount + window.catFiles[cat].length)));
+    }
+    
+    let globalExisting = document.querySelectorAll('.existing-img-item').length;
+    if (globalExisting + totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+        Swal.fire('Total Limit Reached', `Maximum ${IMG_TOTAL_LIMIT} images allowed across all categories.`, 'warning');
+        incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - (globalExisting + totalImageCount())));
+    }
 
-  catFiles[cat] = catFiles[cat].concat(incoming);
-  syncCategoryInput(cat);
-  renderAllCategories();
+    window.catFiles[cat] = window.catFiles[cat].concat(incoming);
+    syncCategoryInput(cat);
+    renderCategory(cat);
+    renderAllCategories();
 }
 
-window.removeCatImage = function (cat, fileName) {
-  catFiles[cat] = catFiles[cat].filter(f => f.name !== fileName);
-  syncCategoryInput(cat);
-  renderAllCategories();
-};
+document.addEventListener('DOMContentLoaded', function () {
+    // Attach drag events to already rendered server images
+    document.querySelectorAll('.existing-img-item').forEach(el => {
+        el.draggable = true;
+        attachDragEvents(el, el.dataset.cat);
+    });
 
-
-
-  document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.img-cat-tab').forEach(tab => {
-      tab.addEventListener('click', function () {
-        const cat = this.dataset.cat;
-        document.querySelectorAll('.img-cat-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.img-cat-panel').forEach(p => p.classList.remove('active'));
-        this.classList.add('active');
-        document.querySelector(`.img-cat-panel[data-cat-panel="${cat}"]`)?.classList.add('active');
-      });
+        tab.addEventListener('click', function () {
+            const cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.img-cat-panel').forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelector(`.img-cat-panel[data-cat-panel="${cat}"]`)?.classList.add('active');
+        });
     });
+
+   
     IMG_CATEGORIES.forEach(cat => {
-      const zone = document.querySelector(`.img-cat-upload-area[data-cat="${cat}"]`);
-      const input = document.getElementById('imgInput-' + cat);
-      if (!zone || !input) return;
-      zone.addEventListener('click', () => input.click());
-      input.addEventListener('change', e => handleCatFiles(cat, e.target.files));
-      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
-      zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-      zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); handleCatFiles(cat, e.dataTransfer.files); });
+        const zone = document.querySelector(`.img-cat-upload-area[data-cat="${cat}"]`);
+        const input = document.getElementById('imgInput-' + cat);
+        if (!zone || !input) return;
+        zone.addEventListener('click', () => input.click());
+        input.addEventListener('change', e => handleCatFiles(cat, e.target.files));
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+        zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); handleCatFiles(cat, e.dataTransfer.files); });
     });
-    renderAllCategories();
-  });
+
+   renderAllCategories();
+    updateCoverPhotoAndLabels();
+});
 
   
 
@@ -2011,26 +2567,32 @@ function calculatePgMoveInCost() {
     let monthlyRent = parseFloat(document.getElementById("room_rent")?.value) || 0;
 
     // 2. Advance Rent Calculation (PG uses numeric values: "0".."11" or "fixed")
-    let advance = 0;
-    let advanceType = document.getElementById("advance_rent_month")?.value || "";
+   
 
-    if (advanceType === "fixed") {
-        advance = parseFloat(document.getElementById("advance_rent_amount")?.value) || 0;
-    } else if (advanceType !== "" && advanceType !== "0") {
-        let months = parseFloat(advanceType) || 0;
-        advance = monthlyRent * months;
-    }
+
 
     // 3. Refundable Security Deposit Calculation (same numeric pattern)
-    let deposit = 0;
-    let depositType = document.getElementById("security_deposit_type")?.value || "";
+   // 2. Advance Rent Calculation
+let advance = 0;
+let advanceType = document.getElementById("advance_rent_month")?.value || "";
 
-    if (depositType === "fixed") {
-        deposit = parseFloat(document.getElementById("security_deposit_amount")?.value) || 0;
-    } else if (depositType !== "" && depositType !== "0") {
-        let months = parseFloat(depositType) || 0;
-        deposit = monthlyRent * months;
-    }
+if (advanceType === "Fixed Amount") {
+    advance = parseFloat(document.getElementById("advance_rent_amount")?.value) || 0;
+} else if (advanceType && advanceType !== "No Advance") {
+    let m = advanceType.match(/(\d+)/);
+    advance = monthlyRent * (m ? parseFloat(m[1]) : 0);
+}
+
+// 3. Refundable Security Deposit Calculation
+let deposit = 0;
+let depositType = document.getElementById("security_deposit_type")?.value || "";
+
+if (depositType === "Fixed Amount") {
+    deposit = parseFloat(document.getElementById("security_deposit_amount")?.value) || 0;
+} else if (depositType && depositType !== "No Deposit") {
+    let m = depositType.match(/(\d+)/);
+    deposit = monthlyRent * (m ? parseFloat(m[1]) : 0);
+}
 
     // 4. Brokerage Calculation
     let brokerage = 0;

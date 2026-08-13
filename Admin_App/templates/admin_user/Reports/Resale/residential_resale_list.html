@@ -723,6 +723,8 @@
                         <th>Uploaded By Contact</th>
                         <th>Uploaded By Role</th>
                         <th>Upload File Name</th>
+                           <th>Upload File</th>
+
 
                         <th>Is Duplicate?</th>
                         <th>Duplicate Count</th>
@@ -939,6 +941,20 @@
                         <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
                         <td>{{ prop.uploaded_by_role|default:"—" }}</td>
                         <td>{{ prop.upload_file_name|default:"Web UI Listing Form" }}</td>
+                        <td>
+    {% if prop.upload_file %}
+        <a href="{{ prop.upload_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size: 0.75rem; font-weight: 600;">
+            <i class="fas fa-file-download me-1"></i> 
+            {% if prop.upload_file_name %}
+                {{ prop.upload_file_name|truncatechars:15 }}
+            {% else %}
+                Download
+            {% endif %}
+        </a>
+    {% else %}
+        <span class="text-muted fw-bold">—</span>
+    {% endif %}
+</td>
 
                         <!-- Status & Audit -->
                         <td>{% if prop.is_duplicate %}<span class="badge bg-danger">Yes</span>{% else %}<span class="badge bg-success">No</span>{% endif %}</td>

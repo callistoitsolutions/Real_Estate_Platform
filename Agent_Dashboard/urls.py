@@ -44,32 +44,144 @@ urlpatterns = [
 
 
 
-    ############ urls for Rental Residential Listing ############################
+    ############ urls Start for Rental Residential Listing For Agent ############################
 
     path('residential_agent',views.residential_agent,name="residential_agent"),
     path('residential_agent_edit/<str:pk>',views.residential_agent_edit,name="residential_agent_edit"),
-    path('rental_list_agent',views.rental_list_agent,name="rental_list_agent"),
+    path('residential_list_agent',views.residential_list_agent,name="residential_list_agent"),
     path(
     'rental/residential_view_agent/<str:pk>/',
     views.rental_residential_view_agent,
     name='rental_residential_view_agent'
     ),
-
+   path('residential_add_agent',views.residential_add_agent,name="residential_add_agent"),
     path('residential_import_excel_agent/', views.import_residential_excel_agent, name='import_residential_excel_agent'),
 
     path('residential_download_template_agent/', views.download_residential_template_agent, name='download_residential_template_agent'),
+    path('rental-residential-agent/delete/<str:pk>/',
+    views.rental_residential_delete_agent,
+    name='rental_residential_delete_agent'
+    ),
+
+    path('rental-residential-agent/bulk-delete/', views.rental_bulk_delete_agent, name='rental_bulk_delete_agent'),
 
 
-     ############ urls for Rental Residential Listing ############################
+
+    ############ urls End for Rental Residential Listing For Agent ############################
+
+
+
+    ############ urls Start for Rental Commercial Listing For Agent ############################
 
     path('commercial_agent',views.commercial_agent,name="commercial_agent"),
     path('commercial_list_agent',views.commercial_list_agent,name="commercial_list_agent"),
+    path('commercial_rental_add_agent', views.commercial_rental_add_agent, name='commercial_rental_add_agent'),
+
+        
+    
+    path('commercial_agent_edit/<str:pk>', views.commercial_agent_edit, name="commercial_agent_edit"),
+    path('commercial/view_agent/<str:pk>/',  views.commercial_view_agent,   name='commercial_view_agent'),
+    path('commercial_agent/export/', views.export_commercial_rent_agent, name='export_commercial_rent_agent'),
+    #path('commercial-rm/import-excel/', views.import_commercial_rental_excel_rm, name='import_commercial_rental_excel_rm'),
+   # path('commercial-rm/commercial/download-template/', views.download_commercial_rental12_template_rm, name='download_commercial_rental12_template_rm'),
+    path('commercial-agent/bulk-delete/', views.commercial_bulk_delete_agent, name='commercial_bulk_delete_agent'),
+    path('commercial-agent/delete/<str:pk>/', views.commercial_delete_agent, name='commercial_delete_agent'),
 
 
-     ############ urls for Rental Residential Listing ############################
+
+    ############ urls END for Rental Commercial Listing For Agent ############################
+
+    
+   ########### urls start for pg list forms for agent ###########################
+
+    path('pg_agent_list',views.pg_agent_list,name="pg_agent_list"),
+
+    
 
     path('pg_coliving_agent',views.pg_coliving_agent,name="pg_coliving_agent"),
-    path('pg_list_agent',views.pg_list_agent,name="pg_list_agent"),
+    path('add-pg-agent/', views.add_pg_agent, name='add_pg_agent'),
+    path('pg-coliving-agent/export/', views.export_pg_coliving_agent, name='export_pg_coliving_agent'),
+    path('pg-agent/edit/<str:pk>/', views.pg_agent_edit, name='pg_agent_edit'),
+    path('pg-coliving-agent/view/<str:pk>/', views.pg_coliving_view_agent, name='pg_coliving_view_agent'),
+
+    #path('pg-rm/import-excel/',       views.import_pg_excel_rm,       name='import_pg_excel_rm'),
+   # path('pg-rm/pg/download-template/',  views.download_pg_template_rm,  name='download_pg_template_rm'),
+    path('pg-coliving-agent/bulk-delete/', views.pg_bulk_delete_agent, name='pg_bulk_delete_agent'),
+    path(
+    'pg-coliving-agent/delete/<str:pk>/',
+    views.pg_coliving_delete_agent,
+    name='pg_coliving_delete_agent'
+    ),
+    
+########### urls End for pg forms for landlord ###########################
+
+
+################START URL SECTION RESALE INDUSTRIAL PLOT LISTING Agent ######################################################
+
+
+
+
+    path('industrial_plot_resale_list_agent',views.industrial_plot_resale_list_agent,name="industrial_plot_resale_list_agent"),
+    path('industrial_plot_resale_agent',views.industrial_plot_resale_agent,name="industrial_plot_resale_agent"),
+    path('industrial-plot-resale-agent/add/', views.industrial_plot_resale_add_agent, name='industrial_plot_resale_add_agent'),
+    path('industrial-plot-agent/edit/<str:pk>/', views.industrial_plot_resale_edit_agent, name='industrial_plot_resale_edit_agent'),
+    path('industrial-plot-agent/view/<str:pk>/', views.industrial_plot_resale_view_agent, name='industrial_plot_resale_view_agent'),
+    path('industrial-plot-agent/delete/<str:pk>/', views.industrial_plot_resale_delete_agent, name='industrial_plot_resale_delete_agent'),
+    path('industrial-plot-agent/bulk-delete/', views.industrial_plot_resale_bulk_delete_agent, name='industrial_plot_resale_bulk_delete_agent'),
+    path('industrial-plot-resale-agent/export/', views.export_industrial_plot_resale_agent, name='export_industrial_plot_resale_agent'),
+
+
+
+ ################END URL SECTION RESALE INDUSTRIAL PLOT LISTING Agent ######################################################
+
+    
+ ################Start URL SECTION RESALE Agriculture PLOT LISTING AGENT ######################################################
+
+
+    path('agricultural_plot_resale_list_agent',views.agricultural_plot_resale_list_agent,name="agricultural_plot_resale_list_agent"),
+
+    path('agricultural_plot_resale_agent',views.agricultural_plot_resale_agent,name="agricultural_plot_resale_agent"),
+
+    path(
+        'agricultural-plot-resale-agent/add/',
+        views.agricultural_plot_resale_add_agent,
+        name='agricultural_plot_resale_add_agent'
+    ),
+
+    path(
+        'agricultural-plot-resale-agent/edit/<str:pk>/',
+        views.agricultural_plot_resale_edit_agent,
+        name='agricultural_plot_resale_edit_agent'
+    ),
+    path(
+        'agricultural-plot-resale-agent/delete/<str:pk>/',
+         views.agricultural_plot_resale_delete_agent,
+        name='agricultural_plot_resale_delete_agent'
+    ),
+
+    # Bulk Delete
+    path(
+        'agricultural-plot-resale-agent/bulk-delete/',
+        views.agricultural_plot_resale_bulk_delete_agent,
+        name='agricultural_plot_resale_bulk_delete_agent'
+    ),
+
+
+    path(
+        'agricultural-plot-resale-agent/export/',
+        views.export_agricultural_plot_resale_agent,
+        name='export_agricultural_plot_resale_agent'
+    ),
+
+    path(
+        'agricultural-plot-resale-agent/view/<str:pk>/',
+        views.agricultural_plot_resale_view_agent,
+        name='agricultural_plot_resale_view_agent'
+    ),
+
+
+   ################End URL SECTION RESALE Agriculture PLOT LISTING Agent ######################################################
+
 
 
        ############ urls for Resale Residential Listing ############################
@@ -124,16 +236,7 @@ urlpatterns = [
     path('commercial_plot_resale_list_agent',views.commercial_plot_resale_list_agent,name="commercial_plot_resale_list_agent"),
 
 
- ############ urls for Resale Industrial Plot Listing ############################
-
-   path('industrial_plot_resale_agent',views.industrial_plot_resale_agent,name="industrial_plot_resale_agent"),
-   path('industrial_plot_resale_list_agent',views.industrial_plot_resale_list_agent,name="industrial_plot_resale_list_agent"),
-
-
- ############ urls for Resale Agricultural Plot Listing ############################
-    
-   path('agricultural_plot_resale_agent',views.agricultural_plot_resale_agent,name="agricultural_plot_resale_agent"),
-   path('agricultural_plot_resale_list_agent',views.agricultural_plot_resale_list_agent,name="agricultural_plot_resale_list_agent"),
+ 
     
 ]
 

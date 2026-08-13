@@ -49,6 +49,14 @@ admin.site.register(RentalResidentialProperty)
 admin.site.register(RentalResidentialVideo)
 
 
+########### Register  RentalResidentialImages Table/Modal ###############
+
+admin.site.register(RentalResidentialImage)
+
+########### Register RentalActivityLog Table/Modal ###############
+
+admin.site.register(RentalActivityLog)
+
 ########### Register  CommercialRentalProperty Table/Modal ###############
 
 admin.site.register(CommercialRentalProperty)
@@ -96,3 +104,23 @@ admin.site.register(IndustrialResaleProperty)
 ############ Register Agicultural Resale Property Table/Modal ##################3
 
 admin.site.register(AgriculturalResaleProperty)
+
+
+############ Register Industrial Plot Resale Property Table/Modal ##################3
+
+admin.site.register(IndustrialPlotResaleProperty)
+
+
+############ Register Industrial Plot Resale Video Property Table/Modal ##################3
+
+admin.site.register(IndustrialPlotResaleVideo)
+
+
+############ Register Agriculture Plot Resale Property Table/Modal ##################3
+
+admin.site.register(AgriculturalPlotResaleProperty)
+
+
+############ Register Agriculture Plot Resale Video Property Table/Modal ##################3
+
+admin.site.register(AgriculturalPlotResaleVideo)

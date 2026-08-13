@@ -632,6 +632,15 @@
     }
   }
 
+  .preview-item.dragging {
+    opacity: 0.4;
+}
+
+  .preview-item.drag-over {
+    opacity: 0.5;
+    border: 2px dashed #667eea;
+    transform: scale(0.95);
+}
   /* Image Upload & Drag/Drop */
   .image-upload-area {
     border: 3px dashed #cbd5e0;
@@ -3187,17 +3196,39 @@ function syncCategoryInput(cat) {
     document.getElementById('imgInput-' + cat).files = dt.files;
 }
 
+
 function renderCategory(cat) {
     var preview = document.getElementById('imgPreview-' + cat);
     preview.innerHTML = '';
-    catFiles[cat].forEach(function (file) {
+    catFiles[cat].forEach(function (file, idx) {
+        var div = document.createElement('div');
+        div.className = 'preview-item';
+        div.draggable = true;
+        div.dataset.index = idx;
+
+        var img = document.createElement('img');
+        div.appendChild(img);
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-image';
+        removeBtn.innerHTML = '✖';
+        removeBtn.onclick = function () { removeCatImage(cat, file.name); };
+        div.appendChild(removeBtn);
+
+        // Cover-photo badge on the first tile of exterior/reception
+        if (idx === 0 && (cat === 'exterior' || cat === 'reception')) {
+            var coverTag = document.createElement('span');
+            coverTag.style.cssText = 'position:absolute;bottom:6px;left:6px;background:linear-gradient(135deg,#f6d365,#fda085);color:#3b2a00;font-size:0.62rem;font-weight:800;padding:3px 9px;border-radius:20px;';
+            coverTag.innerHTML = '<i class="fas fa-star"></i> Cover';
+            div.appendChild(coverTag);
+        }
+
+        preview.appendChild(div);
+        attachDragEvents(div, cat);
+
         var reader = new FileReader();
-        reader.onload = function (e) {
-            var div = document.createElement('div');
-            div.className = 'preview-item';
-            div.innerHTML = '<img src="' + e.target.result + '"><button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\',\'' + file.name.replace(/'/g, "\\'") + '\')">✖</button>';
-            preview.appendChild(div);
-        };
+        reader.onload = function (e) { img.src = e.target.result; };
         reader.readAsDataURL(file);
     });
     document.getElementById('count-' + cat).innerText = catFiles[cat].length;
@@ -3206,6 +3237,41 @@ function renderCategory(cat) {
     if (tab) tab.classList.toggle('has-images', catFiles[cat].length > 0);
 }
 
+function attachDragEvents(item, cat) {
+    item.addEventListener('dragstart', function (e) {
+        item.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', item.dataset.index);
+    });
+    item.addEventListener('dragend', function () {
+        item.classList.remove('dragging');
+        document.querySelectorAll('.preview-item.drag-over').forEach(function (el) {
+            el.classList.remove('drag-over');
+        });
+    });
+    item.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', function () {
+        item.classList.remove('drag-over');
+    });
+    item.addEventListener('drop', function (e) {
+        e.preventDefault();
+        item.classList.remove('drag-over');
+
+        var fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        var toIndex = parseInt(item.dataset.index, 10);
+        if (isNaN(fromIndex) || isNaN(toIndex) || fromIndex === toIndex) return;
+
+        var moved = catFiles[cat].splice(fromIndex, 1)[0];
+        catFiles[cat].splice(toIndex, 0, moved);
+
+        syncCategoryInput(cat);
+        renderCategory(cat);
+    });
+}
 
 function renderAllCategories() {
     IMG_CATEGORIES.forEach(renderCategory);

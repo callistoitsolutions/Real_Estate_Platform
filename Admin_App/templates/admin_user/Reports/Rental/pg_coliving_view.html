@@ -188,10 +188,10 @@
                     {% endif %}
                 </div>
                 <div class="d-flex gap-2">
-                    <a href="{% url 'pg_edit' pg.id %}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600;">
+                    <a href="{% url 'pg_edit' pg.id %}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" style="font-size:1.100rem; font-weight:600;">
                         <i class="fas fa-edit"></i> Edit Record
                     </a>
-                    <a href="{% url 'pg_list' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600;">
+                    <a href="{% url 'pg_list' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:1.100rem; font-weight:600;">
                         <i class="fas fa-arrow-left"></i> Back
                     </a>
                 </div>
@@ -204,24 +204,39 @@
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
                 <div style="flex: 1; min-width: 260px;">
                     <h1>{{ pg.property_title }}</h1>
-                    <div class="prop-hero-location">
+                    <div class="prop-hero-location" style="font-size:20px; font-weight:700; color:black;">
                         <i class="fas fa-location-dot"></i>
                         {{ pg.locality }}, {{ pg.city }}
                     </div>
                 </div>
+              
                 <div class="text-end">
                     <div class="mb-1">
-                        <span class="badge bg-success px-3 py-2"><i class="fas fa-bed me-1"></i> Starting Rent</span>
+                        <span class="badge bg-success px-3 py-2"><i class="fas fa-bed me-1"></i> Starting Room Rent</span>
                     </div>
-                    <div class="prop-hero-price-tag">₹{{ starting_rent|default:"0"|intcomma }} <span>/ mo</span></div>
+                    <div class="prop-hero-price-tag">
+                        ₹{{ starting_rent|default:"0"|intcomma }} <span>/ mo</span>
+                    </div>
+                    
+                    <!-- Added Monthly Maintenance -->
+                    {% if pg.maintenance_type == 'Extra' and pg.maintenance_amount %}
+                    <div style="font-size:0.82rem; color: #64748b; margin-top:6px;">
+                        + <strong>₹{{ pg.maintenance_amount|default:"0"|intcomma }}</strong>
+                        <strong>Maintenance / mo</strong>
+                    </div>
+                    {% elif pg.maintenance_type == 'Included in Rent' %}
+                    <div style="font-size:0.82rem; color: #10b981; margin-top:6px; font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> Maintenance Included
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="prop-quick-stats">
                 <div class="quick-stat-chip"><i class="fas fa-bed"></i> {{ pg.total_beds|default:"0" }} Beds Total</div>
                 <div class="quick-stat-chip"><i class="fas fa-users"></i> {{ pg.pg_for|default:"Any"|title }} Allowed</div>
-                <div class="quick-stat-chip"><i class="fas fa-couch"></i> {{ pg.furnishing_type|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-couch"></i> {{ pg.furnishing_status|default:"—" }}</div>
                 <div class="quick-stat-chip"><i class="fas fa-utensils"></i> {% if pg.meals_available %}Meals Included{% else %}No Meals{% endif %}</div>
-                <div class="quick-stat-chip"><i class="fas fa-calendar-alt"></i> {{ pg.minimum_stay|default:"1" }} Mo Stay</div>
+                <div class="quick-stat-chip"><i class="fas fa-calendar-alt"></i> {{ pg.minimum_stay|default:"1" }} Month Stay</div>
             </div>
         </div>
     </div>
@@ -359,14 +374,13 @@
         <div class="container-fluid px-4">
             <div class="prop-sticky-nav-inner" id="propNavTabs">
                 <a href="#sec-listed" class="prop-nav-link active" data-target="sec-listed"><i class="fas fa-user-tie"></i> Listed By</a>
-                <a href="#sec-basic" class="prop-nav-link" data-target="sec-basic"><i class="fas fa-layer-group"></i> Basic Info</a>
-                <a href="#sec-rooms" class="prop-nav-link" data-target="sec-rooms"><i class="fas fa-bed"></i> Rooms & Rent</a>
-                <a href="#sec-rules" class="prop-nav-link" data-target="sec-rules"><i class="fas fa-gavel"></i> Rules</a>
-                {% if pg.meals_available %}<a href="#sec-meals" class="prop-nav-link" data-target="sec-meals"><i class="fas fa-utensils"></i> Food</a>{% endif %}
-                <a href="#sec-pricing" class="prop-nav-link" data-target="sec-pricing"><i class="fas fa-indian-rupee-sign"></i> Pricing</a>
-                <a href="#sec-location" class="prop-nav-link" data-target="sec-location"><i class="fas fa-map-location-dot"></i> Location</a>
-                <a href="#sec-amenities" class="prop-nav-link" data-target="sec-amenities"><i class="fas fa-wand-magic-sparkles"></i> Amenities</a>
-                <a href="#sec-desc" class="prop-nav-link" data-target="sec-desc"><i class="fas fa-align-left"></i> Description</a>
+                <a href="#sec-basic" class="prop-nav-link" data-target="sec-basic"><i class="fas fa-layer-group"></i> Basic Information</a>
+                
+                <!-- Fixed ID Mapping -->
+                <a href="#sec-pricing" class="prop-nav-link" data-target="sec-pricing"><i class="fas fa-indian-rupee-sign"></i> Room Details & Pricing</a>
+                <a href="#sec-rules" class="prop-nav-link" data-target="sec-rules"><i class="fas fa-gavel"></i> PG Regulations</a>
+                <a href="#sec-amenities" class="prop-nav-link" data-target="sec-amenities"><i class="fas fa-wand-magic-sparkles"></i> Amenities & Nearby Facilities</a>
+                <a href="#sec-desc" class="prop-nav-link" data-target="sec-desc"><i class="fas fa-align-left"></i> Property Descriptions</a>
                 <a href="#sec-owner" class="prop-nav-link" data-target="sec-owner"><i class="fas fa-database"></i> Media & Upload Meta</a>
                 <a href="#sec-faqs" class="prop-nav-link" data-target="sec-faqs"><i class="fas fa-comments-question"></i> FAQs</a>
             </div>
@@ -435,6 +449,11 @@
                                 <div class="spec-label">Building / Project / Society Name</div>
                                 <div class="spec-value">{{ pg.building_name|default:"—" }}</div>
                             </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">Property No/Unit No</div>
+                                <div class="spec-value">{{ pg.property_no|default:"—" }}</div>
+                            </div>
                             <div class="spec-item">
                                 <div class="spec-label">City</div>
                                 <div class="spec-value"> {{ pg.city }}</div>
@@ -447,7 +466,7 @@
 
                              <div class="spec-item">
                                 <div class="spec-label">Property Address</div>
-                                <div class="spec-value">{{ pg.property_address }}</div>
+                                <div class="spec-value">{{ pg.address }}</div>
                             </div>
 
 
@@ -565,73 +584,9 @@
                         </div>
                     </div>
 
-                    <div class="prop-section" id="sec-rooms">
-                        <div class="prop-section-title">
-                            <div class="section-icon" style="color:var(--success); background:#ecfdf5;"><i class="fas fa-bed"></i></div>
-                            Room Configurations & Rent
-                        </div>
-                        <div class="room-wrap">
-                            {% for room in parsed_rooms %}
-                            <div class="room-card">
-                                <h4><i class="fas fa-bed text-muted me-1"></i> {{ room.room_type }}</h4>
-                                <div class="room-row"><span class="room-lbl">Available Beds</span><span class="room-val">{{ room.room_beds }}</span></div>
-                                <div class="room-row"><span class="room-lbl">Monthly Rent</span><span class="room-val text-danger">₹{{ room.room_rent }}</span></div>
-                                <div class="room-row"><span class="room-lbl">Security Deposit</span><span class="room-val">₹{{ room.room_deposit }}</span></div>
-                                
-                                {% if room.room_brokerage == 'Yes' %}
-                                <div style="border-top:1px dashed #cbd5e1; margin-top:8px; padding-top:8px;">
-                                    <div class="room-row"><span class="room-lbl">Brokerage %</span><span class="room-val">{{ room.room_brokerage_percent|default:"—" }}</span></div>
-                                    {% if room.room_manual_brokerage %}<div class="room-row"><span class="room-lbl">Manual</span><span class="room-val">₹{{ room.room_manual_brokerage }}</span></div>{% endif %}
-                                </div>
-                                {% endif %}
-                                {% if room.room_facilities %}
-                                <div class="mt-2 text-muted" style="font-size: 11px;"><strong>Includes:</strong> {{ room.room_facilities }}</div>
-                                {% endif %}
-                            </div>
-                            {% empty %}
-                                <div class="empty-state w-100"><i class="fas fa-folder-open"></i><p>No individual room specifics recorded.</p></div>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <div class="prop-section" id="sec-rules">
-                        <div class="prop-section-title">
-                            <div class="section-icon" style="color:#ef4444; background:#fef2f2;"><i class="fas fa-gavel"></i></div>
-                            Rules & Policies
-                        </div>
-                       
-
-                        <div class="sub-section-label">Property Restrictions</div>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% if pg.opposite_sex_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Opposite Sex Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Opposite Sex</span>{% endif %}
-                            {% if pg.any_time_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Any Time Entry</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> Strict Timings</span>{% endif %}
-                            {% if pg.visitors_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Visitors Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Visitors</span>{% endif %}
-                            {% if pg.guardian_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Guardians Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Guardians</span>{% endif %}
-                            {% if pg.drinking_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Drinking Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Drinking</span>{% endif %}
-                            {% if pg.smoking_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Smoking Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Smoking</span>{% endif %}
-                        </div>
-                    </div>
-
-                    {% if pg.meals_available %}
-                    <div class="prop-section" id="sec-meals">
-                        <div class="prop-section-title">
-                            <div class="section-icon" style="color:#f97316; background:#fff7ed;"><i class="fas fa-utensils"></i></div>
-                            Meals & Food Services
-                        </div>
-                        <div class="sub-section-label">Meal Offerings</div>
-                        <div class="d-flex flex-wrap gap-2 mb-4">
-                            {% for item in meal_offerings_list %}
-                                <span class="amenity-pill"><i class="fas fa-pizza-slice text-warning"></i> {{ item }}</span>
-                            {% endfor %}
-                        </div>
-                        <div class="sub-section-label">Meal Speciality</div>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for item in meal_speciality_list %}
-                                <span class="amenity-pill"><i class="fas fa-leaf text-success"></i> {{ item }}</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
+                  
+                   
+                   
 
                     <!-- ══════════ NEW SECTION: PRICING (formatted like residential's Pricing Details) ══════════ -->
                  
@@ -664,11 +619,12 @@
                                     {% if pg.advance_rent_month == 'fixed' %}
                                         <div style="font-weight:700; color:#1e293b;">₹{{ pg.advance_rent_amount|floatformat:"0"|intcomma }}</div>
                                         <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">(Fixed Amount)</div>
-                                    {% elif pg.advance_rent_month and pg.advance_rent_month != '0' %}
-                                        {% widthratio starting_rent 1 pg.advance_rent_month as adv_val %}
-                                        <div style="font-weight:700; color:#1e293b;">₹{{ adv_val|floatformat:"0"|intcomma }}</div>
-                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">({{ pg.advance_rent_month }} Month{% if pg.advance_rent_month != '1' %}s{% endif %} Rent)</div>
+
+                                   {% elif pg.advance_rent_month and pg.advance_rent_month != '0' %}
+                                        <div style="font-weight:700; color:#1e293b;">₹{{ pg.get_advance_rent_amount|floatformat:"0"|intcomma }}</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">({{ pg.advance_rent_month }} {% if pg.advance_rent_month != '1' %}{% endif %})</div>
                                     {% else %}
+
                                         <div style="font-weight:700; color:#1e293b;">—</div>
                                         <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">(No Advance)</div>
                                     {% endif %}
@@ -682,10 +638,11 @@
                                     {% if pg.security_deposit_type == 'fixed' %}
                                         <div style="font-weight:700;">₹{{ pg.security_deposit_amount|floatformat:"0"|intcomma }}</div>
                                         <div style="font-size:0.75rem; opacity:0.85; font-weight:500; margin-top:2px;">(Fixed Amount)</div>
-                                    {% elif pg.security_deposit_type and pg.security_deposit_type != '0' %}
-                                        {% widthratio starting_rent 1 pg.security_deposit_type as sec_val %}
-                                        <div style="font-weight:700;">₹{{ sec_val|floatformat:"0"|intcomma }}</div>
-                                        <div style="font-size:0.75rem; opacity:0.85; font-weight:500; margin-top:2px;">({{ pg.security_deposit_type }} Month{% if pg.security_deposit_type != '1' %}s{% endif %} Rent)</div>
+
+                                  {% elif pg.security_deposit_type and pg.security_deposit_type != '0' %}
+                                        <div style="font-weight:700;">₹{{ pg.get_security_deposit_amount|floatformat:"0"|intcomma }}</div>
+                                        
+                                        <div style="font-size:0.75rem; opacity:0.85; font-weight:500; margin-top:2px;">({{ pg.security_deposit_type }}{% if pg.security_deposit_type != '1' %}{% endif %})</div>
                                     {% else %}
                                         <div style="font-weight:700;">—</div>
                                         <div style="font-size:0.75rem; opacity:0.85; font-weight:500; margin-top:2px;">(No Deposit)</div>
@@ -702,11 +659,12 @@
                                         <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">(Fixed Amount)</div>
                                     {% elif pg.brokerage_percentage == '1 Month Rent' %}
                                         <div style="font-weight:700; color:#1e293b;">₹{{ starting_rent|floatformat:"0"|intcomma }}</div>
-                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">(1 Month Rent)</div>
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;"></div>
+
                                     {% elif pg.brokerage_percentage == '15 Days Rent' %}
-                                        {% widthratio starting_rent 2 1 as bro_val %}
-                                        <div style="font-weight:700; color:#1e293b;">₹{{ bro_val|floatformat:"0"|intcomma }}</div>
-                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">(15 Days Rent)</div>
+                                        <div style="font-weight:700; color:#1e293b;">₹{{ pg.get_brokerage_amount|floatformat:"0"|intcomma }}</div>
+
+                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;"></div>
                                     {% elif pg.brokerage_percentage == 'No Brokerage' %}
                                         <div style="font-weight:700; color:#1e293b;">₹0</div>
                                         <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">(No Brokerage)</div>
@@ -723,7 +681,7 @@
                             {% if pg.maintenance_type == 'Extra' %}
                             <div class="spec-item spec-full">
                                 <div class="spec-label">Monthly Maintenance Amount</div>
-                                <div class="spec-value">₹{{ pg.maintenance_amount|default:"0"|intcomma }}</div>
+                                <div class="spec-value">₹{{ pg.maintenance_amount|default:"0"|intcomma }}/ mo</div>
                             </div>
                             {% endif %}
 
@@ -739,38 +697,47 @@
                         </div>
                     </div>
                     <!-- ══════════ NEW SECTION: LOCATION (matches residential) ══════════ -->
-                    <div class="prop-section" id="sec-location">
+                    
+                     <div class="prop-section" id="sec-rules">
                         <div class="prop-section-title">
-                            <div class="section-icon"><i class="fas fa-map-location-dot"></i></div>
-                            Location Details
+                            <div class="section-icon" style="color:#ef4444; background:#fef2f2;"><i class="fas fa-gavel"></i></div>
+                          PG Regulations
                         </div>
-                        <div class="mt-2 mb-4">
-                            <div class="spec-label mb-2">Complete Address</div>
-                            <div class="address-box">
-                                <i class="fas fa-map-pin text-primary me-2"></i>
-                                {{ pg.property_address|default:"No address provided." }}
-                            </div>
-                        </div>
-                        <div class="spec-grid">
-                            <div class="spec-item">
-                                <div class="spec-label">City</div>
-                                <div class="spec-value">{{ pg.city|default:"—" }}</div>
-                            </div>
-                            <div class="spec-item">
-                                <div class="spec-label">Locality / Area</div>
-                                <div class="spec-value">{{ pg.locality|default:"—" }}</div>
-                            </div>
-                           
+                       
+
+                        <div class="sub-section-label">Property Restrictions</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% if pg.opposite_gender_visitors_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Opposite Gender Visitors Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Opposite Gender Visitors Allowed</span>{% endif %}
+                            {% if pg.visitors_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Visitors Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Visitors Allowed</span>{% endif %}
+                            {% if pg.parents_guardians_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Parents/Guardians Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Parents/Guardians Allowed</span>{% endif %}
+                            {% if pg.entry_24x7_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> 24x7 Entry Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No 24x7 Entry Allowed</span>{% endif %}
+                            {% if pg.curfew_time %}
+    <span class="amenity-pill off"><i class="fas fa-clock"></i> Curfew: {{ pg.curfew_time|time:"h:i A" }}</span>
+{% else %}
+    <span class="amenity-pill on"><i class="fas fa-clock"></i> No Curfew Time</span>
+{% endif %}
+     
+
+
+                                           {% if pg.smoking_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Smoking Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Smoking Allowed</span>{% endif %}
+                                                  {% if pg.alcohol_consumption_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Alcohol Consumption Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Alcohol Consumption Allowed</span>{% endif %}
+                            {% if pg.couples_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Couples Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Couples Allowed</span>{% endif %}
+                            {% if pg.pets_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Pets Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Pets Allowed</span>{% endif %}
+                            {% if pg.cooking_allowed %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Cooking Allowed</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Cooking Allowed</span>{% endif %}
+             
+                     
+                            {% if pg.police_verification_required %}<span class="amenity-pill on"><i class="fas fa-check-circle"></i> Police Verification Required</span>{% else %}<span class="amenity-pill off"><i class="fas fa-times-circle"></i> No Police Verification Required</span>{% endif %}
                         </div>
                     </div>
+
 
                     <div class="prop-section" id="sec-amenities">
                         <div class="prop-section-title">
                             <div class="section-icon" style="color:#06b6d4; background:#ecfeff;"><i class="fas fa-wand-magic-sparkles"></i></div>
-                            PG Amenities & Nearby Hubs
+                             Amenities & Nearby Facilities
                         </div>
                         <div class="sub-section-label d-flex justify-content-between align-items-center">
-                            <span>Core PG Amenities</span>
+                            <span> Amenities</span>
                             <span class="badge rounded-pill bg-success" style="font-size:13px;">{{ amenities_list|length }} Amenities</span>
                         </div>
                         <div class="d-flex flex-wrap gap-2 mb-4">
@@ -782,7 +749,7 @@
                         </div>
                         <div class="sub-section-label d-flex justify-content-between align-items-center">
                             <span>Nearby Facilities</span>
-                            <span class="badge rounded-pill bg-primary" style="font-size:13px;">{{ facilities_list|length }} Facilities</span>
+                            <span class="badge rounded-pill bg-primary" style="font-size:13px;">{{ facilities_list|length }}Nearby Facilities</span>
                         </div>
                         <div class="d-flex flex-wrap gap-2">
                             {% for item in facilities_list %}
@@ -808,7 +775,7 @@
                             {% endif %}
 
                             <div class="sub-section-label">Property Summary</div>
-                            {% if pg.description %}
+                            {% if pg.property_summary %}
                                 <p class="mb-4">{{ pg.property_summary }}</p>
                             {% else %}
                                 <p class="mb-4 text-muted">Not generated.</p>
@@ -918,7 +885,7 @@
                     <div class="prop-section" id="sec-faqs">
                         <div class="prop-section-title">
                             <div class="section-icon"><i class="fas fa-comments-question"></i></div>
-                            Auto-Generated PG FAQs
+                            Auto-Generated Property(FAQs)
                         </div>
                         <div class="accordion prop-faq" id="faqAccordion">
                             {% for faq in pg.faqs.all %}
@@ -951,11 +918,12 @@
                                     <span class="advance" style="font-size:12px; color:white; font-weight:bolder; display:block; margin-top:4px;">
                                         (₹{{ pg.advance_rent_amount|floatformat:"0"|intcomma }} - Advance Fixed)
                                     </span>
-                                {% elif pg.advance_rent_month and pg.advance_rent_month != '0' %}
-                                    {% widthratio starting_rent 1 pg.advance_rent_month as adv_val %}
+
+                              {% elif pg.advance_rent_month and pg.advance_rent_month != '0' %}
                                     <span class="advance" style="font-size:12px; color:white; font-weight:bolder; display:block; margin-top:4px;">
-                                        (₹{{ adv_val|floatformat:"0"|intcomma }} - Advance {{ pg.advance_rent_month }} Month{% if pg.advance_rent_month != '1' %}s{% endif %})
+                                        (₹{{ pg.get_advance_rent_amount|floatformat:"0"|intcomma }} - Advance {{ pg.advance_rent_month }}{% if pg.advance_rent_month != '1' %}{% endif %})
                                     </span>
+
                                 {% else %}
                                     <span class="advance" style="font-size:12px; color:white; font-weight:bolder; display:block; margin-top:4px;">(No Advance)</span>
                                 {% endif %}
@@ -970,10 +938,11 @@
                                     {% if pg.security_deposit_type == 'fixed' %}
                                         <div class="sidebar-mini-stat-val">₹{{ pg.security_deposit_amount|floatformat:"0"|intcomma }}</div>
                                         <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">(Fixed Amount)</div>
+
                                     {% elif pg.security_deposit_type and pg.security_deposit_type != '0' %}
-                                        {% widthratio starting_rent 1 pg.security_deposit_type as sec_val %}
-                                        <div class="sidebar-mini-stat-val">₹{{ sec_val|floatformat:"0"|intcomma }}</div>
-                                        <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">({{ pg.security_deposit_type }} Month{% if pg.security_deposit_type != '1' %}s{% endif %})</div>
+                                        <div class="sidebar-mini-stat-val">₹{{ pg.get_security_deposit_amount|floatformat:"0"|intcomma }}</div>
+
+                                        <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">({{ pg.security_deposit_type }}{% if pg.security_deposit_type != '1' %}s{% endif %})</div>
                                     {% else %}
                                         <div class="sidebar-mini-stat-val">—</div>
                                         <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">(No Deposit)</div>
@@ -1147,20 +1116,47 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Scroll Spy Nav
+    // Scroll Spy Nav
     const navLinks = document.querySelectorAll('.prop-nav-link');
     const sections = document.querySelectorAll('.prop-section[id]');
+    
     function updateActiveNav() {
-        let activeId = null; const scrollY = window.scrollY;
-        sections.forEach(sec => { if (scrollY >= sec.getBoundingClientRect().top + window.scrollY - 160) activeId = sec.id; });
-        if (activeId) navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('data-target') === activeId));
+        let activeId = null; 
+        const scrollPosition = window.scrollY;
+        
+        sections.forEach(sec => { 
+            // Calculate absolute top position of the section
+            const sectionTop = sec.getBoundingClientRect().top + window.scrollY;
+            // Add a buffer so it highlights slightly before it hits the exact top
+            if (scrollPosition >= sectionTop - 180) {
+                activeId = sec.id;
+            }
+        });
+        
+        if (activeId) {
+            navLinks.forEach(l => {
+                if (l.getAttribute('data-target') === activeId) {
+                    l.classList.add('active');
+                } else {
+                    l.classList.remove('active');
+                }
+            });
+        }
     }
+    
     window.addEventListener('scroll', updateActiveNav, { passive: true });
+    
     navLinks.forEach(link => {
         link.addEventListener('click', function (e) {
-            e.preventDefault(); const target = document.getElementById(this.getAttribute('data-target'));
-            if (target) window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 130, behavior: 'smooth' });
+            e.preventDefault(); 
+            const target = document.getElementById(this.getAttribute('data-target'));
+            if (target) {
+                // Native smooth scroll (automatically respects your scroll-margin-top CSS)
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         });
     });
+    
     updateActiveNav();
 
     // Horizontal scroll fix for sticky nav (same as residential)

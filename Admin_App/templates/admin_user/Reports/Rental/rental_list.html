@@ -1150,10 +1150,11 @@
              
                 <th>Brokerage / Service Fee</th> 
                 
-                <th>Advance Rent Month</th>
-                <th>Advance Rent Amount</th>
-                <th>Refundable Security Deposit Type</th>
-                <th>Refundable Security Deposit Amount</th>
+               
+                 <th>Advance Rent Month </th>
+            <th>Advance Rent Amount</th>
+            <th>Refundable Security Deposit</th>
+            <th>Refundable Security Deposit Amount</th>
                 
                 <th>Maintenance Type</th>
                 <th>Monthly Maintenance Amt</th>
@@ -1183,6 +1184,7 @@
                 <th>UB Contact</th>
                 <th>UB Role</th>
                 <th>Data Uploaded Via</th>
+                 <th>Uploaded File </th>
                 <th>Created At</th>
 
                   <th>Property Unique Key</th>
@@ -1216,7 +1218,7 @@
         {% elif prop.listing_status == "Rented" %}
             <span class="badge bg-info text-dark">Rented</span>
         {% else %}
-            <span class="badge bg-light text-dark">N/A</span>
+            <span class="badge bg-success text-dark">Draft</span>
         {% endif %}
     </td>
     
@@ -1229,7 +1231,7 @@
         {% elif prop.approval_status == "Rejected" %}
             <span class="badge bg-danger">Rejected</span>
         {% else %}
-            <span class="badge bg-light text-dark">N/A</span>
+            <span class="badge bg-warning text-dark">Pending</span>
         {% endif %}
     </td>
 
@@ -1381,42 +1383,56 @@
 </td>
 
     <!-- ADVANCE RENT (Updated with clean labels) -->
-    <td style="font-weight:500;">
-        {{ prop.get_advance_rent_type_label|default:"—" }}
-    </td>
-    <td>
-        {% if prop.get_advance_rent_amount %}
-            <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_advance_rent_amount|floatformat:"0" }}</div>
-            {% if prop.advance_rent_month != "fixed" and prop.advance_rent_month != "0" %}
-                <div style="font-size:11px;color:#64748b;margin-top:2px;">
-                    ({{ prop.get_advance_rent_type_label }})
-                </div>
-            {% elif prop.advance_rent_month == "fixed" %}
-                <div style="font-size:11px;color:#2563eb;margin-top:2px;">(Manual Fixed)</div>
-            {% endif %}
-        {% else %}
-            —
-        {% endif %}
-    </td>
+ 
 
-    <!-- SECURITY DEPOSIT (Updated with clean labels) -->
-    <td style="font-weight:500;">
-        {{ prop.get_security_deposit_type_label|default:"—" }}
-    </td>
-    <td>
-        {% if prop.get_security_deposit_amount %}
-            <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_security_deposit_amount|floatformat:"0" }}</div>
-            {% if prop.security_deposit_type != "fixed" and prop.security_deposit_type != "0" %}
-                <div style="font-size:11px;color:#64748b;margin-top:2px;">
-                    ({{ prop.get_security_deposit_type_label }})
-                </div>
-            {% elif prop.security_deposit_type == "fixed" %}
-                <div style="font-size:11px;color:#2563eb;margin-top:2px;">(Manual Fixed)</div>
-            {% endif %}
-        {% else %}
-            —
+    <!-- ADVANCE RENT: Amount + Type together -->
+<!-- ADVANCE RENT: Amount + Type together -->
+<td>
+    {% if prop.get_advance_rent_amount %}
+        <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_advance_rent_amount|floatformat:"0" }}</div>
+        {% if prop.get_advance_rent_type_label != "Fixed Amount" and prop.get_advance_rent_type_label != "No Advance" %}
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                ({{ prop.get_advance_rent_type_label }})
+            </div>
+        {% elif prop.get_advance_rent_type_label == "Fixed Amount" %}
+            <div style="font-size:11px;color:#2563eb;margin-top:2px;">(Manual Fixed)</div>
         {% endif %}
-    </td>
+    {% else %}
+        —
+    {% endif %}
+</td>
+
+ <!-- 53. Advance Rent Amount (Styled with Brackets) -->
+            <td>
+               
+                    <div style="font-weight:600;color:#1e293b;">{{ prop.advance_rent_amount|floatformat:"0"|default:"—"  }}</div>
+                    
+              
+            </td>
+
+<!-- SECURITY DEPOSIT: Amount + Type together -->
+<!-- SECURITY DEPOSIT: Amount + Type together -->
+<td>
+    {% if prop.get_security_deposit_amount %}
+        <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_security_deposit_amount|floatformat:"0" }}</div>
+        {% if prop.get_security_deposit_type_label != "Fixed Amount" and prop.get_security_deposit_type_label != "No Deposit" %}
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                ({{ prop.get_security_deposit_type_label }})
+            </div>
+        {% elif prop.get_security_deposit_type_label == "Fixed Amount" %}
+            <div style="font-size:11px;color:#2563eb;margin-top:2px;">(Manual Fixed)</div>
+        {% endif %}
+    {% else %}
+        —
+    {% endif %}
+</td>
+
+ <td>
+               
+                    <div style="font-weight:600;color:#1e293b;">{{ prop.security_deposit_amount|floatformat:"0" }}</div>
+                 
+            </td>
+
 
     <!-- Maintenance & Move-in Cost -->
     <td>{{ prop.maintenance_type|default:"—" }}</td>
@@ -1459,6 +1475,21 @@
     <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
     <td>{{ prop.uploaded_by_role|default:"—" }}</td>
     <td>{{ prop.upload_file_name|default:"Web UI Listing Form" }}</td>
+   
+    <td>
+    {% if prop.upload_file %}
+        <a href="{{ prop.upload_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size: 0.75rem; font-weight: 600;">
+            <i class="fas fa-file-download me-1"></i> 
+            {% if prop.upload_file_name %}
+                {{ prop.upload_file_name|truncatechars:15 }}
+            {% else %}
+                Download
+            {% endif %}
+        </a>
+    {% else %}
+        <span class="text-muted fw-bold">—</span>
+    {% endif %}
+</td>
     <td>{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
 
       <td><code style="font-size:11px;background:#f1f5f9;padding:2px 4px;border-radius:4px;">{{ prop.property_unique_key|default:"—" }}</code></td>
@@ -2116,31 +2147,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
     // 1. Debounce logic for the text input (auto submits 500ms after user stops typing)
-    let typingTimer;
-    const typingInterval = 500; 
+    
+
+    // Instant client-side filtering script (No page reload required)
     const searchInput = document.getElementById('searchInput');
-    const form = document.getElementById('liveSearchForm');
+    const tableRows = document.querySelectorAll('#rentalTable tbody tr');
 
     if (searchInput) {
         searchInput.addEventListener('keyup', function () {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(() => {
-                form.submit();
-            }, typingInterval);
-        });
-        
-        searchInput.addEventListener('keydown', function () {
-            clearTimeout(typingTimer);
-        });
-        
-        // Auto-focus logic to keep cursor active after reload
-        const len = searchInput.value.length;
-        if (len) {
-            searchInput.focus();
-            searchInput.setSelectionRange(len, len);
-        }
-    }
+            const query = searchInput.value.toLowerCase().trim();
 
+            tableRows.forEach(row => {
+                // Ignore the empty state row
+                if (row.cells.length <= 1) return;
+
+                let rowText = row.textContent.toLowerCase();
+                if (rowText.includes(query)) {
+                    row.style.display = ""; // Show matching row instantly
+                } else {
+                    row.style.display = "none"; // Hide non-matching row instantly
+                }
+            });
+        });
+    }
     // 2. Logic to clear individual tags and auto-submit
     function clearFilterSelect(selectName) {
         const select = form.querySelector(`select[name="${selectName}"]`);

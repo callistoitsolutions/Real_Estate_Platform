@@ -599,6 +599,8 @@ class RentalResidentialProperty(models.Model):
     uploaded_by_contact = models.CharField(max_length=20, blank=True, null=True)
     uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
     upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    # Add this new field to store the actual file
+    upload_file = models.FileField(upload_to='property_uploads/files/', blank=True, null=True)
    
 
     # =====================================================
@@ -634,26 +636,22 @@ class RentalResidentialProperty(models.Model):
         role = (self.listed_by_role or "").strip().lower()
         return self.BROKERAGE_LABEL_MAP.get(role, "Brokerage")   # default fallback
 
+
     def get_advance_rent_type_label(self):
-        val = (self.advance_rent_month or "").strip().lower()
-        if val == "fixed":
+        val = (self.advance_rent_month or "").strip()
+        
+        if val.lower() in ["fixed", "fixed amount"]:
             return "Fixed Amount"
-        try:
-            months = int(val)
-            return "No Advance" if months == 0 else f"{months} Month{'s' if months != 1 else ''} Rent"
-        except (TypeError, ValueError):
-            return "-"
+            
+        return val or "-"
 
     def get_security_deposit_type_label(self):
-        val = (self.security_deposit_type or "").strip().lower()
-        if val == "fixed":
+        val = (self.security_deposit_type or "").strip()
+        
+        if val.lower() in ["fixed", "fixed amount"]:
             return "Fixed Amount"
-        try:
-            months = int(val)
-            return "No Deposit" if months == 0 else f"{months} Month{'s' if months != 1 else ''} Rent"
-        except (TypeError, ValueError):
-            return "-"
-
+            
+        return val or "-"
     def get_brokerage_display_value(self):
         """Returns the value that should sit next to the label — resolves
         the 'Fixed Amount' case to the manually typed figure."""
@@ -675,29 +673,36 @@ class RentalResidentialProperty(models.Model):
     def get_advance_rent_amount(self):
         rent = self.monthly_rent or 0
         raw = (self.advance_rent_month or "").strip().lower()
-        has_amount = self.advance_rent_amount not in (None, 0, "", "0")
 
-        if raw == "fixed" or (has_amount and raw not in [str(n) for n in range(0, 12)]):
-            # explicit "fixed", OR type is blank/invalid but an amount was typed in anyway
+        # 1. If explicitly set to Fixed Amount, use the fixed value
+        if raw in ["fixed", "fixed amount"]:
             return self.advance_rent_amount or 0
+
+        # 2. Try to calculate based on the dropdown string (e.g., "1 Month Rent")
         try:
-            months = int(raw)
+            months = int(raw.split()[0])
             return months * rent
-        except (TypeError, ValueError):
-            return self.advance_rent_amount or 0   # last-resort fallback: use whatever amount exists
+        except (TypeError, ValueError, IndexError):
+            # 3. Final fallback ONLY if the dropdown value is unrecognized
+            return self.advance_rent_amount or 0
 
     def get_security_deposit_amount(self):
         rent = self.monthly_rent or 0
         raw = (self.security_deposit_type or "").strip().lower()
-        has_amount = self.security_deposit_amount not in (None, 0, "", "0")
 
-        if raw == "fixed" or (has_amount and raw not in [str(n) for n in range(0, 12)]):
+        # 1. If explicitly set to Fixed Amount, use the fixed value
+        if raw in ["fixed", "fixed amount"]:
             return self.security_deposit_amount or 0
+
+        # 2. Try to calculate based on the dropdown string (e.g., "2 Months Rent")
         try:
-            months = int(raw)
+            months = int(raw.split()[0])
             return months * rent
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, IndexError):
+            # 3. Final fallback ONLY if the dropdown value is unrecognized
             return self.security_deposit_amount or 0
+
+
 
     def get_brokerage_amount(self):
         rent = self.monthly_rent or 0
@@ -1148,6 +1153,7 @@ class RentalActivityLog(models.Model):
 
 import uuid
 import hashlib
+from decimal import Decimal, InvalidOperation
 from django.db import models
 
 def generate_commercial_rental_id():
@@ -1257,7 +1263,10 @@ class CommercialRentalProperty(models.Model):
     uploaded_by_email = models.CharField(max_length=150, blank=True, null=True)
     uploaded_by_contact = models.CharField(max_length=50, blank=True, null=True)
     uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
+
     upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    # Add this new field to store the actual file
+    upload_file = models.FileField(upload_to='property_uploads/files/', blank=True, null=True)
 
     is_deleted = models.BooleanField(default=False)
     is_duplicate = models.BooleanField(default=False)
@@ -1285,6 +1294,17 @@ class CommercialRentalProperty(models.Model):
         if self.brokerage_percentage == "Fixed Amount":
             return self.manual_brokerage or "-"
         return self.brokerage_percentage or "-"
+
+    # AREA FORMATTING HELPER (ALWAYS 2 DECIMAL PLACES, MATCHING DB STORAGE)
+    def format_area(self, value):
+        if value in (None, "", 0):
+            return None
+        try:
+            return f"{Decimal(value):.2f}"
+        except (InvalidOperation, TypeError, ValueError):
+            return value
+
+    # DERIVED MONEY HELPERS
 
     # DERIVED MONEY HELPERS
     def get_advance_rent_amount(self):
@@ -1357,9 +1377,13 @@ class CommercialRentalProperty(models.Model):
         summary = f"A premium {p_cond} {p_type} is available for rent in {loc}{city_str}. "
         if self.monthly_rent:
             summary += f"Available at a highly competitive rent of ₹{self.monthly_rent:,}/month. "
-        if self.builtup_area:
-            summary += f"This property offers an expansive built-up area of {self.builtup_area} sq.ft. "
-        summary += "It is highly suitable for setting up a professional corporate office, IT establishment, or retail business."
+        if self.builtup_area or self.carpet_area:
+            area_bits = []
+            if self.builtup_area:
+                area_bits.append(f"built-up area of {self.format_area(self.builtup_area)} sq.ft.")
+            if self.carpet_area:
+                area_bits.append(f"carpet area of {self.format_area(self.carpet_area)} sq.ft.")
+            summary += f"This property offers an expansive {' and '.join(area_bits)} "
         self.property_summary = summary
 
         # 2. Detailed Description
@@ -1368,10 +1392,14 @@ class CommercialRentalProperty(models.Model):
             long_desc += f"<p>Situated within the highly sought-after commercial complex of <strong>{self.building_name}</strong>, this property ensures prime visibility and professional appeal.</p>"
 
         long_desc += "<h3>Property Highlights:</h3><ul>"
-        if self.builtup_area:
-            carpet_str = f" (Carpet Area: {self.carpet_area} sq.ft.)" if self.carpet_area else ""
-            long_desc += f"<li><strong>Space & Dimensions:</strong> Generous built-up area of {self.builtup_area} sq.ft.{carpet_str}.</li>"
-        
+        if self.builtup_area or self.carpet_area:
+            if self.builtup_area and self.carpet_area:
+                dim_text = f"Generous built-up area of {self.format_area(self.builtup_area)} sq.ft. (Carpet Area: {self.format_area(self.carpet_area)} sq.ft.)"
+            elif self.builtup_area:
+                dim_text = f"Generous built-up area of {self.format_area(self.builtup_area)} sq.ft."
+            else:
+                dim_text = f"Carpet area of {self.format_area(self.carpet_area)} sq.ft."
+            long_desc += f"<li><strong>Space & Dimensions:</strong> {dim_text}.</li>"
         if self.monthly_rent:
             dep_val = self.get_security_deposit_amount()
             dep_str = f" (Security Deposit: ₹{dep_val:,})" if dep_val else ""
@@ -1413,7 +1441,7 @@ class CommercialRentalProperty(models.Model):
         loc = self.locality or ""
         b_name = f"in {self.building_name}" if self.building_name else ""
         city_name = f", {self.city}" if self.city else ""
-        area_str = f"({self.builtup_area} sq.ft.)" if self.builtup_area else ""
+        area_str = f"({self.format_area(self.builtup_area)} sq.ft.)" if self.builtup_area else ""
 
         # Auto-generate title without skipping
         title_parts = [p_type, "for Rent"]
@@ -1494,10 +1522,12 @@ class CommercialRentalProperty(models.Model):
                 })
 
         # FAQ 3: Built-up Area & Workstations
-        if self.builtup_area:
+        if self.builtup_area or self.carpet_area:
+            builtup_str = self.format_area(self.builtup_area) or '—'
+            carpet_str = self.format_area(self.carpet_area) or '—'
             faq_pool.append({
                 "q": "What are the total area dimensions and workspace setup metrics?",
-                "a": f"The property features a built-up area of {self.builtup_area} sq.ft. (Carpet area: {self.carpet_area or '—'} sq.ft.). It can comfortably support {self.min_seats or 0} to {self.max_seats or 0} workstations along with {self.cabins or 0} private executive cabins.",
+                "a": f"The property features a built-up area of {builtup_str} sq.ft. (Carpet area: {carpet_str} sq.ft.). It can comfortably support {self.min_seats or 0} to {self.max_seats or 0} workstations along with {self.cabins or 0} private executive cabins.",
             })
 
         # FAQ 4: Utilities & Lifts
@@ -1734,6 +1764,8 @@ class PGColivingProperty(models.Model):
     uploaded_by_contact = models.CharField(max_length=50, blank=True, null=True)
     uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
     upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    # Add this new field to store the actual file
+    upload_file = models.FileField(upload_to='property_uploads/files/', blank=True, null=True)
 
     is_deleted = models.BooleanField(default=False)
     is_duplicate = models.BooleanField(default=False)
@@ -1769,38 +1801,48 @@ class PGColivingProperty(models.Model):
     #  DERIVED MONEY HELPERS (added — mirrors CommercialRentalProperty)
     # ═══════════════════════════════════════════════════════════════════════
     def get_advance_rent_amount(self):
-        """
-        advance_rent_month stores either a numeric month-count string ("0".."11")
-        or the literal "fixed" (per the pg_coliving.html select options).
-        """
         rent = self.monthly_rent or 0
         raw = (self.advance_rent_month or "").strip().lower()
         has_amount = self.advance_rent_amount not in (None, 0, "", "0")
 
-        if raw == "fixed" or has_amount:
+        if raw == "fixed amount" or raw == "fixed" or has_amount:
             return self.advance_rent_amount or 0
         try:
-            months = int(float(raw))
+            months = int(raw.split()[0])
             return months * rent
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, IndexError):
             return self.advance_rent_amount or 0
 
     def get_security_deposit_amount(self):
-        """
-        security_deposit_type stores either a numeric month-count string ("0".."11")
-        or the literal "fixed".
-        """
         rent = self.monthly_rent or 0
         raw = (self.security_deposit_type or "").strip().lower()
         has_amount = self.security_deposit_amount not in (None, 0, "", "0")
 
-        if raw == "fixed" or has_amount:
+        if raw == "fixed amount" or raw == "fixed" or has_amount:
             return self.security_deposit_amount or 0
         try:
-            months = int(float(raw))
+            months = int(raw.split()[0])
             return months * rent
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, IndexError):
             return self.security_deposit_amount or 0
+
+
+
+    def get_advance_rent_type_label(self):
+        val = (self.advance_rent_month or "").strip()
+        
+        if val.lower() in ["fixed", "fixed amount"]:
+            return "Fixed Amount"
+            
+        return val or "-"
+
+    def get_security_deposit_type_label(self):
+        val = (self.security_deposit_type or "").strip()
+        
+        if val.lower() in ["fixed", "fixed amount"]:
+            return "Fixed Amount"
+            
+        return val or "-"
 
     def get_brokerage_amount(self):
         rent = self.monthly_rent or 0
@@ -1862,7 +1904,7 @@ class PGColivingProperty(models.Model):
         if self.monthly_rent:
             dep_val = self.get_security_deposit_amount()
             dep_str = f" (Security Deposit: ₹{dep_val:,.0f})" if dep_val else ""
-            long_desc += f"<li><strong>Monthly Rent:</strong> ₹{self.monthly_rent:,} per person{dep_str}.</li>"
+            long_desc += f"<li><strong>Monthly Rent:</strong> ₹{self.monthly_rent:,}/ per person{dep_str}.</li>"
         long_desc += f"<li><strong>Furnishing:</strong> Fully {furnish} living quarters.</li>"
         if self.meals_available:
             long_desc += f"<li><strong>Food & Dining:</strong> Bundled meal provisioning offering {self.meal_offerings} ({self.meal_speciality or 'Standard'}).</li>"
@@ -1905,7 +1947,7 @@ class PGColivingProperty(models.Model):
 
         # Build Unique Key Only on First Create
         if self._state.adding:
-            key_source = f"{self.address}|{self.locality}|{self.city}|{self.property_no}|{self.monthly_rent}"
+            key_source = f"{self.address}|{self.locality}|{self.city}|{self.property_no}|{self.pincode}"
             self.property_unique_key = key_source.strip().lower().replace(" ", "")
 
         super().save(*args, **kwargs)
@@ -2232,7 +2274,10 @@ class ResaleResidentialProperty(models.Model):
     uploaded_by_email = models.EmailField(blank=True, null=True)
     uploaded_by_contact = models.CharField(max_length=30, blank=True, null=True)
     uploaded_by_role = models.CharField(max_length=50, blank=True, null=True)
+  
     upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    # Add this new field to store the actual file
+    upload_file = models.FileField(upload_to='property_uploads/files/', blank=True, null=True)
 
     ############### Timestamp and other details ###########################
     is_deleted = models.BooleanField(default=False)
@@ -4378,9 +4423,12 @@ class AgriculturalResaleFAQ(models.Model):
 ################## START MODEL SECTION Industrial Plot RESALE LISTING################
 
 
+
+
+
+
 def generate_industrial_plot_id():
     return f"EFIPR-{uuid.uuid4().hex[:8].upper()}"
-
 
 class IndustrialPlotResaleProperty(models.Model):
     id = models.CharField(
@@ -4395,16 +4443,19 @@ class IndustrialPlotResaleProperty(models.Model):
     category = models.CharField(max_length=100, blank=True, null=True)
     sub_category = models.CharField(max_length=100, blank=True, null=True)
 
-
     listed_by_type = models.CharField(max_length=100, blank=True, null=True)
     assigned_to = models.CharField(max_length=50, blank=True, null=True)     # "id-role" value from dropdown, only if "other"
   
-
     listed_by_id = models.CharField(max_length=150, blank=True, null=True)
     listed_by_name = models.CharField(max_length=150, blank=True, null=True)
     listed_by_email = models.CharField(max_length=150, blank=True, null=True)
     listed_by_contact = models.CharField(max_length=20, blank=True, null=True)
-    listed_by_role = models.CharField(max_length=100, blank=True, null=True) 
+    listed_by_role = models.CharField(max_length=100, blank=True, null=True)
+
+    # ── DUPLICATE DETECTION ─────────────────────────────────────────────────
+    property_unique_key = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    duplicate_count = models.PositiveIntegerField(default=0)
+    duplicate_group_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)   # <-- drives the duplicate label
 
     # ── STEP 1: BASIC INFORMATION & ZONE DETAILS ───────────────────────────
     property_title = models.CharField(max_length=255, blank=True, null=True)
@@ -4440,6 +4491,7 @@ class IndustrialPlotResaleProperty(models.Model):
 
     # ── STEP 2: PRICING & BROKERAGE ────────────────────────────────────────
     selling_price = models.BigIntegerField(blank=True, null=True)
+    price_per_sqft = models.BigIntegerField(blank=True, null=True)
     price_negotiable = models.CharField(max_length=20, default="no")
     additional_charges = models.CharField(max_length=100, blank=True, null=True)
     brokerage_percentage = models.CharField(max_length=100, blank=True, null=True)
@@ -4493,6 +4545,7 @@ class IndustrialPlotResaleProperty(models.Model):
     uploaded_by_contact = models.CharField(max_length=50, blank=True, null=True)
     uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
     upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    upload_file = models.FileField(upload_to='industrial_resaleplot_property_uploads/files/', blank=True, null=True)
 
     is_deleted = models.BooleanField(default=False)
     
@@ -4530,9 +4583,26 @@ class IndustrialPlotResaleProperty(models.Model):
     # ═══════════════════════════════════════════════════════════════════════
     #  AUTO DESCRIPTIONS ENGINE
     # ═══════════════════════════════════════════════════════════════════════
+    # ── SMART AREA FORMATTER (Keeps decimals if present, strips zeros if whole number) ──
+    # ── PRECISE 2-DECIMAL AREA FORMATTER ──
+    def _clean_area(self):
+        if self.plot_area is None:
+            return ""
+        try:
+            # Converts the value to a float and formats it strictly with 2 decimal places
+            # e.g., 1500 -> 1500.00, 1400.00 -> 1400.00, 1455.90 -> 1455.90
+            f = float(self.plot_area)
+            return f"{f:.2f}"
+        except (TypeError, ValueError):
+            return str(self.plot_area)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    #  AUTO DESCRIPTIONS ENGINE
+    # ═══════════════════════════════════════════════════════════════════════
     def generate_auto_descriptions(self):
         p_type = (self.property_type or "Industrial Plot").replace("_", " ").title()
-        area_str = f"{self.plot_area} sq.m" if self.plot_area else "Prime Area"
+        area_clean = self._clean_area()
+        area_str = f"{area_clean} sq.m" if area_clean else "Prime Area"
         estate = f"in {self.industrial_estate_name}" if self.industrial_estate_name else ""
         loc = self.locality or "Industrial Zone"
         city_str = f", {self.city}" if self.city else ""
@@ -4550,12 +4620,21 @@ class IndustrialPlotResaleProperty(models.Model):
         long_desc = f"<p>Expand your industrial footprint with this strategically situated <strong>{area_str} {p_type}</strong> located {estate} in <strong>{loc}{city_str}</strong>.</p>"
 
         long_desc += "<h3>Key Site Specifications:</h3><ul>"
+
         if self.plot_area:
-            long_desc += f"<li><strong>Plot Area & Dimensions:</strong> Total area of {self.plot_area} sq.m (Frontage: {self.plot_frontage or '—'}m x Depth: {self.plot_depth or '—'}m). Shape: {self.plot_shape or 'Regular'}.</li>"
+            f_val = f"{self.plot_frontage:.2f}" if self.plot_frontage else "—"
+            d_val = f"{self.plot_depth:.2f}" if self.plot_depth else "—"
+            long_desc += f"<li><strong>Plot Area & Dimensions:</strong> Total area of {area_clean} sq.m (Frontage: {f_val}m x Depth: {d_val}m). Shape: {self.plot_shape or 'Regular'}.</li>"
+        
         long_desc += f"<li><strong>Road Access:</strong> Abuts a {self.road_width or 'Standard'} road with '{self.plot_road_facing or 'Direct Road Access'}'. Corner plot: {self.corner_plot.upper()}.</li>"
-        if self.selling_price:
-            psq = round(float(self.selling_price) / float(self.plot_area)) if (self.plot_area and float(self.plot_area) > 0) else 0
-            long_desc += f"<li><strong>Commercial Valuation:</strong> Listed at ₹{self.selling_price:,} (~₹{psq:,}/sq.m). Negotiable: {self.price_negotiable.upper()}.</li>"
+        
+        if self.selling_price and self.plot_area:
+            try:
+                psq = round(float(self.selling_price) / float(self.plot_area)) if float(self.plot_area) > 0 else 0
+                long_desc += f"<li><strong>Commercial Valuation:</strong> Listed at ₹{self.selling_price:,} (~₹{psq:,}/sq.m). Negotiable: {self.price_negotiable.upper()}.</li>"
+            except (TypeError, ValueError, ZeroDivisionError):
+                pass
+
         long_desc += f"<li><strong>Current Site Status:</strong> Offered in '{self.current_possession_status or 'Vacant & Ready'}' condition.</li>"
         long_desc += "</ul>"
 
@@ -4570,8 +4649,13 @@ class IndustrialPlotResaleProperty(models.Model):
         long_desc += f"<li><strong>Title & Encumbrances:</strong> Title status is verified as '{self.title_clearance or 'Clear & Marketable'}'. Encumbrance status: {self.property_encumbrance_status or 'Nil'}.</li>"
         long_desc += "</ul>"
 
-        if self.amenities:
-            long_desc += f"<h3>Estate Infrastructure & Amenities:</h3><p>The site offers superior logistics support including: <strong>{self.amenities}</strong>.</p>"
+        if self.amenities or self.nearby_facilities:
+            long_desc += "<h3>Estate Infrastructure & Location Advantages:</h3><p>The site offers superior logistics support and strategic advantages:</p><ul>"
+            if self.amenities:
+                long_desc += f"<li><strong>On-Site Amenities:</strong> {self.amenities}.</li>"
+            if self.nearby_facilities:
+                long_desc += f"<li><strong>Nearby Facilities & Connectivity:</strong> {self.nearby_facilities}.</li>"
+            long_desc += "</ul>"
 
         long_desc += "<p>Contact us immediately to arrange a technical site inspection or verify MIDC / Authority documentation.</p>"
         self.property_description = long_desc
@@ -4579,47 +4663,124 @@ class IndustrialPlotResaleProperty(models.Model):
     # ═══════════════════════════════════════════════════════════════════════
     #  SAVE OVERRIDE
     # ═══════════════════════════════════════════════════════════════════════
+    # ═══════════════════════════════════════════════════════════════════════
+    #  SAVE OVERRIDE
+    # ═══════════════════════════════════════════════════════════════════════
     def save(self, *args, **kwargs):
-        area_lbl = f"{self.plot_area} sq.m" if self.plot_area else ""
+        # ── AUTO-CALCULATE PRICE PER SQ.M / SQ.FT ──
+        if self.selling_price and self.plot_area:
+            try:
+                area_val = float(self.plot_area)
+                if area_val > 0:
+                    self.price_per_sqft = round(float(self.selling_price) / area_val)
+                else:
+                    self.price_per_sqft = None
+            except (TypeError, ValueError, ZeroDivisionError):
+                self.price_per_sqft = None
+        else:
+            self.price_per_sqft = None
+
+        area_clean = self._clean_area()
+        area_lbl = f"{area_clean} sq.m" if area_clean else ""
         p_type = (self.property_type or "Industrial Plot").replace("_", " ").title()
         loc = self.locality or ""
         city_name = f", {self.city}" if self.city else ""
 
+        # Generates clean title (e.g., "1498 sq.m It Park Plot for Sale in ...")
         self.property_title = " ".join(filter(bool, [area_lbl, p_type, "for Sale in", loc + city_name]))[:255]
+        
+        # Forces regeneration of summaries and descriptions with the correct formatting on every save/edit
         self.generate_auto_descriptions()
+
+        # >>> BUILD UNIQUE KEY ONLY ON FIRST CREATE <<<
+        if self._state.adding:
+            key_source = f"{self.address}|{self.locality}|{self.city}|{self.plot_area}|{self.property_no}"
+            self.property_unique_key = key_source.strip().lower().replace(" ", "")
+
         super().save(*args, **kwargs)
+
+        # >>> RECALCULATE DUPLICATE GROUP FROM ACTUAL DB STATE (idempotent) <<<
+        if self.property_unique_key:
+            group_qs = IndustrialPlotResaleProperty.objects.filter(
+                property_unique_key=self.property_unique_key,
+                is_deleted=False,
+            )
+            total = group_qs.count()
+
+            if total > 1:
+                original_id = group_qs.order_by("created_at").first().pk
+                group_qs.update(
+                    duplicate_count=total,
+                    duplicate_group_id=original_id,
+                    is_duplicate=True,
+                )
+            else:
+                group_qs.update(
+                    duplicate_count=1,
+                    duplicate_group_id=None,
+                    is_duplicate=False,
+                )
+
         self.generate_auto_faqs()
 
     # ═══════════════════════════════════════════════════════════════════════
-    #  AUTO FAQ ENGINE
+    #  AUTO FAQ ENGINE (Guaranteed 7 FAQs)
     # ═══════════════════════════════════════════════════════════════════════
     def generate_auto_faqs(self):
+          # Ensure model is imported here if not at top
+
         self.faqs.all().delete()
         faq_pool = []
 
+        # FAQ 1: Pricing
         if self.selling_price and self.plot_area:
             psq = round(float(self.selling_price) / float(self.plot_area)) if float(self.plot_area) > 0 else 0
             faq_pool.append({
                 "q": "What is the total sale value and rate per square metre for this industrial plot?",
                 "a": f"The total asking price is ₹{self.selling_price:,}, which translates to approximately ₹{psq:,} per sq.m. Price negotiability is indicated as: '{self.price_negotiable.upper()}'.",
             })
-
-        if self.brokerage_percentage:
-            label = self.get_brokerage_label()
-            val = self.get_brokerage_display_value()
+        else:
             faq_pool.append({
-                "q": f"Is there a {label.lower()} applicable on this industrial plot purchase?",
-                "a": f"Yes, the applicable {label.lower()} for this property transaction is: {val}.",
+                "q": "Is the pricing for this industrial plot finalized?",
+                "a": "The pricing details are currently available upon request. Please contact the listing manager for exact commercial valuations.",
             })
 
+        # FAQ 2: Brokerage
+        label = self.get_brokerage_label()
+        val = self.get_brokerage_display_value()
+        faq_pool.append({
+            "q": f"Is there a {label.lower()} applicable on this industrial plot purchase?",
+            "a": f"Yes, the applicable {label.lower()} for this property transaction is: {val}.",
+        })
+
+        # FAQ 3: Utilities
         faq_pool.append({
             "q": "What industrial power load and utility infrastructure are available on site?",
             "a": f"The plot features '{self.power_supply or 'Industrial Power Grid'}' with a sanctioned capacity of {self.power_load_kva or 'Standard'} KVA. Water provisioning is handled via '{self.industrial_water_supply or 'MIDC Piped Supply'}', and effluent treatment options include '{self.effluent_treatment or 'Standard Drainage'}'.",
         })
 
+        # FAQ 4: Legal / Title
         faq_pool.append({
             "q": "What is the MIDC / Authority transfer NOC and title clearance status?",
             "a": f"The property ownership tenure is classified as '{self.ownership_type or 'Industrial Lease'}'. MIDC / Authority transfer NOC status is '{self.midc_transfer_noc or 'Clear'}', and the legal title is verified as '{self.title_clearance or 'Clear & Marketable'}'.",
+        })
+
+        # FAQ 5: Approvals / Permissibility
+        faq_pool.append({
+            "q": "What types of industries are permissible to operate on this plot?",
+            "a": f"This zone is primarily sanctioned for '{self.industry_type_permissible or 'General Industrial Activity'}'. The current layout approval status is recorded as '{self.layout_approval_status or 'Approved'}' with an allowable FSI of {self.industrial_fsi or '1.0'}.",
+        })
+
+        # FAQ 6: Dimensions & Access
+        faq_pool.append({
+            "q": "What are the physical dimensions and road access specifications of the plot?",
+            "a": f"The plot is '{self.plot_shape or 'Regular'}' in shape. It benefits from a '{self.plot_road_facing or 'Direct'}' facing towards a {self.road_width or 'Standard'} wide approach road. Corner plot advantage: {self.corner_plot.upper()}.",
+        })
+
+        # FAQ 7: Surroundings & Location
+        faq_pool.append({
+            "q": "What are the key location advantages and nearby facilities surrounding the plot?",
+            "a": f"Located in {self.locality or 'an established industrial hub'}, the site boasts proximity to essential logistics infrastructure. Specifically, nearby facilities include: {self.nearby_facilities or 'Strategic transport nodes and local commercial support hubs'}.",
         })
 
         for item in faq_pool:
@@ -4631,14 +4792,95 @@ class IndustrialPlotResaleProperty(models.Model):
 
 # ── CHILD MODELS ───────────────────────────────────────────────────────────
 
+
+
+
+
+
+# ==========================================================
+# INDUSTRIAL PLOT RESALE — IMAGE MODEL (Category-wise, like RentalResidentialImage)
+# ==========================================================
+
 class IndustrialPlotResaleImage(models.Model):
-    property = models.ForeignKey(IndustrialPlotResaleProperty, on_delete=models.CASCADE, related_name="images")
+    CATEGORY_CHOICES = [
+        ('full_plot',          'Full Plot View'),
+        ('main_entrance',      'Main Entrance'),
+        ('boundary_fencing',   'Boundary / Fencing'),
+        ('road_facing',        'Road Facing View'),
+        ('approach_road',      'Approach Road'),
+        ('truck_access',       'Truck Access'),
+        ('industrial_estate',  'Industrial Estate / Surroundings'),
+        ('electricity_infra',  'Electricity / Power Infrastructure'),
+        ('water_infra',        'Water Infrastructure'),
+        ('aerial_drone',       'Aerial / Drone View'),
+        ('layout_site_plan',   'Plot Layout / Site Plan'),
+    ]
+
+    property = models.ForeignKey(
+        'IndustrialPlotResaleProperty',
+        on_delete=models.CASCADE,
+        related_name="images"
+    )
     image = models.ImageField(upload_to="industrial_plot/images/")
+    category = models.CharField(max_length=25, choices=CATEGORY_CHOICES, default='full_plot')
     sequence_order = models.PositiveIntegerField(default=0)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["sequence_order", "uploaded_at"]
+        ordering = ["category", "sequence_order", "uploaded_at"]
+
+    def __str__(self):
+        return f"{self.property_id} - {self.get_category_display()} ({self.sequence_order})"
+
+
+# ==========================================================
+# INDUSTRIAL PLOT RESALE — VIDEO MODEL (same 3-source pattern as RentalResidentialVideo)
+# ==========================================================
+
+class IndustrialPlotResaleVideo(models.Model):
+    SOURCE_CHOICES = [
+        ('uploaded',    'Manually Uploaded'),
+        ('auto',        'Auto Generated Slideshow'),
+        ('rm_assisted', 'RM Assisted Link'),
+    ]
+    property = models.ForeignKey(
+        'IndustrialPlotResaleProperty',
+        on_delete=models.CASCADE,
+        related_name="video"
+    )
+    video = models.FileField(upload_to="industrial_plot/videos/", null=True, blank=True)
+    video_url = models.URLField(null=True, blank=True)
+    source = models.CharField(max_length=15, choices=SOURCE_CHOICES, default='auto')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def youtube_thumbnail(self):
+        import re
+        if self.source == 'rm_assisted' and self.video_url:
+            match = re.search(
+                r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/shorts/)([A-Za-z0-9_-]{6,})',
+                self.video_url
+            )
+            if match:
+                return f"https://img.youtube.com/vi/{match.group(1)}/hqdefault.jpg"
+        return None
+
+    def get_platform_type(self):
+        if not self.video_url:
+            return 'unknown'
+        url = self.video_url.lower()
+        if 'youtube.com' in url or 'youtu.be' in url:
+            return 'youtube'
+        elif 'instagram.com' in url or 'instagr.am' in url:
+            return 'instagram'
+        elif 'facebook.com' in url or 'fb.watch' in url:
+            return 'facebook'
+        elif 'vimeo.com' in url:
+            return 'vimeo'
+        elif 'drive.google.com' in url:
+            return 'gdrive'
+        return 'external'
+
+
 
 
 class IndustrialPlotResaleFAQ(models.Model):
@@ -4649,20 +4891,27 @@ class IndustrialPlotResaleFAQ(models.Model):
 
 class IndustrialPlotResaleActivityLog(models.Model):
     ACTION_CHOICES = [
+        ("SEARCH", "Manual Query Search"),
         ("CREATE", "Property Entry Created"),
         ("UPDATE", "Record Update Action"),
         ("DELETE", "Deletion / Purge Record"),
+        ("EXCEL_IMPORT", "Excel Sheet Import Data"),
     ]
+
     timestamp = models.DateTimeField(auto_now_add=True)
     user_identity = models.CharField(max_length=255, null=True, blank=True)
     user_role = models.CharField(max_length=100, null=True, blank=True)
     action_type = models.CharField(max_length=50, choices=ACTION_CHOICES)
     property_id = models.CharField(max_length=100, null=True, blank=True)
+    targeted_fields = models.CharField(max_length=255, null=True, blank=True)
+    associated_file = models.CharField(max_length=255, null=True, blank=True)
     action_payload = models.TextField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     status = models.CharField(max_length=20, default="SUCCESS")
 
     class Meta:
         ordering = ["-timestamp"]
+
 
 
 
@@ -4671,6 +4920,8 @@ class IndustrialPlotResaleActivityLog(models.Model):
 
 
 ################## START MODEL SECTION Agricultural Plot RESALE LISTING################
+
+
 
 
 
@@ -4692,19 +4943,25 @@ class AgriculturalPlotResaleProperty(models.Model):
     category = models.CharField(max_length=100, blank=True, null=True)
     sub_category = models.CharField(max_length=100, blank=True, null=True)
 
-
     listed_by_type = models.CharField(max_length=100, blank=True, null=True)
-    assigned_to = models.CharField(max_length=50, blank=True, null=True)     # "id-role" value from dropdown, only if "other"
-  
+    assigned_to = models.CharField(max_length=50, blank=True, null=True)
 
     listed_by_id = models.CharField(max_length=150, blank=True, null=True)
     listed_by_name = models.CharField(max_length=150, blank=True, null=True)
     listed_by_email = models.CharField(max_length=150, blank=True, null=True)
     listed_by_contact = models.CharField(max_length=20, blank=True, null=True)
-    listed_by_role = models.CharField(max_length=100, blank=True, null=True) 
+    listed_by_role = models.CharField(max_length=100, blank=True, null=True)
+
+    # ── DUPLICATE DETECTION ─────────────────────────────────────────────────
+    property_unique_key = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    duplicate_count = models.PositiveIntegerField(default=0)
+    duplicate_group_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    is_duplicate = models.BooleanField(default=False)
+
     # ── STEP 1: BASIC INFORMATION & REVENUE CLASSIFICATION ─────────────────
     property_title = models.CharField(max_length=255, blank=True, null=True)
     plot_title = models.CharField(max_length=100, default="agricultural_plot")
+
     # INTERNAL ONLY — Gat / Gut / Khasra / Survey Number (never shown publicly)
     property_no = models.CharField(max_length=150, blank=True, null=True)
 
@@ -4716,8 +4973,8 @@ class AgriculturalPlotResaleProperty(models.Model):
     layout_approval_status = models.CharField(max_length=100, blank=True, null=True)
 
     # ── STEP 1: SPECIFICATIONS & AGRICULTURAL DETAILS ──────────────────────
-    plot_frontage = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  # ft
-    plot_depth = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)     # ft
+    plot_frontage = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    plot_depth = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     plot_shape = models.CharField(max_length=100, blank=True, null=True)
     plot_road_facing = models.CharField(max_length=100, blank=True, null=True)
     road_width = models.CharField(max_length=50, blank=True, null=True)
@@ -4735,6 +4992,7 @@ class AgriculturalPlotResaleProperty(models.Model):
 
     # ── STEP 2: PRICING & BROKERAGE ────────────────────────────────────────
     selling_price = models.BigIntegerField(blank=True, null=True)
+    price_per_unit = models.BigIntegerField(blank=True, null=True)  # auto: selling_price / plot_area, label = "Rate per <unit>"
     price_negotiable = models.CharField(max_length=20, default="no")
     additional_charges = models.CharField(max_length=100, blank=True, null=True)
     brokerage_percentage = models.CharField(max_length=100, blank=True, null=True)
@@ -4748,10 +5006,9 @@ class AgriculturalPlotResaleProperty(models.Model):
     title_clearance = models.CharField(max_length=100, blank=True, null=True)
     property_encumbrance_status = models.CharField(max_length=100, blank=True, null=True)
 
-    # Agricultural Specific Records
-    satbara_available = models.CharField(max_length=50, blank=True, null=True)     # 7/12 Utara
-    khate_utara = models.CharField(max_length=50, blank=True, null=True)           # 8A Khate
-    section63_clearance = models.CharField(max_length=100, blank=True, null=True)  # Non-Agriculturist Permission
+    satbara_available = models.CharField(max_length=50, blank=True, null=True)
+    khate_utara = models.CharField(max_length=50, blank=True, null=True)
+    section63_clearance = models.CharField(max_length=100, blank=True, null=True)
 
     property_tax_status = models.CharField(max_length=100, blank=True, null=True)
     outstanding_tax_amount = models.BigIntegerField(blank=True, null=True)
@@ -4790,9 +5047,9 @@ class AgriculturalPlotResaleProperty(models.Model):
     uploaded_by_contact = models.CharField(max_length=50, blank=True, null=True)
     uploaded_by_role = models.CharField(max_length=100, blank=True, null=True)
     upload_file_name = models.CharField(max_length=255, blank=True, null=True)
+    upload_file = models.FileField(upload_to='agricultural_resaleplot_property_uploads/files/', blank=True, null=True)
 
     is_deleted = models.BooleanField(default=False)
-    is_duplicate = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.CharField(max_length=150, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -4824,16 +5081,32 @@ class AgriculturalPlotResaleProperty(models.Model):
         return self.brokerage_percentage or "-"
 
     # ═══════════════════════════════════════════════════════════════════════
+    #  RATE PER UNIT LABEL HELPER (e.g. "Rate per Hectare", "Rate per Acre")
+    # ═══════════════════════════════════════════════════════════════════════
+    def get_rate_label(self):
+        unit = (self.agr_area_unit or "acre").strip()
+        return f"Rate per {unit.capitalize()}"
+
+    def _clean_area(self):
+        if self.plot_area is None:
+            return ""
+        try:
+            f = float(self.plot_area)
+            return f"{f:.2f}"
+        except (TypeError, ValueError):
+            return str(self.plot_area)
+
+    # ═══════════════════════════════════════════════════════════════════════
     #  AUTO DESCRIPTIONS ENGINE
     # ═══════════════════════════════════════════════════════════════════════
     def generate_auto_descriptions(self):
         unit = self.agr_area_unit or "acre"
-        area_str = f"{self.plot_area} {unit}" if self.plot_area else "Prime Land Parcel"
+        area_clean = self._clean_area()
+        area_str = f"{area_clean} {unit}" if area_clean else "Prime Land Parcel"
         p_type = (self.property_type or "Agricultural Land").replace("_", " ").title()
         loc = self.locality or "Rural Cluster"
         city_str = f", {self.city}" if self.city else ""
 
-        # Summary
         summary = f"A fertile {area_str} {p_type} parcel is offered for resale at {loc}{city_str}. "
         if self.selling_price:
             summary += f"Listed at ₹{self.selling_price:,}. "
@@ -4842,29 +5115,38 @@ class AgriculturalPlotResaleProperty(models.Model):
         summary += "Well-suited for farming, fruit orchards, or long-term agricultural asset appreciation."
         self.property_summary = summary
 
-        # Detailed Description
         long_desc = f"<p>Explore this prime agricultural investment opportunity: a <strong>{area_str} {p_type}</strong> located in village/taluka <strong>{loc}{city_str}</strong>.</p>"
 
         long_desc += "<h3>Land Specifications & Soil Profile:</h3><ul>"
         if self.plot_area:
-            long_desc += f"<li><strong>Parcel Extent:</strong> Total area of {self.plot_area} {unit} (Frontage: {self.plot_frontage or '—'} ft x Depth: {self.plot_depth or '—'} ft). Shape: {self.plot_shape or 'Regular'}. Topography: {self.land_topography or 'Level Flat'}.</li>"
+            f_val = f"{self.plot_frontage:.2f}" if self.plot_frontage else "—"
+            d_val = f"{self.plot_depth:.2f}" if self.plot_depth else "—"
+            long_desc += f"<li><strong>Parcel Extent:</strong> Total area of {area_clean} {unit} (Frontage: {f_val} ft x Depth: {d_val} ft). Shape: {self.plot_shape or 'Regular'}. Topography: {self.land_topography or 'Level Flat'}.</li>"
         long_desc += f"<li><strong>Soil & Cultivation:</strong> Soil composition is '{self.soil_type or 'Fertile Agricultural'}'. Currently configured with crop/plantation: '{self.current_crop or 'Vacant/Fallow'}'.</li>"
         long_desc += f"<li><strong>Water & Power:</strong> Irrigation sourced via '{self.irrigation_source or 'Standard Agricultural Supply'}'. Power infrastructure: '{self.agr_electricity or 'Agricultural Connection Possible'}'.</li>"
-        long_desc += f"<li><strong>Access & Boundary:</strong> Road/Track approach: '{self.plot_road_facing or 'Village Road Access'}' (Width: {self.road_width or 'Standard'}). Boundary demarcation: '{self.plot_fencing or 'Unmarked/Open'}'.</li>"
+        long_desc += f"<li><strong>Access & Boundary:</strong> Road/Track approach: '{self.plot_road_facing or 'Village Road Access'}' (Width: {self.road_width or 'Standard'}). Boundary demarcation: '{self.plot_fencing or 'Unmarked/Open'}'. Corner plot: {self.corner_plot.upper()}.</li>"
         long_desc += "</ul>"
 
         long_desc += "<h3>Revenue Clearances & Legal Compliance:</h3><ul>"
         long_desc += f"<li><strong>Revenue Records:</strong> Satbara (7/12) Extract availability: '{self.satbara_available or 'Yes'}'. Khate Utara (8A) record: '{self.khate_utara or 'Yes'}'.</li>"
         long_desc += f"<li><strong>Zoning & Conversion:</strong> Revenue land use classification is '{self.land_use or 'Agricultural'}'. NA Conversion status: '{self.na_status or 'Pure Agricultural'}'.</li>"
-        long_desc += f"<li><strong>Special Clearances:</strong> Section 63/63-A clearance requirement: '{self.section63_clearance or 'Standard Agriculturist Norms'}'. Title clearance: '{self.title_clearance or 'Clear & Marketable'}'.</li>"
+        long_desc += f"<li><strong>Special Clearances:</strong> Section 63/63-A clearance requirement: '{self.section63_clearance or 'Standard Agriculturist Norms'}'. Title clearance: '{self.title_clearance or 'Clear & Marketable'}'. Encumbrance: {self.property_encumbrance_status or 'Nil'}.</li>"
         long_desc += "</ul>"
 
-        if self.selling_price:
-            ppa = round(float(self.selling_price) / float(self.plot_area)) if (self.plot_area and float(self.plot_area) > 0) else 0
-            long_desc += f"<h3>Financial Terms:</h3><p>Total consideration is pegged at <strong>₹{self.selling_price:,}</strong> (~₹{ppa:,}/{unit}). Price negotiability: <strong>{self.price_negotiable.upper()}</strong>.</p>"
+        if self.selling_price and self.plot_area:
+            try:
+                ppa = round(float(self.selling_price) / float(self.plot_area)) if float(self.plot_area) > 0 else 0
+                long_desc += f"<h3>Financial Terms:</h3><p>Total consideration is pegged at <strong>₹{self.selling_price:,}</strong> (~₹{ppa:,}/{unit}). Price negotiability: <strong>{self.price_negotiable.upper()}</strong>.</p>"
+            except (TypeError, ValueError, ZeroDivisionError):
+                pass
 
-        if self.amenities:
-            long_desc += f"<h3>Land Amenities:</h3><p>Includes essential farm infrastructure: <strong>{self.amenities}</strong>.</p>"
+        if self.amenities or self.nearby_facilities:
+            long_desc += "<h3>Amenities & Nearby Facilities:</h3><ul>"
+            if self.amenities:
+                long_desc += f"<li><strong>On-Site Amenities:</strong> {self.amenities}.</li>"
+            if self.nearby_facilities:
+                long_desc += f"<li><strong>Nearby Facilities & Connectivity:</strong> {self.nearby_facilities}.</li>"
+            long_desc += "</ul>"
 
         long_desc += "<p>Reach out today for revenue document verification (7/12 & 8A extracts) or a guided farm inspection.</p>"
         self.property_description = long_desc
@@ -4873,15 +5155,49 @@ class AgriculturalPlotResaleProperty(models.Model):
     #  SAVE OVERRIDE
     # ═══════════════════════════════════════════════════════════════════════
     def save(self, *args, **kwargs):
+        # ── AUTO-CALCULATE RATE PER UNIT (e.g. Rate per Hectare/Acre) ──
+        if self.selling_price and self.plot_area:
+            try:
+                area_val = float(self.plot_area)
+                if area_val > 0:
+                    self.price_per_unit = round(float(self.selling_price) / area_val)
+                else:
+                    self.price_per_unit = None
+            except (TypeError, ValueError, ZeroDivisionError):
+                self.price_per_unit = None
+        else:
+            self.price_per_unit = None
+
         unit = self.agr_area_unit or "acre"
-        area_lbl = f"{self.plot_area} {unit}" if self.plot_area else ""
+        area_clean = self._clean_area()
+        area_lbl = f"{area_clean} {unit}" if area_clean else ""
         p_type = (self.property_type or "Agricultural Land").replace("_", " ").title()
         loc = self.locality or ""
         city_name = f", {self.city}" if self.city else ""
 
         self.property_title = " ".join(filter(bool, [area_lbl, p_type, "in", loc + city_name]))[:255]
         self.generate_auto_descriptions()
+
+        # >>> BUILD UNIQUE KEY ONLY ON FIRST CREATE <
+        if self._state.adding:
+            key_source = f"{self.address}|{self.locality}|{self.city}|{self.plot_area}|{self.property_no}"
+            self.property_unique_key = key_source.strip().lower().replace(" ", "")
+
         super().save(*args, **kwargs)
+
+        # >>> RECALCULATE DUPLICATE GROUP FROM ACTUAL DB STATE (idempotent) <
+        if self.property_unique_key:
+            group_qs = AgriculturalPlotResaleProperty.objects.filter(
+                property_unique_key=self.property_unique_key,
+                is_deleted=False,
+            )
+            total = group_qs.count()
+            if total > 1:
+                original_id = group_qs.order_by("created_at").first().pk
+                group_qs.update(duplicate_count=total, duplicate_group_id=original_id, is_duplicate=True)
+            else:
+                group_qs.update(duplicate_count=1, duplicate_group_id=None, is_duplicate=False)
+
         self.generate_auto_faqs()
 
     # ═══════════════════════════════════════════════════════════════════════
@@ -4898,14 +5214,18 @@ class AgriculturalPlotResaleProperty(models.Model):
                 "q": f"What is the total asking price and rate per {unit} for this agricultural land parcel?",
                 "a": f"The total selling price is ₹{self.selling_price:,}, which computes to roughly ₹{ppa:,} per {unit}. Price negotiability status is: '{self.price_negotiable.upper()}'.",
             })
-
-        if self.brokerage_percentage:
-            label = self.get_brokerage_label()
-            val = self.get_brokerage_display_value()
+        else:
             faq_pool.append({
-                "q": f"Is there a {label.lower()} applicable on purchasing this agricultural plot?",
-                "a": f"Yes, the applicable {label.lower()} for this farm land transaction is: {val}.",
+                "q": "Is the pricing for this agricultural plot finalized?",
+                "a": "The pricing details are currently available upon request. Please contact the listing manager for exact valuations.",
             })
+
+        label = self.get_brokerage_label()
+        val = self.get_brokerage_display_value()
+        faq_pool.append({
+            "q": f"Is there a {label.lower()} applicable on purchasing this agricultural plot?",
+            "a": f"Yes, the applicable {label.lower()} for this farm land transaction is: {val}.",
+        })
 
         faq_pool.append({
             "q": "Are the 7/12 (Satbara) and 8A (Khate Utara) revenue extracts available?",
@@ -4917,6 +5237,21 @@ class AgriculturalPlotResaleProperty(models.Model):
             "a": f"Irrigation access is configured via '{self.irrigation_source or 'Standard Source'}', and agricultural electric supply status is '{self.agr_electricity or 'Connection Possible'}'.",
         })
 
+        faq_pool.append({
+            "q": "What is the current land use classification and NA conversion status?",
+            "a": f"This parcel is classified as '{self.land_use or 'Agricultural'}' revenue land. NA Conversion status is recorded as '{self.na_status or 'Pure Agricultural'}'.",
+        })
+
+        faq_pool.append({
+            "q": "What are the physical dimensions and road/track access to this land?",
+            "a": f"The plot is '{self.plot_shape or 'Regular'}' in shape, with access via '{self.plot_road_facing or 'Village Road'}' (Width: {self.road_width or 'Standard'}). Corner plot advantage: {self.corner_plot.upper()}.",
+        })
+
+        faq_pool.append({
+            "q": "What are the key location advantages and nearby facilities surrounding this land?",
+            "a": f"Located in {self.locality or 'an established agricultural belt'}, the parcel is {self.highway_distance or 'conveniently placed'} from the nearest highway. Nearby facilities include: {self.nearby_facilities or 'local markets and village infrastructure'}.",
+        })
+
         for item in faq_pool:
             AgriculturalPlotResaleFAQ.objects.create(property=self, question=item["q"], answer=item["a"])
 
@@ -4924,16 +5259,85 @@ class AgriculturalPlotResaleProperty(models.Model):
         return f"{self.property_title or 'Agricultural Plot Resale'} ({self.id})"
 
 
-# ── CHILD MODELS ───────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════
+#  CHILD MODELS
+# ═══════════════════════════════════════════════════════════════════════════
 
 class AgriculturalPlotResaleImage(models.Model):
-    property = models.ForeignKey(AgriculturalPlotResaleProperty, on_delete=models.CASCADE, related_name="images")
+    CATEGORY_CHOICES = [
+        ('front_view',        'Agricultural Land Front View'),
+        ('full_plot',         'Full Plot / Field View'),
+        ('farm_gate',         'Farm Gate / Main Entrance'),
+        ('boundary_fencing',  'Boundary / Fencing'),
+        ('road_facing',       'Road Facing / Approach Road'),
+        ('cultivated_area',   'Cultivated Area / Crops'),
+        ('irrigation_source', 'Irrigation / Water Source'),
+        ('borewell_well',     'Borewell / Well / Canal'),
+        ('electricity_infra', 'Electricity / Power Infrastructure'),
+        ('farmhouse_shed',    'Farmhouse / Shed / Existing Structure'),
+        ('aerial_drone',      'Aerial / Drone View'),
+        ('layout_site_plan',  'Plot Layout / Site Plan'),
+    ]
+
+    property = models.ForeignKey(
+        'AgriculturalPlotResaleProperty',
+        on_delete=models.CASCADE,
+        related_name="images"
+    )
     image = models.ImageField(upload_to="agricultural_plot/images/")
+    category = models.CharField(max_length=25, choices=CATEGORY_CHOICES, default='front_view')
     sequence_order = models.PositiveIntegerField(default=0)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["sequence_order", "uploaded_at"]
+        ordering = ["category", "sequence_order", "uploaded_at"]
+
+    def __str__(self):
+        return f"{self.property_id} - {self.get_category_display()} ({self.sequence_order})"
+
+
+class AgriculturalPlotResaleVideo(models.Model):
+    SOURCE_CHOICES = [
+        ('uploaded',    'Manually Uploaded'),
+        ('auto',        'Auto Generated Slideshow'),
+        ('rm_assisted', 'RM Assisted Link'),
+    ]
+    property = models.ForeignKey(
+        'AgriculturalPlotResaleProperty',
+        on_delete=models.CASCADE,
+        related_name="video"
+    )
+    video = models.FileField(upload_to="agricultural_plot/videos/", null=True, blank=True)
+    video_url = models.URLField(null=True, blank=True)
+    source = models.CharField(max_length=15, choices=SOURCE_CHOICES, default='auto')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def youtube_thumbnail(self):
+        import re
+        if self.source == 'rm_assisted' and self.video_url:
+            match = re.search(
+                r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/shorts/)([A-Za-z0-9_-]{6,})',
+                self.video_url
+            )
+            if match:
+                return f"https://img.youtube.com/vi/{match.group(1)}/hqdefault.jpg"
+        return None
+
+    def get_platform_type(self):
+        if not self.video_url:
+            return 'unknown'
+        url = self.video_url.lower()
+        if 'youtube.com' in url or 'youtu.be' in url:
+            return 'youtube'
+        elif 'instagram.com' in url or 'instagr.am' in url:
+            return 'instagram'
+        elif 'facebook.com' in url or 'fb.watch' in url:
+            return 'facebook'
+        elif 'vimeo.com' in url:
+            return 'vimeo'
+        elif 'drive.google.com' in url:
+            return 'gdrive'
+        return 'external'
 
 
 class AgriculturalPlotResaleFAQ(models.Model):
@@ -4942,24 +5346,31 @@ class AgriculturalPlotResaleFAQ(models.Model):
     answer = models.TextField()
 
 
+
+
+
 class AgriculturalPlotResaleActivityLog(models.Model):
+
     ACTION_CHOICES = [
+        ("SEARCH", "Manual Query Search"),
         ("CREATE", "Property Entry Created"),
         ("UPDATE", "Record Update Action"),
         ("DELETE", "Deletion / Purge Record"),
+        ("EXCEL_IMPORT", "Excel Sheet Import Data"),
     ]
+
     timestamp = models.DateTimeField(auto_now_add=True)
     user_identity = models.CharField(max_length=255, null=True, blank=True)
     user_role = models.CharField(max_length=100, null=True, blank=True)
     action_type = models.CharField(max_length=50, choices=ACTION_CHOICES)
     property_id = models.CharField(max_length=100, null=True, blank=True)
+    targeted_fields = models.CharField(max_length=255, null=True, blank=True)
+    associated_file = models.CharField(max_length=255, null=True, blank=True)
     action_payload = models.TextField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
     status = models.CharField(max_length=20, default="SUCCESS")
 
     class Meta:
         ordering = ["-timestamp"]
-
-
-
 
 ################## END MODEL SECTION Agricultural Plot RESALE LISTING################

@@ -778,20 +778,8 @@
         <div class="kpi-label">Rejected</div>
         <div class="kpi-desc c-down">Needs correction</div>
     </div>
-    <div class="kpi-card b-pink">
-        <span class="badge-tag tag-new">NEW</span>
-        <div class="kpi-icon ic-pink"><i class="fas fa-clone"></i></div>
-        <div class="kpi-val">{{ duplicate_properties_count }}</div>
-        <div class="kpi-label">Duplicate Properties</div>
-        <div class="kpi-desc c-down"><i class="fas fa-exclamation-triangle"></i> Flagged as duplicate</div>
-    </div>
-    <div class="kpi-card b-cyan">
-        <span class="badge-tag tag-new">NEW</span>
-        <div class="kpi-icon ic-cyan"><i class="fas fa-fingerprint"></i></div>
-        <div class="kpi-val">{{ unique_properties_count }}</div>
-        <div class="kpi-label">Unique Properties</div>
-        <div class="kpi-desc c-up">No duplicate match</div>
-    </div>
+   
+   
 </div>
 
     
@@ -921,15 +909,6 @@
     </select>
 </div>
 
-<div class="search-group">
-    <label>LISTED BY ROLE</label>
-    <select name="listed_by" class="filter-input" onchange="this.form.submit()">
-        <option value="All Roles">All Roles</option>
-        {% for role in unique_listed_roles %}
-            <option value="{{ role }}" {% if listed_by_query == role %}selected{% endif %}>{{ role }}</option>
-        {% endfor %}
-    </select>
-</div>
 
 <div class="search-group">
     <label>UPLOADED BY ROLE</label>
@@ -973,14 +952,7 @@
     </select>
 </div>
 
-<div class="search-group">
-    <label>DUPLICATE STATUS</label>
-    <select name="duplicate" class="filter-input" onchange="this.form.submit()">
-        <option value="All">All Properties</option>
-        <option value="duplicates_only" {% if duplicate_query == 'duplicates_only' %}selected{% endif %}>Duplicates Only</option>
-        <option value="unique_only" {% if duplicate_query == 'unique_only' %}selected{% endif %}>Unique Only</option>
-    </select>
-</div>
+
 
     <div class="search-actions" style="margin-top:auto; padding-bottom:2px;">
         <button type="submit" style="display:none;"></button>
@@ -1093,20 +1065,29 @@
 
         <div class="table-responsive">
     <table class="properties-table" id="rentalTable">
-        <thead>
+       
+      
+
+      
+
+    <thead>
             <tr>
                 <th>Sr.No</th>
                 <th>Listing Status</th>
                 <th>Approval Status</th>
                 <th>Property Id</th>
                 <th>Images</th>
+
+                    <th>Manual Video</th>
+<th>Auto Video</th>
+<th>RM Link Video</th>
                 
               
               
                 
                 <!-- NEW: Duplicate Tracking -->
               
-                <th hidden>Listed By Type</th>
+                <th>Listed By Type</th>
                 <th>Listed By Id</th>
                 <th>Listed By Name</th>
                 <th>Listed By Email</th>
@@ -1143,10 +1124,11 @@
              
                 <th>Brokerage / Service Fee</th> 
                 
-                <th>Advance Rent Month</th>
-                <th>Advance Rent Amount</th>
-                <th>Refundable Security Deposit Type</th>
-                <th>Refundable Security Deposit Amount</th>
+               
+                 <th>Advance Rent Month </th>
+            <th>Advance Rent Amount</th>
+            <th>Refundable Security Deposit</th>
+            <th>Refundable Security Deposit Amount</th>
                 
                 <th>Maintenance Type</th>
                 <th>Monthly Maintenance Amt</th>
@@ -1171,11 +1153,18 @@
                 
                 <th>Listed Elsewhere</th>
                 <th>Portal Name</th>
-                
-                <th>Upload File Name</th>
+                <th>Uploaded By</th>
+                <th>UB Email</th>
+                <th>UB Contact</th>
+                <th>UB Role</th>
+                <th>Data Uploaded Via</th>
+          
                 <th>Created At</th>
 
-                  
+                 
+                
+                
+              
                 
                 <th style="position:sticky;right:0;background:#f8fafc;z-index:2;">Actions</th>
             </tr>
@@ -1264,6 +1253,33 @@
         </div>
     </td>
 
+ <!-- Video Column -->
+   <!-- Manual Upload Video Column -->
+<td>
+    {% for vid in prop.video.all %}
+        {% if vid.source == 'uploaded' and vid.video %}
+            <button onclick="openModal('video-modal-upload-{{ prop.id }}')" class="btn btn-sm btn-outline-success" style="padding: 2px 8px; font-size: 11px;"><i class="fas fa-video"></i> Watch</button>
+        {% endif %}
+    {% endfor %}
+</td>
+
+<!-- Auto Video Column -->
+<td>
+    {% for vid in prop.video.all %}
+        {% if vid.source == 'auto' and vid.video %}
+            <button onclick="openModal('video-modal-auto-{{ prop.id }}')" class="btn btn-sm btn-outline-primary" style="padding: 2px 8px; font-size: 11px;"><i class="fas fa-magic"></i> Watch</button>
+        {% endif %}
+    {% endfor %}
+</td>
+
+<!-- RM Link Video Column -->
+<td>
+    {% for vid in prop.video.all %}
+        {% if vid.source == 'rm_assisted' and vid.video_url %}
+            <button onclick="openLinkVideoModal('{{ vid.video_url }}')" class="btn btn-sm btn-outline-info" style="padding: 2px 8px; font-size: 11px;"><i class="fas fa-play-circle"></i> Play</button>
+        {% endif %}
+    {% endfor %}
+</td>
     <!-- NEW: Listing Metadata -->
     
 
@@ -1271,7 +1287,7 @@
   
 
     <!-- Listed By Details -->
-    <td hidden>{{ prop.listed_by_type|default:"—" }}</td>
+    <td>{{ prop.listed_by_type|default:"self" }}</td>
     <td>{{ prop.listed_by_id|default:"—" }}</td>
     <td>{{ prop.listed_by_name|default:"—" }}</td>
     <td>{{ prop.listed_by_email|default:"—" }}</td>
@@ -1335,42 +1351,56 @@
 </td>
 
     <!-- ADVANCE RENT (Updated with clean labels) -->
-    <td style="font-weight:500;">
-        {{ prop.get_advance_rent_type_label|default:"—" }}
-    </td>
-    <td>
-        {% if prop.get_advance_rent_amount %}
-            <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_advance_rent_amount|floatformat:"0" }}</div>
-            {% if prop.advance_rent_month != "fixed" and prop.advance_rent_month != "0" %}
-                <div style="font-size:11px;color:#64748b;margin-top:2px;">
-                    ({{ prop.get_advance_rent_type_label }})
-                </div>
-            {% elif prop.advance_rent_month == "fixed" %}
-                <div style="font-size:11px;color:#2563eb;margin-top:2px;">(Manual Fixed)</div>
-            {% endif %}
-        {% else %}
-            —
-        {% endif %}
-    </td>
+ 
 
-    <!-- SECURITY DEPOSIT (Updated with clean labels) -->
-    <td style="font-weight:500;">
-        {{ prop.get_security_deposit_type_label|default:"—" }}
-    </td>
-    <td>
-        {% if prop.get_security_deposit_amount %}
-            <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_security_deposit_amount|floatformat:"0" }}</div>
-            {% if prop.security_deposit_type != "fixed" and prop.security_deposit_type != "0" %}
-                <div style="font-size:11px;color:#64748b;margin-top:2px;">
-                    ({{ prop.get_security_deposit_type_label }})
-                </div>
-            {% elif prop.security_deposit_type == "fixed" %}
-                <div style="font-size:11px;color:#2563eb;margin-top:2px;">(Manual Fixed)</div>
-            {% endif %}
-        {% else %}
-            —
+    <!-- ADVANCE RENT: Amount + Type together -->
+<!-- ADVANCE RENT: Amount + Type together -->
+<td>
+    {% if prop.get_advance_rent_amount %}
+        <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_advance_rent_amount|floatformat:"0" }}</div>
+        {% if prop.get_advance_rent_type_label != "Fixed Amount" and prop.get_advance_rent_type_label != "No Advance" %}
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                ({{ prop.get_advance_rent_type_label }})
+            </div>
+        {% elif prop.get_advance_rent_type_label == "Fixed Amount" %}
+            <div style="font-size:11px;color:#2563eb;margin-top:2px;">(Manual Fixed)</div>
         {% endif %}
-    </td>
+    {% else %}
+        —
+    {% endif %}
+</td>
+
+ <!-- 53. Advance Rent Amount (Styled with Brackets) -->
+            <td>
+               
+                    <div style="font-weight:600;color:#1e293b;">{{ prop.advance_rent_amount|floatformat:"0"|default:"—"  }}</div>
+                    
+              
+            </td>
+
+<!-- SECURITY DEPOSIT: Amount + Type together -->
+<!-- SECURITY DEPOSIT: Amount + Type together -->
+<td>
+    {% if prop.get_security_deposit_amount %}
+        <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_security_deposit_amount|floatformat:"0" }}</div>
+        {% if prop.get_security_deposit_type_label != "Fixed Amount" and prop.get_security_deposit_type_label != "No Deposit" %}
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                ({{ prop.get_security_deposit_type_label }})
+            </div>
+        {% elif prop.get_security_deposit_type_label == "Fixed Amount" %}
+            <div style="font-size:11px;color:#2563eb;margin-top:2px;">(Manual Fixed)</div>
+        {% endif %}
+    {% else %}
+        —
+    {% endif %}
+</td>
+
+ <td>
+               
+                    <div style="font-weight:600;color:#1e293b;">{{ prop.security_deposit_amount|floatformat:"0" }}</div>
+                 
+            </td>
+
 
     <!-- Maintenance & Move-in Cost -->
     <td>{{ prop.maintenance_type|default:"—" }}</td>
@@ -1408,12 +1438,19 @@
     <!-- External Listing & Upload Details -->
     <td>{{ prop.listed_elsewhere|default:"—" }}</td>
     <td>{{ prop.portal_name|default:"—" }}</td>
-    
+    <td>{{ prop.uploaded_by_name|default:"—" }}</td>
+    <td>{{ prop.uploaded_by_email|default:"—" }}</td>
+    <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
+    <td>{{ prop.uploaded_by_role|default:"—" }}</td>
     <td>{{ prop.upload_file_name|default:"Web UI Listing Form" }}</td>
+   
+   
     <td>{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
 
-      
+    
 
+    <!-- NEW: Deletion Status -->
+  
     <!-- Actions Sticky Column -->
     <td style="position:sticky;right:0;background:white;z-index:1;">
         <div style="display:flex;gap:8px;">
@@ -1427,10 +1464,10 @@
                 <i class="fas fa-edit"></i>
             </button>
 
-            <button class="btn-action btn-delete"
-                    onclick="deleteProperty('{{ prop.id }}')">
-                <i class="fas fa-trash-alt"></i>
-            </button>
+          <button class="btn-action btn-delete"
+        onclick="deleteProperty('{% url 'rental_residential_delete_rm' prop.id %}')">
+    <i class="fas fa-trash-alt"></i>
+</button>
         </div>
     </td>
 
@@ -1446,6 +1483,10 @@
     </td>
 </tr>
 {% endfor %}
+       
+
+       
+      
         </tbody>
     </table>
 </div>
@@ -1809,6 +1850,7 @@ function showImportResult(data) {
 }
 
 /* ─── Delete Property (Single) ─── */
+
 function deleteProperty(propertyId) {
     Swal.fire({
         title: 'Are you sure?',
@@ -1822,9 +1864,11 @@ function deleteProperty(propertyId) {
         if (result.isConfirmed) {
             Swal.fire({ title: 'Deleting...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
-            const deleteUrl = `/Admin_App/rental-residential/delete/${propertyId}/`;
+            const deleteUrl = propertyId;
 
             fetch(deleteUrl, {
+
+
                 method: 'POST',
                 headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
             })
@@ -1907,7 +1951,7 @@ function executeBulkDelete() {
         if (result.isConfirmed) {
             Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
 
-            fetch("{% url 'rental_bulk_delete' %}", {
+            fetch("{% url 'rental_bulk_delete_rm' %}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1963,29 +2007,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
     // 1. Debounce logic for the text input (auto submits 500ms after user stops typing)
-    let typingTimer;
-    const typingInterval = 500; 
+   
+
+    // Instant client-side filtering script (No page reload required)
     const searchInput = document.getElementById('searchInput');
-    const form = document.getElementById('liveSearchForm');
+    const tableRows = document.querySelectorAll('#rentalTable tbody tr');
 
     if (searchInput) {
         searchInput.addEventListener('keyup', function () {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(() => {
-                form.submit();
-            }, typingInterval);
+            const query = searchInput.value.toLowerCase().trim();
+
+            tableRows.forEach(row => {
+                // Ignore the empty state row
+                if (row.cells.length <= 1) return;
+
+                let rowText = row.textContent.toLowerCase();
+                if (rowText.includes(query)) {
+                    row.style.display = ""; // Show matching row instantly
+                } else {
+                    row.style.display = "none"; // Hide non-matching row instantly
+                }
+            });
         });
-        
-        searchInput.addEventListener('keydown', function () {
-            clearTimeout(typingTimer);
-        });
-        
-        // Auto-focus logic to keep cursor active after reload
-        const len = searchInput.value.length;
-        if (len) {
-            searchInput.focus();
-            searchInput.setSelectionRange(len, len);
-        }
     }
 
     // 2. Logic to clear individual tags and auto-submit

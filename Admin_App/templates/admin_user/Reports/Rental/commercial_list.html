@@ -735,7 +735,7 @@ Electricity Included?</th>
               <th>Brokerage Type</th>
            <th> Brokerage / Service Fee</th>
             <th>Manual Brokerage</th>
-            <th>Advance Rent </th>
+            <th>Advance Rent Month </th>
             <th>Advance Rent Amount</th>
             <th>Refundable Security Deposit</th>
             <th>Refundable Security Deposit Amount</th>
@@ -762,6 +762,7 @@ Electricity Included?</th>
             <th>UB Contact</th>
             <th>UB Role</th>
             <th>Data Uploaded Via</th>
+            <th>Uploaded File </th>
             <th>Created At</th>
              <th>Property Unique Key</th>
                 <th>Duplicate Count</th>
@@ -797,7 +798,7 @@ Electricity Included?</th>
                 {% elif prop.listing_status == "Rented" %}
                     <span class="badge bg-info text-dark">Rented</span>
                 {% else %}
-                    <span class="badge bg-light text-dark">N/A</span>
+                    <span class="badge bg-success text-dark">Draft</span>
                 {% endif %}
             </td>
             
@@ -810,7 +811,7 @@ Electricity Included?</th>
                 {% elif prop.approval_status == "Rejected" %}
                     <span class="badge bg-danger">Rejected</span>
                 {% else %}
-                    <span class="badge bg-light text-dark">N/A</span>
+                    <span class="badge bg-warning text-dark">Pending</span>
                 {% endif %}
             </td>
 
@@ -1111,6 +1112,20 @@ Electricity Included?</th>
             <td>{{ prop.uploaded_by_role|default:"—" }}</td>
             <!-- 75. Data Uploaded Via -->
             <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI Listing Form" }}</small></td>
+          <td>
+    {% if prop.upload_file %}
+        <a href="{{ prop.upload_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size: 0.75rem; font-weight: 600;">
+            <i class="fas fa-file-download me-1"></i> 
+            {% if prop.upload_file_name %}
+                {{ prop.upload_file_name|truncatechars:15 }}
+            {% else %}
+                Download
+            {% endif %}
+        </a>
+    {% else %}
+        <span class="text-muted fw-bold">—</span>
+    {% endif %}
+</td>
             <!-- 76. Created At -->
             <td>{{ prop.created_at|date:"d M Y H:i" }}</td>
 
@@ -1369,24 +1384,36 @@ Electricity Included?</th>
     // ─────────────────────────────────────────────────
     // 2. LIVE TEXT FIELD SEARCH (DEBOUNCED AT 250ms)
     // ─────────────────────────────────────────────────
-    var typingTimer;
+   
+
+    // ─────────────────────────────────────────────────
+    // 2. INSTANT CLIENT-SIDE LIVE TABLE SEARCH
+    // ─────────────────────────────────────────────────
     if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(function () { form.submit(); }, 250);
+        const commercialTableRows = document.querySelectorAll('#commercialTable tbody tr');
+
+        searchInput.addEventListener('keyup', function () {
+            const query = searchInput.value.toLowerCase().trim();
+
+            commercialTableRows.forEach(row => {
+                // Ignore the "No commercial properties found" empty state row
+                if (row.cells.length <= 1) return;
+
+                let rowText = row.textContent.toLowerCase();
+                if (rowText.includes(query)) {
+                    row.style.display = ""; // Show matching row instantly
+                } else {
+                    row.style.display = "none"; // Hide non-matching row instantly
+                }
+            });
         });
 
-        searchInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') { 
-                e.preventDefault(); 
-                clearTimeout(typingTimer); 
-                form.submit(); 
-            }
-            else { clearTimeout(typingTimer); }
-        });
-
+        // Keep cursor active and focused on input
         var len = searchInput.value.length;
-        if (len) { searchInput.focus(); searchInput.setSelectionRange(len, len); }
+        if (len) { 
+            searchInput.focus(); 
+            searchInput.setSelectionRange(len, len); 
+        }
     }
 
     // ─────────────────────────────────────────────────

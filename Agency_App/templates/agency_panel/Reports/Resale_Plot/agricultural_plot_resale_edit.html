@@ -1,0 +1,1675 @@
+{% include "agency_panel/agency_header.html" %}
+{% load static %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+/* ── SAME CSS AS ADD FORM — copy the entire <style> block from the add
+     template (variables, form-section, img-cat-tabs, etc.) unchanged ── */
+:root {
+  --primary: #84cc16; --primary-dark: #22c55e;
+  --primary-grad: linear-gradient(135deg,#84cc16 0%,#22c55e 100%);
+  --success-grad: linear-gradient(135deg,#11998e 0%,#38ef7d 100%);
+  --info-grad: linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);
+  --dark-grad: linear-gradient(135deg,#2c3e50 0%,#34495e 100%);
+  --success:#10b981;--muted:#64748b;--border:#e2e8f0;
+  --bg-light:#f8f9fa;--text-dark:#2d3748;
+  --sidebar-width:280px;--topbar-height:70px;
+  --radius-md:12px;--radius-lg:16px;--radius-xl:20px;
+  --shadow-card:0 4px 24px rgba(0,0,0,.07);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#f5f7fa,#c3cfe2);min-height:100vh}
+.main-content{margin-left:var(--sidebar-width);margin-top:var(--topbar-height);padding:28px}
+.page-wrapper{display:grid;grid-template-columns:1fr 300px;grid-template-rows:auto auto 1fr;gap:22px;align-items:start;max-width:1600px;margin:0 auto}
+.page-header{grid-column:1/-1;background:var(--primary-grad);border-radius:var(--radius-xl);padding:28px 35px;color:#fff;box-shadow:0 8px 32px rgba(132,204,22,.35);position:relative;overflow:hidden}
+.page-header::after{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:rgba(255,255,255,.08);border-radius:50%}
+.page-title{font-size:1.8rem;font-weight:700;margin:0 0 6px}
+.page-subtitle{font-size:.95rem;opacity:.85;margin:0}
+.stepper-container{grid-column:1/-1;background:#fff;border-radius:var(--radius-xl);padding:22px 30px;box-shadow:var(--shadow-card)}
+.stepper{display:flex;align-items:center;overflow-x:auto}
+.step-item{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.step-circle{width:46px;height:46px;min-width:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;border:3px solid var(--border);background:#fff;color:var(--muted);transition:all .3s;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.step-circle.active{background:var(--primary-grad);color:#fff;border-color:transparent;transform:scale(1.1);box-shadow:0 4px 16px rgba(132,204,22,.45)}
+.step-circle.done{background:var(--success-grad);color:#fff;border-color:transparent}
+.step-label{font-size:.82rem;font-weight:600;color:var(--muted);white-space:nowrap;transition:color .3s}
+.step-label.active{color:#84cc16}.step-label.done{color:var(--success)}
+.step-line{flex:1;height:3px;background:var(--border);margin:0 14px;border-radius:2px;min-width:24px;transition:background .4s}
+.step-line.done{background:var(--success-grad)}
+.form-container{grid-column:1/2;background:#fff;border-radius:var(--radius-xl);padding:32px;box-shadow:var(--shadow-card);min-width:0}
+.preview-sidebar{grid-column:2/3;display:flex;flex-direction:column;gap:18px;position:sticky;top:calc(var(--topbar-height) + 20px);align-self:start}
+.step-content{display:none}
+.step-content.active{display:block;animation:fadeInUp .35s ease}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.form-section{margin-bottom:26px;border-radius:var(--radius-md);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.section-header{background:var(--primary-grad);color:#fff;padding:13px 20px;font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:10px}
+.section-header.info-theme{background:var(--info-grad)}
+.section-header.dark-theme{background:var(--dark-grad)}
+.section-body{background:var(--bg-light);padding:22px 24px;border:2px solid #e9ecef;border-top:none;border-radius:0 0 var(--radius-md) var(--radius-md)}
+.form-label{font-weight:600;color:var(--text-dark);margin-bottom:7px;font-size:.88rem;display:flex;align-items:center;gap:5px}
+.required{color:#e74c3c;font-size:1rem}
+.hint-text{font-size:.76rem;color:var(--muted);font-weight:400;margin-top:4px}
+.form-control,.form-select{border:2px solid #e9ecef;border-radius:var(--radius-md);padding:10px 14px;font-size:.92rem;width:100%;transition:border-color .25s,box-shadow .25s;background:#fff;color:var(--text-dark);font-family:inherit}
+.form-control:focus,.form-select:focus{border-color:#84cc16;box-shadow:0 0 0 3px rgba(132,204,22,.15);outline:none}
+.form-control[readonly]{background:#edf2f7;border-color:#cbd5e0;color:#4a5568;font-weight:600;cursor:not-allowed}
+select.form-control,.form-select{appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');background-repeat:no-repeat;background-position:right 12px center;background-size:18px;padding-right:36px}
+textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
+.input-with-unit{position:relative}
+.input-unit{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;padding:0 14px;background:#e9ecef;border:2px solid #e9ecef;border-left:none;border-radius:0 var(--radius-md) var(--radius-md) 0;font-size:.82rem;font-weight:700;color:var(--muted);white-space:nowrap}
+.input-with-unit .form-control{border-radius:var(--radius-md) 0 0 var(--radius-md);padding-right:10px}
+.radio-group{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.radio-option{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:#fff;border:2px solid #e9ecef;border-radius:var(--radius-md);cursor:pointer;font-weight:600;font-size:.85rem;color:var(--text-dark);transition:all .2s}
+.radio-option:hover{border-color:#84cc16;background:#f4faec}
+.radio-option input{accent-color:#84cc16;width:16px;height:16px}
+.sub-section-title{font-size:.8rem;font-weight:700;color:#84cc16;text-transform:uppercase;letter-spacing:.05em;margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid #e9ecef}
+.step-nav{display:flex;justify-content:space-between;align-items:center;margin-top:26px;gap:12px;padding-top:20px;border-top:2px solid #f0f0f0}
+.btn-step{padding:12px 28px;border-radius:var(--radius-md);font-weight:700;cursor:pointer;font-size:.92rem;display:inline-flex;align-items:center;gap:8px;font-family:inherit;transition:all .3s;border:none}
+.btn-next,.btn-submit{background:var(--primary-grad);color:#fff;box-shadow:0 4px 14px rgba(132,204,22,.35)}
+.btn-next:hover,.btn-submit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(132,204,22,.5)}
+.btn-prev{background:var(--bg-light);color:var(--text-dark);border:2px solid var(--border)!important}
+.btn-prev:hover{background:#e9ecef}
+.form-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid #f0f0f0}
+.form-title{font-size:1.5rem;font-weight:700;color:#2d3748;display:flex;align-items:center;gap:12px}
+.btn-back{background:#f8f9fa;color:#2d3748;padding:10px 20px;border-radius:12px;border:none;font-weight:600;cursor:pointer;transition:all .3s ease;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.btn-back:hover{background:var(--dark-grad);color:white;transform:translateY(-2px)}
+.img-upload-guide{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border:2px dashed #4ade80;border-radius:14px;padding:16px 20px;margin-bottom:20px}
+.guide-step{display:flex;align-items:center;gap:10px;flex:1;min-width:190px}
+.guide-step-num{width:30px;height:30px;border-radius:50%;background:var(--primary-grad);color:#fff;font-weight:800;font-size:.85rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(132,204,22,.35)}
+.guide-step-text{font-size:.78rem;color:#14532d;line-height:1.35}
+.guide-step-text strong{display:block;font-size:.85rem;color:#052e16}
+.guide-arrow{color:#4ade80;font-size:1rem;display:none}
+@media(min-width:900px){.guide-arrow{display:block}}
+.img-cat-tabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;margin-bottom:20px;counter-reset:catstep}
+.img-cat-tab{position:relative;border:2px solid #e9ecef;background:#fff;border-radius:14px;padding:18px 14px 14px;font-size:.85rem;font-weight:600;color:#4a5568;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:6px;transition:all .25s ease;counter-increment:catstep}
+.img-cat-tab i{font-size:1.3rem;color:#94a3b8}
+.img-cat-tab .cat-count{background:#f1f5f9;color:#64748b;border-radius:20px;padding:1px 9px;font-size:.72rem;font-weight:700;align-self:flex-end;margin-top:-4px}
+.img-cat-tab.active{background:var(--primary-grad);border-color:transparent;color:#fff}
+.img-cat-tab.active i{color:#fff}
+.img-cat-tab.active .cat-count{background:rgba(255,255,255,.25);color:#fff}
+.img-cat-tab.has-images:not(.active){border-color:#84cc16}
+.img-cat-tab::before{content:counter(catstep);position:absolute;top:-8px;left:-8px;width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid #cbd5e0;color:#64748b;font-size:.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,.08)}
+.img-cat-tab.active::before{border-color:#84cc16;color:#84cc16}
+.img-cat-tab.has-images::before{content:"\f00c";font-family:"Font Awesome 5 Free";font-weight:900;background:#84cc16;border-color:#84cc16;color:#fff}
+.img-cat-tab:nth-child(1)::after{content:"★ Becomes Cover Photo";font-size:.62rem;font-weight:700;color:#b45309;background:#fef3c7;padding:2px 9px;border-radius:20px;align-self:flex-start;margin-top:2px}
+.img-cat-tab.active:nth-child(1)::after{color:#fff;background:rgba(255,255,255,.25)}
+.img-cat-panel{display:none}
+.img-cat-panel.active{display:block;animation:fadeInUp .3s ease}
+.img-cat-upload-area{border:3px dashed #cbd5e0;border-radius:15px;padding:36px 20px;text-align:center;background:#f8f9fa;cursor:pointer;transition:all .3s ease}
+.img-cat-upload-area:hover,.img-cat-upload-area.dragover{border-color:#84cc16;background:#f0fdf4}
+.img-cat-upload-area .upload-icon{width:60px;height:60px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.img-cat-upload-area .upload-icon i{font-size:1.6rem;color:#84cc16;margin:0}
+.img-cat-upload-area .upload-text{font-size:1.05rem;font-weight:600;color:#4a5568;margin-top:6px}
+.img-cat-upload-area .upload-subtext{display:inline-block;margin-top:8px;padding:4px 12px;background:#fff;border:1px solid #e2e8f0;border-radius:20px;color:#475569;font-size:.82rem}
+.img-cat-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;margin-top:18px}
+.img-cat-preview-item{position:relative;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.1);aspect-ratio:1;cursor:grab;border:2px solid transparent}
+.img-cat-preview-item.dragging{opacity:.4}
+.img-cat-preview-item img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.img-cat-preview-item .cover-badge{position:absolute;bottom:8px;left:8px;background:linear-gradient(135deg,#f6d365,#fda085);color:#3b2a00;font-size:.65rem;font-weight:800;padding:3px 9px;border-radius:20px;display:flex;align-items:center;gap:4px}
+.img-cat-preview-item .remove-image{position:absolute;top:8px;right:8px;width:28px;height:28px;background:#e74c3c;color:#fff;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.8rem}
+.img-cat-preview-item .remove-image:hover{background:#c0392b}
+.img-total-summary{display:flex;justify-content:space-between;align-items:center;background:#f8f9fa;border:2px solid #e9ecef;border-radius:16px;padding:16px 22px;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.existing-img-remove-btn{position:absolute;top:8px;right:8px;width:28px;height:28px;background:#e74c3c;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.8rem;z-index:10;border:none;box-shadow:0 2px 5px rgba(0,0,0,.2);transition:all .2s ease}
+.existing-img-remove-btn input{display:none}
+.existing-img-remove-btn:hover{background:#c0392b;transform:scale(1.1)}
+.preview-card{background:linear-gradient(135deg,#2c3e50,#1a252f);border-radius:var(--radius-lg);padding:18px;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.2)}
+.preview-mock{background:#fff;border-radius:var(--radius-md);overflow:hidden;margin-top:14px}
+.preview-image{height:130px;background:linear-gradient(135deg,#ecfccb,#bbf7d0);display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative}
+.preview-badges{position:absolute;top:9px;left:9px;display:flex;gap:5px}
+.preview-badge{font-size:.62rem;font-weight:800;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,.95);color:#0f172a}
+.preview-price{position:absolute;bottom:9px;left:9px;background:rgba(15,23,42,.88);color:#fff;font-size:.88rem;font-weight:800;padding:5px 12px;border-radius:8px}
+.preview-body{background:#fff;padding:14px;color:#0f172a}
+.preview-title{font-size:.88rem;font-weight:800;margin-bottom:5px;line-height:1.4}
+.preview-location{font-size:.75rem;color:var(--muted);margin-bottom:8px}
+.preview-specs{display:flex;gap:12px;font-size:.75rem;color:#475569;font-weight:600;flex-wrap:wrap}
+.checklist-card{background:#fff;border-radius:var(--radius-lg);border:2px solid var(--border);padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.checklist-title{font-size:.88rem;font-weight:800;color:var(--text-dark);margin-bottom:14px}
+.checklist-item{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:.82rem;color:var(--muted);border-bottom:1px solid #f0f4f8;transition:color .3s}
+.checklist-item:last-child{border-bottom:none}
+.checklist-item i{font-size:.75rem;width:14px;flex-shrink:0;color:#cbd5e0;transition:color .3s}
+.checklist-item.done{color:var(--success)}
+.checklist-item.done i{color:var(--success)}
+.inline-status{padding:12px 16px;border-radius:10px;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:10px}
+.is-warning{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.search-select{position:relative;width:100%;font-size:.95rem}
+.search-select-control{border:2px solid #e9ecef;border-radius:12px;padding:12px 15px;background:#fff;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .3s;min-height:48px}
+.search-select-control:hover,.search-select-control:focus{border-color:#84cc16;outline:none}
+.search-select.open .search-select-control{border-color:#84cc16}
+.search-select-value{color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:1.2em}
+.search-select-value.ss-placeholder{color:#94a3b8}
+.search-select-arrow{color:#64748b;transition:transform .2s;font-size:.8rem;flex-shrink:0;margin-left:8px}
+.search-select.open .search-select-arrow{transform:rotate(180deg)}
+.search-select-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid #ced4da;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:9999;overflow:hidden}
+.search-select.open .search-select-panel{display:block}
+.search-select-input{width:100%;border:none;border-bottom:2px solid #e9ecef;padding:12px 15px;font-size:.9rem;outline:none;box-sizing:border-box}
+.search-select-input:focus{border-bottom-color:#84cc16}
+.search-select-options{max-height:260px;overflow-y:auto}
+.search-select-group-label{padding:8px 15px 4px;font-size:.72rem;font-weight:700;color:#94a3b8;letter-spacing:.05em;text-transform:uppercase;background:#f8f9fa}
+.search-select-option{padding:10px 16px;cursor:pointer;color:#2d3748;font-size:.9rem}
+.search-select-option:hover,.search-select-option.highlighted{background:#f4faec;color:#84cc16}
+.search-select-option.selected{background:#84cc16;color:#fff}
+.search-select-no-results{padding:14px 16px;color:#94a3b8;font-size:.88rem;text-align:center}
+.selected-items-display{padding:12px;background:#f8f9fa;border:2px dashed #dee2e6;border-radius:10px;min-height:52px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.item-tag{background:#fff;border:1px solid #dee2e6;border-radius:20px;padding:4px 14px;font-size:.82rem;display:inline-flex;align-items:center;gap:5px;font-weight:600}
+.item-tag .remove-btn{cursor:pointer;color:#dc3545;margin-left:4px;font-size:.75rem}
+.modal-content{border-radius:16px;overflow:hidden}
+.modal-header{background:var(--primary-grad);color:#fff;border:none;padding:18px 24px}
+.modal-title{font-weight:700;font-size:1.05rem}
+.btn-close{filter:invert(1)}
+.modal-footer .btn-primary{background:var(--primary-grad);border:none;border-radius:10px;font-weight:700;padding:10px 24px}
+.modal-footer .btn-secondary{border-radius:10px;font-weight:700;padding:10px 24px}
+#modalSearch{border-radius:10px;border:2px solid #e9ecef;padding:10px 14px;font-size:.92rem;width:100%;font-family:inherit}
+.modal-item-label{padding:10px 14px;background:#fff;border-radius:10px;border:2px solid #e9ecef;cursor:pointer;display:flex;align-items:center;gap:9px;font-size:.85rem;font-weight:600;color:var(--text-dark);transition:all .2s;user-select:none}
+.modal-item-label:hover{border-color:#84cc16;background:#f4faec}
+.modal-item-label.checked{border-color:#84cc16;background:var(--primary-grad);color:#fff}
+.modal-items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:4px 2px}
+.custom-checkbox{width:18px;height:18px;border:2px solid #cbd5e0;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;background:#fff;transition:all .2s ease}
+.custom-checkbox i{font-size:.65rem;color:#fff;opacity:0;transform:scale(.5);transition:all .2s ease}
+.modal-item-label.checked .custom-checkbox{background:#fff;border-color:#fff}
+.modal-item-label.checked .custom-checkbox i{opacity:1;transform:scale(1);color:#10b981}
+.form-group,.col-md-12,.section-body,.step-content,.row{overflow:visible!important}
+@media(max-width:1200px){.page-wrapper{grid-template-columns:1fr}.preview-sidebar{display:none}.form-container{grid-column:1/-1}}
+@media(max-width:992px){.main-content{margin-left:0}}
+@media(max-width:768px){.main-content{padding:16px}.form-container{padding:20px}.step-label{display:none}}
+</style>
+
+<div class="main-content">
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <h1 class="page-title"><i class="fas fa-tractor" style="margin-right:12px;opacity:.9;"></i>Edit Agricultural Plot Listing</h1>
+    <p class="page-subtitle">Update details for {{ property.property_title|default:"this land parcel" }}</p>
+    <button class="btn-back" onclick="history.back();"><i class="fas fa-arrow-left"></i> Back to List</button>
+  </div>
+
+  <div class="stepper-container">
+    <div class="stepper">
+      <div class="step-item"><div class="step-circle active" id="sc1">1</div><div class="step-label active" id="sl1">Land Details</div><div class="step-line" id="line1"></div></div>
+      <div class="step-item"><div class="step-circle" id="sc2">2</div><div class="step-label" id="sl2">Pricing &amp; Legal</div><div class="step-line" id="line2"></div></div>
+      <div class="step-item"><div class="step-circle" id="sc3">3</div><div class="step-label" id="sl3">Amenities &amp; Location</div><div class="step-line" id="line3"></div></div>
+      <div class="step-item"><div class="step-circle" id="sc4">4</div><div class="step-label" id="sl4">Photos &amp; Publish</div></div>
+    </div>
+  </div>
+
+  <div class="form-container">
+    <form action="{% url 'agricultural_plot_resale_edit_agency' property.id %}" method="POST" enctype="multipart/form-data" id="plotForm">
+      {% csrf_token %}
+      <input type="hidden" name="plot_type_main" value="agricultural">
+      <input type="hidden" name="property_id" value="{{ property.id }}">
+
+      <!-- STEP 1 -->
+      <div class="step-content active" id="step1">
+        <div class="form-header"><div class="form-title">🌾 Edit Agricultural Plot #{{ property.id }}</div></div>
+
+       <div class="form-section">
+                            <div class="section-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                                <span><i class="fas fa-upload"></i> Listed By</span>
+                            </div>
+                            <div class="section-body">
+                                
+
+                                <div class="row" id="user_data_div">
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label">User Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" readonly style="background-color:#e9ecef;" value="{{user_obj.user_id}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"> User Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" readonly style="background-color:#e9ecef;" value="{{user_obj.user_name}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label">User Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email" readonly style="background-color:#e9ecef;" value="{{user_obj.user_email}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label">User Contact</label><input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" readonly style="background-color:#e9ecef;" value="{{user_obj.user_phone}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"> User Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" readonly style="background-color:#e9ecef;" value="{{user_obj.user_role}}"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-map"></i> Basic Agricultural Land Information</div>
+          <div class="section-body">
+            <div class="mb-3">
+              <label class="form-label">Property Title</label>
+              <input type="text" class="form-control" id="property_title" name="property_title" value="{{ property.property_title }}" readonly>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Gat / Gut / Khasra / Survey Number <span class="required">*</span></label>
+                <input type="text" class="form-control" name="property_no" id="property_no" value="{{ property.property_no }}" required>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Land Area (acre) <span class="required">*</span></label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" name="plot_area" id="plot_area" value="{{ property.plot_area|floatformat:'0' }}" required min="1" step="any">
+                  <span class="input-unit" id="area_unit">{{ property.agr_area_unit|default:"acre" }}</span>
+                </div>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Agricultural Land Type <span class="required">*</span></label>
+                <select class="form-select form-control" name="property_type" id="property_type" required>
+                  <option value="">— Select Land Type —</option>
+                  <option value="farm_land" {% if property.property_type == "farm_land" %}selected{% endif %}>Farm Land (Open Agricultural)</option>
+                  <option value="orchard_plantation" {% if property.property_type == "orchard_plantation" %}selected{% endif %}>Orchard / Fruit Farm</option>
+                  <option value="irrigated_land" {% if property.property_type == "irrigated_land" %}selected{% endif %}>Irrigated Farm Land</option>
+                  <option value="rain_fed_land" {% if property.property_type == "rain_fed_land" %}selected{% endif %}>Rain-Fed Land</option>
+                  <option value="horticulture_land" {% if property.property_type == "horticulture_land" %}selected{% endif %}>Horticulture / Vegetable Farm</option>
+                  <option value="poultry_land" {% if property.property_type == "poultry_land" %}selected{% endif %}>Poultry / Dairy Land</option>
+                  <option value="agro_tourism_land" {% if property.property_type == "agro_tourism_land" %}selected{% endif %}>Agro Tourism Land</option>
+                  <option value="na_converted_farm" {% if property.property_type == "na_converted_farm" %}selected{% endif %}>NA Converted Agricultural Land</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-file-shield"></i> Revenue Classification & Legal Status</div>
+          <div class="section-body">
+            <div class="row">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Revenue / Land Classification <span class="required">*</span></label>
+                <select class="form-select form-control" name="land_use" id="land_use" required>
+                  <option value="">— Select —</option>
+                  <option value="Agricultural" {% if property.land_use == "Agricultural" %}selected{% endif %}>Agricultural / Shetkari Land</option>
+                  <option value="Revenue_Forest" {% if property.land_use == "Revenue_Forest" %}selected{% endif %}>Revenue Forest</option>
+                  <option value="Gairan" {% if property.land_use == "Gairan" %}selected{% endif %}>Gairan / Grazing Land</option>
+                  <option value="Waste_Land" {% if property.land_use == "Waste_Land" %}selected{% endif %}>Waste / Barren Land</option>
+                  <option value="Converted_NA" {% if property.land_use == "Converted_NA" %}selected{% endif %}>NA Converted</option>
+                  <option value="Garden_Land" {% if property.land_use == "Garden_Land" %}selected{% endif %}>Garden / Horticultural Land</option>
+                  <option value="Paddy_Field" {% if property.land_use == "Paddy_Field" %}selected{% endif %}>Paddy / Rice Land</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">NA Conversion Status <span class="required">*</span></label>
+                <select class="form-select form-control" name="na_status" id="na_status" required>
+                  <option value="">— Select —</option>
+                  <option value="Non-NA" {% if property.na_status == "Non-NA" %}selected{% endif %}>Non-NA</option>
+                  <option value="NA Converted" {% if property.na_status == "NA Converted" %}selected{% endif %}>NA Converted</option>
+                  <option value="NA Applied" {% if property.na_status == "NA Applied" %}selected{% endif %}>NA Applied</option>
+                  <option value="Partial_NA" {% if property.na_status == "Partial_NA" %}selected{% endif %}>Partial NA</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Revenue / Panchayat Sanction</label>
+                <select class="form-select form-control" name="layout_approval_status" id="layout_approval_status">
+                  <option value="">— Select —</option>
+                  <option value="Revenue_Land" {% if property.layout_approval_status == "Revenue_Land" %}selected{% endif %}>Revenue Land</option>
+                  <option value="Gram_Panchayat_NOC" {% if property.layout_approval_status == "Gram_Panchayat_NOC" %}selected{% endif %}>Gram Panchayat NOC</option>
+                  <option value="Forest_Clearance_Pending" {% if property.layout_approval_status == "Forest_Clearance_Pending" %}selected{% endif %}>Forest Clearance Pending</option>
+                  <option value="Not Applicable" {% if property.layout_approval_status == "Not Applicable" %}selected{% endif %}>Not Applicable</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-ruler-combined"></i> Land Specifications & Agricultural Details</div>
+          <div class="section-body">
+            <div class="sub-section-title">Dimensions</div>
+            <div class="row">
+              <div class="col-md-4"><label class="form-label">Frontage / Width (ft)</label><div class="input-with-unit"><input type="number" class="form-control" name="plot_frontage" value="{{ property.plot_frontage|floatformat:'0' }}"><span class="input-unit">ft</span></div></div>
+              <div class="col-md-4"><label class="form-label">Depth / Length (ft)</label><div class="input-with-unit"><input type="number" class="form-control" name="plot_depth" value="{{ property.plot_depth|floatformat:'0' }}"><span class="input-unit">ft</span></div></div>
+              <div class="col-md-4">
+                <label class="form-label">Plot Shape</label>
+                <select class="form-select form-control" name="plot_shape">
+                  <option value="">— Select —</option>
+                  <option value="Rectangular" {% if property.plot_shape == "Rectangular" %}selected{% endif %}>Rectangular</option>
+                  <option value="Square" {% if property.plot_shape == "Square" %}selected{% endif %}>Square</option>
+                  <option value="L-Shaped" {% if property.plot_shape == "L-Shaped" %}selected{% endif %}>L-Shaped</option>
+                  <option value="Triangular" {% if property.plot_shape == "Triangular" %}selected{% endif %}>Triangular</option>
+                  <option value="Irregular" {% if property.plot_shape == "Irregular" %}selected{% endif %}>Irregular</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="sub-section-title mt-3">Road & Access</div>
+            <div class="row">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Road / Track Access <span class="required">*</span></label>
+                <select class="form-select form-control" name="plot_road_facing" required>
+                  <option value="">— Select —</option>
+                  <option value="highway_frontage" {% if property.plot_road_facing == "highway_frontage" %}selected{% endif %}>Highway Direct Frontage</option>
+                  <option value="village_road" {% if property.plot_road_facing == "village_road" %}selected{% endif %}>Village Road Access</option>
+                  <option value="kaccha_track" {% if property.plot_road_facing == "kaccha_track" %}selected{% endif %}>Kachha Track</option>
+                  <option value="canal_road" {% if property.plot_road_facing == "canal_road" %}selected{% endif %}>Canal / River Road</option>
+                  <option value="landlocked" {% if property.plot_road_facing == "landlocked" %}selected{% endif %}>Land-Locked</option>
+                  <option value="railway_near" {% if property.plot_road_facing == "railway_near" %}selected{% endif %}>Near Railway</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Access Road / Track Width</label>
+                <select class="form-select form-control" name="road_width">
+                  <option value="">— Select —</option>
+                  <option value="less_10ft" {% if property.road_width == "less_10ft" %}selected{% endif %}>Less than 10 ft</option>
+                  <option value="10_20ft" {% if property.road_width == "10_20ft" %}selected{% endif %}>10 – 20 ft</option>
+                  <option value="20_40ft" {% if property.road_width == "20_40ft" %}selected{% endif %}>20 – 40 ft</option>
+                  <option value="40ft_plus" {% if property.road_width == "40ft_plus" %}selected{% endif %}>40 ft+</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Corner Plot (Two Road Access)?</label>
+                <select class="form-select form-control" name="corner_plot">
+                  <option value="no" {% if property.corner_plot == "no" %}selected{% endif %}>No</option>
+                  <option value="yes" {% if property.corner_plot == "yes" %}selected{% endif %}>Yes</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="sub-section-title mt-3">Agricultural Land Details</div>
+            <div class="row">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Land Measurement Unit <span class="required">*</span></label>
+                <select class="form-select form-control" name="agr_area_unit" id="agr_area_unit">
+                  <option value="acre" {% if property.agr_area_unit == "acre" %}selected{% endif %}>Acre</option>
+                  <option value="hectare" {% if property.agr_area_unit == "hectare" %}selected{% endif %}>Hectare</option>
+                  <option value="guntha" {% if property.agr_area_unit == "guntha" %}selected{% endif %}>Guntha</option>
+                  <option value="bigha" {% if property.agr_area_unit == "bigha" %}selected{% endif %}>Bigha</option>
+                  <option value="sqft" {% if property.agr_area_unit == "sqft" %}selected{% endif %}>Square Feet</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Soil Type</label>
+                <select class="form-select form-control" name="soil_type">
+                  <option value="">— Select —</option>
+                  <option value="Black_Cotton" {% if property.soil_type == "Black_Cotton" %}selected{% endif %}>Black Cotton Soil</option>
+                  <option value="Red_Laterite" {% if property.soil_type == "Red_Laterite" %}selected{% endif %}>Red / Laterite Soil</option>
+                  <option value="Alluvial" {% if property.soil_type == "Alluvial" %}selected{% endif %}>Alluvial Soil</option>
+                  <option value="Sandy_Loam" {% if property.soil_type == "Sandy_Loam" %}selected{% endif %}>Sandy Loam</option>
+                  <option value="Rocky_Stony" {% if property.soil_type == "Rocky_Stony" %}selected{% endif %}>Rocky / Stony</option>
+                  <option value="Mixed" {% if property.soil_type == "Mixed" %}selected{% endif %}>Mixed Soil</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Current Crop / Plantation</label>
+                <select class="form-select form-control" name="current_crop">
+                  <option value="">— Select —</option>
+                  <option value="No_Crop_Vacant" {% if property.current_crop == "No_Crop_Vacant" %}selected{% endif %}>No Crop / Vacant</option>
+                  <option value="Cotton" {% if property.current_crop == "Cotton" %}selected{% endif %}>Cotton</option>
+                  <option value="Soybean" {% if property.current_crop == "Soybean" %}selected{% endif %}>Soybean</option>
+                  <option value="Wheat" {% if property.current_crop == "Wheat" %}selected{% endif %}>Wheat</option>
+                  <option value="Rice_Paddy" {% if property.current_crop == "Rice_Paddy" %}selected{% endif %}>Rice / Paddy</option>
+                  <option value="Sugarcane" {% if property.current_crop == "Sugarcane" %}selected{% endif %}>Sugarcane</option>
+                  <option value="Vegetable_Garden" {% if property.current_crop == "Vegetable_Garden" %}selected{% endif %}>Vegetable / Horticulture</option>
+                  <option value="Mango_Orchard" {% if property.current_crop == "Mango_Orchard" %}selected{% endif %}>Mango Orchard</option>
+                  <option value="Orange_Orchard" {% if property.current_crop == "Orange_Orchard" %}selected{% endif %}>Orange Orchard</option>
+                  <option value="Teak_Timber" {% if property.current_crop == "Teak_Timber" %}selected{% endif %}>Teak / Timber</option>
+                  <option value="Mixed_Orchard" {% if property.current_crop == "Mixed_Orchard" %}selected{% endif %}>Mixed Orchard</option>
+                  <option value="Other" {% if property.current_crop == "Other" %}selected{% endif %}>Other</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Irrigation / Water Source</label>
+                <select class="form-select form-control" name="irrigation_source">
+                  <option value="">— Select —</option>
+                  <option value="Canal_Irrigation" {% if property.irrigation_source == "Canal_Irrigation" %}selected{% endif %}>Canal / Dam Irrigation</option>
+                  <option value="Borewell" {% if property.irrigation_source == "Borewell" %}selected{% endif %}>Borewell</option>
+                  <option value="Open_Well" {% if property.irrigation_source == "Open_Well" %}selected{% endif %}>Open Well</option>
+                  <option value="Drip_Installed" {% if property.irrigation_source == "Drip_Installed" %}selected{% endif %}>Drip Irrigation</option>
+                  <option value="Rain_Fed" {% if property.irrigation_source == "Rain_Fed" %}selected{% endif %}>Rain-Fed</option>
+                  <option value="Lift_Irrigation" {% if property.irrigation_source == "Lift_Irrigation" %}selected{% endif %}>Lift Irrigation</option>
+                  <option value="No_Water_Source" {% if property.irrigation_source == "No_Water_Source" %}selected{% endif %}>No Water Source</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Electricity on Land</label>
+                <select class="form-select form-control" name="agr_electricity">
+                  <option value="">— Select —</option>
+                  <option value="Agricultural_Pump_Connection" {% if property.agr_electricity == "Agricultural_Pump_Connection" %}selected{% endif %}>Pump Connection Available</option>
+                  <option value="Connection_Possible" {% if property.agr_electricity == "Connection_Possible" %}selected{% endif %}>Connection Possible</option>
+                  <option value="No_Electricity" {% if property.agr_electricity == "No_Electricity" %}selected{% endif %}>No Electricity</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Distance from Nearest Highway / Road</label>
+                <select class="form-select form-control" name="highway_distance">
+                  <option value="">— Select —</option>
+                  <option value="0-1km" {% if property.highway_distance == "0-1km" %}selected{% endif %}>0 – 1 km</option>
+                  <option value="1-3km" {% if property.highway_distance == "1-3km" %}selected{% endif %}>1 – 3 km</option>
+                  <option value="3-5km" {% if property.highway_distance == "3-5km" %}selected{% endif %}>3 – 5 km</option>
+                  <option value="5-10km" {% if property.highway_distance == "5-10km" %}selected{% endif %}>5 – 10 km</option>
+                  <option value="10km+" {% if property.highway_distance == "10km+" %}selected{% endif %}>10+ km</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Land Level / Topography</label>
+                <select class="form-select form-control" name="land_topography">
+                  <option value="">— Select —</option>
+                  <option value="Level_Flat" {% if property.land_topography == "Level_Flat" %}selected{% endif %}>Level / Flat</option>
+                  <option value="Slightly_Undulating" {% if property.land_topography == "Slightly_Undulating" %}selected{% endif %}>Slightly Undulating</option>
+                  <option value="Sloped_Terraced" {% if property.land_topography == "Sloped_Terraced" %}selected{% endif %}>Sloped / Terraced</option>
+                  <option value="Low_Lying" {% if property.land_topography == "Low_Lying" %}selected{% endif %}>Low Lying</option>
+                  <option value="Elevated_High" {% if property.land_topography == "Elevated_High" %}selected{% endif %}>Elevated / High</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Is Land Under Any Government Scheme?</label>
+                <select class="form-select form-control" name="govt_scheme">
+                  <option value="No" {% if property.govt_scheme == "No" %}selected{% endif %}>No</option>
+                  <option value="Forest_Clearance_Required" {% if property.govt_scheme == "Forest_Clearance_Required" %}selected{% endif %}>Forest Clearance Required</option>
+                  <option value="Revenue_Forest" {% if property.govt_scheme == "Revenue_Forest" %}selected{% endif %}>Revenue Forest Land</option>
+                  <option value="Tribal_Land" {% if property.govt_scheme == "Tribal_Land" %}selected{% endif %}>Tribal Land</option>
+                  <option value="Gairan_Land" {% if property.govt_scheme == "Gairan_Land" %}selected{% endif %}>Gairan Land</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="sub-section-title mt-3">Other Physical Details</div>
+            <div class="row">
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Land Demarcation / Boundary</label>
+                <select class="form-select form-control" name="plot_fencing">
+                  <option value="none" {% if property.plot_fencing == "none" %}selected{% endif %}>No Boundary</option>
+                  <option value="stone_markers" {% if property.plot_fencing == "stone_markers" %}selected{% endif %}>Stone Markers</option>
+                  <option value="partial_hedge" {% if property.plot_fencing == "partial_hedge" %}selected{% endif %}>Partial Hedge</option>
+                  <option value="full_hedge" {% if property.plot_fencing == "full_hedge" %}selected{% endif %}>Full Hedge</option>
+                  <option value="barbed_wire" {% if property.plot_fencing == "barbed_wire" %}selected{% endif %}>Barbed Wire</option>
+                  <option value="stone_wall" {% if property.plot_fencing == "stone_wall" %}selected{% endif %}>Stone Wall</option>
+                </select>
+              </div>
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Current Land Use / Occupancy</label>
+                <select class="form-select form-control" name="current_possession_status">
+                  <option value="">— Select —</option>
+                  <option value="Vacant_Fallow" {% if property.current_possession_status == "Vacant_Fallow" %}selected{% endif %}>Vacant / Fallow</option>
+                  <option value="Under_Cultivation" {% if property.current_possession_status == "Under_Cultivation" %}selected{% endif %}>Under Cultivation</option>
+                  <option value="Tenant_Farming" {% if property.current_possession_status == "Tenant_Farming" %}selected{% endif %}>Tenant Farming</option>
+                  <option value="Orchard_Standing" {% if property.current_possession_status == "Orchard_Standing" %}selected{% endif %}>Orchard Standing</option>
+                  <option value="Caretaker" {% if property.current_possession_status == "Caretaker" %}selected{% endif %}>Caretaker Arrangement</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-nav"><div></div><button type="button" class="btn-step btn-next" onclick="goToStep(2)">Move To Next Page <i class="fas fa-arrow-right"></i></button></div>
+      </div><!-- /step1 -->
+
+      <!-- STEP 2 -->
+      <div class="step-content" id="step2">
+        <div class="form-header"><div class="form-title">🌾 Edit Agricultural Plot</div></div>
+
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-indian-rupee-sign"></i> Pricing Details</div>
+          <div class="section-body">
+            <div class="row">
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Selling Price <span class="required">*</span></label>
+                <div class="input-with-unit"><input type="number" class="form-control" name="selling_price" id="selling_price" value="{{ property.selling_price }}" required min="1"><span class="input-unit">₹</span></div>
+              </div>
+              <div class="col-md-6 mt-2">
+                <label class="form-label"><span id="ppsf_label_text">Rate per Hectare (Auto-calculated) {{ property.agr_area_unit|default:"Acre"|title }}</span> <span style="font-weight:400;font-size:.78rem;color:var(--muted)">(Auto)</span></label>
+                <div class="input-with-unit"><input type="number" class="form-control" id="plot_price_per_sqft" value="{{ property.price_per_unit }}" readonly><span class="input-unit" id="ppsf_unit">₹/{{ property.agr_area_unit|default:"acre" }}</span></div>
+              </div>
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Is the Price Negotiable?</label>
+                <div class="radio-group">
+                  <label class="radio-option"><input type="radio" name="price_negotiable" value="yes" {% if property.price_negotiable == "yes" %}checked{% endif %}> Yes</label>
+                  <label class="radio-option"><input type="radio" name="price_negotiable" value="no" {% if property.price_negotiable == "no" or not property.price_negotiable %}checked{% endif %}> Fixed</label>
+                </div>
+              </div>
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Transaction / Transfer Charges</label>
+                <select class="form-select form-control" name="additional_charges">
+                  <option value="none" {% if property.additional_charges == "none" %}selected{% endif %}>No Additional Charges</option>
+                  <option value="stamp_extra" {% if property.additional_charges == "stamp_extra" %}selected{% endif %}>Stamp Duty Extra</option>
+                  <option value="section63_fee" {% if property.additional_charges == "section63_fee" %}selected{% endif %}>Section 63-A Fee Extra</option>
+                  <option value="all_inclusive" {% if property.additional_charges == "all_inclusive" %}selected{% endif %}>All Inclusive</option>
+                </select>
+              </div>
+              <div class="col-md-6 mt-3" id="brokerageSection">
+                <label class="form-label" id="brokerageLabel">Brokerage <span class="required">*</span></label>
+                <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
+                  <option value="">Select</option>
+                  <option value="No Brokerage" {% if property.brokerage_percentage == "No Brokerage" %}selected{% endif %}>No Brokerage</option>
+                  <option value="1% of amount" {% if property.brokerage_percentage == "1% of amount" %}selected{% endif %}>1%</option>
+                  <option value="1.5% of amount" {% if property.brokerage_percentage == "1.5% of amount" %}selected{% endif %}>1.5%</option>
+                  <option value="2% of amount" {% if property.brokerage_percentage == "2% of amount" %}selected{% endif %}>2%</option>
+                  <option value="Fixed Amount" {% if property.brokerage_percentage == "Fixed Amount" %}selected{% endif %}>Fixed Amount</option>
+                  <option value="Negotiable" {% if property.brokerage_percentage == "Negotiable" %}selected{% endif %}>Negotiable</option>
+                </select>
+              </div>
+              <div class="col-md-6 mt-3" id="manualBrokerageSection" style="display:{% if property.brokerage_percentage == 'Fixed Amount' %}block{% else %}none{% endif %};">
+                <label class="form-label">Fixed Brokerage Amount (₹)</label>
+                <div class="input-with-unit"><input type="number" class="form-control" name="manual_brokerage" value="{{ property.manual_brokerage }}"><span class="input-unit">₹</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-shield-halved"></i> Legal, Title & Approval Details</div>
+          <div class="section-body">
+            <div class="sub-section-title">Ownership Details</div>
+            <div class="row">
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Ownership / Tenure Type</label>
+                <select class="form-select form-control" name="ownership_type">
+                  <option value="">— Select —</option>
+                  <option value="individual_shetkari" {% if property.ownership_type == "individual_shetkari" %}selected{% endif %}>Individual / Shetkari</option>
+                  <option value="joint_family" {% if property.ownership_type == "joint_family" %}selected{% endif %}>Joint Family</option>
+                  <option value="huf" {% if property.ownership_type == "huf" %}selected{% endif %}>HUF Property</option>
+                  <option value="trust_land" {% if property.ownership_type == "trust_land" %}selected{% endif %}>Trust Land</option>
+                  <option value="power_of_attorney" {% if property.ownership_type == "power_of_attorney" %}selected{% endif %}>POA Holder</option>
+                  <option value="inherited" {% if property.ownership_type == "inherited" %}selected{% endif %}>Inherited</option>
+                </select>
+              </div>
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Primary Title / Ownership Document</label>
+                <select class="form-select form-control" name="ownership_document_type" id="ownership_document_type">
+                  <option value="">— Select —</option>
+                  <option value="Registered Sale Deed" {% if property.ownership_document_type == "Registered Sale Deed" %}selected{% endif %}>Registered Sale Deed</option>
+                  <option value="Registered Agreement to Sale" {% if property.ownership_document_type == "Registered Agreement to Sale" %}selected{% endif %}>Agreement to Sale</option>
+                  <option value="Conveyance Deed" {% if property.ownership_document_type == "Conveyance Deed" %}selected{% endif %}>Conveyance Deed</option>
+                  <option value="Gift Deed" {% if property.ownership_document_type == "Gift Deed" %}selected{% endif %}>Gift Deed</option>
+                  <option value="Lease Deed" {% if property.ownership_document_type == "Lease Deed" %}selected{% endif %}>Lease Deed</option>
+                  <option value="7/12 Extract" {% if property.ownership_document_type == "7/12 Extract" %}selected{% endif %}>7/12 Extract</option>
+                  <option value="Other" {% if property.ownership_document_type == "Other" %}selected{% endif %}>Other</option>
+                </select>
+              </div>
+              <div class="col-md-6 mt-3" id="other_document_type_div" style="display:{% if property.ownership_document_type == 'Other' %}block{% else %}none{% endif %};">
+                <label class="form-label">Specify Other Ownership Document Type</label>
+                <input type="text" class="form-control" name="other_document_type" value="{{ property.other_document_type }}">
+              </div>
+            </div>
+
+            <div class="sub-section-title mt-3">Approvals & Compliance</div>
+            <div class="row">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">RERA / Revenue Department Status</label>
+                <select class="form-select form-control" name="rera_status">
+                  <option value="">— Select —</option>
+                  <option value="Not Applicable" {% if property.rera_status == "Not Applicable" %}selected{% endif %}>Not Applicable</option>
+                  <option value="NA Converted_RERA_Exempt" {% if property.rera_status == "NA Converted_RERA_Exempt" %}selected{% endif %}>NA Converted — Exempt</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Title Clarity / Marketability</label>
+                <select class="form-select form-control" name="title_clearance">
+                  <option value="">— Select —</option>
+                  <option value="Clear & Marketable Title" {% if property.title_clearance == "Clear & Marketable Title" %}selected{% endif %}>Clear &amp; Marketable</option>
+                  <option value="Under Verification" {% if property.title_clearance == "Under Verification" %}selected{% endif %}>Under Verification</option>
+                  <option value="Legal Dispute" {% if property.title_clearance == "Legal Dispute" %}selected{% endif %}>Legal Dispute</option>
+                  <option value="Encumbrance Exists" {% if property.title_clearance == "Encumbrance Exists" %}selected{% endif %}>Encumbrance Exists</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Encumbrance / Charge Status</label>
+                <select class="form-select form-control" name="property_encumbrance_status">
+                  <option value="">— Select —</option>
+                  <option value="No Encumbrance" {% if property.property_encumbrance_status == "No Encumbrance" %}selected{% endif %}>No Encumbrance</option>
+                  <option value="Mortgaged" {% if property.property_encumbrance_status == "Mortgaged" %}selected{% endif %}>Mortgaged</option>
+                  <option value="Under Litigation" {% if property.property_encumbrance_status == "Under Litigation" %}selected{% endif %}>Under Litigation</option>
+                  <option value="Government Acquisition Notice" {% if property.property_encumbrance_status == "Government Acquisition Notice" %}selected{% endif %}>Govt Acquisition Notice</option>
+                  <option value="Other Claim Exists" {% if property.property_encumbrance_status == "Other Claim Exists" %}selected{% endif %}>Other Claim Exists</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">7/12 Utara (Satbara) Available?</label>
+                <select class="form-select form-control" name="satbara_available">
+                  <option value="Yes" {% if property.satbara_available == "Yes" %}selected{% endif %}>Yes</option>
+                  <option value="No" {% if property.satbara_available == "No" %}selected{% endif %}>No</option>
+                  <option value="Applied" {% if property.satbara_available == "Applied" %}selected{% endif %}>Applied</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">8A Khate Utara (Land Record) Available?</label>
+                <select class="form-select form-control" name="khate_utara">
+                  <option value="Yes" {% if property.khate_utara == "Yes" %}selected{% endif %}>Yes</option>
+                  <option value="No" {% if property.khate_utara == "No" %}selected{% endif %}>No</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Section 63 / 63-A Clearance (Non-Agriculturist Purchase)?</label>
+                <select class="form-select form-control" name="section63_clearance">
+                  <option value="Not_Applicable" {% if property.section63_clearance == "Not_Applicable" %}selected{% endif %}>Not Applicable</option>
+                  <option value="Required" {% if property.section63_clearance == "Required" %}selected{% endif %}>Required</option>
+                  <option value="Obtained" {% if property.section63_clearance == "Obtained" %}selected{% endif %}>Obtained</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="sub-section-title mt-3">Tax & Loan Status</div>
+            <div class="row">
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Land Revenue / Khajana Status</label>
+                <select class="form-select form-control" name="property_tax_status" id="property_tax_status">
+                  <option value="">— Select —</option>
+                  <option value="Fully Paid" {% if property.property_tax_status == "Fully Paid" %}selected{% endif %}>Fully Paid</option>
+                  <option value="Partially Due" {% if property.property_tax_status == "Partially Due" %}selected{% endif %}>Partially Due</option>
+                  <option value="Pending" {% if property.property_tax_status == "Pending" %}selected{% endif %}>Pending</option>
+                  <option value="Not Applicable" {% if property.property_tax_status == "Not Applicable" %}selected{% endif %}>Not Applicable</option>
+                </select>
+              </div>
+              <div id="tax_due_section" style="display:{% if property.property_tax_status == 'Pending' or property.property_tax_status == 'Partially Due' %}block{% else %}none{% endif %};" class="col-md-12">
+                <div class="row">
+                  <div class="col-md-6 mt-3"><label class="form-label"> Outstanding Tax Amount (₹)</label><div class="input-with-unit"><input type="number" class="form-control" name="outstanding_tax_amount" value="{{ property.outstanding_tax_amount }}"><span class="input-unit">₹</span></div></div>
+                  <div class="col-md-6 mt-3" id="pending_since_div" style="display:{% if property.property_tax_status == 'Pending' %}block{% else %}none{% endif %};"><label class="form-label">Tax Dues Pending Since</label><input type="date" class="form-control" name="pending_since" value="{{ property.pending_since|date:'Y-m-d' }}"></div>
+                </div>
+              </div>
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Existing Loan / Mortgage on Property</label>
+                <select class="form-select form-control" name="property_loan_status" id="property_loan_status">
+                  <option value="">— Select —</option>
+                  <option value="No Active Loan" {% if property.property_loan_status == "No Active Loan" %}selected{% endif %}>No Active Loan</option>
+                  <option value="Loan Running" {% if property.property_loan_status == "Loan Running" %}selected{% endif %}>Loan Running</option>
+                  <option value="Loan Closed" {% if property.property_loan_status == "Loan Closed" %}selected{% endif %}>Loan Closed</option>
+                  <option value="Loan Status Not Available" {% if property.property_loan_status == "Loan Status Not Available" %}selected{% endif %}>Not Disclosed</option>
+                </select>
+              </div>
+              <div id="loan_running_section" style="display:{% if property.property_loan_status == 'Loan Running' %}block{% else %}none{% endif %};" class="col-md-12">
+                <div class="row">
+                  <div class="col-md-6 mt-3"><label class="form-label">Lender Bank / NBFC Name</label><input type="text" class="form-control" name="financing_bank" value="{{ property.financing_bank }}"></div>
+                  <div class="col-md-6 mt-3"><label class="form-label">Existing Loan Outstanding Loan Amount (₹)</label><div class="input-with-unit"><input type="number" class="form-control" name="outstanding_loan_amount" value="{{ property.outstanding_loan_amount }}"><span class="input-unit">₹</span></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group mt-3">
+              <label class="form-label">Revenue Authority / Talathi / Tehsil Office</label>
+              <textarea class="form-control" name="sanctioning_authority" rows="2">{{ property.sanctioning_authority }}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+          <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Move To Next Page <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div><!-- /step2 -->
+
+      <!-- STEP 3 -->
+      <div class="step-content" id="step3">
+        <div class="form-header"><div class="form-title">🌾 Edit Agricultural Plot</div></div>
+
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-star"></i> Land Amenities &amp; Nearby Facilities</div>
+          <div class="section-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <label class="form-label mb-0">Amenities</label>
+              <span class="badge px-3 py-2" id="amenitiesCount" style="background:var(--primary-grad);color:#fff;">0 selected</span>
+            </div>
+            <button type="button" class="btn w-100 mb-3" onclick="openModal('amenities')" style="border-radius:10px;font-weight:700;padding:11px;color:#fff;border:none;background:var(--primary-grad);">
+              <i class="fas fa-plus-circle me-2"></i> Select Amenities <span class="badge bg-light text-dark" id="amenitiesBadge">0</span>
+            </button>
+            <div id="amenitiesDisplay" class="selected-items-display"><p class="text-muted text-center m-0" style="font-size:.85rem;">No amenities selected</p></div>
+            <div style="display:none;">
+              {% for amenities in ameneties_obj %}
+              <input type="checkbox" name="amenities[]" value="{{ amenities.amenties_name }}" class="amenities-checkbox" data-icon="{{ amenities.amenties_icon }}" {% if amenities.amenties_name in selected_amenities %}checked{% endif %}>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
+          <div class="section-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <label class="form-label mb-0">Nearby Facilities</label>
+              <span class="badge bg-info text-dark px-3 py-2" id="facilitiesCount">0 selected</span>
+            </div>
+            <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')" style="border-radius:10px;font-weight:700;padding:11px;">
+              <i class="fas fa-plus-circle me-2"></i> Select Nearby Facilities <span class="badge bg-light text-dark" id="facilitiesBadge">0</span>
+            </button>
+            <div id="facilitiesDisplay" class="selected-items-display"><p class="text-muted text-center m-0" style="font-size:.85rem;">No facilities selected</p></div>
+            <div style="display:none;">
+              {% for facilities in facilities_obj %}
+              <input type="checkbox" name="facilities[]" value="{{ facilities.facilities_name }}" class="facilities-checkbox" data-icon="{{ facilities.facilities_icon }}" {% if facilities.facilities_name in selected_facilities %}checked{% endif %}>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-align-left"></i> Property Description</div>
+          <div class="section-body">
+            <textarea class="form-control" name="user_description" rows="5">{{ property.user_description }}</textarea>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header dark-theme"><i class="fas fa-location-dot"></i>Location Details</div>
+          <div class="section-body">
+            <div class="row">
+              <div class="col-md-12 mt-2">
+                <label class="form-label">Complete Land Location / Revenue Address <span class="required">*</span></label>
+                <textarea class="form-control" name="address" rows="3" required>{{ property.address }}</textarea>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Village / Mouza / Taluka Name <span class="required">*</span></label>
+                <input type="text" class="form-control" name="locality" value="{{ property.locality }}" required>
+              </div>
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Nearest Village / Highway / City Landmark</label>
+                <input type="text" class="form-control" name="property_landmark" value="{{ property.property_landmark }}">
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">City / District <span class="required">*</span></label>
+                <input type="text" class="form-control" id="city" name="city" value="{{ property.city }}" required>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">State <span class="required">*</span></label>
+                <select class="form-select form-control" name="state" required>
+                  <option value="">Select State</option>
+                  {% for st in "Andhra Pradesh,Arunachal Pradesh,Assam,Bihar,Chhattisgarh,Goa,Gujarat,Haryana,Himachal Pradesh,Jharkhand,Karnataka,Kerala,Madhya Pradesh,Maharashtra,Manipur,Meghalaya,Mizoram,Nagaland,Odisha,Punjab,Rajasthan,Sikkim,Tamil Nadu,Telangana,Tripura,Uttar Pradesh,Uttarakhand,West Bengal,Delhi,Jammu and Kashmir,Ladakh,Puducherry,Chandigarh,Andaman and Nicobar Islands,Lakshadweep,Dadra and Nagar Haveli and Daman and Diu"|make_list %}{% endfor %}
+                  <option value="Maharashtra" {% if property.state == "Maharashtra" %}selected{% endif %}>Maharashtra</option>
+                  <option value="Gujarat" {% if property.state == "Gujarat" %}selected{% endif %}>Gujarat</option>
+                  <option value="Karnataka" {% if property.state == "Karnataka" %}selected{% endif %}>Karnataka</option>
+                  <option value="Madhya Pradesh" {% if property.state == "Madhya Pradesh" %}selected{% endif %}>Madhya Pradesh</option>
+                  <option value="Andhra Pradesh" {% if property.state == "Andhra Pradesh" %}selected{% endif %}>Andhra Pradesh</option>
+                  <option value="Telangana" {% if property.state == "Telangana" %}selected{% endif %}>Telangana</option>
+                  <option value="Punjab" {% if property.state == "Punjab" %}selected{% endif %}>Punjab</option>
+                  <option value="Rajasthan" {% if property.state == "Rajasthan" %}selected{% endif %}>Rajasthan</option>
+                  <option value="Uttar Pradesh" {% if property.state == "Uttar Pradesh" %}selected{% endif %}>Uttar Pradesh</option>
+                  <!-- add remaining states as needed -->
+                </select>
+              </div>
+              <div class="col-md-6 mt-3"><label class="form-label">PIN Code</label><input type="text" class="form-control" name="pincode" value="{{ property.pincode }}" maxlength="6"></div>
+              <div class="col-md-6 mt-3"><label class="form-label">Google Maps Link</label><input type="url" class="form-control" name="google_maps_link" value="{{ property.google_maps_link }}"></div>
+              <div class="col-md-3 mt-3"><label class="form-label">Latitude</label><input type="text" class="form-control" name="latitude" value="{{ property.latitude }}"></div>
+              <div class="col-md-3 mt-3"><label class="form-label">Longitude</label><input type="text" class="form-control" name="longitude" value="{{ property.longitude }}"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+          <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Move To Next Page <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div><!-- /step3 -->
+
+      <!-- STEP 4 -->
+      <div class="step-content" id="step4">
+        <div class="form-header"><div class="form-title">🌾 Edit Agricultural Plot</div></div>
+
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-images"></i> Photos & Media</div>
+          <div class="section-body">
+
+            <div class="img-total-summary">
+              <div>Total Uploaded: <span id="imgTotalCount">0</span>/25</div>
+            </div>
+
+            <div class="img-cat-tabs" id="imgCatTabs">
+              <div class="img-cat-tab active" data-cat="front_view"><i class="fas fa-image"></i> Front View <span class="cat-count" id="count-front_view">0</span></div>
+              <div class="img-cat-tab" data-cat="full_plot"><i class="fas fa-vector-square"></i> Full Plot/Field <span class="cat-count" id="count-full_plot">0</span></div>
+              <div class="img-cat-tab" data-cat="farm_gate"><i class="fas fa-door-open"></i> Farm Gate <span class="cat-count" id="count-farm_gate">0</span></div>
+              <div class="img-cat-tab" data-cat="boundary_fencing"><i class="fas fa-border-all"></i> Boundary <span class="cat-count" id="count-boundary_fencing">0</span></div>
+              <div class="img-cat-tab" data-cat="road_facing"><i class="fas fa-road"></i> Road/Approach <span class="cat-count" id="count-road_facing">0</span></div>
+              <div class="img-cat-tab" data-cat="cultivated_area"><i class="fas fa-seedling"></i> Cultivated Area <span class="cat-count" id="count-cultivated_area">0</span></div>
+              <div class="img-cat-tab" data-cat="irrigation_source"><i class="fas fa-tint"></i> Irrigation <span class="cat-count" id="count-irrigation_source">0</span></div>
+              <div class="img-cat-tab" data-cat="borewell_well"><i class="fas fa-water"></i> Borewell/Well <span class="cat-count" id="count-borewell_well">0</span></div>
+              <div class="img-cat-tab" data-cat="electricity_infra"><i class="fas fa-bolt"></i> Power Infra <span class="cat-count" id="count-electricity_infra">0</span></div>
+              <div class="img-cat-tab" data-cat="farmhouse_shed"><i class="fas fa-warehouse"></i> Farmhouse/Shed <span class="cat-count" id="count-farmhouse_shed">0</span></div>
+              <div class="img-cat-tab" data-cat="aerial_drone"><i class="fas fa-drone"></i> Aerial/Drone <span class="cat-count" id="count-aerial_drone">0</span></div>
+              <div class="img-cat-tab" data-cat="layout_site_plan"><i class="fas fa-drafting-compass"></i> Layout/Site Plan <span class="cat-count" id="count-layout_site_plan">0</span></div>
+            </div>
+
+            <div class="img-cat-panels">
+              {% for cat_key, cat_label in property.images.model.CATEGORY_CHOICES %}{% endfor %}
+              {% for cat in "front_view,full_plot,farm_gate,boundary_fencing,road_facing,cultivated_area,irrigation_source,borewell_well,electricity_infra,farmhouse_shed,aerial_drone,layout_site_plan"|cut:" "|slice:":9999" %}{% endfor %}
+
+              <!-- Repeat this panel block for each of the 12 categories -->
+              <div class="img-cat-panel active" data-cat-panel="front_view">
+                <input type="file" class="img-cat-input" id="imgInput-front_view" name="plot_images_front_view[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="front_view">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Front View" Photos Here</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-front_view">
+                  {% for img in images_by_category.front_view %}
+                  <div class="img-cat-preview-item existing-img-item" data-cat="front_view" data-img-id="{{ img.id }}" draggable="true">
+                    <img src="{{ img.image.url }}">
+                    <label class="existing-img-remove-btn"><input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;"><i class="fas fa-times" onclick="removeExistingImage(this)"></i></label>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <div class="img-cat-panel" data-cat-panel="full_plot">
+                <input type="file" class="img-cat-input" id="imgInput-full_plot" name="plot_images_full_plot[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="full_plot"><div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div><div class="upload-text">Click or Drag "Full Plot/Field" Photos Here</div></div>
+                <div class="img-cat-preview" id="imgPreview-full_plot">
+                  {% for img in images_by_category.full_plot %}
+                  <div class="img-cat-preview-item existing-img-item" data-cat="full_plot" data-img-id="{{ img.id }}" draggable="true">
+                    <img src="{{ img.image.url }}"><label class="existing-img-remove-btn"><input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;"><i class="fas fa-times" onclick="removeExistingImage(this)"></i></label>
+                  </div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="img-cat-panel" data-cat-panel="farm_gate">
+                <input type="file" class="img-cat-input" id="imgInput-farm_gate" name="plot_images_farm_gate[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="farm_gate"><div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div><div class="upload-text">Click or Drag "Farm Gate" Photos Here</div></div>
+                <div class="img-cat-preview" id="imgPreview-farm_gate">
+                  {% for img in images_by_category.farm_gate %}
+                  <div class="img-cat-preview-item existing-img-item" data-cat="farm_gate" data-img-id="{{ img.id }}" draggable="true">
+                    <img src="{{ img.image.url }}"><label class="existing-img-remove-btn"><input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;"><i class="fas fa-times" onclick="removeExistingImage(this)"></i></label>
+                  </div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="img-cat-panel" data-cat-panel="boundary_fencing">
+                <input type="file" class="img-cat-input" id="imgInput-boundary_fencing" name="plot_images_boundary_fencing[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="boundary_fencing"><div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div><div class="upload-text">Click or Drag "Boundary" Photos Here</div></div>
+                <div class="img-cat-preview" id="imgPreview-boundary_fencing">
+                  {% for img in images_by_category.boundary_fencing %}
+                  <div class="img-cat-preview-item existing-img-item" data-cat="boundary_fencing" data-img-id="{{ img.id }}" draggable="true">
+                    <img src="{{ img.image.url }}"><label class="existing-img-remove-btn"><input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;"><i class="fas fa-times" onclick="removeExistingImage(this)"></i></label>
+                  </div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="img-cat-panel" data-cat-panel="road_facing">
+                <input type="file" class="img-cat-input" id="imgInput-road_facing" name="plot_images_road_facing[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="road_facing"><div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div><div class="upload-text">Click or Drag "Road/Approach" Photos Here</div></div>
+                <div class="img-cat-preview" id="imgPreview-road_facing">
+                  {% for img in images_by_category.road_facing %}
+                  <div class="img-cat-preview-item existing-img-item" data-cat="road_facing" data-img-id="{{ img.id }}" draggable="true">
+                    <img src="{{ img.image.url }}"><label class="existing-img-remove-btn"><input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;"><i class="fas fa-times" onclick="removeExistingImage(this)"></i></label>
+                  </div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="img-cat-panel" data-cat-panel="cultivated_area">
+                <input type="file" class="img-cat-input" id="imgInput-cultivated_area" name="plot_images_cultivated_area[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="cultivated_area"><div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div><div class="upload-text">Click or Drag "Cultivated Area" Photos Here</div></div>
+                <div class="img-cat-preview" id="imgPreview-cultivated_area">
+                  {% for img in images_by_category.cultivated_area %}
+                  <div class="img-cat-preview-item existing-img-item" data-cat="cultivated_area" data-img-id="{{ img.id }}" draggable="true">
+                    <img src="{{ img.image.url }}"><label class="existing-img-remove-btn"><input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;"><i class="fas fa-times" onclick="removeExistingImage(this)"></i></label>
+                  </div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="img-cat-panel" data-cat-panel="irrigation_source">
+                <input type="file" class="img-cat-input" id="imgInput-irrigation_source" name="plot_images_irrigation_source[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="irrigation_source"><div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div><div class="upload-text">Click or Drag "Irrigation" Photos Here</div></div>
+                <div class="img-cat-preview" id="imgPreview-irrigation_source">
+                  {% for img in images_by_category.irrigation_source %}
+                  <div class="img-cat-preview-item existing-img-item" data-cat="irrigation_source" data-img-id="{{ img.id }}" draggable="true">
+                    <img src="{{ img.image.url }}"><label class="existing-img-remove-btn"><input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;"><i class="fas fa-times" onclick="removeExistingImage(this)"></i></label>
+                  </div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="img-cat-panel" data-cat-panel="borewell_well">
+                <input type="file" class="img-cat-input" id="imgInput-borewell_well" name="plot_images_borewell_well[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="borewell_well"><div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div><div class="upload-text">Click or Drag "Borewell/Well" Photos Here</div></div>
+                <div class="img-cat-preview" id="imgPreview-borewell_well">
+                  {% for img in images_by_category.borewell_well %}
+                  <div class="img-cat-preview-item existing-img-item" data-cat="borewell_well" data-img-id="{{ img.id }}" draggable="true">
+                    <img src="{{ img.image.url }}"><label class="existing-img-remove-btn"><input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;"><i class="fas fa-times" onclick="removeExistingImage(this)"></i></label>
+                  </div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="img-cat-panel" data-cat-panel="electricity_infra">
+                <input type="file" class="img-cat-input" id="imgInput-electricity_infra" name="plot_images_electricity_infra[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="electricity_infra"><div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div><div class="upload-text">Click or Drag "Power Infra" Photos Here</div></div>
+                <div class="img-cat-preview" id="imgPreview-electricity_infra">
+                  {% for img in images_by_category.electricity_infra %}
+                  <div class="img-cat-preview-item existing-img-item" data-cat="electricity_infra" data-img-id="{{ img.id }}" draggable="true">
+                    <img src="{{ img.image.url }}"><label class="existing-img-remove-btn"><input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;"><i class="fas fa-times" onclick="removeExistingImage(this)"></i></label>
+                  </div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="img-cat-panel" data-cat-panel="farmhouse_shed">
+                <input type="file" class="img-cat-input" id="imgInput-farmhouse_shed" name="plot_images_farmhouse_shed[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="farmhouse_shed"><div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div><div class="upload-text">Click or Drag "Farmhouse/Shed" Photos Here</div></div>
+                <div class="img-cat-preview" id="imgPreview-farmhouse_shed">
+                  {% for img in images_by_category.farmhouse_shed %}
+                  <div class="img-cat-preview-item existing-img-item" data-cat="farmhouse_shed" data-img-id="{{ img.id }}" draggable="true">
+                    <img src="{{ img.image.url }}"><label class="existing-img-remove-btn"><input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;"><i class="fas fa-times" onclick="removeExistingImage(this)"></i></label>
+                  </div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="img-cat-panel" data-cat-panel="aerial_drone">
+                <input type="file" class="img-cat-input" id="imgInput-aerial_drone" name="plot_images_aerial_drone[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="aerial_drone"><div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div><div class="upload-text">Click or Drag "Aerial/Drone" Photos Here</div></div>
+                <div class="img-cat-preview" id="imgPreview-aerial_drone">
+                  {% for img in images_by_category.aerial_drone %}
+                  <div class="img-cat-preview-item existing-img-item" data-cat="aerial_drone" data-img-id="{{ img.id }}" draggable="true">
+                    <img src="{{ img.image.url }}"><label class="existing-img-remove-btn"><input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;"><i class="fas fa-times" onclick="removeExistingImage(this)"></i></label>
+                  </div>{% endfor %}
+                </div>
+              </div>
+
+              <div class="img-cat-panel" data-cat-panel="layout_site_plan">
+                <input type="file" class="img-cat-input" id="imgInput-layout_site_plan" name="plot_images_layout_site_plan[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="layout_site_plan"><div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div><div class="upload-text">Click or Drag "Layout/Site Plan" Photos Here</div></div>
+                <div class="img-cat-preview" id="imgPreview-layout_site_plan">
+                  {% for img in images_by_category.layout_site_plan %}
+                  <div class="img-cat-preview-item existing-img-item" data-cat="layout_site_plan" data-img-id="{{ img.id }}" draggable="true">
+                    <img src="{{ img.image.url }}"><label class="existing-img-remove-btn"><input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;"><i class="fas fa-times" onclick="removeExistingImage(this)"></i></label>
+                  </div>{% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <div class="row mt-4 pt-3" style="border-top:1px solid #e9ecef;">
+              <div class="col-md-6">
+                <label class="form-label">Revenue Records (7/12 & 8A)</label>
+                {% if property.encumbrance_cert %}<p class="hint-text"><a href="{{ property.encumbrance_cert.url }}" target="_blank">View current file</a></p>{% endif %}
+                <input type="file" class="form-control" name="encumbrance_cert" accept=".pdf,image/*">
+              </div>
+           
+            </div>
+
+            <div class="sub-section-title mt-4">Farm Walkthrough Video</div>
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="video_option" id="video_upload" value="upload" {% if uploaded_video or not auto_video and not rm_video %}checked{% endif %}>
+                  <label class="form-check-label" for="video_upload">Upload Property Video</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="video_option" id="video_auto" value="auto" {% if auto_video and not uploaded_video %}checked{% endif %}>
+                  <label class="form-check-label" for="video_auto">Auto-Generate Slideshow</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="video_option" id="video_rm" value="rm_assisted" {% if rm_video and not uploaded_video and not auto_video %}checked{% endif %}>
+                  <label class="form-check-label" for="video_rm">Share with RM (Large File)</label>
+                </div>
+              </div>
+            </div>
+
+            <div id="videoUploadWrapper">
+              {% if uploaded_video and uploaded_video.video %}
+              <div style="margin-bottom:12px;position:relative;" id="currentVideoBlock">
+                <label class="form-label">Current Uploaded Video</label>
+                <div style="position:relative;">
+                  <video src="{{ uploaded_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
+                  <button type="button" class="existing-img-remove-btn" style="top:32px;right:8px;width:30px;height:30px;position:absolute;" onclick="removeCurrentVideo()"><i class="fas fa-times"></i></button>
+                </div>
+                <input type="checkbox" name="delete_current_video" id="delete_current_video" value="1" style="display:none;">
+              </div>
+              {% endif %}
+              <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+              <div class="img-cat-upload-area" id="videoUploadArea" style="background:#f8fafc;border-color:#94a3b8;">
+                <div class="upload-icon" style="background:#e2e8f0;"><i class="fas fa-video" style="color:#64748b;"></i></div>
+                <div class="upload-text">Click to Replace Video</div>
+              </div>
+              <video id="videoPreview" controls style="display:none;width:100%;max-height:320px;border-radius:12px;margin-top:15px;"></video>
+            </div>
+
+            <div id="videoAutoWrapper" style="display:none;">
+              {% if auto_video and auto_video.video %}
+              <div style="margin-bottom:12px;">
+                <label class="form-label">Current Auto-Generated Slideshow</label>
+                <video src="{{ auto_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
+              </div>
+              {% endif %}
+              <div class="alert alert-info" style="background:#f0fdf4;border-left:4px solid #84cc16;">We'll auto-create a walkthrough from your photos (min. 3 needed).</div>
+              <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" name="regenerate_slideshow" id="regenerate_slideshow">
+                <label class="form-check-label" for="regenerate_slideshow">Regenerate slideshow using current photos</label>
+              </div>
+            </div>
+
+            <div id="videoRMWrapper" style="display:none;">
+              <label class="form-label">Published Video Link</label>
+              <input type="url" class="form-control" id="property_video_link" name="property_video_link" value="{{ rm_video.video_url|default:'' }}">
+              <button type="button" class="btn btn-outline-secondary mt-2" id="previewRMLinkBtn"><i class="fas fa-eye me-1"></i> Preview Link</button>
+              <div id="rmVideoFrame" style="display:none;margin-top:15px;border-radius:12px;overflow:hidden;aspect-ratio:16/9;"><iframe id="rmVideoEmbed" style="width:100%;height:100%;border:0;" allowfullscreen></iframe></div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-body" style="border-radius:12px;border:2px solid #e9ecef;">
+            <div class="row">
+              <div class="col-md-6">
+                <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
+                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes" {% if property.listed_elsewhere == "Yes" %}checked{% endif %}><label class="form-check-label" for="listed_yes">Yes</label></div>
+                <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" {% if property.listed_elsewhere == "No" or not property.listed_elsewhere %}checked{% endif %}><label class="form-check-label" for="listed_no">No</label></div>
+              </div>
+              <div class="col-md-6" id="portalField" style="display:{% if property.listed_elsewhere == 'Yes' %}block{% else %}none{% endif %};">
+                <label class="form-label">Portal Name</label>
+                <input type="text" class="form-control" name="portal_name" value="{{ property.portal_name }}">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+
+        <div class="step-nav">
+          <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+          <button type="submit" class="btn-step btn-submit" id="submitBtn"><i class="fas fa-save"></i> Update Property</button>
+        </div>
+      </div><!-- /step4 -->
+
+    </form>
+  </div>
+
+  <div class="preview-sidebar">
+    <div class="preview-card">
+      <div style="font-size:.82rem;font-weight:600;opacity:.8;margin-bottom:4px;"><i class="fas fa-eye"></i> Live Preview</div>
+      <div class="preview-mock">
+        <div class="preview-image">🌾
+          <div class="preview-badges"><span class="preview-badge">FOR SALE</span><span class="preview-badge" style="background:#84cc16;color:white;">AGRICULTURAL</span></div>
+          <div class="preview-price" id="p_price">₹ {{ property.selling_price|default:0 }}</div>
+        </div>
+        <div class="preview-body">
+          <div class="preview-title" id="p_title">{{ property.property_title|default:"Agricultural Land" }}</div>
+          <div class="preview-location"><i class="fas fa-map-marker-alt" style="color:#84cc16"></i> <span id="p_loc">{{ property.city }}, {{ property.locality }}</span></div>
+          <div class="preview-specs"><span id="p_area">{{ property.plot_area|default:0 }} {{ property.agr_area_unit }}</span><span id="p_cat">—</span></div>
+        </div>
+      </div>
+    </div>
+   
+
+    <div class="checklist-card">
+      <div class="checklist-title">📋 Listing Checklist</div>
+      <div class="checklist-item" id="cl-listedby"><i class="fas fa-circle"></i> Listed by</div>
+      <div class="checklist-item" id="cl-title" hidden><i class="fas fa-circle"></i> </div>
+      <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i>  Basic Agricultural Land Information & Revenue Classification & Legal Status</div>
+      <div class="checklist-item" id="cl-facing"><i class="fas fa-circle"></i> Land Specifications & Agricultural Details</div>
+      <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Pricing Details</div>
+      <div class="checklist-item" id="cl-amenities"><i class="fas fa-circle"></i> Amenities selected</div>
+      <div class="checklist-item" id="cl-facilities"><i class="fas fa-circle"></i> Nearby facilities selected</div>
+      <div class="checklist-item" id="cl-loc"><i class="fas fa-circle"></i> Location Details</div>
+           <div class="checklist-item" id="cl-images"><i class="fas fa-circle"></i> Photos & Media</div>
+     
+
+    </div>
+  </div>
+
+</div></div>
+
+<!-- AMENITIES/FACILITIES MODAL -->
+<div class="modal fade" id="itemsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><span id="modalTitle">Select Items</span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><input type="text" id="modalSearch" placeholder="Type to search…" class="mb-3"><div id="modalItemsList" class="modal-items-grid"></div></div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-secondary" onclick="clearAllModal()">Clear All</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="applyModal()">Apply (<span id="modalSelectedCount">0</span>)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+let currentStep = 1;
+window.EXISTING_IMAGE_COUNT = {{ existing_image_total|default:0 }};
+
+function goToStep(n) {
+  if (n > currentStep && !validateStep(currentStep)) return;
+  document.getElementById('step' + currentStep).classList.remove('active');
+  document.getElementById('step' + n).classList.add('active');
+  for (let i = 1; i <= 4; i++) {
+    const sc=document.getElementById('sc'+i), sl=document.getElementById('sl'+i), ln=document.getElementById('line'+i);
+    if (!sc) continue;
+    sc.className='step-circle'; sl.className='step-label';
+    if (ln) ln.className='step-line';
+    if (i < n) { sc.classList.add('done'); sl.classList.add('done'); sc.innerHTML='<i class="fas fa-check" style="font-size:.65rem"></i>'; if (ln) ln.classList.add('done'); }
+    else if (i === n) { sc.classList.add('active'); sl.classList.add('active'); sc.textContent=i; }
+    else { sc.textContent=i; }
+  }
+  currentStep=n;
+  document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function validateStep(step) {
+  const stepEl=document.getElementById('step'+step);
+  const required=stepEl.querySelectorAll('[required]');
+  let missing=[];
+  required.forEach(f => { f.style.borderColor=''; if (!f.value.trim()) { missing.push('Required field'); f.style.borderColor='#e74c3c'; } });
+  if (missing.length) { Swal.fire({icon:'warning',title:'Please fill required fields',confirmButtonColor:'#84cc16'}); return false; }
+  return true;
+}
+
+function setCheck(id, done) {
+  const el=document.getElementById(id); if(!el) return;
+  el.className='checklist-item'+(done?' done':'');
+  el.querySelector('i').className='fas '+(done?'fa-check-circle':'fa-circle');
+}
+
+/* CATEGORY IMAGE UPLOAD (existing + new mixed) */
+const IMG_CATEGORIES = ['front_view','full_plot','farm_gate','boundary_fencing','road_facing','cultivated_area','irrigation_source','borewell_well','electricity_infra','farmhouse_shed','aerial_drone','layout_site_plan'];
+const IMG_TOTAL_LIMIT = 25;
+window.catFiles = {};
+IMG_CATEGORIES.forEach(c => window.catFiles[c] = []);
+
+function syncCategoryInput(cat) {
+  var dt = new DataTransfer();
+  window.catFiles[cat].forEach(f => dt.items.add(f));
+  document.getElementById('imgInput-' + cat).files = dt.files;
+}
+
+function refreshCategoryCounts(cat) {
+  var preview = document.getElementById('imgPreview-' + cat);
+  if (!preview) return;
+  var count = preview.querySelectorAll('.img-cat-preview-item').length;
+  var countEl = document.getElementById('count-' + cat);
+  if (countEl) countEl.innerText = count;
+  var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+  if (tab) tab.classList.toggle('has-images', count > 0);
+  var total = 0;
+  IMG_CATEGORIES.forEach(c => { var p = document.getElementById('imgPreview-' + c); if (p) total += p.querySelectorAll('.img-cat-preview-item').length; });
+  var totalEl = document.getElementById('imgTotalCount'); if (totalEl) totalEl.innerText = total;
+  setCheck('cl-images', total > 0);
+}
+
+function totalImageCount() {
+  var total = 0;
+  IMG_CATEGORIES.forEach(c => { var p = document.getElementById('imgPreview-' + c); if (p) total += p.querySelectorAll('.img-cat-preview-item').length; });
+  return total;
+}
+
+function attachDragEvents(item, container) {
+  item.addEventListener('dragstart', () => item.classList.add('dragging'));
+  item.addEventListener('dragend', () => item.classList.remove('dragging'));
+  item.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    var dragging = container.querySelector('.dragging');
+    if (!dragging || dragging === item) return;
+    var rect = item.getBoundingClientRect();
+    var after = (e.clientX - rect.left) > (rect.width / 2);
+    if (after) item.after(dragging); else item.before(dragging);
+  });
+}
+
+function handleCatFiles(cat, files) {
+  var incoming = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+    Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed.', 'warning');
+    incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - totalImageCount()));
+  }
+  var preview = document.getElementById('imgPreview-' + cat);
+  if (!preview) return;
+  incoming.forEach(file => {
+    window.catFiles[cat].push(file);
+    var div = document.createElement('div');
+    div.className = 'img-cat-preview-item new-file-item';
+    div.draggable = true;
+    div._file = file;
+    var img = document.createElement('img'); div.appendChild(img);
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button'; removeBtn.className = 'remove-image'; removeBtn.innerHTML = '✖';
+    removeBtn.onclick = () => removeCatImage(cat, div);
+    div.appendChild(removeBtn);
+    preview.appendChild(div);
+    attachDragEvents(div, preview);
+    var reader = new FileReader();
+    reader.onload = e => { img.src = e.target.result; };
+    reader.readAsDataURL(file);
+  });
+  refreshCategoryCounts(cat);
+}
+
+window.removeCatImage = function(cat, el) {
+  var file = el._file;
+  window.catFiles[cat] = window.catFiles[cat].filter(f => f !== file);
+  el.remove();
+  refreshCategoryCounts(cat);
+};
+
+function syncImageOrderAndFiles() {
+  document.querySelectorAll('.image-order-input').forEach(el => el.remove());
+  IMG_CATEGORIES.forEach(cat => {
+    var preview = document.getElementById('imgPreview-' + cat);
+    if (!preview) return;
+    var children = Array.from(preview.children).filter(el => el.classList.contains('img-cat-preview-item'));
+    var newFilesOrdered = []; var tokens = [];
+    children.forEach(el => {
+      if (el.classList.contains('existing-img-item')) tokens.push('existing:' + el.dataset.imgId);
+      else if (el.classList.contains('new-file-item') && el._file) { tokens.push('new:' + newFilesOrdered.length); newFilesOrdered.push(el._file); }
+    });
+    window.catFiles[cat] = newFilesOrdered;
+    syncCategoryInput(cat);
+    tokens.forEach(tok => {
+      var inp = document.createElement('input');
+      inp.type = 'hidden'; inp.className = 'image-order-input';
+      inp.name = 'image_order_' + cat + '[]'; inp.value = tok;
+      document.getElementById('plotForm').appendChild(inp);
+    });
+  });
+}
+
+function renderAllCategories() {
+  IMG_CATEGORIES.forEach(cat => {
+    var preview = document.getElementById('imgPreview-' + cat);
+    if (!preview) return;
+    preview.querySelectorAll('.existing-img-item').forEach(item => attachDragEvents(item, preview));
+    refreshCategoryCounts(cat);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.img-cat-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      var cat = this.dataset.cat;
+      document.querySelectorAll('.img-cat-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.img-cat-panel').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      var targetPanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
+      if (targetPanel) targetPanel.classList.add('active');
+    });
+  });
+  IMG_CATEGORIES.forEach(cat => {
+    var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+    var input = document.getElementById('imgInput-' + cat);
+    if (!zone || !input) return;
+    zone.addEventListener('click', () => input.click());
+    input.addEventListener('change', e => handleCatFiles(cat, e.target.files));
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); handleCatFiles(cat, e.dataTransfer.files); });
+  });
+  renderAllCategories();
+});
+
+window.removeExistingImage = function(iconEl) {
+  var label = iconEl.closest('.existing-img-remove-btn');
+  var checkbox = label ? label.querySelector('input[type="checkbox"]') : null;
+  var tile = iconEl.closest('.existing-img-item');
+  if (checkbox) {
+    var hidden = document.createElement('input');
+    hidden.type = 'hidden'; hidden.name = 'delete_image_ids[]'; hidden.value = checkbox.value;
+    document.getElementById('plotForm').appendChild(hidden);
+  }
+  if (tile) tile.remove();
+  renderAllCategories();
+};
+
+function removeCurrentVideo() {
+  var cb = document.getElementById('delete_current_video');
+  if (cb) cb.checked = true;
+  var block = document.getElementById('currentVideoBlock');
+  if (block) block.style.display = 'none';
+}
+
+/* VIDEO ENGINE */
+document.addEventListener('DOMContentLoaded', function() {
+  var uploadRadio = document.getElementById('video_upload'), autoRadio = document.getElementById('video_auto'), rmRadio = document.getElementById('video_rm');
+  var uploadWrapper = document.getElementById('videoUploadWrapper'), autoWrapper = document.getElementById('videoAutoWrapper'), rmWrapper = document.getElementById('videoRMWrapper');
+  var videoInput = document.getElementById('videoInput'), videoArea = document.getElementById('videoUploadArea'), videoPreview = document.getElementById('videoPreview');
+
+  function toggleVideoOption() {
+    if (uploadWrapper) uploadWrapper.style.display = uploadRadio && uploadRadio.checked ? 'block' : 'none';
+    if (autoWrapper) autoWrapper.style.display = autoRadio && autoRadio.checked ? 'block' : 'none';
+    if (rmWrapper) rmWrapper.style.display = rmRadio && rmRadio.checked ? 'block' : 'none';
+    if (rmRadio && rmRadio.checked) renderVideoPreview();
+  }
+  if (uploadRadio) uploadRadio.addEventListener('change', toggleVideoOption);
+  if (autoRadio) autoRadio.addEventListener('change', toggleVideoOption);
+  if (rmRadio) rmRadio.addEventListener('change', toggleVideoOption);
+  if (videoArea && videoInput) videoArea.addEventListener('click', () => videoInput.click());
+  if (videoInput) {
+    videoInput.addEventListener('change', function(e) {
+      var file = e.target.files[0]; if (!file) return;
+      if (file.size > 20 * 1024 * 1024) {
+        videoInput.value = '';
+        Swal.fire({icon:'warning',title:'Video Too Large',text:'Max 20MB. Please share with RM instead.'});
+        if (rmRadio) rmRadio.checked = true;
+        toggleVideoOption();
+        return;
+      }
+      if (videoPreview) { videoPreview.src = URL.createObjectURL(file); videoPreview.style.display = 'block'; videoPreview.load(); videoPreview.play(); }
+    });
+  }
+  function renderVideoPreview() {
+    var linkInput = document.getElementById('property_video_link'), frame = document.getElementById('rmVideoFrame');
+    if (!linkInput || !frame) return;
+    var url = linkInput.value.trim();
+    if (!url) { frame.style.display = 'none'; return; }
+    frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%;height:350px;border:0;" allowfullscreen></iframe>';
+    var embedIframe = document.getElementById('rmVideoEmbed');
+    var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if (ytMatch) { embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1]; frame.style.display = 'block'; return; }
+    embedIframe.src = url; frame.style.display = 'block';
+  }
+  var linkInputEl = document.getElementById('property_video_link');
+  if (linkInputEl) linkInputEl.addEventListener('input', renderVideoPreview);
+  var previewBtn = document.getElementById('previewRMLinkBtn');
+  if (previewBtn) previewBtn.addEventListener('click', renderVideoPreview);
+  toggleVideoOption();
+  if (document.getElementById('video_rm')?.checked) renderVideoPreview();
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target.name === 'ownership_document_type') document.getElementById('other_document_type_div').style.display = e.target.value === 'Other' ? 'block' : 'none';
+  if (e.target.id === 'property_tax_status') {
+    const v = e.target.value;
+    document.getElementById('tax_due_section').style.display = (v === 'Pending' || v === 'Partially Due') ? 'block' : 'none';
+    document.getElementById('pending_since_div').style.display = v === 'Pending' ? 'block' : 'none';
+  }
+  if (e.target.id === 'property_loan_status') document.getElementById('loan_running_section').style.display = e.target.value === 'Loan Running' ? 'block' : 'none';
+  if (e.target.id === 'brokeragePercentage') document.getElementById('manualBrokerageSection').style.display = e.target.value === 'Fixed Amount' ? 'block' : 'none';
+  if (e.target.name === 'listed_elsewhere') document.getElementById('portalField').style.display = e.target.value === 'Yes' ? 'block' : 'none';
+});
+
+/* LISTED BY */
+function updateBrokerageLabel(role) {
+  const labelEl=document.getElementById('brokerageLabel'); if(!labelEl) return;
+  const r=(role||'').trim().toLowerCase(); let txt='Brokerage';
+  if (r==='admin') txt='EstateFlow Service Fee';
+  else if (r==='relationship manager'||r==='landlord') txt='Buyer Service Fee';
+  else if (r==='agent') txt='Brokerage';
+  else if (r==='agency/builder'||r==='builder') txt='Brokerage / Service Fee';
+  labelEl.innerHTML=`${txt} <span class="required">*</span>`;
+}
+
+function Change_Fields() {
+  const checked=document.querySelector('input[name="listed_by_type"]:checked'); if (!checked) return;
+  const isSelf=checked.value==='self';
+  const otherWrapper=document.getElementById('listedByOtherWrapper');
+  const hiddenSelect=document.getElementById('assigned_to');
+  if (otherWrapper) otherWrapper.style.display=isSelf?'none':'block';
+  if (hiddenSelect) hiddenSelect.required=!isSelf;
+  const admin={id:document.getElementById('selfUserId')?.value||'',name:document.getElementById('selfUserName')?.value||'',email:document.getElementById('selfUserEmail')?.value||'',phone:document.getElementById('selfUserPhone')?.value||'',role:document.getElementById('selfUserRole')?.value||''};
+  const setVal=(id,v)=>{const el=document.getElementById(id);if(el) el.value=v;};
+  if (isSelf) { setVal('listed_by_id',admin.id); setVal('listed_by_name',admin.name); setVal('listed_by_email',admin.email); setVal('listed_by_contact',admin.phone); setVal('listed_by_role',admin.role); updateBrokerageLabel(admin.role); }
+}
+
+function get_user_data() {
+  const assigned_to=document.getElementById('assigned_to').value; if (!assigned_to) return;
+  $.ajax({ method:'POST', url:"{% url 'get_user_data' %}", data:{assigned_to}, dataType:'json',
+    success:function(r){
+      const setVal=(id,v)=>{const el=document.getElementById(id);if(el) el.value=v||'';};
+      setVal('listed_by_id',r.user_id); setVal('listed_by_name',r.name); setVal('listed_by_email',r.email); setVal('listed_by_contact',r.phone||r.contact); setVal('listed_by_role',r.role);
+      updateBrokerageLabel(r.role);
+    }
+  });
+}
+
+(function(){
+  const wrapper=document.getElementById('assignedToSearchSelect'),control=document.getElementById('assignedToControl'),input=document.getElementById('searchTeamMember'),optionsEl=document.getElementById('assignedToOptions'),noResults=document.getElementById('assignedToNoResults'),valueLabel=document.getElementById('assignedToValueLabel'),hiddenSel=document.getElementById('assigned_to'),hiddenRole=document.getElementById('assigned_to_role');
+  if (!wrapper||!hiddenSel) return;
+  let opts=Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-option'));
+  let grpLbls=Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-group-label'));
+  let hi=-1;
+  function open(){wrapper.classList.add('open');input.value='';filterOpts('');setTimeout(()=>input.focus(),0);}
+  function close(){wrapper.classList.remove('open');hi=-1;}
+  function toggle(){wrapper.classList.contains('open')?close():open();}
+  function selectOpt(opt){
+    const v=opt.getAttribute('data-value'),name=opt.getAttribute('data-name'),role=opt.getAttribute('data-role'),uid=opt.getAttribute('data-uid'),phone=opt.getAttribute('data-phone');
+    hiddenSel.value=v; if(hiddenRole) hiddenRole.value=role;
+    valueLabel.textContent=uid+' — '+name+' — '+role+' — '+phone; valueLabel.classList.remove('ss-placeholder');
+    opts.forEach(o=>o.classList.remove('selected')); opt.classList.add('selected');
+    close(); hiddenSel.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  function filterOpts(q){
+    q=q.trim().toLowerCase(); let any=false; const grpHas={};
+    opts.forEach(opt=>{ const hay=opt.getAttribute('data-search')||'',match=hay.indexOf(q)!==-1; opt.style.display=match?'':'none';
+      if(match){any=true;let prev=opt.previousElementSibling; while(prev&&!prev.classList.contains('search-select-group-label')) prev=prev.previousElementSibling; if(prev) grpHas[prev.textContent]=true;}
+    });
+    grpLbls.forEach(lbl=>{lbl.style.display=grpHas[lbl.textContent]?'':'none';});
+    if(noResults) noResults.style.display=any?'none':'block';
+    hi=-1; opts.forEach(o=>o.classList.remove('highlighted'));
+  }
+  control.addEventListener('click',toggle);
+  input.addEventListener('input',()=>filterOpts(input.value));
+  opts.forEach(opt=>opt.addEventListener('click',()=>selectOpt(opt)));
+  document.addEventListener('click',e=>{if(!wrapper.contains(e.target)) close();});
+  hiddenSel.addEventListener('change',()=>{if(typeof get_user_data==='function') get_user_data();});
+})();
+
+document.addEventListener('DOMContentLoaded', function(){
+  updateDisplay('amenities'); updateDisplay('facilities');
+  updateBrokerageLabel(document.getElementById('listed_by_role')?.value);
+});
+
+
+
+document.getElementById('plotForm').addEventListener('submit',function(e){
+  e.preventDefault();
+
+  let changedFields = getChangedFieldsHtml_agri();
+  let alertHtml = `<div style="font-size:1rem;color:#4a5568;margin-bottom:15px;">Are you sure you want to save these changes?</div>`;
+  if (changedFields.length > 0) {
+    alertHtml += `<div style="text-align:left;max-height:250px;overflow-y:auto;background:#f8f9fa;padding:15px;border-radius:12px;border:1px solid #e2e8f0;font-size:0.9rem;">
+                    <strong style="color:#2d3748;display:block;margin-bottom:10px;"><i class="fas fa-clipboard-list"></i> Modifications Detected:</strong>
+                    <ul style="margin:0;padding-left:20px;list-style-type:none;">
+                        ${changedFields.join('')}
+                    </ul>
+                  </div>`;
+  } else {
+    alertHtml += `<div style="background:#f8f9fa;padding:15px;border-radius:12px;color:#718096;font-size:0.95rem;">
+                    <i class="fas fa-info-circle"></i> No modifications detected.
+                  </div>`;
+  }
+
+  Swal.fire({
+    title:'Update Agricultural Plot Listing?', icon:'question', showCancelButton:true,
+    confirmButtonColor:'#11998e', cancelButtonColor:'#cbd5e0',
+    confirmButtonText:'✓ Yes, Update Now', cancelButtonText:'Review Again',
+    html: alertHtml,
+    width: '600px'
+  }).then(result=>{
+    if(!result.isConfirmed) return;
+    const btn=document.getElementById('submitBtn');
+    btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Updating…'; btn.disabled=true;
+    Swal.fire({title:'Saving Changes...',allowOutsideClick:false,didOpen:()=>{Swal.showLoading();}});
+    syncImageOrderAndFiles();
+    const formData=new FormData(this);
+    fetch(this.getAttribute('action'),{method:'POST',body:formData,headers:{'X-Requested-With':'XMLHttpRequest'}})
+      .then(r=>r.json()).then(data=>{
+        if(data.status==='success'){ Swal.fire({icon:'success',title:'✅ Listing Updated!',text:data.message}).then(()=>window.location.reload()); }
+        else { Swal.fire({icon:'error',title:'Update Failed',text:data.message}); btn.innerHTML='<i class="fas fa-save"></i> Update Property'; btn.disabled=false; }
+      })
+      .catch(()=>{ Swal.fire({icon:'error',title:'Server Error',text:'Could not reach server.'}); btn.innerHTML='<i class="fas fa-save"></i> Update Property'; btn.disabled=false; });
+  });
+});
+
+
+</script>
+
+<script>
+let currentModalSection=null;
+function openModal(section){
+  currentModalSection=section;
+  document.getElementById('modalTitle').textContent=section==='amenities'?'Select Amenities':'Select Nearby Facilities';
+  document.getElementById('modalSearch').value='';
+  const container=document.getElementById('modalItemsList'); container.innerHTML='';
+  document.querySelectorAll(`.${section}-checkbox`).forEach(cb=>{
+    const icon=cb.getAttribute('data-icon')||'fas fa-check',val=cb.value,isChecked=cb.checked;
+    const div=document.createElement('div'); div.setAttribute('data-value',val.toLowerCase());
+    const label=document.createElement('label');
+    label.className='modal-item-label'+(isChecked?' checked':'');
+    label.style.cssText=isChecked?'border-color:#84cc16;background:linear-gradient(135deg,#84cc16,#22c55e);color:#fff;':'';
+    label.innerHTML=`<span class="custom-checkbox"><i class="fas fa-check"></i></span><i class="${icon}"></i> ${val}`;
+    label.addEventListener('click',function(){
+      const nowChecked=!cb.checked; cb.checked=nowChecked;
+      if(nowChecked){label.classList.add('checked');label.style.cssText='border-color:#84cc16;background:linear-gradient(135deg,#84cc16,#22c55e);color:#fff;';}
+      else{label.classList.remove('checked');label.style.cssText='';}
+      updateModalCount();
+    });
+    div.appendChild(label); container.appendChild(div);
+  });
+  updateModalCount();
+  new bootstrap.Modal(document.getElementById('itemsModal')).show();
+}
+function updateModalCount(){if(!currentModalSection) return;document.getElementById('modalSelectedCount').textContent=document.querySelectorAll(`.${currentModalSection}-checkbox:checked`).length;}
+function applyModal(){if(currentModalSection) updateDisplay(currentModalSection);}
+function clearAllModal(){
+  if(!currentModalSection) return;
+  document.querySelectorAll(`.${currentModalSection}-checkbox`).forEach(cb=>{cb.checked=false;});
+  document.querySelectorAll('#modalItemsList label').forEach(lbl=>{lbl.classList.remove('checked');lbl.style.cssText='';});
+  updateModalCount();
+}
+function updateDisplay(section){
+  const checked=document.querySelectorAll(`.${section}-checkbox:checked`);
+  const count=checked.length,isAmenities=section==='amenities';
+  const countBadge=document.getElementById(isAmenities?'amenitiesCount':'facilitiesCount');
+  const badgeSpan=document.getElementById(isAmenities?'amenitiesBadge':'facilitiesBadge');
+  const displayEl=document.getElementById(isAmenities?'amenitiesDisplay':'facilitiesDisplay');
+  if(countBadge) countBadge.textContent=count+' selected';
+  if(badgeSpan) badgeSpan.textContent=count;
+  if(!displayEl) return;
+  displayEl.innerHTML='';
+  if(count===0){ displayEl.innerHTML=`<p class="text-muted text-center m-0" style="font-size:.85rem;">No ${section} selected</p>`; }
+  else { checked.forEach(cb=>{ const icon=cb.getAttribute('data-icon')||'fas fa-check'; const tag=document.createElement('span'); tag.className='item-tag'; tag.innerHTML=`<i class="${icon}"></i>${cb.value}<span class="remove-btn" onclick="removeItem('${section}','${cb.value}')"><i class="fas fa-times-circle"></i></span>`; displayEl.appendChild(tag); }); }
+}
+function removeItem(section,name){
+  const cb=Array.from(document.querySelectorAll(`.${section}-checkbox`)).find(c=>c.value===name);
+  if(cb) cb.checked=false; updateDisplay(section);
+}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var yesRadio = document.getElementById('listed_yes'), noRadio = document.getElementById('listed_no'), portalField = document.getElementById('portalField');
+  function togglePortal(){ if(portalField) portalField.style.display = yesRadio.checked ? 'block' : 'none'; }
+  if(yesRadio) yesRadio.addEventListener('change', togglePortal);
+  if(noRadio) noRadio.addEventListener('change', togglePortal);
+});
+document.getElementById('city')?.addEventListener('input', function () { this.value = this.value.replace(/[^a-zA-Z\s]/g, ''); });
+</script>
+
+
+<script>
+let initialFormValues_agri = {};
+
+function captureInitialValues_agri() {
+  const editForm = document.getElementById('plotForm');
+  if (!editForm) return;
+  const inputs = editForm.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    if (input.name && input.type !== 'file' && input.type !== 'hidden' && !input.readOnly && !input.disabled) {
+      if (input.type === 'checkbox' || input.type === 'radio') {
+        if (input.checked) {
+          if (!initialFormValues_agri[input.name]) initialFormValues_agri[input.name] = [];
+          initialFormValues_agri[input.name].push(input.value);
+        }
+      } else {
+        initialFormValues_agri[input.name] = input.value;
+      }
+    }
+  });
+  const checkRadios = editForm.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+  checkRadios.forEach(input => {
+    if (input.name && !initialFormValues_agri[input.name]) initialFormValues_agri[input.name] = [];
+  });
+}
+
+function getChangedFieldsHtml_agri() {
+  let currentValues = {};
+  let changedFieldsHtml = [];
+  const editForm = document.getElementById('plotForm');
+  if (!editForm) return [];
+
+  const inputs = editForm.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    if (input.name && input.type !== 'file' && input.type !== 'hidden' && !input.readOnly && !input.disabled) {
+      if (input.type === 'checkbox' || input.type === 'radio') {
+        if (input.checked) {
+          if (!currentValues[input.name]) currentValues[input.name] = [];
+          currentValues[input.name].push(input.value);
+        }
+      } else {
+        currentValues[input.name] = input.value;
+      }
+    }
+  });
+  const checkRadios = editForm.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+  checkRadios.forEach(input => {
+    if (input.name && !currentValues[input.name]) currentValues[input.name] = [];
+  });
+
+  let allKeys = new Set([...Object.keys(initialFormValues_agri), ...Object.keys(currentValues)]);
+
+  allKeys.forEach(key => {
+    let initial = initialFormValues_agri[key];
+    let current = currentValues[key];
+    let displayKey = key.replace(/\[\]/g, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+    if (Array.isArray(initial) || Array.isArray(current)) {
+      let initArr = initial || [];
+      let currArr = current || [];
+      if (initArr.slice().sort().join(',') !== currArr.slice().sort().join(',')) {
+        changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#f39c12;"><i class="fas fa-edit"></i> <b>${displayKey}</b>:</span> Modified to [${currArr.length > 0 ? currArr.join(', ') : 'None'}]</li>`);
+      }
+    } else {
+      initial = initial || "";
+      current = current || "";
+      if (initial !== current) {
+        if (initial === "" && current !== "") {
+          changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#11998e;"><i class="fas fa-plus-circle"></i> <b>${displayKey}</b>:</span> Newly added as <i>"${current}"</i></li>`);
+        } else if (initial !== "" && current === "") {
+          changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#e74c3c;"><i class="fas fa-minus-circle"></i> <b>${displayKey}</b>:</span> Removed (was <i>"${initial}"</i>)</li>`);
+        } else {
+          changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#f39c12;"><i class="fas fa-edit"></i> <b>${displayKey}</b>:</span> Modified from <i>"${initial}"</i> to <i>"${current}"</i></li>`);
+        }
+      }
+    }
+  });
+
+  return changedFieldsHtml;
+}
+
+document.addEventListener('DOMContentLoaded', captureInitialValues_agri);
+
+
+
+
+function updatePreview() {
+  const title = document.getElementById('property_title')?.value || '';
+  const area = document.getElementById('plot_area')?.value || '';
+  const selling_price = document.getElementById('selling_price')?.value || '';
+  const city = document.getElementById('city')?.value || '';
+  const loc = document.querySelector('input[name="locality"]')?.value || '';
+  const unit = document.getElementById('agr_area_unit')?.value || 'acre';
+
+  // Update live preview card fields
+  const titleEl = document.getElementById('p_title');
+  if (titleEl) titleEl.textContent = title || 'Agricultural Land';
+  
+  const priceEl = document.getElementById('p_price');
+  if (priceEl) priceEl.textContent = selling_price ? '₹ ' + parseInt(selling_price).toLocaleString('en-IN') : '₹ 0';
+  
+  const areaEl = document.getElementById('p_area');
+  if (areaEl) areaEl.textContent = area ? `${Number(area).toLocaleString('en-IN')} ${unit}` : `0 ${unit}`;
+  
+  const locEl = document.getElementById('p_loc');
+  if (locEl) locEl.textContent = (city || loc) ? [city, loc].filter(Boolean).join(', ') : 'City, Locality';
+
+  // Rate per unit calculation auto-fill
+  const psf = document.getElementById('plot_price_per_sqft');
+  if (selling_price && area && parseFloat(area) > 0) {
+    psf.value = Math.round(parseFloat(selling_price) / parseFloat(area));
+  } else { 
+    psf.value = ''; 
+  }
+
+  // Real-time Checklist Evaluation & Ticking
+  setCheck('cl-listedby', !!document.getElementById('listed_by_name')?.value);
+  setCheck('cl-title', !!title);
+  setCheck('cl-area', !!area);
+  setCheck('cl-facing', !!document.querySelector('select[name="plot_road_facing"]')?.value);
+  setCheck('cl-price', !!selling_price);
+  setCheck('cl-amenities', document.querySelectorAll('input[name="amenities[]"]:checked').length > 0);
+  setCheck('cl-facilities', document.querySelectorAll('input[name="facilities[]"]:checked').length > 0);
+  setCheck('cl-loc', !!city && !!loc);
+  
+  var totalImages = 0;
+  if (typeof IMG_CATEGORIES !== 'undefined') {
+    IMG_CATEGORIES.forEach(c => { 
+      var p = document.getElementById('imgPreview-' + c); 
+      if (p) totalImages += p.querySelectorAll('.img-cat-preview-item').length; 
+    });
+  }
+  setCheck('cl-images', totalImages > 0);
+}
+
+// Bind live listeners to trigger checklist validation on change/input
+['plot_title', 'plot_area', 'selling_price', 'city', 'locality', 'listed_by_name'].forEach(id => {
+  const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
+  if (el) el.addEventListener('input', updatePreview);
+});
+
+document.getElementById('property_type')?.addEventListener('change', updatePreview);
+document.querySelector('select[name="plot_road_facing"]')?.addEventListener('change', updatePreview);
+
+// Run checklist verification immediately on page load
+document.addEventListener('DOMContentLoaded', () => {
+  updatePreview();
+});
+</script>
+</body>
+</html>

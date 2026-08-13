@@ -65,6 +65,8 @@
             <li class="nav-item" role="presentation"><button class="nav-link" id="plot-tab" data-bs-toggle="tab" data-bs-target="#plot" type="button" role="tab">Plot (Sell) <span class="badge-count">{{ plot_sale_count }}</span></button></li>
             <li class="nav-item" role="presentation"><button class="nav-link" id="industrial-tab" data-bs-toggle="tab" data-bs-target="#industrial" type="button" role="tab">Industrial (Sell) <span class="badge-count">{{ industrial_resale_count }}</span></button></li>
             <li class="nav-item" role="presentation"><button class="nav-link" id="agricultural-tab" data-bs-toggle="tab" data-bs-target="#agricultural" type="button" role="tab">Agricultural (Sell) <span class="badge-count">{{ agricultural_resale_count }}</span></button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="industrial-plot-tab" data-bs-toggle="tab" data-bs-target="#industrial-plot" type="button" role="tab">Industrial Plot (Sell) <span class="badge-count">{{ industrial_plot_count }}</span></button></li>
+<li class="nav-item" role="presentation"><button class="nav-link" id="agricultural-plot-tab" data-bs-toggle="tab" data-bs-target="#agricultural-plot" type="button" role="tab">Agricultural Plot (Sell) <span class="badge-count">{{ agricultural_plot_count }}</span></button></li>
         </ul>
 
         <div class="tab-content" id="recycleBinTabsContent">
@@ -509,6 +511,121 @@
                 </div>
             </div>
 
+       
+       
+       <div class="tab-pane fade" id="industrial-plot" role="tabpanel">
+                {% if industrial_plot_deleted %}
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <input type="text" class="form-control search-input" placeholder="🔍 Search by Deleted By..." onkeyup="filterTable('industrial-plot-table', this.value)">
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-restore" onclick="processBulkRestore('industrial-plot-resale', 'Industrial Plot Resale')"><i class="fas fa-undo"></i> Restore This Bin</button>
+                        <button class="btn-hard-delete" onclick="processBulkDelete('industrial-plot-resale', 'Industrial Plot Resale')"><i class="fas fa-dumpster-fire"></i> Empty Industrial Plot Bin</button>
+                    </div>
+                </div>
+                {% endif %}
+                <div style="overflow-x: auto;">
+                    <table class="properties-table" id="industrial-plot-table">
+                        <thead>
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Property ID</th>
+                                <th>Property Title</th>
+                                <th>Listed By</th>
+                                <th><i class="fas fa-user-shield"></i> Deleted By</th>
+                                <th><i class="fas fa-clock"></i> Deleted Time</th>
+                                <th><i class="fas fa-hourglass-half"></i> Auto-Delete</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prop in industrial_plot_deleted %}
+                            <tr id="industrial-plot-row-{{ prop.pk }}">
+                                <td><strong>{{ forloop.counter }}</strong></td>
+                                <td><strong>#{{ prop.id }}</strong></td>
+                                <td>{{ prop.property_title }}</td>
+                                <td>{{ prop.listed_by_name }}</td>
+                                <td><span class="deleted-by-text">{{ prop.deleted_by|default:"System Admin" }}</span></td>
+                                <td style="color: #ef4444;">{{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td>
+                                    {% if prop.days_left <= 5 %}
+                                        <span class="badge-danger"><i class="fas fa-exclamation-circle"></i> {{ prop.days_left }} Days</span>
+                                    {% else %}
+                                        <span class="badge-safe">{{ prop.days_left }} Days</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/industrial-plot-resale/restore/{{ prop.pk }}/', 'industrial-plot-row-{{ prop.pk }}')"><i class="fas fa-undo"></i> Restore</button>
+                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/industrial-plot-resale/hard-delete/{{ prop.pk }}/', 'industrial-plot-row-{{ prop.pk }}')"><i class="fas fa-times"></i> Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Industrial Plot Resale Properties.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="agricultural-plot" role="tabpanel">
+                {% if agricultural_plot_deleted %}
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <input type="text" class="form-control search-input" placeholder="🔍 Search by Deleted By..." onkeyup="filterTable('agricultural-plot-table', this.value)">
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-restore" onclick="processBulkRestore('agricultural-plot-resale', 'Agricultural Plot Resale')"><i class="fas fa-undo"></i> Restore This Bin</button>
+                        <button class="btn-hard-delete" onclick="processBulkDelete('agricultural-plot-resale', 'Agricultural Plot Resale')"><i class="fas fa-dumpster-fire"></i> Empty Agricultural Plot Bin</button>
+                    </div>
+                </div>
+                {% endif %}
+                <div style="overflow-x: auto;">
+                    <table class="properties-table" id="agricultural-plot-table">
+                        <thead>
+                            <tr>
+                                <th>Sr.No</th>
+                                <th>Property ID</th>
+                                <th>Property Title</th>
+                                <th>Listed By</th>
+                                <th><i class="fas fa-user-shield"></i> Deleted By</th>
+                                <th><i class="fas fa-clock"></i> Deleted Time</th>
+                                <th><i class="fas fa-hourglass-half"></i> Auto-Delete</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for prop in agricultural_plot_deleted %}
+                            <tr id="agricultural-plot-row-{{ prop.pk }}">
+                                <td><strong>{{ forloop.counter }}</strong></td>
+                                <td><strong>#{{ prop.id }}</strong></td>
+                                <td>{{ prop.property_title }}</td>
+                                <td>{{ prop.listed_by_name }}</td>
+                                <td><span class="deleted-by-text">{{ prop.deleted_by|default:"System Admin" }}</span></td>
+                                <td style="color: #ef4444;">{{ prop.deleted_at|date:"d M Y, h:i A" }}</td>
+                                <td>
+                                    {% if prop.days_left <= 5 %}
+                                        <span class="badge-danger"><i class="fas fa-exclamation-circle"></i> {{ prop.days_left }} Days</span>
+                                    {% else %}
+                                        <span class="badge-safe">{{ prop.days_left }} Days</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn-restore" onclick="processAction('restore', '/Admin_App/agricultural-plot-resale/restore/{{ prop.pk }}/', 'agricultural-plot-row-{{ prop.pk }}')"><i class="fas fa-undo"></i> Restore</button>
+                                        <button class="btn-hard-delete" onclick="processAction('delete', '/Admin_App/agricultural-plot-resale/hard-delete/{{ prop.pk }}/', 'agricultural-plot-row-{{ prop.pk }}')"><i class="fas fa-times"></i> Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="8" style="text-align: center; padding: 30px; color: #94a3b8;">No deleted Agricultural Plot Resale Properties.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+       
+       
+       
+       
         </div>
     </div>
 </div>
@@ -675,11 +792,11 @@
                     didOpen: () => { Swal.showLoading(); }
                 });
                 
-                const endpoints = [
-                    'rental-residential', 'commercial', 'pg-coliving', 'resale-residential',
-                    'commercial-resale', 'plot-sale', 'industrial-resale', 'agricultural-resale'
-                ];
-
+               const endpoints = [
+    'rental-residential', 'commercial', 'pg-coliving', 'resale-residential',
+    'commercial-resale', 'plot-sale', 'industrial-resale', 'agricultural-resale',
+    'industrial-plot-resale', 'agricultural-plot-resale'
+];
                 const promises = endpoints.map(ep => 
                     fetch(`/Admin_App/bulk-restore/${ep}/`, {
                         method: 'POST',

@@ -627,6 +627,7 @@
                     <span class="badge-duplicate"><i class="fas fa-clone"></i> Duplicate Flagged ({{ property.duplicate_count }} linked)</span>
                     {% endif %}
                 </div>
+                 
                 <a href="{% url 'residential_list' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:1.100rem; font-weight:600;">
                     <i class="fas fa-arrow-left"></i> Back to Listing
                 </a>
@@ -1091,12 +1092,20 @@
                             </div>
 
                            
-                            <!-- Monthly Maintenance -->
-{% if property.maintenance_type == 'Extra' %}
+                       <!-- Monthly Maintenance -->
+{% if property.monthy_maintenance_amount or property.maintenance_type %}
 <div class="spec-item spec-full">
     <div class="spec-label">Monthly Maintenance Amount</div>
     <div class="spec-value">
-        ₹{{ property.monthy_maintenance_amount|default:"0"|intcomma }}
+        {% if property.monthy_maintenance_amount and property.monthy_maintenance_amount != "0" %}
+            <span style="font-weight:700; color:#1e293b;">₹{{ property.monthy_maintenance_amount|intcomma }}/ mo</span>
+        {% else %}
+            <span style="font-weight:700; color:#1e293b;">—</span>
+        {% endif %}
+        
+        <span style="font-size:0.8rem; color:var(--muted); font-weight:500; margin-left:4px;">
+            ({{ property.maintenance_type|default:"Included" }})
+        </span>
     </div>
 </div>
 {% endif %}
