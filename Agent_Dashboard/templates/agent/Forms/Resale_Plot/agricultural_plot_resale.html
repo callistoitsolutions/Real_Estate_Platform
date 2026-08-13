@@ -1,3 +1,4 @@
+
 {% include "agent/agent_header.html" %}
 {% load static %}
 
@@ -97,14 +98,100 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 .btn-prev{background:var(--bg-light);color:var(--text-dark);border:2px solid var(--border)!important}
 .btn-prev:hover{background:#e9ecef}
 
-/* IMAGE UPLOAD */
-.image-upload-area{border:3px dashed #cbd5e0;border-radius:var(--radius-lg);padding:40px 20px;text-align:center;background:var(--bg-light);cursor:pointer;transition:all .3s}
-.image-upload-area:hover,.image-upload-area.dragover{border-color:#84cc16;background:#f4faec}
-.image-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:14px;margin-top:18px}
-.preview-item{position:relative;border-radius:var(--radius-md);overflow:hidden;aspect-ratio:1;border:2px solid var(--border)}
-.preview-item img{width:100%;height:100%;object-fit:cover;display:block}
-.remove-image{position:absolute;top:7px;right:7px;width:26px;height:26px;background:#e74c3c;color:#fff;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.7rem;z-index:10}
 
+
+
+/* ================= CATEGORY IMAGE UPLOAD ================= */
+.img-upload-guide {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 2px dashed #4ade80; border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px;
+}
+.guide-step { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 190px; }
+.guide-step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--primary-grad); color: #fff;
+    font-weight: 800; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 3px 8px rgba(132,204,22,0.35);
+}
+.guide-step-text { font-size: 0.78rem; color: #14532d; line-height: 1.35; }
+.guide-step-text strong { display: block; font-size: 0.85rem; color: #052e16; }
+.guide-arrow { color: #4ade80; font-size: 1rem; display: none; }
+@media (min-width: 900px) { .guide-arrow { display: block; } }
+
+.img-cat-tabs {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 12px; margin-bottom: 20px; counter-reset: catstep;
+}
+.img-cat-tab {
+    position: relative; border: 2px solid #e9ecef; background: #fff; border-radius: 14px;
+    padding: 18px 14px 14px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
+    cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    transition: all 0.25s ease; counter-increment: catstep;
+}
+.img-cat-tab i { font-size: 1.3rem; color: #94a3b8; }
+.img-cat-tab .cat-count {
+    background: #f1f5f9; color: #64748b; border-radius: 20px;
+    padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
+    align-self: flex-end; margin-top: -4px;
+}
+.img-cat-tab.active { background: var(--primary-grad); border-color: transparent; color: #fff; }
+.img-cat-tab.active i { color: #fff; }
+.img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+.img-cat-tab.has-images:not(.active) { border-color: #84cc16; }
+.img-cat-tab::before {
+    content: counter(catstep); position: absolute; top: -8px; left: -8px;
+    width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid #cbd5e0; color: #64748b;
+    font-size: 0.68rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+.img-cat-tab.active::before { border-color: #84cc16; color: #84cc16; }
+.img-cat-tab.has-images::before { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; background: #84cc16; border-color: #84cc16; color: #fff; }
+.img-cat-tab:nth-child(1)::after {
+    content: "★ Becomes Cover Photo"; font-size: 0.62rem; font-weight: 700; color: #b45309;
+    background: #fef3c7; padding: 2px 9px; border-radius: 20px; align-self: flex-start; margin-top: 2px;
+}
+.img-cat-tab.active:nth-child(1)::after { color: #fff; background: rgba(255,255,255,0.25); }
+.img-cat-panel { display: none; }
+.img-cat-panel.active { display: block; animation: fadeInUp 0.3s ease; }
+.img-cat-upload-area {
+    border: 3px dashed #cbd5e0; border-radius: 15px; padding: 36px 20px;
+    text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+}
+.img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #84cc16; background: #f0fdf4; }
+.img-cat-upload-area .upload-icon {
+    width: 60px; height: 60px; border-radius: 50%; background: #dcfce7;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+}
+.img-cat-upload-area .upload-icon i { font-size: 1.6rem; color: #84cc16; margin: 0; }
+.img-cat-upload-area .upload-text { font-size: 1.05rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+.img-cat-upload-area .upload-subtext {
+    display: inline-block; margin-top: 8px; padding: 4px 12px; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 20px; color: #475569; font-size: 0.82rem;
+}
+.img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+.img-cat-preview-item {
+    position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
+}
+.img-cat-preview-item.dragging { opacity: 0.4; }
+.img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;}
+.img-cat-preview-item .cover-badge {
+    position: absolute; bottom: 8px; left: 8px; background: linear-gradient(135deg,#f6d365,#fda085); color: #3b2a00;
+    font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 4px;
+}
+.img-cat-preview-item .remove-image {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff;
+    border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
+}
+.img-cat-preview-item .remove-image:hover { background: #c0392b; }
+.img-total-summary {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 16px;
+    padding: 16px 22px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+}
 /* PREVIEW CARD */
 .preview-card{background:linear-gradient(135deg,#2c3e50,#1a252f);border-radius:var(--radius-lg);padding:18px;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.2)}
 .preview-mock{background:#fff;border-radius:var(--radius-md);overflow:hidden;margin-top:14px}
@@ -272,6 +359,10 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
       <p class="page-subtitle" id="pageSubtitle">
         List your farm, orchard, or agricultural plot to connect with genuine buyers and investors.
       </p>
+       <button class="btn-back" onclick="history.back();">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to List
+                </button>
     </div>
   </div>
 
@@ -303,7 +394,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
   <!-- FORM CONTAINER -->
   <div class="form-container" id="formContainer">
 
-    <form action="" method="POST" enctype="multipart/form-data" id="plotForm">
+    <form action="{% url 'agricultural_plot_resale_add_agent' %}" method="POST" enctype="multipart/form-data" id="plotForm">
       {% csrf_token %}
       <input type="hidden" name="plot_type_main" id="plot_type_hidden" value="agricultural">
 
@@ -315,53 +406,28 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
           <div class="form-header">
                 <div class="form-title">
                   
-         🌾 Agricultural Land
+         🌾 Agricultural Plot
                 </div>
-                <button class="btn-back" onclick="history.back();">
-                    <i class="fas fa-arrow-left"></i>
-                    Back to List
-                </button>
+               
             </div>
 
         <!-- ── LISTED BY ── -->
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-id-badge"></i> Listed By</div>
-          <div class="section-body">
+                            <div class="section-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                                <span><i class="fas fa-upload"></i> Listed By</span>
+                            </div>
+                            <div class="section-body">
+                                
 
-           
-
-            <!-- Hidden admin values -->
-            
-
-            <!-- Searchable team member dropdown (shown when Other) -->
-        
-
-            <!-- Read-only summary row (auto-filled) -->
-            <div class="row mt-3" id="user_data_div">
-              <div class="col-md-3 mt-2">
-                <label class="form-label"><i class="fas fa-id-card"></i> ID</label>
-                <input type="text" class="form-control" name="listed_by_id" value="{{user_obj.user_id}}" readonly>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label"><i class="fas fa-user"></i> Name</label>
-                <input type="text" class="form-control" name="listed_by_name" value="{{user_obj.user_name}}" readonly>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
-                <input type="email" class="form-control" name="listed_by_email" value="{{user_obj.user_email}}" readonly>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label"><i class="fas fa-phone"></i> Contact</label>
-                <input type="text" class="form-control" name="listed_by_contact"  value="{{user_obj.user_phone}}" readonly>
-              </div>
-              <div class="col-md-3 mt-3">
-                <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
-                <input type="text" class="form-control" name="listed_by_role" value="{{user_obj.user_role}}"  readonly>
-              </div>
-            </div>
-
-          </div>
-        </div>
+                                <div class="row" id="user_data_div">
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label">User Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" readonly style="background-color:#e9ecef;" value="{{user_obj.user_id}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"> User Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" readonly style="background-color:#e9ecef;" value="{{user_obj.user_name}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label">User Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email" readonly style="background-color:#e9ecef;" value="{{user_obj.user_email}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label">User Contact</label><input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" readonly style="background-color:#e9ecef;" value="{{user_obj.user_phone}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"> User Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" readonly style="background-color:#e9ecef;" value="{{user_obj.user_role}}"></div></div>
+                                </div>
+                            </div>
+                        </div>
 
         <!-- ── AUTO TITLE / BASIC INFO ── -->
         <div class="form-section">
@@ -369,15 +435,11 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
           <div class="section-body">
             <div class="mb-3">
               <label class="form-label"> Property Title </label>
-              <input type="text" class="form-control" id="property_title" readonly placeholder="Property Title auto-generated by system">
+              <input type="text" class="form-control" id="property_title" name="property_title" readonly placeholder="Property Title auto-generated by system">
               <p class="hint-text">This headline appears on search results and listing page</p>
             </div>
             <div class="row">
-              <div class="col-md-6 mt-2" hidden>
-                <label class="form-label">Advertisement Headline</label>
-                <input type="text" class="form-control" value="tyagiresidence" name="plot_title" id="plot_title" maxlength="120"
-                  placeholder="e.g., 3 Acre Irrigated Farm Land with Borewell, Canal Water, Near NH-6">
-              </div>
+              
               <div class="col-md-6 mt-2">
                 <label class="form-label">Gat / Gut / Khasra / Survey Number<span class="required">*</span></label>
                 <input type="text" class="form-control" name="property_no" id="property_no"
@@ -398,7 +460,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Agricultural Land Type <span class="required">*</span></label>
-                <select class="form-select form-control" name="plot_category" id="plot_category" required>
+                <select class="form-select form-control" name="property_type" id="property_type" required>
                   <option value="">— Select Land Type —</option>
                   <option value="farm_land">Farm Land (Open Agricultural)</option>
                   <option value="orchard_plantation">Orchard / Fruit Farm (Mango, Orange, etc.)</option>
@@ -416,7 +478,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
         <!-- ── ZONE / REVENUE CLASSIFICATION ── -->
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-file-shield"></i> Revenue Classification &amp; Legal Status</div>
+          <div class="section-header"><i class="fas fa-file-shield"></i> Revenue Classification & Legal Status</div>
           <div class="section-body">
             <div class="row">
               <div class="col-md-4 mt-2">
@@ -458,7 +520,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
         <!-- ── PLOT SPECIFICATIONS ── -->
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-ruler-combined"></i> Land Specifications &amp; Agricultural Details</div>
+          <div class="section-header"><i class="fas fa-ruler-combined"></i> Land Specifications & Agricultural Details</div>
           <div class="section-body">
 
             <!-- DIMENSIONS -->
@@ -467,7 +529,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               <div class="col-md-4">
                 <label class="form-label">Frontage / Width (ft)</label>
                 <div class="input-with-unit">
-                  <input type="number" class="form-control" name="plot_frontage" placeholder="e.g., 200" min="1">
+                  <input type="number" class="form-control" name="plot_frontage" id="plot_frontage" placeholder="e.g., 200" min="1">
                   <span class="input-unit">ft</span>
                 </div>
                 <p class="hint-text">Width of the land facing the road / track</p>
@@ -475,14 +537,14 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               <div class="col-md-4">
                 <label class="form-label">Depth / Length (ft)</label>
                 <div class="input-with-unit">
-                  <input type="number" class="form-control" name="plot_depth" placeholder="e.g., 400" min="1">
+                  <input type="number" class="form-control" name="plot_depth" id="plot_depth" placeholder="e.g., 400" min="1">
                   <span class="input-unit">ft</span>
                 </div>
                 <p class="hint-text">Depth from front to rear of land</p>
               </div>
               <div class="col-md-4">
                 <label class="form-label">Plot Shape</label>
-                <select class="form-select form-control" name="plot_shape">
+                <select class="form-select form-control" name="plot_shape" id="plot_shape">
                   <option value="">— Select Shape —</option>
                   <option value="Rectangular">Rectangular</option>
                   <option value="Square">Square</option>
@@ -494,7 +556,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
             </div>
 
             <!-- ROAD ACCESS -->
-            <div class="sub-section-title mt-3">Road &amp; Access</div>
+            <div class="sub-section-title mt-3">Road & Access</div>
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Road / Track Access to Land <span class="required">*</span></label>
@@ -541,14 +603,10 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <option value="sqft">Square Feet</option>
                 </select>
               </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Khasra / Gat / Gut Number</label>
-                <input type="text" class="form-control" name="khasra_number" placeholder="e.g., Gat No. 234, Khasra 45/B">
-                <p class="hint-text">Survey / Gat number from 7/12 or land records</p>
-              </div>
+              
               <div class="col-md-4 mt-2">
                 <label class="form-label">Soil Type</label>
-                <select class="form-select form-control" name="soil_type">
+                <select class="form-select form-control" name="soil_type" id="soil_type">
                   <option value="">— Select —</option>
                   <option value="Black_Cotton">Black Cotton Soil (Regur)</option>
                   <option value="Red_Laterite">Red / Laterite Soil</option>
@@ -560,7 +618,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Current Crop / Plantation</label>
-                <select class="form-select form-control" name="current_crop">
+                <select class="form-select form-control" name="current_crop" id="current_crop">
                   <option value="">— Select —</option>
                   <option value="No_Crop_Vacant">No Crop — Vacant / Fallow Land</option>
                   <option value="Cotton">Cotton</option>
@@ -578,7 +636,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Irrigation / Water Source</label>
-                <select class="form-select form-control" name="irrigation_source">
+                <select class="form-select form-control" name="irrigation_source" id="irrigation_source">
                   <option value="">— Select —</option>
                   <option value="Canal_Irrigation">Canal / Dam Irrigation (Assured)</option>
                   <option value="Borewell">Borewell (On Plot)</option>
@@ -591,7 +649,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Electricity on Land</label>
-                <select class="form-select form-control" name="agr_electricity">
+                <select class="form-select form-control" name="agr_electricity" id="agr_electricity">
                   <option value="">— Select —</option>
                   <option value="Agricultural_Pump_Connection">Agricultural Pump Connection (Available)</option>
                   <option value="Connection_Possible">Connection Possible from Nearby Line</option>
@@ -600,7 +658,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Distance from Nearest Highway / Road</label>
-                <select class="form-select form-control" name="highway_distance">
+                <select class="form-select form-control" name="highway_distance" id="highway_distance">
                   <option value="">— Select —</option>
                   <option value="0-1km">0 – 1 km (Very Close)</option>
                   <option value="1-3km">1 – 3 km</option>
@@ -611,7 +669,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Land Level / Topography</label>
-                <select class="form-select form-control" name="land_topography">
+                <select class="form-select form-control" name="land_topography" id="land_topography">
                   <option value="">— Select —</option>
                   <option value="Level_Flat">Level / Flat (Ready to Cultivate)</option>
                   <option value="Slightly_Undulating">Slightly Undulating</option>
@@ -622,7 +680,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Is Land Under Any Government Scheme?</label>
-                <select class="form-select form-control" name="govt_scheme">
+                <select class="form-select form-control" name="govt_scheme" id="govt_scheme">
                   <option value="No">No</option>
                   <option value="Forest_Clearance_Required">Forest Clearance Required</option>
                   <option value="Revenue_Forest">Revenue Forest Land</option>
@@ -666,14 +724,22 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
         <div class="step-nav">
           <div></div>
           <button type="button" class="btn-step btn-next" onclick="goToStep(2)">
-            Next: Pricing &amp; Legal <i class="fas fa-arrow-right"></i>
+         Move To Next Page <i class="fas fa-arrow-right"></i>
           </button>
         </div>
       </div><!-- /step1 -->
 
       <!-- ════════════ STEP 2 — PRICING & LEGAL ════════════ -->
       <div class="step-content" id="step2">
-        <div id="step2Badge"><div class="type-badge">🌾 Agricultural Land</div></div>
+        
+        <div class="form-header">
+                <div class="form-title">
+                  
+         🌾 Agricultural Plot
+                </div>
+               
+            </div>
+
 
         <!-- PRICING -->
         <div class="form-section">
@@ -683,7 +749,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               <div class="col-md-6 mt-2">
                 <label class="form-label">  Selling Price <span class="required">*</span></label>
                 <div class="input-with-unit">
-                  <input type="number" class="form-control" name="plot_price" id="plot_price" required min="1" placeholder="e.g., 3500000">
+                  <input type="number" class="form-control" name="selling_price" id="selling_price" required min="1" placeholder="e.g., 3500000">
                   <span class="input-unit">₹</span>
                 </div>
                 <p class="hint-text">Total price for the entire land parcel (₹)</p>
@@ -742,7 +808,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
         <!-- LEGAL -->
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-shield-halved"></i> Legal, Title &amp; Approval Details</div>
+          <div class="section-header"><i class="fas fa-shield-halved"></i> Legal, Title & Approval Details</div>
           <div class="section-body">
 
             <div class="sub-section-title">Ownership Details</div>
@@ -778,12 +844,12 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                 </select>
               </div>
               <div class="col-md-6 mt-3" id="other_document_type_div" style="display:none;">
-                <label class="form-label">Specify Document Type</label>
-                <input type="text" class="form-control" name="other_document_type" placeholder="Describe your ownership document">
+                <label class="form-label">Specify Other Ownership Document Type</label>
+                <input type="text" class="form-control" name="other_document_type" id="other_document_type" placeholder="Describe your ownership document">
               </div>
             </div>
 
-            <div class="sub-section-title mt-3">Approvals &amp; Compliance</div>
+            <div class="sub-section-title mt-3">Approvals & Compliance</div>
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">RERA / Revenue Department Status</label>
@@ -796,7 +862,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Title Clarity / Marketability</label>
-                <select class="form-select form-control" name="title_clearance">
+                <select class="form-select form-control" name="title_clearance" id="title_clearance">
                   <option value="">— Select —</option>
                   <option value="Clear & Marketable Title">Clear &amp; Marketable Title</option>
                   <option value="Under Verification">Title Under Verification / Search</option>
@@ -806,7 +872,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Encumbrance / Charge Status</label>
-                <select class="form-select form-control" name="property_encumbrance_status">
+                <select class="form-select form-control" name="property_encumbrance_status" id="property_encumbrance_status">
                   <option value="">— Select —</option>
                   <option value="No Encumbrance">No Encumbrance (Clear EC)</option>
                   <option value="Mortgaged">Mortgaged / Hypothecated (Bank / NBFC)</option>
@@ -819,7 +885,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               <!-- AGRICULTURAL-SPECIFIC LEGAL -->
               <div class="col-md-4 mt-3">
                 <label class="form-label">7/12 Utara (Satbara) Available?</label>
-                <select class="form-select form-control" name="satbara_available">
+                <select class="form-select form-control" name="satbara_available" id="satbara_available">
                   <option value="Yes">Yes — Available</option>
                   <option value="No">No — Not Available</option>
                   <option value="Applied">Applied / In Process</option>
@@ -827,14 +893,14 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">8A Khate Utara (Land Record) Available?</label>
-                <select class="form-select form-control" name="khate_utara">
+                <select class="form-select form-control" name="khate_utara" id="khate_utara">
                   <option value="Yes">Yes — Available</option>
                   <option value="No">No</option>
                 </select>
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Section 63 / 63-A Clearance (Non-Agriculturist Purchase)?</label>
-                <select class="form-select form-control" name="section63_clearance">
+                <select class="form-select form-control" name="section63_clearance" id="section63_clearance">
                   <option value="Not_Applicable">Not Applicable (Agriculturist Buyer)</option>
                   <option value="Required">Required (Non-Agriculturist Buyer)</option>
                   <option value="Obtained">Obtained / Cleared</option>
@@ -843,7 +909,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
             </div>
 
-            <div class="sub-section-title mt-3">Tax &amp; Loan Status</div>
+            <div class="sub-section-title mt-3">Tax & Loan Status</div>
             <div class="row">
               <div class="col-md-6 mt-2">
                 <label class="form-label">Land Revenue / Khajana Status</label>
@@ -860,13 +926,13 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <div class="col-md-6 mt-3">
                     <label class="form-label">Outstanding Tax Amount (₹)</label>
                     <div class="input-with-unit">
-                      <input type="number" class="form-control" name="outstanding_tax_amount" placeholder="e.g., 15000">
+                      <input type="number" class="form-control" name="outstanding_tax_amount" id="outstanding_tax_amount" placeholder="e.g., 15000">
                       <span class="input-unit">₹</span>
                     </div>
                   </div>
                   <div class="col-md-6 mt-3" id="pending_since_div" style="display:none;">
-                    <label class="form-label">Tax Pending Since</label>
-                    <input type="date" class="form-control" name="pending_since">
+                    <label class="form-label">Tax Dues Pending Since</label>
+                    <input type="date" class="form-control" name="pending_since" id="pending_since">
                   </div>
                 </div>
               </div>
@@ -884,12 +950,12 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                 <div class="row">
                   <div class="col-md-6 mt-3">
                     <label class="form-label">Lender Bank / NBFC Name</label>
-                    <input type="text" class="form-control" name="financing_bank" placeholder="e.g., HDFC Bank, SBI, ICICI">
+                    <input type="text" class="form-control" name="financing_bank" id="financing_bank" placeholder="e.g., HDFC Bank, SBI, ICICI">
                   </div>
                   <div class="col-md-6 mt-3">
-                    <label class="form-label">Outstanding Loan Amount (₹)</label>
+                    <label class="form-label"> Existing Loan Outstanding Loan Amount (₹)</label>
                     <div class="input-with-unit">
-                      <input type="number" class="form-control" name="outstanding_loan_amount" placeholder="e.g., 1200000">
+                      <input type="number" class="form-control" name="outstanding_loan_amount" id="outstanding_loan_amount" placeholder="e.g., 1200000">
                       <span class="input-unit">₹</span>
                     </div>
                   </div>
@@ -899,25 +965,33 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
             <div class="form-group mt-3">
               <label class="form-label">Revenue Authority / Talathi / Tehsil Office</label>
-              <textarea class="form-control" name="sanctioning_authority" rows="2" id="ta_sanctioning"
+              <textarea class="form-control" name="sanctioning_authority" rows="2" id="sanctioning_authority"
                 placeholder="e.g., Talathi Office, Tehsil / Tahsildar Office, Revenue Department, Sub-Divisional Officer (SDO), District Collector Office"></textarea>
             </div>
           </div>
         </div>
 
         <div class="step-nav">
-          <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
-          <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next: Amenities &amp; Location <i class="fas fa-arrow-right"></i></button>
+          <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+          <button type="button" class="btn-step btn-next" onclick="goToStep(3)"> Move To Next Page<i class="fas fa-arrow-right"></i></button>
         </div>
       </div><!-- /step2 -->
 
       <!-- ════════════ STEP 3 — AMENITIES & LOCATION ════════════ -->
       <div class="step-content" id="step3">
-        <div id="step3Badge"><div class="type-badge">🌾 Agricultural Land</div></div>
+        
+        <div class="form-header">
+                <div class="form-title">
+                  
+         🌾 Agricultural Plot
+                </div>
+               
+            </div>
+
 
         <!-- AMENITIES -->
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-star"></i> Land Facilities &amp; Agricultural Infrastructure</div>
+          <div class="section-header"><i class="fas fa-star"></i> Land Amenities  & Nearby Facilities </div>
           <div class="section-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <div>
@@ -942,7 +1016,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
         <!-- NEARBY FACILITIES -->
         <div class="form-section">
-          <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i> Nearby Markets, Villages &amp; Connectivity</div>
+          <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
           <div class="section-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <div>
@@ -970,7 +1044,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
           <div class="section-body">
             <div class="form-group">
               <label class="form-label">Property Description <span style="font-weight:400;font-size:.78rem;color:var(--muted)"></span></label>
-              <textarea class="form-control" name="user_description" rows="5" id="ta_description"
+              <textarea class="form-control" name="user_description" rows="5" id="user_description"
                 placeholder="Describe the land — soil type, water source, current crop/plantation, topography, connectivity, investment potential, nearby infrastructure…
 
 Example: 3-acre black-soil irrigated farm land with borewell and drip irrigation. Currently under soybean and orange plantation. Canal nearby. 2 km from NH-6. Level topography. 7/12 clear. Ideal for farming or agro-tourism."></textarea>
@@ -985,13 +1059,55 @@ Example: 3-acre black-soil irrigated farm land with borewell and drip irrigation
           <div class="section-body">
             <div class="row">
 
+
+               <div class="col-md-12 mt-3">
+                <label class="form-label">Complete Land Location / Revenue Address <span class="required">*</span></label>
+                <textarea class="form-control" name="address" id="address" rows="3" required
+                  placeholder="e.g., Gat No. 234, Mouza Khapri, Kalmeshwar Taluka, Nagpur District – 441501"></textarea>
+              </div>
+
+            
+
+
+               <div class="col-md-4 mt-2">
+                <label class="form-label">Village / Mouza / Taluka Name <span class="required">*</span></label>
+                <input type="text" class="form-control" name="locality" id="locality" required
+                  placeholder="e.g., Mouza Khapri, Kalmeshwar Taluka">
+                <p class="hint-text">Primary location filter used by buyers</p>
+              </div>
+
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Nearest Village / Highway / City Landmark</label>
+                <input type="text" class="form-control" name="property_landmark" id="property_landmark"
+                  placeholder="e.g., Near Kalmeshwar Bus Stand, 2 km from NH-6">
+              </div>
+
+
               <div class="col-md-4 mt-2">
+                <div class="form-group">
+                  <label class="form-label">City/District <span class="required">*</span></label>
+                  <input type="text"
+                    class="form-control"
+                    id="city"
+                    name="city"
+                    placeholder="e.g., Nagpur"
+                    required>
+
+                  <script>
+                  document.getElementById('city').addEventListener('input', function () {
+                      this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+                  });
+                  </script>
+                </div>
+              </div>
+             
+                <div class="col-md-4 mt-2">
                 <div class="form-group">
                   <label class="form-label">
                     State <span class="required-star" style="color:red;">*</span>
                   </label>
 
-                  <select class="form-select form-control" name="plot_state" required>
+                  <select class="form-select form-control" name="state" id="state" required>
                     <option value="">Select State</option>
 
                     <!-- States -->
@@ -1036,55 +1152,23 @@ Example: 3-acre black-soil irrigated farm land with borewell and drip irrigation
                   </select>
                 </div>
               </div>
-
-              <div class="col-md-4 mt-2">
-                <div class="form-group">
-                  <label class="form-label">City/District <span class="required">*</span></label>
-                  <input type="text"
-                    class="form-control"
-                    id="plot_city"
-                    name="plot_city"
-                    placeholder="e.g., Nagpur"
-                    required>
-
-                  <script>
-                  document.getElementById('plot_city').addEventListener('input', function () {
-                      this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
-                  });
-                  </script>
-                </div>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Village / Mouza / Taluka Name <span class="required">*</span></label>
-                <input type="text" class="form-control" name="plot_locality" id="plot_locality" required
-                  placeholder="e.g., Mouza Khapri, Kalmeshwar Taluka">
-                <p class="hint-text">Primary location filter used by buyers</p>
-              </div>
-              <div class="col-md-6 mt-3">
-                <label class="form-label">Nearest Village / Highway / City Landmark</label>
-                <input type="text" class="form-control" name="property_landmark"
-                  placeholder="e.g., Near Kalmeshwar Bus Stand, 2 km from NH-6">
-              </div>
+              
               <div class="col-md-6 mt-3">
                 <label class="form-label">PIN Code</label>
-                <input type="text" class="form-control" name="plot_pincode" placeholder="e.g., 441501" maxlength="6">
+                <input type="text" class="form-control" name="pincode" id="pincode" placeholder="e.g., 441501" maxlength="6">
               </div>
-              <div class="col-md-12 mt-3">
-                <label class="form-label">Complete Land Location / Revenue Address <span class="required">*</span></label>
-                <textarea class="form-control" name="plot_address" id="plot_address" rows="3" required
-                  placeholder="e.g., Gat No. 234, Mouza Khapri, Kalmeshwar Taluka, Nagpur District – 441501"></textarea>
-              </div>
+             
               <div class="col-md-6 mt-3">
                 <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
-                <input type="url" class="form-control" name="google_maps_link" placeholder="https://maps.google.com/?q=…">
+                <input type="url" class="form-control" name="google_maps_link" id="google_maps_link" placeholder="https://maps.google.com/?q=…">
               </div>
               <div class="col-md-3 mt-3">
                 <label class="form-label">Latitude</label>
-                <input type="text" class="form-control" name="latitude" placeholder="e.g., 21.1458">
+                <input type="text" class="form-control" name="latitude" id="plot_latitude" placeholder="e.g., 21.1458">
               </div>
               <div class="col-md-3 mt-3">
                 <label class="form-label">Longitude</label>
-                <input type="text" class="form-control" name="longitude" placeholder="e.g., 79.0882">
+                <input type="text" class="form-control" name="longitude" id="plot_longitude" placeholder="e.g., 79.0882">
               </div>
             </div>
             <div class="inline-status is-warning mt-3">
@@ -1095,48 +1179,279 @@ Example: 3-acre black-soil irrigated farm land with borewell and drip irrigation
         </div>
 
         <div class="step-nav">
-          <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
-          <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Next: Photos &amp; Publish <i class="fas fa-arrow-right"></i></button>
+          <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+          <button type="button" class="btn-step btn-next" onclick="goToStep(4)"> Move To Next Page <i class="fas fa-arrow-right"></i></button>
         </div>
       </div><!-- /step3 -->
 
       <!-- ════════════ STEP 4 — PHOTOS & PUBLISH ════════════ -->
       <div class="step-content" id="step4">
-        <div id="step4Badge"><div class="type-badge">🌾 Agricultural Land</div></div>
+       
+        <div class="form-header">
+                <div class="form-title">
+                  
+         🌾 Agricultural Plot
+                </div>
+              
+            </div>
+
 
         <!-- MEDIA -->
+      
+
+        <!-- MEDIA & VIDEO UPLOAD -->
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-images"></i> Photos &amp; Media</div>
+          <div class="section-header"><i class="fas fa-images"></i> Photos &  Media</div>
           <div class="section-body">
-            <div class="inline-status is-success mb-3">
-              <i class="fas fa-lightbulb"></i>
-              <span style="font-size:.8rem;">Listings with 5+ clear photos get <strong>3× more inquiries</strong>. Upload photos of the land from all sides, road access, surroundings, and documents.</span>
+
+            <div class="img-upload-guide">
+              <div class="guide-step">
+                <div class="guide-step-num">1</div>
+                <div class="guide-step-text">
+                  <strong>Pick a category</strong>
+                  Tap a tile below (Front View, Farm Gate, etc.)
+                </div>
+              </div>
+              <i class="fas fa-arrow-right guide-arrow"></i>
+              <div class="guide-step">
+                <div class="guide-step-num">2</div>
+                <div class="guide-step-text">
+                  <strong>Upload matching photos</strong>
+                  Click or drag images into that category only
+                </div>
+              </div>
+              <i class="fas fa-arrow-right guide-arrow"></i>
+              <div class="guide-step">
+                <div class="guide-step-num">3</div>
+                <div class="guide-step-text">
+                  <strong>Set your cover photo</strong>
+                  Drag to reorder — the 1st photo in Front View is used as the cover
+                </div>
+              </div>
             </div>
-            <div class="image-upload-area" id="uploadArea">
-              <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
-              <i class="fas fa-cloud-upload-alt fa-3x mb-2" style="color:#84cc16"></i>
-              <div style="font-weight:700;font-size:1.05rem;color:#2d3748;margin-top:8px;">Click to Select or Drag &amp; Drop Images</div>
-              <div style="font-size:.85rem;color:#718096;margin-top:6px;">JPG, PNG, WEBP · Max 5MB per image</div>
-              <span class="badge bg-primary p-2 mt-2" id="imageCounter">Uploaded: 0 / 10 Images</span>
+
+            <div class="img-total-summary">
+              <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/25</div>
+              <div id="imgMinNotice" class="min-ok"><i class="fas fa-info-circle"></i> 5+ photos get 3× more inquiries.</div>
             </div>
-            <div class="image-preview-grid" id="imagePreview"></div>
-            <div class="row mt-4">
-              <div class="col-md-4">
+
+            <div class="img-cat-tabs" id="imgCatTabs">
+              <div class="img-cat-tab active" data-cat="front_view"><i class="fas fa-image"></i> Front View <span class="cat-count" id="count-front_view">0</span></div>
+              <div class="img-cat-tab" data-cat="full_plot"><i class="fas fa-vector-square"></i> Full Plot / Field View <span class="cat-count" id="count-full_plot">0</span></div>
+              <div class="img-cat-tab" data-cat="farm_gate"><i class="fas fa-door-open"></i> Farm Gate / Entrance <span class="cat-count" id="count-farm_gate">0</span></div>
+              <div class="img-cat-tab" data-cat="boundary_fencing"><i class="fas fa-border-all"></i> Boundary / Fencing <span class="cat-count" id="count-boundary_fencing">0</span></div>
+              <div class="img-cat-tab" data-cat="road_facing"><i class="fas fa-road"></i> Road / Approach Road <span class="cat-count" id="count-road_facing">0</span></div>
+              <div class="img-cat-tab" data-cat="cultivated_area"><i class="fas fa-seedling"></i> Cultivated Area / Crops <span class="cat-count" id="count-cultivated_area">0</span></div>
+              <div class="img-cat-tab" data-cat="irrigation_source"><i class="fas fa-tint"></i> Irrigation / Water Source <span class="cat-count" id="count-irrigation_source">0</span></div>
+              <div class="img-cat-tab" data-cat="borewell_well"><i class="fas fa-water"></i> Borewell / Well / Canal <span class="cat-count" id="count-borewell_well">0</span></div>
+              <div class="img-cat-tab" data-cat="electricity_infra"><i class="fas fa-bolt"></i> Power Infra <span class="cat-count" id="count-electricity_infra">0</span></div>
+              <div class="img-cat-tab" data-cat="farmhouse_shed"><i class="fas fa-warehouse"></i> Farmhouse / Shed <span class="cat-count" id="count-farmhouse_shed">0</span></div>
+              <div class="img-cat-tab" data-cat="aerial_drone"><i class="fas fa-drone"></i> Aerial / Drone <span class="cat-count" id="count-aerial_drone">0</span></div>
+              <div class="img-cat-tab" data-cat="layout_site_plan"><i class="fas fa-drafting-compass"></i> Layout / Site Plan <span class="cat-count" id="count-layout_site_plan">0</span></div>
+            </div>
+
+            <div class="img-cat-panels">
+              <!-- Front View -->
+              <div class="img-cat-panel active" data-cat-panel="front_view">
+                <input type="file" id="imgInput-front_view" name="plot_images_front_view[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="front_view">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Front View" Photos Here</div>
+                  <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-front_view"></div>
+              </div>
+
+              <!-- Full Plot / Field View -->
+              <div class="img-cat-panel" data-cat-panel="full_plot">
+                <input type="file" id="imgInput-full_plot" name="plot_images_full_plot[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="full_plot">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Full Plot / Field View" Photos Here</div>
+                  <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-full_plot"></div>
+              </div>
+
+              <!-- Farm Gate / Main Entrance -->
+              <div class="img-cat-panel" data-cat-panel="farm_gate">
+                <input type="file" id="imgInput-farm_gate" name="plot_images_farm_gate[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="farm_gate">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Farm Gate / Entrance" Photos Here</div>
+                  <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-farm_gate"></div>
+              </div>
+
+              <!-- Boundary / Fencing -->
+              <div class="img-cat-panel" data-cat-panel="boundary_fencing">
+                <input type="file" id="imgInput-boundary_fencing" name="plot_images_boundary_fencing[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="boundary_fencing">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Boundary / Fencing" Photos Here</div>
+                  <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-boundary_fencing"></div>
+              </div>
+
+              <!-- Road Facing / Approach Road -->
+              <div class="img-cat-panel" data-cat-panel="road_facing">
+                <input type="file" id="imgInput-road_facing" name="plot_images_road_facing[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="road_facing">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Road / Approach Road" Photos Here</div>
+                  <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-road_facing"></div>
+              </div>
+
+              <!-- Cultivated Area / Crops -->
+              <div class="img-cat-panel" data-cat-panel="cultivated_area">
+                <input type="file" id="imgInput-cultivated_area" name="plot_images_cultivated_area[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="cultivated_area">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Cultivated Area / Crops" Photos Here</div>
+                  <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-cultivated_area"></div>
+              </div>
+
+              <!-- Irrigation / Water Source -->
+              <div class="img-cat-panel" data-cat-panel="irrigation_source">
+                <input type="file" id="imgInput-irrigation_source" name="plot_images_irrigation_source[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="irrigation_source">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Irrigation / Water Source" Photos Here</div>
+                  <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-irrigation_source"></div>
+              </div>
+
+              <!-- Borewell / Well / Canal -->
+              <div class="img-cat-panel" data-cat-panel="borewell_well">
+                <input type="file" id="imgInput-borewell_well" name="plot_images_borewell_well[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="borewell_well">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Borewell / Well / Canal" Photos Here</div>
+                  <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-borewell_well"></div>
+              </div>
+
+              <!-- Electricity / Power Infrastructure -->
+              <div class="img-cat-panel" data-cat-panel="electricity_infra">
+                <input type="file" id="imgInput-electricity_infra" name="plot_images_electricity_infra[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="electricity_infra">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Power Infra" Photos Here</div>
+                  <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-electricity_infra"></div>
+              </div>
+
+              <!-- Farmhouse / Shed / Existing Structure -->
+              <div class="img-cat-panel" data-cat-panel="farmhouse_shed">
+                <input type="file" id="imgInput-farmhouse_shed" name="plot_images_farmhouse_shed[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="farmhouse_shed">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Farmhouse / Shed" Photos Here</div>
+                  <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-farmhouse_shed"></div>
+              </div>
+
+              <!-- Aerial / Drone View -->
+              <div class="img-cat-panel" data-cat-panel="aerial_drone">
+                <input type="file" id="imgInput-aerial_drone" name="plot_images_aerial_drone[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="aerial_drone">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Aerial / Drone" Photos Here</div>
+                  <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-aerial_drone"></div>
+              </div>
+
+              <!-- Plot Layout / Site Plan -->
+              <div class="img-cat-panel" data-cat-panel="layout_site_plan">
+                <input type="file" id="imgInput-layout_site_plan" name="plot_images_layout_site_plan[]" accept="image/*" multiple style="display:none;">
+                <div class="img-cat-upload-area" data-cat="layout_site_plan">
+                  <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                  <div class="upload-text">Click or Drag "Layout / Site Plan" Photos Here</div>
+                  <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+                </div>
+                <div class="img-cat-preview" id="imgPreview-layout_site_plan"></div>
+              </div>
+            </div>
+
+            <!-- Documents -->
+            <div class="row mt-4 pt-3" style="border-top: 1px solid #e9ecef;">
+              <div class="col-md-6">
                 <label class="form-label">Revenue Records (7/12 &amp; 8A)</label>
-                <input type="file" class="form-control" name="encumbrance_cert" accept=".pdf,image/*">
+                <input type="file" class="form-control" name="encumbrance_cert" id="encumbrance_cert" accept=".pdf,image/*">
                 <p class="hint-text">Upload Satbara (7/12) and Khate Utara (8A) — most important documents</p>
               </div>
-              <div class="col-md-4">
-                <label class="form-label">Land Map / Site Sketch / Demarcation Plan</label>
-                <input type="file" class="form-control" name="layout_plan" accept=".pdf,image/*">
-                <p class="hint-text">Survey / revenue map showing land boundaries</p>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Video Tour <span style="font-weight:400;font-size:.78rem">(Optional)</span></label>
-                <input type="file" class="form-control" name="social_video" accept="video/*">
-                <p class="hint-text">MP4 video walkthrough of the land (max 100MB)</p>
+            
+            </div>
+
+            <div class="sub-section-title mt-4">Farm Walkthrough Video</div>
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <label class="form-label d-block">Video Option</label>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="video_option" id="video_upload" value="upload" checked>
+                  <label class="form-check-label" for="video_upload">Upload Property Video</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="video_option" id="video_auto" value="auto">
+                  <label class="form-check-label" for="video_auto">Auto-Generate Slideshow from Photos</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="video_option" id="video_rm" value="rm_assisted">
+                  <label class="form-check-label" for="video_rm">Video is Large — Share with Our RM</label>
+                </div>
               </div>
             </div>
+
+            <div id="videoUploadWrapper">
+              <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+              <div class="img-cat-upload-area" id="videoUploadArea" style="background:#f8fafc; border-color:#94a3b8;">
+                <div class="upload-icon" style="background:#e2e8f0;"><i class="fas fa-video" style="color:#64748b;"></i></div>
+                <div class="upload-text">Click to Upload Farm Walkthrough Video</div>
+                <div class="upload-subtext">MP4/MOV, max 60 seconds, up to 20MB</div>
+              </div>
+              <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px;"></video>
+            </div>
+
+            <div id="videoAutoWrapper" style="display:none;">
+              <div class="alert alert-info" style="background:#f0fdf4; border-left:4px solid #84cc16; border-radius:8px; padding:14px 18px; margin-bottom: 15px; border-top:none; border-right:none; border-bottom:none; color: #365314;">
+                <i class="fas fa-magic me-2" style="color:#84cc16;"></i>
+                We'll auto-create a walkthrough video from your uploaded photos (min. 3 needed).
+              </div>
+
+              <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
+                <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
+                <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:1px solid #cbd5e1; background:#000; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></canvas>
+              </div>
+
+              <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:12px; font-weight:600;">
+                <i class="fas fa-exclamation-circle me-1"></i> Please upload at least 3 land images above to preview the auto-slideshow.
+              </div>
+            </div>
+
+            <div id="videoRMWrapper" style="display:none;">
+              <div class="alert alert-info" style="background:#f0fdf4; border-left:4px solid #84cc16; border-radius:8px; padding:14px 18px; margin-bottom:15px; border-top:none; border-right:none; border-bottom:none; color: #365314;">
+                <i class="fas fa-headset me-2" style="color:#84cc16;"></i>
+                Share the video directly with your RM. Once published, paste the link below.
+              </div>
+              <label class="form-label">Published Video Link</label>
+              <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="Paste YouTube / Instagram / Facebook link">
+              <button type="button" class="btn btn-outline-secondary mt-2" id="previewRMLinkBtn" style="border-radius:10px;"><i class="fas fa-eye me-1"></i> Preview Link</button>
+              <div id="rmVideoFrame" style="display:none; margin-top:15px; border-radius:12px; overflow:hidden; aspect-ratio:16/9;">
+                <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1159,7 +1474,7 @@ Example: 3-acre black-soil irrigated farm land with borewell and drip irrigation
               <div class="col-md-6" id="portalField" style="display:none;">
                 <div class="form-group">
                   <label class="form-label">Portal Name</label>
-                  <input type="text" class="form-control" name="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker">
+                  <input type="text" class="form-control" name="portal_name" id="portal_name" placeholder="Housing, 99acres, MagicBricks, NoBroker">
                 </div>
               </div>
             </div>
@@ -1167,20 +1482,22 @@ Example: 3-acre black-soil irrigated farm land with borewell and drip irrigation
         </div>
 
         <!-- PROPERTY UPLOADED BY (Admin Session — read-only) -->
-     <div class="form-section" hidden>
-                        <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
-                        <div class="section-body">
-                            <div class="row">
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i>Name</label><input type="text" class="form-control" name="uploaded_by_name" value="{{ user_obj.user_name }}" disabled></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="uploaded_by_email" value="{{ user_obj.user_email }}" disabled></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="uploaded_by_contact" value="{{ user_obj.user_phone }}" disabled></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="uploaded_by_role" value="{{ user_obj.user_role }}" disabled></div></div>
-                            </div>
-                        </div>
-                    </div>
+       <div class="form-section">
+          <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
+          <div class="section-body">
+            <div class="row">
+             
+                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i>Name</label><input type="text" class="form-control" name="uploaded_by_name" id="uploaded_by_name" value="{{user_obj.user_name}}" disabled></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="uploaded_by_email" id="uploaded_by_email" value="{{user_obj.user_email}}" disabled></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="uploaded_by_contact" id="uploaded_by_contact" value="{{ user_obj.user_phone }}" disabled></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="uploaded_by_role" id="uploaded_by_role" value="{{ user_obj.user_role }}" disabled></div></div>
+
+            </div>
+          </div>
+        </div>
 
         <div class="step-nav">
-          <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+          <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Previous Page</button>
           <button type="submit" class="btn-step btn-submit" id="submitBtn"><i class="fas fa-save"></i> Submit Property</button>
         </div>
       </div><!-- /step4 -->
@@ -1201,7 +1518,7 @@ Example: 3-acre black-soil irrigated farm land with borewell and drip irrigation
           <div class="preview-price" id="p_price">₹ 0</div>
         </div>
         <div class="preview-body">
-          <div class="preview-title" id="p_title">Your Land Headline</div>
+          <div class="preview-title" id="p_title">Property Title</div>
           <div class="preview-location"><i class="fas fa-map-marker-alt" style="color:#84cc16"></i> <span id="p_loc">City, Locality</span></div>
           <div class="preview-specs">
             <span id="p_area">0 acre</span>
@@ -1210,18 +1527,20 @@ Example: 3-acre black-soil irrigated farm land with borewell and drip irrigation
         </div>
       </div>
     </div>
-    <div class="checklist-card">
+  
+     <div class="checklist-card">
       <div class="checklist-title">📋 Listing Checklist</div>
-      <div class="checklist-item" id="cl-listedby"><i class="fas fa-circle"></i> Listed by filled</div>
-      <div class="checklist-item" id="cl-title"><i class="fas fa-circle"></i> Land headline added</div>
-      <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i> Land area filled</div>
-      <div class="checklist-item" id="cl-facing"><i class="fas fa-circle"></i> Road / track access set</div>
-      <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Selling price set</div>
+      <div class="checklist-item" id="cl-listedby"><i class="fas fa-circle"></i> Listed by</div>
+            <div class="checklist-item" id="cl-title" hidden><i class="fas fa-circle"></i> </div>
+      <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i>  Basic Agricultural Land Information & Revenue Classification & Legal Status</div>
+      <div class="checklist-item" id="cl-facing"><i class="fas fa-circle"></i> Land Specifications & Agricultural Details</div>
+      <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Pricing Details</div>
       <div class="checklist-item" id="cl-amenities"><i class="fas fa-circle"></i> Amenities selected</div>
       <div class="checklist-item" id="cl-facilities"><i class="fas fa-circle"></i> Nearby facilities selected</div>
-      <div class="checklist-item" id="cl-loc"><i class="fas fa-circle"></i> City &amp; locality filled</div>
-      <div class="checklist-item" id="cl-images"><i class="fas fa-circle"></i> At least 1 photo uploaded</div>
-      <div class="checklist-item" id="cl-contact"><i class="fas fa-circle"></i> Contact person details filled</div>
+      <div class="checklist-item" id="cl-loc"><i class="fas fa-circle"></i> Location Details</div>
+      <div class="checklist-item" id="cl-images"><i class="fas fa-circle"></i> Photos & Media</div>
+     
+
     </div>
   </div>
 
@@ -1254,14 +1573,11 @@ Example: 3-acre black-soil irrigated farm land with borewell and drip irrigation
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-
-$("#Resale_Plot").addClass("active");
-
 /* ═══════════════════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════════════════════ */
 let currentStep   = 1;
-let selectedFiles = [];
+
 
 /* ═══════════════════════════════════════════════════════════
    STEPPER
@@ -1284,16 +1600,20 @@ function goToStep(n) {
     } else { sc.textContent = i; }
   }
   currentStep = n;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
   updatePreview();
 
   if (n === 4) setTimeout(syncUploadedByStep4, 80);
 }
 
+
+
+
 function validateStep(step) {
   const stepEl = document.getElementById('step' + step);
   const required = stepEl.querySelectorAll('[required]');
   let missing = [];
+  
   required.forEach(f => {
     f.style.borderColor = '';
     if (!f.value.trim()) {
@@ -1302,14 +1622,16 @@ function validateStep(step) {
       f.style.borderColor = '#e74c3c';
     }
   });
-  if (step === 3) {
-    if (!document.querySelectorAll('input[name="amenities[]"]:checked').length) missing.push('At least one Amenity');
-    if (!document.querySelectorAll('input[name="facilities[]"]:checked').length) missing.push('At least one Nearby Facility');
-  }
+
+  // Both amenities and facilities are now optional (validation block removed)
+
   if (missing.length) {
-    Swal.fire({ icon: 'warning', title: 'Please fill required fields',
+    Swal.fire({ 
+      icon: 'warning', 
+      title: 'Please fill required fields',
       html: `<ul style="text-align:left;display:inline-block;color:#e74c3c;font-weight:600;">${missing.map(f=>`<li>${f}</li>`).join('')}</ul>`,
-      confirmButtonColor: '#84cc16' });
+      confirmButtonColor: '#84cc16' 
+    });
     return false;
   }
   return true;
@@ -1317,14 +1639,17 @@ function validateStep(step) {
 
 /* ═══════════════════════════════════════════════════════════
    LIVE PREVIEW
+/* ═══════════════════════════════════════════════════════════
+   LIVE PREVIEW & AUTO-CALCULATE RATE
 ═══════════════════════════════════════════════════════════ */
 function updatePreview() {
   const title  = document.getElementById('plot_title')?.value || '';
   const area   = document.getElementById('plot_area')?.value || '';
-  const price  = document.getElementById('plot_price')?.value || '';
-  const city   = document.getElementById('plot_city')?.value || '';
-  const loc    = document.getElementById('plot_locality')?.value || '';
-  const catEl  = document.getElementById('plot_category');
+  // Fixed: Consistently use selling_price instead of the undefined 'price' variable
+  const selling_price = document.getElementById('selling_price')?.value || '';
+  const city   = document.getElementById('city')?.value || '';
+  const loc    = document.getElementById('locality')?.value || '';
+  const catEl  = document.getElementById('property_type');
   const catTxt = catEl?.value ? catEl.options[catEl.selectedIndex].text.split('(')[0].trim() : '—';
   const unit   = document.getElementById('agr_area_unit')?.value || 'acre';
 
@@ -1333,25 +1658,31 @@ function updatePreview() {
   autoTitle += 'Agricultural Land ';
   if (title) autoTitle += `| ${title} `;
   if (loc || city) autoTitle += `@ ${[loc,city].filter(Boolean).join(', ')}`;
-  document.getElementById('property_title').value = autoTitle.trim();
+  
+  const propTitleEl = document.getElementById('property_title');
+  if (propTitleEl) propTitleEl.value = autoTitle.trim();
 
-  document.getElementById('p_title').textContent = title || 'Your Land Headline';
-  document.getElementById('p_price').textContent = price ? '₹' + parseInt(price).toLocaleString('en-IN') : '₹ 0';
+  document.getElementById('p_title').textContent = title || 'Property Title';
+  // Fixed: Using selling_price variable here
+  document.getElementById('p_price').textContent = selling_price ? '₹' + parseInt(selling_price).toLocaleString('en-IN') : '₹ 0';
   document.getElementById('p_area').textContent  = area ? `${Number(area).toLocaleString('en-IN')} ${unit}` : `0 ${unit}`;
   document.getElementById('p_cat').textContent   = catEl?.value ? catTxt : 'Agricultural Land';
   document.getElementById('p_loc').textContent   = (city||loc) ? [city,loc].filter(Boolean).join(', ') : 'City, Locality';
 
+  // AUTO-CALCULATION FIX:
   const psf = document.getElementById('plot_price_per_sqft');
-  if (price && area && parseFloat(area) > 0) {
-    psf.value = Math.round(parseFloat(price) / parseFloat(area));
+  if (selling_price && area && parseFloat(area) > 0) {
+    psf.value = Math.round(parseFloat(selling_price) / parseFloat(area));
   } else { psf.value = ''; }
 
-  document.getElementById('area_unit').textContent = unit;
-  document.getElementById('ppsf_unit').textContent = `₹/${unit}`;
+  const areaUnitEl = document.getElementById('area_unit');
+  const ppsfUnitEl = document.getElementById('ppsf_unit');
+  if (areaUnitEl) areaUnitEl.textContent = unit;
+  if (ppsfUnitEl) ppsfUnitEl.textContent = `₹/${unit}`;
 
   setCheck('cl-title',  !!title);
   setCheck('cl-area',   !!area);
-  setCheck('cl-price',  !!price);
+  setCheck('cl-price',  !!selling_price);
   setCheck('cl-loc',    !!city && !!loc);
   setCheck('cl-contact',!!(document.getElementById('listed_by_name')?.value));
 }
@@ -1363,9 +1694,16 @@ function setCheck(id, done) {
   const el = document.getElementById(id);
   if (!el) return;
   el.className = 'checklist-item' + (done ? ' done' : '');
-  el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+  const icon = el.querySelector('i');
+  if (icon) icon.className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
 }
 
+/* LIVE INPUT LISTENERS FIXED (Matched to correct HTML IDs) */
+['plot_title', 'plot_area', 'selling_price', 'city', 'locality', 'listed_by_name'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', updatePreview);
+});
+document.getElementById('property_type')?.addEventListener('change', updatePreview);
 /* ═══════════════════════════════════════════════════════════
    IMAGE UPLOAD
 ═══════════════════════════════════════════════════════════ */
@@ -1374,103 +1712,385 @@ function setCheck(id, done) {
 /* ═══════════════════════════════════════════════════════════
    IMAGE UPLOAD
 ═══════════════════════════════════════════════════════════ */
-const uploadArea   = document.getElementById('uploadArea');
-const imageInput   = document.getElementById('imageInput');
-const imagePreview = document.getElementById('imagePreview');
 
-uploadArea.addEventListener('click',     () => imageInput.click());
-uploadArea.addEventListener('dragover',  (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-uploadArea.addEventListener('drop',      (e) => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-imageInput.addEventListener('change',    (e) => handleFiles(e.target.files));
 
-let dragSrcEl = null;
+/* ============================================================
+   CATEGORY-WISE IMAGE UPLOAD LOGIC
+============================================================ */
+const IMG_CATEGORIES = ['front_view','full_plot','farm_gate','boundary_fencing','road_facing','cultivated_area','irrigation_source','borewell_well','electricity_infra','farmhouse_shed','aerial_drone','layout_site_plan'];
+const IMG_TOTAL_LIMIT = 25;
+window.catFiles = {};
+const catFiles = window.catFiles;
+IMG_CATEGORIES.forEach(function(c) { catFiles[c] = []; });
 
-function handleFiles(files) {
-  const arr = Array.from(files);
-  if (selectedFiles.length + arr.length > 10) {
-    Swal.fire({ icon: 'warning', title: 'Image Limit Reached', text: 'Maximum 10 images allowed.', confirmButtonColor: '#84cc16' });
-    return;
-  }
-  
-  arr.forEach(file => {
-    if (!file.type.startsWith('image/')) return;
-    selectedFiles.push(file);
-    const reader = new FileReader();
-    
-    reader.onload = e => {
-      const div = document.createElement('div');
-      div.className = 'preview-item';
-      div.setAttribute('data-filename', file.name);
-      div.setAttribute('draggable', 'true'); // Enables dragging
-      
-      div.innerHTML = `<img src="${e.target.result}" alt="preview"><button type="button" class="remove-image" onclick="removeImg(this,'${file.name}')"><i class="fas fa-times"></i></button>`;
-      
-      // Add Drag and Drop Event Listeners
-      div.addEventListener('dragstart', handleDragStart);
-      div.addEventListener('dragover', handleDragOver);
-      div.addEventListener('drop', handleDrop);
-      div.addEventListener('dragend', handleDragEnd);
-
-      imagePreview.appendChild(div);
-      updateImageCounter();
-    };
-    reader.readAsDataURL(file);
-  });
+function totalImageCount() {
+    return IMG_CATEGORIES.reduce(function(sum, c) { return sum + catFiles[c].length; }, 0);
 }
 
-// --- Drag and Drop Sorting Logic ---
-function handleDragStart(e) {
-  dragSrcEl = this;
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/html', this.innerHTML);
-  this.style.opacity = '0.4';
-  this.style.border = '2px dashed #84cc16'; // Matched to agricultural template's primary color
+function syncCategoryInput(cat) {
+    var dt = new DataTransfer();
+    catFiles[cat].forEach(function(file) { dt.items.add(file); });
+    document.getElementById('imgInput-' + cat).files = dt.files;
 }
 
-function handleDragOver(e) {
-  e.preventDefault(); 
-  e.dataTransfer.dropEffect = 'move';
-  return false;
+function renderCategory(cat) {
+    var preview = document.getElementById('imgPreview-' + cat);
+    if (!preview) return;
+    preview.innerHTML = '';
+
+    catFiles[cat].forEach(function(file, idx) {
+        var div = document.createElement('div');
+        div.className = 'img-cat-preview-item';
+        div.draggable = true;
+        div.dataset.index = idx;
+
+        var img = document.createElement('img');
+        div.appendChild(img);
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-image';
+        removeBtn.innerHTML = '✖';
+        removeBtn.onclick = function() { removeCatImage(cat, file.name.replace(/'/g, "\\'")); };
+        div.appendChild(removeBtn);
+
+        if (idx === 0 && cat === 'front_view') {
+            var coverTag = document.createElement('span');
+            coverTag.className = 'cover-badge';
+            coverTag.innerHTML = '<i class="fas fa-star"></i> Cover';
+            div.appendChild(coverTag);
+        }
+
+        preview.appendChild(div);
+        attachDragEvents(div, cat);
+
+        var reader = new FileReader();
+        reader.onload = function(e) { img.src = e.target.result; };
+        reader.readAsDataURL(file);
+    });
+
+    const countEl = document.getElementById('count-' + cat);
+    if(countEl) countEl.innerText = catFiles[cat].length;
+
+    var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+    if (tab) tab.classList.toggle('has-images', catFiles[cat].length > 0);
 }
 
-function handleDrop(e) {
-  e.stopPropagation();
-  if (dragSrcEl !== this) {
-    // 1. Reorder DOM Elements
-    const allItems = Array.from(imagePreview.children);
-    const srcIndex = allItems.indexOf(dragSrcEl);
-    const destIndex = allItems.indexOf(this);
+function attachDragEvents(item, cat) {
+    item.addEventListener('dragstart', function(e) {
+        item.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', item.dataset.index);
+    });
+    item.addEventListener('dragend', function() {
+        item.classList.remove('dragging');
+        document.querySelectorAll('.img-cat-preview-item.drag-over').forEach(function(el) { el.classList.remove('drag-over'); });
+    });
+    item.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', function() { item.classList.remove('drag-over'); });
+    item.addEventListener('drop', function(e) {
+        e.preventDefault();
+        item.classList.remove('drag-over');
 
-    if (srcIndex < destIndex) {
-      this.parentNode.insertBefore(dragSrcEl, this.nextSibling);
-    } else {
-      this.parentNode.insertBefore(dragSrcEl, this);
+        var fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        var toIndex = parseInt(item.dataset.index, 10);
+        if (isNaN(fromIndex) || isNaN(toIndex) || fromIndex === toIndex) return;
+
+        var moved = catFiles[cat].splice(fromIndex, 1)[0];
+        catFiles[cat].splice(toIndex, 0, moved);
+
+        syncCategoryInput(cat);
+        renderCategory(cat);
+    });
+}
+
+function renderAllCategories() {
+    IMG_CATEGORIES.forEach(renderCategory);
+    var total = totalImageCount();
+    const totalEl = document.getElementById('imgTotalCount');
+    if(totalEl) totalEl.innerText = total;
+    setCheck('cl-images', total > 0);
+}
+
+function handleCatFiles(cat, files) {
+    var incoming = Array.from(files).filter(function(f) { return f.type.startsWith('image/'); });
+    if (totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+        Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all categories.', 'warning');
+        incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - totalImageCount()));
+    }
+    catFiles[cat] = catFiles[cat].concat(incoming);
+    syncCategoryInput(cat);
+    renderAllCategories();
+}
+
+window.removeCatImage = function(cat, fileName) {
+    catFiles[cat] = catFiles[cat].filter(function(f) { return f.name !== fileName; });
+    syncCategoryInput(cat);
+    renderAllCategories();
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.img-cat-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.img-cat-panel').forEach(function(p) { p.classList.remove('active'); });
+            this.classList.add('active');
+            var targetPanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
+            if(targetPanel) targetPanel.classList.add('active');
+        });
+    });
+
+    IMG_CATEGORIES.forEach(function(cat) {
+        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+        var input = document.getElementById('imgInput-' + cat);
+        if (!zone || !input) return;
+
+        zone.addEventListener('click', function() { input.click(); });
+        input.addEventListener('change', function(e) { handleCatFiles(cat, e.target.files); });
+        zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            handleCatFiles(cat, e.dataTransfer.files);
+        });
+    });
+    renderAllCategories();
+});
+
+/* ============================================================
+   VIDEO ENGINE & CANVAS PREVIEW
+============================================================ */
+document.addEventListener('DOMContentLoaded', function () {
+    var uploadRadio      = document.getElementById('video_upload');
+    var autoRadio        = document.getElementById('video_auto');
+    var rmRadio          = document.getElementById('video_rm');
+    var uploadWrapper    = document.getElementById('videoUploadWrapper');
+    var autoWrapper      = document.getElementById('videoAutoWrapper');
+    var rmWrapper        = document.getElementById('videoRMWrapper');
+    var videoInput       = document.getElementById('videoInput');
+    var videoArea        = document.getElementById('videoUploadArea');
+    var videoPreview     = document.getElementById('videoPreview');
+
+    var slideshowInterval = null;
+    var canvas = document.getElementById('slideshowCanvas');
+    var ctx = canvas ? canvas.getContext('2d') : null;
+
+    function getUploadedImages(callback) {
+        var sources = [];
+        if (window.catFiles) {
+            Object.keys(window.catFiles).forEach(function (cat) {
+                if (Array.isArray(window.catFiles[cat])) {
+                    window.catFiles[cat].forEach(function (file) {
+                        if (file instanceof File && file.type.startsWith('image/')) {
+                            sources.push({ type: 'file', data: file });
+                        }
+                    });
+                }
+            });
+        }
+        var uniqueSources = [];
+        var seen = new Set();
+        sources.forEach(function (s) {
+            var key = s.type === 'file' ? s.data.name + s.data.size : s.data;
+            if (!seen.has(key)) { seen.add(key); uniqueSources.push(s); }
+        });
+
+        if (uniqueSources.length === 0) { callback([]); return; }
+
+        var loadedImages = [];
+        var processed = 0;
+        uniqueSources.forEach(function (srcObj) {
+            var img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function () {
+                loadedImages.push(img);
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+            img.onerror = function () {
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+            img.src = srcObj.type === 'file' ? URL.createObjectURL(srcObj.data) : srcObj.data;
+        });
     }
 
-    // 2. Sync selectedFiles array with the new DOM sequence
-    const newOrderFilenames = Array.from(imagePreview.children).map(el => el.getAttribute('data-filename'));
-    selectedFiles.sort((a, b) => newOrderFilenames.indexOf(a.name) - newOrderFilenames.indexOf(b.name));
-  }
-  return false;
-}
+    function startAutoSlideshowPreview() {
+        stopAutoSlideshowPreview();
+        var container = document.getElementById('autoSlideshowPreviewContainer');
+        var warning = document.getElementById('autoSlideshowWarning');
 
-function handleDragEnd(e) {
-  this.style.opacity = '1';
-  this.style.border = '2px solid var(--border)';
-}
+        getUploadedImages(function (images) {
+            if (images.length < 3) {
+                if (container) container.style.display = 'none';
+                if (warning) warning.style.display = 'block';
+                return;
+            }
+            if (warning) warning.style.display = 'none';
+            if (container) container.style.display = 'block';
+            runCanvasAnimation(images);
+        });
+    }
 
-function removeImg(btn, name) { 
-  selectedFiles = selectedFiles.filter(f => f.name !== name); 
-  btn.closest('.preview-item').remove(); 
-  updateImageCounter(); 
-}
+    function runCanvasAnimation(images) {
+        if (!ctx || !canvas || images.length === 0) return;
+        var durationPerSlide = 3500, fadeDuration = 800, startTime = null;
 
-function updateImageCounter() { 
-  const n = selectedFiles.length; 
-  document.getElementById('imageCounter').textContent = `Uploaded: ${n} / 10 Images`; 
-  setCheck('cl-images', n >= 1); 
-}
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var elapsed = timestamp - startTime;
+            var progress = (elapsed % durationPerSlide) / durationPerSlide;
+            var index = Math.floor(elapsed / durationPerSlide) % images.length;
+            var nextIndex = (index + 1) % images.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            var slideTime = elapsed % durationPerSlide;
+            var isFading = slideTime > (durationPerSlide - fadeDuration);
+            var fadeOpacity = isFading ? (slideTime - (durationPerSlide - fadeDuration)) / fadeDuration : 0;
+
+            drawCinematicFrame(images[index], progress, 1.0);
+            if (isFading) drawCinematicFrame(images[nextIndex], 0, fadeOpacity);
+            slideshowInterval = requestAnimationFrame(animate);
+        }
+
+        function drawCinematicFrame(img, progress, opacity) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            var scale = 1.0 + (progress * 0.08);
+            var hRatio = canvas.width / img.width;
+            var vRatio = canvas.height / img.height;
+            var ratio  = Math.max(hRatio, vRatio) * scale;
+            var baseShiftX = (canvas.width - img.width * ratio) / 2;
+            var centerShiftY = (canvas.height - img.height * ratio) / 2;
+            var panOffsetX = (progress - 0.5) * (canvas.width * 0.04);
+            var centerShiftX = baseShiftX + panOffsetX;
+
+            ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+            ctx.restore();
+        }
+
+        stopAutoSlideshowPreview();
+        slideshowInterval = requestAnimationFrame(animate);
+    }
+
+    function stopAutoSlideshowPreview() {
+        if (slideshowInterval) { cancelAnimationFrame(slideshowInterval); slideshowInterval = null; }
+    }
+
+    function toggleVideoOption() {
+        if (uploadWrapper) uploadWrapper.style.display = uploadRadio && uploadRadio.checked ? 'block' : 'none';
+        if (autoWrapper)   autoWrapper.style.display   = autoRadio && autoRadio.checked   ? 'block' : 'none';
+        if (rmWrapper)     rmWrapper.style.display     = rmRadio && rmRadio.checked     ? 'block' : 'none';
+
+        if (autoRadio && autoRadio.checked) startAutoSlideshowPreview();
+        else stopAutoSlideshowPreview();
+
+        if (rmRadio && rmRadio.checked) renderVideoPreview();
+    }
+
+    if (uploadRadio) uploadRadio.addEventListener('change', toggleVideoOption);
+    if (autoRadio)   autoRadio.addEventListener('change', toggleVideoOption);
+    if (rmRadio)     rmRadio.addEventListener('change', toggleVideoOption);
+
+    if (videoArea && videoInput) {
+        videoArea.addEventListener('click', function () { videoInput.click(); });
+    }
+
+    if (videoInput) {
+        videoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
+            var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
+            var companyWhatsAppNumber = "917057205423";
+
+            var rawMessage = "Hello Team,\n\nI am trying to upload a video for my agricultural plot listing, but the file size exceeds the 20MB limit.\n\n" +
+                             "📌 *Property Details:*\n" +
+                             "• *Title:* " + propTitle + "\n" +
+                             "• *Listed By:* " + listedByName + "\n" +
+                             "• *Video File Name:* " + file.name + "\n" +
+                             "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
+                             "Please assist me in publishing this video for my listing.";
+            var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
+
+            if (file.size > 20 * 1024 * 1024) {
+                videoInput.value = '';
+                if (videoPreview) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                    videoPreview.style.display = 'none';
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Video File Too Large',
+                    text: 'This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.',
+                    showCancelButton: true,
+                    confirmButtonColor: '#25D366',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fab fa-whatsapp me-1"></i> Share',
+                    cancelButtonText: 'Okay',
+                    allowOutsideClick: false
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.open(whatsappUrl, '_blank');
+                        if (rmRadio) rmRadio.checked = true;
+                        toggleVideoOption();
+                    }
+                });
+                return;
+            }
+
+            if (videoPreview) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    }
+
+    function renderVideoPreview() {
+        var linkInput = document.getElementById('property_video_link');
+        var frame = document.getElementById('rmVideoFrame');
+        if (!linkInput || !frame) return;
+
+        var url = linkInput.value.trim();
+        if (!url) { frame.style.display = 'none'; return; }
+
+        frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:350px; border:0; border-radius:8px;" allowfullscreen></iframe>';
+        var embedIframe = document.getElementById('rmVideoEmbed');
+
+        var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        if (ytMatch) {
+            embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1];
+            frame.style.display = 'block';
+            return;
+        }
+
+        embedIframe.src = url;
+        frame.style.display = 'block';
+    }
+
+    var linkInputEl = document.getElementById('property_video_link');
+    if (linkInputEl) linkInputEl.addEventListener('input', renderVideoPreview);
+
+    var previewBtn = document.getElementById('previewRMLinkBtn');
+    if (previewBtn) previewBtn.addEventListener('click', renderVideoPreview);
+
+    toggleVideoOption();
+});
 /* ═══════════════════════════════════════════════════════════
    CONDITIONAL TOGGLES
 ═══════════════════════════════════════════════════════════ */
@@ -1547,21 +2167,21 @@ function Change_Fields() {
 
   const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
   if (isSelf) {
-    setVal('uploaded_by_id',      admin.id);
-    setVal('uploaded_by_name',    admin.name);
-    setVal('uploaded_by_email',   admin.email);
-    setVal('uploaded_by_contact', admin.phone);
-    setVal('uploaded_by_role',    admin.role);
+    setVal('listed_by_id',      admin.id);
+    setVal('listed_by_name',    admin.name);
+    setVal('listed_by_email',   admin.email);
+    setVal('listed_by_contact', admin.phone);
+    setVal('listed_by_role',    admin.role);
     updateBrokerageLabel(admin.role);
   } else {
-    setVal('uploaded_by_id',      '');
-    setVal('uploaded_by_name',    '');
-    setVal('uploaded_by_email',   '');
-    setVal('uploaded_by_contact', '');
-    setVal('uploaded_by_role',    '');
+    setVal('listed_by_id',      '');
+    setVal('listed_by_name',    '');
+    setVal('listed_by_email',   '');
+    setVal('listed_by_contact', '');
+    setVal('listed_by_role',    '');
   }
   syncUploadedByStep4();
-  setCheck('cl-listedby', !!document.getElementById('uploaded_by_name')?.value);
+  setCheck('cl-listedby', !!document.getElementById('listed_by_name')?.value);
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1571,7 +2191,7 @@ function Change_Fields() {
 function get_user_data() {
   const assigned_to = document.getElementById('assigned_to').value;
   if (!assigned_to) {
-    ['uploaded_by_id','uploaded_by_name','uploaded_by_email','uploaded_by_contact','uploaded_by_role'].forEach(id => {
+    ['listed_by_id','listed_by_name','listed_by_email','listed_by_contact','listed_by_role'].forEach(id => {
       const el = document.getElementById(id); if(el) el.value = '';
     });
     syncUploadedByStep4();
@@ -1584,11 +2204,11 @@ function get_user_data() {
     dataType: 'json',
     success: function(r) {
       const setVal = (id, v) => { const el = document.getElementById(id); if(el) el.value = v||''; };
-      setVal('uploaded_by_id',      r.user_id);
-      setVal('uploaded_by_name',    r.name);
-      setVal('uploaded_by_email',   r.email);
-      setVal('uploaded_by_contact', r.phone || r.contact);
-      setVal('uploaded_by_role',    r.role);
+      setVal('listed_by_id',      r.user_id);
+      setVal('listed_by_name',    r.name);
+      setVal('listed_by_email',   r.email);
+      setVal('listed_by_contact', r.phone || r.contact);
+      setVal('listed_by_role',    r.role);
       updateBrokerageLabel(r.role);
       syncUploadedByStep4();
       setCheck('cl-listedby', !!r.name);
@@ -1602,11 +2222,11 @@ function get_user_data() {
 /* Mirror the Step 1 read-only fields into the Step 4 display */
 function syncUploadedByStep4() {
   const map = {
-    upby_id_display:      'uploaded_by_id',
-    upby_name_display:    'uploaded_by_name',
-    upby_email_display:   'uploaded_by_email',
-    upby_contact_display: 'uploaded_by_contact',
-    upby_role_display:    'uploaded_by_role'
+    upby_id_display:      'listed_by_id',
+    upby_name_display:    'listed_by_name',
+    upby_email_display:   'listed_by_email',
+    upby_contact_display: 'listed_by_contact',
+    upby_role_display:    'listed_by_role'
   };
   Object.entries(map).forEach(([toId, fromId]) => {
     const from = document.getElementById(fromId);
@@ -1713,6 +2333,9 @@ function syncUploadedByStep4() {
 /* ═══════════════════════════════════════════════════════════
    SUBMIT
 ═══════════════════════════════════════════════════════════ */
+
+
+
 document.getElementById('plotForm').addEventListener('submit', function(e) {
   e.preventDefault();
   for (let i = 1; i <= 4; i++) {
@@ -1731,12 +2354,20 @@ document.getElementById('plotForm').addEventListener('submit', function(e) {
     confirmButtonText: '✓ Yes, Publish Now', cancelButtonText: 'Review Again'
   }).then(result => {
     if (!result.isConfirmed) return;
+
     const btn = document.getElementById('submitBtn');
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing…';
     btn.disabled = true;
+
+    Swal.fire({
+      title: 'Checking & Saving Listing...',
+      text: 'Validating duplicate inventory rules...',
+      allowOutsideClick: false,
+      didOpen: () => { Swal.showLoading(); }
+    });
+
+    IMG_CATEGORIES.forEach(cat => syncCategoryInput(cat));
     const formData = new FormData(this);
-    formData.delete('property_images[]');
-    selectedFiles.forEach(f => formData.append('property_images[]', f));
     fetch(this.getAttribute('action'), { method:'POST', body:formData, headers:{'X-Requested-With':'XMLHttpRequest'} })
       .then(r => r.json())
       .then(data => {
@@ -1906,3 +2537,26 @@ document.addEventListener('DOMContentLoaded', function() {
     togglePortalField();
 });
 </script>
+
+  <script>
+          document.getElementById('city').addEventListener('input', function () {
+            this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+          });
+
+
+          if (isAmenities) {
+    setCheck('cl-amenities', count > 0);
+  } else {
+    // Optional checklist item update (doesn't block form progression)
+    const el = document.getElementById('cl-facilities');
+    if (el) {
+      if (count > 0) {
+        el.className = 'checklist-item done';
+        el.querySelector('i').className = 'fas fa-check-circle';
+      } else {
+        el.className = 'checklist-item';
+        el.querySelector('i').className = 'fas fa-circle';
+      }
+    }
+  }
+        </script>

@@ -68,34 +68,118 @@
     .remove-image { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; background: #e74c3c; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; font-size: 0.9rem; z-index: 10;}
     .remove-image:hover { background: #c0392b; transform: scale(1.1); }
 
-    /* Category Image Tab Upload CSS */
-    .img-cat-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-    .img-cat-tab { border: 2px solid #e9ecef; background: #fff; border-radius: 12px; padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: #4a5568; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.25s ease; white-space: nowrap; }
-    .img-cat-tab i { font-size: 0.95rem; color: #94a3b8; }
-    .img-cat-tab .cat-count { background: #f1f5f9; color: #64748b; border-radius: 20px; padding: 1px 9px; font-size: 0.72rem; font-weight: 700; }
-    .img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
-    .img-cat-tab.active i { color: #fff; }
-    .img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
-    .img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
+    .existing-img-remove-btn {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+    background: #e74c3c; color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.8rem; z-index: 5;
+    border: none;
+}
+.existing-img-remove-btn input { display: none; }
+.existing-img-remove-btn:hover { background: #c0392b; }
 
-    .img-cat-panel { display: none; }
-    .img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+    /* ================= PROPERTY IMAGE CATEGORY UPLOAD — IMPROVED UX ================= */
+.img-upload-guide {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    border: 2px dashed #a5b4fc; border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px;
+}
+.guide-step { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 190px; }
+.guide-step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--primary-gradient); color: #fff;
+    font-weight: 800; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 3px 8px rgba(102,126,234,0.35);
+}
+.guide-step-text { font-size: 0.78rem; color: #3730a3; line-height: 1.35; }
+.guide-step-text strong { display: block; font-size: 0.85rem; color: #1e1b4b; }
+.guide-arrow { color: #a5b4fc; font-size: 1rem; display: none; }
+@media (min-width: 900px) { .guide-arrow { display: block; } }
 
-    .img-cat-upload-area { border: 3px dashed #cbd5e0; border-radius: 15px; padding: 28px 20px; text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease; }
-    .img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
-    .img-cat-upload-area .upload-icon i { font-size: 2.2rem; color: #667eea; }
-    .img-cat-upload-area .upload-text { font-size: 1rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
-    .img-cat-upload-area .upload-subtext { font-size: 0.82rem; color: #718096; margin-top: 4px; }
+.img-cat-tabs {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 12px; margin-bottom: 20px; counter-reset: catstep;
+}
 
-    .img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
-    .img-cat-preview-item { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); aspect-ratio: 1; cursor: grab; border: 2px solid transparent; }
-    .img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.img-cat-tab {
+    position: relative; border: 2px solid #e9ecef; background: #fff; border-radius: 14px;
+    padding: 18px 14px 14px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
+    cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    transition: all 0.25s ease; counter-increment: catstep;
+}
+.img-cat-tab i { font-size: 1.3rem; color: #94a3b8; }
+.img-cat-tab .cat-count {
+    background: #f1f5f9; color: #64748b; border-radius: 20px;
+    padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
+    align-self: flex-end; margin-top: -4px;
+}
+.img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
+.img-cat-tab.active i { color: #fff; }
+.img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+.img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
 
-    .img-total-summary { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
-    .img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 0.95rem; }
-    .img-total-summary .total-count span { color: #667eea; }
-    .img-total-summary .min-warning { font-size: 0.8rem; color: #e74c3c; font-weight: 600; }
-    .img-total-summary .min-ok { font-size: 0.8rem; color: #10b981; font-weight: 600; }
+.img-cat-tab::before {
+    content: counter(catstep); position: absolute; top: -8px; left: -8px;
+    width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid #cbd5e0; color: #64748b;
+    font-size: 0.68rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+.img-cat-tab.active::before { border-color: #667eea; color: #667eea; }
+.img-cat-tab.has-images::before { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; background: #38ef7d; border-color: #38ef7d; color: #fff; }
+
+.img-cat-tab:nth-child(1)::after, .img-cat-tab:nth-child(2)::after {
+    content: "★ Becomes Cover Photo"; font-size: 0.62rem; font-weight: 700; color: #b45309;
+    background: #fef3c7; padding: 2px 9px; border-radius: 20px; align-self: flex-start; margin-top: 2px;
+}
+.img-cat-tab.active:nth-child(1)::after, .img-cat-tab.active:nth-child(2)::after { color: #fff; background: rgba(255,255,255,0.25); }
+
+.img-cat-panel { display: none; }
+.img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+.img-cat-upload-area {
+    border: 3px dashed #cbd5e0; border-radius: 15px; padding: 36px 20px;
+    text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+}
+.img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
+.img-cat-upload-area .upload-icon {
+    width: 60px; height: 60px; border-radius: 50%; background: #eef2ff;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+}
+.img-cat-upload-area .upload-icon i { font-size: 1.6rem; color: #667eea; margin: 0; }
+.img-cat-upload-area .upload-text { font-size: 1.05rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+.img-cat-upload-area .upload-subtext {
+    display: inline-block; margin-top: 8px; padding: 4px 12px; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 20px; color: #475569; font-size: 0.82rem;
+}
+
+.img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+.img-cat-preview-item {
+    position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
+}
+.img-cat-preview-item.dragging { opacity: 0.4; }
+.img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;}
+.img-cat-preview-item .cover-badge {
+    position: absolute; bottom: 8px; left: 8px; background: linear-gradient(135deg,#f6d365,#fda085); color: #3b2a00;
+    font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 4px;
+}
+.img-cat-preview-item .remove-image {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff;
+    border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
+}
+.img-cat-preview-item .remove-image:hover { background: #c0392b; }
+
+.img-total-summary {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 16px;
+    padding: 16px 22px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+}
+.img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 1.05rem; }
+.img-total-summary .min-ok { font-size: 0.85rem; color: #10b981; font-weight: 600; }
+
+   
 
     /* Search Select Dropdown (Listed By - Other) */
     .search-select { position: relative; width: 100%; font-size: 0.95rem; }
@@ -463,49 +547,57 @@
                                     <input type="text" class="form-control" name="manual_brokerage" value="{{ property.manual_brokerage|default:'' }}" placeholder="e.g. Fixed Amount">
                                 </div>
 
-                                <div class="col-md-6"><div class="form-group"><label class="form-label">Advance Rent Month</label>
-                                    <select class="form-select form-control" id="advance_rent_month" name="advance_rent_month">
-                                        <option value="">Select</option>
-                                        <option value="0" {% if property.advance_rent_month == '0' %}selected{% endif %}>No Advance</option>
-                                        <option value="1" {% if property.advance_rent_month == '1' or not property.advance_rent_month %}selected{% endif %}>1 Month Rent</option>
-                                        <option value="2" {% if property.advance_rent_month == '2' %}selected{% endif %}>2 Months Rent</option>
-                                        <option value="3" {% if property.advance_rent_month == '3' %}selected{% endif %}>3 Months Rent</option>
-                                        <option value="4" {% if property.advance_rent_month == '4' %}selected{% endif %}>4 Months Rent</option>
-                                        <option value="5" {% if property.advance_rent_month == '5' %}selected{% endif %}>5 Months Rent</option>
-                                        <option value="6" {% if property.advance_rent_month == '6' %}selected{% endif %}>6 Months Rent</option>
-                                        <option value="7" {% if property.advance_rent_month == '7' %}selected{% endif %}>7 Months Rent</option>
-                                        <option value="8" {% if property.advance_rent_month == '8' %}selected{% endif %}>8 Months Rent</option>
-                                        <option value="9" {% if property.advance_rent_month == '9' %}selected{% endif %}>9 Months Rent</option>
-                                        <option value="10" {% if property.advance_rent_month == '10' %}selected{% endif %}>10 Months Rent</option>
-                                        <option value="11" {% if property.advance_rent_month == '11' %}selected{% endif %}>11 Months Rent</option>
-                                        <option value="fixed" {% if property.advance_rent_month == 'fixed' %}selected{% endif %}>Fixed Amount</option>
-                                    </select>
-                                </div></div>
-                                <div class="col-md-6 mt-2" id="advance_amount_div" style="{% if property.advance_rent_month != 'fixed' %}display:none;{% endif %}">
+                               <div class="col-md-6"><div class="form-group"><label class="form-label">Advance Rent Month</label>
+    <select class="form-select form-control" id="advance_rent_month" name="advance_rent_month">
+        <option value="">Select</option>
+        <option value="No Advance" {% if property.advance_rent_month == "No Advance" %}selected{% endif %}>No Advance</option>
+        <option value="1 Month Rent" {% if property.advance_rent_month == "1 Month Rent" %}selected{% endif %}>1 Month Rent</option>
+        <option value="2 Months Rent" {% if property.advance_rent_month == "2 Months Rent" %}selected{% endif %}>2 Months Rent</option>
+        <option value="3 Months Rent" {% if property.advance_rent_month == "3 Months Rent" %}selected{% endif %}>3 Months Rent</option>
+        <option value="4 Months Rent" {% if property.advance_rent_month == "4 Months Rent" %}selected{% endif %}>4 Months Rent</option>
+        <option value="5 Months Rent" {% if property.advance_rent_month == "5 Months Rent" %}selected{% endif %}>5 Months Rent</option>
+        <option value="6 Months Rent" {% if property.advance_rent_month == "6 Months Rent" %}selected{% endif %}>6 Months Rent</option>
+        <option value="7 Months Rent" {% if property.advance_rent_month == "7 Months Rent" %}selected{% endif %}>7 Months Rent</option>
+        <option value="8 Months Rent" {% if property.advance_rent_month == "8 Months Rent" %}selected{% endif %}>8 Months Rent</option>
+        <option value="9 Months Rent" {% if property.advance_rent_month == "9 Months Rent" %}selected{% endif %}>9 Months Rent</option>
+        <option value="10 Months Rent" {% if property.advance_rent_month == "10 Months Rent" %}selected{% endif %}>10 Months Rent</option>
+        <option value="11 Months Rent" {% if property.advance_rent_month == "11 Months Rent" %}selected{% endif %}>11 Months Rent</option>
+        <option value="Fixed Amount" {% if property.advance_rent_month == "Fixed Amount" %}selected{% endif %}>Fixed Amount</option>
+    </select>
+</div></div>
+                            
+                        
+
+
+
+                                <div class="col-md-6 mt-2" id="advance_amount_div" style="{% if property.advance_rent_month != 'Fixed Amount' %}display:none;{% endif %}">
                                     <div class="form-group"><label class="form-label">Advance Rent Amount</label><input type="number" class="form-control" name="advance_rent_amount" id="advance_rent_amount" value="{{ property.advance_rent_amount|default:'' }}"></div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="form-label">Refundable Security Deposit <span class="required-star">*</span></label>
+                                        
+
+                                      
                                         <select class="form-select form-control" id="security_deposit_type" name="security_deposit_type">
-                                            <option value="">Select</option>
-                                            <option value="0" {% if property.security_deposit_type == '0' %}selected{% endif %}>No Advance</option>
-                                            <option value="1" {% if property.security_deposit_type == '1' or not property.security_deposit_type %}selected{% endif %}>1 Month Rent</option>
-                                            <option value="2" {% if property.security_deposit_type == '2' %}selected{% endif %}>2 Months Rent</option>
-                                            <option value="3" {% if property.security_deposit_type == '3' %}selected{% endif %}>3 Months Rent</option>
-                                            <option value="4" {% if property.security_deposit_type == '4' %}selected{% endif %}>4 Months Rent</option>
-                                            <option value="5" {% if property.security_deposit_type == '5' %}selected{% endif %}>5 Months Rent</option>
-                                            <option value="6" {% if property.security_deposit_type == '6' %}selected{% endif %}>6 Months Rent</option>
-                                            <option value="7" {% if property.security_deposit_type == '7' %}selected{% endif %}>7 Months Rent</option>
-                                            <option value="8" {% if property.security_deposit_type == '8' %}selected{% endif %}>8 Months Rent</option>
-                                            <option value="9" {% if property.security_deposit_type == '9' %}selected{% endif %}>9 Months Rent</option>
-                                            <option value="10" {% if property.security_deposit_type == '10' %}selected{% endif %}>10 Months Rent</option>
-                                            <option value="11" {% if property.security_deposit_type == '11' %}selected{% endif %}>11 Months Rent</option>
-                                            <option value="fixed" {% if property.security_deposit_type == 'fixed' %}selected{% endif %}>Fixed Amount</option>
-                                        </select>
+    <option value="">Select</option>
+    <option value="No Deposit" {% if property.security_deposit_type == "No Deposit" %}selected{% endif %}>No Deposit</option>
+    <option value="1 Month Rent" {% if property.security_deposit_type == "1 Month Rent" %}selected{% endif %}>1 Month Rent</option>
+    <option value="2 Months Rent" {% if property.security_deposit_type == "2 Months Rent" %}selected{% endif %}>2 Months Rent</option>
+    <option value="3 Months Rent" {% if property.security_deposit_type == "3 Months Rent" %}selected{% endif %}>3 Months Rent</option>
+    <option value="4 Months Rent" {% if property.security_deposit_type == "4 Months Rent" %}selected{% endif %}>4 Months Rent</option>
+    <option value="5 Months Rent" {% if property.security_deposit_type == "5 Months Rent" %}selected{% endif %}>5 Months Rent</option>
+    <option value="6 Months Rent" {% if property.security_deposit_type == "6 Months Rent" %}selected{% endif %}>6 Months Rent</option>
+    <option value="7 Months Rent" {% if property.security_deposit_type == "7 Months Rent" %}selected{% endif %}>7 Months Rent</option>
+    <option value="8 Months Rent" {% if property.security_deposit_type == "8 Months Rent" %}selected{% endif %}>8 Months Rent</option>
+    <option value="9 Months Rent" {% if property.security_deposit_type == "9 Months Rent" %}selected{% endif %}>9 Months Rent</option>
+    <option value="10 Months Rent" {% if property.security_deposit_type == "10 Months Rent" %}selected{% endif %}>10 Months Rent</option>
+    <option value="11 Months Rent" {% if property.security_deposit_type == "11 Months Rent" %}selected{% endif %}>11 Months Rent</option>
+    <option value="Fixed Amount" {% if property.security_deposit_type == "Fixed Amount" %}selected{% endif %}>Fixed Amount</option>
+</select>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mt-2" id="security_deposit_div" style="{% if property.security_deposit_type != 'fixed' %}display:none;{% endif %}">
+<div class="col-md-6 mt-2" id="security_deposit_div" style="{% if property.security_deposit_type != 'Fixed Amount' %}display:none;{% endif %}">
                                     <div class="form-group"><label class="form-label">Refundable Security Deposit Amount</label><input type="number" class="form-control" name="security_deposit_amount" id="security_deposit_amount" value="{{ property.security_deposit_amount|default:'' }}"></div>
                                 </div>
                             </div>
@@ -675,9 +767,35 @@
                         <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
                         <div class="section-body">
 
+                            <div class="img-upload-guide">
+                                <div class="guide-step">
+                                    <div class="guide-step-num">1</div>
+                                    <div class="guide-step-text">
+                                        <strong>Pick a category</strong>
+                                        Tap a tile below (Exterior, Living Room, etc.)
+                                    </div>
+                                </div>
+                                <i class="fas fa-arrow-right guide-arrow"></i>
+                                <div class="guide-step">
+                                    <div class="guide-step-num">2</div>
+                                    <div class="guide-step-text">
+                                        <strong>Upload matching photos</strong>
+                                        Click or drag images into that category only
+                                    </div>
+                                </div>
+                                <i class="fas fa-arrow-right guide-arrow"></i>
+                                <div class="guide-step">
+                                    <div class="guide-step-num">3</div>
+                                    <div class="guide-step-text">
+                                        <strong>Set your cover photo</strong>
+                                        Drag to reorder — the 1st photo in Exterior or Living is used as the cover
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="img-total-summary">
                                 <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/20</div>
-                                <div id="imgMinNotice" class="min-warning"><i class="fas fa-exclamation-circle"></i> Add at least 3 images to publish</div>
+                                <div id="imgMinNotice" class="min-ok"><i class="fas fa-info-circle"></i> Images are optional but recommended</div>
                             </div>
 
                             <!-- Category Tabs -->
@@ -693,30 +811,25 @@
 
                             <div class="img-cat-panels">
                                 <!-- 1. EXTERIOR -->
-                                <div class="img-cat-panel active" data-cat-panel="exterior">
-                                    {% with existing=images_by_category.exterior %}
-                                    {% if existing %}
-                                    <div class="img-cat-preview" style="margin-bottom:14px;">
-                                        {% for img in existing %}
-                                        <div class="img-cat-preview-item">
-                                            <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                    {% endif %}
-                                    {% endwith %}
-                                    <input type="file" class="img-cat-input" id="imgInput-exterior" name="property_images_exterior[]" accept="image/*" multiple style="display:none;">
-                                    <div class="img-cat-upload-area" data-cat="exterior">
-                                        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                                        <div class="upload-text">Click or Drag Exterior / Building Photos Here</div>
-                                        <div class="upload-subtext">Front view, entrance, society/building — up to 5 images</div>
-                                    </div>
-                                    <div class="img-cat-preview" id="imgPreview-exterior"></div>
-                                </div>
-
+                             <div class="img-cat-panel active" data-cat-panel="exterior">
+    <input type="file" class="img-cat-input" id="imgInput-exterior" name="property_images_exterior[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="exterior">
+        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+        <div class="upload-text">Click or Drag Exterior / Building Photos Here</div>
+        <div class="upload-subtext">Front view, entrance, society/building — up to 5 images</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-exterior">
+        {% for img in images_by_category.exterior %}
+        <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="exterior">
+            <img src="{{ img.image.url }}">
+            <label class="existing-img-remove-btn" title="Remove this image">
+              <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+</div>
                                 <!-- 2. LIVING -->
                                 <div class="img-cat-panel" data-cat-panel="living">
                                     {% with existing=images_by_category.living %}
@@ -725,9 +838,11 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                            
+                                            <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -750,9 +865,10 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                           <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -775,9 +891,11 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                          
+                                            <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -800,9 +918,10 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                            <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -825,9 +944,10 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                          <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -850,9 +970,10 @@
                                         {% for img in existing %}
                                         <div class="img-cat-preview-item">
                                             <img src="{{ img.image.url }}">
-                                            <label style="position:absolute;bottom:6px;left:6px;background:rgba(220,38,38,.9);color:#fff;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
-                                                <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="margin:0;"> Delete
-                                            </label>
+                                          <label class="existing-img-remove-btn" title="Remove this image">
+  <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+  <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+</label>
                                         </div>
                                         {% endfor %}
                                     </div>
@@ -894,13 +1015,19 @@
                             </div>
                             <input type="hidden" name="video_source" id="video_source" value="upload">
 
-                            <div id="videoUploadWrapper">
-                                {% if uploaded_video and uploaded_video.video %}
-                                <div style="margin-bottom:12px;">
-                                    <label class="form-label">Current Uploaded Video</label>
-                                    <video src="{{ uploaded_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
-                                </div>
-                                {% endif %}
+                          <div id="videoUploadWrapper">
+    {% if uploaded_video and uploaded_video.video %}
+    <div style="margin-bottom:12px; position:relative;" id="currentVideoBlock">
+        <label class="form-label">Current Uploaded Video</label>
+        <div style="position:relative;">
+            <video src="{{ uploaded_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
+            <button type="button" class="existing-img-remove-btn" style="top:32px; right:8px;" title="Remove this video" onclick="removeCurrentVideo()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <input type="checkbox" name="delete_current_video" id="delete_current_video" value="1" style="display:none;">
+    </div>
+    {% endif %}
                                 <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
                                 <div class="image-upload-area" id="videoUploadArea">
                                     <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size:2.2rem;color:#667eea;"></i></div>
@@ -1270,316 +1397,13 @@ function Change_Fields() {
 })();
 </script>
 
-<script>
-$(document).ready(function () {
-    updatePreview();
-    initBrokerage();
-
-    var currentSection = null;
-    ['amenities', 'facilities'].forEach(function (section) { updateDisplay(section); });
-
-    window.openModal = function (section) {
-        currentSection = section;
-        $('#modalTitle').text('Select ' + section.charAt(0).toUpperCase() + section.slice(1));
-        var container = $('#modalItemsList').empty();
-        $('.' + section + '-checkbox').each(function () {
-            container.append(
-                '<div class="col-md-4 col-sm-6 mb-2"><div class="form-check">' +
-                '<input class="form-check-input modal-item-checkbox" type="checkbox" value="' + this.value + '" data-icon="' + $(this).data('icon') + '" ' + (this.checked ? 'checked' : '') + '>' +
-                '<label class="form-check-label"><i class="' + $(this).data('icon') + '"></i> ' + this.value + '</label>' +
-                '</div></div>'
-            );
-        });
-        updateModalCount();
-        $('#itemsModal').modal('show');
-    };
-
-    window.removeItem = function (section, name) {
-        $('.' + section + '-checkbox').filter(function () { return this.value === name; }).prop('checked', false);
-        updateDisplay(section);
-    };
-
-    window.clearAll = function () {
-        if (!currentSection) return;
-        $('.' + currentSection + '-checkbox').prop('checked', false);
-        $('.modal-item-checkbox').prop('checked', false);
-        updateDisplay(currentSection);
-        updateModalCount();
-    };
-
-    function updateDisplay(section) {
-        var checked = $('.' + section + '-checkbox:checked');
-        var count = checked.length;
-        $('#' + section + 'Count').text(count + ' selected');
-        $('#' + section + 'Badge').text(count);
-        var display = $('#' + section + 'Display').empty();
-        if (count === 0) {
-            display.html('<p class="text-muted text-center m-0">No ' + section + ' selected</p>');
-        } else {
-            checked.each(function () {
-                display.append(
-                    '<span class="item-tag"><i class="' + $(this).data('icon') + '"></i> ' + this.value +
-                    '<span class="remove-btn" onclick="removeItem(\'' + section + '\',\'' + this.value + '\')"><i class="fas fa-times-circle"></i></span></span>'
-                );
-            });
-        }
-    }
-
-    function updateModalCount() { $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length); }
-    $(document).on('change', '.modal-item-checkbox', updateModalCount);
-
-    $('#itemsModal .btn-primary').on('click', function () {
-        if (!currentSection) return;
-        var checked = $('.modal-item-checkbox:checked');
-        $('.' + currentSection + '-checkbox').prop('checked', false);
-        checked.each(function () { $('.' + currentSection + '-checkbox[value="' + this.value + '"]').prop('checked', true); });
-        updateDisplay(currentSection);
-    });
-
-    if (typeof CKEDITOR !== 'undefined') {
-        if (CKEDITOR.instances.rent_residential_desc) CKEDITOR.instances.rent_residential_desc.destroy();
-    }
-});
-
-// --- STEPPER LOGIC ---
-let currentStep = 1;
-const totalSteps = 4;
-
-function validateStep(stepIndex) {
-    let isValid = true;
-    let currentStepEl = document.getElementById('step' + stepIndex);
-    if (!currentStepEl) return true;
-    let requiredFields = currentStepEl.querySelectorAll('input[required], select[required], textarea[required]');
-    requiredFields.forEach(function(field) {
-        field.classList.remove('is-invalid');
-        if (!field.value || field.value.trim() === '') {
-            isValid = false;
-            field.classList.add('is-invalid');
-            if (field.id === 'assigned_to') {
-                document.getElementById('assignedToSearchSelect')?.classList.add('validation-error');
-            }
-        } else if (field.id === 'assigned_to') {
-            document.getElementById('assignedToSearchSelect')?.classList.remove('validation-error');
-        }
-    });
-    return isValid;
-}
-
-function goToStep(n) {
-    if (n > currentStep) {
-        for (let i = currentStep; i < n; i++) {
-            if (!validateStep(i)) {
-                Swal.fire({ icon: 'warning', title: 'Incomplete Details', text: 'Please fill out all highlighted required fields before proceeding.', confirmButtonColor: '#667eea' });
-                document.querySelectorAll('.step-content').forEach(step => step.classList.remove('active'));
-                document.getElementById('step' + i).classList.add('active');
-                currentStep = i;
-                return;
-            }
-        }
-    }
-    document.querySelectorAll('.step-content').forEach(step => step.classList.remove('active'));
-    document.getElementById('step' + n).classList.add('active');
-
-    for (let i = 1; i <= totalSteps; i++) {
-        let circle = document.getElementById('sc' + i);
-        let label = document.getElementById('sl' + i);
-        let line = document.getElementById('line' + i);
-        if (i < n) { circle.classList.add('done'); circle.classList.remove('active'); label.classList.add('done'); label.classList.remove('active'); if (line) line.classList.add('done'); }
-        else if (i === n) { circle.classList.add('active'); circle.classList.remove('done'); label.classList.add('active'); label.classList.remove('done'); if (line) line.classList.remove('done'); }
-        else { circle.classList.remove('done', 'active'); label.classList.remove('done', 'active'); if (line) line.classList.remove('done'); }
-    }
-    currentStep = n;
-    updatePreview();
-    document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function updatePreview() {
-    const type = document.querySelector('select[name="property_type"]')?.value;
-    const title = document.querySelector('input[name="property_title"]')?.value;
-    const price = document.querySelector('input[name="monthly_rent"]')?.value;
-    const city = document.querySelector('input[name="city"]')?.value;
-    const loc = document.querySelector('input[name="locality_area"]')?.value;
-    const area = document.querySelector('input[name="built_up_area"]')?.value;
-
-    document.getElementById('previewType').innerText = type || 'Type';
-    document.getElementById('previewTitle').innerText = title || 'Property Title';
-    document.getElementById('previewArea').innerText = area || '0';
-    document.getElementById('previewPrice').innerText = price ? '₹ ' + Number(price).toLocaleString('en-IN') + ' / mo' : '₹ 0 / mo';
-    document.getElementById('previewLocation').innerText = [loc, city].filter(Boolean).join(', ') || 'City, Locality';
-}
-
-document.querySelectorAll('input, select, textarea').forEach(el => {
-    el.addEventListener('input', updatePreview);
-    el.addEventListener('change', updatePreview);
-    updateChecklist();
-});
-
-function updateChecklist() {
-    setCheck('cl-type', !!document.getElementById('property_type')?.value);
-    setCheck('cl-bhk', !!document.getElementById('bhk_type')?.value);
-    setCheck('cl-area', !!document.getElementById('built_up_area')?.value);
-    setCheck('cl-price', !!document.getElementById('monthly_rent')?.value);
-    setCheck('cl-location', !!document.getElementById('city')?.value && !!document.getElementById('locality_area')?.value);
-    setCheck('cl-owner', !!document.getElementById('listed_by_name')?.value);
-}
-
-function setCheck(id, done) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.className = 'checklist-item' + (done ? ' done' : '');
-    el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
-}
-
-function initBrokerage() {
-    document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
-        document.getElementById('manualBrokerage').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
-    });
-    document.getElementById('advance_rent_month')?.addEventListener('change', function () {
-        document.getElementById('advance_amount_div').style.display = this.value === 'fixed' ? 'block' : 'none';
-    });
-    document.getElementById('security_deposit_type')?.addEventListener('change', function () {
-        document.getElementById('security_deposit_div').style.display = this.value === 'fixed' ? 'block' : 'none';
-    });
-    document.getElementById('maintenance_extra')?.addEventListener('change', function () {
-        document.getElementById('maintenanceAmountDiv').style.display = this.checked ? 'block' : 'none';
-    });
-    document.getElementById('maintenance_included')?.addEventListener('change', function () {
-        document.getElementById('maintenanceAmountDiv').style.display = this.checked ? 'none' : 'block';
-    });
-    document.getElementById('listed_yes')?.addEventListener('change', function () {
-        document.getElementById('portalField').style.display = this.checked ? 'block' : 'none';
-    });
-    document.getElementById('listed_no')?.addEventListener('change', function () {
-        document.getElementById('portalField').style.display = this.checked ? 'none' : 'block';
-    });
-}
-
-// --- CATEGORIZED IMAGE UPLOAD ENGINE ---
-const IMG_CATEGORIES = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others'];
-const IMG_CATEGORY_LIMITS = { exterior: 5, living: 5, bedroom: 6, kitchen: 4, bathroom: 4, balcony: 3, others: 5 };
-const IMG_TOTAL_LIMIT = 20;
-
-const EXISTING_IMG_COUNTS = {
-  exterior: {{ images_by_category.exterior|length|default:0 }},
-  living: {{ images_by_category.living|length|default:0 }},
-  bedroom: {{ images_by_category.bedroom|length|default:0 }},
-  kitchen: {{ images_by_category.kitchen|length|default:0 }},
-  bathroom: {{ images_by_category.bathroom|length|default:0 }},
-  balcony: {{ images_by_category.balcony|length|default:0 }},
-  others: {{ images_by_category.others|length|default:0 }}
-};
-
-const catFiles = {};
-IMG_CATEGORIES.forEach(function (c) { catFiles[c] = []; });
-
-function existingTotalCount() {
-    return IMG_CATEGORIES.reduce(function (sum, c) { return sum + (EXISTING_IMG_COUNTS[c] || 0); }, 0);
-}
-
-function totalImageCount() {
-    return IMG_CATEGORIES.reduce(function (sum, c) { return sum + catFiles[c].length; }, 0);
-}
 
 
 
 
-function renderCategory(cat) {
-    var preview = document.getElementById('imgPreview-' + cat);
-    if (!preview) return;
-    preview.innerHTML = '';
-    catFiles[cat].forEach(function (file) {
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            var div = document.createElement('div');
-            div.className = 'img-cat-preview-item';
-            div.innerHTML = '<img src="' + e.target.result + '"><button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\',\'' + file.name.replace(/'/g, "\\'") + '\')">✖</button>';
-            preview.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-    });
-    var newCount = catFiles[cat].length;
-    var savedCount = EXISTING_IMG_COUNTS[cat] || 0;
-    var countEl = document.getElementById('count-' + cat);
-    if (countEl) countEl.innerText = savedCount + newCount;
 
-    var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
-    if (tab) tab.classList.toggle('has-images', (savedCount + newCount) > 0);
-}
 
-function renderAllCategories() {
-    IMG_CATEGORIES.forEach(renderCategory);
-    var total = existingTotalCount() + totalImageCount();
-    var totalEl = document.getElementById('imgTotalCount');
-    if (totalEl) totalEl.innerText = total;
 
-    var notice = document.getElementById('imgMinNotice');
-    if (notice) {
-        if (total >= 3) {
-            notice.className = 'min-ok';
-            notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + total + ' images on this listing.';
-        } else {
-            notice.className = 'min-warning';
-            notice.innerHTML = '<i class="fas fa-exclamation-circle"></i> Add at least 3 images to publish';
-        }
-    }
-}
-
-function handleCatFiles(cat, files) {
-    var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
-    var limit = IMG_CATEGORY_LIMITS[cat] || 5;
-    var alreadyStored = EXISTING_IMG_COUNTS[cat] || 0;
-
-    if (alreadyStored + catFiles[cat].length + incoming.length > limit) {
-        Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
-        incoming = incoming.slice(0, Math.max(0, limit - alreadyStored - catFiles[cat].length));
-    }
-    if (existingTotalCount() + totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
-        Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all categories.', 'warning');
-        incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - existingTotalCount() - totalImageCount()));
-    }
-
-    catFiles[cat] = catFiles[cat].concat(incoming);
-    syncCategoryInput(cat);
-    renderAllCategories();
-}
-
-window.removeCatImage = function (cat, fileName) {
-    catFiles[cat] = catFiles[cat].filter(function (f) { return f.name !== fileName; });
-    syncCategoryInput(cat);
-    renderAllCategories();
-};
-
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
-        tab.addEventListener('click', function () {
-            var cat = this.dataset.cat;
-            document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
-            document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
-            this.classList.add('active');
-            var panel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
-            if (panel) panel.classList.add('active');
-        });
-    });
-
-    IMG_CATEGORIES.forEach(function (cat) {
-        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
-        var input = document.getElementById('imgInput-' + cat);
-        if (!zone || !input) return;
-
-        zone.addEventListener('click', function () { input.click(); });
-        input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
-        zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
-        zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
-        zone.addEventListener('drop', function (e) {
-            e.preventDefault();
-            zone.classList.remove('dragover');
-            handleCatFiles(cat, e.dataTransfer.files);
-        });
-    });
-
-    renderAllCategories();
-});
-</script>
 
 <script>
 // --- FORM CHANGE TRACKER & SUBMIT LISTENER ---
@@ -1735,22 +1559,25 @@ document.addEventListener("DOMContentLoaded", function () {
         let advance = 0;
         let advanceType = document.getElementById("advance_rent_month")?.value;
 
-        if (advanceType === "fixed") {
-            advance = parseFloat(document.getElementById("advance_rent_amount")?.value) || 0;
-        } else {
-            let months = parseFloat(advanceType) || 0;
-            advance = monthlyRent * months;
-        }
+        if (advanceType === "Fixed Amount") {
+    advance = parseFloat(document.getElementById("advance_rent_amount")?.value) || 0;
+} else if (advanceType && advanceType !== "No Advance") {
+    let m = advanceType.match(/(\d+)/);
+    advance = monthlyRent * (m ? parseFloat(m[1]) : 0);
+}
 
         let deposit = 0;
         let depositType = document.getElementById("security_deposit_type")?.value;
 
-        if (depositType === "fixed") {
-            deposit = parseFloat(document.getElementById("security_deposit_amount")?.value) || 0;
-        } else {
-            let months = parseFloat(depositType) || 0;
-            deposit = monthlyRent * months;
-        }
+      
+
+        if (depositType === "Fixed Amount") {
+    deposit = parseFloat(document.getElementById("security_deposit_amount")?.value) || 0;
+} else if (depositType && depositType !== "No Advance") {
+    let m = depositType.match(/(\d+)/);
+     deposit = monthlyRent * (m ? parseFloat(m[1]) : 0);
+}
+
 
         let brokerage = 0;
         let brokerageType = document.getElementById("brokeragePercentage")?.value;
@@ -1817,6 +1644,9 @@ document.addEventListener('DOMContentLoaded', function () {
     builtUpInput.addEventListener('blur', function () { if (carpetInput.value) validateCarpetArea(); });
 });
 </script>
+
+
+
 
 <script>
 // --- VIDEO OPTION & CANVAS SLIDESHOW PREVIEW ---
@@ -2106,4 +1936,479 @@ document.addEventListener('DOMContentLoaded', function () {
 
     toggleVideoOption();
 });
+function removeCurrentVideo() {
+    document.getElementById('delete_current_video').checked = true;
+    var block = document.getElementById('currentVideoBlock');
+    if (block) block.style.display = 'none';
+}
+</script>
+
+
+
+<script>
+$(document).ready(function () {
+    updatePreview();
+    initBrokerage();
+
+    var currentSection = null;
+    ['amenities', 'facilities'].forEach(function (section) { updateDisplay(section); });
+
+    window.openModal = function (section) {
+        currentSection = section;
+        $('#modalTitle').text('Select ' + section.charAt(0).toUpperCase() + section.slice(1));
+        var container = $('#modalItemsList').empty();
+        $('.' + section + '-checkbox').each(function () {
+            container.append(
+                '<div class="col-md-4 col-sm-6 mb-2"><div class="form-check">' +
+                '<input class="form-check-input modal-item-checkbox" type="checkbox" value="' + this.value + '" data-icon="' + $(this).data('icon') + '" ' + (this.checked ? 'checked' : '') + '>' +
+                '<label class="form-check-label"><i class="' + $(this).data('icon') + '"></i> ' + this.value + '</label>' +
+                '</div></div>'
+            );
+        });
+        updateModalCount();
+        $('#itemsModal').modal('show');
+    };
+
+    window.removeItem = function (section, name) {
+        $('.' + section + '-checkbox').filter(function () { return this.value === name; }).prop('checked', false);
+        updateDisplay(section);
+    };
+
+    window.clearAll = function () {
+        if (!currentSection) return;
+        $('.' + currentSection + '-checkbox').prop('checked', false);
+        $('.modal-item-checkbox').prop('checked', false);
+        updateDisplay(currentSection);
+        updateModalCount();
+    };
+
+    function updateDisplay(section) {
+        var checked = $('.' + section + '-checkbox:checked');
+        var count = checked.length;
+        $('#' + section + 'Count').text(count + ' selected');
+        $('#' + section + 'Badge').text(count);
+        var display = $('#' + section + 'Display').empty();
+        if (count === 0) {
+            display.html('<p class="text-muted text-center m-0">No ' + section + ' selected</p>');
+        } else {
+            checked.each(function () {
+                display.append(
+                    '<span class="item-tag"><i class="' + $(this).data('icon') + '"></i> ' + this.value +
+                    '<span class="remove-btn" onclick="removeItem(\'' + section + '\',\'' + this.value + '\')"><i class="fas fa-times-circle"></i></span></span>'
+                );
+            });
+        }
+    }
+
+    function updateModalCount() { $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length); }
+    $(document).on('change', '.modal-item-checkbox', updateModalCount);
+
+    $('#itemsModal .btn-primary').on('click', function () {
+        if (!currentSection) return;
+        var checked = $('.modal-item-checkbox:checked');
+        $('.' + currentSection + '-checkbox').prop('checked', false);
+        checked.each(function () { $('.' + currentSection + '-checkbox[value="' + this.value + '"]').prop('checked', true); });
+        updateDisplay(currentSection);
+    });
+
+    if (typeof CKEDITOR !== 'undefined') {
+        if (CKEDITOR.instances.rent_residential_desc) CKEDITOR.instances.rent_residential_desc.destroy();
+    }
+});
+
+// --- STEPPER LOGIC ---
+let currentStep = 1;
+const totalSteps = 4;
+
+function validateStep(stepIndex) {
+    let isValid = true;
+    let currentStepEl = document.getElementById('step' + stepIndex);
+    if (!currentStepEl) return true;
+    let requiredFields = currentStepEl.querySelectorAll('input[required], select[required], textarea[required]');
+    requiredFields.forEach(function(field) {
+        field.classList.remove('is-invalid');
+        if (!field.value || field.value.trim() === '') {
+            isValid = false;
+            field.classList.add('is-invalid');
+            if (field.id === 'assigned_to') {
+                document.getElementById('assignedToSearchSelect')?.classList.add('validation-error');
+            }
+        } else if (field.id === 'assigned_to') {
+            document.getElementById('assignedToSearchSelect')?.classList.remove('validation-error');
+        }
+    });
+    return isValid;
+}
+
+function goToStep(n) {
+    if (n > currentStep) {
+        for (let i = currentStep; i < n; i++) {
+            if (!validateStep(i)) {
+                Swal.fire({ icon: 'warning', title: 'Incomplete Details', text: 'Please fill out all highlighted required fields before proceeding.', confirmButtonColor: '#667eea' });
+                document.querySelectorAll('.step-content').forEach(step => step.classList.remove('active'));
+                document.getElementById('step' + i).classList.add('active');
+                currentStep = i;
+                return;
+            }
+        }
+    }
+    document.querySelectorAll('.step-content').forEach(step => step.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+
+    for (let i = 1; i <= totalSteps; i++) {
+        let circle = document.getElementById('sc' + i);
+        let label = document.getElementById('sl' + i);
+        let line = document.getElementById('line' + i);
+        if (i < n) { circle.classList.add('done'); circle.classList.remove('active'); label.classList.add('done'); label.classList.remove('active'); if (line) line.classList.add('done'); }
+        else if (i === n) { circle.classList.add('active'); circle.classList.remove('done'); label.classList.add('active'); label.classList.remove('done'); if (line) line.classList.remove('done'); }
+        else { circle.classList.remove('done', 'active'); label.classList.remove('done', 'active'); if (line) line.classList.remove('done'); }
+    }
+    currentStep = n;
+    updatePreview();
+    document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function updatePreview() {
+    const type = document.querySelector('select[name="property_type"]')?.value;
+    const title = document.querySelector('input[name="property_title"]')?.value;
+    const price = document.querySelector('input[name="monthly_rent"]')?.value;
+    const city = document.querySelector('input[name="city"]')?.value;
+    const loc = document.querySelector('input[name="locality_area"]')?.value;
+    const area = document.querySelector('input[name="built_up_area"]')?.value;
+
+    document.getElementById('previewType').innerText = type || 'Type';
+    document.getElementById('previewTitle').innerText = title || 'Property Title';
+    document.getElementById('previewArea').innerText = area || '0';
+    document.getElementById('previewPrice').innerText = price ? '₹ ' + Number(price).toLocaleString('en-IN') + ' / mo' : '₹ 0 / mo';
+    document.getElementById('previewLocation').innerText = [loc, city].filter(Boolean).join(', ') || 'City, Locality';
+}
+
+document.querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('input', updatePreview);
+    el.addEventListener('change', updatePreview);
+    updateChecklist();
+});
+
+function updateChecklist() {
+    setCheck('cl-type', !!document.getElementById('property_type')?.value);
+    setCheck('cl-bhk', !!document.getElementById('bhk_type')?.value);
+    setCheck('cl-area', !!document.getElementById('built_up_area')?.value);
+    setCheck('cl-price', !!document.getElementById('monthly_rent')?.value);
+    setCheck('cl-location', !!document.getElementById('city')?.value && !!document.getElementById('locality_area')?.value);
+    setCheck('cl-owner', !!document.getElementById('listed_by_name')?.value);
+}
+
+function setCheck(id, done) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'checklist-item' + (done ? ' done' : '');
+    el.querySelector('i').className = 'fas ' + (done ? 'fa-check-circle' : 'fa-circle');
+}
+
+
+
+function initBrokerage() {
+    // 1. Brokerage Eraser
+    document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
+        document.getElementById('manualBrokerage').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+        if (this.value !== 'Fixed Amount') {
+            document.querySelector('input[name="manual_brokerage"]').value = '';
+        }
+    });
+   
+    // 2. Advance Rent Eraser
+    document.getElementById('advance_rent_month')?.addEventListener('change', function () {
+        document.getElementById('advance_amount_div').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+        if (this.value !== 'Fixed Amount') {
+            document.getElementById('advance_rent_amount').value = '';
+        }
+    });
+
+    // 3. Security Deposit Eraser
+    document.getElementById('security_deposit_type')?.addEventListener('change', function () {
+        document.getElementById('security_deposit_div').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+        if (this.value !== 'Fixed Amount') {
+            document.getElementById('security_deposit_amount').value = '';
+        }
+    });
+
+    // 4. Maintenance Eraser
+    document.getElementById('maintenance_extra')?.addEventListener('change', function () {
+        document.getElementById('maintenanceAmountDiv').style.display = this.checked ? 'block' : 'none';
+    });
+    document.getElementById('maintenance_included')?.addEventListener('change', function () {
+        document.getElementById('maintenanceAmountDiv').style.display = this.checked ? 'none' : 'block';
+        if (this.checked) {
+            document.getElementById('monthy_maintenance_amount').value = '';
+        }
+    });
+
+    // 5. Portal Eraser
+    document.getElementById('listed_yes')?.addEventListener('change', function () {
+        document.getElementById('portalField').style.display = this.checked ? 'block' : 'none';
+    });
+    document.getElementById('listed_no')?.addEventListener('change', function () {
+        document.getElementById('portalField').style.display = this.checked ? 'none' : 'block';
+        if (this.checked) {
+            document.getElementById('portal_name').value = '';
+        }
+    });
+}
+
+// ================= CATEGORY-WISE IMAGE UPLOAD LOGIC =================
+const IMG_CATEGORIES = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others'];
+const IMG_CATEGORY_LIMITS = { exterior: 5, living: 5, bedroom: 6, kitchen: 4, bathroom: 4, balcony: 3, others: 5 };
+const IMG_TOTAL_LIMIT = 20;
+const IMG_MIN_REQUIRED = 0; // Made optional
+
+const EXISTING_IMG_COUNTS = {
+  exterior: {{ images_by_category.exterior|length|default:0 }},
+  living: {{ images_by_category.living|length|default:0 }},
+  bedroom: {{ images_by_category.bedroom|length|default:0 }},
+  kitchen: {{ images_by_category.kitchen|length|default:0 }},
+  bathroom: {{ images_by_category.bathroom|length|default:0 }},
+  balcony: {{ images_by_category.balcony|length|default:0 }},
+  others: {{ images_by_category.others|length|default:0 }}
+};
+
+const catFiles = {};
+IMG_CATEGORIES.forEach(function (c) { catFiles[c] = []; });
+
+function existingTotalCount() {
+  return IMG_CATEGORIES.reduce(function (sum, c) { return sum + (EXISTING_IMG_COUNTS[c] || 0); }, 0);
+}
+
+function totalImageCount() {
+  return IMG_CATEGORIES.reduce(function (sum, c) { return sum + catFiles[c].length; }, 0);
+}
+
+function syncCategoryInput(cat) {
+  var dt = new DataTransfer();
+  catFiles[cat].forEach(function (file) { dt.items.add(file); });
+  var inputEl = document.getElementById('imgInput-' + cat);
+  if (inputEl) {
+      inputEl.files = dt.files;
+  }
+}
+
+
+
+function updateCoverPhotoAndLabels() {
+  var hasCover = false;
+  IMG_CATEGORIES.forEach(function (cat) {
+    var container = document.getElementById('imgPreview-' + cat);
+    if (!container) return;
+    container.querySelectorAll('.img-cat-preview-item').forEach(function (item) {
+      var old = item.querySelector('.cover-badge');
+      if (old) old.remove();
+      if (!hasCover && (cat === 'exterior' || cat === 'living')) {
+        item.insertAdjacentHTML('beforeend', '<span class="cover-badge"><i class="fas fa-star"></i> Cover</span>');
+        hasCover = true;
+      }
+    });
+  });
+}
+
+function renderCategory(cat) {
+  var preview = document.getElementById('imgPreview-' + cat);
+  if (!preview) return;
+
+  // only remove previously-rendered NEW files; keep existing-img-item tiles intact
+  preview.querySelectorAll('.new-file-item').forEach(function (el) { el.remove(); });
+
+  catFiles[cat].forEach(function (file, idx) {
+    var div = document.createElement('div');
+    div.className = 'img-cat-preview-item new-file-item';
+    div.draggable = true;
+    div.dataset.fileName = file.name;
+    div.dataset.cat = cat;
+
+    var img = document.createElement('img');
+    div.appendChild(img);
+
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'remove-image';
+    removeBtn.innerHTML = '✖';
+    removeBtn.onclick = function (evt) { removeCatImage(cat, file.name.replace(/'/g, "\\'"), evt); };
+    div.appendChild(removeBtn);
+
+    preview.appendChild(div);
+    attachDragEvents(div, cat);
+
+    var reader = new FileReader();
+    reader.onload = function (e) { img.src = e.target.result; };
+    reader.readAsDataURL(file);
+  });
+
+  updateCoverPhotoAndLabels();
+
+  var newCount = catFiles[cat].length;
+  var savedCount = preview.querySelectorAll('.existing-img-item').length;
+  var countEl = document.getElementById('count-' + cat);
+  if (countEl) countEl.innerText = savedCount + newCount;
+
+  var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+  if (tab) tab.classList.toggle('has-images', (savedCount + newCount) > 0);
+}
+
+
+function attachDragEvents(item, cat) {
+  item.addEventListener('dragstart', function (e) {
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', item.dataset.index);
+  });
+  item.addEventListener('dragend', function () {
+      item.classList.remove('dragging');
+      document.querySelectorAll('.img-cat-preview-item.drag-over').forEach(function (el) {
+          el.classList.remove('drag-over');
+      });
+  });
+  item.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      item.classList.add('drag-over');
+  });
+  item.addEventListener('dragleave', function () {
+      item.classList.remove('drag-over');
+  });
+
+  
+ item.addEventListener('drop', function (e) {
+      e.preventDefault();
+      item.classList.remove('drag-over');
+
+      var container = item.parentNode;
+      var dragged = container.querySelector('.dragging');
+      if (!dragged || dragged === item) return;
+
+      var items = Array.from(container.querySelectorAll('.img-cat-preview-item'));
+      var fromIdx = items.indexOf(dragged);
+      var toIdx = items.indexOf(item);
+
+      if (fromIdx < toIdx) {
+          container.insertBefore(dragged, item.nextSibling);
+      } else {
+          container.insertBefore(dragged, item);
+      }
+
+      updateCoverPhotoAndLabels();
+  });
+}
+
+function renderAllCategories() {
+
+
+  IMG_CATEGORIES.forEach(renderCategory);
+  var total = existingTotalCount() + totalImageCount();
+  const totalEl = document.getElementById('imgTotalCount');
+  if(totalEl) totalEl.innerText = total;
+
+  var notice = document.getElementById('imgMinNotice');
+  if (notice) {
+    if (total > 0) {
+        notice.className = 'min-ok';
+        notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + total + ' images on this listing.';
+    } else {
+        notice.className = 'min-ok';
+        notice.innerHTML = '<i class="fas fa-info-circle"></i> Images are optional but recommended';
+    }
+  }
+
+  var clPhotos = document.getElementById('chk-img');
+  if (clPhotos) {
+      var hasPhotos = total > 0;
+      clPhotos.style.color = hasPhotos ? '#10b981' : '#cbd5e0';
+      var icon = clPhotos.querySelector('i');
+      if (icon) icon.style.color = hasPhotos ? '#10b981' : '#cbd5e0';
+  }
+}
+
+function handleCatFiles(cat, files) {
+  var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
+  var limit = IMG_CATEGORY_LIMITS[cat] || 5;
+  var alreadyStored = EXISTING_IMG_COUNTS[cat] || 0;
+
+  if (alreadyStored + catFiles[cat].length + incoming.length > limit) {
+      Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category (including already-saved images).', 'warning');
+      incoming = incoming.slice(0, Math.max(0, limit - alreadyStored - catFiles[cat].length));
+  }
+  if (existingTotalCount() + totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+      Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all categories.', 'warning');
+      incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - existingTotalCount() - totalImageCount()));
+  }
+
+  catFiles[cat] = catFiles[cat].concat(incoming);
+  syncCategoryInput(cat);
+  renderAllCategories();
+}
+
+window.removeCatImage = function (cat, fileName, evt) {
+  if (evt) evt.stopPropagation();
+  catFiles[cat] = catFiles[cat].filter(function (f) { return f.name !== fileName; });
+  syncCategoryInput(cat);
+  renderAllCategories();
+};
+
+
+
+window.removeExistingImage = function (iconEl) {
+    var label = iconEl.closest('.existing-img-remove-btn');
+    var checkbox = label ? label.querySelector('input[type="checkbox"]') : null;
+    var tile = iconEl.closest('.img-cat-preview-item');
+
+    if (checkbox) {
+        var hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'delete_image_ids[]';
+        hidden.value = checkbox.value;
+        document.getElementById('rentalEditForm').appendChild(hidden);
+    }
+
+    if (tile) tile.remove();
+
+    renderAllCategories();
+    updateCoverPhotoAndLabels();
+};
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+          var cat = this.dataset.cat;
+          document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
+          document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
+          this.classList.add('active');
+          var targetPanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
+          if(targetPanel) targetPanel.classList.add('active');
+      });
+  });
+
+  IMG_CATEGORIES.forEach(function (cat) {
+      var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+      var input = document.getElementById('imgInput-' + cat);
+      if (!zone || !input) return;
+
+      zone.addEventListener('click', function () { input.click(); });
+      input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
+      zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
+      zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
+      zone.addEventListener('drop', function (e) {
+          e.preventDefault();
+          zone.classList.remove('dragover');
+          handleCatFiles(cat, e.dataTransfer.files);
+      });
+  });
+
+  document.querySelectorAll('.existing-img-item').forEach(function (el) {
+      el.draggable = true;
+      attachDragEvents(el, el.dataset.cat);
+  });
+
+  renderAllCategories();
+  updateCoverPhotoAndLabels();
+});
+
+
 </script>

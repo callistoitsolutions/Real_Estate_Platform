@@ -1,0 +1,2653 @@
+{% include "landlord/landlord_header.html" %}
+{% load static %}
+
+<!--
+============================================================
+  NOTES ON WHAT CHANGED VS THE OLD EDIT FORM
+============================================================
+- Step 2 is now a SINGLE flattened room card (matching the model:
+  room_type / total_beds / monthly_rent / advance_rent_month /
+  advance_rent_amount / security_deposit_type / security_deposit_amount /
+  maintenance_type / maintenance_amount) instead of a `pg.rooms.all`
+  loop against a Room model that doesn't exist on PGColivingProperty.
+- Step 3 regulation toggles now use the REAL model field names:
+  opposite_gender_visitors_allowed, visitors_allowed,
+  parents_guardians_allowed, entry_24x7_allowed, curfew_time,
+  smoking_allowed, alcohol_consumption_allowed, couples_allowed,
+  pets_allowed, cooking_allowed, police_verification_required
+  (old form used opposite_sex_allowed / any_time_allowed / guardian_allowed
+  / drinking_allowed, none of which exist on the model).
+- Amenities/Facilities now use the same "modal picker" pattern as the
+  add form (not a plain checkbox grid), pre-checked from
+  `selected_amenities` / `selected_facilities` (pass these from the view
+  as lists split from pg.amenities / pg.nearby_facilities).
+- Step 4 now uses the same 12 category image tabs as the add form,
+  showing existing images per category with a remove checkbox, plus
+  the same 3-option video system (upload / auto-slideshow / RM-assisted).
+- Removed owner_name / contact_number / email / alternate_contact fields
+  entirely — these don't exist on PGColivingProperty. Contact info is
+  listed_by_* and uploaded_by_*, both already on the model.
+============================================================
+-->
+
+<style>
+  :root {
+    --primary-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --muted:#64748b; --border:#e2e8f0; --success:#10b981;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Poppins', sans-serif; background:#f8fafc; color:#334155; }
+  .main-content { padding:30px; min-height:100vh; }
+
+  .stepper { display:flex; align-items:center; margin-bottom:30px; background:white; padding:20px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,0.05); }
+  .step-item { display:flex; align-items:center; flex:1; }
+  .step-circle { width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; border:3px solid var(--border); background:white; color:var(--muted); transition:all 0.3s ease; }
+  .step-circle.active { background:var(--primary-gradient); color:white; border-color:transparent; box-shadow:0 4px 15px rgba(102,126,234,0.3); }
+  .step-circle.done { background:var(--success); color:white; border-color:transparent; }
+  .step-label { font-size:0.85rem; font-weight:700; margin-left:12px; color:var(--muted); }
+  .step-label.active { color:#667eea; }
+  .step-label.done { color:var(--success); }
+  .step-line { flex:1; height:3px; background:var(--border); margin:0 15px; }
+  .step-line.done { background:var(--success); }
+
+  .page-wrap { display:grid; grid-template-columns:1fr 320px; gap:24px; }
+  .form-container { background:white; border-radius:20px; padding:35px; box-shadow:0 10px 40px rgba(0,0,0,0.05); }
+  .form-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; padding-bottom:20px; border-bottom:2px solid #f0f0f0; }
+  .form-title { font-size:1.5rem; font-weight:700; color:#2d3748; display:flex; align-items:center; gap:12px; }
+  .form-title i { width:45px; height:45px; background:var(--primary-gradient); color:white; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+  .btn-back { background:#f8f9fa; color:#2d3748; padding:10px 20px; border-radius:12px; border:none; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:8px; text-decoration:none; }
+  .btn-back:hover { background:#2c3e50; color:white; }
+
+  .form-section { margin-bottom:30px; }
+  .section-header { background:var(--primary-gradient); color:white; padding:15px 20px; border-radius:12px 12px 0 0; font-weight:600; font-size:1.1rem; display:flex; align-items:center; gap:10px; }
+  .section-body { background:#f8f9fa; padding:25px; border-radius:0 0 12px 12px; border:2px solid #e9ecef; border-top:none; }
+
+  .form-label { font-weight:600; color:#2d3748; margin-bottom:8px; font-size:0.9rem; display:flex; align-items:center; gap:5px; }
+  .required { color:#e74c3c; }
+  .form-control, .form-select { width:100%; border:2px solid #e9ecef; border-radius:12px; padding:12px 15px; font-size:0.95rem; outline:none; transition:all 0.3s; font-family:'Poppins', sans-serif; }
+  .form-control:focus, .form-select:focus { border-color:#667eea; box-shadow:0 0 0 4px rgba(102,126,234,0.1); }
+  .form-control[readonly], .form-control[disabled] { background:#edf2f7; color:#4a5568; font-weight:600; }
+
+  .step-content { display:none; }
+  .step-content.active { display:block; }
+
+  .pill-group { display:flex; flex-wrap:wrap; gap:10px; }
+  .pill-btn { padding:10px 20px; border-radius:999px; border:2px solid #e5e7eb; background:#fff; font-size:0.85rem; font-weight:600; cursor:pointer; transition:all 0.2s; }
+  .pill-btn:hover { border-color:#667eea; background:#f0f4ff; }
+  .pill-btn.active { background:var(--primary-gradient); border-color:transparent; color:#fff; }
+
+  .toggle-switch { position:relative; display:inline-block; width:50px; height:26px; }
+  .toggle-switch input { opacity:0; width:0; height:0; }
+  .toggle-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#cbd5e1; transition:0.3s; border-radius:26px; }
+  .toggle-slider:before { position:absolute; content:""; height:20px; width:20px; left:3px; bottom:3px; background-color:white; transition:0.3s; border-radius:50%; }
+ 
+ 
+input:checked + .toggle-slider { background-color:#667eea; }
+  input:checked + .toggle-slider:before { transform:translateX(24px); }
+
+  .form-check {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+  }
+  .form-check-input {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e0;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+  }
+  .form-check-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-left: 10px;
+    cursor: pointer;
+  }
+
+  /* --- Custom Search Select Dropdown Styles --- */
+  .search-select {
+    position: relative;
+    width: 100%;
+    font-family: 'Poppins', sans-serif;
+  }
+  .search-select-control {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 12px 15px;
+    font-size: 0.95rem;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: #334155;
+  }
+  .search-select-control:focus, .search-select-control.active {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+  .search-select-panel {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 999;
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 10px;
+  }
+  .search-select.open .search-select-panel {
+    display: block;
+  }
+  .search-select-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+    margin-bottom: 8px;
+    transition: border-color 0.2s;
+  }
+  .search-select-input:focus {
+    border-color: #667eea;
+  }
+  .search-select-options {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .search-select-group-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    padding: 6px 10px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    margin-top: 6px;
+  }
+  .search-select-option {
+    padding: 10px 12px;
+    font-size: 0.88rem;
+    color: #1e293b;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .search-select-option:hover {
+    background: #f0f4ff;
+    color: #667eea;
+  }
+  .search-select-no-results {
+    padding: 12px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.85rem;
+  }
+
+  .selected-items-display { padding:12px; background:#f8f9fa; border:2px dashed #dee2e6; border-radius:8px; min-height:50px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+
+  .item-tag { background:white; border:1px solid #dee2e6; border-radius:20px; padding:4px 14px; font-size:13px; display:inline-flex; align-items:center; gap:5px; }
+  .item-tag .remove-btn { cursor:pointer; color:#dc3545; margin-left:4px; font-size:12px; }
+
+  
+
+  /* ================= PROPERTY IMAGE CATEGORY UPLOAD — IMPROVED UX ================= */
+.img-upload-guide {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    border: 2px dashed #a5b4fc; border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px;
+}
+.guide-step { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 190px; }
+.guide-step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--primary-gradient); color: #fff;
+    font-weight: 800; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 3px 8px rgba(102,126,234,0.35);
+}
+.guide-step-text { font-size: 0.78rem; color: #3730a3; line-height: 1.35; }
+.guide-step-text strong { display: block; font-size: 0.85rem; color: #1e1b4b; }
+.guide-arrow { color: #a5b4fc; font-size: 1rem; display: none; }
+@media (min-width: 900px) { .guide-arrow { display: block; } }
+
+
+
+.img-cat-tabs {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 12px; margin-bottom: 20px; counter-reset: catstep;
+}
+
+.img-cat-tab {
+    position: relative; border: 2px solid #e9ecef; background: #fff; border-radius: 14px;
+    padding: 18px 14px 14px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
+    cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    transition: all 0.25s ease; counter-increment: catstep;
+}
+.img-cat-tab i { font-size: 1.3rem; color: #94a3b8; }
+.img-cat-tab .cat-count {
+    background: #f1f5f9; color: #64748b; border-radius: 20px;
+    padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
+    align-self: flex-end; margin-top: -4px;
+}
+.img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
+.img-cat-tab.active i { color: #fff; }
+.img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+.img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
+
+.img-cat-tab::before {
+    content: counter(catstep); position: absolute; top: -8px; left: -8px;
+    width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid #cbd5e0; color: #64748b;
+    font-size: 0.68rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+.img-cat-tab.active::before { border-color: #667eea; color: #667eea; }
+.img-cat-tab.has-images::before { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; background: #38ef7d; border-color: #38ef7d; color: #fff; }
+
+.img-cat-tab:nth-child(1)::after, .img-cat-tab:nth-child(2)::after {
+    content: "★ Becomes Cover Photo"; font-size: 0.62rem; font-weight: 700; color: #b45309;
+    background: #fef3c7; padding: 2px 9px; border-radius: 20px; align-self: flex-start; margin-top: 2px;
+}
+.img-cat-tab.active:nth-child(1)::after, .img-cat-tab.active:nth-child(2)::after { color: #fff; background: rgba(255,255,255,0.25); }
+
+.img-cat-panel { display: none; }
+.img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+.img-cat-upload-area {
+    border: 3px dashed #cbd5e0; border-radius: 15px; padding: 36px 20px;
+    text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+}
+.img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
+.img-cat-upload-area .upload-icon {
+    width: 60px; height: 60px; border-radius: 50%; background: #eef2ff;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+}
+.img-cat-upload-area .upload-icon i { font-size: 1.6rem; color: #667eea; margin: 0; }
+.img-cat-upload-area .upload-text { font-size: 1.05rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+.img-cat-upload-area .upload-subtext {
+    display: inline-block; margin-top: 8px; padding: 4px 12px; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 20px; color: #475569; font-size: 0.82rem;
+}
+
+.img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+.img-cat-preview-item {
+    position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
+}
+.img-cat-preview-item.dragging { opacity: 0.4; }
+.img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;}
+.img-cat-preview-item .cover-badge {
+    position: absolute; bottom: 8px; left: 8px; background: linear-gradient(135deg,#f6d365,#fda085); color: #3b2a00;
+    font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 4px;
+}
+.img-cat-preview-item .remove-image {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff;
+    border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
+}
+.img-cat-preview-item .remove-image:hover { background: #c0392b; }
+
+.existing-img-remove-btn {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+    background: #e74c3c; color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 0.8rem; z-index: 5; border: none;
+}
+.existing-img-remove-btn input { display: none; }
+.existing-img-remove-btn:hover { background: #c0392b; }
+
+.img-total-summary {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 16px;
+    padding: 16px 22px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+}
+.img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 1.05rem; }
+.img-total-summary .min-ok { font-size: 0.85rem; color: #10b981; font-weight: 600; }
+
+.image-upload-area { border:3px dashed #cbd5e0; border-radius:15px; padding:40px; text-align:center; background:#f8f9fa; cursor:pointer; transition:all 0.2s; }
+.image-upload-area:hover { border-color:#667eea; background:#f0f4ff; }
+
+  .preview-sidebar { display:flex; flex-direction:column; gap:20px; position:sticky; top:20px; height:fit-content; }
+  .preview-card { background:linear-gradient(180deg, #2c3e50 0%, #1a252f 100%); border-radius:16px; padding:20px; color:white; }
+  .pc-head { font-size:0.8rem; font-weight:700; color:rgba(255,255,255,0.6); margin-bottom:15px; }
+  .pc-mock { background:white; border-radius:12px; overflow:hidden; position:relative; }
+  .pcm-img { height:140px; background:linear-gradient(135deg, #fef3c7, #fde68a); display:flex; align-items:center; justify-content:center; font-size:3rem; position:relative; }
+  .pcm-badges { position:absolute; top:10px; left:10px; display:flex; gap:6px; }
+  .pcm-badge { font-size:0.65rem; font-weight:800; padding:4px 10px; border-radius:6px; background:#7c3aed; color:white; }
+  .pcm-price { position:absolute; bottom:10px; left:10px; background:rgba(15,23,42,0.9); color:white; font-size:0.95rem; font-weight:900; padding:5px 12px; border-radius:8px; }
+  .pcm-body { padding:15px; color:#1e293b; }
+  .pcm-title { font-size:0.95rem; font-weight:800; margin-bottom:5px; }
+  .pcm-loc { font-size:0.75rem; color:#64748b; }
+  .checklist-card { background:white; border-radius:16px; border:1px solid var(--border); padding:18px; box-shadow:0 4px 15px rgba(0,0,0,0.05); }
+  .cl-title { font-size:0.9rem; font-weight:800; color:#0f172a; margin-bottom:12px; }
+  .cl-item { display:flex; align-items:center; gap:10px; padding:5px 0; font-size:0.8rem; color:var(--muted); }
+  .cl-item.done { color:var(--success); }
+  .step-nav { display:flex; justify-content:space-between; margin-top:30px; }
+  .btn-pr { background:var(--primary-gradient); color:white; padding:12px 28px; border-radius:12px; font-weight:700; border:none; cursor:pointer; }
+  .btn-sec { background:white; color:#2d3748; padding:12px 28px; border-radius:12px; font-weight:700; border:2px solid #e9ecef; cursor:pointer; }
+
+  @media (max-width:1200px) { .page-wrap { grid-template-columns:1fr; } .preview-sidebar { display:none; } }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<div class="main-content">
+  <div class="page-wrap">
+    <div>
+      <div class="stepper" id="stepper">
+        <div class="step-item"><div class="step-circle active" id="sc1">1</div><div class="step-label active" id="sl1">Basic Info</div></div><div class="step-line" id="line1"></div>
+        <div class="step-item"><div class="step-circle" id="sc2">2</div><div class="step-label" id="sl2">Rooms &amp; Pricing</div></div><div class="step-line" id="line2"></div>
+        <div class="step-item"><div class="step-circle" id="sc3">3</div><div class="step-label" id="sl3">Amenities &amp; Rules</div></div><div class="step-line" id="line3"></div>
+        <div class="step-item"><div class="step-circle" id="sc4">4</div><div class="step-label" id="sl4">Photos &amp; Contact</div></div>
+      </div>
+
+      <div class="form-container">
+        <div class="form-header">
+          <div class="form-title"><i class="fas fa-edit"></i> Edit PG / Co-Living Property</div>
+          <a href="{% url 'pg_landlord_list' %}" class="btn-back"><i class="fas fa-arrow-left"></i> Back to List</a>
+        </div>
+
+       <form method="POST" enctype="multipart/form-data" id="pgEditForm" action="{% url 'pg_landlord_edit' pg.id %}" novalidate>
+          {% csrf_token %}
+
+          <!-- ================= STEP 1: BASIC INFO ================= -->
+          <div class="step-content active" id="step1">
+
+             <div class="form-section">
+                        <div class="section-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                            <span><i class="fas fa-upload"></i> Listed By</span>
+                        </div>
+                        <div class="section-body">
+                            
+
+                            <div class="row" id="user_data_div">
+
+    <!-- User ID -->
+    <div class="col-md-3">
+        <div class="form-group">
+            <label class="form-label">
+                <i class="fas fa-id-card"></i> User Id
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   name="listed_by_id"
+                   id="listed_by_id"
+                   value="{{ pg.listed_by_id|default:'' }}"
+                   readonly
+                   style="background-color:#e9ecef;">
+        </div>
+    </div>
+
+    <!-- User Name -->
+    <div class="col-md-3">
+        <div class="form-group">
+            <label class="form-label">
+                <i class="fas fa-user"></i> User Name
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   name="listed_by_name"
+                   id="listed_by_name"
+                   value="{{ pg.listed_by_name|default:'' }}"
+                   readonly
+                   style="background-color:#e9ecef;">
+        </div>
+    </div>
+
+    <!-- User Email -->
+    <div class="col-md-3">
+        <div class="form-group">
+            <label class="form-label">
+                <i class="fas fa-envelope"></i> User Email
+            </label>
+
+            <input type="email"
+                   class="form-control"
+                   name="listed_by_email"
+                   id="listed_by_email"
+                   value="{{ pg.listed_by_email|default:'' }}"
+                   readonly
+                   style="background-color:#e9ecef;">
+        </div>
+    </div>
+
+    <!-- User Contact -->
+    <div class="col-md-3">
+        <div class="form-group">
+            <label class="form-label">
+                <i class="fas fa-phone"></i> User Contact
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   name="listed_by_contact"
+                   id="listed_by_contact"
+                   value="{{ pg.listed_by_contact|default:'' }}"
+                   readonly
+                   style="background-color:#e9ecef;">
+        </div>
+    </div>
+
+    <!-- User Role -->
+    <div class="col-md-3">
+        <div class="form-group">
+            <label class="form-label">
+                <i class="fas fa-user-tag"></i> User Role
+            </label>
+
+            <input type="text"
+                   class="form-control"
+                   name="listed_by_role"
+                   id="listed_by_role"
+                   value="{{ pg.listed_by_role|default:'' }}"
+                   readonly
+                   style="background-color:#e9ecef;">
+        </div>
+    </div>
+
+</div>
+                        </div>
+                    </div>
+
+
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-info-circle"></i> Basic Information</div>
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Property Title</label>
+                      <input type="text" class="form-control" id="property_title" name="property_title" value="{{ pg.property_title }}" disabled>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Building / Project / Society Name</label>
+                      <input type="text" class="form-control" id="building_name" name="building_name" value="{{ pg.building_name|default:'' }}">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Property No/Unit No <span class="required">*</span></label>
+                    
+                    
+                    <input type="text" class="form-control" id="property_no" name="property_no" value="{{ pg.property_no|default:'' }}" required>
+
+                    <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block; font-weight:bold;">
+                                            <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
+                                        </span>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Tower/Wing Number</label>
+                      <input type="text" class="form-control" id="wing_number" name="wing_number" value="{{ pg.wing_number|default:'' }}">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">City <span class="required">*</span></label>
+                      <input type="text" class="form-control" id="city" name="city" value="{{ pg.city|default:'' }}" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Locality <span class="required">*</span></label>
+                      <input type="text" class="form-control" id="locality" name="locality" value="{{ pg.locality|default:'' }}" required>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group mt-2">
+                  <label class="form-label">Property Address <span class="required">*</span></label>
+                  <textarea class="form-control" name="address" id="address" rows="3" required>{{ pg.address|default:'' }}</textarea>
+                </div>
+
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Property Landmark</label>
+                      <input type="text" class="form-control" id="property_landmark" name="property_landmark" value="{{ pg.property_landmark|default:'' }}">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Pincode <span class="required">*</span></label>
+                      <input type="number" class="form-control" id="pincode" name="pincode" value="{{ pg.pincode|default:'' }}" required>
+                    </div>
+                  </div>
+                  
+
+                  <div class="col-md-6">
+    <div class="form-group">
+        <label class="form-label">
+            State <span class="required">*</span>
+        </label>
+        <select class="form-select form-control" name="state" id="state" required>
+            <option value="">Select State</option>
+
+            <!-- States -->
+            <option value="Andhra Pradesh" {% if pg.state == 'Andhra Pradesh' %}selected{% endif %}>Andhra Pradesh</option>
+            <option value="Arunachal Pradesh" {% if pg.state == 'Arunachal Pradesh' %}selected{% endif %}>Arunachal Pradesh</option>
+            <option value="Assam" {% if pg.state == 'Assam' %}selected{% endif %}>Assam</option>
+            <option value="Bihar" {% if pg.state == 'Bihar' %}selected{% endif %}>Bihar</option>
+            <option value="Chhattisgarh" {% if pg.state == 'Chhattisgarh' %}selected{% endif %}>Chhattisgarh</option>
+            <option value="Goa" {% if pg.state == 'Goa' %}selected{% endif %}>Goa</option>
+            <option value="Gujarat" {% if pg.state == 'Gujarat' %}selected{% endif %}>Gujarat</option>
+            <option value="Haryana" {% if pg.state == 'Haryana' %}selected{% endif %}>Haryana</option>
+            <option value="Himachal Pradesh" {% if pg.state == 'Himachal Pradesh' %}selected{% endif %}>Himachal Pradesh</option>
+            <option value="Jharkhand" {% if pg.state == 'Jharkhand' %}selected{% endif %}>Jharkhand</option>
+            <option value="Karnataka" {% if pg.state == 'Karnataka' %}selected{% endif %}>Karnataka</option>
+            <option value="Kerala" {% if pg.state == 'Kerala' %}selected{% endif %}>Kerala</option>
+            <option value="Madhya Pradesh" {% if pg.state == 'Madhya Pradesh' %}selected{% endif %}>Madhya Pradesh</option>
+            <option value="Maharashtra" {% if pg.state == 'Maharashtra' %}selected{% endif %}>Maharashtra</option>
+            <option value="Manipur" {% if pg.state == 'Manipur' %}selected{% endif %}>Manipur</option>
+            <option value="Meghalaya" {% if pg.state == 'Meghalaya' %}selected{% endif %}>Meghalaya</option>
+            <option value="Mizoram" {% if pg.state == 'Mizoram' %}selected{% endif %}>Mizoram</option>
+            <option value="Nagaland" {% if pg.state == 'Nagaland' %}selected{% endif %}>Nagaland</option>
+            <option value="Odisha" {% if pg.state == 'Odisha' %}selected{% endif %}>Odisha</option>
+            <option value="Punjab" {% if pg.state == 'Punjab' %}selected{% endif %}>Punjab</option>
+            <option value="Rajasthan" {% if pg.state == 'Rajasthan' %}selected{% endif %}>Rajasthan</option>
+            <option value="Sikkim" {% if pg.state == 'Sikkim' %}selected{% endif %}>Sikkim</option>
+            <option value="Tamil Nadu" {% if pg.state == 'Tamil Nadu' %}selected{% endif %}>Tamil Nadu</option>
+            <option value="Telangana" {% if pg.state == 'Telangana' %}selected{% endif %}>Telangana</option>
+            <option value="Tripura" {% if pg.state == 'Tripura' %}selected{% endif %}>Tripura</option>
+            <option value="Uttar Pradesh" {% if pg.state == 'Uttar Pradesh' %}selected{% endif %}>Uttar Pradesh</option>
+            <option value="Uttarakhand" {% if pg.state == 'Uttarakhand' %}selected{% endif %}>Uttarakhand</option>
+            <option value="West Bengal" {% if pg.state == 'West Bengal' %}selected{% endif %}>West Bengal</option>
+
+            <!-- Union Territories -->
+            <option value="Andaman and Nicobar Islands" {% if pg.state == 'Andaman and Nicobar Islands' %}selected{% endif %}>Andaman and Nicobar Islands</option>
+            <option value="Chandigarh" {% if pg.state == 'Chandigarh' %}selected{% endif %}>Chandigarh</option>
+            <option value="Dadra and Nagar Haveli and Daman and Diu" {% if pg.state == 'Dadra and Nagar Haveli and Daman and Diu' %}selected{% endif %}>Dadra and Nagar Haveli and Daman and Diu</option>
+            <option value="Delhi" {% if pg.state == 'Delhi' %}selected{% endif %}>Delhi</option>
+            <option value="Jammu and Kashmir" {% if pg.state == 'Jammu and Kashmir' %}selected{% endif %}>Jammu and Kashmir</option>
+            <option value="Ladakh" {% if pg.state == 'Ladakh' %}selected{% endif %}>Ladakh</option>
+            <option value="Lakshadweep" {% if pg.state == 'Lakshadweep' %}selected{% endif %}>Lakshadweep</option>
+            <option value="Puducherry" {% if pg.state == 'Puducherry' %}selected{% endif %}>Puducherry</option>
+        </select>
+    </div>
+</div>
+
+                  <div class="col-md-6 mt-3">
+                    <label class="form-label">Google Maps Link</label>
+                    <input type="url" class="form-control" name="google_maps_link" value="{{ pg.google_maps_link|default:'' }}">
+                  </div>
+                  <div class="col-md-3 mt-3">
+                    <label class="form-label">Latitude</label>
+                    <input type="text" class="form-control" name="latitude" value="{{ pg.latitude|default:'' }}">
+                  </div>
+                  <div class="col-md-3 mt-3">
+                    <label class="form-label">Longitude</label>
+                    <input type="text" class="form-control" name="longitude" value="{{ pg.longitude|default:'' }}">
+                  </div>
+
+                  <div class="col-md-6 mt-3">
+                    <div class="form-group">
+                      <label class="form-label">PG for <span class="required">*</span></label>
+                      <div class="pill-group" id="pg_forGroup">
+                        <button type="button" class="pill-btn {% if pg.pg_for == 'Boys' %}active{% endif %}" data-field="pg_for" data-value="Boys">Boys</button>
+                        <button type="button" class="pill-btn {% if pg.pg_for == 'Girls' %}active{% endif %}" data-field="pg_for" data-value="Girls">Girls</button>
+                        <button type="button" class="pill-btn {% if pg.pg_for == 'Co-living' %}active{% endif %}" data-field="pg_for" data-value="Co-living">Co-living</button>
+                      </div>
+                      <input type="hidden" name="pg_for" id="pg_for" value="{{ pg.pg_for|default:'' }}" required>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row mt-2">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label class="form-label">Furnishing Status <span class="required">*</span></label>
+                      <select class="form-select" name="furnishing_status" id="furnishing_status" required>
+                        <option value="">Select</option>
+                        <option value="unfurnished" {% if pg.furnishing_status == 'unfurnished' %}selected{% endif %}>Unfurnished</option>
+                        <option value="semi-furnished" {% if pg.furnishing_status == 'semi-furnished' %}selected{% endif %}>Semi-Furnished</option>
+                        <option value="fully-furnished" {% if pg.furnishing_status == 'fully-furnished' %}selected{% endif %}>Fully Furnished</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <label class="form-label">Best Suited For</label>
+                      <div class="pill-group" id="best_suited_forGroup">
+                        <button type="button" class="pill-btn {% if 'Students' in pg.best_suited_for %}active{% endif %}" data-field="best_suited_for" data-value="Students">Students</button>
+                        <button type="button" class="pill-btn {% if 'Working Professionals' in pg.best_suited_for %}active{% endif %}" data-field="best_suited_for" data-value="Working Professionals">Working Professionals</button>
+                        <button type="button" class="pill-btn {% if 'Family' in pg.best_suited_for %}active{% endif %}" data-field="best_suited_for" data-value="Family">Family</button>
+                      </div>
+                      <input type="hidden" name="best_suited_for" id="best_suited_for" value="{{ pg.best_suited_for|default:'' }}">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Meals Available?</label>
+                      <label class="toggle-switch">
+                        <input type="checkbox" id="mealsToggle" name="meals_available" {% if pg.meals_available %}checked{% endif %}>
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="col-md-6" id="mealOfferings" style="display:{% if pg.meals_available %}block{% else %}none{% endif %};">
+                    <div class="form-group">
+                      <label class="form-label">Meal Offerings</label>
+                      <div class="pill-group" id="mealOfferingsGroup">
+                        <button type="button" class="pill-btn {% if 'Breakfast' in pg.meal_offerings %}active{% endif %}" data-field="meal_offerings" data-value="Breakfast">Breakfast</button>
+                        <button type="button" class="pill-btn {% if 'Lunch' in pg.meal_offerings %}active{% endif %}" data-field="meal_offerings" data-value="Lunch">Lunch</button>
+                        <button type="button" class="pill-btn {% if 'Dinner' in pg.meal_offerings %}active{% endif %}" data-field="meal_offerings" data-value="Dinner">Dinner</button>
+                      </div>
+                      <input type="hidden" name="meal_offerings" id="mealOfferingsHidden" value="{{ pg.meal_offerings|default:'' }}">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group mt-2" id="mealSpeciality" style="display:{% if pg.meals_available %}block{% else %}none{% endif %};">
+                  <label class="form-label">Meal Speciality</label>
+                  <div class="pill-group" id="mealSpecialityGroup">
+                    <button type="button" class="pill-btn {% if 'Veg' in pg.meal_speciality %}active{% endif %}" data-field="meal_speciality" data-value="Veg">Veg</button>
+                    <button type="button" class="pill-btn {% if 'Non-Veg' in pg.meal_speciality %}active{% endif %}" data-field="meal_speciality" data-value="Non-Veg">Non-Veg</button>
+                    <button type="button" class="pill-btn {% if 'Jain' in pg.meal_speciality %}active{% endif %}" data-field="meal_speciality" data-value="Jain">Jain</button>
+                  </div>
+                  <input type="hidden" name="meal_speciality" id="mealSpecialityHidden" value="{{ pg.meal_speciality|default:'' }}">
+                </div>
+
+                <div class="row mt-2">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label class="form-label">Notice Period (Days)</label>
+                      <input type="number" class="form-control" name="notice_period" id="notice_period" value="{{ pg.notice_period|default:'' }}" min="0">
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label class="form-label">Lock-in Period (Days)</label>
+                      <input type="number" class="form-control" name="lockin_period" id="lockin_period" value="{{ pg.lockin_period|default:'' }}" min="0">
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label class="form-label">Minimum Stay (Months) <span class="required">*</span></label>
+                      <input type="number" class="form-control" id="minimum_stay" name="minimum_stay" value="{{ pg.minimum_stay|default:'' }}" min="1" required>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Available From <span class="required">*</span></label>
+                      <input type="date" class="form-control" id="available_from" name="available_from" value="{{ pg.available_from|date:'Y-m-d' }}" required>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Property Managed By</label>
+                      <select class="form-select" id="property_managed_by" name="property_managed_by">
+                        <option value="">Select Property Manager</option>
+                        <option value="owner" {% if pg.property_managed_by == 'owner' %}selected{% endif %}>Owner / Self Managed</option>
+                        <option value="family" {% if pg.property_managed_by == 'family' %}selected{% endif %}>Family Member</option>
+                        <option value="caretaker" {% if pg.property_managed_by == 'caretaker' %}selected{% endif %}>Caretaker</option>
+                        <option value="warden" {% if pg.property_managed_by == 'warden' %}selected{% endif %}>Warden</option>
+                        <option value="manager" {% if pg.property_managed_by == 'manager' %}selected{% endif %}>Property Manager</option>
+                        <option value="management_company" {% if pg.property_managed_by == 'management_company' %}selected{% endif %}>Management Company</option>
+                        <option value="pg_operator" {% if pg.property_managed_by == 'pg_operator' %}selected{% endif %}>PG Operator</option>
+                        <option value="co_living_operator" {% if pg.property_managed_by == 'co_living_operator' %}selected{% endif %}>Co-Living Operator</option>
+                        <option value="agency" {% if pg.property_managed_by == 'agency' %}selected{% endif %}>Agency / Broker</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="form-label">Property Manager Stays at Property?</label>
+                      <div style="display:flex;gap:20px;margin-top:6px;">
+                        <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;cursor:pointer;">
+                          <input type="radio" name="manager_stays" value="true" {% if pg.manager_stays %}checked{% endif %}> Yes
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;cursor:pointer;">
+                          <input type="radio" name="manager_stays" value="false" {% if not pg.manager_stays %}checked{% endif %}> No
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label" id="brokerageLabel">Brokerage <span class="required">*</span></label>
+                    <select class="form-select" name="brokerage_percentage" id="brokeragePercentage">
+                      <option value="">Select</option>
+                      <option value="No Brokerage" {% if pg.brokerage_percentage == 'No Brokerage' %}selected{% endif %}>No Brokerage</option>
+                      <option value="15 Days Rent" {% if pg.brokerage_percentage == '15 Days Rent' %}selected{% endif %}>15 Days Rent</option>
+                      <option value="1 Month Rent" {% if pg.brokerage_percentage == '1 Month Rent' %}selected{% endif %}>1 Month Rent</option>
+                      <option value="Fixed Amount" {% if pg.brokerage_percentage == 'Fixed Amount' %}selected{% endif %}>Fixed Amount</option>
+                      <option value="Negotiable" {% if pg.brokerage_percentage == 'Negotiable' %}selected{% endif %}>Negotiable</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row mt-2" id="manualBrokerage" style="display:{% if pg.brokerage_percentage == 'Fixed Amount' %}block{% else %}none{% endif %};">
+                  <div class="col-md-6">
+                    <label class="form-label">Enter Fixed Brokerage</label>
+                    <input type="text" class="form-control" name="manual_brokerage" value="{{ pg.manual_brokerage|default:'' }}">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-nav">
+              <div></div>
+              <button type="button" class="btn-pr" onclick="goToStep(2)">Move To Next Page <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <!-- ================= STEP 2: ROOM DETAILS & PRICING (flattened, single room) ================= -->
+          <div class="step-content" id="step2">
+            <div class="form-section">
+              <div class="section-header"><i class="fa-solid fa-door-closed"></i> Step 2 — Room Details &amp; Pricing</div>
+              <div class="section-body">
+                <div class="room-card">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label class="form-label">Room Type <span class="required">*</span></label>
+                        <select class="form-select" name="room_type" id="room_type" required>
+                          <option value="">Select Type</option>
+                          <option value="single" {% if pg.room_type == 'single' %}selected{% endif %}>Single Occupancy</option>
+                          <option value="double" {% if pg.room_type == 'double' %}selected{% endif %}>Double Sharing</option>
+                          <option value="triple" {% if pg.room_type == 'triple' %}selected{% endif %}>Triple Sharing</option>
+                          <option value="quad" {% if pg.room_type == 'quad' %}selected{% endif %}>4+ Sharing</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label class="form-label">Total Beds In Room <span class="required">*</span></label>
+                        <input type="number" class="form-control pg-room-beds" name="room_beds" id="room_beds" value="{{ pg.total_beds|default:'' }}" required>
+                      </div>
+                    </div>
+                  </div>
+
+                 
+
+
+                  <div class="row mt-2">
+  <div class="col-md-6">
+    <div class="form-group">
+      <label class="form-label">Rent Per Occupant (₹) <span class="required">*</span></label>
+      <input type="number" class="form-control room-rent" id="room_rent" name="room_rent" value="{{ pg.monthly_rent|default:'' }}" min="0" required>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="form-group">
+      <label class="form-label">Advance Rent Month</label>
+      <select class="form-select" id="advance_rent_month" name="advance_rent_month">
+        <option value="">Select</option>
+        <option value="No Advance" {% if pg.advance_rent_month == "No Advance" %}selected{% endif %}>No Advance</option>
+        <option value="1 Month Rent" {% if pg.advance_rent_month == "1 Month Rent" %}selected{% endif %}>1 Month Rent</option>
+        <option value="2 Months Rent" {% if pg.advance_rent_month == "2 Months Rent" %}selected{% endif %}>2 Months Rent</option>
+        <option value="3 Months Rent" {% if pg.advance_rent_month == "3 Months Rent" %}selected{% endif %}>3 Months Rent</option>
+        <option value="4 Months Rent" {% if pg.advance_rent_month == "4 Months Rent" %}selected{% endif %}>4 Months Rent</option>
+        <option value="5 Months Rent" {% if pg.advance_rent_month == "5 Months Rent" %}selected{% endif %}>5 Months Rent</option>
+        <option value="6 Months Rent" {% if pg.advance_rent_month == "6 Months Rent" %}selected{% endif %}>6 Months Rent</option>
+        <option value="7 Months Rent" {% if pg.advance_rent_month == "7 Months Rent" %}selected{% endif %}>7 Months Rent</option>
+        <option value="8 Months Rent" {% if pg.advance_rent_month == "8 Months Rent" %}selected{% endif %}>8 Months Rent</option>
+        <option value="9 Months Rent" {% if pg.advance_rent_month == "9 Months Rent" %}selected{% endif %}>9 Months Rent</option>
+        <option value="10 Months Rent" {% if pg.advance_rent_month == "10 Months Rent" %}selected{% endif %}>10 Months Rent</option>
+        <option value="11 Months Rent" {% if pg.advance_rent_month == "11 Months Rent" %}selected{% endif %}>11 Months Rent</option>
+        <option value="Fixed Amount" {% if pg.advance_rent_month == "Fixed Amount" %}selected{% endif %}>Fixed Amount</option>
+      </select>
+    </div>
+  </div>
+</div><!-- ✅ ADD THIS closing div for the row -->
+
+<div class="row mt-2">
+  <div class="col-md-6" id="advance_amount_div" style="{% if pg.advance_rent_month != 'Fixed Amount' %}display:none;{% endif %}">
+    <div class="form-group">
+      <label class="form-label">Advance Rent Amount</label>
+      <input type="number" class="form-control" name="advance_rent_amount" id="advance_rent_amount" value="{{ pg.advance_rent_amount|default:'' }}">
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="form-group">
+      <label class="form-label">Refundable Room Security Deposit (₹/Person) <span class="required">*</span></label>
+      <select class="form-select" id="security_deposit_type" name="security_deposit_type" required>
+        <option value="">Select</option>
+        <option value="No Deposit" {% if pg.security_deposit_type == "No Deposit" %}selected{% endif %}>No Deposit</option>
+        <option value="1 Month Rent" {% if pg.security_deposit_type == "1 Month Rent" %}selected{% endif %}>1 Month Rent</option>
+        <option value="2 Months Rent" {% if pg.security_deposit_type == "2 Months Rent" %}selected{% endif %}>2 Months Rent</option>
+        <option value="3 Months Rent" {% if pg.security_deposit_type == "3 Months Rent" %}selected{% endif %}>3 Months Rent</option>
+        <option value="4 Months Rent" {% if pg.security_deposit_type == "4 Months Rent" %}selected{% endif %}>4 Months Rent</option>
+        <option value="5 Months Rent" {% if pg.security_deposit_type == "5 Months Rent" %}selected{% endif %}>5 Months Rent</option>
+        <option value="6 Months Rent" {% if pg.security_deposit_type == "6 Months Rent" %}selected{% endif %}>6 Months Rent</option>
+        <option value="7 Months Rent" {% if pg.security_deposit_type == "7 Months Rent" %}selected{% endif %}>7 Months Rent</option>
+        <option value="8 Months Rent" {% if pg.security_deposit_type == "8 Months Rent" %}selected{% endif %}>8 Months Rent</option>
+        <option value="9 Months Rent" {% if pg.security_deposit_type == "9 Months Rent" %}selected{% endif %}>9 Months Rent</option>
+        <option value="10 Months Rent" {% if pg.security_deposit_type == "10 Months Rent" %}selected{% endif %}>10 Months Rent</option>
+        <option value="11 Months Rent" {% if pg.security_deposit_type == "11 Months Rent" %}selected{% endif %}>11 Months Rent</option>
+        <option value="Fixed Amount" {% if pg.security_deposit_type == "Fixed Amount" %}selected{% endif %}>Fixed Amount</option>
+      </select>
+    </div>
+  </div>
+</div>
+                 
+
+       <div class="row mt-2" id="security_deposit_div" style="display:{% if pg.security_deposit_type == 'Fixed Amount' %}block{% else %}none{% endif %};">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label class="form-label">Refundable Security Deposit Amount</label>
+                        <input type="number" class="form-control" name="security_deposit_amount" id="security_deposit_amount" value="{{ pg.security_deposit_amount|default:'' }}">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row mt-2">
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <label class="form-label">Maintenance Type</label>
+                        <div style="display:flex; gap:15px;">
+                          <div class="form-check">
+                            <input class="form-check-input" type="radio" name="maintenance_type" id="maintenance_included" value="Included in Rent" {% if pg.maintenance_type == 'Included in Rent' or not pg.maintenance_type %}checked{% endif %}>
+                            <label class="form-check-label" for="maintenance_included">Included in Rent</label>
+                          </div>
+                          <div class="form-check">
+                            <input class="form-check-input" type="radio" name="maintenance_type" id="maintenance_extra" value="Extra" {% if pg.maintenance_type == 'Extra' %}checked{% endif %}>
+                            <label class="form-check-label" for="maintenance_extra">Excluding from Rent</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row mt-2">
+                    <div class="col-md-6" id="maintenanceAmountDiv" style="display:{% if pg.maintenance_type == 'Extra' %}block{% else %}none{% endif %};">
+                      <div class="form-group">
+                        <label class="form-label">Monthly Maintenance Amount</label>
+                        <input type="number" class="form-control" name="maintenance_amount" value="{{ pg.maintenance_amount|default:'' }}">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label class="form-label">Estimated Move-In Cost (Per Occupant)</label>
+                        <input type="number" class="form-control" name="total_move_in_cost" value="{{ pg.total_move_in_cost|default:'' }}" readonly>
+                        <div style="font-size:.72rem;color:#94a3b8;margin-top:4px;">Recalculated automatically on save.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-nav">
+              <button type="button" class="btn-sec" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+              <button type="button" class="btn-pr" onclick="goToStep(3)">Move To Next Page <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <!-- ================= STEP 3: REGULATIONS, AMENITIES, FACILITIES, DESCRIPTION ================= -->
+          <div class="step-content" id="step3">
+            <div class="form-section">
+              <div class="section-header"><i class="fa-solid fa-gavel"></i> Step 3 — PG Regulations</div>
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-6"><div class="form-group"><label class="form-label">Opposite Gender Visitors Allowed?</label><label class="toggle-switch"><input type="checkbox" name="opposite_gender_visitors_allowed" {% if pg.opposite_gender_visitors_allowed %}checked{% endif %}><span class="toggle-slider"></span></label></div></div>
+                  <div class="col-md-6"><div class="form-group"><label class="form-label">Visitors Allowed?</label><label class="toggle-switch"><input type="checkbox" name="visitors_allowed" {% if pg.visitors_allowed %}checked{% endif %}><span class="toggle-slider"></span></label></div></div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-6"><div class="form-group"><label class="form-label">Parents/Guardians Allowed?</label><label class="toggle-switch"><input type="checkbox" name="parents_guardians_allowed" {% if pg.parents_guardians_allowed %}checked{% endif %}><span class="toggle-slider"></span></label></div></div>
+                  <div class="col-md-6"><div class="form-group"><label class="form-label">24x7 Entry Allowed?</label><label class="toggle-switch"><input type="checkbox" id="entry_24x7_allowed" name="entry_24x7_allowed" {% if pg.entry_24x7_allowed %}checked{% endif %}><span class="toggle-slider"></span></label></div></div>
+                </div>
+                <div class="row mt-2" id="curfew_time_row">
+                  <div class="col-md-6"><div class="form-group"><label class="form-label">Curfew Time</label><input type="time" class="form-control" name="curfew_time" value="{{ pg.curfew_time|time:'H:i' }}"></div></div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-6"><div class="form-group"><label class="form-label">Smoking Allowed?</label><label class="toggle-switch"><input type="checkbox" name="smoking_allowed" {% if pg.smoking_allowed %}checked{% endif %}><span class="toggle-slider"></span></label></div></div>
+                  <div class="col-md-6"><div class="form-group"><label class="form-label">Alcohol Consumption Allowed?</label><label class="toggle-switch"><input type="checkbox" name="alcohol_consumption_allowed" {% if pg.alcohol_consumption_allowed %}checked{% endif %}><span class="toggle-slider"></span></label></div></div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-6"><div class="form-group"><label class="form-label">Couples Allowed?</label><label class="toggle-switch"><input type="checkbox" name="couples_allowed" {% if pg.couples_allowed %}checked{% endif %}><span class="toggle-slider"></span></label></div></div>
+                  <div class="col-md-6"><div class="form-group"><label class="form-label">Pets Allowed?</label><label class="toggle-switch"><input type="checkbox" name="pets_allowed" {% if pg.pets_allowed %}checked{% endif %}><span class="toggle-slider"></span></label></div></div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-6"><div class="form-group"><label class="form-label">Cooking Allowed?</label><label class="toggle-switch"><input type="checkbox" name="cooking_allowed" {% if pg.cooking_allowed %}checked{% endif %}><span class="toggle-slider"></span></label></div></div>
+                  <div class="col-md-6"><div class="form-group"><label class="form-label">Police Verification Required?</label><label class="toggle-switch"><input type="checkbox" name="police_verification_required" {% if pg.police_verification_required %}checked{% endif %}><span class="toggle-slider"></span></label></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-star"></i> Amenities &amp; Nearby Facilities</div>
+              <div class="section-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <label class="form-label mb-0"><i class="fas fa-star text-warning"></i> Amenities</label>
+                  <span class="badge bg-primary" id="amenitiesCount">0 selected</span>
+                </div>
+                <button type="button" class="btn btn-primary w-100 mb-3" onclick="openModal('amenities')">
+                  <i class="fas fa-plus-circle me-2"></i> Select Amenities <span class="badge bg-light text-dark ms-2" id="amenitiesBadge">0</span>
+                </button>
+                <div id="amenitiesDisplay" class="selected-items-display">
+                  <p class="text-muted text-center">No amenities selected</p>
+                </div>
+                <div style="display:none;">
+                  {% for am in ameneties_obj %}
+                  <input type="checkbox" name="amenities[]" value="{{ am.amenties_name }}" class="amenities-checkbox" data-icon="{{ am.amenties_icon }}" {% if am.amenties_name in selected_amenities %}checked{% endif %}>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-map-marker-alt"></i> Nearby Facilities</div>
+              <div class="section-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <label class="form-label mb-0"><i class="fas fa-map-marker-alt text-primary"></i> Nearby Facilities</label>
+                  <span class="badge bg-primary" id="facilitiesCount">0 selected</span>
+                </div>
+                <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')">
+                  <i class="fas fa-plus-circle me-2"></i> Select Facilities <span class="badge bg-light text-dark ms-2" id="facilitiesBadge">0</span>
+                </button>
+                <div id="facilitiesDisplay" class="selected-items-display">
+                  <p class="text-muted text-center">No facilities selected</p>
+                </div>
+                <div style="display:none;">
+                  {% for fa in facilities_obj %}
+                  <input type="checkbox" name="nearby_facilities[]" value="{{ fa.facilities_name }}" class="facilities-checkbox" data-icon="{{ fa.facilities_icon }}" {% if fa.facilities_name in selected_facilities %}checked{% endif %}>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-align-left"></i> Add Property Description</div>
+              <div class="section-body">
+                <div class="form-group">
+                  <label class="form-label mb-0"><i class="fas fa-file-alt"></i> Property Description</label>
+                  <textarea class="form-control" name="user_description" id="user_description" rows="6">{{ pg.user_description|default:'' }}</textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-nav">
+              <button type="button" class="btn-sec" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+              <button type="button" class="btn-pr" onclick="goToStep(4)">Move To Next Page <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+
+          <!-- ================= STEP 4: IMAGES, VIDEO, LISTING STATUS, UPLOADER ================= -->
+          <div class="step-content" id="step4">
+
+      
+<div class="form-section">
+  <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
+  <div class="section-body">
+
+    <div class="img-upload-guide">
+        <div class="guide-step">
+            <div class="guide-step-num">1</div>
+            <div class="guide-step-text">
+                <strong>Pick a category</strong>
+                Tap a tile below (Exterior, Single Room, etc.)
+            </div>
+        </div>
+        <i class="fas fa-arrow-right guide-arrow"></i>
+        <div class="guide-step">
+            <div class="guide-step-num">2</div>
+            <div class="guide-step-text">
+                <strong>Upload matching photos</strong>
+                Click or drag images into that category only
+            </div>
+        </div>
+        <i class="fas fa-arrow-right guide-arrow"></i>
+        <div class="guide-step">
+            <div class="guide-step-num">3</div>
+            <div class="guide-step-text">
+                <strong>Set your cover photo</strong>
+                Drag to reorder — the 1st photo in Exterior or Single Room is used as the cover
+            </div>
+        </div>
+    </div>
+
+    <div class="img-total-summary">
+        <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/30</div>
+        <div id="imgMinNotice" class="min-ok"><i class="fas fa-info-circle"></i> Images are optional but recommended</div>
+    </div>
+
+    <!-- Hidden input container for deleted image IDs & sorting -->
+    <div id="deletedImagesContainer"></div>
+
+    <!-- Category Tabs -->
+    <div class="img-cat-tabs" id="imgCatTabs">
+        <div class="img-cat-tab active" data-cat="exterior"><i class="fas fa-building"></i> Building Exterior <span class="cat-count" id="count-exterior">0</span></div>
+        <div class="img-cat-tab" data-cat="single_room"><i class="fas fa-bed"></i> Single Occupancy <span class="cat-count" id="count-single_room">0</span></div>
+        <div class="img-cat-tab" data-cat="double_room"><i class="fas fa-user-friends"></i> Double Sharing <span class="cat-count" id="count-double_room">0</span></div>
+        <div class="img-cat-tab" data-cat="multi_room"><i class="fas fa-users"></i> Triple / Multi Sharing <span class="cat-count" id="count-multi_room">0</span></div>
+        <div class="img-cat-tab" data-cat="lounge"><i class="fas fa-couch"></i> Common Lounge <span class="cat-count" id="count-lounge">0</span></div>
+        <div class="img-cat-tab" data-cat="kitchen"><i class="fas fa-utensils"></i> Shared Kitchen <span class="cat-count" id="count-kitchen">0</span></div>
+        <div class="img-cat-tab" data-cat="dining"><i class="fas fa-chair"></i> Dining Area <span class="cat-count" id="count-dining">0</span></div>
+        <div class="img-cat-tab" data-cat="washroom"><i class="fas fa-restroom"></i> Bathroom / Washroom <span class="cat-count" id="count-washroom">0</span></div>
+        <div class="img-cat-tab" data-cat="laundry"><i class="fas fa-tshirt"></i> Laundry Area <span class="cat-count" id="count-laundry">0</span></div>
+        <div class="img-cat-tab" data-cat="parking"><i class="fas fa-square-parking"></i> Parking <span class="cat-count" id="count-parking">0</span></div>
+        <div class="img-cat-tab" data-cat="amenities"><i class="fas fa-tree"></i> Common Amenities <span class="cat-count" id="count-amenities">0</span></div>
+        <div class="img-cat-tab" data-cat="floor_plan"><i class="fas fa-ruler-combined"></i> Floor Plan <span class="cat-count" id="count-floor_plan">0</span></div>
+    </div>
+
+    <div class="img-cat-panels">
+        <!-- 1. Exterior -->
+        <div class="img-cat-panel active" data-cat-panel="exterior">
+            <div class="img-cat-upload-area" data-cat="exterior">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Building Exterior Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-exterior">
+                {% for img in pg.images.all %}{% if img.category == 'exterior' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="exterior">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'exterior', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-exterior" name="property_images_exterior[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 2. Single Room -->
+        <div class="img-cat-panel" data-cat-panel="single_room">
+            <div class="img-cat-upload-area" data-cat="single_room">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Single Occupancy Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-single_room">
+                {% for img in pg.images.all %}{% if img.category == 'single_room' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="single_room">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'single_room', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-single_room" name="property_images_single_room[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 3. Double Room -->
+        <div class="img-cat-panel" data-cat-panel="double_room">
+            <div class="img-cat-upload-area" data-cat="double_room">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Double Sharing Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-double_room">
+                {% for img in pg.images.all %}{% if img.category == 'double_room' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="double_room">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'double_room', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-double_room" name="property_images_double_room[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 4. Multi Room -->
+        <div class="img-cat-panel" data-cat-panel="multi_room">
+            <div class="img-cat-upload-area" data-cat="multi_room">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Triple/Multi Sharing Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-multi_room">
+                {% for img in pg.images.all %}{% if img.category == 'multi_room' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="multi_room">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'multi_room', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-multi_room" name="property_images_multi_room[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 5. Lounge -->
+        <div class="img-cat-panel" data-cat-panel="lounge">
+            <div class="img-cat-upload-area" data-cat="lounge">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Common Lounge Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-lounge">
+                {% for img in pg.images.all %}{% if img.category == 'lounge' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="lounge">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'lounge', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-lounge" name="property_images_lounge[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 6. Kitchen -->
+        <div class="img-cat-panel" data-cat-panel="kitchen">
+            <div class="img-cat-upload-area" data-cat="kitchen">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Shared Kitchen Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-kitchen">
+                {% for img in pg.images.all %}{% if img.category == 'kitchen' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="kitchen">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'kitchen', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-kitchen" name="property_images_kitchen[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 7. Dining -->
+        <div class="img-cat-panel" data-cat-panel="dining">
+            <div class="img-cat-upload-area" data-cat="dining">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Dining Area Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-dining">
+                {% for img in pg.images.all %}{% if img.category == 'dining' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="dining">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'dining', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-dining" name="property_images_dining[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 8. Washroom -->
+        <div class="img-cat-panel" data-cat-panel="washroom">
+            <div class="img-cat-upload-area" data-cat="washroom">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Bathroom / Washroom Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-washroom">
+                {% for img in pg.images.all %}{% if img.category == 'washroom' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="washroom">
+                    <img src="{{ img.image.url }}">
+                    <span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'washroom', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-washroom" name="property_images_washroom[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 9. Laundry -->
+        <div class="img-cat-panel" data-cat-panel="laundry">
+            <div class="img-cat-upload-area" data-cat="laundry">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Laundry Area Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-laundry">
+                {% for img in pg.images.all %}{% if img.category == 'laundry' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="laundry">
+                    <img src="{{ img.image.url }}"><span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'laundry', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-laundry" name="property_images_laundry[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 10. Parking -->
+        <div class="img-cat-panel" data-cat-panel="parking">
+            <div class="img-cat-upload-area" data-cat="parking">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Parking Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-parking">
+                {% for img in pg.images.all %}{% if img.category == 'parking' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="parking">
+                    <img src="{{ img.image.url }}"><span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'parking', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-parking" name="property_images_parking[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 11. Amenities -->
+        <div class="img-cat-panel" data-cat-panel="amenities">
+            <div class="img-cat-upload-area" data-cat="amenities">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Common Amenities Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-amenities">
+                {% for img in pg.images.all %}{% if img.category == 'amenities' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="amenities">
+                    <img src="{{ img.image.url }}"><span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'amenities', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-amenities" name="property_images_amenities[]" accept="image/*" multiple style="display:none;">
+        </div>
+
+        <!-- 12. Floor Plan -->
+        <div class="img-cat-panel" data-cat-panel="floor_plan">
+            <div class="img-cat-upload-area" data-cat="floor_plan">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">Click or Drag Floor Plan Photos Here</div>
+            </div>
+            <div class="img-cat-preview" id="imgPreview-floor_plan">
+                {% for img in pg.images.all %}{% if img.category == 'floor_plan' %}
+                <div class="img-cat-preview-item existing-img-item" id="existing-img-{{ img.id }}" data-cat="floor_plan">
+                    <img src="{{ img.image.url }}"><span class="img-index-badge">Saved</span>
+                    <button type="button" class="remove-image" onclick="removeExistingCatImage('{{ img.id }}', 'floor_plan', event)"><i class="fas fa-times"></i></button>
+                </div>
+                {% endif %}{% endfor %}
+            </div>
+            <input type="file" class="img-cat-input" id="imgInput-floor_plan" name="property_images_floor_plan[]" accept="image/*" multiple style="display:none;">
+        </div>
+    </div>
+
+    <div style="font-size:0.8rem; color:#64748b; margin-top:6px;">
+      <i class="fas fa-arrows-alt"></i> Drag thumbnails within a category to reorder. The first image under <strong>Building Exterior</strong> or <strong>Single Occupancy</strong> acts as the cover photo.
+    </div>
+  </div>
+</div>
+
+
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-video"></i> Property Walkthrough Video</div>
+              <div class="section-body">
+               
+              {% with existing_video=pg.videos.last %}
+
+<div class="row mb-3">
+  <div class="col-md-12">
+    <label class="form-label d-block">Video Option</label>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="video_option" id="video_upload" value="upload" {% if not existing_video or existing_video.source == 'upload' %}checked{% endif %}>
+      <label class="form-check-label" for="video_upload">Upload Property Video</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="video_option" id="video_auto" value="auto" {% if existing_video.source == 'auto' %}checked{% endif %}>
+      <label class="form-check-label" for="video_auto">Auto-Generate Slideshow from Photos</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" type="radio" name="video_option" id="video_rm" value="rm_assisted" {% if existing_video.source == 'rm_assisted' %}checked{% endif %}>
+      <label class="form-check-label" for="video_rm">Video is Large — Share with Our RM</label>
+    </div>
+  </div>
+</div>
+
+<input type="hidden" name="video_source" id="video_source" value="upload">
+
+<div id="videoUploadWrapper">
+  {% if existing_video and existing_video.video and existing_video.source != 'auto' and existing_video.source != 'rm_assisted' %}
+  <div style="margin-bottom:12px; position:relative;" id="currentVideoBlock">
+    <label class="form-label">Current Uploaded Video</label>
+    <div style="position:relative;">
+      <video src="{{ existing_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
+      <button type="button" class="existing-img-remove-btn" style="top:32px; right:8px;" title="Remove this video" onclick="removeCurrentVideo('currentVideoBlock')">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <input type="checkbox" name="delete_current_video" id="delete_current_video" value="1" style="display:none;">
+  </div>
+  {% endif %}
+
+  <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+  <div class="image-upload-area" id="videoUploadArea">
+    <div class="upload-icon"><i class="fas fa-cloud-upload-alt" style="font-size:2.2rem;color:#667eea;"></i></div>
+    <div class="upload-text">Click to Upload Complete PG Walkthrough Video</div>
+    <div class="upload-subtext">MP4/MOV, max 60 seconds, up to 50MB</div>
+  </div>
+  <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px;"></video>
+</div>
+
+<div id="videoAutoWrapper" style="display:none;">
+  {% if existing_video and existing_video.source == 'auto' and existing_video.video %}
+  <div style="margin-bottom:12px; position:relative;" id="currentAutoVideoBlock">
+    <label class="form-label">Current Auto-Generated Slideshow</label>
+    <div style="position:relative;">
+      <video src="{{ existing_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
+      <button type="button" class="existing-img-remove-btn" style="top:32px; right:8px;" title="Remove this video" onclick="removeCurrentVideo('currentAutoVideoBlock')">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <input type="checkbox" name="delete_current_video" id="delete_current_video" value="1" style="display:none;">
+  </div>
+  {% endif %}
+
+  <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom:15px;">
+    <i class="fas fa-magic me-2" style="color:#667eea;"></i>
+    We'll auto-create a walkthrough video from your uploaded photos (min. 3 needed).
+  </div>
+  <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
+    <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
+    <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:1px solid #cbd5e1; background:#000;"></canvas>
+  </div>
+  <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:12px; font-weight:600;">
+    <i class="fas fa-exclamation-circle me-1"></i> Please upload at least 3 property images above to preview the auto-slideshow.
+  </div>
+
+  <div class="form-check mt-2">
+    <input class="form-check-input" type="checkbox" name="regenerate_slideshow" id="regenerate_slideshow">
+    <label class="form-check-label" for="regenerate_slideshow">Regenerate slideshow using current photos</label>
+  </div>
+</div>
+
+<div id="videoRMWrapper" style="display:none;">
+  <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #667eea; border-radius:8px; padding:14px 18px; margin-bottom:15px;">
+    <i class="fas fa-headset me-2" style="color:#667eea;"></i>
+    Share the video directly with your RM (WhatsApp / email). Once they publish it, paste the public link below.
+  </div>
+  <label class="form-label">Published Video Link</label>
+  <input type="url" class="form-control" id="property_video_link" name="property_video_link"
+         value="{% if existing_video.source == 'rm_assisted' %}{{ existing_video.video_url|default:'' }}{% endif %}"
+         placeholder="Paste YouTube / Instagram / Facebook link">
+  <button type="button" class="btn-sec mt-2" id="previewRMLinkBtn"><i class="fas fa-eye me-1"></i> Preview Link</button>
+  <div id="rmVideoFrame" style="display:none; margin-top:15px; border-radius:12px; overflow:hidden; aspect-ratio:16/9;">
+    <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+  </div>
+</div>
+
+{% endwith %}
+              </div>
+            </div>
+
+            
+<div class="form-section">
+  <div class="section-body" style="border-radius:12px; border:2px solid #e9ecef;">
+    <div class="row">
+
+      <!-- Listed Elsewhere -->
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
+
+          <div class="form-check form-check-inline">
+            <input class="form-check-input"
+                   type="radio"
+                   name="listed_elsewhere"
+                   id="listed_yes"
+                   value="Yes"
+                   {% if pg.listed_elsewhere|default:'' == 'Yes' %}checked{% endif %}>
+            <label class="form-check-label" for="listed_yes">Yes</label>
+          </div>
+
+          <div class="form-check form-check-inline">
+            <input class="form-check-input"
+                   type="radio"
+                   name="listed_elsewhere"
+                   id="listed_no"
+                   value="No"
+                   {% if pg.listed_elsewhere|default:'' == 'No' %}checked{% endif %}>
+            <label class="form-check-label" for="listed_no">No</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Portal Name -->
+     <div class="col-md-6"
+           id="portalField"
+           style="display:{% if pg.listed_elsewhere|default:'' == 'Yes' %}block{% else %}none{% endif %};">
+
+        <div class="form-group">
+          <label class="form-label">Portal Name</label>
+
+          <input type="text"
+                 class="form-control"
+                 name="portal_name"
+                 id="portal_name"
+                 value="{{ pg.portal_name|default:'' }}"
+                 placeholder="Enter portal name">
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+  
+
+
+
+
+            <div class="form-section">
+              <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
+              <div class="section-body">
+                <div class="row">
+                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" value="{{ pg.uploaded_by_name|default:'' }}" readonly></div></div>
+                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" value="{{ pg.uploaded_by_email|default:'' }}" readonly></div></div>
+                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" value="{{ pg.uploaded_by_contact|default:'' }}" readonly></div></div>
+                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" value="{{ pg.uploaded_by_role|default:'' }}" readonly></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-nav">
+              <button type="button" class="btn-sec" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+              <button type="submit" class="btn-pr" style="background:var(--success-gradient);"><i class="fas fa-save"></i> Update Listing</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="preview-sidebar">
+      <div class="preview-card">
+        <div class="pc-head"><i class="fas fa-eye"></i> Live Preview</div>
+        <div class="pc-mock">
+          <div class="pcm-img">
+            🏠
+             <div class="pcm-badges"><span class="pcm-badge">For Rent</span></div>
+            <div class="pcm-badges"><span class="pcm-badge" style="margin-left:80px;">PG</span></div>
+            <div class="pcm-price" id="previewPrice">₹ {{ pg.monthly_rent|default:'—' }} /mo</div>
+          </div>
+          <div class="pcm-body">
+            <div class="pcm-title" id="previewTitle">{{ pg.property_title|default:"Premium Accommodation" }}</div>
+            <div class="pcm-loc" id="previewLoc"><i class="fas fa-map-marker-alt" style="color:#667eea;"></i> {{ pg.locality }}{% if pg.city %}, {{ pg.city }}{% endif %}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-card">
+        <div class="cl-title">📋 Listing Checklist</div>
+        <div class="cl-item" id="cl-pgname"><i class="fas fa-circle"></i> Basic details &amp; title verified</div>
+        <div class="cl-item" id="cl-location"><i class="fas fa-circle"></i> Location &amp; address details added</div>
+        <div class="cl-item" id="cl-beds"><i class="fas fa-circle"></i> Room capacity &amp; beds configured</div>
+        <div class="cl-item" id="cl-rooms"><i class="fas fa-circle"></i> Room rent &amp; pricing entered</div>
+        <div class="cl-item" id="cl-amenities"><i class="fas fa-circle"></i> PG rules &amp; amenities selected</div>
+        <div class="cl-item" id="cl-facilities"><i class="fas fa-circle"></i> Nearby facilities &amp; description added</div>
+        <div class="cl-item" id="cl-photos"><i class="fas fa-circle"></i> Property photos &amp; media uploaded</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Common Modal (same as add form) -->
+<div class="modal fade" id="itemsModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-list"></i> <span id="modalTitle">Select Items</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control mb-3" id="modalSearch" placeholder="Search...">
+        <div id="modalItemsList" class="row"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="clearAll()">Clear All</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Apply (<span id="modalSelectedCount">0</span>)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  // ---------- Listed By self/other toggle (same as add form) ----------
+  
+
+  // ---------- Listed By self/other toggle (same as add form) ----------
+  function updateBrokerageLabel(role) {
+    var labelElement = document.getElementById('brokerageLabel');
+    if (!labelElement) return;
+    
+    var normalizedRole = (role || "").trim().toLowerCase();
+    var labelText = "";
+    
+    switch (normalizedRole) {
+      case 'admin': labelText = "EstateFlow Service Fee"; break;
+      case 'relationship manager': labelText = "Service Fee"; break;
+      case 'landlord': labelText = "Tenant Service Fee"; break;
+      case 'agent': labelText = "Brokerage"; break;
+      case 'agency/builder':
+      case 'builder': labelText = "Service Fee"; break;
+      default: labelText = "Brokerage"; break;
+    }
+    labelElement.innerHTML = labelText + ' <span class="required">*</span>';
+  }
+
+  function Change_Fields(){
+    var checkedInput = document.querySelector('input[name="listed_by_type"]:checked');
+    if (!checkedInput) return;
+    var selectedValue = checkedInput.value;
+    var admin_id = document.getElementById('selfUserId')?.value || "";
+    var admin_name = document.getElementById('selfUserName')?.value || "";
+    var admin_email = document.getElementById('selfUserEmail')?.value || "";
+    var admin_phone = document.getElementById('selfUserPhone')?.value || "";
+    var admin_role = document.getElementById('selfUserRole')?.value || "";
+    var targetId = document.getElementById('listed_by_id');
+    var targetName = document.getElementById('listed_by_name');
+    var targetEmail = document.getElementById('listed_by_email');
+    var targetContact = document.getElementById('listed_by_contact');
+    var targetRole = document.getElementById('listed_by_role');
+    var hiddenSelect = document.getElementById('assigned_to');
+
+    if (selectedValue == "self") {
+      var otherWrapper = document.getElementById('listedByOtherWrapper');
+      if (otherWrapper) otherWrapper.style.display = "none";
+      if (hiddenSelect) { hiddenSelect.value = ""; hiddenSelect.required = false; }
+      if (targetId) targetId.value = admin_id;
+      if (targetName) targetName.value = admin_name;
+      if (targetEmail) targetEmail.value = admin_email;
+      if (targetContact) targetContact.value = admin_phone;
+      if (targetRole) targetRole.value = admin_role;
+      
+      updateBrokerageLabel(admin_role); // Added UI update
+    } else {
+      if (hiddenSelect) hiddenSelect.required = true;
+      var otherWrapper = document.getElementById('listedByOtherWrapper');
+      if (otherWrapper) otherWrapper.style.display = "block";
+    }
+  }
+
+ document.addEventListener('DOMContentLoaded', function() {
+    // 1. Set the Brokerage Label on load
+    var initialRole = document.getElementById('listed_by_role')?.value;
+    if(initialRole) {
+      updateBrokerageLabel(initialRole);
+    }
+
+    // 2. Pre-fill the custom dropdown if Listed By Other User
+    var listedByTypeOther = document.getElementById('listedByOther');
+    if (listedByTypeOther && listedByTypeOther.checked) {
+      var existingUid = document.getElementById('listed_by_id')?.value;
+      
+      if (existingUid) {
+        var options = document.querySelectorAll('.search-select-option');
+        for (var i = 0; i < options.length; i++) {
+          // Match the user ID from the input field to the data-uid in the dropdown
+          if (options[i].getAttribute('data-uid') === existingUid) {
+            
+            // Update the visual label text
+            var labelEl = document.getElementById('assignedToValueLabel');
+            if (labelEl) {
+              labelEl.textContent = options[i].textContent.trim();
+              labelEl.classList.remove('ss-placeholder');
+            }
+            
+            // Set the hidden select value so the form submits correctly
+            var hiddenSelect = document.getElementById('assigned_to');
+            if (hiddenSelect) {
+              hiddenSelect.value = options[i].getAttribute('data-value');
+            }
+            
+            // Mark option as selected visually
+            options[i].classList.add('selected');
+            break;
+          }
+        }
+      }
+    }
+  });
+
+  // ---------- Pill buttons (pg_for / best_suited_for / meal_offerings / meal_speciality) ----------
+  document.querySelectorAll('.pill-btn').forEach(btn => {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      const field = this.dataset.field;
+      if (field === 'pg_for') {
+        this.parentElement.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      } else {
+        this.classList.toggle('active');
+      }
+      syncPillInputsValue();
+    });
+  });
+
+  function syncPillInputsValue() {
+    const activePgFor = document.querySelector('.pill-btn[data-field="pg_for"].active');
+    document.getElementById('pg_for').value = activePgFor ? activePgFor.dataset.value : '';
+    ['best_suited_for', 'meal_offerings', 'meal_speciality'].forEach(fieldName => {
+      const vals = Array.from(document.querySelectorAll(`.pill-btn[data-field="${fieldName}"].active`)).map(b => b.dataset.value);
+      const idMap = { meal_offerings: 'mealOfferingsHidden', meal_speciality: 'mealSpecialityHidden', best_suited_for: 'best_suited_for' };
+      const el = document.getElementById(idMap[fieldName]);
+      if (el) el.value = vals.join(',');
+    });
+  }
+
+  document.getElementById('mealsToggle').addEventListener('change', function () {
+    const show = this.checked;
+    document.getElementById('mealOfferings').style.display = show ? 'block' : 'none';
+    document.getElementById('mealSpeciality').style.display = show ? 'block' : 'none';
+  });
+
+
+  
+  document.getElementById('brokeragePercentage')?.addEventListener('change', function () {
+    document.getElementById('manualBrokerage').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+    // Clear the value if it is no longer fixed
+    if (this.value !== 'Fixed Amount') {
+        document.querySelector('input[name="manual_brokerage"]').value = '';
+    }
+  });
+
+  document.getElementById('advance_rent_month')?.addEventListener('change', function () {
+    document.getElementById('advance_amount_div').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+    // Clear the value if it is no longer fixed
+    if (this.value !== 'Fixed Amount') {
+        document.getElementById('advance_rent_amount').value = '';
+    }
+  });
+
+  document.getElementById('security_deposit_type')?.addEventListener('change', function () {
+    document.getElementById('security_deposit_div').style.display = this.value === 'Fixed Amount' ? 'block' : 'none';
+    // Clear the value if it is no longer fixed
+    if (this.value !== 'Fixed Amount') {
+        document.getElementById('security_deposit_amount').value = '';
+    }
+  });
+
+
+  document.querySelectorAll('input[name="maintenance_type"]').forEach(r => {
+    r.addEventListener('change', function () {
+      document.getElementById('maintenanceAmountDiv').style.display = this.value === 'Extra' ? 'block' : 'none';
+    });
+  });
+  document.getElementById('listed_yes')?.addEventListener('change', function () { document.getElementById('portalField').style.display = 'block'; });
+  document.getElementById('listed_no')?.addEventListener('change', function () { document.getElementById('portalField').style.display = 'none'; });
+
+  // ---------- Existing image removal toggle ----------
+ 
+
+
+ 
+  // ---------- Existing image removal (per-category, matches commercial edit form) ----------
+  function removeExistingImage(iconEl) {
+    const label = iconEl.closest('.existing-img-remove-btn');
+    const checkbox = label ? label.querySelector('input[type="checkbox"]') : null;
+    if (checkbox) checkbox.checked = true;
+
+    const tile = iconEl.closest('.img-cat-preview-item');
+    if (tile) tile.style.display = 'none';
+
+    const panel = iconEl.closest('.img-cat-panel');
+    if (panel) {
+      const cat = panel.getAttribute('data-cat-panel');
+      if (cat && EXISTING_IMG_COUNTS[cat] > 0) EXISTING_IMG_COUNTS[cat] -= 1;
+    }
+    renderAllCategories();
+  }
+
+ 
+  function removeCurrentVideo(blockId) {
+  blockId = blockId || 'currentVideoBlock';
+  var checkbox = document.getElementById('delete_current_video');
+  if (checkbox) checkbox.checked = true;
+  var block = document.getElementById(blockId);
+  if (block) block.style.display = 'none';
+}
+
+  // ---------- Amenities / Facilities modal (same pattern as add form) ----------
+  let currentSection = null;
+  $(document).ready(function () {
+    ['amenities', 'facilities'].forEach(updateDisplay);
+
+   
+
+    window.openModal = function (section) {
+      currentSection = section;
+      $('#modalTitle').text(`Select ${section.charAt(0).toUpperCase() + section.slice(1)}`);
+      const container = $('#modalItemsList').empty();
+      $(`.${section}-checkbox`).each(function () {
+        container.append(`
+          <div class="col-md-4 col-sm-6 mb-2 modal-item-col">
+            <div class="form-check">
+              <input class="form-check-input modal-item-checkbox" type="checkbox" value="${this.value}" data-icon="${$(this).data('icon')}" ${this.checked ? 'checked' : ''}>
+              <label class="form-check-label"><i class="${$(this).data('icon')}"></i> ${this.value}</label>
+            </div>
+          </div>`);
+      });
+      updateModalCount();
+      $('#modalSearch').val('');
+      $('.modal-item-col').show();
+      $('#itemsModal').modal('show');
+      setTimeout(() => $('#modalSearch').trigger('focus'), 300);
+    };
+
+    // Live-filter the modal list as the user types
+    $(document).on('input', '#modalSearch', function () {
+      const query = $(this).val().trim().toLowerCase();
+      $('.modal-item-col').each(function () {
+        const label = $(this).find('.form-check-label').text().trim().toLowerCase();
+        $(this).toggle(label.indexOf(query) !== -1);
+      });
+    });
+    window.removeItem = function (section, name) {
+      $(`.${section}-checkbox`).filter(function () { return this.value === name; }).prop('checked', false);
+      updateDisplay(section);
+    };
+
+    window.clearAll = function () {
+      if (!currentSection) return;
+      $(`.${currentSection}-checkbox`).prop('checked', false);
+      $('.modal-item-checkbox').prop('checked', false);
+      updateDisplay(currentSection);
+      updateModalCount();
+    };
+
+    function updateDisplay(section) {
+      const checked = $(`.${section}-checkbox:checked`);
+      $(`#${section}Count`).text(`${checked.length} selected`);
+      $(`#${section}Badge`).text(checked.length);
+      const display = $(`#${section}Display`).empty();
+      if (checked.length === 0) {
+        display.html(`<p class="text-muted text-center m-0">No ${section} selected</p>`);
+      } else {
+        checked.each(function () {
+          const $tag = $('<span class="item-tag"></span>');
+          $tag.append($('<i></i>').addClass($(this).data('icon')));
+          $tag.append(' ' + this.value + ' ');
+          const $remove = $('<span class="remove-btn"></span>').append('<i class="fas fa-times-circle"></i>');
+          $remove.on('click', () => removeItem(section, this.value));
+          $tag.append($remove);
+          display.append($tag);
+        });
+      }
+      setCheck(section === 'amenities' ? 'cl-amenities' : 'cl-facilities', checked.length > 0);
+    }
+    window.updateDisplay = updateDisplay;
+
+    function updateModalCount() { $('#modalSelectedCount').text($('.modal-item-checkbox:checked').length); }
+    $(document).on('change', '.modal-item-checkbox', updateModalCount);
+    $('#itemsModal .btn-primary').on('click', function () {
+      if (!currentSection) return;
+      const checked = $('.modal-item-checkbox:checked');
+      $(`.${currentSection}-checkbox`).prop('checked', false);
+      checked.each(function () { $(`.${currentSection}-checkbox[value="${this.value}"]`).prop('checked', true); });
+      updateDisplay(currentSection);
+    });
+  });
+
+  // ---------- Step navigation ----------
+ // ---------- Step navigation ----------
+  let currentStep = 1;
+  function goToStep(n) {
+    document.getElementById('step' + currentStep).classList.remove('active');
+    document.getElementById('step' + n).classList.add('active');
+    for (let i = 1; i <= 4; i++) {
+      const sc = document.getElementById('sc' + i), sl = document.getElementById('sl' + i), line = document.getElementById('line' + i);
+      sc.className = 'step-circle'; sl.className = 'step-label'; if (line) line.className = 'step-line';
+      if (i < n) { sc.classList.add('done'); sc.innerHTML = '<i class="fas fa-check" style="font-size:.65rem;"></i>'; sl.classList.add('done'); if (line) line.classList.add('done'); }
+      else if (i === n) { sc.classList.add('active'); sc.textContent = i; sl.classList.add('active'); }
+      else { sc.textContent = i; }
+    }
+    currentStep = n;
+    
+    // Smooth scroll specifically to the step progress bar or form container
+    const scrollTarget = document.querySelector('.stepper') || document.querySelector('.form-container');
+    if (scrollTarget) {
+      // offset a bit if you have a sticky topbar, otherwise 'start' works perfectly
+      scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+ // ---------- Category-wise image upload (matches commercial edit form's engine) ----------
+
+
+ // ================= CATEGORY-WISE IMAGE UPLOAD LOGIC =================
+
+
+ // ================= CATEGORY-WISE IMAGE UPLOAD LOGIC =================
+
+
+ // ================= CATEGORY-WISE IMAGE UPLOAD LOGIC =================
+const IMG_CATEGORIES = ['exterior', 'single_room', 'double_room', 'multi_room', 'lounge', 'kitchen', 'dining', 'washroom', 'laundry', 'parking', 'amenities', 'floor_plan'];
+const IMG_CATEGORY_LIMITS = { exterior: 5, single_room: 4, double_room: 5, multi_room: 5, lounge: 4, kitchen: 3, dining: 3, washroom: 4, laundry: 3, parking: 3, amenities: 5, floor_plan: 3 };
+const IMG_TOTAL_LIMIT = 30;
+const IMG_MIN_REQUIRED = 0; // Made optional
+
+window.catFiles = {};
+IMG_CATEGORIES.forEach(c => window.catFiles[c] = []);
+window.markedDeletionsQueue = [];
+
+function existingTotalCount() {
+    let total = 0;
+    IMG_CATEGORIES.forEach(cat => {
+        const preview = document.getElementById('imgPreview-' + cat);
+        if (preview) {
+            total += preview.querySelectorAll('.existing-img-item').length;
+        }
+    });
+    return total;
+}
+
+function totalImageCount() {
+    return IMG_CATEGORIES.reduce((sum, c) => sum + window.catFiles[c].length, 0);
+}
+
+function syncCategoryInput(cat) {
+    const dt = new DataTransfer();
+    window.catFiles[cat].forEach(f => dt.items.add(f));
+    const inputEl = document.getElementById('imgInput-' + cat);
+    if (inputEl) inputEl.files = dt.files;
+}
+
+function renderCategory(cat) {
+    const preview = document.getElementById('imgPreview-' + cat);
+    if (!preview) return;
+
+    // Clean out only new files (leave existing ones intact)
+    preview.querySelectorAll('.new-file-item').forEach(el => el.remove());
+
+    window.catFiles[cat].forEach((file, idx) => {
+        const div = document.createElement('div');
+        div.className = 'img-cat-preview-item new-file-item';
+        div.draggable = true;
+        div.dataset.fileName = file.name;
+        div.dataset.cat = cat;
+
+        div.innerHTML = `
+            <img src="">
+            <span class="img-index-badge">New</span>
+            <button type="button" class="remove-image" onclick="removeCatImage('${cat}', '${file.name.replace(/'/g, "\\'")}', event)"><i class="fas fa-times"></i></button>
+        `;
+
+        preview.appendChild(div);
+        attachDragEvents(div, cat);
+
+        const reader = new FileReader();
+        reader.onload = e => { div.querySelector('img').src = e.target.result; };
+        reader.readAsDataURL(file);
+    });
+
+    updateCoverPhotoAndLabels();
+
+    const newCount = window.catFiles[cat].length;
+    const savedCount = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
+    const countEl = document.getElementById('count-' + cat);
+    if (countEl) countEl.innerText = savedCount + newCount;
+
+    const tab = document.querySelector(`.img-cat-tab[data-cat="${cat}"]`);
+    if (tab) tab.classList.toggle('has-images', (savedCount + newCount) > 0);
+}
+
+function updateCoverPhotoAndLabels() {
+    let hasCover = false;
+    let existingOrder = [];
+
+    IMG_CATEGORIES.forEach(cat => {
+        const container = document.getElementById('imgPreview-' + cat);
+        if (!container) return;
+        
+        const items = container.querySelectorAll('.img-cat-preview-item');
+        items.forEach((item, index) => {
+            if (item.classList.contains('existing-img-item')) {
+                existingOrder.push(item.id.replace('existing-img-', ''));
+            }
+
+            const oldCover = item.querySelector('.cover-badge');
+            if (oldCover) oldCover.remove();
+            
+            const idxBadge = item.querySelector('.img-index-badge');
+            if (idxBadge) {
+                idxBadge.innerHTML = (item.classList.contains('existing-img-item') ? 'Saved - ' : '') + 'Image ' + (index + 1);
+            }
+
+            if (!hasCover && (cat === 'exterior' || cat === 'single_room')) {
+                item.insertAdjacentHTML('beforeend', '<span class="cover-badge" style="position:absolute; bottom:8px; left:8px; background:linear-gradient(135deg,#f6d365,#fda085); color:#3b2a00; font-size:0.65rem; font-weight:800; padding:3px 9px; border-radius:20px; z-index:10;"><i class="fas fa-star"></i> Cover Photo</span>');
+                hasCover = true;
+            }
+        });
+    });
+    
+    let orderInput = document.getElementById('existing_images_order');
+    if (!orderInput) {
+        orderInput = document.createElement('input');
+        orderInput.type = 'hidden';
+        orderInput.name = 'existing_images_order';
+        orderInput.id = 'existing_images_order';
+        const deleteContainer = document.getElementById('deletedImagesContainer');
+        if (deleteContainer) deleteContainer.appendChild(orderInput);
+    }
+    orderInput.value = existingOrder.join(',');
+}
+
+function attachDragEvents(item, cat) {
+    item.addEventListener('dragstart', function (e) {
+        item.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        const container = item.parentNode;
+        const itemsArray = Array.from(container.querySelectorAll('.img-cat-preview-item'));
+        e.dataTransfer.setData('text/plain', itemsArray.indexOf(item));
+    });
+    item.addEventListener('dragend', function () {
+        item.classList.remove('dragging');
+        document.querySelectorAll('.img-cat-preview-item.drag-over').forEach(el => el.classList.remove('drag-over'));
+    });
+    item.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', function () {
+        item.classList.remove('drag-over');
+    });
+    item.addEventListener('drop', function (e) {
+        e.preventDefault();
+        item.classList.remove('drag-over');
+
+        const container = item.parentNode;
+        const draggedItem = container.querySelector('.dragging');
+        if (!draggedItem || draggedItem === item) return;
+
+        const itemsArray = Array.from(container.querySelectorAll('.img-cat-preview-item'));
+        const fromIndex = itemsArray.indexOf(draggedItem);
+        const toIndex = itemsArray.indexOf(item);
+
+        if (fromIndex < toIndex) {
+            container.insertBefore(draggedItem, item.nextSibling);
+        } else {
+            container.insertBefore(draggedItem, item);
+        }
+
+        syncCategoryInputFromDOM(cat);
+        updateCoverPhotoAndLabels();
+    });
+}
+
+function syncCategoryInputFromDOM(cat) {
+    const container = document.getElementById('imgPreview-' + cat);
+    if (!container || !window.catFiles[cat]) return;
+    
+    const newOrderFiles = [];
+    container.querySelectorAll('.new-file-item').forEach(el => {
+        const fName = el.dataset.fileName;
+        const fileObj = window.catFiles[cat].find(f => f.name === fName);
+        if(fileObj) newOrderFiles.push(fileObj);
+    });
+    
+    window.catFiles[cat] = newOrderFiles;
+    
+    const dt = new DataTransfer();
+    window.catFiles[cat].forEach(f => dt.items.add(f));
+    const inputEl = document.getElementById('imgInput-' + cat);
+    if (inputEl) inputEl.files = dt.files;
+}
+
+window.removeExistingCatImage = function(imageId, cat, evt) {
+    if (evt) evt.stopPropagation();
+
+    const el = document.getElementById('existing-img-' + imageId);
+    const container = document.getElementById('deletedImagesContainer');
+
+    if (el) {
+        el.remove();
+        if (!window.markedDeletionsQueue.includes(imageId)) {
+            window.markedDeletionsQueue.push(imageId);
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type  = 'hidden';
+            hiddenInput.name  = 'deleted_images[]';
+            hiddenInput.value = imageId;
+            if (container) container.appendChild(hiddenInput);
+        }
+    }
+    renderAllCategories();
+    updateCoverPhotoAndLabels();
+};
+
+window.removeCatImage = function (cat, fileName, evt) {
+    if (evt) evt.stopPropagation();
+    window.catFiles[cat] = window.catFiles[cat].filter(f => f.name !== fileName);
+    syncCategoryInput(cat);
+    renderCategory(cat);
+    renderAllCategories();
+    updateCoverPhotoAndLabels();
+};
+
+function renderAllCategories() {
+    let grandTotal = 0;
+
+    IMG_CATEGORIES.forEach(cat => {
+        const existingCount = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
+        const newCount = (window.catFiles && window.catFiles[cat]) ? window.catFiles[cat].length : 0;
+        
+        const catTotal = existingCount + newCount;
+        grandTotal += catTotal;
+
+        const countEl = document.getElementById('count-' + cat);
+        if (countEl) countEl.innerText = catTotal;
+
+        const tab = document.querySelector(`.img-cat-tab[data-cat="${cat}"]`);
+        if (tab) tab.classList.toggle('has-images', catTotal > 0);
+    });
+
+    const totalCountEl = document.getElementById('imgTotalCount');
+    if (totalCountEl) totalCountEl.innerText = grandTotal;
+
+    const notice = document.getElementById('imgMinNotice');
+    if (notice) {
+        if (grandTotal > 0) {
+            notice.className = 'min-ok';
+            notice.innerHTML = `<i class="fas fa-check-circle"></i> Great! ${grandTotal} images saved/selected.`;
+        } else {
+            notice.className = 'min-ok';
+            notice.innerHTML = `<i class="fas fa-info-circle"></i> Images are optional but recommended`;
+        }
+    }
+    setCheck('cl-photos', grandTotal > 0);
+}
+
+function handleCatFiles(cat, files) {
+    let incoming = Array.from(files).filter(f => f.type.startsWith('image/'));
+    const limit = IMG_CATEGORY_LIMITS[cat] || 6;
+    const existingCount = document.querySelectorAll(`#imgPreview-${cat} .existing-img-item`).length;
+
+    if (existingCount + window.catFiles[cat].length + incoming.length > limit) {
+        Swal.fire('Category Limit Reached', `Maximum ${limit} images allowed for this category.`, 'warning');
+        incoming = incoming.slice(0, Math.max(0, limit - (existingCount + window.catFiles[cat].length)));
+    }
+    
+    let globalExisting = document.querySelectorAll('.existing-img-item').length;
+    if (globalExisting + totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+        Swal.fire('Total Limit Reached', `Maximum ${IMG_TOTAL_LIMIT} images allowed across all categories.`, 'warning');
+        incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - (globalExisting + totalImageCount())));
+    }
+
+    window.catFiles[cat] = window.catFiles[cat].concat(incoming);
+    syncCategoryInput(cat);
+    renderCategory(cat);
+    renderAllCategories();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Attach drag events to already rendered server images
+    document.querySelectorAll('.existing-img-item').forEach(el => {
+        el.draggable = true;
+        attachDragEvents(el, el.dataset.cat);
+    });
+
+    document.querySelectorAll('.img-cat-tab').forEach(tab => {
+        tab.addEventListener('click', function () {
+            const cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.img-cat-panel').forEach(p => p.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelector(`.img-cat-panel[data-cat-panel="${cat}"]`)?.classList.add('active');
+        });
+    });
+
+   
+    IMG_CATEGORIES.forEach(cat => {
+        const zone = document.querySelector(`.img-cat-upload-area[data-cat="${cat}"]`);
+        const input = document.getElementById('imgInput-' + cat);
+        if (!zone || !input) return;
+        zone.addEventListener('click', () => input.click());
+        input.addEventListener('change', e => handleCatFiles(cat, e.target.files));
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+        zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); handleCatFiles(cat, e.dataTransfer.files); });
+    });
+
+   renderAllCategories();
+    updateCoverPhotoAndLabels();
+});
+
+  
+
+ function setCheck(id, ok) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.className = 'cl-item' + (ok ? ' done' : '');
+    const icon = el.querySelector('i');
+    if (icon) icon.className = 'fas ' + (ok ? 'fa-check-circle' : 'fa-circle');
+  }
+
+  function updatePgChecklist() {
+    setCheck('cl-pgname', !!(document.getElementById('property_no')?.value && document.getElementById('city')?.value));
+    setCheck('cl-location', !!(document.getElementById('locality')?.value && document.getElementById('address')?.value));
+    setCheck('cl-beds', !!(document.getElementById('room_type')?.value && document.getElementById('room_beds')?.value));
+    setCheck('cl-rooms', !!(document.getElementById('room_rent')?.value));
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('input, select, textarea').forEach(function (el) {
+      el.addEventListener('input', updatePgChecklist);
+      el.addEventListener('change', updatePgChecklist);
+    });
+    updatePgChecklist();
+  });
+
+  // ---------- Video option engine (identical to add form's 3-option system) ----------
+  document.addEventListener('DOMContentLoaded', function () {
+    var uploadRadio = document.getElementById('video_upload');
+    var autoRadio = document.getElementById('video_auto');
+    var rmRadio = document.getElementById('video_rm');
+    var uploadWrapper = document.getElementById('videoUploadWrapper');
+    var autoWrapper = document.getElementById('videoAutoWrapper');
+    var rmWrapper = document.getElementById('videoRMWrapper');
+    var videoInput = document.getElementById('videoInput');
+    var videoArea = document.getElementById('videoUploadArea');
+    var videoPreview = document.getElementById('videoPreview');
+    var videoSourceField = document.getElementById('video_source');
+    if (!uploadRadio || !autoRadio || !rmRadio) return;
+
+    var slideshowInterval = null;
+    var canvas = document.getElementById('slideshowCanvas');
+    var ctx = canvas ? canvas.getContext('2d') : null;
+
+ 
+    function getUploadedImages(callback) {
+      var sources = [];
+
+      // 1. Newly picked files (not yet saved to DB)
+      Object.keys(catFiles).forEach(cat => catFiles[cat].forEach(file => sources.push({ type: 'file', data: file })));
+
+      // 2. Existing saved images already rendered in each category panel
+      //    (only the ones still visible — removed ones are hidden via display:none)
+      document.querySelectorAll('.img-cat-preview-item img').forEach(imgEl => {
+        var tile = imgEl.closest('.img-cat-preview-item');
+        if (tile && tile.style.display === 'none') return; // skip images marked for removal
+        if (imgEl.src) sources.push({ type: 'url', data: imgEl.src });
+      });
+
+      if (sources.length === 0) { callback([]); return; }
+
+      var loaded = [], processed = 0;
+      sources.forEach(function (src) {
+        var img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = () => { loaded.push(img); processed++; if (processed === sources.length) callback(loaded); };
+        img.onerror = () => { processed++; if (processed === sources.length) callback(loaded); };
+        img.src = src.type === 'file' ? URL.createObjectURL(src.data) : src.data;
+      });
+    }
+
+    function startAutoSlideshowPreview() {
+      stopAutoSlideshowPreview();
+      var container = document.getElementById('autoSlideshowPreviewContainer');
+      var warning = document.getElementById('autoSlideshowWarning');
+      getUploadedImages(function (images) {
+        if (images.length < 3) {
+          if (container) container.style.display = 'none';
+          if (warning) warning.style.display = 'block';
+          return;
+        }
+        if (warning) warning.style.display = 'none';
+        if (container) container.style.display = 'block';
+        runCanvasAnimation(images);
+      });
+    }
+
+   
+
+    function runCanvasAnimation(images) {
+      if (!ctx || !canvas) return;
+      var durationPerSlide = 3500, fadeDuration = 800, startTime = null;
+      function animate(ts) {
+        if (!startTime) startTime = ts;
+        var elapsed = ts - startTime;
+        var progress = (elapsed % durationPerSlide) / durationPerSlide;
+        var index = Math.floor(elapsed / durationPerSlide) % images.length;
+        var nextIndex = (index + 1) % images.length;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        var slideTime = elapsed % durationPerSlide;
+        var isFading = slideTime > (durationPerSlide - fadeDuration);
+        var fadeOpacity = isFading ? (slideTime - (durationPerSlide - fadeDuration)) / fadeDuration : 0;
+        drawFrame(images[index], progress, 1.0);
+        if (isFading) drawFrame(images[nextIndex], 0, fadeOpacity);
+        slideshowInterval = requestAnimationFrame(animate);
+      }
+      function drawFrame(img, progress, opacity) {
+        ctx.save(); ctx.globalAlpha = opacity;
+        ctx.fillStyle = "#0f172a"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        var scale = 1.0 + (progress * 0.08);
+        var ratio = Math.max(canvas.width / img.width, canvas.height / img.height) * scale;
+        var shiftX = (canvas.width - img.width * ratio) / 2 + (progress - 0.5) * (canvas.width * 0.04);
+        var shiftY = (canvas.height - img.height * ratio) / 2;
+        ctx.drawImage(img, 0, 0, img.width, img.height, shiftX, shiftY, img.width * ratio, img.height * ratio);
+        ctx.restore();
+      }
+      stopAutoSlideshowPreview();
+      slideshowInterval = requestAnimationFrame(animate);
+    }
+    function stopAutoSlideshowPreview() { if (slideshowInterval) { cancelAnimationFrame(slideshowInterval); slideshowInterval = null; } }
+
+
+    function removeCurrentVideo(blockId) {
+  blockId = blockId || 'currentVideoBlock';
+  var checkbox = document.getElementById('delete_current_video');
+  if (checkbox) checkbox.checked = true;
+  var block = document.getElementById(blockId);
+  if (block) block.style.display = 'none';
+}
+    function toggleVideoOption() {
+      uploadWrapper.style.display = uploadRadio.checked ? 'block' : 'none';
+      autoWrapper.style.display = autoRadio.checked ? 'block' : 'none';
+      rmWrapper.style.display = rmRadio.checked ? 'block' : 'none';
+      videoSourceField.value = uploadRadio.checked ? 'upload' : (autoRadio.checked ? 'auto' : 'rm_assisted');
+      if (autoRadio.checked) startAutoSlideshowPreview(); else stopAutoSlideshowPreview();
+    }
+    uploadRadio.addEventListener('change', toggleVideoOption);
+    autoRadio.addEventListener('change', toggleVideoOption);
+    rmRadio.addEventListener('change', toggleVideoOption);
+    document.addEventListener('change', e => { if (e.target.type === 'file' && e.target.id !== 'videoInput' && autoRadio.checked) setTimeout(startAutoSlideshowPreview, 300); });
+
+   
+    if (videoArea) videoArea.addEventListener('click', () => videoInput.click());
+    if (videoInput) videoInput.addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+
+      var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
+      var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
+      // TODO: replace with your actual support WhatsApp number
+      var companyWhatsAppNumber = "917057205423";
+      var rawMessage = "Hello Team,\n\nI am trying to upload a video for my PG / Co-living listing, but the file size exceeds the 50MB limit.\n\n" +
+                       "📌 *Property Details:*\n" +
+                       "• *Title:* " + propTitle + "\n" +
+                       "• *Listed By:* " + listedByName + "\n" +
+                       "• *Video File Name:* " + file.name + "\n" +
+                       "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
+                       "Please assist me in publishing this video for my listing.";
+
+      var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
+
+      if (file.size > 50 * 1024 * 1024) {
+        videoInput.value = '';
+
+        if (videoPreview) {
+          videoPreview.pause();
+          videoPreview.removeAttribute('src');
+          videoPreview.load();
+          videoPreview.style.display = 'none';
+        }
+
+        Swal.fire({
+          icon: 'warning',
+          title: 'Video File Too Large',
+          text: 'This video exceeds the maximum 50MB allowed size. Please share the video with our Relationship Manager.',
+          showCancelButton: true,
+          confirmButtonColor: '#25D366',
+          cancelButtonColor: '#6c757d',
+          confirmButtonText: '<i class="fab fa-whatsapp me-1"></i> Share',
+          cancelButtonText: 'Okay',
+          allowOutsideClick: false
+        }).then(function (result) {
+          if (result.isConfirmed) {
+            window.open(whatsappUrl, '_blank');
+            rmRadio.checked = true;
+            toggleVideoOption();
+            var linkField = document.getElementById('property_video_link');
+            if (linkField) linkField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        });
+        return;
+      }
+
+      if (videoPreview) {
+        videoPreview.src = URL.createObjectURL(file);
+        videoPreview.style.display = 'block';
+        videoPreview.load();
+        videoPreview.play();
+      }
+    });
+
+    function renderVideoPreview() {
+      var linkInput = document.getElementById('property_video_link');
+      var frame = document.getElementById('rmVideoFrame');
+      if (!linkInput || !frame) return;
+      var url = linkInput.value.trim();
+      if (!url) { frame.style.display = 'none'; return; }
+      frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:350px; border:0; border-radius:8px;" allowfullscreen></iframe>';
+      var iframe = document.getElementById('rmVideoEmbed');
+      var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+      iframe.src = yt ? ('https://www.youtube.com/embed/' + yt[1]) : url;
+      frame.style.display = 'block';
+    }
+    document.getElementById('property_video_link')?.addEventListener('input', renderVideoPreview);
+    document.getElementById('previewRMLinkBtn')?.addEventListener('click', renderVideoPreview);
+
+    toggleVideoOption();
+  });
+
+
+  // ---------- Custom Search Select Functionality ----------
+  document.addEventListener('click', function (e) {
+    const searchSelect = document.getElementById('assignedToSearchSelect');
+    const control = document.getElementById('assignedToControl');
+    const panel = document.getElementById('assignedToPanel');
+
+    if (!searchSelect) return;
+
+    if (control && control.contains(e.target)) {
+      searchSelect.classList.toggle('open');
+      if (searchSelect.classList.contains('open')) {
+        document.getElementById('searchTeamMember')?.focus();
+      }
+    } else if (!searchSelect.contains(e.target)) {
+      searchSelect.classList.remove('open');
+    }
+  });
+
+  // Filter options when typing in the search box
+  document.getElementById('searchTeamMember')?.addEventListener('input', function () {
+    const query = this.value.toLowerCase().trim();
+    const options = document.querySelectorAll('.search-select-option');
+    let hasMatches = false;
+
+    options.forEach(opt => {
+      const searchData = opt.getAttribute('data-search') || '';
+      if (searchData.indexOf(query) !== -1) {
+        opt.style.display = 'block';
+        hasMatches = true;
+      } else {
+        opt.style.display = 'none';
+      }
+    });
+
+    const noResults = document.getElementById('assignedToNoResults');
+    if (noResults) {
+      noResults.style.display = hasMatches ? 'none' : 'block';
+    }
+  });
+
+  // Select a team member option
+  
+
+  // Select a team member option
+  document.querySelectorAll('.search-select-option').forEach(opt => {
+    opt.addEventListener('click', function () {
+      const val = this.getAttribute('data-value');
+      const name = this.getAttribute('data-name');
+      const role = this.getAttribute('data-role');
+      const phone = this.getAttribute('data-phone');
+      const uid = this.getAttribute('data-uid');
+
+      // Update label view
+      document.getElementById('assignedToValueLabel').textContent = this.textContent.trim();
+      document.getElementById('assignedToSearchSelect').classList.remove('open');
+
+      // Sync with hidden select element for form submission
+      const hiddenSelect = document.getElementById('assigned_to');
+      if (hiddenSelect) {
+        hiddenSelect.value = val;
+        hiddenSelect.dispatchEvent(new Event('change'));
+      }
+
+      // Fill user data fields dynamically
+      if (document.getElementById('listed_by_id')) document.getElementById('listed_by_id').value = uid;
+      if (document.getElementById('listed_by_name')) document.getElementById('listed_by_name').value = name;
+      if (document.getElementById('listed_by_contact')) document.getElementById('listed_by_contact').value = phone;
+      if (document.getElementById('listed_by_role')) document.getElementById('listed_by_role').value = role;
+      
+      updateBrokerageLabel(role); // Added UI update
+    });
+  });
+  // ---------- Submit (fetch/JSON, same pattern as add form) ----------
+
+
+  // ---------- Change Tracking Engine (same pattern as commercial edit form) ----------
+  let pgInitialFormValues = {};
+
+  function capturePgInitialValues() {
+    const editForm = document.getElementById('pgEditForm');
+    if (!editForm) return;
+    const inputs = editForm.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      if (input.name && input.type !== 'file' && input.type !== 'hidden' && !input.readOnly && !input.disabled) {
+        if (input.type === 'checkbox' || input.type === 'radio') {
+          if (input.checked) {
+            if (!pgInitialFormValues[input.name]) pgInitialFormValues[input.name] = [];
+            pgInitialFormValues[input.name].push(input.value);
+          }
+        } else {
+          pgInitialFormValues[input.name] = input.value;
+        }
+      }
+    });
+    const checkRadios = editForm.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+    checkRadios.forEach(input => {
+      if (input.name && !pgInitialFormValues[input.name]) pgInitialFormValues[input.name] = [];
+    });
+  }
+
+  function getPgChangedFieldsHtml() {
+    let currentValues = {};
+    let changedFieldsHtml = [];
+    const editForm = document.getElementById('pgEditForm');
+    if (!editForm) return [];
+
+    const inputs = editForm.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      if (input.name && input.type !== 'file' && input.type !== 'hidden' && !input.readOnly && !input.disabled) {
+        if (input.type === 'checkbox' || input.type === 'radio') {
+          if (input.checked) {
+            if (!currentValues[input.name]) currentValues[input.name] = [];
+            currentValues[input.name].push(input.value);
+          }
+        } else {
+          currentValues[input.name] = input.value;
+        }
+      }
+    });
+    const checkRadios = editForm.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+    checkRadios.forEach(input => {
+      if (input.name && !currentValues[input.name]) currentValues[input.name] = [];
+    });
+
+    let allKeys = new Set([...Object.keys(pgInitialFormValues), ...Object.keys(currentValues)]);
+
+    allKeys.forEach(key => {
+      let initial = pgInitialFormValues[key];
+      let current = currentValues[key];
+      let displayKey = key.replace(/\[\]/g, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+      if (Array.isArray(initial) || Array.isArray(current)) {
+        let initArr = initial || [];
+        let currArr = current || [];
+        if (initArr.sort().join(',') !== currArr.sort().join(',')) {
+          changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#f39c12;"><i class="fas fa-edit"></i> <b>${displayKey}</b>:</span> Modified to [${currArr.length > 0 ? currArr.join(', ') : 'None'}]</li>`);
+        }
+      } else {
+        initial = initial || "";
+        current = current || "";
+        if (initial !== current) {
+          if (initial === "" && current !== "") {
+            changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#11998e;"><i class="fas fa-plus-circle"></i> <b>${displayKey}</b>:</span> Newly added as <i>"${current}"</i></li>`);
+          } else if (initial !== "" && current === "") {
+            changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#e74c3c;"><i class="fas fa-minus-circle"></i> <b>${displayKey}</b>:</span> Removed (was <i>"${initial}"</i>)</li>`);
+          } else {
+            changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#f39c12;"><i class="fas fa-edit"></i> <b>${displayKey}</b>:</span> Modified from <i>"${initial}"</i> to <i>"${current}"</i></li>`);
+          }
+        }
+      }
+    });
+
+    return changedFieldsHtml;
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    capturePgInitialValues();
+  });
+
+  // ---------- Submit (fetch/JSON, with change-tracking confirmation) ----------
+  document.getElementById('pgEditForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    let changedFields = getPgChangedFieldsHtml();
+    let alertHtml = `<div style="font-size: 1rem; color: #4a5568; margin-bottom: 15px;">Update this PG / Co-living listing with the changes made?</div>`;
+
+    if (changedFields.length > 0) {
+      alertHtml += `<div style="text-align: left; max-height: 250px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 0.9rem;">
+                      <strong style="color: #2d3748; display: block; margin-bottom: 10px;"><i class="fas fa-clipboard-list"></i> Modifications Detected:</strong>
+                      <ul style="margin: 0; padding-left: 20px; list-style-type: none;">
+                          ${changedFields.join('')}
+                      </ul>
+                    </div>`;
+    } else {
+      alertHtml += `<div style="background: #f8f9fa; padding: 15px; border-radius: 12px; color: #718096; font-size: 0.95rem;">
+                      <i class="fas fa-info-circle"></i> No modifications detected.
+                    </div>`;
+    }
+
+    Swal.fire({
+      title: 'Save Changes?',
+      html: alertHtml,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#667eea',
+      cancelButtonColor: '#cbd5e0',
+      confirmButtonText: 'Yes, Save',
+      width: '600px'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire({ title: 'Saving changes...', allowOutsideClick: false, allowEscapeKey: false, didOpen: () => Swal.showLoading() });
+
+        IMG_CATEGORIES.forEach(cat => syncCategoryInput(cat));
+        var formData = new FormData(this);
+        var form = this;
+
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.status === 'success') {
+              Swal.fire({ icon: 'success', title: 'Listing Updated!', text: data.message, confirmButtonColor: '#10b981' })
+                .then(() => { window.location.href = data.redirect_url || "{% url 'pg_list' %}"; });
+            } else {
+              Swal.fire('Update Failed', data.message, 'error');
+            }
+          })
+          .catch(() => Swal.fire('Error', 'Server did not respond as expected.', 'error'));
+      }
+    });
+  });
+
+  window.addEventListener('DOMContentLoaded', syncPillInputsValue);
+</script>
+
+
+<script>
+// ============================================================
+// AUTO MOVE-IN COST CALCULATOR (PG / CO-LIVING)
+// ============================================================
+function calculatePgMoveInCost() {
+    // 1. Base Rent Per Occupant
+    let monthlyRent = parseFloat(document.getElementById("room_rent")?.value) || 0;
+
+    // 2. Advance Rent Calculation (PG uses numeric values: "0".."11" or "fixed")
+   
+
+
+
+    // 3. Refundable Security Deposit Calculation (same numeric pattern)
+   // 2. Advance Rent Calculation
+let advance = 0;
+let advanceType = document.getElementById("advance_rent_month")?.value || "";
+
+if (advanceType === "Fixed Amount") {
+    advance = parseFloat(document.getElementById("advance_rent_amount")?.value) || 0;
+} else if (advanceType && advanceType !== "No Advance") {
+    let m = advanceType.match(/(\d+)/);
+    advance = monthlyRent * (m ? parseFloat(m[1]) : 0);
+}
+
+// 3. Refundable Security Deposit Calculation
+let deposit = 0;
+let depositType = document.getElementById("security_deposit_type")?.value || "";
+
+if (depositType === "Fixed Amount") {
+    deposit = parseFloat(document.getElementById("security_deposit_amount")?.value) || 0;
+} else if (depositType && depositType !== "No Deposit") {
+    let m = depositType.match(/(\d+)/);
+    deposit = monthlyRent * (m ? parseFloat(m[1]) : 0);
+}
+
+    // 4. Brokerage Calculation
+    let brokerage = 0;
+    let brokerageType = document.getElementById("brokeragePercentage")?.value || "";
+
+    switch (brokerageType) {
+        case "15 Days Rent":
+            brokerage = monthlyRent / 2;
+            break;
+        case "1 Month Rent":
+            brokerage = monthlyRent;
+            break;
+        case "Fixed Amount":
+            brokerage = parseFloat(document.querySelector("[name='manual_brokerage']")?.value) || 0;
+            break;
+        case "No Brokerage":
+        case "Negotiable":
+        default:
+            brokerage = 0;
+            break;
+    }
+
+    // 5. Maintenance Charges Calculation
+    let maintenance = 0;
+    let maintRadio = document.querySelector("input[name='maintenance_type']:checked")?.value;
+
+    if (maintRadio === "Extra") {
+        maintenance = parseFloat(document.querySelector("[name='maintenance_amount']")?.value) || 0;
+    }
+
+    // 6. Calculate Grand Total
+    let totalMoveInCost = advance + deposit + brokerage + maintenance;
+
+    // 7. Update Output Field
+    let totalInput = document.getElementById("total_move_in_cost") || document.querySelector("[name='total_move_in_cost']");
+    if (totalInput) {
+        totalInput.value = Math.round(totalMoveInCost);
+    }
+}
+
+function initPgCalculator() {
+    const eventTargets = [
+        "#room_rent",
+        "#advance_rent_month",
+        "#advance_rent_amount",
+        "#security_deposit_type",
+        "#security_deposit_amount",
+        "#brokeragePercentage",
+        "[name='manual_brokerage']",
+        "[name='maintenance_amount']",
+        "input[name='maintenance_type']"
+    ];
+
+    document.querySelectorAll(eventTargets.join(",")).forEach(function (element) {
+        if (!element) return;
+        element.addEventListener("input", calculatePgMoveInCost);
+        element.addEventListener("change", calculatePgMoveInCost);
+    });
+
+    // Run once initially — populates the field on edit-page load with existing data
+    calculatePgMoveInCost();
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initPgCalculator);
+} else {
+    initPgCalculator();
+}
+</script>

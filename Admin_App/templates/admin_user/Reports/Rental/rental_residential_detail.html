@@ -627,6 +627,7 @@
                     <span class="badge-duplicate"><i class="fas fa-clone"></i> Duplicate Flagged ({{ property.duplicate_count }} linked)</span>
                     {% endif %}
                 </div>
+                 
                 <a href="{% url 'residential_list' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:1.100rem; font-weight:600;">
                     <i class="fas fa-arrow-left"></i> Back to Listing
                 </a>
@@ -685,102 +686,141 @@
     </div>
 
  
+
     <div style="background: #111827;">
-<div class="container-fluid px-0">
+    <div class="container-fluid px-0">
 
-{% if video_obj %}
-<div style="background:#000; position:relative;">
-    <video controls style="width:100%; max-height:420px; display:block; background:#000;"
-           poster="{% if images %}{{ images.0.image.url }}{% endif %}">
-        <source src="{{ video_obj.video.url }}" type="video/mp4">
-    </video>
-    <span style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,.7); color:#fff; font-size:.75rem; font-weight:600; padding:5px 12px; border-radius:20px;">
-        <i class="fas {% if video_obj.source == 'auto' %}fa-magic{% else %}fa-video{% endif %}"></i>
-        {% if video_obj.source == 'auto' %}Auto-Generated Walkthrough{% else %}Property Video{% endif %}
-    </span>
-</div>
-{% endif %}
+        <!-- 1. VIDEO PREVIEW SECTION (RM Assisted Link / Manual Upload / Auto Video File) -->
+        {% if selected_video %}
+            {% if selected_video.source == 'rm_assisted' and selected_video.video_url %}
+            <div style="background:#000; position:relative; border-bottom: 2px solid #222; text-align:center; padding: 15px 20px;">
+                {% if selected_video.youtube_thumbnail %}
+                    <a href="{{ selected_video.video_url }}" target="_blank" style="display:inline-block; position:relative; max-width: 100%;">
+                        <img src="{{ selected_video.youtube_thumbnail }}" alt="RM Video Thumbnail" style="width:100%; max-height:280px; object-fit:cover; border-radius: 8px;">
+                        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); border-radius: 8px;">
+                            <i class="fab fa-youtube text-danger" style="font-size: 54px;"></i>
+                        </div>
+                    </a>
+                {% else %}
+                    <div class="p-3 text-white" style="max-width: 600px; margin: 0 auto;">
+                        <div class="p-3 rounded" style="background: #1f2937; border: 1px solid #374151;">
+                            <i class="fas fa-video fa-2x text-primary mb-2"></i>
+                            <h6 class="fw-bold mb-1">RM Assisted Video Link</h6>
+                            <p class="text-muted small text-truncate mb-2">{{ selected_video.video_url }}</p>
+                            <a href="{{ selected_video.video_url }}" target="_blank" class="btn btn-sm btn-primary px-3 py-1 fw-bold" style="font-size: 0.75rem;">
+                                <i class="fas fa-external-link-alt me-1"></i> Open Video Link
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+                <span style="position:absolute; top:20px; right:25px; background:rgba(0,0,0,.75); color:#fff; font-size:0.7rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.2);">
+                    <i class="fas fa-link me-1"></i> RM Assisted Link (Active)
+                </span>
+            </div>
 
-<div class="prop-gallery-grid">
+            {% elif selected_video.video %}
+            <div style="background:#000; position:relative; border-bottom: 2px solid #222; text-align: center; padding: 10px 0;">
+                <video controls style="width:100%; max-height:300px; display:block; margin: 0 auto; background:#000;"
+                       poster="{% if images %}{{ images.0.image.url }}{% endif %}">
+                    <source src="{{ selected_video.video.url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <span style="position:absolute; top:18px; right:20px; background:rgba(0,0,0,.75); color:#fff; font-size:0.7rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.2);">
+                    {% if selected_video.source == 'auto' %}
+                        <i class="fas fa-magic me-1"></i> Auto-Generated Walkthrough
+                    {% else %}
+                        <i class="fas fa-video me-1"></i> Property Video Walkthrough
+                    {% endif %}
+                </span>
+            </div>
+            {% endif %}
+        {% endif %}
 
-    <div class="prop-gallery-main" id="galMain">
+        <!-- 2. PROP GALLERY GRID WITH PROPER ARRAY SLICE FALLBACKS FOR SIDE THUMBNAILS -->
+      <!-- 2. PROP GALLERY GRID (Direct Sequential Thumbnails: Index 1 and Index 2) -->
+        <div class="prop-gallery-grid">
+            <!-- Main Large Image / Slideshow Viewer -->
+            <div class="prop-gallery-main" id="galMain">
+                {% if images %}
+                    {% for img in images %}
+                    <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
+                        <img src="{{ img.image.url }}" alt="{{ img.category|title }} view {{ forloop.counter }}">
+                    </div>
+                    {% endfor %}
+                    <div class="gallery-hud">
+                        <div class="gallery-hud-left">
+                            <button class="btn-play-pause" id="playPauseBtn" type="button"><i class="fas fa-pause"></i></button>
+                            <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
+                        </div>
+                        <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> AUTO SLIDESHOW ({{ images|length }} IMAGES)</span>
+                    </div>
+                {% else %}
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,#f8fafc,#eef2f7,#e2e8f0);">
+                        <div class="text-center">
+                            <i class="fas fa-building" style="font-size:60px; color:#2563eb;"></i>
+                            <h2 style="margin-top:22px; font-weight:700; color:#1e293b;">EstateFlow</h2>
+                            <p style="color:#64748b; font-size:15px;">Property Images Not Available</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Top Thumbnail Slot (Always Image #2) -->
+            <div class="prop-gallery-thumb" onclick="setSlide(1)" id="galThumb1">
+                {% if images|length > 1 %}
+                    <img src="{{ images.1.image.url }}" alt="Thumbnail 2">
+                {% else %}
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background:#1e2733;">
+                        <i class="fas fa-building text-primary"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Bottom Thumbnail Slot (Always Image #3 + More Photos Overlay) -->
+            <div class="prop-gallery-thumb" onclick="setSlide(2)" id="galThumb2">
+                {% if images|length > 2 %}
+                    <img src="{{ images.2.image.url }}" alt="Thumbnail 3">
+                    {% if images|length > 3 %}
+                    <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoLightboxStrip">
+                        <div class="text-center"><span>+{{ images|length|add:"-3" }}</span><small>More Photos</small></div>
+                    </div>
+                    {% endif %}
+                {% elif images|length > 1 %}
+                    <img src="{{ images.1.image.url }}" alt="Thumbnail 2">
+                {% else %}
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background:#1e2733;">
+                        <i class="fas fa-building text-primary"></i>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Category Filter Tabs Bar -->
+        {% if grouped_images %}
+        <div style="background:#0d1117; padding:10px 16px;">
+            <div class="d-flex flex-wrap gap-2">
+               <span class="cat-filter-tab active" data-filter="all" style="cursor:pointer; padding:5px 13px; border-radius:20px; background:#2563eb; color:#fff; font-size:.72rem; font-weight:600;">All ({{ images|length }})</span>
+                {% for cat_key, cat_data in grouped_images.items %}
+                <span class="cat-filter-tab" data-filter="{{ cat_key }}" style="cursor:pointer; padding:5px 13px; border-radius:20px; background:#1f2937; color:#cbd5e0; font-size:.72rem; font-weight:600;">{{ cat_data.label }} ({{ cat_data.images|length }})</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Bottom Thumbnail Strip Bar -->
         {% if images %}
-            {% for img in images %}
-            <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
-                <img src="{{ img.image.url }}" alt="{{ img.category|title }} view {{ forloop.counter }}">
-            </div>
-            {% endfor %}
-            <div class="gallery-hud">
-                <div class="gallery-hud-left">
-                    <button class="btn-play-pause" id="playPauseBtn"><i class="fas fa-pause"></i></button>
-                    <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
+        <div style="background:#0d1117; padding:8px 16px 12px;">
+            <div class="prop-image-strip" id="imageStrip">
+                {% for img in images %}
+                <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}" data-cat="{{ img.category }}" data-slide="{{ forloop.counter0 }}" onclick="setSlide({{ forloop.counter0 }})">
+                    <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
                 </div>
-                <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> AI Video Walkthrough</span>
+                {% endfor %}
             </div>
-        {% else %}
-            <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,#f8fafc,#eef2f7,#e2e8f0);">
-                <div class="text-center">
-                    <i class="fas fa-building" style="font-size:60px; color:#2563eb;"></i>
-                    <h2 style="margin-top:22px; font-weight:700; color:#1e293b;">EstateFlow</h2>
-                    <p style="color:#64748b; font-size:15px;">Property Images Not Available</p>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-
- 
-
-    <div class="prop-gallery-thumb" onclick="setSlide({{ thumb1_idx|default:1 }})" id="galThumb1">
-    {% if thumb1_image %}
-        <img src="{{ thumb1_image.image.url }}" alt="{{ thumb1_image.category|title }}">
-    {% else %}
-        <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,#f8fafc,#eef2f7,#e2e8f0);">
-            <i class="fas fa-building" style="font-size:20px; color:#2563eb;"></i>
-        </div>
-    {% endif %}
-</div>
-
-
-<div class="prop-gallery-thumb" onclick="setSlide({{ thumb2_idx|default:2 }})" id="galThumb2">
-    {% if thumb2_image %}
-        <img src="{{ thumb2_image.image.url }}" alt="{{ thumb2_image.category|title }}">
-        {% if images|length > 3 %}
-        <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoLightboxStrip">
-            <div class="text-center"><span>+{{ images|length|add:"-3" }}</span><small>More Photos</small></div>
         </div>
         {% endif %}
-    {% else %}
-        <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,#f8fafc,#eef2f7,#e2e8f0);">
-            <i class="fas fa-building" style="font-size:20px; color:#2563eb;"></i>
-        </div>
-    {% endif %}
-</div>
-</div>
 
-{% if grouped_images %}
-<div style="background:#0d1117; padding:10px 16px;">
-    <div class="d-flex flex-wrap gap-2">
-       <span class="cat-filter-tab active" data-filter="all" style="cursor:pointer; padding:5px 13px; border-radius:20px; background:#2563eb; color:#fff; font-size:.72rem; font-weight:600;">All ({{ images|length }})</span>
-        {% for cat_key, cat_data in grouped_images.items %}
-        <span class="cat-filter-tab" data-filter="{{ cat_key }}" style="cursor:pointer; padding:5px 13px; border-radius:20px; background:#1f2937; color:#cbd5e0; font-size:.72rem; font-weight:600;">{{ cat_data.label }} ({{ cat_data.images|length }})</span>
-        {% endfor %}
     </div>
-</div>
-{% endif %}
-
-{% if images %}
-<div style="background:#0d1117;padding:8px 16px 12px;">
-    <div class="prop-image-strip" id="imageStrip">
-        {% for img in images %}
-        <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}" data-cat="{{ img.category }}" data-slide="{{ forloop.counter0 }}" onclick="setSlide({{ forloop.counter0 }})">
-            <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
-        </div>
-        {% endfor %}
-    </div>
-</div>
-{% endif %}
-
-</div>
 </div>
 
     <!-- STICKY NAV -->
@@ -1052,12 +1092,20 @@
                             </div>
 
                            
-                            <!-- Monthly Maintenance -->
-{% if property.maintenance_type == 'Extra' %}
+                       <!-- Monthly Maintenance -->
+{% if property.monthy_maintenance_amount or property.maintenance_type %}
 <div class="spec-item spec-full">
     <div class="spec-label">Monthly Maintenance Amount</div>
     <div class="spec-value">
-        ₹{{ property.monthy_maintenance_amount|default:"0"|intcomma }}
+        {% if property.monthy_maintenance_amount and property.monthy_maintenance_amount != "0" %}
+            <span style="font-weight:700; color:#1e293b;">₹{{ property.monthy_maintenance_amount|intcomma }}/ mo</span>
+        {% else %}
+            <span style="font-weight:700; color:#1e293b;">—</span>
+        {% endif %}
+        
+        <span style="font-size:0.8rem; color:var(--muted); font-weight:500; margin-left:4px;">
+            ({{ property.maintenance_type|default:"Included" }})
+        </span>
     </div>
 </div>
 {% endif %}
@@ -1455,27 +1503,34 @@
 </div>
 
 
+<!-- LIGHTBOX MODAL WITH CATEGORY TABS -->
 <div class="modal fade" id="photoLightboxStrip" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content" style="background:#0d1117; border:none;">
             <div class="modal-header" style="border-color:#222;">
-                <h5 style="color:#fff;"><i class="fas fa-images"></i> All Photos</h5>
-                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <h5 style="color:#fff;"><i class="fas fa-images"></i> Categorized Property Photos</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 {% if grouped_images %}
-                <div class="d-flex flex-wrap gap-2 mb-3">
-                    <span class="modal-cat-tab active" data-filter="all" style="cursor:pointer; padding:6px 14px; border-radius:20px; background:#2563eb; color:#fff; font-size:.8rem; font-weight:600;">All ({{ images|length }})</span>
+                <div class="d-flex flex-wrap gap-2 mb-4" id="lightboxCategoryFilters">
+                    <button type="button" class="btn modal-cat-tab active-cat-btn" data-filter="all" style="background:#2563eb; color:#fff; font-size:.8rem; font-weight:600; border-radius:20px; padding:6px 14px;">All Photos ({{ images|length }})</button>
                     {% for cat_key, cat_data in grouped_images.items %}
-                    <span class="modal-cat-tab" data-filter="{{ cat_key }}" style="cursor:pointer; padding:6px 14px; border-radius:20px; background:#1f2937; color:#cbd5e0; font-size:.8rem; font-weight:600;">{{ cat_data.label }} ({{ cat_data.images|length }})</span>
+                    <button type="button" class="btn modal-cat-tab" data-filter="{{ cat_key }}" style="background:#1f2937; color:#cbd5e0; font-size:.8rem; font-weight:600; border-radius:20px; padding:6px 14px;">{{ cat_data.label }} ({{ cat_data.images|length }})</button>
                     {% endfor %}
                 </div>
                 {% endif %}
-                <div class="row g-2">
+                
+                <div class="row g-2" id="lightboxImagesGrid">
                     {% for img in images %}
                     <div class="col-4 col-md-3 modal-thumb-item" data-cat="{{ img.category }}">
-                        <img src="{{ img.image.url }}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; cursor:pointer;"
-                             onclick="setSlide({{ forloop.counter0 }}); var m = bootstrap.Modal.getInstance(document.getElementById('photoLightboxStrip')); if(m) m.hide();">
+                        <div style="position:relative;">
+                            <img src="{{ img.image.url }}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; cursor:pointer;"
+                                 onclick="setSlide({{ forloop.counter0 }}); var m = bootstrap.Modal.getInstance(document.getElementById('photoLightboxStrip')); if(m) m.hide();">
+                            <span style="position:absolute; bottom:6px; left:6px; background:rgba(0,0,0,0.75); color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; text-transform:uppercase;">
+                                {{ img.get_category_display|default:img.category }}
+                            </span>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
@@ -1483,6 +1538,35 @@
         </div>
     </div>
 </div>
+
+<script>
+// Lightbox Category Filtering Script
+document.addEventListener("DOMContentLoaded", function () {
+    const filterButtons = document.querySelectorAll('#lightboxCategoryFilters .modal-cat-tab');
+    const imageItems = document.querySelectorAll('#lightboxImagesGrid .modal-thumb-item');
+
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            filterButtons.forEach(b => {
+                b.style.background = '#1f2937';
+                b.style.color = '#cbd5e0';
+            });
+            this.style.background = '#2563eb';
+            this.style.color = '#fff';
+
+            const selectedCat = this.getAttribute('data-filter');
+
+            imageItems.forEach(item => {
+                if (selectedCat === 'all' || item.getAttribute('data-cat') === selectedCat) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
 <!-- LIGHTBOX MODAL -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

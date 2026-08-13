@@ -526,6 +526,156 @@ body{font-family:var(--ff);background:var(--bg);color:var(--text);font-size:14px
   </div>
 </div>
 
+
+
+<div class="pg-kpi-wrap">
+  <div class="pg-row-lbl">Row 5 — Listing, Approval &amp; Duplicate Status</div>
+  <div class="pg-kpi-grid pg-g4">
+
+    <div class="pg-kpi k-green">
+      <div class="pg-kpi-ico ic-green"><i class="fas fa-wifi"></i></div>
+      <div class="pg-kpi-val">{{ active_listing_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Active Listings</div>
+      <div class="pg-kpi-sub"><span class="up"><i class="fas fa-circle" style="font-size:8px"></i></span>&nbsp;Live listings</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:100%;background:var(--green)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-amber">
+      <div class="pg-kpi-ico ic-amber"><i class="fas fa-pause-circle"></i></div>
+      <div class="pg-kpi-val">{{ inactive_listing_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Inactive Listings</div>
+      <div class="pg-kpi-sub">Not currently live</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:40%;background:var(--amber)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-blue">
+      <div class="pg-kpi-ico ic-blue"><i class="fas fa-handshake"></i></div>
+      <div class="pg-kpi-val">{{ sold_listing_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Sold</div>
+      <div class="pg-kpi-sub">Closed deals</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:20%;background:var(--blue)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-indigo">
+      <div class="pg-kpi-ico ic-indigo"><i class="fas fa-key"></i></div>
+      <div class="pg-kpi-val">{{ rented_listing_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Rented</div>
+      <div class="pg-kpi-sub">Currently occupied</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:60%;background:var(--indigo)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-amber">
+      <div class="pg-kpi-ico ic-amber"><i class="fas fa-hourglass-half"></i></div>
+      <div class="pg-kpi-val">{{ pending_approval_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Pending Approval</div>
+      <div class="pg-kpi-sub">Awaiting review</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:35%;background:var(--amber)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-green">
+      <div class="pg-kpi-ico ic-green"><i class="fas fa-check-circle"></i></div>
+      <div class="pg-kpi-val">{{ approved_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Approved</div>
+      <div class="pg-kpi-sub"><span class="up"><i class="fas fa-arrow-up"></i></span>&nbsp;Verified listings</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:80%;background:var(--green)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-red">
+      <div class="pg-kpi-ico ic-red"><i class="fas fa-times-circle"></i></div>
+      <div class="pg-kpi-val">{{ rejected_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Rejected</div>
+      <div class="pg-kpi-sub"><span class="dn"><i class="fas fa-arrow-down"></i></span>&nbsp;Needs correction</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:15%;background:var(--red)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-pink">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-pink"><i class="fas fa-clone"></i></div>
+      <div class="pg-kpi-val">{{ duplicate_properties_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Duplicate Properties</div>
+      <div class="pg-kpi-sub"><i class="fas fa-exclamation-triangle" style="font-size:10px"></i>&nbsp;Flagged as duplicate</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:25%;background:var(--pink)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-cyan">
+      <span class="pg-kpi-tag tag-new">New</span>
+      <div class="pg-kpi-ico ic-cyan"><i class="fas fa-fingerprint"></i></div>
+      <div class="pg-kpi-val">{{ unique_properties_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Unique Properties</div>
+      <div class="pg-kpi-sub">No duplicate match</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:90%;background:var(--cyan)"></div></div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     BLOCK 2 — EXTRA FILTER FIELDS
+     WHERE: inside <form method="GET" id="pgSearchForm">, inside the
+     FIRST .pg-search-row (the one with Search Keyword / PG For / City
+     / Furnishing / Meals / Sharing) — paste these 4 new .pg-sf blocks
+     right before that row's closing </div>.
+================================================================ -->
+
+
+<!-- ════════════════════════════════════════════════════════════
+     BLOCK 3 — REPLACE the debounce script + placeholder text
+     ════════════════════════════════════════════════════════════ -->
+
+<!-- 3a. FIND (there are two copies of this in the file — the page has
+     a duplicated <script> block at the bottom; update BOTH):
+
+        let typingTimer;
+        if(searchInput) {
+            let val = searchInput.value;
+            searchInput.focus();
+            searchInput.value = '';
+            searchInput.value = val;
+
+            searchInput.addEventListener("input", function() {
+                clearTimeout(typingTimer);
+                loader.style.display = 'inline-block';
+                typingTimer = setTimeout(() => { form.submit(); }, 600);
+            });
+        }
+
+     REPLACE `600` with `900` in both copies (slower, "search all
+     fields" server-side query already covers everything now — see
+     the updated pg_list view). If you prefer one single clean version,
+     use this: -->
+<script>
+let typingTimer;
+const TYPING_DELAY_MS = 900; // was 600ms — slowed down on purpose
+
+if (searchInput) {
+    let val = searchInput.value;
+    searchInput.focus();
+    searchInput.value = '';
+    searchInput.value = val;
+
+    searchInput.addEventListener("input", function () {
+        clearTimeout(typingTimer);
+        if (loader) loader.style.display = 'inline-block';
+        typingTimer = setTimeout(() => { form.submit(); }, TYPING_DELAY_MS);
+    });
+
+    searchInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            clearTimeout(typingTimer);
+            form.submit();
+        }
+    });
+}
+</script>
+
+<!-- 3b. FIND:
+        placeholder="PG name, city, locality, owner, contact…"
+     REPLACE WITH:
+        placeholder="ID, PG name, city, locality, owner, contact, listed by, uploaded by, status…"
+-->
+
 <!-- CHARTS -->
 <div class="pg-charts-grid">
   <div class="pg-chart-card">
@@ -699,6 +849,57 @@ document.addEventListener("DOMContentLoaded", function() {
         </select>
       </div>
       
+
+
+      <div class="pg-sf">
+  <label>Listed By Role</label>
+  <select name="listed_by" class="auto-submit">
+    <option value="All Roles">All Roles</option>
+    {% for role in unique_roles %}
+      <option value="{{ role }}" {% if listed_by_filter == role %}selected{% endif %}>{{ role }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div class="pg-sf">
+  <label>Uploaded By Role</label>
+  <select name="uploaded_by" class="auto-submit">
+    <option value="All Roles">All Roles</option>
+    {% for role in unique_uploaded_roles %}
+      <option value="{{ role }}" {% if uploaded_by_filter == role %}selected{% endif %}>{{ role }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div class="pg-sf">
+  <label>Listing Status</label>
+  <select name="listing_status" class="auto-submit">
+    <option value="All Status">All Status</option>
+    {% for ls in unique_listing_status %}
+      <option value="{{ ls }}" {% if listing_status_filter == ls %}selected{% endif %}>{{ ls }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div class="pg-sf">
+  <label>Approval Status</label>
+  <select name="approval_status" class="auto-submit">
+    <option value="All Approval">All Approval</option>
+    {% for a in unique_approval_status %}
+      <option value="{{ a }}" {% if approval_status_filter == a %}selected{% endif %}>{{ a }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div class="pg-sf">
+  <label>Duplicate Status</label>
+  <select name="duplicate" class="auto-submit">
+    <option value="All">All Properties</option>
+    <option value="duplicates_only" {% if duplicate_filter == 'duplicates_only' %}selected{% endif %}>Duplicates Only</option>
+    <option value="unique_only" {% if duplicate_filter == 'unique_only' %}selected{% endif %}>Unique Only</option>
+  </select>
+</div>
+
     </div>
 
     <!-- Second Row (Dates) -->
@@ -770,7 +971,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Approval Status</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property Id</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Images</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Video</th>
+<th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Uploaded Video</th>
+<th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Auto Slideshow</th>
+<th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">RM Video Link</th>
 
                 <!-- ── Listed By Information ─────────────────────────────── -->
 
@@ -814,17 +1017,31 @@ document.addEventListener("DOMContentLoaded", function() {
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Available From</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property Managed By</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property Manager Stays at Property</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">brokerage_percentage</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">manual_brokerage</th>
+                                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Brokerage Type</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Brokerage / Service Fee</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Manual Brokerage</th>
 
                 <!-- ── Room Details & Financials ─────────────────────────── -->
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; border-left: 3px solid #c4b5fd;">Room Type </th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Total Beds In Room</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Rent Per Occupant (₹/Bed/Month/Person)</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Advance Rent Month</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Advance Rent Amount</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Refundable Room Security_Deposite (₹/Person)</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Refundable Security Deposit Amount</th>
+
+
+
+             
+
+
+
+
+                         <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Advance Rent Month</th>
+
+                         <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Advance Rent Amount</th>
+
+
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Refundable Security Deposit(₹/Person)</th>
+
+
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Refundable Security Deposit Amount(₹/Person)</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Maintenance Type</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Monthly Maintenance Amount</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; border-right: 3px solid #c4b5fd;">Estimated Move-In Cost (Per Occupant)</th>
@@ -857,6 +1074,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">uploaded_by_contact</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">uploaded_by_role</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">upload_file_name</th>
+
+                                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Uploaded File</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">is_deleted</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">is_duplicate</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">deleted_at</th>
@@ -879,25 +1098,37 @@ document.addEventListener("DOMContentLoaded", function() {
             <tr id="row-{{ prop.id }}">
 
                 <!-- Meta & Identifiers -->
+                
+                <!-- Sr.No (Maintains correct index mapping across pagination and searches) -->
+
                 <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
-                <td>
-                    {% if prop.listing_status == "Active" %}
-                        <span class="badge bg-success">Active</span>
-                    {% elif prop.listing_status == "Inactive" %}
-                        <span class="badge bg-secondary">Inactive</span>
-                    {% else %}
-                        <span class="badge bg-light text-dark">{{ prop.listing_status|default:"N/A" }}</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if prop.approval_status == "Approved" %}
-                        <span class="badge bg-success">Approved</span>
-                    {% elif prop.approval_status == "Pending" %}
-                        <span class="badge bg-warning text-dark">Pending</span>
-                    {% else %}
-                        <span class="badge bg-light text-dark">{{ prop.approval_status|default:"N/A" }}</span>
-                    {% endif %}
-                </td>
+              
+
+                  <td>
+        {% if prop.listing_status == "Active" %}
+            <span class="badge bg-success">Active</span>
+        {% elif prop.listing_status == "Inactive" %}
+            <span class="badge bg-secondary">Inactive</span>
+        {% elif prop.listing_status == "Sold" %}
+            <span class="badge bg-primary">Sold</span>
+        {% elif prop.listing_status == "Rented" %}
+            <span class="badge bg-info text-dark">Rented</span>
+        {% else %}
+            <span class="badge bg-success text-dark">Draft</span>
+        {% endif %}
+    </td>
+               
+     <td>
+        {% if prop.approval_status == "Pending" %}
+            <span class="badge bg-warning text-dark">Pending</span>
+        {% elif prop.approval_status == "Approved" %}
+            <span class="badge bg-success">Approved</span>
+        {% elif prop.approval_status == "Rejected" %}
+            <span class="badge bg-danger">Rejected</span>
+        {% else %}
+            <span class="badge bg-warning text-dark">Pending</span>
+        {% endif %}
+    </td>
                 <td style="font-weight: 700; color: #7c3aed;">{{ prop.id|default:"—" }}</td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
@@ -919,11 +1150,56 @@ document.addEventListener("DOMContentLoaded", function() {
                         {% endif %}
                     </div>
                 </td>
-                <td>
-                    {% if prop.video %}
-                        <a href="{{ prop.video.url }}" target="_blank" onclick="openVideoPreview('{{ prop.video.url }}'); return false;" style="color: #0d9488; text-decoration: none; font-weight: 600;"><i class="fas fa-video"></i> View</a>
-                    {% else %}<span class="text-muted">—</span>{% endif %}
-                </td>
+               
+
+ 
+                <!-- ================= 6A. UPLOADED VIDEO ================= -->
+<td>
+    {% for vid in prop.videos.all %}
+        {% if vid.source == 'upload' or vid.source == 'uploaded' %}
+            {% if vid.video %}
+                <button onclick="openVideoPreview('{{ vid.video.url }}')"
+                        class="btn btn-sm btn-outline-success" style="padding: 2px 8px; font-size: 11px;">
+                    <i class="fas fa-video"></i> Watch
+                </button>
+            {% else %}
+                <span class="badge bg-warning text-dark" style="font-size:0.75rem;">Pending RM</span>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</td>
+
+<!-- ================= 6B. AUTO-GENERATED SLIDESHOW ================= -->
+<td>
+    {% for vid in prop.videos.all %}
+        {% if vid.source == 'auto' %}
+            {% if vid.video %}
+                <button onclick="openVideoPreview('{{ vid.video.url }}')"
+                        class="btn btn-sm btn-outline-primary" style="padding: 2px 8px; font-size: 11px;">
+                    <i class="fas fa-magic"></i> Watch
+                </button>
+            {% else %}
+                <span class="badge bg-secondary" style="font-size:0.75rem;">Generating...</span>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</td>
+
+<!-- ================= 6C. RM ASSISTED EXTERNAL LINK ================= -->
+<td>
+    {% for vid in prop.videos.all %}
+        {% if vid.source == 'rm_assisted' %}
+            {% if vid.video_url %}
+                <button onclick="openLinkVideoModal('{{ vid.video_url }}')"
+                        class="btn btn-sm btn-outline-info" style="padding: 2px 8px; font-size: 11px;">
+                    <i class="fas fa-play-circle"></i> Play
+                </button>
+            {% else %}
+                <span class="badge bg-info text-dark" style="font-size:0.75rem;">Link Pending</span>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</td>
 
               
                 <td>{{ prop.listed_by_type|default:"—" }}</td>
@@ -969,17 +1245,108 @@ document.addEventListener("DOMContentLoaded", function() {
                 <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
                 <td>{{ prop.property_managed_by|default:"—" }}</td>
                 <td>{{ prop.manager_stays|yesno:"Yes,No" }}</td>
-                <td>{{ prop.brokerage_percentage|default:"—" }}</td>
-                <td>{{ prop.manual_brokerage|default:"—" }}</td>
+
+                 <td>
+                {% if prop.brokerage_percentage %}
+                    <div style="font-size:11px;color:#64748b;font-weight:600;">{{ prop.get_brokerage_label }}</div>
+                  
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+
+                
+            <!-- Brokerage Type -->
+           <td>
+    <div style="font-size:11px;color:#64748b;font-weight:600;">
+        {% if prop.brokerage_percentage and prop.brokerage_percentage != "Fixed Amount" %}
+            <span style="color:#1e293b; font-size:13px;">₹{{ prop.get_brokerage_amount|default:"0"|floatformat:"0" }}</span> 
+            ({{ prop.brokerage_percentage }})
+        {% elif prop.brokerage_percentage %}
+            {{ prop.brokerage_percentage }}
+        {% else %}
+            —
+        {% endif %}
+    </div>
+</td>
+
+            <!-- Brokerage / Service Fee (Combined Display) -->
+            
+            
+            <!-- Manual Brokerage (Kept to maintain database sequence) -->
+            <td>
+                {% if prop.brokerage_percentage == "Fixed Amount" and prop.manual_brokerage %}
+                    ₹{{ prop.manual_brokerage }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
 
                 <!-- Room Details & Financials -->
                 <td style="background: #faf5ff; border-left: 3px solid #c4b5fd;">{{ prop.room_type|capfirst|default:"—" }}</td>
                 <td style="background: #faf5ff; font-weight: 700;">{{ prop.total_beds|default:"0" }}</td>
                 <td style="background: #faf5ff; font-weight: 700; color: #059669;">{% if prop.monthly_rent %}₹{{ prop.monthly_rent }}{% else %}—{% endif %}</td>
-                <td style="background: #faf5ff;">{{ prop.advance_rent_month|default:"—" }}</td>
-                <td style="background: #faf5ff;">{% if prop.advance_rent_amount %}₹{{ prop.advance_rent_amount }}{% else %}—{% endif %}</td>
-                <td style="background: #faf5ff;">{{ prop.security_deposit_type|default:"—" }}</td>
-                <td style="background: #faf5ff;">{% if prop.security_deposit_amount %}₹{{ prop.security_deposit_amount }}{% else %}—{% endif %}</td>
+               
+
+ <td>
+    {% if prop.get_advance_rent_amount %}
+        <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_advance_rent_amount|floatformat:"0" }}</div>
+        
+        {% if prop.get_advance_rent_type_label == "Fixed Amount" %}
+            <div style="font-size:11px;color:#2563eb;margin-top:2px;">
+                ({{ prop.get_advance_rent_type_label }})
+            </div>
+        {% else %}
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                ({{ prop.get_advance_rent_type_label }})
+            </div>
+        {% endif %}
+        
+    {% else %}
+        —
+    {% endif %}
+</td>
+
+              <td>
+               
+                    <div style="font-weight:600;color:#1e293b;">{{ prop.advance_rent_amount|floatformat:"0"|default:"—"  }}</div>
+                    
+              
+            </td>
+
+
+
+  
+               <td>
+    {% if prop.get_security_deposit_amount %}
+        <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_security_deposit_amount|floatformat:"0" }}</div>
+        
+        {% if prop.get_security_deposit_type_label == "Fixed Amount" %}
+            <div style="font-size:11px;color:#2563eb;margin-top:2px;">
+                ({{ prop.get_security_deposit_type_label }})
+            </div>
+        {% else %}
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                ({{ prop.get_security_deposit_type_label }})
+            </div>
+        {% endif %}
+        
+    {% else %}
+        —
+    {% endif %}
+</td>
+       
+
+             <td>
+               
+                    <div style="font-weight:600;color:#1e293b;">{{ prop.security_deposit_amount|floatformat:"0" }}</div>
+                 
+            </td>
+
+
+            <!-- Advance Rent Amount (Combined Display) -->
+          
+               
                 <td style="background: #faf5ff;">{{ prop.maintenance_type|default:"—" }}</td>
                 <td style="background: #faf5ff;">{% if prop.maintenance_amount %}₹{{ prop.maintenance_amount }}{% else %}—{% endif %}</td>
                 <td style="background: #faf5ff; font-weight: 700; color: #2563eb; border-right: 3px solid #c4b5fd;">{% if prop.total_move_in_cost %}₹{{ prop.total_move_in_cost }}{% else %}—{% endif %}</td>
@@ -1012,6 +1379,21 @@ document.addEventListener("DOMContentLoaded", function() {
                 <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_role|default:"—" }}</td>
                 <td><small class="text-muted">{{ prop.upload_file_name|default:"Web Form" }}</small></td>
+
+                <td>
+    {% if prop.upload_file %}
+        <a href="{{ prop.upload_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size: 0.75rem; font-weight: 600;">
+            <i class="fas fa-file-download me-1"></i> 
+            {% if prop.upload_file_name %}
+                {{ prop.upload_file_name|truncatechars:15 }}
+            {% else %}
+                Download
+            {% endif %}
+        </a>
+    {% else %}
+        <span class="text-muted fw-bold">—</span>
+    {% endif %}
+</td>
                 <td>{% if prop.is_deleted %}<span class="badge bg-danger">Deleted</span>{% else %}<span class="badge bg-success">Active</span>{% endif %}</td>
                 <td>{% if prop.is_duplicate %}<span class="badge bg-danger">Yes</span>{% else %}<span class="badge bg-light text-dark">No</span>{% endif %}</td>
                 <td>{{ prop.deleted_at|date:"d M Y H:i"|default:"—" }}</td>
@@ -1049,6 +1431,43 @@ document.addEventListener("DOMContentLoaded", function() {
         </tbody>
     </table>
 </div>
+
+{% if page_obj.has_other_pages %}
+<div class="pg-pager-row" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+    <div class="pg-pager-info">
+        Showing <strong>{{ page_obj.start_index }}</strong> to <strong>{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> entries
+    </div>
+    <div class="pg-pager">
+        
+        <!-- Previous Button -->
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pg-pg">&laquo; Prev</a>
+        {% else %}
+            <span class="pg-pg disabled">&laquo; Prev</span>
+        {% endif %}
+
+        <!-- Page Numbers -->
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="pg-pg active">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pg-pg">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Next Button -->
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pg-pg">Next &raquo;</a>
+        {% else %}
+            <span class="pg-pg disabled">Next &raquo;</span>
+        {% endif %}
+        
+    </div>
+</div>
+{% endif %}
+<!-- ========================================== -->
+
+
     <style>
         .imp-overlay {
             display: none; position: fixed; inset: 0;
@@ -1295,6 +1714,35 @@ document.addEventListener("DOMContentLoaded", function() {
         </div>
     </div>
 
+
+    <div class="modal fade" id="linkVideoModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px; overflow:hidden; border:none; background:#0f172a;">
+      <div class="modal-header" style="background:linear-gradient(135deg,#7C3AED,#4C1D95); color:#fff; border:none;">
+        <h6 class="modal-title" style="font-weight:700;"><i class="fas fa-video me-2"></i>External Video Preview</h6>
+        <button type="button" class="close" data-dismiss="modal" onclick="document.getElementById('linkVideoFrame').src=''" style="color:white; opacity:1; background:none; border:none; font-size:22px;">&times;</button>
+      </div>
+      <div class="modal-body p-0" style="position:relative; background:#000; min-height:350px; display:flex; flex-direction:column; justify-content:center;">
+        <div style="aspect-ratio:16/9; width:100%; position:relative;">
+            <iframe id="linkVideoFrame" style="width:100%; height:100%; border:0; position:absolute; top:0; left:0; z-index:2;" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#94a3b8; z-index:1; padding:20px; text-align:center;">
+                <i class="fas fa-shield-alt" style="font-size:3rem; margin-bottom:12px; color:#475569;"></i>
+                <p style="font-size:14px; margin-bottom:6px; color:#e2e8f0; font-weight:600;">Loading Preview...</p>
+                <p style="font-size:12px; max-width:400px; margin-bottom:15px;">If the video does not load automatically, the platform has blocked inline embedding.</p>
+                <a id="linkVideoDirectBtn" href="#" target="_blank" class="btn btn-sm btn-primary" style="background:#3b82f6; border:none; padding:8px 16px; font-weight:600; border-radius:6px;">
+                    <i class="fas fa-external-link-alt me-1"></i> Open Video Directly in New Tab
+                </a>
+            </div>
+        </div>
+        <div class="text-center py-2" style="background:#1e293b; border-top:1px solid #334155; z-index:3;">
+          <a id="linkVideoFallback" href="#" target="_blank" style="color:#60a5fa; font-size:0.85rem; font-weight:600; text-decoration:none;">
+            <i class="fas fa-external-link-alt me-1"></i> Having trouble viewing? Click here to open source URL
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000000cc; z-index:9999;">
     <span onclick="closePreview()" style="position:absolute;top:20px;right:30px;color:white;font-size:30px;cursor:pointer;">✖</span>
@@ -1758,20 +2206,34 @@ document.addEventListener("DOMContentLoaded", function () {
     const loader = document.getElementById('loadingIndicator');
 
     // Debounce text input
-    let typingTimer;
-    if(searchInput) {
+    
+    // Instant client-side live search script for PG table
+    const searchInput = document.getElementById("pgSearchInput");
+    const pgTableRows = document.querySelectorAll("#pgTable tbody tr");
+
+    if (searchInput) {
+        // Retain cursor focus and position
         let val = searchInput.value;
         searchInput.focus();
         searchInput.value = '';
         searchInput.value = val;
 
-        searchInput.addEventListener("input", function() {
-            clearTimeout(typingTimer);
-            loader.style.display = 'inline-block';
-            typingTimer = setTimeout(() => { form.submit(); }, 600);
+        searchInput.addEventListener("keyup", function () {
+            const query = searchInput.value.toLowerCase().trim();
+
+            pgTableRows.forEach(row => {
+                // Ignore the empty/no-data state row
+                if (row.cells.length <= 1) return;
+
+                let rowText = row.textContent.toLowerCase();
+                if (rowText.includes(query)) {
+                    row.style.display = ""; // Show matching row instantly
+                } else {
+                    row.style.display = "none"; // Hide non-matching row instantly
+                }
+            });
         });
     }
-
     // Auto submit dropdowns and dates
     autoSubmitElements.forEach(el => {
         el.addEventListener("change", function() {
@@ -1854,6 +2316,55 @@ function forcePGExport(format) {
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+function toEmbedUrl(url) {
+    if (!url) return '';
+
+    var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
+    if (yt) {
+        var origin = encodeURIComponent(window.location.origin);
+        return 'https://www.youtube.com/embed/' + yt[1] + '?rel=0&modestbranding=1&autoplay=1&origin=' + origin;
+    }
+
+    var vimeo = url.match(/vimeo\.com\/(?:video\/|)(\d+)/i);
+    if (vimeo) {
+        return 'https://player.vimeo.com/video/' + vimeo[1] + '?autoplay=1';
+    }
+
+    if (url.indexOf('instagram.com') !== -1 || url.indexOf('instagr.am') !== -1) {
+        var cleanInsta = url.split('?')[0].replace(/\/$/, '');
+        return cleanInsta + '/embed/';
+    }
+
+    if (url.indexOf('facebook.com') !== -1 || url.indexOf('fb.watch') !== -1) {
+        return 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(url) + '&show_text=0&autoplay=1';
+    }
+
+    var gdrive = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+    if (gdrive) {
+        return 'https://drive.google.com/file/d/' + gdrive[1] + '/preview';
+    }
+
+    return url;
+}
+
+function openLinkVideoModal(url) {
+    if (!url) return;
+    var embedUrl = toEmbedUrl(url);
+
+    document.getElementById('linkVideoFrame').src = embedUrl;
+    document.getElementById('linkVideoFallback').href = url;
+    var directBtn = document.getElementById('linkVideoDirectBtn');
+    if (directBtn) directBtn.href = url;
+
+    $('#linkVideoModal').modal('show');
+}
+
+$('#linkVideoModal').on('hidden.bs.modal', function () {
+    document.getElementById('linkVideoFrame').src = '';
+});
+</script>
 
 </body>
 </html>

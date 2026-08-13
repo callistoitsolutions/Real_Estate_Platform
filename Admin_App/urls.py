@@ -803,14 +803,14 @@ urlpatterns = [
 
     path('residential_plot_resale',views.residential_plot_resale,name="residential_plot_resale"),
     path('commercial_plot_resale',views.commercial_plot_resale,name="commercial_plot_resale"),
-    path('industrial_plot_resale',views.industrial_plot_resale,name="industrial_plot_resale"),
-    path('agricultural_plot_resale',views.agricultural_plot_resale,name="agricultural_plot_resale"),
+ 
+   
 
 
     path('residential_plot_resale_list',views.residential_plot_resale_list,name="residential_plot_resale_list"),
     path('commercial_plot_resale_list',views.commercial_plot_resale_list,name="commercial_plot_resale_list"),
-    path('industrial_plot_resale_list',views.industrial_plot_resale_list,name="industrial_plot_resale_list"),
-    path('agricultural_plot_resale_list',views.agricultural_plot_resale_list,name="agricultural_plot_resale_list"),
+   
+    
 
 
 #######################END URL SECTION RESALE PLOT LISTING###############
@@ -836,8 +836,8 @@ urlpatterns = [
     
     path('industrial-resale/view/<str:id>/', views.industrial_resale_view, name='industrial_resale_view'),
 
-    path('industrial-resale/restore/<str:id>/', views.industrial_resale_restore, name='industrial_resale_restore'),
-    path('industrial-resale/hard-delete/<str:id>/', views.industrial_resale_hard_delete, name='industrial_resale_hard_delete'),
+   # path('industrial-resale/restore/<str:id>/', views.industrial_resale_restore, name='industrial_resale_restore'),
+   # path('industrial-resale/hard-delete/<str:id>/', views.industrial_resale_hard_delete, name='industrial_resale_hard_delete'),
 
     path('industrial-resale/delete/', views.industrial_resale_delete, name='industrial_resale_delete'),
 
@@ -878,10 +878,133 @@ urlpatterns = [
 
     
 
-
+    
     path('agricultural-resale/restore/<str:id>/', views.agricultural_resale_restore, name='agricultural_resale_restore'),
     path('agricultural-resale/hard-delete/<str:id>/', views.agricultural_resale_hard_delete, name='agricultural_resale_hard_delete'),
     ################END URL SECTION RESALE AGRICULTURAL LISTING######################################################
+
+
+
+ ################START URL SECTION RESALE INDUSTRIAL PLOT LISTING######################################################
+
+
+
+
+    path('industrial_plot_resale_list',views.industrial_plot_resale_list,name="industrial_plot_resale_list"),
+    path('industrial_plot_resale',views.industrial_plot_resale,name="industrial_plot_resale"),
+    path('industrial-plot-resale/add/', views.industrial_plot_resale_add, name='industrial_plot_resale_add'),
+
+
+
+   
+   
+    path('industrial-plot-resale/restore/<str:pk>/', views.industrial_plot_resale_restore, name='industrial_plot_resale_restore'),
+    path('industrial-plot-resale/hard-delete/<str:pk>/', views.industrial_plot_resale_hard_delete, name='industrial_plot_resale_hard_delete'),
+
+ 
+
+    # ── View / Edit / Delete ──
+    path('industrial-plot/view/<str:pk>/', views.industrial_plot_resale_view, name='industrial_plot_resale_view'),
+    path('industrial-plot/edit/<str:pk>/', views.industrial_plot_resale_edit, name='industrial_plot_resale_edit'),
+    path('industrial-plot/delete/<str:pk>/', views.industrial_plot_resale_delete, name='industrial_plot_resale_delete'),
+    path('industrial-plot/bulk-delete/', views.industrial_plot_resale_bulk_delete, name='industrial_plot_resale_bulk_delete'),
+
+    # ── Excel download/import (from the previous step) ──
+    path('industrial-plot/template/download/', views.download_industrial_plot_template, name='download_industrial_template'),
+    path('industrial-plot/template/import/', views.import_industrial_plot_excel, name='import_industrial_plot_excel'),
+
+    path('industrial-plot-resale/export/', views.export_industrial_plot_resale, name='export_industrial_plot_resale'),
+
+
+
+
+
+ ################END URL SECTION RESALE INDUSTRIAL PLOT LISTING######################################################
+
+
+
+ ################Start URL SECTION RESALE Agriculture PLOT LISTING######################################################
+
+
+    path('agricultural_plot_resale_list',views.agricultural_plot_resale_list,name="agricultural_plot_resale_list"),
+
+    path('agricultural_plot_resale',views.agricultural_plot_resale,name="agricultural_plot_resale"),
+
+  
+    path(
+        'agricultural-plot-resale/view/<str:pk>/',
+        views.agricultural_plot_resale_view,
+        name='agricultural_plot_resale_view'
+    ),
+    # Add / Create
+    path(
+        'agricultural-plot-resale/',
+        views.agricultural_plot_resale,
+        name='agricultural_plot_resale'
+    ),
+   
+
+    path(
+        'agricultural-plot-resale/add/',
+        views.agricultural_plot_resale_add,
+        name='agricultural_plot_resale_add'
+    ),
+
+
+    path(
+        'agricultural-plot-resale/edit/<str:pk>/',
+        views.agricultural_plot_resale_edit,
+        name='agricultural_plot_resale_edit'
+    ),
+
+    # View (detail page)
+   
+
+ 
+    # Excel — Download Template
+    path(
+        'agricultural-plot-resale/download-template/',
+        views.download_agricultural_plot_template,
+        name='download_agricultural_plot_template'
+    ),
+
+    # Excel — Import
+    path(
+        'agricultural-plot-resale/import-excel/',
+        views.import_agricultural_plot_excel,
+        name='import_agricultural_plot_excel'
+    ),
+
+    path(
+        'agricultural-plot-resale/export/',
+        views.export_agricultural_plot_resale,
+        name='export_agricultural_plot_resale'
+    ),
+
+    # Excel/CSV — Export
+
+
+    path(
+        'agricultural-plot-resale/delete/<str:pk>/',
+        views.agricultural_plot_resale_delete,
+        name='agricultural_plot_resale_delete'
+    ),
+
+    # Bulk Delete
+    path(
+        'agricultural-plot-resale/bulk-delete/',
+        views.agricultural_plot_resale_bulk_delete,
+        name='agricultural_plot_resale_bulk_delete'
+    ),
+   
+    path('agricultural-plot-resale/restore/<str:pk>/', views.agricultural_plot_resale_restore, name='agricultural_plot_resale_restore'),
+    path('agricultural-plot-resale/hard-delete/<str:pk>/', views.agricultural_plot_resale_hard_delete, name='agricultural_plot_resale_hard_delete'),
+   
+
+
+################END URL SECTION RESALE Agriculture PLOT LISTING######################################################
+
+
 
 
 #########################START URL SECTION Blogs##############################################################

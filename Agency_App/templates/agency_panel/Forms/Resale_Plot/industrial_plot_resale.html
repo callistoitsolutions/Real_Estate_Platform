@@ -135,12 +135,112 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
     }
 .type-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:.78rem;font-weight:700;color:#fff;margin-bottom:14px;background:var(--primary-grad)}
 
-.image-upload-area{border:3px dashed #cbd5e0;border-radius:var(--radius-lg);padding:40px 20px;text-align:center;background:var(--bg-light);cursor:pointer;transition:all .3s}
-.image-upload-area:hover,.image-upload-area.dragover{border-color:#10b981;background:#ecfdf5}
-.image-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:14px;margin-top:18px}
-.preview-item{position:relative;border-radius:var(--radius-md);overflow:hidden;aspect-ratio:1;border:2px solid var(--border)}
-.preview-item img{width:100%;height:100%;object-fit:cover;display:block}
-.remove-image{position:absolute;top:7px;right:7px;width:26px;height:26px;background:#e74c3c;color:#fff;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.7rem;z-index:10}
+
+
+
+/* ================= PROPERTY IMAGE CATEGORY UPLOAD — IMPROVED UX ================= */
+.img-upload-guide {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border: 2px dashed #34d399; border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px;
+}
+.guide-step { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 190px; }
+.guide-step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--primary-grad); color: #fff;
+    font-weight: 800; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 3px 8px rgba(16,185,129,0.35);
+}
+.guide-step-text { font-size: 0.78rem; color: #064e3b; line-height: 1.35; }
+.guide-step-text strong { display: block; font-size: 0.85rem; color: #022c22; }
+.guide-arrow { color: #34d399; font-size: 1rem; display: none; }
+@media (min-width: 900px) { .guide-arrow { display: block; } }
+
+.img-cat-tabs {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 12px; margin-bottom: 20px; counter-reset: catstep;
+}
+
+.img-cat-tab {
+    position: relative; border: 2px solid #e9ecef; background: #fff; border-radius: 14px;
+    padding: 18px 14px 14px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
+    cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    transition: all 0.25s ease; counter-increment: catstep;
+}
+.img-cat-tab i { font-size: 1.3rem; color: #94a3b8; }
+.img-cat-tab .cat-count {
+    background: #f1f5f9; color: #64748b; border-radius: 20px;
+    padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
+    align-self: flex-end; margin-top: -4px;
+}
+.img-cat-tab.active { background: var(--primary-grad); border-color: transparent; color: #fff; }
+.img-cat-tab.active i { color: #fff; }
+.img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+.img-cat-tab.has-images:not(.active) { border-color: #10b981; }
+
+.img-cat-tab::before {
+    content: counter(catstep); position: absolute; top: -8px; left: -8px;
+    width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid #cbd5e0; color: #64748b;
+    font-size: 0.68rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+.img-cat-tab.active::before { border-color: #10b981; color: #10b981; }
+.img-cat-tab.has-images::before { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; background: #10b981; border-color: #10b981; color: #fff; }
+
+.img-cat-tab:nth-child(1)::after {
+    content: "★ Becomes Cover Photo"; font-size: 0.62rem; font-weight: 700; color: #b45309;
+    background: #fef3c7; padding: 2px 9px; border-radius: 20px; align-self: flex-start; margin-top: 2px;
+}
+.img-cat-tab.active:nth-child(1)::after { color: #fff; background: rgba(255,255,255,0.25); }
+
+.img-cat-panel { display: none; }
+.img-cat-panel.active { display: block; animation: fadeInUp 0.3s ease; }
+
+.img-cat-upload-area {
+    border: 3px dashed #cbd5e0; border-radius: 15px; padding: 36px 20px;
+    text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+}
+.img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #10b981; background: #ecfdf5; }
+.img-cat-upload-area .upload-icon {
+    width: 60px; height: 60px; border-radius: 50%; background: #d1fae5;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+}
+.img-cat-upload-area .upload-icon i { font-size: 1.6rem; color: #10b981; margin: 0; }
+.img-cat-upload-area .upload-text { font-size: 1.05rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+.img-cat-upload-area .upload-subtext {
+    display: inline-block; margin-top: 8px; padding: 4px 12px; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 20px; color: #475569; font-size: 0.82rem;
+}
+
+.img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+.img-cat-preview-item {
+    position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
+}
+.img-cat-preview-item.dragging { opacity: 0.4; }
+.img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;}
+.img-cat-preview-item .cover-badge {
+    position: absolute; bottom: 8px; left: 8px; background: linear-gradient(135deg,#f6d365,#fda085); color: #3b2a00;
+    font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 4px;
+}
+.img-cat-preview-item .remove-image {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff;
+    border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
+}
+.img-cat-preview-item .remove-image:hover { background: #c0392b; }
+
+.img-total-summary {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 16px;
+    padding: 16px 22px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+}
+
+.preview-item .cover-badge{position:absolute;bottom:7px;left:7px;background:linear-gradient(135deg,#f6d365,#fda085);color:#3b2a00;font-size:.6rem;font-weight:800;padding:3px 8px;border-radius:20px}
+.existing-img-item{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:1;border:2px solid var(--border)}
+.existing-img-item img{width:100%;height:100%;object-fit:cover}
+.existing-img-item label{position:absolute;top:7px;right:7px;background:rgba(255,255,255,.9);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 
 .preview-card{background:linear-gradient(135deg,#2c3e50,#1a252f);border-radius:var(--radius-lg);padding:18px;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.2)}
 .preview-mock{background:#fff;border-radius:var(--radius-md);overflow:hidden;margin-top:14px}
@@ -249,6 +349,11 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
   <div class="page-header">
     <h1 class="page-title"><i class="fas fa-industry" style="margin-right:12px;opacity:.9;"></i>Sell Your Industrial Plot</h1>
     <p class="page-subtitle">List your MIDC, SEZ, or industrial land to connect with serious manufacturers and businesses</p>
+
+    <button class="btn-back" onclick="history.back();">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to List
+                </button>
   </div>
 
   <!-- STEPPER -->
@@ -261,24 +366,24 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
       </div>
       <div class="step-item">
         <div class="step-circle" id="sc2">2</div>
-        <div class="step-label" id="sl2">Infrastructure &amp; Legal</div>
+        <div class="step-label" id="sl2">Infrastructure & Legal</div>
         <div class="step-line" id="line2"></div>
       </div>
       <div class="step-item">
         <div class="step-circle" id="sc3">3</div>
-        <div class="step-label" id="sl3">Amenities &amp; Location</div>
+        <div class="step-label" id="sl3">Amenities &  Location</div>
         <div class="step-line" id="line3"></div>
       </div>
       <div class="step-item">
         <div class="step-circle" id="sc4">4</div>
-        <div class="step-label" id="sl4">Photos &amp; Publish</div>
+        <div class="step-label" id="sl4">Photos & Publish</div>
       </div>
     </div>
   </div>
 
   <!-- FORM CONTAINER -->
   <div class="form-container">
-    <form action="" method="POST" enctype="multipart/form-data" id="indPlotForm">
+   <form action="{% url 'industrial_plot_resale_add_agency' %}" method="POST" enctype="multipart/form-data" id="indPlotForm">
       {% csrf_token %}
       <input type="hidden" name="plot_type_main" value="industrial">
 
@@ -291,46 +396,28 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   
             🏭 Industrial Plot
                 </div>
-                <button class="btn-back" onclick="history.back();">
-                    <i class="fas fa-arrow-left"></i>
-                    Back to List
-                </button>
+                
             </div>
 
         <!-- LISTED BY -->
+       
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-id-badge"></i> Listed By</div>
-          <div class="section-body">
-          
+                            <div class="section-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                                <span><i class="fas fa-upload"></i> Listed By</span>
+                            </div>
+                            <div class="section-body">
+                                
 
-           
+                                <div class="row" id="user_data_div">
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label">User Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" readonly style="background-color:#e9ecef;" value="{{user_obj.user_id}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"> User Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" readonly style="background-color:#e9ecef;" value="{{user_obj.user_name}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label">User Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email" readonly style="background-color:#e9ecef;" value="{{user_obj.user_email}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label">User Contact</label><input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" readonly style="background-color:#e9ecef;" value="{{user_obj.user_phone}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"> User Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" readonly style="background-color:#e9ecef;" value="{{user_obj.user_role}}"></div></div>
+                                </div>
+                            </div>
+                        </div>
 
-          
-
-            <div class="row mt-3" id="user_data_div">
-              <div class="col-md-3 mt-2">
-                <label class="form-label"><i class="fas fa-id-card"></i> ID</label>
-                <input type="text" class="form-control" name="listed_by_id" value="{{user_obj.user_id}}" readonly>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label"><i class="fas fa-user"></i> Name</label>
-                <input type="text" class="form-control" name="listed_by_name" value="{{user_obj.user_name}}" readonly>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
-                <input type="email" class="form-control" name="listed_by_email" value="{{user_obj.user_email}}" readonly>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label"><i class="fas fa-phone"></i> Contact</label>
-                <input type="text" class="form-control" name="listed_by_contact"  value="{{user_obj.user_phone}}" readonly>
-              </div>
-              <div class="col-md-3 mt-3">
-                <label class="form-label"><i class="fas fa-user-tag"></i> Role</label>
-                <input type="text" class="form-control" name="listed_by_role" value="{{user_obj.user_role}}"  readonly>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <!-- BASIC INFO -->
         <div class="form-section">
@@ -338,16 +425,14 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
           <div class="section-body">
             <div class="mb-3">
               <label class="form-label">Property Title</label>
-              <input type="text" class="form-control" id="property_title" readonly placeholder="Auto-generated by system">
+              <input type="text" class="form-control" id="property_title" name="property_title" readonly placeholder="Auto-generated by system">
               <p class="hint-text">This headline appears on search results and listing page</p>
             </div>
             <div class="row">
-              <div class="col-md-6 mt-2" hidden>
-                <input type="text" class="form-control" name="plot_title" id="plot_title" value="industrial_plot">
-              </div>
+             
               <div class="col-md-6 mt-2">
                 <label class="form-label">Plot / Survey Number <span class="required">*</span></label>
-                <input type="text" class="form-control" name="property_no" placeholder="e.g., MIDC Plot No. B-45, Sector 3" required>
+                <input type="text" class="form-control" name="property_no" id="property_no" placeholder="e.g., MIDC Plot No. B-45, Sector 3" required>
                 <span style="font-size:.75rem;color:red;margin-top:4px;display:block;font-weight:bold;">
                   <i class="fas fa-info-circle"></i> Required for verification — not shown publicly.
                 </span>
@@ -362,7 +447,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Industrial Plot Type <span class="required">*</span></label>
-                <select class="form-select form-control" name="plot_category" id="plot_category" required>
+                <select class="form-select form-control" name="property_type" id="property_type" required>
                   <option value="">— Select Industrial Plot Type —</option>
                   <option value="midc_industrial">MIDC Plot (Factory / Manufacturing)</option>
                   <option value="warehouse_logistics">Warehouse / Cold Storage / Logistics Plot</option>
@@ -381,12 +466,12 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
         <!-- ZONE & ESTATE -->
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-file-shield"></i> Industrial Zone, Estate &amp; Authority Details</div>
+          <div class="section-header"><i class="fas fa-file-shield"></i> Industrial Zone, Estate &; Authority Details</div>
           <div class="section-body">
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Industrial Zone / Land Use <span class="required">*</span></label>
-                <select class="form-select form-control" name="land_use" required>
+                <select class="form-select form-control" name="land_use" id="land_use" required>
                   <option value="">— Select Zone —</option>
                   <option value="MIDC_Zone">MIDC Zone (Maharashtra Industrial Dev Corp)</option>
                   <option value="SEZ_Zone">SEZ Zone (Special Economic Zone)</option>
@@ -402,7 +487,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Industrial Zone Type <span class="required">*</span></label>
-                <select class="form-select form-control" name="industrial_zone_type" required>
+                <select class="form-select form-control" name="industrial_zone_type" id="industrial_zone_type" required>
                   <option value="">— Select —</option>
                   <option value="MIDC">MIDC (Maharashtra Industrial Dev Corp)</option>
                   <option value="SEZ">SEZ (Special Economic Zone)</option>
@@ -415,11 +500,11 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Industrial Estate / Park Name</label>
-                <input type="text" class="form-control" name="industrial_estate_name" placeholder="e.g., Butibori MIDC, Hingna MIDC, Nagpur SEZ">
+                <input type="text" class="form-control" name="industrial_estate_name" id="industrial_estate_name" placeholder="e.g., Butibori MIDC, Hingna MIDC, Nagpur SEZ">
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">NA Status / Industrial Conversion <span class="required">*</span></label>
-                <select class="form-select form-control" name="na_status" required>
+                <select class="form-select form-control" name="na_status" id="na_status"  required>
                   <option value="">— Select —</option>
                   <option value="NA_Industrial">NA Converted for Industrial Use</option>
                   <option value="MIDC_Allotted">MIDC Allotted Land (NA Not Applicable)</option>
@@ -429,7 +514,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Industrial Authority / Estate Approval</label>
-                <select class="form-select form-control" name="layout_approval_status">
+                <select class="form-select form-control" name="layout_approval_status" id="layout_approval_status">
                   <option value="">— Select —</option>
                   <option value="MIDC_Approved">MIDC Approved Plot</option>
                   <option value="SEZ_Approved">SEZ Board Approved</option>
@@ -440,7 +525,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Permissible FSI / Coverage</label>
-                <select class="form-select form-control" name="industrial_fsi">
+                <select class="form-select form-control" name="industrial_fsi" id="industrial_fsi">
                   <option value="">— Select —</option>
                   <option value="0.5">0.5 (Low Density)</option>
                   <option value="1.0">1.0 (Standard Industrial)</option>
@@ -464,7 +549,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                <div class="col-md-4">
                 <label class="form-label">Plot Frontage / Width (m)</label>
                 <div class="input-with-unit">
-                  <input type="number" class="form-control" name="plot_frontage" placeholder="e.g., 30" min="1">
+                  <input type="number" class="form-control" name="plot_frontage" id="plot_frontage" placeholder="e.g., 30" min="1">
                   <span class="input-unit">m</span>
                 </div>
                 <p class="hint-text">Road-facing width for vehicle / truck access</p>
@@ -472,13 +557,13 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               <div class="col-md-4">
                 <label class="form-label">Depth / Length (m)</label>
                 <div class="input-with-unit">
-                  <input type="number" class="form-control" name="plot_depth" placeholder="e.g., 80" min="1">
+                  <input type="number" class="form-control" name="plot_depth" id="plot_depth" placeholder="e.g., 80" min="1">
                   <span class="input-unit">m</span>
                 </div>
               </div>
               <div class="col-md-4">
                 <label class="form-label">Plot Shape</label>
-                <select class="form-select form-control" name="plot_shape">
+                <select class="form-select form-control" name="plot_shape" id="plot_shape">
                   <option value="">— Select Shape —</option>
                   <option value="Rectangular">Rectangular</option>
                   <option value="Square">Square</option>
@@ -493,7 +578,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Road Access &amp; Entry <span class="required">*</span></label>
-                <select class="form-select form-control" name="plot_road_facing" required>
+                <select class="form-select form-control" name="plot_road_facing" id="plot_road_facing" required>
                   <option value="">— Select —</option>
                   <option value="NH_SH_Access">National / State Highway Direct Access</option>
                   <option value="MIDC_Road">MIDC / Estate Internal Road (Paved)</option>
@@ -505,7 +590,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Road Width (Front of Plot)</label>
-                <select class="form-select form-control" name="road_width">
+                <select class="form-select form-control" name="road_width" id="road_width">
                   <option value="">— Select —</option>
                   <option value="18m">18 m (Standard MIDC Road)</option>
                   <option value="24m">24 m (Wide MIDC Road)</option>
@@ -518,7 +603,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
                <div class="col-md-4 mt-2">
                 <label class="form-label">Corner Plot?</label>
-                <select class="form-select form-control" name="corner_plot">
+                <select class="form-select form-control" name="corner_plot" id="corner_plot">
                   <option value="no">No — Single Road Access</option>
                   <option value="yes">Yes — Corner Plot (Two Road Access)</option>
                 </select>
@@ -530,7 +615,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">Power Supply Available</label>
-                <select class="form-select form-control" name="power_supply">
+                <select class="form-select form-control" name="power_supply" id="power_supply">
                   <option value="">— Select —</option>
                   <option value="3Phase_Available">3-Phase Industrial Power (Available)</option>
                   <option value="3Phase_Connection_Needed">3-Phase — Connection Needed</option>
@@ -542,14 +627,14 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               <div class="col-md-4 mt-2">
                 <label class="form-label">Power Load Sanctioned</label>
                 <div class="input-with-unit">
-                  <input type="number" class="form-control" name="power_load_kva" placeholder="e.g., 200">
+                  <input type="number" class="form-control" name="power_load_kva" id="power_load_kva" placeholder="e.g., 200">
                   <span class="input-unit">KVA</span>
                 </div>
                 <p class="hint-text">Leave blank if not yet sanctioned</p>
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Water Supply</label>
-                <select class="form-select form-control" name="industrial_water_supply">
+                <select class="form-select form-control" name="industrial_water_supply" id="industrial_water_supply">
                   <option value="">— Select —</option>
                   <option value="MIDC_Water">MIDC / Authority Piped Water</option>
                   <option value="Municipal_Water">Municipal / Corporation Water</option>
@@ -560,7 +645,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Drain / Effluent Facility</label>
-                <select class="form-select form-control" name="effluent_treatment">
+                <select class="form-select form-control" name="effluent_treatment" id="effluent_treatment">
                   <option value="">— Select —</option>
                   <option value="Common_ETP">Common ETP Available (Estate)</option>
                   <option value="Individual_ETP_Needed">Individual ETP to be Set Up</option>
@@ -570,7 +655,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Permissible Industry Type</label>
-                <select class="form-select form-control" name="industry_type_permissible">
+                <select class="form-select form-control" name="industry_type_permissible" id="industry_type_permissible">
                   <option value="">— Select —</option>
                   <option value="Light_Non_Polluting">Light Non-Polluting Industry</option>
                   <option value="Medium_Industry">Medium Scale Industry</option>
@@ -584,7 +669,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Compound Wall / Security Fencing</label>
-                <select class="form-select form-control" name="plot_fencing">
+                <select class="form-select form-control" name="plot_fencing" id="plot_fencing">
                   <option value="none">No Boundary (Open Industrial Site)</option>
                   <option value="partial">Partially Fenced</option>
                   <option value="full_compound">Full RCC Compound Wall</option>
@@ -595,7 +680,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
                  <div class="col-md-4 mt-2">
                 <label class="form-label">Loading / Unloading Facility</label>
-                <select class="form-select form-control" name="loading_dock">
+                <select class="form-select form-control" name="loading_dock" id="loading_dock">
                   <option value="">— Select —</option>
                   <option value="Loading_Dock_Available">Loading Dock / Ramp Available</option>
                   <option value="Open_Ground_Loading">Open Ground Loading Space</option>
@@ -608,7 +693,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
             <div class="row">
               <div class="col-md-6 mt-2">
                 <label class="form-label">Current Plot / Shed Status</label>
-                <select class="form-select form-control" name="current_possession_status">
+                <select class="form-select form-control" name="current_possession_status" id="current_possession_status">
                   <option value="">— Select —</option>
                   <option value="Vacant_Ready">Vacant — Ready for Industrial Construction</option>
                   <option value="Piling_Done">Piling / Foundation Work Done</option>
@@ -626,14 +711,20 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
         <div class="step-nav">
           <div></div>
           <button type="button" class="btn-step btn-next" onclick="goToStep(2)">
-            Next: Infrastructure &amp; Legal <i class="fas fa-arrow-right"></i>
+            Move to Next Page <i class="fas fa-arrow-right"></i>
           </button>
         </div>
       </div><!-- /step1 -->
 
       <!-- ════════════ STEP 2 — INFRASTRUCTURE & LEGAL ════════════ -->
       <div class="step-content" id="step2">
-        <div class="type-badge">🏭 Industrial Plot</div>
+        <div class="form-header">
+                <div class="form-title">
+                  
+            🏭 Industrial Plot
+                </div>
+               
+            </div>
 
         <!-- PRICING -->
         <div class="form-section">
@@ -643,7 +734,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               <div class="col-md-6 mt-2">
                 <label class="form-label"> Selling Price <span class="required">*</span></label>
                 <div class="input-with-unit">
-                  <input type="number" class="form-control" name="plot_price" id="plot_price" required min="1" placeholder="e.g., 15000000">
+                  <input type="number" class="form-control" name="selling_price" id="selling_price" required min="1" placeholder="e.g., 15000000">
                   <span class="input-unit">₹</span>
                 </div>
               </div>
@@ -653,7 +744,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <span style="font-weight:400;font-size:.78rem;color:var(--muted)">(Auto-calculated)</span>
                 </label>
                 <div class="input-with-unit">
-                  <input type="number" class="form-control" id="plot_price_per_sqft" placeholder="Auto-filled…" readonly>
+                  <input type="number" class="form-control" id="plot_price_per_sqft" name="price_per_sqft" placeholder="Auto-filled…" readonly>
                   <span class="input-unit">₹/sq.m</span>
                 </div>
               </div>
@@ -666,7 +757,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-6 mt-3">
                 <label class="form-label">Additional Industrial Charges</label>
-                <select class="form-select form-control" name="additional_charges">
+                <select class="form-select form-control" name="additional_charges" id="additional_charges">
                   <option value="none">No Additional Charges</option>
                   <option value="midc_transfer">MIDC Transfer Premium / Charges Extra</option>
                   <option value="stamp_extra">Stamp Duty &amp; Registration Extra</option>
@@ -701,14 +792,14 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
         <!-- LEGAL -->
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-shield-halved"></i> Legal, Title &amp; Industrial Authority Details</div>
+          <div class="section-header"><i class="fas fa-shield-halved"></i> Legal, Title &; Industrial Authority Details</div>
           <div class="section-body">
 
             <div class="sub-section-title">Ownership Details</div>
             <div class="row">
               <div class="col-md-6 mt-2">
                 <label class="form-label">Ownership / Tenure Type</label>
-                <select class="form-select form-control" name="ownership_type">
+                <select class="form-select form-control" name="ownership_type" id="ownership_type">
                   <option value="">— Select Ownership —</option>
                   <option value="midc_lease">MIDC Leasehold (99-Year Lease — Transferable)</option>
                   <option value="freehold">Freehold Industrial Land (Private)</option>
@@ -732,8 +823,8 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                 </select>
               </div>
               <div class="col-md-6 mt-3" id="other_document_type_div" style="display:none;">
-                <label class="form-label">Specify Document Type</label>
-                <input type="text" class="form-control" name="other_document_type" placeholder="Describe your ownership document">
+                <label class="form-label">Specify Other Ownership Document Type</label>
+                <input type="text" class="form-control" name="other_document_type" id="other_document_type" placeholder="Describe your ownership document">
               </div>
             </div>
 
@@ -741,7 +832,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
             <div class="row">
               <div class="col-md-4 mt-2">
                 <label class="form-label">MIDC / Authority Allotment Letter</label>
-                <select class="form-select form-control" name="midc_allotment">
+                <select class="form-select form-control" name="midc_allotment" id="midc_allotment">
                   <option value="Available">Available (Original Allotment)</option>
                   <option value="Transfer_Letter">Transfer Letter (Previous Owner)</option>
                   <option value="Not_Available">Not Available</option>
@@ -750,7 +841,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">MIDC Transfer / NOC Status</label>
-                <select class="form-select form-control" name="midc_transfer_noc">
+                <select class="form-select form-control" name="midc_transfer_noc" id="midc_transfer_noc">
                   <option value="">— Select —</option>
                   <option value="NOC_Available">NOC Available from MIDC</option>
                   <option value="NOC_Applied">NOC Application Pending</option>
@@ -760,7 +851,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-2">
                 <label class="form-label">Environmental Clearance (EC)</label>
-                <select class="form-select form-control" name="environmental_clearance">
+                <select class="form-select form-control" name="environmental_clearance" id="environmental_clearance">
                   <option value="">— Select —</option>
                   <option value="Not_Required">Not Required (Below Threshold)</option>
                   <option value="EC_Obtained">EC Obtained</option>
@@ -770,7 +861,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">RERA / Industrial Authority Status</label>
-                <select class="form-select form-control" name="rera_status">
+                <select class="form-select form-control" name="rera_status" id="rera_status">
                   <option value="">— Select —</option>
                   <option value="MIDC_Allotted">MIDC Plot — Authority Allotted</option>
                   <option value="SEZ_Registered">SEZ Registered Unit</option>
@@ -780,7 +871,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Title Clarity / Marketability</label>
-                <select class="form-select form-control" name="title_clearance">
+                <select class="form-select form-control" name="title_clearance" id="title_clearance">
                   <option value="">— Select —</option>
                   <option value="Clear & Marketable Title">Clear &amp; Marketable Title</option>
                   <option value="Under Verification">Title Under Verification</option>
@@ -790,7 +881,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-4 mt-3">
                 <label class="form-label">Encumbrance / Charge Status</label>
-                <select class="form-select form-control" name="property_encumbrance_status">
+                <select class="form-select form-control" name="property_encumbrance_status" id="property_encumbrance_status">
                   <option value="">— Select —</option>
                   <option value="No Encumbrance">No Encumbrance (Clear EC)</option>
                   <option value="Mortgaged">Mortgaged / Hypothecated (Bank / NBFC)</option>
@@ -801,7 +892,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
             </div>
 
-            <div class="sub-section-title mt-3">Tax &amp; Loan Status</div>
+            <div class="sub-section-title mt-3"> Property Tax & Loan Status</div>
             <div class="row">
               <div class="col-md-6 mt-2">
                 <label class="form-label">Industrial Property Tax / Assessment Status</label>
@@ -818,13 +909,13 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                   <div class="col-md-6 mt-3">
                     <label class="form-label">Outstanding Tax / Dues Amount (₹)</label>
                     <div class="input-with-unit">
-                      <input type="number" class="form-control" name="outstanding_tax_amount" placeholder="e.g., 50000">
+                      <input type="number" class="form-control" name="outstanding_tax_amount" id="outstanding_tax_amount" placeholder="e.g., 50000">
                       <span class="input-unit">₹</span>
                     </div>
                   </div>
                   <div class="col-md-6 mt-3" id="pending_since_div" style="display:none;">
                     <label class="form-label">Dues Pending Since</label>
-                    <input type="date" class="form-control" name="pending_since">
+                    <input type="date" class="form-control" name="pending_since" id="pending_since">
                   </div>
                 </div>
               </div>
@@ -842,12 +933,12 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
                 <div class="row">
                   <div class="col-md-6 mt-3">
                     <label class="form-label">Lender Bank / NBFC Name</label>
-                    <input type="text" class="form-control" name="financing_bank" placeholder="e.g., HDFC Bank, SBI, ICICI">
+                    <input type="text" class="form-control" name="financing_bank" id="financing_bank" placeholder="e.g., HDFC Bank, SBI, ICICI">
                   </div>
                   <div class="col-md-6 mt-3">
                     <label class="form-label">Outstanding Loan Amount (₹)</label>
                     <div class="input-with-unit">
-                      <input type="number" class="form-control" name="outstanding_loan_amount" placeholder="e.g., 5000000">
+                      <input type="number" class="form-control" name="outstanding_loan_amount" id="outstanding_loan_amount" placeholder="e.g., 5000000">
                       <span class="input-unit">₹</span>
                     </div>
                   </div>
@@ -857,7 +948,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
             <div class="form-group mt-3">
               <label class="form-label">Industrial Authority / Estate Developer</label>
-              <textarea class="form-control" name="sanctioning_authority" rows="2"
+              <textarea class="form-control" name="sanctioning_authority" id="sanctioning_authority" rows="2"
                 placeholder="e.g., MIDC Nagpur, MIDC Butibori, Nagpur SEZ Ltd, Private Industrial Estate, GIDC, CIDCO Industrial"></textarea>
             </div>
 
@@ -869,21 +960,27 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
         </div>
 
         <div class="step-nav">
-          <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
-          <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Next: Amenities &amp; Location <i class="fas fa-arrow-right"></i></button>
+          <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+          <button type="button" class="btn-step btn-next" onclick="goToStep(3)">Move To Next Page <i class="fas fa-arrow-right"></i></button>
         </div>
       </div><!-- /step2 -->
 
       <!-- ════════════ STEP 3 — AMENITIES & LOCATION ════════════ -->
       <div class="step-content" id="step3">
-        <div class="type-badge">🏭 Industrial Plot</div>
+        <div class="form-header">
+                <div class="form-title">
+                  
+            🏭 Industrial Plot
+                </div>
+               
+            </div>
 
         <!-- AMENITIES -->
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-star"></i> Industrial Site Utilities &amp; Facilities</div>
+          <div class="section-header"><i class="fas fa-star"></i> Industrial Amenities & Nearby Facilities</div>
           <div class="section-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <label class="form-label mb-0">Available Amenities</label>
+           <label class="form-label mb-0">Amenities <span style="font-weight:400;font-size:.78rem;color:var(--muted)"></span></label>
               <span class="badge px-3 py-2" id="amenitiesCount" style="font-size:.82rem;background:var(--primary-grad);color:#fff;">0 selected</span>
             </div>
             <button type="button" class="btn w-100 mb-3" onclick="openModal('amenities')"
@@ -903,10 +1000,10 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
         <!-- NEARBY FACILITIES -->
         <div class="form-section">
-          <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i> Connectivity &amp; Nearby Infrastructure</div>
+          <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i>  Nearby Facilities</div>
           <div class="section-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <label class="form-label mb-0">Nearby Facilities</label>
+            <label class="form-label mb-0">Nearby Facilities <span style="font-weight:400;font-size:.78rem;color:var(--muted)">(Optional)</span></label>
               <span class="badge bg-info text-dark px-3 py-2" id="facilitiesCount" style="font-size:.82rem;">0 selected</span>
             </div>
             <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')"
@@ -930,7 +1027,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
           <div class="section-body">
             <div class="form-group">
               <label class="form-label">Property Description <span style="font-weight:400;font-size:.78rem;color:var(--muted)"></span></label>
-              <textarea class="form-control" name="user_description" rows="5" id="ta_description"
+              <textarea class="form-control" name="user_description" rows="5" id="user_description"
                 placeholder="Describe the industrial plot — estate, connectivity (highway, railway, port), power availability, water source, existing shed / foundation, type of industry permitted…&#10;&#10;Example: 2,000 sq.m MIDC Butibori plot. 3-phase power (200 KVA sanctioned). MIDC piped water. 24 ft road frontage. Loading dock space. Suitable for light manufacturing, packaging, warehouse. Transfer NOC available. Clear title."></textarea>
               <p class="hint-text">Include estate name, power load, water source, road width, industry type, and NOC status for maximum buyer interest.</p>
             </div>
@@ -939,138 +1036,367 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 
         <!-- LOCATION -->
         <div class="form-section">
-          <div class="section-header dark-theme"><i class="fas fa-location-dot"></i> Location Details</div>
-          <div class="section-body">
-            <div class="row">
-              <div class="col-md-4 mt-2">
-                <label class="form-label">State <span class="required">*</span></label>
-                <select class="form-select form-control" name="plot_state" required>
-                  <option value="">Select State</option>
-                  <option value="Andhra Pradesh">Andhra Pradesh</option>
-                  <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                  <option value="Assam">Assam</option>
-                  <option value="Bihar">Bihar</option>
-                  <option value="Chhattisgarh">Chhattisgarh</option>
-                  <option value="Goa">Goa</option>
-                  <option value="Gujarat">Gujarat</option>
-                  <option value="Haryana">Haryana</option>
-                  <option value="Himachal Pradesh">Himachal Pradesh</option>
-                  <option value="Jharkhand">Jharkhand</option>
-                  <option value="Karnataka">Karnataka</option>
-                  <option value="Kerala">Kerala</option>
-                  <option value="Madhya Pradesh">Madhya Pradesh</option>
-                  <option value="Maharashtra">Maharashtra</option>
-                  <option value="Manipur">Manipur</option>
-                  <option value="Meghalaya">Meghalaya</option>
-                  <option value="Mizoram">Mizoram</option>
-                  <option value="Nagaland">Nagaland</option>
-                  <option value="Odisha">Odisha</option>
-                  <option value="Punjab">Punjab</option>
-                  <option value="Rajasthan">Rajasthan</option>
-                  <option value="Sikkim">Sikkim</option>
-                  <option value="Tamil Nadu">Tamil Nadu</option>
-                  <option value="Telangana">Telangana</option>
-                  <option value="Tripura">Tripura</option>
-                  <option value="Uttar Pradesh">Uttar Pradesh</option>
-                  <option value="Uttarakhand">Uttarakhand</option>
-                  <option value="West Bengal">West Bengal</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-                  <option value="Ladakh">Ladakh</option>
-                  <option value="Puducherry">Puducherry</option>
-                  <option value="Chandigarh">Chandigarh</option>
-                  <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-                  <option value="Lakshadweep">Lakshadweep</option>
-                  <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">City / District <span class="required">*</span></label>
-                <input type="text" class="form-control" id="plot_city" name="plot_city" placeholder="e.g., Nagpur" required>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">MIDC Phase / Industrial Area Name <span class="required">*</span></label>
-                <input type="text" class="form-control" name="plot_locality" id="plot_locality" required
-                  placeholder="e.g., Butibori MIDC Phase II, Hingna MIDC">
-                <p class="hint-text">Primary location filter used by buyers</p>
-              </div>
-              <div class="col-md-6 mt-3">
-                <label class="form-label">Nearest Highway / Railway / Port Reference</label>
-                <input type="text" class="form-control" name="property_landmark"
-                  placeholder="e.g., 3 km from NH-6, Near Butibori Railway Station">
-              </div>
-              <div class="col-md-6 mt-3">
-                <label class="form-label">PIN Code</label>
-                <input type="text" class="form-control" name="plot_pincode" placeholder="e.g., 441108" maxlength="6">
-              </div>
-              <div class="col-md-12 mt-3">
-                <label class="form-label">Complete Industrial Plot Address <span class="required">*</span></label>
-                <textarea class="form-control" name="plot_address" id="plot_address" rows="3" required
-                  placeholder="e.g., Plot No. B-45, Sector 3, Butibori MIDC, Nagpur – 441108, Maharashtra"></textarea>
-              </div>
-              <div class="col-md-6 mt-3">
-                <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
-                <input type="url" class="form-control" name="google_maps_link" placeholder="https://maps.google.com/?q=…">
-              </div>
-              <div class="col-md-3 mt-3">
-                <label class="form-label">Latitude</label>
-                <input type="text" class="form-control" name="plot_latitude" placeholder="e.g., 20.9834">
-              </div>
-              <div class="col-md-3 mt-3">
-                <label class="form-label">Longitude</label>
-                <input type="text" class="form-control" name="plot_longitude" placeholder="e.g., 79.1567">
-              </div>
-            </div>
-            <div class="inline-status is-warning mt-3">
-              <i class="fas fa-triangle-exclamation"></i>
-              <span style="font-size:.8rem;">Accurate MIDC phase / estate name and highway distance significantly improves buyer response rate.</span>
-            </div>
-          </div>
-        </div>
+  <div class="section-header dark-theme"><i class="fas fa-location-dot"></i>Property Location Details</div>
+  <div class="section-body">
+    <div class="row">
+      
+      <!-- 1. Complete Address (Added to match the image's top block) -->
+      <div class="col-md-12 mt-2">
+        <label class="form-label">Complete Industrial Plot Address <span class="required">*</span></label>
+        <textarea class="form-control" name="plot_address" id="plot_address" rows="2" placeholder="e.g., Plot No. A-12, Sector 1, Bhosari MIDC..." required></textarea>
+      </div>
+
+      <!-- 2. MIDC Phase / Industrial Area (Full width) -->
+      <div class="col-md-12 mt-3">
+        <label class="form-label">MIDC Phase / Industrial Area Name <span class="required">*</span></label>
+        <input type="text" class="form-control" name="locality" id="locality" required
+          placeholder="e.g., Bhosari MIDC Phase I">
+        <p class="hint-text">Primary location filter used by buyers</p>
+      </div>
+
+      <!-- 3. Nearest Highway Reference (Full width) -->
+      <div class="col-md-12 mt-2">
+        <label class="form-label">Nearest Highway / Railway / Port Reference</label>
+        <input type="text" class="form-control" name="property_landmark" id="property_landmark"
+          placeholder="e.g., 2 km from Pune-Nashik Highway">
+      </div>
+
+      <!-- 4. City & State (Side by side) -->
+      <div class="col-md-6 mt-3">
+        <label class="form-label">City / District <span class="required">*</span></label>
+        <input type="text" class="form-control" id="city" name="city" placeholder="e.g., Pune" required>
+      </div>
+      <div class="col-md-6 mt-3">
+        <label class="form-label">State <span class="required">*</span></label>
+        <select class="form-select form-control" name="state" id="state" required>
+          <option value="">Select State</option>
+          <option value="Andhra Pradesh">Andhra Pradesh</option>
+          <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+          <option value="Assam">Assam</option>
+          <option value="Bihar">Bihar</option>
+          <option value="Chhattisgarh">Chhattisgarh</option>
+          <option value="Goa">Goa</option>
+          <option value="Gujarat">Gujarat</option>
+          <option value="Haryana">Haryana</option>
+          <option value="Himachal Pradesh">Himachal Pradesh</option>
+          <option value="Jharkhand">Jharkhand</option>
+          <option value="Karnataka">Karnataka</option>
+          <option value="Kerala">Kerala</option>
+          <option value="Madhya Pradesh">Madhya Pradesh</option>
+          <option value="Maharashtra">Maharashtra</option>
+          <option value="Manipur">Manipur</option>
+          <option value="Meghalaya">Meghalaya</option>
+          <option value="Mizoram">Mizoram</option>
+          <option value="Nagaland">Nagaland</option>
+          <option value="Odisha">Odisha</option>
+          <option value="Punjab">Punjab</option>
+          <option value="Rajasthan">Rajasthan</option>
+          <option value="Sikkim">Sikkim</option>
+          <option value="Tamil Nadu">Tamil Nadu</option>
+          <option value="Telangana">Telangana</option>
+          <option value="Tripura">Tripura</option>
+          <option value="Uttar Pradesh">Uttar Pradesh</option>
+          <option value="Uttarakhand">Uttarakhand</option>
+          <option value="West Bengal">West Bengal</option>
+          <option value="Delhi">Delhi</option>
+          <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+          <option value="Ladakh">Ladakh</option>
+          <option value="Puducherry">Puducherry</option>
+          <option value="Chandigarh">Chandigarh</option>
+          <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+          <option value="Lakshadweep">Lakshadweep</option>
+          <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+        </select>
+      </div>
+
+      <!-- 5. Pincode & Google Maps Link (Side by side) -->
+      <div class="col-md-6 mt-3">
+        <label class="form-label">PIN Code</label>
+        <input type="text" class="form-control" name="pincode" id="pincode" placeholder="e.g., 411026" maxlength="6">
+      </div>
+      <div class="col-md-6 mt-3">
+        <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
+        <input type="url" class="form-control" name="google_maps_link" id="google_maps_link" placeholder="https://maps.google.com/?q=…">
+      </div>
+
+      <!-- 6. Latitude & Longitude (Side by side) -->
+      <div class="col-md-6 mt-3">
+        <label class="form-label">Latitude</label>
+        <input type="text" class="form-control" name="plot_latitude" id="plot_latitude" placeholder="e.g., 18.6270">
+      </div>
+      <div class="col-md-6 mt-3">
+        <label class="form-label">Longitude</label>
+        <input type="text" class="form-control" name="plot_longitude" id="plot_longitude" placeholder="e.g., 73.8350">
+      </div>
+      
+    </div>
+    <div class="inline-status is-warning mt-3">
+      <i class="fas fa-triangle-exclamation"></i>
+      <span style="font-size:.8rem;">Accurate MIDC phase / estate name and highway distance significantly improves buyer response rate.</span>
+    </div>
+  </div>
+</div>
 
         <div class="step-nav">
-          <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
-          <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Next: Photos &amp; Publish <i class="fas fa-arrow-right"></i></button>
+          <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+          <button type="button" class="btn-step btn-next" onclick="goToStep(4)">Move To Next Page <i class="fas fa-arrow-right"></i></button>
         </div>
       </div><!-- /step3 -->
 
       <!-- ════════════ STEP 4 — PHOTOS & PUBLISH ════════════ -->
       <div class="step-content" id="step4">
-        <div class="type-badge">🏭 Industrial Plot</div>
+       <div class="form-header">
+                <div class="form-title">
+                  
+            🏭 Industrial Plot
+                </div>
+               
+            </div>
 
         <!-- MEDIA -->
+      
+
+        <!-- MEDIA & VIDEO UPLOAD -->
         <div class="form-section">
-          <div class="section-header"><i class="fas fa-images"></i> Photos &amp; Media</div>
+          <div class="section-header"><i class="fas fa-images"></i> Photos & Media</div>
           <div class="section-body">
-            <div class="inline-status is-success mb-3">
-              <i class="fas fa-lightbulb"></i>
-              <span style="font-size:.8rem;">Upload photos of all sides, road frontage, power lines, shed / structure, and MIDC board. <strong>5+ photos get 3× more inquiries.</strong></span>
+
+            <div class="img-upload-guide">
+              <div class="guide-step">
+                <div class="guide-step-num">1</div>
+                <div class="guide-step-text">
+                  <strong>Pick a category</strong>
+                  Tap a tile below (Full Plot, Entrance, etc.)
+                </div>
+              </div>
+              <i class="fas fa-arrow-right guide-arrow"></i>
+              <div class="guide-step">
+                <div class="guide-step-num">2</div>
+                <div class="guide-step-text">
+                  <strong>Upload matching photos</strong>
+                  Click or drag images into that category only
+                </div>
+              </div>
+              <i class="fas fa-arrow-right guide-arrow"></i>
+              <div class="guide-step">
+                <div class="guide-step-num">3</div>
+                <div class="guide-step-text">
+                  <strong>Set your cover photo</strong>
+                  Drag to reorder — the 1st photo in Full Plot View is used as the cover
+                </div>
+              </div>
             </div>
-            <div class="image-upload-area" id="uploadArea">
-              <input type="file" id="imageInput" name="property_images[]" multiple accept="image/*" style="display:none;">
-              <i class="fas fa-cloud-upload-alt fa-3x mb-2" style="color:#10b981"></i>
-              <div style="font-weight:700;font-size:1.05rem;color:#2d3748;margin-top:8px;">Click to Select or Drag &amp; Drop Images</div>
-              <div style="font-size:.85rem;color:#718096;margin-top:6px;">JPG, PNG, WEBP · Max 5MB per image</div>
-              <span class="badge p-2 mt-2" style="background:var(--primary-grad);color:#fff;" id="imageCounter">Uploaded: 0 / 10 Images</span>
+
+            <div class="img-total-summary">
+              <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/25</div>
+              <div id="imgMinNotice" class="min-ok"><i class="fas fa-info-circle"></i> 5+ photos get 3× more inquiries.</div>
             </div>
-            <div class="image-preview-grid" id="imagePreview"></div>
-            <div class="row mt-4">
+
+            <div class="img-cat-tabs" id="imgCatTabs">
+              <div class="img-cat-tab active" data-cat="full_plot"><i class="fas fa-vector-square"></i> Full Plot View <span class="cat-count" id="count-full_plot">0</span></div>
+              <div class="img-cat-tab" data-cat="main_entrance"><i class="fas fa-door-open"></i> Main Entrance <span class="cat-count" id="count-main_entrance">0</span></div>
+              <div class="img-cat-tab" data-cat="boundary_fencing"><i class="fas fa-border-all"></i> Boundary/Fencing <span class="cat-count" id="count-boundary_fencing">0</span></div>
+              <div class="img-cat-tab" data-cat="road_facing"><i class="fas fa-road"></i> Road Facing <span class="cat-count" id="count-road_facing">0</span></div>
+              <div class="img-cat-tab" data-cat="approach_road"><i class="fas fa-route"></i> Approach Road <span class="cat-count" id="count-approach_road">0</span></div>
+              <div class="img-cat-tab" data-cat="truck_access"><i class="fas fa-truck"></i> Truck Access <span class="cat-count" id="count-truck_access">0</span></div>
+              <div class="img-cat-tab" data-cat="industrial_estate"><i class="fas fa-industry"></i> Estate/Area <span class="cat-count" id="count-industrial_estate">0</span></div>
+              <div class="img-cat-tab" data-cat="electricity_infra"><i class="fas fa-bolt"></i> Power Infra <span class="cat-count" id="count-electricity_infra">0</span></div>
+              <div class="img-cat-tab" data-cat="water_infra"><i class="fas fa-tint"></i> Water Infra <span class="cat-count" id="count-water_infra">0</span></div>
+              <div class="img-cat-tab" data-cat="aerial_drone"><i class="fas fa-drone"></i> Aerial/Drone <span class="cat-count" id="count-aerial_drone">0</span></div>
+              <div class="img-cat-tab" data-cat="layout_site_plan"><i class="fas fa-drafting-compass"></i> Layout/Site Plan <span class="cat-count" id="count-layout_site_plan">0</span></div>
+            </div>
+
+          
+            <div class="img-cat-panels">
+  <!-- Full Plot View -->
+  <div class="img-cat-panel active" data-cat-panel="full_plot">
+    <input type="file" id="imgInput-full_plot" name="plot_images_full_plot[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="full_plot">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Full Plot View" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-full_plot"></div>
+  </div>
+
+  <!-- Main Entrance -->
+  <div class="img-cat-panel" data-cat-panel="main_entrance">
+    <input type="file" id="imgInput-main_entrance" name="plot_images_main_entrance[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="main_entrance">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Main Entrance" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-main_entrance"></div>
+  </div>
+
+  <!-- Boundary/Fencing -->
+  <div class="img-cat-panel" data-cat-panel="boundary_fencing">
+    <input type="file" id="imgInput-boundary_fencing" name="plot_images_boundary_fencing[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="boundary_fencing">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Boundary/Fencing" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-boundary_fencing"></div>
+  </div>
+
+  <!-- Road Facing -->
+  <div class="img-cat-panel" data-cat-panel="road_facing">
+    <input type="file" id="imgInput-road_facing" name="plot_images_road_facing[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="road_facing">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Road Facing" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-road_facing"></div>
+  </div>
+
+  <!-- Approach Road -->
+  <div class="img-cat-panel" data-cat-panel="approach_road">
+    <input type="file" id="imgInput-approach_road" name="plot_images_approach_road[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="approach_road">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Approach Road" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-approach_road"></div>
+  </div>
+
+  <!-- Truck Access -->
+  <div class="img-cat-panel" data-cat-panel="truck_access">
+    <input type="file" id="imgInput-truck_access" name="plot_images_truck_access[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="truck_access">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Truck Access" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-truck_access"></div>
+  </div>
+
+  <!-- Estate/Area -->
+  <div class="img-cat-panel" data-cat-panel="industrial_estate">
+    <input type="file" id="imgInput-industrial_estate" name="plot_images_industrial_estate[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="industrial_estate">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Estate/Area" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-industrial_estate"></div>
+  </div>
+
+  <!-- Power Infra -->
+  <div class="img-cat-panel" data-cat-panel="electricity_infra">
+    <input type="file" id="imgInput-electricity_infra" name="plot_images_electricity_infra[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="electricity_infra">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Power Infra" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-electricity_infra"></div>
+  </div>
+
+  <!-- Water Infra -->
+  <div class="img-cat-panel" data-cat-panel="water_infra">
+    <input type="file" id="imgInput-water_infra" name="plot_images_water_infra[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="water_infra">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Water Infra" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-water_infra"></div>
+  </div>
+
+  <!-- Aerial/Drone -->
+  <div class="img-cat-panel" data-cat-panel="aerial_drone">
+    <input type="file" id="imgInput-aerial_drone" name="plot_images_aerial_drone[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="aerial_drone">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Aerial/Drone" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-aerial_drone"></div>
+  </div>
+
+  <!-- Layout/Site Plan -->
+  <div class="img-cat-panel" data-cat-panel="layout_site_plan">
+    <input type="file" id="imgInput-layout_site_plan" name="plot_images_layout_site_plan[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="layout_site_plan">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Layout/Site Plan" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-layout_site_plan"></div>
+  </div>
+</div>
+            <!-- Documents -->
+            <div class="row mt-4 pt-3" style="border-top: 1px solid #e9ecef;">
               <div class="col-md-4">
                 <label class="form-label">MIDC Allotment / Transfer Letter</label>
-                <input type="file" class="form-control"  name="encumbrance_cert" accept=".pdf,image/*">
+                <input type="file" class="form-control" id="encumbrance_cert" name="encumbrance_cert" accept=".pdf,image/*">
                 <p class="hint-text">Upload MIDC original allotment or transfer letter (PDF)</p>
               </div>
-              <div class="col-md-4">
-                <label class="form-label">Industrial Layout / Site Plan</label>
-                <input type="file" class="form-control" name="layout_plan" accept=".pdf,image/*">
-                <p class="hint-text">MIDC approved layout or industrial shed plan</p>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Video Tour <span style="font-weight:400;font-size:.78rem">(Optional)</span></label>
-                <input type="file" class="form-control" name="social_video" accept="video/*">
-                <p class="hint-text">MP4 video walkthrough of the plot / shed (max 100MB)</p>
+              
+            </div>
+
+            <div class="sub-section-title mt-4">Plot Walkthrough Video</div>
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <label class="form-label d-block">Video Option</label>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="video_option" id="video_upload" value="upload" checked>
+                  <label class="form-check-label" for="video_upload">Upload Property Video</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="video_option" id="video_auto" value="auto">
+                  <label class="form-check-label" for="video_auto">Auto-Generate Slideshow from Photos</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="video_option" id="video_rm" value="rm_assisted">
+                  <label class="form-check-label" for="video_rm">Video is Large — Share with Our RM</label>
+                </div>
               </div>
             </div>
+
+            <div id="videoUploadWrapper">
+              <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+              <div class="img-cat-upload-area" id="videoUploadArea" style="background:#f8fafc; border-color:#94a3b8;">
+                <div class="upload-icon" style="background:#e2e8f0;"><i class="fas fa-video" style="color:#64748b;"></i></div>
+                <div class="upload-text">Click to Upload Industrial Walkthrough Video</div>
+                <div class="upload-subtext">MP4/MOV, max 60 seconds, up to 20MB</div>
+              </div>
+              <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px;"></video>
+            </div>
+
+            <div id="videoAutoWrapper" style="display:none;">
+              <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #10b981; border-radius:8px; padding:14px 18px; margin-bottom: 15px; border-top:none; border-right:none; border-bottom:none; color: #064e3b;">
+                <i class="fas fa-magic me-2" style="color:#10b981;"></i>
+                We'll auto-create a walkthrough video from your uploaded photos (min. 3 needed).
+              </div>
+              
+              <div id="autoSlideshowPreviewContainer" style="display:none; text-align:center;">
+                <label class="form-label d-block fw-bold text-start">Live Photo Slideshow Preview</label>
+                <canvas id="slideshowCanvas" width="640" height="360" style="max-width:100%; height:auto; border-radius:12px; border:1px solid #cbd5e1; background:#000; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></canvas>
+              </div>
+
+              <div id="autoSlideshowWarning" class="text-danger mt-2" style="display:none; font-size:12px; font-weight:600;">
+                <i class="fas fa-exclamation-circle me-1"></i> Please upload at least 3 plot images above to preview the auto-slideshow.
+              </div>
+            </div>
+
+            <div id="videoRMWrapper" style="display:none;">
+              <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #10b981; border-radius:8px; padding:14px 18px; margin-bottom:15px; border-top:none; border-right:none; border-bottom:none; color: #064e3b;">
+                <i class="fas fa-headset me-2" style="color:#10b981;"></i>
+                Share the video directly with your RM. Once published, paste the link below.
+              </div>
+              <label class="form-label">Published Video Link</label>
+              <input type="url" class="form-control" id="property_video_link" name="property_video_link" placeholder="Paste YouTube / Instagram / Facebook link">
+              <button type="button" class="btn btn-outline-secondary mt-2" id="previewRMLinkBtn" style="border-radius:10px;"><i class="fas fa-eye me-1"></i> Preview Link</button>
+              <div id="rmVideoFrame" style="display:none; margin-top:15px; border-radius:12px; overflow:hidden; aspect-ratio:16/9;">
+                <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1091,27 +1417,29 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
               </div>
               <div class="col-md-6" id="portalField" style="display:none;">
                 <label class="form-label">Portal Name</label>
-                <input type="text" class="form-control" name="portal_name" placeholder="Housing, 99acres, MagicBricks, IndiaMART">
+                <input type="text" class="form-control" name="portal_name" id="portal_name" placeholder="Housing, 99acres, MagicBricks, IndiaMART">
               </div>
             </div>
           </div>
         </div>
 
         <!-- PROPERTY UPLOADED BY -->
-    <div class="form-section" hidden>
-                        <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
-                        <div class="section-body">
-                            <div class="row">
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i>Name</label><input type="text" class="form-control" name="uploaded_by_name" value="{{ user_obj.user_name }}" disabled></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="uploaded_by_email" value="{{ user_obj.user_email }}" disabled></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="uploaded_by_contact" value="{{ user_obj.user_phone }}" disabled></div></div>
-                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="uploaded_by_role" value="{{ user_obj.user_role }}" disabled></div></div>
-                            </div>
-                        </div>
-                    </div>
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
+          <div class="section-body">
+            <div class="row">
+              
+                                                  <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i>Name</label><input type="text" class="form-control" name="uploaded_by_name" id="uploaded_by_name" value="{{user_obj.user_name}}" disabled></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" name="uploaded_by_email" id="uploaded_by_email" value="{{user_obj.user_email}}" disabled></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" name="uploaded_by_contact" id="uploaded_by_contact" value="{{ user_obj.user_phone }}" disabled></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" name="uploaded_by_role" id="uploaded_by_role" value="{{ user_obj.user_role }}" disabled></div></div>
+
+            </div>
+          </div>
+        </div>
 
         <div class="step-nav">
-          <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+          <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Previous Page</button>
           <button type="submit" class="btn-step btn-submit" id="submitBtn"><i class="fas fa-save"></i> Submit Property</button>
         </div>
       </div><!-- /step4 -->
@@ -1133,7 +1461,7 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
           <div class="preview-price" id="p_price">₹ 0</div>
         </div>
         <div class="preview-body">
-          <div class="preview-title" id="p_title">Industrial Plot Headline</div>
+          <div class="preview-title" id="p_title">Property Title</div>
           <div class="preview-location"><i class="fas fa-map-marker-alt" style="color:#10b981"></i> <span id="p_loc">City, MIDC Area</span></div>
           <div class="preview-specs">
             <span id="p_area">0 sq.m</span>
@@ -1187,13 +1515,9 @@ textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-
-$("#Resale_Plot").addClass("active");
-
 /* ═══ STATE ═══ */
-let currentStep  = 1;
-let selectedFiles= [];
 
+let currentStep  = 1;
 /* ═══ STEPPER ═══ */
 function goToStep(n) {
   if (n > currentStep && !validateStep(currentStep)) return;
@@ -1213,7 +1537,7 @@ function goToStep(n) {
     } else { sc.textContent=i; }
   }
   currentStep=n;
-  window.scrollTo({top:0,behavior:'smooth'});
+  document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
   updatePreview();
   if (n===4) setTimeout(syncUploadedByStep4, 80);
 }
@@ -1229,10 +1553,10 @@ function validateStep(step) {
       missing.push(lbl||'Required field'); f.style.borderColor='#e74c3c';
     }
   });
+  
   if (step===3) {
-    if (!document.querySelectorAll('input[name="amenities[]"]:checked').length) missing.push('At least one Amenity');
-    if (!document.querySelectorAll('input[name="facilities[]"]:checked').length) missing.push('At least one Nearby Facility');
-  }
+  // Amenities & Facilities are optional now — no validation required
+}
   if (missing.length) {
     Swal.fire({icon:'warning',title:'Please fill required fields',
       html:`<ul style="text-align:left;display:inline-block;color:#e74c3c;font-weight:600;">${missing.map(f=>`<li>${f}</li>`).join('')}</ul>`,
@@ -1245,10 +1569,10 @@ function validateStep(step) {
 /* ═══ LIVE PREVIEW ═══ */
 function updatePreview() {
   const area  = document.getElementById('plot_area')?.value || '';
-  const price = document.getElementById('plot_price')?.value || '';
-  const city  = document.getElementById('plot_city')?.value || '';
-  const loc   = document.getElementById('plot_locality')?.value || '';
-  const catEl = document.getElementById('plot_category');
+  const price = document.getElementById('selling_price')?.value || '';
+  const city  = document.getElementById('city')?.value || '';
+  const loc   = document.getElementById('locality')?.value || '';
+  const catEl = document.getElementById('property_type');
   const catTxt= catEl?.value ? catEl.options[catEl.selectedIndex].text.split('(')[0].trim() : '—';
 
   let autoTitle='';
@@ -1280,106 +1604,390 @@ function setCheck(id, done) {
 }
 
 
+/* ============================================================
+   CATEGORY-WISE IMAGE UPLOAD LOGIC
+============================================================ */
+
+const IMG_CATEGORIES = ['full_plot','main_entrance','boundary_fencing','road_facing','approach_road','truck_access','industrial_estate','electricity_infra','water_infra','aerial_drone','layout_site_plan'];
+const IMG_TOTAL_LIMIT = 25;
+window.catFiles = {};
+const catFiles = window.catFiles;
+IMG_CATEGORIES.forEach(function(c) { catFiles[c] = []; });
 
 
-/* ═══ IMAGE UPLOAD ═══ */
-const uploadArea   = document.getElementById('uploadArea');
-const imageInput   = document.getElementById('imageInput');
-const imagePreview = document.getElementById('imagePreview');
+function totalImageCount() {
+    return IMG_CATEGORIES.reduce(function(sum, c) { return sum + catFiles[c].length; }, 0);
+}
 
-uploadArea.addEventListener('click',     () => imageInput.click());
-uploadArea.addEventListener('dragover',  e  => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-uploadArea.addEventListener('drop',      e  => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-imageInput.addEventListener('change',    e  => handleFiles(e.target.files));
+function syncCategoryInput(cat) {
+    var dt = new DataTransfer();
+    catFiles[cat].forEach(function(file) { dt.items.add(file); });
+    document.getElementById('imgInput-' + cat).files = dt.files;
+}
 
-let dragSrcEl = null;
-
-function handleFiles(files) {
-  const arr = Array.from(files);
-  if (selectedFiles.length + arr.length > 10) {
-    Swal.fire({ icon:'warning', title:'Image Limit Reached', text:'Maximum 10 images allowed.', confirmButtonColor:'#10b981' });
-    return;
-  }
-  
-  arr.forEach(file => {
-    if (!file.type.startsWith('image/')) return;
-    selectedFiles.push(file);
-    const reader = new FileReader();
+function renderCategory(cat) {
+    var preview = document.getElementById('imgPreview-' + cat);
+    if (!preview) return;
+    preview.innerHTML = '';
     
-    reader.onload = e => {
-      const div = document.createElement('div');
-      div.className = 'preview-item';
-      div.setAttribute('data-filename', file.name);
-      div.setAttribute('draggable', 'true'); // Enables dragging
-      
-      div.innerHTML = `<img src="${e.target.result}" alt="preview"><button type="button" class="remove-image" onclick="removeImg(this,'${file.name}')"><i class="fas fa-times"></i></button>`;
-      
-      // Add Drag and Drop Event Listeners
-      div.addEventListener('dragstart', handleDragStart);
-      div.addEventListener('dragover', handleDragOver);
-      div.addEventListener('drop', handleDrop);
-      div.addEventListener('dragend', handleDragEnd);
+    catFiles[cat].forEach(function(file, idx) {
+        var div = document.createElement('div');
+        div.className = 'img-cat-preview-item';
+        div.draggable = true;
+        div.dataset.index = idx;
 
-      imagePreview.appendChild(div);
-      updateImageCounter();
-    };
-    reader.readAsDataURL(file);
-  });
+        var img = document.createElement('img');
+        div.appendChild(img);
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-image';
+        removeBtn.innerHTML = '✖';
+        removeBtn.onclick = function() { removeCatImage(cat, file.name.replace(/'/g, "\\'")); };
+        div.appendChild(removeBtn);
+
+        if (idx === 0 && cat === 'full_plot') {
+            var coverTag = document.createElement('span');
+            coverTag.className = 'cover-badge';
+            coverTag.innerHTML = '<i class="fas fa-star"></i> Cover';
+            div.appendChild(coverTag);
+        }
+
+        preview.appendChild(div);
+        attachDragEvents(div, cat);
+
+        var reader = new FileReader();
+        reader.onload = function(e) { img.src = e.target.result; };
+        reader.readAsDataURL(file);
+    });
+
+    const countEl = document.getElementById('count-' + cat);
+    if(countEl) countEl.innerText = catFiles[cat].length;
+
+    var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+    if (tab) tab.classList.toggle('has-images', catFiles[cat].length > 0);
 }
 
-// --- Drag and Drop Sorting Logic ---
-function handleDragStart(e) {
-  dragSrcEl = this;
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/html', this.innerHTML);
-  this.style.opacity = '0.4';
-  this.style.border = '2px dashed #10b981'; // Matched to industrial template's primary color
+function attachDragEvents(item, cat) {
+    item.addEventListener('dragstart', function(e) {
+        item.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', item.dataset.index);
+    });
+    item.addEventListener('dragend', function() {
+        item.classList.remove('dragging');
+        document.querySelectorAll('.img-cat-preview-item.drag-over').forEach(function(el) { el.classList.remove('drag-over'); });
+    });
+    item.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        item.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', function() { item.classList.remove('drag-over'); });
+    item.addEventListener('drop', function(e) {
+        e.preventDefault();
+        item.classList.remove('drag-over');
+
+        var fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        var toIndex = parseInt(item.dataset.index, 10);
+        if (isNaN(fromIndex) || isNaN(toIndex) || fromIndex === toIndex) return;
+
+        var moved = catFiles[cat].splice(fromIndex, 1)[0];
+        catFiles[cat].splice(toIndex, 0, moved);
+
+        syncCategoryInput(cat);
+        renderCategory(cat);
+    });
 }
 
-function handleDragOver(e) {
-  e.preventDefault(); 
-  e.dataTransfer.dropEffect = 'move';
-  return false;
+function renderAllCategories() {
+    IMG_CATEGORIES.forEach(renderCategory);
+    var total = totalImageCount();
+    const totalEl = document.getElementById('imgTotalCount');
+    if(totalEl) totalEl.innerText = total;
+    setCheck('cl-images', total > 0);
 }
 
-function handleDrop(e) {
-  e.stopPropagation();
-  if (dragSrcEl !== this) {
-    // 1. Reorder DOM Elements
-    const allItems = Array.from(imagePreview.children);
-    const srcIndex = allItems.indexOf(dragSrcEl);
-    const destIndex = allItems.indexOf(this);
+function handleCatFiles(cat, files) {
+    var incoming = Array.from(files).filter(function(f) { return f.type.startsWith('image/'); });
+    if (totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+        Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all categories.', 'warning');
+        incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - totalImageCount()));
+    }
+    catFiles[cat] = catFiles[cat].concat(incoming);
+    syncCategoryInput(cat);
+    renderAllCategories();
+}
 
-    if (srcIndex < destIndex) {
-      this.parentNode.insertBefore(dragSrcEl, this.nextSibling);
-    } else {
-      this.parentNode.insertBefore(dragSrcEl, this);
+window.removeCatImage = function(cat, fileName) {
+    catFiles[cat] = catFiles[cat].filter(function(f) { return f.name !== fileName; });
+    syncCategoryInput(cat);
+    renderAllCategories();
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.img-cat-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.img-cat-panel').forEach(function(p) { p.classList.remove('active'); });
+            this.classList.add('active');
+            var targetPanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
+            if(targetPanel) targetPanel.classList.add('active');
+        });
+    });
+
+    IMG_CATEGORIES.forEach(function(cat) {
+        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+        var input = document.getElementById('imgInput-' + cat);
+        if (!zone || !input) return;
+
+        zone.addEventListener('click', function() { input.click(); });
+        input.addEventListener('change', function(e) { handleCatFiles(cat, e.target.files); });
+        zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            handleCatFiles(cat, e.dataTransfer.files);
+        });
+    });
+    renderAllCategories();
+});
+
+
+/* ============================================================
+   FINAL UNIFIED RESIDENTIAL VIDEO ENGINE & CANVAS PREVIEW
+============================================================ */
+document.addEventListener('DOMContentLoaded', function () {
+    var uploadRadio      = document.getElementById('video_upload');
+    var autoRadio        = document.getElementById('video_auto');
+    var rmRadio          = document.getElementById('video_rm');
+    var uploadWrapper    = document.getElementById('videoUploadWrapper');
+    var autoWrapper      = document.getElementById('videoAutoWrapper');
+    var rmWrapper        = document.getElementById('videoRMWrapper');
+    var videoInput       = document.getElementById('videoInput');
+    var videoArea        = document.getElementById('videoUploadArea');
+    var videoPreview     = document.getElementById('videoPreview');
+   
+    var slideshowInterval = null;
+    var canvas = document.getElementById('slideshowCanvas');
+    var ctx = canvas ? canvas.getContext('2d') : null;
+
+    function getUploadedImages(callback) {
+        var sources = [];
+        if (window.catFiles) {
+            Object.keys(window.catFiles).forEach(function (cat) {
+                if (Array.isArray(window.catFiles[cat])) {
+                    window.catFiles[cat].forEach(function (file) {
+                        if (file instanceof File && file.type.startsWith('image/')) {
+                            sources.push({ type: 'file', data: file });
+                        }
+                    });
+                }
+            });
+        }
+        var uniqueSources = [];
+        var seen = new Set();
+        sources.forEach(function (s) {
+            var key = s.type === 'file' ? s.data.name + s.data.size : s.data;
+            if (!seen.has(key)) { seen.add(key); uniqueSources.push(s); }
+        });
+
+        if (uniqueSources.length === 0) { callback([]); return; }
+
+        var loadedImages = [];
+        var processed = 0;
+        uniqueSources.forEach(function (srcObj) {
+            var img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function () {
+                loadedImages.push(img);
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+            img.onerror = function () {
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+            img.src = srcObj.type === 'file' ? URL.createObjectURL(srcObj.data) : srcObj.data;
+        });
     }
 
-    // 2. Sync selectedFiles array with the new DOM sequence
-    const newOrderFilenames = Array.from(imagePreview.children).map(el => el.getAttribute('data-filename'));
-    selectedFiles.sort((a, b) => newOrderFilenames.indexOf(a.name) - newOrderFilenames.indexOf(b.name));
-  }
-  return false;
-}
+    function startAutoSlideshowPreview() {
+        stopAutoSlideshowPreview();
+        var container = document.getElementById('autoSlideshowPreviewContainer');
+        var warning = document.getElementById('autoSlideshowWarning');
 
-function handleDragEnd(e) {
-  this.style.opacity = '1';
-  this.style.border = '2px solid var(--border)';
-}
+        getUploadedImages(function (images) {
+            if (images.length < 3) {
+                if (container) container.style.display = 'none';
+                if (warning) warning.style.display = 'block';
+                return;
+            }
+            if (warning) warning.style.display = 'none';
+            if (container) container.style.display = 'block';
+            runCanvasAnimation(images);
+        });
+    }
 
-function removeImg(btn, name) { 
-  selectedFiles = selectedFiles.filter(f => f.name !== name); 
-  btn.closest('.preview-item').remove(); 
-  updateImageCounter(); 
-}
+    function runCanvasAnimation(images) {
+        if (!ctx || !canvas || images.length === 0) return;
+        var durationPerSlide = 3500, fadeDuration = 800, startTime = null;
 
-function updateImageCounter() { 
-  const n = selectedFiles.length; 
-  document.getElementById('imageCounter').textContent = `Uploaded: ${n} / 10 Images`; 
-  setCheck('cl-images', n >= 1); 
-}
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var elapsed = timestamp - startTime;
+            var progress = (elapsed % durationPerSlide) / durationPerSlide;
+            var index = Math.floor(elapsed / durationPerSlide) % images.length;
+            var nextIndex = (index + 1) % images.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            var slideTime = elapsed % durationPerSlide;
+            var isFading = slideTime > (durationPerSlide - fadeDuration);
+            var fadeOpacity = isFading ? (slideTime - (durationPerSlide - fadeDuration)) / fadeDuration : 0;
+
+            drawCinematicFrame(images[index], progress, 1.0);
+            if (isFading) drawCinematicFrame(images[nextIndex], 0, fadeOpacity);
+            slideshowInterval = requestAnimationFrame(animate);
+        }
+
+        function drawCinematicFrame(img, progress, opacity) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            var scale = 1.0 + (progress * 0.08);
+            var hRatio = canvas.width / img.width;
+            var vRatio = canvas.height / img.height;
+            var ratio  = Math.max(hRatio, vRatio) * scale;
+            var baseShiftX = (canvas.width - img.width * ratio) / 2;
+            var centerShiftY = (canvas.height - img.height * ratio) / 2;
+            var panOffsetX = (progress - 0.5) * (canvas.width * 0.04);
+            var centerShiftX = baseShiftX + panOffsetX;
+
+            ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+            ctx.restore();
+        }
+
+        stopAutoSlideshowPreview();
+        slideshowInterval = requestAnimationFrame(animate);
+    }
+
+    function stopAutoSlideshowPreview() {
+        if (slideshowInterval) { cancelAnimationFrame(slideshowInterval); slideshowInterval = null; }
+    }
+
+    function toggleVideoOption() {
+        if (uploadWrapper) uploadWrapper.style.display = uploadRadio && uploadRadio.checked ? 'block' : 'none';
+        if (autoWrapper)   autoWrapper.style.display   = autoRadio && autoRadio.checked   ? 'block' : 'none';
+        if (rmWrapper)     rmWrapper.style.display     = rmRadio && rmRadio.checked     ? 'block' : 'none';
+
+        if (autoRadio && autoRadio.checked) startAutoSlideshowPreview();
+        else stopAutoSlideshowPreview();
+
+        if (rmRadio && rmRadio.checked) renderVideoPreview();
+    }
+
+    if (uploadRadio) uploadRadio.addEventListener('change', toggleVideoOption);
+    if (autoRadio)   autoRadio.addEventListener('change', toggleVideoOption);
+    if (rmRadio)     rmRadio.addEventListener('change', toggleVideoOption);
+
+    if (videoArea && videoInput) {
+        videoArea.addEventListener('click', function () { videoInput.click(); });
+    }
+
+    // Direct Video Upload + WhatsApp Modal (20MB Limit)
+    if (videoInput) {
+        videoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
+            var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
+            var companyWhatsAppNumber = "917057205423";
+
+            var rawMessage = "Hello Team,\n\nI am trying to upload a video for my industrial plot listing, but the file size exceeds the 20MB limit.\n\n" +
+                             "📌 *Property Details:*\n" +
+                             "• *Title:* " + propTitle + "\n" +
+                             "• *Listed By:* " + listedByName + "\n" +
+                             "• *Video File Name:* " + file.name + "\n" +
+                             "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
+                             "Please assist me in publishing this video for my listing.";
+            var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
+
+            if (file.size > 20 * 1024 * 1024) {
+                videoInput.value = '';
+                if (videoPreview) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                    videoPreview.style.display = 'none';
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Video File Too Large',
+                    text: 'This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.',
+                    showCancelButton: true,
+                    confirmButtonColor: '#25D366',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fab fa-whatsapp me-1"></i> Share',
+                    cancelButtonText: 'Okay',
+                    allowOutsideClick: false
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.open(whatsappUrl, '_blank');
+                        if (rmRadio) rmRadio.checked = true;
+                        toggleVideoOption();
+                    }
+                });
+                return;
+            }
+
+            if (videoPreview) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    }
+
+    function renderVideoPreview() {
+        var linkInput = document.getElementById('property_video_link');
+        var frame = document.getElementById('rmVideoFrame');
+        if (!linkInput || !frame) return;
+
+        var url = linkInput.value.trim();
+        if (!url) { frame.style.display = 'none'; return; }
+
+        frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:350px; border:0; border-radius:8px;" allowfullscreen></iframe>';
+        var embedIframe = document.getElementById('rmVideoEmbed');
+
+        var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        if (ytMatch) {
+            embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1];
+            frame.style.display = 'block';
+            return;
+        }
+
+        embedIframe.src = url;
+        frame.style.display = 'block';
+    }
+
+    var linkInputEl = document.getElementById('property_video_link');
+    if (linkInputEl) linkInputEl.addEventListener('input', renderVideoPreview);
+
+    var previewBtn = document.getElementById('previewRMLinkBtn');
+    if (previewBtn) previewBtn.addEventListener('click', renderVideoPreview);
+
+    toggleVideoOption();
+});
+
+
+
 /* ═══ CONDITIONAL TOGGLES ═══ */
 document.addEventListener('change', function(e) {
   if (e.target.name==='ownership_document_type')
@@ -1398,10 +2006,10 @@ document.addEventListener('change', function(e) {
   if (e.target.name==='power_supply')     setCheck('cl-power',!!e.target.value);
 });
 
-['plot_area','plot_price','plot_city','plot_locality'].forEach(id=>{
+['plot_area','selling_price','city','locality'].forEach(id=>{
   const el=document.getElementById(id); if(el) el.addEventListener('input',updatePreview);
 });
-document.getElementById('plot_category')?.addEventListener('change',updatePreview);
+document.getElementById('property_type')?.addEventListener('change',updatePreview);
 
 /* ═══ LISTED BY ═══ */
 function updateBrokerageLabel(role) {
@@ -1432,29 +2040,29 @@ function Change_Fields() {
   };
   const setVal=(id,v)=>{const el=document.getElementById(id);if(el) el.value=v;};
   if (isSelf) {
-    setVal('uploaded_by_id',admin.id); setVal('uploaded_by_name',admin.name);
-    setVal('uploaded_by_email',admin.email); setVal('uploaded_by_contact',admin.phone);
-    setVal('uploaded_by_role',admin.role); updateBrokerageLabel(admin.role);
+    setVal('listed_by_id',admin.id); setVal('listed_by_name',admin.name);
+    setVal('listed_by_email',admin.email); setVal('listed_by_contact',admin.phone);
+    setVal('listed_by_role',admin.role); updateBrokerageLabel(admin.role);
   } else {
-    ['uploaded_by_id','uploaded_by_name','uploaded_by_email','uploaded_by_contact','uploaded_by_role'].forEach(id=>setVal(id,''));
+    ['listed_by_id','listed_by_name','listed_by_email','listed_by_contact','listed_by_role'].forEach(id=>setVal(id,''));
   }
   syncUploadedByStep4();
-  setCheck('cl-listedby',!!document.getElementById('uploaded_by_name')?.value);
+  setCheck('cl-listedby',!!document.getElementById('listed_by_name')?.value);
 }
 
 function get_user_data() {
   const assigned_to=document.getElementById('assigned_to').value;
   if (!assigned_to) {
-    ['uploaded_by_id','uploaded_by_name','uploaded_by_email','uploaded_by_contact','uploaded_by_role'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
+    ['listed_by_id','listed_by_name','listed_by_email','listed_by_contact','listed_by_role'].forEach(id=>{const el=document.getElementById(id);if(el) el.value='';});
     syncUploadedByStep4(); return;
   }
   $.ajax({
     method:'POST',url:"{% url 'get_user_data' %}",data:{assigned_to},dataType:'json',
     success:function(r){
       const setVal=(id,v)=>{const el=document.getElementById(id);if(el) el.value=v||'';};
-      setVal('uploaded_by_id',r.user_id); setVal('uploaded_by_name',r.name);
-      setVal('uploaded_by_email',r.email); setVal('uploaded_by_contact',r.phone||r.contact);
-      setVal('uploaded_by_role',r.role); updateBrokerageLabel(r.role);
+      setVal('listed_by_id',r.user_id); setVal('listed_by_name',r.name);
+      setVal('listed_by_email',r.email); setVal('listed_by_contact',r.phone||r.contact);
+      setVal('listed_by_role',r.role); updateBrokerageLabel(r.role);
       syncUploadedByStep4(); setCheck('cl-listedby',!!r.name);
     }
   });
@@ -1548,14 +2156,25 @@ document.getElementById('indPlotForm').addEventListener('submit',function(e){
     icon:'question',showCancelButton:true,
     confirmButtonColor:'#11998e',cancelButtonColor:'#cbd5e0',
     confirmButtonText:'✓ Yes, Publish Now',cancelButtonText:'Review Again'
-  }).then(result=>{
+
+  
+    }).then(result=>{
     if(!result.isConfirmed) return;
     const btn=document.getElementById('submitBtn');
     btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Publishing…';btn.disabled=true;
+
+    Swal.fire({
+      title: 'Checking & Saving Listing...',
+      text: 'Validating duplicate inventory rules...',
+      allowOutsideClick: false,
+      didOpen: () => { Swal.showLoading(); }
+    });
+
+    IMG_CATEGORIES.forEach(cat => syncCategoryInput(cat));
     const formData=new FormData(this);
-    formData.delete('property_images[]');
-    selectedFiles.forEach(f=>formData.append('property_images[]',f));
+
     fetch(this.getAttribute('action'),{method:'POST',body:formData,headers:{'X-Requested-With':'XMLHttpRequest'}})
+
       .then(r=>r.json())
       .then(data=>{
         if(data.status==='success'){
@@ -1647,3 +2266,8 @@ function removeItem(section,name){
   if(cb) cb.checked=false; updateDisplay(section);
 }
 </script>
+   <script>
+          document.getElementById('city').addEventListener('input', function () {
+            this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+          });
+        </script>

@@ -101,13 +101,7 @@
             <div class="kpi-label">Total Commercial</div>
             <div class="kpi-desc"><i class="fas fa-database"></i> All listed records</div>
         </div>
-        <div class="kpi-card b-blue">
-            <span class="badge-tag tag-existing">EXISTING</span>
-            <div class="kpi-icon ic-blue"><i class="fas fa-wifi"></i></div>
-            <div class="kpi-val">{{ active_count|default:"0" }}</div>
-            <div class="kpi-label">Active Listings</div>
-            <div class="kpi-desc"><i class="fas fa-circle" style="color:#10b981;font-size:8px"></i> Live on portal</div>
-        </div>
+       
         <div class="kpi-card b-orange">
             <span class="badge-tag tag-new">NEW</span>
             <div class="kpi-icon ic-orange"><i class="fas fa-lock"></i></div>
@@ -280,6 +274,162 @@
         </div>
     </div>
 
+
+    <!-- ════════════════════════════════════════════════════════════════
+     FILE: commercial_list.html
+     WHAT TO DO WITH THIS FILE
+     ════════════════════════════════════════════════════════════════
+     This is NOT a full page — it is 3 separate blocks you paste into
+     your existing commercial_list.html. Each block below tells you
+     exactly where it goes (BEFORE / AFTER / REPLACE).
+================================================================== -->
+
+
+
+<div class="row-divider"><span>ROW 6 — LISTING, APPROVAL &amp; DUPLICATE STATUS</span></div>
+<div class="kpi-row">
+    <div class="kpi-card b-green">
+        <div class="kpi-icon ic-green"><i class="fas fa-wifi"></i></div>
+        <div class="kpi-val">{{ active_listing_count }}</div>
+        <div class="kpi-label">Active Listings</div>
+        <div class="kpi-desc c-up"><i class="fas fa-circle" style="color:#10b981;font-size:8px;"></i> Live listings</div>
+    </div>
+    <div class="kpi-card b-orange">
+        <div class="kpi-icon ic-orange"><i class="fas fa-pause-circle"></i></div>
+        <div class="kpi-val">{{ inactive_listing_count }}</div>
+        <div class="kpi-label">Inactive Listings</div>
+        <div class="kpi-desc">Not currently live</div>
+    </div>
+    <div class="kpi-card b-blue">
+        <div class="kpi-icon ic-blue"><i class="fas fa-handshake"></i></div>
+        <div class="kpi-val">{{ sold_listing_count }}</div>
+        <div class="kpi-label">Sold</div>
+        <div class="kpi-desc">Closed deals</div>
+    </div>
+    <div class="kpi-card b-purple">
+        <div class="kpi-icon ic-purple"><i class="fas fa-key"></i></div>
+        <div class="kpi-val">{{ rented_listing_count }}</div>
+        <div class="kpi-label">Rented</div>
+        <div class="kpi-desc">Currently occupied</div>
+    </div>
+    <div class="kpi-card b-orange">
+        <div class="kpi-icon ic-orange"><i class="fas fa-hourglass-half"></i></div>
+        <div class="kpi-val">{{ pending_approval_count }}</div>
+        <div class="kpi-label">Pending Approval</div>
+        <div class="kpi-desc">Awaiting review</div>
+    </div>
+    <div class="kpi-card b-green">
+        <div class="kpi-icon ic-green"><i class="fas fa-check-circle"></i></div>
+        <div class="kpi-val">{{ approved_count }}</div>
+        <div class="kpi-label">Approved</div>
+        <div class="kpi-desc c-up">Verified listings</div>
+    </div>
+    <div class="kpi-card b-red">
+        <div class="kpi-icon ic-red"><i class="fas fa-times-circle"></i></div>
+        <div class="kpi-val">{{ rejected_count }}</div>
+        <div class="kpi-label">Rejected</div>
+        <div class="kpi-desc c-down">Needs correction</div>
+    </div>
+    <div class="kpi-card b-pink">
+        <span class="badge-tag tag-new">NEW</span>
+        <div class="kpi-icon ic-pink"><i class="fas fa-clone"></i></div>
+        <div class="kpi-val">{{ duplicate_properties_count }}</div>
+        <div class="kpi-label">Duplicate Properties</div>
+        <div class="kpi-desc c-down"><i class="fas fa-exclamation-triangle"></i> Flagged as duplicate</div>
+    </div>
+    <div class="kpi-card b-cyan">
+        <span class="badge-tag tag-new">NEW</span>
+        <div class="kpi-icon ic-cyan"><i class="fas fa-fingerprint"></i></div>
+        <div class="kpi-val">{{ unique_properties_count }}</div>
+        <div class="kpi-label">Unique Properties</div>
+        <div class="kpi-desc c-up">No duplicate match</div>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     BLOCK 2 — EXTRA FILTER FIELDS
+     WHERE: inside the existing <form id="liveSearchForm"> ...
+     paste this right BEFORE the closing:
+        <div style="width:100%; border-top:1px dashed #e5e7eb; ...">  (the date-range block)
+     i.e. right after the "Budget" .search-group and before the
+     date-range div. This adds: Uploaded By Role, Listing Status,
+     Approval Status, Duplicate Status.
+================================================================ -->
+
+
+<!-- ════════════════════════════════════════════════════════════
+     BLOCK 3 — REPLACE the download-excel <div> and REPLACE the
+     debounce script.
+     ════════════════════════════════════════════════════════════ -->
+
+<!-- 3a. FIND this block (just above the <table id="commercialTable">)
+     and DELETE it — the Excel export view/URL no longer exists:
+
+        <div style="display:flex; gap:10px;">
+            <button type="button"
+                    onclick="forceExport('excel')"
+                    class="btn btn-success btn-sm" style="height:38px; background-color: #10b981; border: none;">
+                <i class="fas fa-file-excel"></i> Download Excel
+            </button>
+        </div>
+
+     Also delete the matching `forceExport(format)` JS function and the
+     `{% url 'export_commercial_rent' %}` reference at the bottom of the
+     <script> block — that URL/view is being removed together with the
+     download button. -->
+
+
+<!-- 3b. FIND this script section:
+
+    var typingTimer;
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(function () { form.submit(); }, 250);
+        });
+        ...
+    }
+
+     REPLACE the whole block with the version below. This searches
+     across every field on the server side already (see BLOCK in the
+     view file), and slows the debounce down so it doesn't fire a
+     request on every keystroke — it waits until the user actually
+     pauses typing before searching. -->
+<script>
+var typingTimer;
+var TYPING_DELAY_MS = 900; // slower on purpose — was 250ms (too fast / fired mid-word)
+
+if (searchInput) {
+    searchInput.addEventListener('input', function () {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(function () { form.submit(); }, TYPING_DELAY_MS);
+    });
+
+    searchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            clearTimeout(typingTimer);
+            form.submit(); // Enter still searches immediately
+        } else {
+            clearTimeout(typingTimer);
+        }
+    });
+
+    var len = searchInput.value.length;
+    if (len) { searchInput.focus(); searchInput.setSelectionRange(len, len); }
+}
+</script>
+
+
+<!-- 3c. Update the placeholder text on the search input itself to make
+     clear it now searches everything, not just a few fields:
+
+     FIND:
+        placeholder="Title, city, locality, owner name…"
+     REPLACE WITH:
+        placeholder="ID, title, city, locality, owner name, listed by, uploaded by…"
+-->
     <!-- ═══════ CHARTS ═══════ -->
     <div class="analytics-section">
         <div class="chart-container">
@@ -309,31 +459,7 @@
     </div>
 
     <!-- ═══════ QUICK STATS ═══════ -->
-    <div class="quick-stats">
-        <h3 class="quick-stats-title"><i class="fas fa-chart-line"></i> Performance Insights</h3>
-        <div class="stats-row">
-            <div class="stat-item">
-                <div class="stat-item-icon" style="color:#10b981"><i class="fas fa-user-check"></i></div>
-                <div class="stat-item-value">{{ total_tenants }}</div>
-                <div class="stat-item-label">Total Tenants</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-item-icon" style="color:#3b82f6"><i class="fas fa-calendar-check"></i></div>
-                <div class="stat-item-value">{{ collection_rate }}%</div>
-                <div class="stat-item-label">Collection Rate</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-item-icon" style="color:#f59e0b"><i class="fas fa-clock"></i></div>
-                <div class="stat-item-value">{{ pending_payments }}</div>
-                <div class="stat-item-label">Pending Payments</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-item-icon" style="color:#8b5cf6"><i class="fas fa-tools"></i></div>
-                <div class="stat-item-value">{{ maintenance_req }}</div>
-                <div class="stat-item-label">Maintenance Req</div>
-            </div>
-        </div>
-    </div>
+  
 
     <!-- ═══════ PROPERTIES SECTION ═══════ -->
     <div class="properties-section">
@@ -423,6 +549,46 @@
             {% endfor %}
         </select>
     </div>
+
+    <div class="search-group">
+    <label>Uploaded By Role</label>
+    <select name="uploaded_by" class="filter-input auto-submit-select">
+        <option value="All Roles">All Roles</option>
+        {% for role in unique_uploaded_roles %}
+            <option value="{{ role }}" {% if uploaded_by_query == role %}selected{% endif %}>{{ role }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="search-group">
+    <label>Listing Status</label>
+    <select name="listing_status" class="filter-input auto-submit-select">
+        <option value="All Status">All Status</option>
+        {% for ls in unique_listing_status %}
+            <option value="{{ ls }}" {% if listing_status_query == ls %}selected{% endif %}>{{ ls }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="search-group">
+    <label>Approval Status</label>
+    <select name="approval_status" class="filter-input auto-submit-select">
+        <option value="All Approval">All Approval</option>
+        {% for a in unique_approval_status %}
+            <option value="{{ a }}" {% if approval_status_query == a %}selected{% endif %}>{{ a }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="search-group">
+    <label>Duplicate Status</label>
+    <select name="duplicate" class="filter-input auto-submit-select">
+        <option value="All">All Properties</option>
+        <option value="duplicates_only" {% if duplicate_query == 'duplicates_only' %}selected{% endif %}>Duplicates Only</option>
+        <option value="unique_only" {% if duplicate_query == 'unique_only' %}selected{% endif %}>Unique Only</option>
+    </select>
+</div>
+
 
     <div style="width:100%; border-top:1px dashed #e5e7eb; padding-top:14px; margin-top:4px;">
         <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">
@@ -569,7 +735,7 @@ Electricity Included?</th>
               <th>Brokerage Type</th>
            <th> Brokerage / Service Fee</th>
             <th>Manual Brokerage</th>
-            <th>Advance Rent </th>
+            <th>Advance Rent Month </th>
             <th>Advance Rent Amount</th>
             <th>Refundable Security Deposit</th>
             <th>Refundable Security Deposit Amount</th>
@@ -596,6 +762,7 @@ Electricity Included?</th>
             <th>UB Contact</th>
             <th>UB Role</th>
             <th>Data Uploaded Via</th>
+            <th>Uploaded File </th>
             <th>Created At</th>
              <th>Property Unique Key</th>
                 <th>Duplicate Count</th>
@@ -631,7 +798,7 @@ Electricity Included?</th>
                 {% elif prop.listing_status == "Rented" %}
                     <span class="badge bg-info text-dark">Rented</span>
                 {% else %}
-                    <span class="badge bg-light text-dark">N/A</span>
+                    <span class="badge bg-success text-dark">Draft</span>
                 {% endif %}
             </td>
             
@@ -644,7 +811,7 @@ Electricity Included?</th>
                 {% elif prop.approval_status == "Rejected" %}
                     <span class="badge bg-danger">Rejected</span>
                 {% else %}
-                    <span class="badge bg-light text-dark">N/A</span>
+                    <span class="badge bg-warning text-dark">Pending</span>
                 {% endif %}
             </td>
 
@@ -678,20 +845,13 @@ Electricity Included?</th>
                 </div>
             </td>
 
-           <!-- ================= 6A. UPLOADED VIDEO ================= -->
-<!-- ================= 6A. UPLOADED VIDEO ================= -->
 <td>
     {% if prop.uploaded_video %}
         {% if prop.uploaded_video.video %}
-            <div style="position:relative; width:75px; height:50px; cursor:pointer; border-radius:8px; overflow:hidden; border:2px solid #3b82f6;" 
-                onclick="openVideoModal('{{ prop.uploaded_video.video.url }}', 'Uploaded Walkthrough Video')" title="Watch Uploaded Video">
-                <video style="width:100%; height:100%; object-fit:cover;" muted>
-                    <source src="{{ prop.uploaded_video.video.url }}#t=0.5" type="video/mp4">
-                </video>
-                <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center;">
-                    <i class="fas fa-play-circle" style="color:#fff; font-size:20px;"></i>
-                </div>
-            </div>
+            <button onclick="openVideoModal('{{ prop.uploaded_video.video.url }}', 'Uploaded Walkthrough Video')"
+                    class="btn btn-sm btn-outline-success" style="padding: 2px 8px; font-size: 11px;">
+                <i class="fas fa-video"></i> Watch
+            </button>
         {% else %}
             <span class="badge bg-warning text-dark" style="font-size:0.75rem;" title="File > 20MB sent to RM">
                 <i class="fas fa-clock me-1"></i> Pending RM
@@ -702,20 +862,14 @@ Electricity Included?</th>
     {% endif %}
 </td>
 
-<!-- ================= 6B. AUTO-GENERATED SLIDESHOW ================= -->
+<!-- ================= 6B. AUTO-GENERATED SLIDESHOW (replace old thumbnail block) ================= -->
 <td>
     {% if prop.auto_video %}
         {% if prop.auto_video.video %}
-            <div style="position:relative; width:75px; height:50px; cursor:pointer; border-radius:8px; overflow:hidden; border:2px solid #8b5cf6;" 
-                <div style="position:relative; width:75px; height:50px; cursor:pointer; border-radius:8px; overflow:hidden; border:2px solid #8b5cf6;" 
-                 onclick="openVideoModal('{{ prop.auto_video.video.url }}', 'Auto-Generated Slideshow')" title="Watch Auto-Generated Slideshow">
-                <video style="width:100%; height:100%; object-fit:cover;" muted>
-                    <source src="{{ prop.auto_video.video.url }}#t=0.5" type="video/mp4">
-                </video>
-                <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center;">
-                    <i class="fas fa-magic" style="color:#fff; font-size:18px;"></i>
-                </div>
-            </div>
+            <button onclick="openVideoModal('{{ prop.auto_video.video.url }}', 'Auto-Generated Slideshow')"
+                    class="btn btn-sm btn-outline-primary" style="padding: 2px 8px; font-size: 11px;">
+                <i class="fas fa-magic"></i> Watch
+            </button>
         {% else %}
             <span class="badge bg-secondary" style="font-size:0.75rem;">Generating...</span>
         {% endif %}
@@ -724,23 +878,14 @@ Electricity Included?</th>
     {% endif %}
 </td>
 
-<!-- ================= 6C. RM ASSISTED EXTERNAL LINK ================= -->
+<!-- ================= 6C. RM ASSISTED EXTERNAL LINK (replace old thumbnail block) ================= -->
 <td>
     {% if prop.rm_video %}
         {% if prop.rm_video.video_url %}
-            {% if prop.rm_video.youtube_thumbnail %}
-                <div style="position:relative; width:75px; height:50px; cursor:pointer; border-radius:8px; overflow:hidden; border:2px solid #ef4444;" 
-                     onclick="window.open('{{ prop.rm_video.video_url }}', '_blank')" title="Watch on YouTube">
-                    <img src="{{ prop.rm_video.youtube_thumbnail }}" style="width:100%; height:100%; object-fit:cover;">
-                    <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center;">
-                        <i class="fab fa-youtube" style="color:#ff0000; font-size:22px; background:#fff; border-radius:50%; padding:2px;"></i>
-                    </div>
-                </div>
-            {% else %}
-                <a href="{{ prop.rm_video.video_url }}" target="_blank" class="btn btn-sm btn-outline-danger" style="font-size:0.75rem; padding:4px 8px; border-radius:6px; white-space:nowrap;">
-                    <i class="fas fa-external-link-alt me-1"></i> Open Link
-                </a>
-            {% endif %}
+            <button onclick="openLinkVideoModal('{{ prop.rm_video.video_url }}')"
+                    class="btn btn-sm btn-outline-info" style="padding: 2px 8px; font-size: 11px;">
+                <i class="fas fa-play-circle"></i> Play
+            </button>
         {% else %}
             <span class="badge bg-info text-dark" style="font-size:0.75rem;">Link Pending</span>
         {% endif %}
@@ -967,6 +1112,20 @@ Electricity Included?</th>
             <td>{{ prop.uploaded_by_role|default:"—" }}</td>
             <!-- 75. Data Uploaded Via -->
             <td><small class="text-muted">{{ prop.upload_file_name|default:"Web UI Listing Form" }}</small></td>
+          <td>
+    {% if prop.upload_file %}
+        <a href="{{ prop.upload_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size: 0.75rem; font-weight: 600;">
+            <i class="fas fa-file-download me-1"></i> 
+            {% if prop.upload_file_name %}
+                {{ prop.upload_file_name|truncatechars:15 }}
+            {% else %}
+                Download
+            {% endif %}
+        </a>
+    {% else %}
+        <span class="text-muted fw-bold">—</span>
+    {% endif %}
+</td>
             <!-- 76. Created At -->
             <td>{{ prop.created_at|date:"d M Y H:i" }}</td>
 
@@ -1171,6 +1330,35 @@ Electricity Included?</th>
         </div>
     </div>
 
+    <div class="modal fade" id="linkVideoModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px; overflow:hidden; border:none; background:#0f172a;">
+      <div class="modal-header" style="background:linear-gradient(135deg,#DC2626,#991B1B); color:#fff; border:none;">
+        <h6 class="modal-title" style="font-weight:700;"><i class="fas fa-video me-2"></i>External Video Preview</h6>
+        <button type="button" class="close" data-dismiss="modal" onclick="document.getElementById('linkVideoFrame').src=''" style="color:white; opacity:1; background:none; border:none; font-size:22px;">&times;</button>
+      </div>
+      <div class="modal-body p-0" style="position:relative; background:#000; min-height:350px; display:flex; flex-direction:column; justify-content:center;">
+        <div style="aspect-ratio:16/9; width:100%; position:relative;">
+            <iframe id="linkVideoFrame" style="width:100%; height:100%; border:0; position:absolute; top:0; left:0; z-index:2;" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#94a3b8; z-index:1; padding:20px; text-align:center;">
+                <i class="fas fa-shield-alt" style="font-size:3rem; margin-bottom:12px; color:#475569;"></i>
+                <p style="font-size:14px; margin-bottom:6px; color:#e2e8f0; font-weight:600;">Loading Preview...</p>
+                <p style="font-size:12px; max-width:400px; margin-bottom:15px;">If the video does not load automatically, the platform has blocked inline embedding.</p>
+                <a id="linkVideoDirectBtn" href="#" target="_blank" class="btn btn-sm btn-primary" style="background:#3b82f6; border:none; padding:8px 16px; font-weight:600; border-radius:6px;">
+                    <i class="fas fa-external-link-alt me-1"></i> Open Video Directly in New Tab
+                </a>
+            </div>
+        </div>
+        <div class="text-center py-2" style="background:#1e293b; border-top:1px solid #334155; z-index:3;">
+          <a id="linkVideoFallback" href="#" target="_blank" style="color:#60a5fa; font-size:0.85rem; font-weight:600; text-decoration:none;">
+            <i class="fas fa-external-link-alt me-1"></i> Having trouble viewing? Click here to open source URL
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
     <!-- ═══════════════════════════════════════════════ -->
     <!--                  SCRIPTS                        -->
@@ -1196,24 +1384,36 @@ Electricity Included?</th>
     // ─────────────────────────────────────────────────
     // 2. LIVE TEXT FIELD SEARCH (DEBOUNCED AT 250ms)
     // ─────────────────────────────────────────────────
-    var typingTimer;
+   
+
+    // ─────────────────────────────────────────────────
+    // 2. INSTANT CLIENT-SIDE LIVE TABLE SEARCH
+    // ─────────────────────────────────────────────────
     if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            clearTimeout(typingTimer);
-            typingTimer = setTimeout(function () { form.submit(); }, 250);
+        const commercialTableRows = document.querySelectorAll('#commercialTable tbody tr');
+
+        searchInput.addEventListener('keyup', function () {
+            const query = searchInput.value.toLowerCase().trim();
+
+            commercialTableRows.forEach(row => {
+                // Ignore the "No commercial properties found" empty state row
+                if (row.cells.length <= 1) return;
+
+                let rowText = row.textContent.toLowerCase();
+                if (rowText.includes(query)) {
+                    row.style.display = ""; // Show matching row instantly
+                } else {
+                    row.style.display = "none"; // Hide non-matching row instantly
+                }
+            });
         });
 
-        searchInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') { 
-                e.preventDefault(); 
-                clearTimeout(typingTimer); 
-                form.submit(); 
-            }
-            else { clearTimeout(typingTimer); }
-        });
-
+        // Keep cursor active and focused on input
         var len = searchInput.value.length;
-        if (len) { searchInput.focus(); searchInput.setSelectionRange(len, len); }
+        if (len) { 
+            searchInput.focus(); 
+            searchInput.setSelectionRange(len, len); 
+        }
     }
 
     // ─────────────────────────────────────────────────
@@ -1659,6 +1859,56 @@ Electricity Included?</th>
     window.location.href = exportUrl;
 }
     </script>
+
+
+    <script>
+function toEmbedUrl(url) {
+    if (!url) return '';
+
+    var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
+    if (yt) {
+        var origin = encodeURIComponent(window.location.origin);
+        return 'https://www.youtube.com/embed/' + yt[1] + '?rel=0&modestbranding=1&autoplay=1&origin=' + origin;
+    }
+
+    var vimeo = url.match(/vimeo\.com\/(?:video\/|)(\d+)/i);
+    if (vimeo) {
+        return 'https://player.vimeo.com/video/' + vimeo[1] + '?autoplay=1';
+    }
+
+    if (url.indexOf('instagram.com') !== -1 || url.indexOf('instagr.am') !== -1) {
+        var cleanInsta = url.split('?')[0].replace(/\/$/, '');
+        return cleanInsta + '/embed/';
+    }
+
+    if (url.indexOf('facebook.com') !== -1 || url.indexOf('fb.watch') !== -1) {
+        return 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(url) + '&show_text=0&autoplay=1';
+    }
+
+    var gdrive = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+    if (gdrive) {
+        return 'https://drive.google.com/file/d/' + gdrive[1] + '/preview';
+    }
+
+    return url;
+}
+
+function openLinkVideoModal(url) {
+    if (!url) return;
+    var embedUrl = toEmbedUrl(url);
+
+    document.getElementById('linkVideoFrame').src = embedUrl;
+    document.getElementById('linkVideoFallback').href = url;
+    var directBtn = document.getElementById('linkVideoDirectBtn');
+    if (directBtn) directBtn.href = url;
+
+    $('#linkVideoModal').modal('show');
+}
+
+$('#linkVideoModal').on('hidden.bs.modal', function () {
+    document.getElementById('linkVideoFrame').src = '';
+});
+</script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

@@ -1052,72 +1052,113 @@
     }
 
     /* Categorized Image Styling */
-    .img-cat-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-    .img-cat-tab {
-        border: 2px solid #e9ecef; background: #fff; border-radius: 12px;
-        padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
-        cursor: pointer; display: flex; align-items: center; gap: 8px;
-        transition: all 0.25s ease; white-space: nowrap;
-    }
-    .img-cat-tab i { font-size: 0.95rem; color: #94a3b8; }
-    .img-cat-tab .cat-count {
-        background: #f1f5f9; color: #64748b; border-radius: 20px;
-        padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
-    }
-    .img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
-    .img-cat-tab.active i { color: #fff; }
-    .img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
-    .img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
+   
 
-    .img-cat-panel { display: none; }
-    .img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+    /* ================= PROPERTY IMAGE CATEGORY UPLOAD — IMPROVED UX ================= */
+.img-upload-guide {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    border: 2px dashed #a5b4fc; border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px;
+}
+.guide-step { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 190px; }
+.guide-step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--primary-gradient); color: #fff;
+    font-weight: 800; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 3px 8px rgba(102,126,234,0.35);
+}
+.guide-step-text { font-size: 0.78rem; color: #3730a3; line-height: 1.35; }
+.guide-step-text strong { display: block; font-size: 0.85rem; color: #1e1b4b; }
+.guide-arrow { color: #a5b4fc; font-size: 1rem; display: none; }
+@media (min-width: 900px) { .guide-arrow { display: block; } }
 
-    .img-cat-upload-area {
-        border: 3px dashed #cbd5e0; border-radius: 15px; padding: 28px 20px;
-        text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
-    }
-    .img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
-    .img-cat-upload-area .upload-icon i { font-size: 2.2rem; color: #667eea; }
-    .img-cat-upload-area .upload-text { font-size: 1rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
-    .img-cat-upload-area .upload-subtext { font-size: 0.82rem; color: #718096; margin-top: 4px; }
+.img-cat-tabs {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 12px; margin-bottom: 20px; counter-reset: catstep;
+}
 
-    .img-cat-preview {
-        display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 14px; margin-top: 18px;
-    }
-    .img-cat-preview-item {
-        position: relative; border-radius: 12px; overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1); aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
-    }
-    .img-cat-preview-item.dragging { opacity: 0.4; }
-    .img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .img-cat-preview-item .img-index-badge {
-        position: absolute; top: 8px; left: 8px; background: rgba(15,23,42,0.85); color: #fff;
-        font-size: 0.7rem; font-weight: 700; padding: 3px 9px; border-radius: 20px;
-    }
-    .img-cat-preview-item .cover-badge {
-        position: absolute; bottom: 8px; left: 8px;
-        background: linear-gradient(135deg,#f6d365,#fda085); color: #3b2a00;
-        font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 20px;
-        display: flex; align-items: center; gap: 4px;
-        z-index: 10;
-    }
-    .img-cat-preview-item .remove-image {
-        position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
-        background: #e74c3c; color: #fff; border: none; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
-    }
-    .img-cat-preview-item .remove-image:hover { background: #c0392b; }
+.img-cat-tab {
+    position: relative; border: 2px solid #e9ecef; background: #fff; border-radius: 14px;
+    padding: 18px 14px 14px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
+    cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    transition: all 0.25s ease; counter-increment: catstep;
+}
+.img-cat-tab i { font-size: 1.3rem; color: #94a3b8; }
+.img-cat-tab .cat-count {
+    background: #f1f5f9; color: #64748b; border-radius: 20px;
+    padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
+    align-self: flex-end; margin-top: -4px;
+}
+.img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
+.img-cat-tab.active i { color: #fff; }
+.img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+.img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
 
-    .img-total-summary {
-        display: flex; justify-content: space-between; align-items: center;
-        background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px;
-        padding: 14px 18px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
-    }
-    .img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 0.95rem; }
-    .img-total-summary .total-count span { color: #667eea; }
-    .img-total-summary .min-warning { font-size: 0.8rem; color: #e74c3c; font-weight: 600; }
-    .img-total-summary .min-ok { font-size: 0.8rem; color: #10b981; font-weight: 600; }
+.img-cat-tab::before {
+    content: counter(catstep); position: absolute; top: -8px; left: -8px;
+    width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid #cbd5e0; color: #64748b;
+    font-size: 0.68rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+.img-cat-tab.active::before { border-color: #667eea; color: #667eea; }
+.img-cat-tab.has-images::before { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; background: #38ef7d; border-color: #38ef7d; color: #fff; }
+
+.img-cat-tab:nth-child(1)::after, .img-cat-tab:nth-child(2)::after {
+    content: "★ Becomes Cover Photo"; font-size: 0.62rem; font-weight: 700; color: #b45309;
+    background: #fef3c7; padding: 2px 9px; border-radius: 20px; align-self: flex-start; margin-top: 2px;
+}
+.img-cat-tab.active:nth-child(1)::after, .img-cat-tab.active:nth-child(2)::after { color: #fff; background: rgba(255,255,255,0.25); }
+
+.img-cat-panel { display: none; }
+.img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+.img-cat-upload-area {
+    border: 3px dashed #cbd5e0; border-radius: 15px; padding: 36px 20px;
+    text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+}
+.img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
+.img-cat-upload-area .upload-icon {
+    width: 60px; height: 60px; border-radius: 50%; background: #eef2ff;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+}
+.img-cat-upload-area .upload-icon i { font-size: 1.6rem; color: #667eea; margin: 0; }
+.img-cat-upload-area .upload-text { font-size: 1.05rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+.img-cat-upload-area .upload-subtext {
+    display: inline-block; margin-top: 8px; padding: 4px 12px; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 20px; color: #475569; font-size: 0.82rem;
+}
+
+.img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+.img-cat-preview-item {
+    position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
+}
+.img-cat-preview-item.dragging { opacity: 0.4; border: 2px dashed #667eea; }
+.img-cat-preview-item.drag-over { opacity: 0.6; transform: scale(0.95); }
+.img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;}
+.img-cat-preview-item .img-index-badge {
+    position: absolute; top: 8px; left: 8px; background: rgba(15,23,42,0.85); color: #fff;
+    font-size: 0.7rem; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+}
+.img-cat-preview-item .cover-badge {
+    position: absolute; bottom: 8px; left: 8px; background: linear-gradient(135deg,#f6d365,#fda085); color: #3b2a00;
+    font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 4px; z-index: 10;
+}
+.img-cat-preview-item .remove-image {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff;
+    border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
+}
+.img-cat-preview-item .remove-image:hover { background: #c0392b; }
+
+.img-total-summary {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 16px;
+    padding: 16px 22px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+}
+.img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 1.05rem; }
+.img-total-summary .min-ok { font-size: 0.85rem; color: #10b981; font-weight: 600; }
 
     @media (max-width: 1200px) {
         .page-wrapper {
@@ -2233,11 +2274,35 @@
                     <div class="form-section">
                         <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
                         <div class="section-body">
+                         <div class="img-upload-guide">
+                                <div class="guide-step">
+                                    <div class="guide-step-num">1</div>
+                                    <div class="guide-step-text">
+                                        <strong>Pick a category</strong>
+                                        Tap a tile below (Exterior, Living Room, etc.)
+                                    </div>
+                                </div>
+                                <i class="fas fa-arrow-right guide-arrow"></i>
+                                <div class="guide-step">
+                                    <div class="guide-step-num">2</div>
+                                    <div class="guide-step-text">
+                                        <strong>Upload matching photos</strong>
+                                        Click or drag images into that category only
+                                    </div>
+                                </div>
+                                <i class="fas fa-arrow-right guide-arrow"></i>
+                                <div class="guide-step">
+                                    <div class="guide-step-num">3</div>
+                                    <div class="guide-step-text">
+                                        <strong>Set your cover photo</strong>
+                                        Drag to reorder — the 1st photo in Exterior or Living is used as the cover
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="img-total-summary">
                                 <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/20</div>
-                                <div id="imgMinNotice" class="min-warning">
-                                    <i class="fas fa-exclamation-circle"></i> Add at least 3 images (across any rooms) to publish
-                                </div>
+                                <div id="imgMinNotice" class="min-ok"><i class="fas fa-info-circle"></i> Images are optional but recommended</div>
                             </div>
 
                             <!-- Hidden input container for deleted image IDs & sorting -->
@@ -3237,91 +3302,78 @@
             });
         });
 
+      
+
+        // ================= CATEGORY-WISE IMAGE UPLOAD LOGIC =================
         const IMG_CATEGORIES = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others'];
         const IMG_CATEGORY_LIMITS = { exterior: 5, living: 5, bedroom: 6, kitchen: 4, bathroom: 4, balcony: 3, others: 5 };
         const IMG_TOTAL_LIMIT = 20;
-        const IMG_MIN_REQUIRED = 3;
+        const IMG_MIN_REQUIRED = 0; // Made optional
 
         window.catFiles = {};
-        IMG_CATEGORIES.forEach(function (c) { window.catFiles[c] = []; });
+        IMG_CATEGORIES.forEach(c => window.catFiles[c] = []);
+        window.markedDeletionsQueue = [];
 
-        window.totalImageCount = function () {
-            return IMG_CATEGORIES.reduce(function (sum, c) { return sum + window.catFiles[c].length; }, 0);
-        };
-
-        let draggedItem = null;
-
-        function handleDragStart(e) {
-            draggedItem = this;
-            this.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', this.innerHTML);
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            return false;
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            if (draggedItem && draggedItem !== this) {
-                let container = this.parentNode;
-                let allItems = [...container.querySelectorAll('.img-cat-preview-item')];
-                let draggedIdx = allItems.indexOf(draggedItem);
-                let droppedIdx = allItems.indexOf(this);
-
-                if (draggedIdx < droppedIdx) {
-                    container.insertBefore(draggedItem, this.nextSibling);
-                } else {
-                    container.insertBefore(draggedItem, this);
-                }
-                
-                let cat = container.id.replace('imgPreview-', '');
-                syncCategoryInputFromDOM(cat);
-                updateCoverPhotoAndLabels();
-            }
-            return false;
-        }
-
-        function handleDragEnd() {
-            this.classList.remove('dragging');
-            draggedItem = null;
-        }
-
-        document.querySelectorAll('.existing-img-item').forEach(function(el) {
-            el.draggable = true;
-            el.addEventListener('dragstart', handleDragStart);
-            el.addEventListener('dragover', handleDragOver);
-            el.addEventListener('drop', handleDrop);
-            el.addEventListener('dragend', handleDragEnd);
-        });
-
-        function syncCategoryInputFromDOM(cat) {
-            var container = document.getElementById('imgPreview-' + cat);
-            if (!container || !window.catFiles[cat]) return;
-            
-            var newOrderFiles = [];
-            container.querySelectorAll('.new-file-item').forEach(el => {
-                var fName = el.dataset.fileName;
-                var fileObj = window.catFiles[cat].find(f => f.name === fName);
-                if(fileObj) newOrderFiles.push(fileObj);
+        function existingTotalCount() {
+            let total = 0;
+            IMG_CATEGORIES.forEach(cat => {
+                total += document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
             });
-            
-            window.catFiles[cat] = newOrderFiles;
-            
-            var dt = new DataTransfer();
-            window.catFiles[cat].forEach(f => dt.items.add(f));
-            var inputEl = document.getElementById('imgInput-' + cat);
-            if (inputEl) inputEl.files = dt.files;
+            return total;
+        }
+
+        function totalImageCount() {
+            return IMG_CATEGORIES.reduce((sum, c) => sum + window.catFiles[c].length, 0);
         }
 
         function syncCategoryInput(cat) {
-            var dt = new DataTransfer();
-            window.catFiles[cat].forEach(function (file) { dt.items.add(file); });
-            var inputEl = document.getElementById('imgInput-' + cat);
+            const dt = new DataTransfer();
+            window.catFiles[cat].forEach(f => dt.items.add(f));
+            const inputEl = document.getElementById('imgInput-' + cat);
             if (inputEl) inputEl.files = dt.files;
+        }
+
+        function renderCategory(cat) {
+            const preview = document.getElementById('imgPreview-' + cat);
+            if (!preview) return;
+
+            // Remove newly added tiles to re-render them cleanly
+            preview.querySelectorAll('.new-file-item').forEach(el => el.remove());
+
+            window.catFiles[cat].forEach((file, idx) => {
+                const div = document.createElement('div');
+                div.className = 'img-cat-preview-item new-file-item';
+                div.draggable = true;
+                div.dataset.fileName = file.name;
+                div.dataset.cat = cat;
+
+                const img = document.createElement('img');
+                div.appendChild(img);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'remove-image';
+                removeBtn.innerHTML = '✖';
+                removeBtn.onclick = (evt) => { removeCatImage(cat, file.name.replace(/'/g, "\\'"), evt); };
+                div.appendChild(removeBtn);
+
+                preview.appendChild(div);
+                attachDragEvents(div, cat);
+
+                const reader = new FileReader();
+                reader.onload = e => { img.src = e.target.result; };
+                reader.readAsDataURL(file);
+            });
+
+            updateCoverPhotoAndLabels();
+            
+            const newCount = window.catFiles[cat].length;
+            const savedCount = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
+            const countEl = document.getElementById('count-' + cat);
+            if (countEl) countEl.innerText = savedCount + newCount;
+
+            const tab = document.querySelector(`.img-cat-tab[data-cat="${cat}"]`);
+            if (tab) tab.classList.toggle('has-images', (savedCount + newCount) > 0);
         }
 
         function updateCoverPhotoAndLabels() {
@@ -3347,8 +3399,9 @@
                         idxBadge.innerHTML = (item.classList.contains('existing-img-item') ? 'Saved - ' : '') + 'Image ' + (index + 1);
                     }
 
-                    if (!hasCover) {
-                        item.insertAdjacentHTML('beforeend', '<span class="cover-badge" style="position:absolute; bottom:8px; left:8px; background:linear-gradient(135deg,#f6d365,#fda085); color:#3b2a00; font-size:0.65rem; font-weight:800; padding:3px 9px; border-radius:20px; z-index:10;"><i class="fas fa-star"></i> Cover Photo</span>');
+                    // Assign cover photo to the very first item in exterior/living
+                    if (!hasCover && (cat === 'exterior' || cat === 'living')) {
+                        item.insertAdjacentHTML('beforeend', '<span class="cover-badge" style="position:absolute; bottom:8px; left:8px; background:linear-gradient(135deg,#f6d365,#fda085); color:#3b2a00; font-size:0.65rem; font-weight:800; padding:3px 9px; border-radius:20px; z-index:10;"><i class="fas fa-star"></i> Cover</span>');
                         hasCover = true;
                     }
                 });
@@ -3365,68 +3418,68 @@
             orderInput.value = existingOrder.join(',');
         }
 
-        function renderCategory(cat) {
-            var preview = document.getElementById('imgPreview-' + cat);
-            if (!preview) return;
-
-            preview.querySelectorAll('.new-file-item').forEach(el => el.remove());
-
-            window.catFiles[cat].forEach(function (file) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    var div = document.createElement('div');
-                    div.className = 'img-cat-preview-item new-file-item';
-                    div.draggable = true;
-                    div.dataset.fileName = file.name;
-                    div.dataset.cat = cat;
-
-                    div.innerHTML =
-                        '<img src="' + e.target.result + '">' +
-                        '<span class="img-index-badge"></span>' + 
-                        '<button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\', \'' + file.name.replace(/'/g, "\\'") + '\', event)">✖</button>';
-
-                    div.addEventListener('dragstart', handleDragStart);
-                    div.addEventListener('dragover', handleDragOver);
-                    div.addEventListener('drop', handleDrop);
-                    div.addEventListener('dragend', handleDragEnd);
-
-                    preview.appendChild(div);
-                    updateCoverPhotoAndLabels();
-                };
-                reader.readAsDataURL(file);
+        function attachDragEvents(item, cat) {
+            item.addEventListener('dragstart', function (e) {
+                item.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                // Pass the index position to easily swap later
+                const container = item.parentNode;
+                const itemsArray = Array.from(container.querySelectorAll('.img-cat-preview-item'));
+                e.dataTransfer.setData('text/plain', itemsArray.indexOf(item));
             });
-            
-            var countEl = document.getElementById('count-' + cat);
-            if (countEl) countEl.innerText = window.catFiles[cat].length + preview.querySelectorAll('.existing-img-item').length;
+            item.addEventListener('dragend', function () {
+                item.classList.remove('dragging');
+                document.querySelectorAll('.img-cat-preview-item.drag-over').forEach(el => el.classList.remove('drag-over'));
+            });
+            item.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                item.classList.add('drag-over');
+            });
+            item.addEventListener('dragleave', function () {
+                item.classList.remove('drag-over');
+            });
+            item.addEventListener('drop', function (e) {
+                e.preventDefault();
+                item.classList.remove('drag-over');
 
-            var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
-            if (tab) tab.classList.toggle('has-images', (window.catFiles[cat].length + preview.querySelectorAll('.existing-img-item').length) > 0);
+                const container = item.parentNode;
+                const draggedItem = container.querySelector('.dragging');
+                if (!draggedItem || draggedItem === item) return;
+
+                const itemsArray = Array.from(container.querySelectorAll('.img-cat-preview-item'));
+                const fromIndex = itemsArray.indexOf(draggedItem);
+                const toIndex = itemsArray.indexOf(item);
+
+                if (fromIndex < toIndex) {
+                    container.insertBefore(draggedItem, item.nextSibling);
+                } else {
+                    container.insertBefore(draggedItem, item);
+                }
+
+                syncCategoryInputFromDOM(cat);
+                updateCoverPhotoAndLabels();
+            });
         }
 
-        window.markedDeletionsQueue = [];
-
-        window.removeExistingCatImage = function(imageId, cat, evt) {
-            if (evt) evt.stopPropagation();
-
-            const el = document.getElementById('existing-img-' + imageId);
-            const container = document.getElementById('deletedImagesContainer');
-
-            if (el) {
-                el.remove();
-
-                if (!window.markedDeletionsQueue.includes(imageId)) {
-                    window.markedDeletionsQueue.push(imageId);
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type  = 'hidden';
-                    hiddenInput.name  = 'deleted_images[]';
-                    hiddenInput.value = imageId;
-                    container.appendChild(hiddenInput);
-                }
-            }
-
-            renderAllCategories();
-            updateCoverPhotoAndLabels();
-        };
+        function syncCategoryInputFromDOM(cat) {
+            const container = document.getElementById('imgPreview-' + cat);
+            if (!container || !window.catFiles[cat]) return;
+            
+            const newOrderFiles = [];
+            container.querySelectorAll('.new-file-item').forEach(el => {
+                const fName = el.dataset.fileName;
+                const fileObj = window.catFiles[cat].find(f => f.name === fName);
+                if(fileObj) newOrderFiles.push(fileObj);
+            });
+            
+            window.catFiles[cat] = newOrderFiles;
+            
+            const dt = new DataTransfer();
+            window.catFiles[cat].forEach(f => dt.items.add(f));
+            const inputEl = document.getElementById('imgInput-' + cat);
+            if (inputEl) inputEl.files = dt.files;
+        }
 
         function renderAllCategories() {
             const categories = ['exterior', 'living', 'bedroom', 'kitchen', 'bathroom', 'balcony', 'others'];
@@ -3451,80 +3504,124 @@
 
             const notice = document.getElementById('imgMinNotice');
             if (notice) {
-                if (grandTotal >= 3) {
+                if (grandTotal > 0) {
                     notice.className = 'min-ok';
                     notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + grandTotal + ' images saved/selected.';
                 } else {
-                    notice.className = 'min-warning';
-                    notice.innerHTML = '<i class="fas fa-exclamation-circle"></i> Add at least 3 images (across any rooms) to publish';
+                    notice.className = 'min-ok';
+                    notice.innerHTML = '<i class="fas fa-info-circle"></i> Images are optional but recommended';
                 }
             }
+
+            // Update Checklist (optional)
+            if (typeof updatePreview === 'function') updatePreview();
         }
 
-        renderAllCategories();
-        updateCoverPhotoAndLabels();
 
-        function handleCatFiles(cat, files) {
-            var incoming = Array.from(files).filter(function (f) { return f.type.startsWith('image/'); });
-            var limit = IMG_CATEGORY_LIMITS[cat] || 5;
 
-            var existingCount = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length;
+        function handleCatFiles(cat, fileList) {
+    const newFiles = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+    if (newFiles.length === 0) return;
 
-            if (existingCount + window.catFiles[cat].length + incoming.length > limit) {
-                Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category.', 'warning');
-                incoming = incoming.slice(0, Math.max(0, limit - (existingCount + window.catFiles[cat].length)));
-            }
-            
-            var globalExisting = document.querySelectorAll('.existing-img-item').length;
-            if (globalExisting + window.totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
-                Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all rooms.', 'warning');
-                incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - (globalExisting + window.totalImageCount())));
-            }
+    const currentCatCount = document.querySelectorAll('#imgPreview-' + cat + ' .existing-img-item').length + window.catFiles[cat].length;
+    const catLimit = IMG_CATEGORY_LIMITS[cat] || 5;
 
-            window.catFiles[cat] = window.catFiles[cat].concat(incoming);
+    const currentGrandTotal = existingTotalCount() + totalImageCount();
+
+    let allowedSlots = Math.min(catLimit - currentCatCount, IMG_TOTAL_LIMIT - currentGrandTotal);
+
+    if (allowedSlots <= 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Limit Reached',
+            text: currentCatCount >= catLimit
+                ? `You can upload a maximum of ${catLimit} images in this category.`
+                : `You can upload a maximum of ${IMG_TOTAL_LIMIT} images in total.`,
+            confirmButtonColor: '#667eea'
+        });
+        return;
+    }
+
+    if (newFiles.length > allowedSlots) {
+        Swal.fire({
+            icon: 'info',
+            title: 'Some Images Skipped',
+            text: `Only ${allowedSlots} more image(s) could be added due to category/total limits.`,
+            confirmButtonColor: '#667eea'
+        });
+    }
+
+    const filesToAdd = newFiles.slice(0, allowedSlots);
+    window.catFiles[cat] = window.catFiles[cat].concat(filesToAdd);
+
+    syncCategoryInput(cat);
+    renderCategory(cat);
+    renderAllCategories();
+
+    // reset the input so selecting the same file again re-triggers change
+    const inputEl = document.getElementById('imgInput-' + cat);
+    if (inputEl) inputEl.value = '';
+}
+        window.removeCatImage = function (cat, fileName, evt) {
+            if (evt) evt.stopPropagation();
+            window.catFiles[cat] = window.catFiles[cat].filter(f => f.name !== fileName);
             syncCategoryInput(cat);
             renderCategory(cat);
             renderAllCategories();
-        }
+        };
 
-        window.removeCatImage = function (cat, fileName, evt) {
+        window.markedDeletionsQueue = [];
+        window.removeExistingCatImage = function(imageId, cat, evt) {
             if (evt) evt.stopPropagation();
-            window.catFiles[cat] = window.catFiles[cat].filter(function (f) { return f.name !== fileName; });
-            syncCategoryInput(cat);
-            renderCategory(cat);
+
+            const el = document.getElementById('existing-img-' + imageId);
+            const container = document.getElementById('deletedImagesContainer');
+
+            if (el) {
+                el.remove();
+                if (!window.markedDeletionsQueue.includes(imageId)) {
+                    window.markedDeletionsQueue.push(imageId);
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type  = 'hidden';
+                    hiddenInput.name  = 'deleted_images[]';
+                    hiddenInput.value = imageId;
+                    container.appendChild(hiddenInput);
+                }
+            }
+
             renderAllCategories();
             updateCoverPhotoAndLabels();
         };
 
-        document.querySelectorAll('.img-cat-tab').forEach(function (tab) {
-            tab.addEventListener('click', function () {
-                var cat = this.dataset.cat;
-                document.querySelectorAll('.img-cat-tab').forEach(function (t) { t.classList.remove('active'); });
-                document.querySelectorAll('.img-cat-panel').forEach(function (p) { p.classList.remove('active'); });
+        // Attach drag events to already rendered server images
+        document.querySelectorAll('.existing-img-item').forEach(el => {
+            el.draggable = true;
+            attachDragEvents(el, el.dataset.cat);
+        });
 
+        document.querySelectorAll('.img-cat-tab').forEach(tab => {
+            tab.addEventListener('click', function () {
+                const cat = this.dataset.cat;
+                document.querySelectorAll('.img-cat-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.img-cat-panel').forEach(p => p.classList.remove('active'));
                 this.classList.add('active');
-                var activePanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
-                if (activePanel) activePanel.classList.add('active');
+                document.querySelector(`.img-cat-panel[data-cat-panel="${cat}"]`)?.classList.add('active');
             });
         });
 
-        IMG_CATEGORIES.forEach(function (cat) {
-            var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
-            var input = document.getElementById('imgInput-' + cat);
-
-            if (zone && input) {
-                zone.addEventListener('click', function () { input.click(); });
-                input.addEventListener('change', function (e) { handleCatFiles(cat, e.target.files); });
-
-                zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
-                zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
-                zone.addEventListener('drop', function (e) {
-                    e.preventDefault();
-                    zone.classList.remove('dragover');
-                    handleCatFiles(cat, e.dataTransfer.files);
-                });
-            }
+        IMG_CATEGORIES.forEach(cat => {
+            const zone = document.querySelector(`.img-cat-upload-area[data-cat="${cat}"]`);
+            const input = document.getElementById('imgInput-' + cat);
+            if (!zone || !input) return;
+            zone.addEventListener('click', () => input.click());
+            input.addEventListener('change', e => handleCatFiles(cat, e.target.files));
+            zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+            zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+            zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); handleCatFiles(cat, e.dataTransfer.files); });
         });
+
+        renderAllCategories();
+        updateCoverPhotoAndLabels();
 
         const brokeragePercentage = document.getElementById("brokerage_percentage");
         const manualBrokerage = document.getElementById("manualBrokerage");
@@ -4053,6 +4150,12 @@ function processPropertySubmission(_this) {
             field.removeClass('is-invalid');
         }
     }
+
+    var existingImagesCount = document.querySelectorAll('.existing-img-item').length;
+    var newImagesCount = window.totalImageCount ? window.totalImageCount() : 0;
+    var grandTotalImages = existingImagesCount + newImagesCount;
+
+
     
 
     if (!isValid) {

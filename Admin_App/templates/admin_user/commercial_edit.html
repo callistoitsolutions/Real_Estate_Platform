@@ -99,38 +99,108 @@
   .item-tag { background: white; border: 1px solid #dee2e6; border-radius: 20px; padding: 4px 14px; font-size: 13px; display: inline-flex; align-items: center; gap: 5px; }
   .item-tag .remove-btn { cursor: pointer; color: #dc3545; margin-left: 4px; font-size: 12px; }
 
-  /* ================= PROPERTY IMAGE CATEGORY UPLOAD (12-category system) ================= */
-  .img-cat-tabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; margin-bottom: 20px; }
-  .img-cat-tab { position: relative; border: 2px solid #e9ecef; background: #fff; border-radius: 14px; padding: 18px 14px 14px; font-size: 0.85rem; font-weight: 600; color: #4a5568; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; transition: all 0.25s ease; }
-  .img-cat-tab i { font-size: 1.3rem; color: #94a3b8; }
-  .img-cat-tab .cat-count { background: #f1f5f9; color: #64748b; border-radius: 20px; padding: 1px 9px; font-size: 0.72rem; font-weight: 700; align-self: flex-end; margin-top: -4px; }
-  .img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
-  .img-cat-tab.active i { color: #fff; }
-  .img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
-  .img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
+ 
 
-  .img-cat-panel { display: none; }
-  .img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+  /* ================= PROPERTY IMAGE CATEGORY UPLOAD — IMPROVED UX ================= */
+.img-upload-guide {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+    border: 2px dashed #a5b4fc; border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px;
+}
+.guide-step { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 190px; }
+.guide-step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--primary-gradient); color: #fff;
+    font-weight: 800; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 3px 8px rgba(102,126,234,0.35);
+}
+.guide-step-text { font-size: 0.78rem; color: #3730a3; line-height: 1.35; }
+.guide-step-text strong { display: block; font-size: 0.85rem; color: #1e1b4b; }
+.guide-arrow { color: #a5b4fc; font-size: 1rem; display: none; }
+@media (min-width: 900px) { .guide-arrow { display: block; } }
 
-  .img-cat-upload-area { border: 3px dashed #cbd5e0; border-radius: 15px; padding: 36px 20px; text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease; }
-  .img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
-  .img-cat-upload-area .upload-icon { width: 60px; height: 60px; border-radius: 50%; background: #eef2ff; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
-  .img-cat-upload-area .upload-icon i { font-size: 1.6rem; color: #667eea; margin: 0; }
-  .img-cat-upload-area .upload-text { font-size: 1.05rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
-  .img-cat-upload-area .upload-subtext { display: inline-block; margin-top: 8px; padding: 4px 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 20px; color: #475569; font-size: 0.82rem; }
+.img-cat-tabs {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 12px; margin-bottom: 20px; counter-reset: catstep;
+}
 
-  .img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
-  .img-cat-preview-item { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); aspect-ratio: 1; border: 2px solid transparent; }
-  .img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .img-cat-preview-item .remove-image { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; }
-  .img-cat-preview-item .remove-image:hover { background: #c0392b; }
+.img-cat-tab {
+    position: relative; border: 2px solid #e9ecef; background: #fff; border-radius: 14px;
+    padding: 18px 14px 14px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
+    cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    transition: all 0.25s ease; counter-increment: catstep;
+}
+.img-cat-tab i { font-size: 1.3rem; color: #94a3b8; }
+.img-cat-tab .cat-count {
+    background: #f1f5f9; color: #64748b; border-radius: 20px;
+    padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
+    align-self: flex-end; margin-top: -4px;
+}
+.img-cat-tab.active { background: var(--primary-gradient); border-color: transparent; color: #fff; }
+.img-cat-tab.active i { color: #fff; }
+.img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+.img-cat-tab.has-images:not(.active) { border-color: #38ef7d; }
 
-  .img-total-summary { display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 16px; padding: 16px 22px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
-  .img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 1.05rem; }
-  .img-total-summary .total-count span { color: #667eea; }
-  .img-total-summary .min-warning { font-size: 0.8rem; color: #e74c3c; font-weight: 600; }
-  .img-total-summary .min-ok { font-size: 0.8rem; color: #10b981; font-weight: 600; }
+.img-cat-tab::before {
+    content: counter(catstep); position: absolute; top: -8px; left: -8px;
+    width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid #cbd5e0; color: #64748b;
+    font-size: 0.68rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+.img-cat-tab.active::before { border-color: #667eea; color: #667eea; }
+.img-cat-tab.has-images::before { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; background: #38ef7d; border-color: #38ef7d; color: #fff; }
 
+.img-cat-tab:nth-child(1)::after, .img-cat-tab:nth-child(2)::after {
+    content: "★ Becomes Cover Photo"; font-size: 0.62rem; font-weight: 700; color: #b45309;
+    background: #fef3c7; padding: 2px 9px; border-radius: 20px; align-self: flex-start; margin-top: 2px;
+}
+.img-cat-tab.active:nth-child(1)::after, .img-cat-tab.active:nth-child(2)::after { color: #fff; background: rgba(255,255,255,0.25); }
+
+.img-cat-panel { display: none; }
+.img-cat-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+.img-cat-upload-area {
+    border: 3px dashed #cbd5e0; border-radius: 15px; padding: 36px 20px;
+    text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+}
+.img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #667eea; background: #f0f4ff; }
+.img-cat-upload-area .upload-icon {
+    width: 60px; height: 60px; border-radius: 50%; background: #eef2ff;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+}
+.img-cat-upload-area .upload-icon i { font-size: 1.6rem; color: #667eea; margin: 0; }
+.img-cat-upload-area .upload-text { font-size: 1.05rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+.img-cat-upload-area .upload-subtext {
+    display: inline-block; margin-top: 8px; padding: 4px 12px; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 20px; color: #475569; font-size: 0.82rem;
+}
+
+.img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+.img-cat-preview-item {
+    position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
+}
+.img-cat-preview-item.dragging { opacity: 0.4; }
+.img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;}
+.img-cat-preview-item .cover-badge {
+    position: absolute; bottom: 8px; left: 8px; background: linear-gradient(135deg,#f6d365,#fda085); color: #3b2a00;
+    font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 4px;
+}
+.img-cat-preview-item .remove-image {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff;
+    border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
+}
+.img-cat-preview-item .remove-image:hover { background: #c0392b; }
+
+.img-total-summary {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 16px;
+    padding: 16px 22px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+}
+.img-total-summary .total-count { font-weight: 700; color: #2d3748; font-size: 1.05rem; }
+.img-total-summary .min-ok { font-size: 0.85rem; color: #10b981; font-weight: 600; }
 
   .existing-img-remove-btn {
     position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
@@ -141,6 +211,8 @@
 }
 .existing-img-remove-btn input { display: none; }
 .existing-img-remove-btn:hover { background: #c0392b; }
+
+
 
 
   /* ================= CUSTOM SEARCH SELECT POPUP FIX ================= */
@@ -299,7 +371,7 @@
           <div class="step-item"><div class="step-circle" id="sc4">4</div><div class="step-label" id="sl4">Images & Contact</div></div>
         </div>
 
-        <form id="commercialEditForm" action="{% url 'commercial_edit' prop.id %}" method="POST" enctype="multipart/form-data">
+       <form id="commercialEditForm" action="{% url 'commercial_edit' prop.id %}" method="POST" enctype="multipart/form-data" novalidate>
           {% csrf_token %}
 
           <!-- ================= STEP 1 ================= -->
@@ -488,6 +560,9 @@
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Shop No/Godown/Unit No <span style="color:red;">*</span></label>
                     <input type="text" class="form-control" name="property_no" value="{{ prop.property_no }}" required>
+                    <span style="font-size: 0.75rem; color: red; margin-top: 4px; display: block; font-weight:bold;">
+                                            <i class="fas fa-info-circle"></i> Note: Required for verification not shown publicly.
+                                        </span>
                   </div>
 
                   <div class="col-md-6 mb-3">
@@ -559,13 +634,16 @@
                     </select>
                   </div>
 
+                  
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Built-up Area (sq.ft) <span class="required">*</span></label>
-                    <input type="number" class="form-control" name="builtup_area" id="builtup_area" value="{{ prop.builtup_area }}" required>
+                    <!-- Added step="any" to allow decimals like 0.00 -->
+                    <input type="number" step="any" class="form-control" name="builtup_area" id="builtup_area" value="{{ prop.builtup_area }}" required>
                   </div>
                   <div class="col-md-6 mb-3">
                     <label class="form-label">Carpet Area (sq.ft)</label>
-                    <input type="number" class="form-control" name="carpet_area" id="carpet_area" value="{{ prop.carpet_area|default:'' }}">
+                    <!-- Added step="any" to allow decimals like 0.00 -->
+                    <input type="number" step="any" class="form-control" name="carpet_area" id="carpet_area" value="{{ prop.carpet_area|default:'' }}">
                   </div>
                 </div>
               </div>
@@ -1004,9 +1082,35 @@
               <div class="section-header"><i class="fas fa-images"></i> Property Images</div>
               <div class="section-body">
 
+                <div class="img-upload-guide">
+                    <div class="guide-step">
+                        <div class="guide-step-num">1</div>
+                        <div class="guide-step-text">
+                            <strong>Pick a category</strong>
+                            Tap a tile below (Exterior, Reception, etc.)
+                        </div>
+                    </div>
+                    <i class="fas fa-arrow-right guide-arrow"></i>
+                    <div class="guide-step">
+                        <div class="guide-step-num">2</div>
+                        <div class="guide-step-text">
+                            <strong>Upload matching photos</strong>
+                            Click or drag images into that category only
+                        </div>
+                    </div>
+                    <i class="fas fa-arrow-right guide-arrow"></i>
+                    <div class="guide-step">
+                        <div class="guide-step-num">3</div>
+                        <div class="guide-step-text">
+                            <strong>Set your cover photo</strong>
+                            Drag to reorder — the 1st photo in Exterior or Reception is used as the cover
+                        </div>
+                    </div>
+                </div>
+
                 <div class="img-total-summary">
                   <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/30</div>
-                  <div id="imgMinNotice" class="min-warning"><i class="fas fa-exclamation-circle"></i> Add at least 3 images to publish</div>
+                  <div id="imgMinNotice" class="min-ok"><i class="fas fa-info-circle"></i> Images are optional but recommended</div>
                 </div>
 
                 <div class="img-cat-tabs" id="imgCatTabs">
@@ -1919,6 +2023,9 @@ document.addEventListener('DOMContentLoaded', function () {
 // ============================================================
 // COMMERCIAL IMAGE CATEGORY UPLOAD LOGIC (12 categories)
 // ============================================================
+
+
+// ================= CATEGORY-WISE IMAGE UPLOAD LOGIC =================
 const IMG_CATEGORIES = [
   'exterior', 'reception', 'workspace', 'cabins', 'meeting_room',
   'shop_showroom', 'warehouse', 'pantry', 'washroom', 'parking',
@@ -1932,10 +2039,8 @@ const IMG_CATEGORY_LIMITS = {
 };
 
 const IMG_TOTAL_LIMIT = 30;
-const IMG_MIN_REQUIRED = 3;
+const IMG_MIN_REQUIRED = 0; // Made optional
 
-// Images already saved in the database for this property, per category.
-// Used as an offset so category/total limits account for existing images, not just newly picked files.
 const EXISTING_IMG_COUNTS = {
   exterior: {{ images_by_category.exterior|length|default:0 }},
   reception: {{ images_by_category.reception|length|default:0 }},
@@ -1970,47 +2075,98 @@ function syncCategoryInput(cat) {
 
 function renderCategory(cat) {
   var preview = document.getElementById('imgPreview-' + cat);
+  if (!preview) return;
   preview.innerHTML = '';
-  catFiles[cat].forEach(function (file) {
+  
+  catFiles[cat].forEach(function (file, idx) {
+    var div = document.createElement('div');
+    div.className = 'img-cat-preview-item';
+    div.draggable = true;
+    div.dataset.index = idx;
+
+    var img = document.createElement('img');
+    div.appendChild(img);
+
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'remove-image';
+    removeBtn.innerHTML = '✖';
+    removeBtn.onclick = function (evt) { removeCatImage(cat, file.name.replace(/'/g, "\\'"), evt); };
+    div.appendChild(removeBtn);
+
+    // Cover-photo logic applies if the first newly added tile is in exterior/reception
+    if (idx === 0 && (cat === 'exterior' || cat === 'reception') && EXISTING_IMG_COUNTS[cat] === 0) {
+        var coverTag = document.createElement('span');
+        coverTag.className = 'cover-badge';
+        coverTag.innerHTML = '<i class="fas fa-star"></i> Cover';
+        div.appendChild(coverTag);
+    }
+
+    preview.appendChild(div);
+    attachDragEvents(div, cat);
+
     var reader = new FileReader();
-    reader.onload = function (e) {
-      var div = document.createElement('div');
-      div.className = 'img-cat-preview-item';
-      div.innerHTML = '<img src="' + e.target.result + '"><button type="button" class="remove-image" onclick="removeCatImage(\'' + cat + '\',\'' + file.name.replace(/'/g, "\\'") + '\')">✖</button>';
-      preview.appendChild(div);
-    };
+    reader.onload = function (e) { img.src = e.target.result; };
     reader.readAsDataURL(file);
   });
+
   var newCount = catFiles[cat].length;
   var savedCount = EXISTING_IMG_COUNTS[cat] || 0;
-  document.getElementById('count-' + cat).innerText = savedCount + newCount;
+  var countEl = document.getElementById('count-' + cat);
+  if(countEl) countEl.innerText = savedCount + newCount;
 
   var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
   if (tab) tab.classList.toggle('has-images', (savedCount + newCount) > 0);
 }
 
+function attachDragEvents(item, cat) {
+  item.addEventListener('dragstart', function (e) {
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', item.dataset.index);
+  });
+  item.addEventListener('dragend', function () {
+      item.classList.remove('dragging');
+      document.querySelectorAll('.img-cat-preview-item.drag-over').forEach(function (el) {
+          el.classList.remove('drag-over');
+      });
+  });
+  item.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      item.classList.add('drag-over');
+  });
+  item.addEventListener('dragleave', function () {
+      item.classList.remove('drag-over');
+  });
+  item.addEventListener('drop', function (e) {
+      e.preventDefault();
+      item.classList.remove('drag-over');
+
+      var fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+      var toIndex = parseInt(item.dataset.index, 10);
+      if (isNaN(fromIndex) || isNaN(toIndex) || fromIndex === toIndex) return;
+
+      var moved = catFiles[cat].splice(fromIndex, 1)[0];
+      catFiles[cat].splice(toIndex, 0, moved);
+
+      syncCategoryInput(cat);
+      renderCategory(cat);
+  });
+}
+
 function renderAllCategories() {
   IMG_CATEGORIES.forEach(renderCategory);
   var total = existingTotalCount() + totalImageCount();
-  document.getElementById('imgTotalCount').innerText = total;
-
-  var notice = document.getElementById('imgMinNotice');
-  if (notice) {
-    if (total >= IMG_MIN_REQUIRED) {
-      notice.className = 'min-ok';
-      notice.innerHTML = '<i class="fas fa-check-circle"></i> Great! ' + total + ' images on this listing.';
-    } else {
-      notice.className = 'min-warning';
-      notice.innerHTML = '<i class="fas fa-exclamation-circle"></i> Add at least ' + IMG_MIN_REQUIRED + ' images to publish';
-    }
-  }
+  const totalEl = document.getElementById('imgTotalCount');
+  if(totalEl) totalEl.innerText = total;
 
   var clPhotos = document.getElementById('cl-photos');
   if (clPhotos) {
-    var hasPhotos = total > 0;
-    clPhotos.style.color = hasPhotos ? '#10b981' : '#cbd5e0';
-    var icon = clPhotos.querySelector('i');
-    if (icon) icon.style.color = hasPhotos ? '#10b981' : '#cbd5e0';
+      var hasPhotos = total > 0;
+      clPhotos.style.color = hasPhotos ? '#10b981' : '#cbd5e0';
+      var icon = clPhotos.querySelector('i');
+      if (icon) icon.style.color = hasPhotos ? '#10b981' : '#cbd5e0';
   }
 }
 
@@ -2020,12 +2176,12 @@ function handleCatFiles(cat, files) {
   var alreadyStored = EXISTING_IMG_COUNTS[cat] || 0;
 
   if (alreadyStored + catFiles[cat].length + incoming.length > limit) {
-    Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category (including already-saved images).', 'warning');
-    incoming = incoming.slice(0, Math.max(0, limit - alreadyStored - catFiles[cat].length));
+      Swal.fire('Category Limit Reached', 'Maximum ' + limit + ' images allowed for this category (including already-saved images).', 'warning');
+      incoming = incoming.slice(0, Math.max(0, limit - alreadyStored - catFiles[cat].length));
   }
   if (existingTotalCount() + totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
-    Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all categories.', 'warning');
-    incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - existingTotalCount() - totalImageCount()));
+      Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all categories.', 'warning');
+      incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - existingTotalCount() - totalImageCount()));
   }
 
   catFiles[cat] = catFiles[cat].concat(incoming);
@@ -2033,11 +2189,17 @@ function handleCatFiles(cat, files) {
   renderAllCategories();
 }
 
-window.removeCatImage = function (cat, fileName) {
+window.removeCatImage = function (cat, fileName, evt) {
+  if (evt) evt.stopPropagation();
   catFiles[cat] = catFiles[cat].filter(function (f) { return f.name !== fileName; });
   syncCategoryInput(cat);
   renderAllCategories();
 };
+
+
+
+
+
 
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.img-cat-tab').forEach(function (tab) {

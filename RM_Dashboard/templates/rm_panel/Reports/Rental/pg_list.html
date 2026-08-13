@@ -1,3 +1,4 @@
+
 {% include "rm_panel/rm_header.html" %}
 {% load static %}
 <style>
@@ -202,11 +203,11 @@ body{font-family:var(--ff);background:var(--bg);color:var(--text);font-size:14px
                                 <i class="fas fa-plus-circle"></i> Add Pg Co living (Rent) Property
                             </button>
                         </a>
-                        {% comment %} <button class="btn-primary-custom"
+                        <button hidden class="btn-primary-custom"
                                 style="background: transparent; border: 2px solid white; color: white;"
                                 onclick="openImportModal()">
                             <i class="fas fa-file-excel"></i> Import Excel
-                        </button> {% endcomment %}
+                        </button>
                         <button class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#bulkDeleteModal" style="background: #ef4444; border-color: #ef4444; color: white;">
                             <i class="fas fa-trash-alt"></i> Bulk Delete
                         </button>
@@ -295,7 +296,7 @@ body{font-family:var(--ff);background:var(--bg);color:var(--text);font-size:14px
 
 <!-- ROW 2 — REVENUE KPIs (5 CARDS) -->
 <div class="pg-kpi-wrap">
-  <div class="pg-row-lbl">Row 2 — Revenue &amp; Pricing</div>
+  <div class="pg-row-lbl">Row 2 — Revenue & Pricing</div>
   <div class="pg-kpi-grid pg-g5">
 
     <div class="pg-kpi k-amber">
@@ -347,7 +348,7 @@ body{font-family:var(--ff);background:var(--bg);color:var(--text);font-size:14px
 
 <!-- ROW 3 — AMENITY & FACILITY KPIs (6 CARDS) -->
 <div class="pg-kpi-wrap">
-  <div class="pg-row-lbl">Row 3 — Amenity &amp; Facility Summary</div>
+  <div class="pg-row-lbl">Row 3 — Amenity & Facility Summary</div>
   <div class="pg-kpi-grid pg-g6">
 
     <div class="pg-kpi k-green">
@@ -355,7 +356,7 @@ body{font-family:var(--ff);background:var(--bg);color:var(--text);font-size:14px
       <div class="pg-kpi-ico ic-green"><i class="fas fa-utensils"></i></div>
       <div class="pg-kpi-val">{{ meals_available_count|default:"0" }}</div>
       <div class="pg-kpi-lbl">Meals Included</div>
-      <div class="pg-kpi-sub"><i class="fas fa-check" style="font-size:10px"></i>&nbsp;With food facility</div>
+      <div class="pg-kpi-sub"><i class="fas fa-check" style="font-size:10px"></i>With food facility</div>
       <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:{{ meals_pct|default:0 }}%;background:var(--green)"></div></div>
     </div>
 
@@ -409,7 +410,7 @@ body{font-family:var(--ff);background:var(--bg);color:var(--text);font-size:14px
 
 <!-- ROW 4 — POLICY KPIs (5 CARDS) -->
 <div class="pg-kpi-wrap">
-  <div class="pg-row-lbl">Row 4 — House Rules &amp; Policy Summary</div>
+  <div class="pg-row-lbl">Row 4 — House Rules & Policy Summary</div>
   <div class="pg-kpi-grid pg-g5">
 
     <div class="pg-kpi k-green">
@@ -526,6 +527,142 @@ body{font-family:var(--ff);background:var(--bg);color:var(--text);font-size:14px
   </div>
 </div>
 
+
+
+<div class="pg-kpi-wrap">
+  <div class="pg-row-lbl">Row 5 — Listing, Approval & Duplicate Status</div>
+  <div class="pg-kpi-grid pg-g4">
+
+    <div class="pg-kpi k-green">
+      <div class="pg-kpi-ico ic-green"><i class="fas fa-wifi"></i></div>
+      <div class="pg-kpi-val">{{ active_listing_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Active Listings</div>
+      <div class="pg-kpi-sub"><span class="up"><i class="fas fa-circle" style="font-size:8px"></i></span>&nbsp;Live listings</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:100%;background:var(--green)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-amber">
+      <div class="pg-kpi-ico ic-amber"><i class="fas fa-pause-circle"></i></div>
+      <div class="pg-kpi-val">{{ inactive_listing_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Inactive Listings</div>
+      <div class="pg-kpi-sub">Not currently live</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:40%;background:var(--amber)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-blue">
+      <div class="pg-kpi-ico ic-blue"><i class="fas fa-handshake"></i></div>
+      <div class="pg-kpi-val">{{ sold_listing_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Sold</div>
+      <div class="pg-kpi-sub">Closed deals</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:20%;background:var(--blue)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-indigo">
+      <div class="pg-kpi-ico ic-indigo"><i class="fas fa-key"></i></div>
+      <div class="pg-kpi-val">{{ rented_listing_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Rented</div>
+      <div class="pg-kpi-sub">Currently occupied</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:60%;background:var(--indigo)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-amber">
+      <div class="pg-kpi-ico ic-amber"><i class="fas fa-hourglass-half"></i></div>
+      <div class="pg-kpi-val">{{ pending_approval_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Pending Approval</div>
+      <div class="pg-kpi-sub">Awaiting review</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:35%;background:var(--amber)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-green">
+      <div class="pg-kpi-ico ic-green"><i class="fas fa-check-circle"></i></div>
+      <div class="pg-kpi-val">{{ approved_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Approved</div>
+      <div class="pg-kpi-sub"><span class="up"><i class="fas fa-arrow-up"></i></span>&nbsp;Verified listings</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:80%;background:var(--green)"></div></div>
+    </div>
+
+    <div class="pg-kpi k-red">
+      <div class="pg-kpi-ico ic-red"><i class="fas fa-times-circle"></i></div>
+      <div class="pg-kpi-val">{{ rejected_count|default:"0" }}</div>
+      <div class="pg-kpi-lbl">Rejected</div>
+      <div class="pg-kpi-sub"><span class="dn"><i class="fas fa-arrow-down"></i></span>&nbsp;Needs correction</div>
+      <div class="pg-kpi-bar"><div class="pg-kpi-bar-fill" style="width:15%;background:var(--red)"></div></div>
+    </div>
+
+   
+
+ 
+
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     BLOCK 2 — EXTRA FILTER FIELDS
+     WHERE: inside <form method="GET" id="pgSearchForm">, inside the
+     FIRST .pg-search-row (the one with Search Keyword / PG For / City
+     / Furnishing / Meals / Sharing) — paste these 4 new .pg-sf blocks
+     right before that row's closing </div>.
+================================================================ -->
+
+
+<!-- ════════════════════════════════════════════════════════════
+     BLOCK 3 — REPLACE the debounce script + placeholder text
+     ════════════════════════════════════════════════════════════ -->
+
+<!-- 3a. FIND (there are two copies of this in the file — the page has
+     a duplicated <script> block at the bottom; update BOTH):
+
+        let typingTimer;
+        if(searchInput) {
+            let val = searchInput.value;
+            searchInput.focus();
+            searchInput.value = '';
+            searchInput.value = val;
+
+            searchInput.addEventListener("input", function() {
+                clearTimeout(typingTimer);
+                loader.style.display = 'inline-block';
+                typingTimer = setTimeout(() => { form.submit(); }, 600);
+            });
+        }
+
+     REPLACE `600` with `900` in both copies (slower, "search all
+     fields" server-side query already covers everything now — see
+     the updated pg_list view). If you prefer one single clean version,
+     use this: -->
+<script>
+let typingTimer;
+const TYPING_DELAY_MS = 900; // was 600ms — slowed down on purpose
+
+if (searchInput) {
+    let val = searchInput.value;
+    searchInput.focus();
+    searchInput.value = '';
+    searchInput.value = val;
+
+    searchInput.addEventListener("input", function () {
+        clearTimeout(typingTimer);
+        if (loader) loader.style.display = 'inline-block';
+        typingTimer = setTimeout(() => { form.submit(); }, TYPING_DELAY_MS);
+    });
+
+    searchInput.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            clearTimeout(typingTimer);
+            form.submit();
+        }
+    });
+}
+</script>
+
+<!-- 3b. FIND:
+        placeholder="PG name, city, locality, owner, contact…"
+     REPLACE WITH:
+        placeholder="ID, PG name, city, locality, owner, contact, listed by, uploaded by, status…"
+-->
+
 <!-- CHARTS -->
 <div class="pg-charts-grid">
   <div class="pg-chart-card">
@@ -570,9 +707,12 @@ body{font-family:var(--ff);background:var(--bg);color:var(--text);font-size:14px
 
 
 <script>
+
+    // ✅ NEW / FIXED:
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. Safely load the JSON data passed from Django View
-    const chartData = JSON.parse('{{ chart_data_json|escapejs }}');
+    const rawData = '{{ chart_data_json|escapejs }}';
+    const chartData = rawData ? JSON.parse(rawData) : {};
+
 
     // 2. Property Distribution Pie Chart
     const pieCtx = document.getElementById('propertyPieChart').getContext('2d');
@@ -696,6 +836,50 @@ document.addEventListener("DOMContentLoaded", function() {
         </select>
       </div>
       
+
+
+      <div class="pg-sf">
+  <label>Listed By Role</label>
+  <select name="listed_by" class="auto-submit">
+    <option value="All Roles">All Roles</option>
+    {% for role in unique_roles %}
+      <option value="{{ role }}" {% if listed_by_filter == role %}selected{% endif %}>{{ role }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div class="pg-sf">
+  <label>Uploaded By Role</label>
+  <select name="uploaded_by" class="auto-submit">
+    <option value="All Roles">All Roles</option>
+    {% for role in unique_uploaded_roles %}
+      <option value="{{ role }}" {% if uploaded_by_filter == role %}selected{% endif %}>{{ role }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div class="pg-sf">
+  <label>Listing Status</label>
+  <select name="listing_status" class="auto-submit">
+    <option value="All Status">All Status</option>
+    {% for ls in unique_listing_status %}
+      <option value="{{ ls }}" {% if listing_status_filter == ls %}selected{% endif %}>{{ ls }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+<div class="pg-sf">
+  <label>Approval Status</label>
+  <select name="approval_status" class="auto-submit">
+    <option value="All Approval">All Approval</option>
+    {% for a in unique_approval_status %}
+      <option value="{{ a }}" {% if approval_status_filter == a %}selected{% endif %}>{{ a }}</option>
+    {% endfor %}
+  </select>
+</div>
+
+
+
     </div>
 
     <!-- Second Row (Dates) -->
@@ -709,7 +893,7 @@ document.addEventListener("DOMContentLoaded", function() {
             <input type="date" name="to_date" value="{{ to_date }}" class="auto-submit">
         </div>
         <div style="display:flex;gap:8px;align-items:flex-end;flex-shrink:0">
-            <a href="{% url 'pg_list' %}" class="pg-btn pg-btn-outline" style="height: 38px; justify-content: center;"><i class="fas fa-times"></i> Reset</a>
+            <a href="{% url 'pg_rm_list' %}" class="pg-btn pg-btn-outline" style="height: 38px; justify-content: center;"><i class="fas fa-times"></i> Reset</a>
         </div>
     </div>
   </form>
@@ -726,19 +910,14 @@ document.addEventListener("DOMContentLoaded", function() {
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
         
     <div style="display: flex; gap: 10px;">
-    {% comment %} <a href="{% url 'export_pg_coliving' %}?format=excel" 
+    <a href="{% url 'export_pg_coliving_rm' %}?format=excel" 
        target="_blank" 
        class="btn btn-sm" 
        style="background-color: #6366f1; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
         <i class="fas fa-file-excel"></i> Direct Excel Download
     </a>
     
-    <a href="{% url 'export_pg_coliving' %}?format=csv" 
-       target="_blank" 
-       class="btn btn-sm" 
-       style="background-color: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
-        <i class="fas fa-file-csv"></i> Direct CSV Download
-    </a> {% endcomment %}
+   
 </div>
       
     </div>
@@ -766,90 +945,120 @@ document.addEventListener("DOMContentLoaded", function() {
         <thead>
             <tr style="background: linear-gradient(135deg, #667eea10, #764ba210); border-bottom: 2px solid var(--border);">
 
-                <!-- ── Meta ─────────────────────────────────────────────── -->
+                <!-- ── Meta & Identifiers ────────────────────────────────── -->
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Sr.No</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Listing Status</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Approval Status</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property Id</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Images</th>
+<th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Uploaded Video</th>
+<th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Auto Slideshow</th>
+<th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">RM Video Link</th>
 
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Guided Video Tour</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">pg_property_id</th>
+                <!-- ── Listed By Information ─────────────────────────────── -->
+
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Listed By Type</th>
+
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Listed By ID</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Listed By Name</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Listed By Email</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Listed By Contact</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Listed By Role</th>
+
+                <!-- ── Duplicate Tracking Fields ─────────────────────────── -->
+                
+
+                <!-- ── Basic Information ─────────────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property Title</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Building / Project / Society Name</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property No/Unit No</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Tower/Wing Number</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">City</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Locality</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property Address</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property Landmark</th>
+                                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">pincode</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">State</th>
+
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">  Google Maps Link</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Latitude</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Longitude</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;"> PG for</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Furnishing Status</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Best Suited For</th>
+
+                <!-- ── Meals & Policies ─────────────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Meals Available?</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Meal Offerings</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Meal Speciality</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Notice Period (Days)</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Lock-in Period (Days)</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Minimum Stay (Months)</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Available From</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property Managed By</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property Manager Stays at Property</th>
+                                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Brokerage Type</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Brokerage / Service Fee</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Manual Brokerage</th>
+
+                <!-- ── Room Details & Financials ─────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; border-left: 3px solid #c4b5fd;">Room Type </th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Total Beds In Room</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Rent Per Occupant (₹/Bed/Month/Person)</th>
 
 
-                <!-- ── Basic Info ────────────────────────────────────────── -->
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">property_title</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">city</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">building_name</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">locality</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">property_address</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">total_beds</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">pg_for</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">furnishing_type</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">sharing_type</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">best_suited_for</th>
 
-                                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">meals_available</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">meal_offerings</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">meal_speciality</th>
-
-                <!-- ── PGRoomDetail — one group of columns per room slot ── -->
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">notice_period</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">lockin_period</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">minimum_stay</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">available_from</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">property_managed_by</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property manager stays at Property</th>
-                <!-- Room 1 -->
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; border-left: 3px solid #c4b5fd;">room_type_1</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_beds_1</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_rent_1</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_deposit_1</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_brokerage_1</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_brokerage_percent_1</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_manual_brokerage_1</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; border-right: 3px solid #c4b5fd;">room_facilities_1</th>
-                <!-- Room 2 -->
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; border-left: 3px solid #ddd6fe;">room_type_2</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_beds_2</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_rent_2</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_deposit_2</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_brokerage_2</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_brokerage_percent_2</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">room_manual_brokerage_2</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #5b21b6; background: #f5f3ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; border-right: 3px solid #ddd6fe;">room_facilities_2</th>
-
-                <!-- ── Meals ─────────────────────────────────────────────── -->
+             
 
 
-                <!-- ── Rules ─────────────────────────────────────────────── -->
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">opposite_sex_allowed</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">any_time_allowed</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">visitors_allowed</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">guardian_allowed</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">drinking_allowed</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">smoking_allowed</th>
 
-                <!-- ── Amenities ──────────────────────────────────────────── -->
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">property_description</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">amenities</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">nearby_facilities</th>
 
-                <!-- ── Contact ───────────────────────────────────────────── -->
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">owner_name</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">contact_number</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">email</th>
-                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">alternate_contact</th>
+                         <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Advance Rent Month</th>
 
-                <!-- ── Uploader ──────────────────────────────────────────── -->
+                         <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Advance Rent Amount</th>
+
+
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Refundable Security Deposit(₹/Person)</th>
+
+
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Refundable Security Deposit Amount(₹/Person)</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Maintenance Type</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1;">Monthly Maintenance Amount</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: #7c3aed; background: #faf5ff; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 1; border-right: 3px solid #c4b5fd;">Estimated Move-In Cost (Per Occupant)</th>
+
+                <!-- ── Regulations & Rules ───────────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;"> Opposite Gender Visitors Allowed?</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Visitors Allowed?</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Parents/Guardians Allowed?</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">24x7 Entry Allowed?</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Curfew Time</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Smoking Allowed?</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Alcohol Consumption Allowed?</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Couples Allowed?</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Pets Allowed?</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Cooking Allowed?</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Police Verification Required?</th>
+
+                <!-- ── Descriptions & Amenities ──────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Amenities</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Nearby Facilities</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property Summary</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Property Description</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">User Description</th>
+
+                <!-- ── Status & Metadata ─────────────────────────────────── -->
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Is Property Already Listed Elsewhere?</th>
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">Portal Name</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">uploaded_by_name</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">uploaded_by_email</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">uploaded_by_contact</th>
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">uploaded_by_role</th>
-
-                <!-- ── Audit ─────────────────────────────────────────────── -->
-
                 <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">upload_file_name</th>
 
-                                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">created_at</th>
 
+                <th style="padding: 11px 12px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: #f8fafc; z-index: 1;">created_at</th>
+
+               
 
                 <!-- ── Actions ───────────────────────────────────────────── -->
                 <th style="padding: 11px 12px; text-align: center; font-size: 11px; font-weight: 700; color: white; position: sticky; right: 0; background: #1a1039; z-index: 2;">Actions</th>
@@ -858,185 +1067,355 @@ document.addEventListener("DOMContentLoaded", function() {
 
         <tbody>
             {% for prop in page_obj %}
-            {% with rooms=prop.rooms.all %}
             <tr id="row-{{ prop.id }}">
 
-                <!-- Meta -->
+                <!-- Meta & Identifiers -->
+                
+                <!-- Sr.No (Maintains correct index mapping across pagination and searches) -->
+
                 <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
 
+
+                     <td>
+        {% if prop.listing_status == "Active" %}
+            <span class="badge bg-success">Active</span>
+        {% elif prop.listing_status == "Inactive" %}
+            <span class="badge bg-secondary">Inactive</span>
+        {% elif prop.listing_status == "Sold" %}
+            <span class="badge bg-primary">Sold</span>
+        {% elif prop.listing_status == "Rented" %}
+            <span class="badge bg-info text-dark">Rented</span>
+        {% else %}
+            <span class="badge bg-success text-dark">Draft</span>
+        {% endif %}
+    </td>
+               
+     <td>
+        {% if prop.approval_status == "Pending" %}
+            <span class="badge bg-warning text-dark">Pending</span>
+        {% elif prop.approval_status == "Approved" %}
+            <span class="badge bg-success">Approved</span>
+        {% elif prop.approval_status == "Rejected" %}
+            <span class="badge bg-danger">Rejected</span>
+        {% else %}
+            <span class="badge bg-warning text-dark">Pending</span>
+        {% endif %}
+    </td>
+
+                <td style="font-weight: 700; color: #7c3aed;">{{ prop.id|default:"—" }}</td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                         {% if prop.images.all %}
-                            <div style="position: relative; width: 50px; height: 50px; min-width: 50px;" title="Click to view all images">
+                            <div style="position: relative; width: 40px; height: 40px;" title="Click to view all images">
                                 {% with first_img=prop.images.all|first %}
-                                    <img src="{{ first_img.image.url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <img src="{{ first_img.image.url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
                                 {% endwith %}
                                 {% if prop.images.count > 1 %}
-                                    <div style="position: absolute; bottom: -4px; right: -4px; background: rgba(0,0,0,0.8); color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 10px; border: 1px solid white; font-weight: bold; line-height: 1;">
+                                    <div style="position: absolute; bottom: -4px; right: -4px; background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; padding: 1px 4px; border-radius: 8px;">
                                         +{{ prop.images.count|add:"-1" }}
                                     </div>
                                 {% endif %}
                             </div>
                         {% else %}
-                            <div style="width: 50px; height: 50px; min-width: 50px; border-radius: 8px; background: linear-gradient(135deg, #2563eb, #1e40af); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                <i class="fas fa-home" style="font-size: 16px;"></i>
-                                <span style="font-size: 6px; font-weight: 700; margin-top: 2px; line-height: 1;">EstateFlow</span>
+                            <div style="width: 40px; height: 40px; border-radius: 6px; background: #2563eb; display: flex; align-items: center; justify-content: center; color: white;">
+                                <i class="fas fa-home" style="font-size: 14px;"></i>
                             </div>
                         {% endif %}
                     </div>
                 </td>
-
                
-                <td>
-                    {% if prop.video %}
-                        <a href="{{ prop.video.url }}" target="_blank" onclick="openVideoPreview('{{ prop.video.url }}'); return false;" style="color: #0d9488; text-decoration: none; font-weight: 600;"><i class="fas fa-video"></i> Run Stream</a>
-                    {% else %}<span class="text-muted">—</span>{% endif %}
-                </td>
 
-                <td style="font-weight: 700; color: #7c3aed;">{{ prop.pg_property_id|default:"—" }}</td>
+ 
+                <!-- ================= 6A. UPLOADED VIDEO ================= -->
+<td>
+    {% for vid in prop.videos.all %}
+        {% if vid.source == 'upload' or vid.source == 'uploaded' %}
+            {% if vid.video %}
+                <button onclick="openVideoPreview('{{ vid.video.url }}')"
+                        class="btn btn-sm btn-outline-success" style="padding: 2px 8px; font-size: 11px;">
+                    <i class="fas fa-video"></i> Watch
+                </button>
+            {% else %}
+                <span class="badge bg-warning text-dark" style="font-size:0.75rem;">Pending RM</span>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</td>
+
+<!-- ================= 6B. AUTO-GENERATED SLIDESHOW ================= -->
+<td>
+    {% for vid in prop.videos.all %}
+        {% if vid.source == 'auto' %}
+            {% if vid.video %}
+                <button onclick="openVideoPreview('{{ vid.video.url }}')"
+                        class="btn btn-sm btn-outline-primary" style="padding: 2px 8px; font-size: 11px;">
+                    <i class="fas fa-magic"></i> Watch
+                </button>
+            {% else %}
+                <span class="badge bg-secondary" style="font-size:0.75rem;">Generating...</span>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</td>
+
+<!-- ================= 6C. RM ASSISTED EXTERNAL LINK ================= -->
+<td>
+    {% for vid in prop.videos.all %}
+        {% if vid.source == 'rm_assisted' %}
+            {% if vid.video_url %}
+                <button onclick="openLinkVideoModal('{{ vid.video_url }}')"
+                        class="btn btn-sm btn-outline-info" style="padding: 2px 8px; font-size: 11px;">
+                    <i class="fas fa-play-circle"></i> Play
+                </button>
+            {% else %}
+                <span class="badge bg-info text-dark" style="font-size:0.75rem;">Link Pending</span>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</td>
+
+              
+                <td>{{ prop.listed_by_type|default:"self" }}</td>
+               
+                <td>{{ prop.listed_by_id|default:"—" }}</td>
+                <td>{{ prop.listed_by_name|default:"—" }}</td>
+                <td>{{ prop.listed_by_email|default:"—" }}</td>
+                <td>{{ prop.listed_by_contact|default:"—" }}</td>
+                <td>{{ prop.listed_by_role|default:"—" }}</td>
+
+                <!-- Duplicate Tracking Fields -->
               
 
-                <!-- Basic Info -->
-                <td class="property-title">{{ prop.property_title|default:"—" }}</td>
-                <td>{{ prop.city|default:"—" }}</td>
+                <!-- Basic Information -->
+                <td class="property-title" style="font-weight: 600;">{{ prop.property_title|default:"—" }}</td>
                 <td>{{ prop.building_name|default:"—" }}</td>
+                <td>{{ prop.property_no|default:"—" }}</td>
+                <td>{{ prop.wing_number|default:"—" }}</td>
+                <td>{{ prop.city|default:"—" }}</td>
                 <td>{{ prop.locality|default:"—" }}</td>
-                <td><span class="truncate-cell" title="{{ prop.property_address }}">{{ prop.property_address|default:"—" }}</span></td>
-                <td style="font-weight: 700;">{{ prop.total_beds|default:"0" }} Beds</td>
-                <td><span class="badge badge-pg">{{ prop.pg_for|default:"—" }}</span></td>
-                <td>{{ prop.furnishing_type|default:"—" }}</td>
-                <td>{{ prop.sharing_type|default:"—" }}</td>
+                <td><span class="truncate-cell" title="{{ prop.address }}">{{ prop.address|default:"—" }}</span></td>
+                <td>{{ prop.property_landmark|default:"—" }}</td>
+                 <td>{{ prop.pincode|default:"—" }}</td>
+                <td>{{ prop.state|default:"—" }}</td>
+               
+                <td>
+                    {% if prop.google_maps_link %}
+                        <a href="{{ prop.google_maps_link }}" target="_blank" style="color: #2563eb;"><i class="fas fa-map-marker-alt"></i> Map</a>
+                    {% else %}—{% endif %}
+                </td>
+                <td>{{ prop.latitude|default:"—" }}</td>
+                <td>{{ prop.longitude|default:"—" }}</td>
+                <td><span class="badge bg-primary">{{ prop.pg_for|default:"—" }}</span></td>
+                <td>{{ prop.furnishing_status|default:"—" }}</td>
                 <td>{{ prop.best_suited_for|default:"—" }}</td>
 
-                <td><span class="badge {% if prop.meals_available %}badge-residential{% else %}badge-commercial{% endif %}">{{ prop.meals_available|yesno:"Active,None" }}</span></td>
+                <!-- Meals & Policies -->
+                <td><span class="badge {% if prop.meals_available %}bg-success{% else %}bg-secondary{% endif %}">{{ prop.meals_available|yesno:"Yes,No" }}</span></td>
                 <td>{{ prop.meal_offerings|default:"—" }}</td>
                 <td>{{ prop.meal_speciality|default:"—" }}</td>
-
-                <!-- Rules -->
-                <td>{{ prop.notice_period|default:"0" }} Days</td>
-                <td>{{ prop.lockin_period|default:"0" }} Days</td>
-                <td>{{ prop.minimum_stay|default:"0" }} Months</td>
+                <td>{{ prop.notice_period|default:"—" }} Days</td>
+                <td>{{ prop.lockin_period|default:"—" }} Days</td>
+                <td>{{ prop.minimum_stay|default:"—" }} Months</td>
                 <td>{{ prop.available_from|date:"d M Y"|default:"—" }}</td>
                 <td>{{ prop.property_managed_by|default:"—" }}</td>
-                <td>{{ prop.manager_stays|yesno:"Yes (On-Site),No" }}</td>
+                <td>{{ prop.manager_stays|yesno:"Yes,No" }}</td>
 
-                <!-- ── Room 1 — individual DB-field columns ── -->
-                {% with r=rooms|first %}
-                <td style="background: #faf5ff; border-left: 3px solid #c4b5fd;">{{ r.room_type|capfirst|default:"—" }}</td>
-                <td style="background: #faf5ff;">{{ r.room_beds|default:"—" }}</td>
-                <td style="background: #faf5ff; font-weight: 700; color: #059669;">{% if r %}₹{{ r.room_rent|floatformat:"0" }}{% else %}—{% endif %}</td>
-                <td style="background: #faf5ff;">{% if r %}₹{{ r.room_deposit|floatformat:"0" }}{% else %}—{% endif %}</td>
-                <td style="background: #faf5ff;">{{ r.room_brokerage|default:"—" }}</td>
-                <td style="background: #faf5ff;">{{ r.room_brokerage_percent|default:"—" }}</td>
-                <td style="background: #faf5ff;">{{ r.room_manual_brokerage|default:"—" }}</td>
-                <td style="background: #faf5ff; border-right: 3px solid #c4b5fd;"><span class="truncate-cell" title="{{ r.room_facilities }}">{{ r.room_facilities|default:"—" }}</span></td>
-                {% endwith %}
+                 <td>
+                {% if prop.brokerage_percentage %}
+                    <div style="font-size:11px;color:#64748b;font-weight:600;">{{ prop.get_brokerage_label }}</div>
+                  
+                {% else %}
+                    —
+                {% endif %}
+            </td>
 
-                <!-- ── Room 2 — individual DB-field columns ── -->
-                {% with r=rooms.1 %}
-                <td style="background: #f5f3ff; border-left: 3px solid #ddd6fe;">{{ r.room_type|capfirst|default:"—" }}</td>
-                <td style="background: #f5f3ff;">{{ r.room_beds|default:"—" }}</td>
-                <td style="background: #f5f3ff; font-weight: 700; color: #059669;">{% if r %}₹{{ r.room_rent|floatformat:"0" }}{% else %}—{% endif %}</td>
-                <td style="background: #f5f3ff;">{% if r %}₹{{ r.room_deposit|floatformat:"0" }}{% else %}—{% endif %}</td>
-                <td style="background: #f5f3ff;">{{ r.room_brokerage|default:"—" }}</td>
-                <td style="background: #f5f3ff;">{{ r.room_brokerage_percent|default:"—" }}</td>
-                <td style="background: #f5f3ff;">{{ r.room_manual_brokerage|default:"—" }}</td>
-                <td style="background: #f5f3ff; border-right: 3px solid #ddd6fe;"><span class="truncate-cell" title="{{ r.room_facilities }}">{{ r.room_facilities|default:"—" }}</span></td>
-                {% endwith %}
-
-                <!-- Meals -->
                 
-                <td>{{ prop.opposite_sex_allowed|yesno:"Allowed,Banned" }}</td>
-                <td>{{ prop.any_time_allowed|yesno:"24/7 Access,Curfew Enforced" }}</td>
-                <td>{{ prop.visitors_allowed|yesno:"Allowed,Restricted" }}</td>
-                <td>{{ prop.guardian_allowed|yesno:"Allowed,Restricted" }}</td>
-                <td>{{ prop.drinking_allowed|yesno:"Allowed,Banned" }}</td>
-                <td>{{ prop.smoking_allowed|yesno:"Allowed,Banned" }}</td>
+            <!-- Brokerage Type -->
+           <td>
+    <div style="font-size:11px;color:#64748b;font-weight:600;">
+        {% if prop.brokerage_percentage and prop.brokerage_percentage != "Fixed Amount" %}
+            <span style="color:#1e293b; font-size:13px;">₹{{ prop.get_brokerage_amount|default:"0"|floatformat:"0" }}</span> 
+            ({{ prop.brokerage_percentage }})
+        {% elif prop.brokerage_percentage %}
+            {{ prop.brokerage_percentage }}
+        {% else %}
+            —
+        {% endif %}
+    </div>
+</td>
 
-                <!-- Amenities -->
-                <td><span class="truncate-cell" title="{{ prop.property_description }}">{{ prop.property_description|default:"—" }}</span></td>
+            <!-- Brokerage / Service Fee (Combined Display) -->
+            
+            
+            <!-- Manual Brokerage (Kept to maintain database sequence) -->
+            <td>
+                {% if prop.brokerage_percentage == "Fixed Amount" and prop.manual_brokerage %}
+                    ₹{{ prop.manual_brokerage }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+
+                <!-- Room Details & Financials -->
+                <td style="background: #faf5ff; border-left: 3px solid #c4b5fd;">{{ prop.room_type|capfirst|default:"—" }}</td>
+                <td style="background: #faf5ff; font-weight: 700;">{{ prop.total_beds|default:"0" }}</td>
+                <td style="background: #faf5ff; font-weight: 700; color: #059669;">{% if prop.monthly_rent %}₹{{ prop.monthly_rent }}{% else %}—{% endif %}</td>
+               
+
+ <td>
+    {% if prop.get_advance_rent_amount %}
+        <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_advance_rent_amount|floatformat:"0" }}</div>
+        
+        {% if prop.get_advance_rent_type_label == "Fixed Amount" %}
+            <div style="font-size:11px;color:#2563eb;margin-top:2px;">
+                ({{ prop.get_advance_rent_type_label }})
+            </div>
+        {% else %}
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                ({{ prop.get_advance_rent_type_label }})
+            </div>
+        {% endif %}
+        
+    {% else %}
+        —
+    {% endif %}
+</td>
+
+              <td>
+               
+                    <div style="font-weight:600;color:#1e293b;">{{ prop.advance_rent_amount|floatformat:"0"|default:"—"  }}</div>
+                    
+              
+            </td>
+
+
+
+  
+               <td>
+    {% if prop.get_security_deposit_amount %}
+        <div style="font-weight:600;color:#1e293b;">₹{{ prop.get_security_deposit_amount|floatformat:"0" }}</div>
+        
+        {% if prop.get_security_deposit_type_label == "Fixed Amount" %}
+            <div style="font-size:11px;color:#2563eb;margin-top:2px;">
+                ({{ prop.get_security_deposit_type_label }})
+            </div>
+        {% else %}
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">
+                ({{ prop.get_security_deposit_type_label }})
+            </div>
+        {% endif %}
+        
+    {% else %}
+        —
+    {% endif %}
+</td>
+       
+
+             <td>
+               
+                    <div style="font-weight:600;color:#1e293b;">{{ prop.security_deposit_amount|floatformat:"0" }}</div>
+                 
+            </td>
+
+
+            <!-- Advance Rent Amount (Combined Display) -->
+          
+               
+                <td style="background: #faf5ff;">{{ prop.maintenance_type|default:"—" }}</td>
+                <td style="background: #faf5ff;">{% if prop.maintenance_amount %}₹{{ prop.maintenance_amount }}{% else %}—{% endif %}</td>
+                <td style="background: #faf5ff; font-weight: 700; color: #2563eb; border-right: 3px solid #c4b5fd;">{% if prop.total_move_in_cost %}₹{{ prop.total_move_in_cost }}{% else %}—{% endif %}</td>
+
+                <!-- Regulations & Rules -->
+                <td>{{ prop.opposite_gender_visitors_allowed|yesno:"Allowed,Not Allowed" }}</td>
+                <td>{{ prop.visitors_allowed|yesno:"Allowed,Restricted" }}</td>
+                <td>{{ prop.parents_guardians_allowed|yesno:"Allowed,Restricted" }}</td>
+                <td>{{ prop.entry_24x7_allowed|yesno:"24/7 Access,Curfew Enforced" }}</td>
+                <td>{{ prop.curfew_time|default:"—" }}</td>
+                <td>{{ prop.smoking_allowed|yesno:"Allowed,Prohibited" }}</td>
+                <td>{{ prop.alcohol_consumption_allowed|yesno:"Allowed,Prohibited" }}</td>
+                <td>{{ prop.couples_allowed|yesno:"Allowed,Not Allowed" }}</td>
+                <td>{{ prop.pets_allowed|yesno:"Allowed,Not Allowed" }}</td>
+                <td>{{ prop.cooking_allowed|yesno:"Allowed,Not Allowed" }}</td>
+                <td>{{ prop.police_verification_required|yesno:"Mandatory,Not Required" }}</td>
+
+                <!-- Descriptions & Amenities -->
                 <td><span class="truncate-cell" title="{{ prop.amenities }}"><code>{{ prop.amenities|default:"—" }}</code></span></td>
                 <td><span class="truncate-cell" title="{{ prop.nearby_facilities }}"><code>{{ prop.nearby_facilities|default:"—" }}</code></span></td>
+                <td><span class="truncate-cell" title="{{ prop.property_summary }}">{{ prop.property_summary|default:"—" }}</span></td>
+                <td><span class="truncate-cell" title="{{ prop.property_description }}">{{ prop.property_description|default:"—" }}</span></td>
+                <td><span class="truncate-cell" title="{{ prop.user_description }}">{{ prop.user_description|default:"—" }}</span></td>
 
-                <!-- Contact -->
-                <td>{{ prop.owner_name|default:"—" }}</td>
-                <td style="color: #2563eb; font-weight: 700;">{{ prop.contact_number|default:"—" }}</td>
-                <td>{{ prop.email|default:"—" }}</td>
-                <td>{{ prop.alternate_contact|default:"—" }}</td>
-
-                <!-- Uploader -->
+                <!-- Status & Metadata -->
+                <td>{{ prop.listed_elsewhere|default:"No" }}</td>
+                <td>{{ prop.portal_name|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_name|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_email|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_contact|default:"—" }}</td>
                 <td>{{ prop.uploaded_by_role|default:"—" }}</td>
+                <td><small class="text-muted">{{ prop.upload_file_name|default:"Web Form" }}</small></td>
 
-             
-                <td><small class="text-muted">{{ prop.upload_file_name|default:"Web Listing Form" }}</small></td>
+           
+            
+                <td>{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
+       
                 
-                  <td>{{ prop.created_at|date:"d M Y H:i"|default:"—" }}</td>
-               
 
                 <!-- Actions -->
                 <td style="position: sticky; right: 0; background: white; z-index: 2; box-shadow: -2px 0 5px rgba(0,0,0,0.05);">
-                    <div class="action-buttons">
-
-                        <a href="{% url 'pg_coliving_view' prop.id %}" 
-   class="btn-action btn-view" 
-   title="View Property">
-    <i class="fas fa-eye"></i>
-</a>
-      
-                        <button class="btn-action btn-edit"
-                            onclick="window.location.href='{% url 'pg_edit_page' property_id=prop.id %}'"
-                            title="Modify Record Parameters">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-action btn-delete"
-    onclick="deletePG('{{ prop.id }}')"
-    title="Delete Property">
-    <i class="fas fa-trash"></i>
-</button>
-
-              </div>
+                    <div class="action-buttons" style="display: flex; gap: 4px;">
+                        <a href="{% url 'pg_coliving_view_rm' prop.id %}" class="btn-action btn-view" title="View Property"><i class="fas fa-eye"></i></a>
+                        <button class="btn-action btn-edit" onclick="window.location.href='{% url 'pg_rm_edit' prop.id %}'"><i class="fas fa-edit"></i></button>
+                        <button class="btn-action btn-delete" onclick="deletePG('{{ prop.id }}')" title="Delete Property"><i class="fas fa-trash"></i></button>
+                    </div>
                 </td>
             </tr>
-            {% endwith %}
             {% empty %}
             <tr>
-                <td colspan="70">
-                    <div class="empty-state">
-                        <i class="fas fa-home"></i>
-                         pg_coliving listing data Not found
-                    </div>
+                <td colspan="100" style="text-align: center; padding: 40px; color: var(--faint);">
+                    <i class="fas fa-home" style="font-size: 3rem; display: block; margin-bottom: 12px;"></i>
+                    pg_coliving listing data not found.
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
- 
 
-    {% if page_obj.has_other_pages %}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-        <div style="font-size: 0.85rem; color: #64748b;">
-            Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-        </div>
-        <div style="display: flex; gap: 5px;">
-            {% if page_obj.has_previous %}
-                <a href="?page=1{% if search %}&search={{ search }}{% endif %}" style="padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #475569; background: white;">&laquo;</a>
-                <a href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}" style="padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #475569; background: white;">&lsaquo;</a>
-            {% endif %}
-            
-            <span style="padding: 6px 12px; background: #6366f1; color: white; border-radius: 6px; font-weight: 600;">{{ page_obj.number }}</span>
-            
-            {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}" style="padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #475569; background: white;">&rsaquo;</a>
-                <a href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}" style="padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #475569; background: white;">&raquo;</a>
-            {% endif %}
-        </div>
+{% if page_obj.has_other_pages %}
+<div class="pg-pager-row" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+    <div class="pg-pager-info">
+        Showing <strong>{{ page_obj.start_index }}</strong> to <strong>{{ page_obj.end_index }}</strong> of <strong>{{ page_obj.paginator.count }}</strong> entries
     </div>
-    {% endif %}
+    <div class="pg-pager">
+        
+        <!-- Previous Button -->
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pg-pg">&laquo; Prev</a>
+        {% else %}
+            <span class="pg-pg disabled">&laquo; Prev</span>
+        {% endif %}
+
+        <!-- Page Numbers -->
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="pg-pg active">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pg-pg">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Next Button -->
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="pg-pg">Next &raquo;</a>
+        {% else %}
+            <span class="pg-pg disabled">Next &raquo;</span>
+        {% endif %}
+        
+    </div>
 </div>
+{% endif %}
+<!-- ========================================== -->
+
 
     <style>
         .imp-overlay {
@@ -1201,7 +1580,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 <div class="download-bar">
                     <span><i class="fas fa-info-circle"></i>&nbsp; Not sure about the format?</span>
-                    <a href="{% url 'download_pg_template' %}">
+                    <a href="{% url 'download_pg_template_rm' %}">
                         <i class="fas fa-download"></i> Download Template
                     </a>
                 </div>
@@ -1285,6 +1664,35 @@ document.addEventListener("DOMContentLoaded", function() {
     </div>
 
 
+    <div class="modal fade" id="linkVideoModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px; overflow:hidden; border:none; background:#0f172a;">
+      <div class="modal-header" style="background:linear-gradient(135deg,#7C3AED,#4C1D95); color:#fff; border:none;">
+        <h6 class="modal-title" style="font-weight:700;"><i class="fas fa-video me-2"></i>External Video Preview</h6>
+        <button type="button" class="close" data-dismiss="modal" onclick="document.getElementById('linkVideoFrame').src=''" style="color:white; opacity:1; background:none; border:none; font-size:22px;">&times;</button>
+      </div>
+      <div class="modal-body p-0" style="position:relative; background:#000; min-height:350px; display:flex; flex-direction:column; justify-content:center;">
+        <div style="aspect-ratio:16/9; width:100%; position:relative;">
+            <iframe id="linkVideoFrame" style="width:100%; height:100%; border:0; position:absolute; top:0; left:0; z-index:2;" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#94a3b8; z-index:1; padding:20px; text-align:center;">
+                <i class="fas fa-shield-alt" style="font-size:3rem; margin-bottom:12px; color:#475569;"></i>
+                <p style="font-size:14px; margin-bottom:6px; color:#e2e8f0; font-weight:600;">Loading Preview...</p>
+                <p style="font-size:12px; max-width:400px; margin-bottom:15px;">If the video does not load automatically, the platform has blocked inline embedding.</p>
+                <a id="linkVideoDirectBtn" href="#" target="_blank" class="btn btn-sm btn-primary" style="background:#3b82f6; border:none; padding:8px 16px; font-weight:600; border-radius:6px;">
+                    <i class="fas fa-external-link-alt me-1"></i> Open Video Directly in New Tab
+                </a>
+            </div>
+        </div>
+        <div class="text-center py-2" style="background:#1e293b; border-top:1px solid #334155; z-index:3;">
+          <a id="linkVideoFallback" href="#" target="_blank" style="color:#60a5fa; font-size:0.85rem; font-weight:600; text-decoration:none;">
+            <i class="fas fa-external-link-alt me-1"></i> Having trouble viewing? Click here to open source URL
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="previewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000000cc; z-index:9999;">
     <span onclick="closePreview()" style="position:absolute;top:20px;right:30px;color:white;font-size:30px;cursor:pointer;">✖</span>
 
@@ -1293,6 +1701,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </div>
 
 
+<!-- ✅ PASTE THIS CLEAN REPLACEMENT CODE -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1300,203 +1709,43 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <script>
 // ==========================================
-// 1. DELETE FUNCTION (SweetAlert2)
+// 1. IMPORT MODAL CONTROLLERS (DEFINED GLOBALLY)
 // ==========================================
-function deletePG(propertyId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this! All associated rooms and images will be permanently deleted.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444', 
-        cancelButtonColor: '#94a3b8',  
-        confirmButtonText: '<i class="fas fa-trash-alt"></i> Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({ 
-                title: 'Deleting...', 
-                allowOutsideClick: false, 
-                didOpen: () => { Swal.showLoading(); } 
-            });
-
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
-            const deleteUrl = `/Admin_App/pg-coliving/delete/${propertyId}/`; // Ensure this matches urls.py!
-
-            fetch(deleteUrl, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Deleted!',
-                        text: 'The PG property has been removed.',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
-                    
-                    const row = document.getElementById(`row-${propertyId}`);
-                    if (row) {
-                        row.style.transition = "all 0.4s ease";
-                        row.style.opacity = "0";
-                        row.style.transform = "translateX(-20px)";
-                        setTimeout(() => row.remove(), 400);
-                    } else {
-                        setTimeout(() => window.location.reload(), 1500); 
-                    }
-                } else {
-                    Swal.fire('Error!', data.message || 'Could not delete PG.', 'error');
-                }
-            })
-            .catch(error => {
-                console.error("Delete error:", error);
-                Swal.fire('Error!', `Server connection failed: ${error.message}`, 'error');
-            });
-        }
-    });
-}
-
-// ==========================================
-// 1.5 BULK DELETE LOGIC
-// ==========================================
-function toggleDeleteInputs() {
-    const type = document.getElementById('deleteType').value;
-    document.getElementById('dateRangeInputs').style.display = (type === 'date_range') ? 'flex' : 'none';
-    document.getElementById('uploaderInput').style.display = (type === 'by_uploader') ? 'block' : 'none';
-    document.getElementById('fileInput').style.display = (type === 'by_file') ? 'block' : 'none';
-}
-
-function executeBulkDelete() {
-    const type = document.getElementById('deleteType').value;
-    if (!type) {
-        Swal.fire('Warning', 'Please select a delete criteria.', 'warning');
-        return;
-    }
-
-    let payload = { delete_type: type };
-
-    if (type === 'date_range') {
-        payload.from_date = document.getElementById('fromDate').value;
-        payload.to_date = document.getElementById('toDate').value;
-        if (!payload.from_date || !payload.to_date) {
-            Swal.fire('Warning', 'Please select both From and To dates.', 'warning');
-            return;
-        }
-    } else if (type === 'by_uploader') {
-        payload.uploader_text = document.getElementById('uploaderText').value;
-        if (!payload.uploader_text) {
-            Swal.fire('Warning', 'Please enter the uploader detail.', 'warning');
-            return;
-        }
-    } else if (type === 'by_file') {
-        payload.file_name = document.getElementById('selectedFile').value;
-        if (!payload.file_name) {
-            Swal.fire('Warning', 'Please select an Excel file from the list.', 'warning');
-            return;
-        }
-    } else if (type === 'current_page') {
-        const rows = document.querySelectorAll('tr[id^="row-"]');
-        const ids = Array.from(rows).map(row => row.id.split('-')[1]);
-        if (ids.length === 0) {
-            Swal.fire('Warning', 'No data on the current page to delete.', 'warning');
-            return;
-        }
-        payload.page_ids = ids;
-    }
-
-    Swal.fire({
-        title: 'Are you absolutely sure?',
-        text: "This action will permanently delete the selected PG records and their media!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#ef4444',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Yes, delete them!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
-
-            fetch("{% url 'pg_bulk_delete' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire('Deleted!', data.message, 'success').then(() => {
-                        window.location.reload();
-                    });
-                } else {
-                    Swal.fire('Error', data.message, 'error');
-                }
-            })
-            .catch(err => Swal.fire('Error', 'Server error occurred.', 'error'));
-        }
-    });
-}
-
-// ==========================================
-// 2. MEDIA PREVIEW MODALS
-// ==========================================
-function openImagePreview(src){
-    document.getElementById("previewModal").style.display = "block";
-    document.getElementById("previewImage").src = src;
-    document.getElementById("previewImage").style.display = "block";
-    document.getElementById("previewVideo").style.display = "none";
-}
-
-function openVideoPreview(src){
-    document.getElementById("previewModal").style.display = "block";
-    document.getElementById("previewVideo").src = src;
-    document.getElementById("previewVideo").style.display = "block";
-    document.getElementById("previewImage").style.display = "none";
-}
-
-function closePreview(){
-    document.getElementById("previewModal").style.display = "none";
-}
-
-// ==========================================
-// 3. UI & EXCEL IMPORT MODAL
-// ==========================================
-$("#Rent").addClass("active");
-
 let selectedFile = null;
 
 function openImportModal() {
-    document.getElementById('importModal').classList.add('show');
-    resetImportModal();
+    const modal = document.getElementById('importModal');
+    if (modal) {
+        modal.classList.add('show');
+        resetImportModal();
+    }
 }
+
 function closeImportModal() {
-    document.getElementById('importModal').classList.remove('show');
+    const modal = document.getElementById('importModal');
+    if (modal) modal.classList.remove('show');
 }
+
 function resetImportModal() {
     selectedFile = null;
-    document.getElementById('pgExcelFile').value = '';
-    document.getElementById('fileChip').style.display = 'none';
-    document.getElementById('impProgress').style.display = 'none';
-    document.getElementById('impResult').style.display = 'none';
-    document.getElementById('uploadBtn').disabled = true;
+    const fileInput = document.getElementById('pgExcelFile');
+    const chip = document.getElementById('fileChip');
+    const prog = document.getElementById('impProgress');
+    const res = document.getElementById('impResult');
+    const btn = document.getElementById('uploadBtn');
+
+    if (fileInput) fileInput.value = '';
+    if (chip) chip.style.display = 'none';
+    if (prog) prog.style.display = 'none';
+    if (res) res.style.display = 'none';
+    if (btn) btn.disabled = true;
 }
 
 function onFileSelect(input) {
     const file = input.files[0];
     if (!file) return;
     if (!file.name.endsWith('.xlsx')) {
-        alert('Please select an .xlsx file only.');
+        Swal.fire('Warning', 'Please select an .xlsx file only.', 'warning');
         input.value = '';
         return;
     }
@@ -1524,16 +1773,18 @@ function handleDragOver(e) {
     e.preventDefault();
     document.getElementById('dropZone').classList.add('drag-over');
 }
+
 function handleDragLeave(e) {
     document.getElementById('dropZone').classList.remove('drag-over');
 }
+
 function handleDrop(e) {
     e.preventDefault();
     document.getElementById('dropZone').classList.remove('drag-over');
     const file = e.dataTransfer.files[0];
     if (file) {
         if (!file.name.endsWith('.xlsx')) {
-            alert('Please drop an .xlsx file only.');
+            Swal.fire('Warning', 'Please drop an .xlsx file only.', 'warning');
             return;
         }
         setFile(file);
@@ -1546,27 +1797,9 @@ function animateProgress(targetPct, text) {
     document.getElementById('progText').textContent = text;
 }
 
-function showResult(data) {
-    const box = document.getElementById('impResult');
-    if (data.status === 'success') {
-        box.className = 'imp-result success';
-        const errorHtml = data.errors && data.errors.length
-            ? `<ul class="err-list">${data.errors.map(e=>`<li>${e}</li>`).join('')}</ul>`
-            : '';
-        box.innerHTML = `
-            <strong><i class="fas fa-check-circle"></i> Import Complete</strong>
-            <div class="res-row">
-                <div class="res-item"><i class="fas fa-check"></i><span class="res-val">${data.imported}</span> Imported</div>
-                <div class="res-item"><i class="fas fa-exclamation-triangle"></i><span class="res-val">${data.skipped}</span> Skipped</div>
-            </div>
-            ${errorHtml}
-        `;
-    } else {
-        box.className = 'imp-result error';
-        box.innerHTML = `<strong><i class="fas fa-times-circle"></i> Error</strong><p style="margin:6px 0 0;">${data.message}</p>`;
-    }
-    box.style.display = 'block';
-}
+
+
+
 
 async function doUpload() {
     if (!selectedFile) return;
@@ -1583,7 +1816,7 @@ async function doUpload() {
     try {
         animateProgress(60, 'Processing rows…');
 
-        const response = await fetch("{% url 'import_pg_excel' %}", {
+        const response = await fetch("{% url 'import_pg_excel_rm' %}", {
             method: 'POST',
             headers: { 'X-CSRFToken': '{{ csrf_token }}' },
             body: formData
@@ -1592,142 +1825,63 @@ async function doUpload() {
         animateProgress(100, 'Done!');
         const data = await response.json();
 
-        if (data.status === "success") {
+        // 🟢 CLOSE THE MODAL FIRST SO SWEETALERT CAN BE SEEN ON TOP
+        closeImportModal();
 
-            // ── CASE: Same file + same user uploaded again (all skipped) ──────
-            if (data.same_file_same_user_skipped > 0 && data.imported === 0 && data.skipped > 0 && data.diff_file_same_data_skipped === 0) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Already Uploaded!',
-                    html: `
-                        <div style="text-align:center;">
-                            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:18px 20px;margin-bottom:16px;">
-                                <i class="fas fa-exclamation-triangle" style="font-size:2rem;color:#d97706;margin-bottom:10px;display:block;"></i>
-                                <div style="font-size:15px;font-weight:700;color:#92400e;">Same File &amp; Same User Detected</div>
-                                <div style="font-size:13px;color:#78350f;margin-top:6px;">
-                                    The file <strong>${data.file_name}</strong> was already uploaded by <strong>${data.uploader_name || 'you'}</strong>
-                                    with the same data.
-                                </div>
-                            </div>
-                            <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
-                                <div style="background:#fef2f2;padding:14px 20px;border-radius:10px;min-width:120px;">
-                                    <div style="font-size:28px;font-weight:800;color:#dc2626;">${data.same_file_same_user_skipped}</div>
-                                    <div style="font-size:12px;color:#991b1b;font-weight:600;">Rows Skipped</div>
-                                </div>
-                                <div style="background:#f0fdf4;padding:14px 20px;border-radius:10px;min-width:120px;">
-                                    <div style="font-size:28px;font-weight:800;color:#16a34a;">${data.imported}</div>
-                                    <div style="font-size:12px;color:#166534;font-weight:600;">New Imported</div>
-                                </div>
-                            </div>
-                            <div style="margin-top:14px;font-size:12px;color:#64748b;">
-                                If you have new data in this file, it has been imported above. Duplicate rows were skipped automatically.
-                            </div>
-                        </div>
-                    `,
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#7c3aed',
-                });
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-upload"></i> Upload &amp; Import';
-                return;
-            }
-
-            // ── CASE: Different file but same data already exists ─────────────
-            if (data.diff_file_same_data_skipped > 0 && data.imported === 0) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Duplicate Data Detected!',
-                    html: `
-                        <div style="text-align:center;">
-                            <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:18px 20px;margin-bottom:16px;">
-                                <i class="fas fa-ban" style="font-size:2rem;color:#dc2626;margin-bottom:10px;display:block;"></i>
-                                <div style="font-size:15px;font-weight:700;color:#991b1b;">Same Property Data Already Exists</div>
-                                <div style="font-size:13px;color:#7f1d1d;margin-top:6px;">
-                                    All <strong>${data.diff_file_same_data_skipped}</strong> rows in <strong>${data.file_name}</strong>
-                                    already exist in the database from a different file. No new data was imported.
-                                </div>
-                            </div>
-                            <div style="font-size:12px;color:#64748b;margin-top:10px;">
-                                The system matches records by contact number, email, property address &amp; locality.
-                                If these details are different, the record will be imported as new.
-                            </div>
-                        </div>
-                    `,
-                    confirmButtonText: 'Understood',
-                    confirmButtonColor: '#ef4444',
-                });
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-upload"></i> Upload &amp; Import';
-                return;
-            }
-
-            // ── CASE: Normal success (with optional partial skips) ────────────
-            let skippedBreakdown = '';
-            if (data.same_file_same_user_skipped > 0) {
-                skippedBreakdown += `<div style="padding:6px 10px;background:#fffbeb;border-radius:6px;color:#92400e;font-size:12px;margin-top:6px;">
-                    <i class="fas fa-info-circle"></i> ${data.same_file_same_user_skipped} rows skipped — same file &amp; user duplicate
-                </div>`;
-            }
-            if (data.same_file_diff_user_skipped > 0) {
-                skippedBreakdown += `<div style="padding:6px 10px;background:#eff6ff;border-radius:6px;color:#1e40af;font-size:12px;margin-top:6px;">
-                    <i class="fas fa-user-slash"></i> ${data.same_file_diff_user_skipped} rows skipped — same file uploaded by different user
-                </div>`;
-            }
-            if (data.diff_file_same_data_skipped > 0) {
-                skippedBreakdown += `<div style="padding:6px 10px;background:#fef2f2;border-radius:6px;color:#991b1b;font-size:12px;margin-top:6px;">
-                    <i class="fas fa-ban"></i> ${data.diff_file_same_data_skipped} rows skipped — same data exists from a different file
-                </div>`;
-            }
-
-            let errorHtml = '';
-            if (data.errors && data.errors.length > 0) {
-                errorHtml = `<div style="max-height:180px;overflow-y:auto;text-align:left;margin-top:12px;padding:10px;background:#fff7f7;border-radius:10px;border:1px solid #fecaca;font-size:12px;">`;
-                data.errors.forEach(err => {
-                    errorHtml += `<div style="padding:6px 8px;margin-bottom:6px;background:white;border-radius:5px;color:#dc2626;border-left:3px solid #dc2626;">${err}</div>`;
-                });
-                errorHtml += `</div>`;
-            }
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Import Complete',
-                width: 680,
-                html: `
-                    <div style="text-align:center;">
-                        <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin:16px 0;">
-                            <div style="background:#ecfdf5;padding:16px 22px;border-radius:12px;min-width:130px;">
-                                <div style="font-size:32px;font-weight:800;color:#16a34a;">${data.imported}</div>
-                                <div style="font-size:13px;font-weight:600;color:#166534;">Imported</div>
-                            </div>
-                            <div style="background:#fef2f2;padding:16px 22px;border-radius:12px;min-width:130px;">
-                                <div style="font-size:32px;font-weight:800;color:#dc2626;">${data.skipped}</div>
-                                <div style="font-size:13px;font-weight:600;color:#991b1b;">Total Skipped</div>
-                            </div>
-                        </div>
-                        ${skippedBreakdown}
-                        ${errorHtml}
-                    </div>
-                `
-            });
-
-            if (data.imported > 0) {
-                setTimeout(() => location.reload(), 2500);
-            }
-
-        } else {
-            // ── Server returned error status ──────────────────────────────────
+        // 1. HARD REJECT (Missing fields / invalid file)
+        if (!response.ok || data.status === 'error') {
             Swal.fire({
                 icon: 'error',
-                title: 'Import Failed',
-                text: data.message || 'Something went wrong. Please try again.'
+                title: 'Upload Rejected',
+                html: `<div style="text-align:left;font-size:13px;color:#7f1d1d;">${data.message || 'Something went wrong.'}</div>`,
+                confirmButtonColor: '#ef4444',
             });
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-upload"></i> Upload &amp; Import';
+            return;
         }
 
+        // 2. ALL ROWS SKIPPED / DUPLICATES BLOCKED (0 Created)
+        if (data.created === 0 && (data.skipped > 0 || data.duplicates_blocked > 0)) {
+            let errHtml = '';
+            if (data.errors && data.errors.length > 0) {
+                errHtml = `<div style="max-height:160px;overflow-y:auto;text-align:left;margin-top:10px;font-size:12px;color:#991b1b;">
+                    ${data.errors.map(e => `<div style="margin-bottom:4px;">• ${e}</div>`).join('')}
+                </div>`;
+            }
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Duplicate File / Data Detected!',
+                html: `
+                    <div style="text-align:center;">
+                        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px;color:#92400e;font-size:13px;">
+                            <i class="fas fa-exclamation-triangle" style="font-size:1.5rem;margin-bottom:6px;display:block;"></i>
+                            No new records were added. All <strong>${data.skipped}</strong> row(s) in <strong>${selectedFile.name}</strong> already exist in the system.
+                        </div>
+                        ${errHtml}
+                    </div>
+                `,
+                confirmButtonColor: '#f59e0b',
+            });
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-upload"></i> Upload &amp; Import';
+            return;
+        }
+
+        // 3. PARTIAL / SUCCESSFUL IMPORT
+        Swal.fire({
+            icon: data.status === 'partial_error' ? 'warning' : 'success',
+            title: data.status === 'partial_error' ? 'Import Partially Complete' : 'Import Complete',
+            text: `Successfully created ${data.created || 0} property record(s). ${data.skipped ? data.skipped + ' row(s) skipped.' : ''}`
+        }).then(() => location.reload());
+
     } catch (err) {
+        closeImportModal();
         Swal.fire({
             icon: 'error',
             title: 'Network Error',
-            text: 'Could not reach the server. Please check your connection and try again.'
+            text: 'Could not reach the server. Please check your connection.'
         });
     }
 
@@ -1735,80 +1889,219 @@ async function doUpload() {
     btn.innerHTML = '<i class="fas fa-upload"></i> Upload &amp; Import';
 }
 
-// Sidebar helpers
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    if (window.innerWidth <= 768) {
-        sidebar.classList.toggle('active');
-        overlay.classList.toggle('active');
-        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-    } else {
-        sidebar.classList.toggle('collapsed');
-    }
-}
-function closeSidebar() {
-    document.getElementById('sidebar').classList.remove('active');
-    document.getElementById('sidebarOverlay').classList.remove('active');
-    document.body.style.overflow = '';
-}
-function toggleSubmenu(event, element) {
-    event.preventDefault(); event.stopPropagation();
-    const submenu = element.nextElementSibling;
-    document.querySelectorAll('.submenu').forEach(s => { if(s!==submenu) s.classList.remove('active'); });
-    document.querySelectorAll('.menu-link').forEach(l => { if(l!==element) l.classList.remove('dropdown-open'); });
-    submenu.classList.toggle('active');
-    element.classList.toggle('dropdown-open');
-}
-
 // ==========================================
-// 4. CHARTS INITIALIZATION
+// 2. DELETE FUNCTIONS
 // ==========================================
-document.addEventListener("DOMContentLoaded", function() {
-    if (document.getElementById('propertyPieChart')) {
-        const chartDataRaw = '{{ chart_data_json|escapejs }}';
-        let chartData = {};
-        try {
-            chartData = chartDataRaw ? JSON.parse(chartDataRaw) : null;
-        } catch(e) { console.error("Chart JSON parse error"); }
-
-        if(chartData && chartData.property_distribution) {
-            new Chart(document.getElementById('propertyPieChart').getContext('2d'), {
-                type: 'pie',
-                data: {
-                    labels: ['Residential','Commercial','PG/Co-living'],
-                    datasets: [{
-                        data: chartData.property_distribution,
-                        backgroundColor: ['rgba(102,126,234,.8)','rgba(245,87,108,.8)','rgba(79,172,254,.8)'],
-                        borderColor: ['rgba(102,126,234,1)','rgba(245,87,108,1)','rgba(79,172,254,1)'],
-                        borderWidth: 2
-                    }]
-                },
-                options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true, padding:15, font:{size:11} } } } }
+function deletePG(propertyId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444', 
+        cancelButtonColor: '#94a3b8',  
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+            fetch(`pg-coliving-rm/delete/${propertyId}/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire('Deleted!', 'Record deleted.', 'success');
+                    const row = document.getElementById(`row-${propertyId}`);
+                    if (row) row.remove();
+                    else location.reload();
+                } else {
+                    Swal.fire('Error!', data.message || 'Could not delete.', 'error');
+                }
             });
+        }
+    });
+}
 
-            new Chart(document.getElementById('rentalIncomeChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: chartData.months,
-                    datasets: [{
-                        label: 'Rental Income (₹)',
-                        data: chartData.rental_income,
-                        backgroundColor: 'rgba(102,126,234,.7)',
-                        borderColor: 'rgba(102,126,234,1)',
-                        borderWidth:2, borderRadius:8
-                    }]
+function toggleDeleteInputs() {
+    const type = document.getElementById('deleteType').value;
+    document.getElementById('dateRangeInputs').style.display = (type === 'date_range') ? 'flex' : 'none';
+    document.getElementById('uploaderInput').style.display = (type === 'by_uploader') ? 'block' : 'none';
+    document.getElementById('fileInput').style.display = (type === 'by_file') ? 'block' : 'none';
+}
+
+function executeBulkDelete() {
+    const type = document.getElementById('deleteType').value;
+    if (!type) {
+        Swal.fire('Warning', 'Please select a delete criteria.', 'warning');
+        return;
+    }
+
+    let payload = { delete_type: type };
+
+    if (type === 'date_range') {
+        payload.from_date = document.getElementById('fromDate').value;
+        payload.to_date = document.getElementById('toDate').value;
+    } else if (type === 'by_uploader') {
+        payload.uploader_text = document.getElementById('uploaderText').value;
+    } else if (type === 'by_file') {
+        payload.file_name = document.getElementById('selectedFile').value;
+    }
+
+    Swal.fire({
+        title: 'Confirm Bulk Delete?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'Yes, delete!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("{% url 'pg_bulk_delete_rm' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{ beginAtZero:true, grid:{borderDash:[5,5], color:'#e2e8f0'}, ticks:{ callback:v=>'₹'+(v/1000)+'k', font:{size:10} } }, x:{ grid:{display:false}, ticks:{font:{size:10}} } } }
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    Swal.fire('Deleted!', data.message, 'success').then(() => location.reload());
+                } else {
+                    Swal.fire('Error', data.message, 'error');
+                }
+            });
+        }
+    });
+}
+
+// ==========================================
+// 3. MEDIA PREVIEW & FILTER HELPERS
+// ==========================================
+function openImagePreview(src) {
+    document.getElementById("previewModal").style.display = "block";
+    document.getElementById("previewImage").src = src;
+    document.getElementById("previewImage").style.display = "block";
+    document.getElementById("previewVideo").style.display = "none";
+}
+
+function openVideoPreview(src) {
+    document.getElementById("previewModal").style.display = "block";
+    document.getElementById("previewVideo").src = src;
+    document.getElementById("previewVideo").style.display = "block";
+    document.getElementById("previewImage").style.display = "none";
+}
+
+function closePreview() {
+    document.getElementById("previewModal").style.display = "none";
+}
+
+function forcePGExport(format) {
+    var form = document.getElementById('pgSearchForm');
+    var params = new URLSearchParams(new FormData(form));
+    params.set('format', format);
+    var exportUrl = "{% url 'export_pg_coliving' %}?" + params.toString();
+    window.open(exportUrl, '_blank');
+}
+
+// ==========================================
+// 4. CHARTS & SEARCH INITIALIZATION
+// ==========================================
+document.addEventListener("DOMContentLoaded", function () {
+    // Smart search auto submit
+    const form = document.getElementById("pgSearchForm");
+    const searchInput = document.getElementById("pgSearchInput");
+    const autoSubmitElements = document.querySelectorAll(".auto-submit");
+    const loader = document.getElementById('loadingIndicator');
+
+    let typingTimer;
+    if (searchInput) {
+        searchInput.addEventListener("input", function() {
+            clearTimeout(typingTimer);
+            if (loader) loader.style.display = 'inline-block';
+            typingTimer = setTimeout(() => { if (form) form.submit(); }, 600);
+        });
+    }
+
+    autoSubmitElements.forEach(el => {
+        el.addEventListener("change", function() {
+            if (loader) loader.style.display = 'inline-block';
+            if (form) form.submit();
+        });
+    });
+
+    // Date range verification
+    const fromDate = document.getElementById("fromDate");
+    const toDate = document.getElementById("toDate");
+    if (fromDate && toDate) {
+        function validateDates() {
+            if (fromDate.value && toDate.value) {
+                if (new Date(toDate.value) < new Date(fromDate.value)) {
+                    Swal.fire({ icon: 'error', title: 'Invalid Date Range', text: 'To Date cannot be earlier than From Date!' });
+                    toDate.value = "";
+                }
+            }
+        }
+        fromDate.addEventListener("change", validateDates);
+        toDate.addEventListener("change", validateDates);
+    }
+
+    // Chart safe initializers
+    const PG_FOR_LABELS = {{ pg_for_labels|default:"[]"|safe }};
+    const PG_FOR_DATA = {{ pg_for_data|default:"[]"|safe }};
+    const RENT_LABELS = {{ rent_range_labels|default:"[]"|safe }};
+    const RENT_DATA = {{ rent_range_data|default:"[]"|safe }};
+    const FURNISH_LABELS = {{ furnishing_labels|default:"[]"|safe }};
+    const FURNISH_DATA = {{ furnishing_data|default:"[]"|safe }};
+    const CITY_LABELS = {{ city_labels|default:"[]"|safe }};
+    const CITY_DATA = {{ city_data|default:"[]"|safe }};
+
+    const COLORS = ["#7c3aed","#db2777","#2563eb","#16a34a","#d97706","#0d9488","#ea580c","#4f46e5","#0891b2","#e42525"];
+
+    function makeBar(id, labels, data, label) {
+        const el = document.getElementById(id);
+        if (el) {
+            new Chart(el, {
+                type: "bar",
+                data: { labels, datasets: [{ label, data, backgroundColor: COLORS, borderRadius: 8 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
         }
     }
-});
 
-window.addEventListener('resize', function() {
-    if (window.innerWidth > 768) closeSidebar();
+    function makeDoughnut(id, labels, data) {
+        const el = document.getElementById(id);
+        if (el) {
+            new Chart(el, {
+                type: "doughnut",
+                data: { labels, datasets: [{ data, backgroundColor: COLORS }] },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+    }
+
+    makeBar("pgForChart", PG_FOR_LABELS, PG_FOR_DATA, "PG Listings");
+    makeBar("rentChart", RENT_LABELS, RENT_DATA, "Count");
+    makeDoughnut("furnishChart", FURNISH_LABELS, FURNISH_DATA);
+    makeBar("cityChart", CITY_LABELS, CITY_DATA, "PGs");
+
+    document.querySelectorAll(".r-fill").forEach(function(el) {
+        var pct = parseFloat(el.getAttribute("data-pct")) || 0;
+        pct = Math.min(pct, 100);
+        setTimeout(function() { el.style.strokeDashoffset = 245 - (245 * pct / 100); }, 200);
+    });
 });
 </script>
+
+
+
+
+
+
+
+
 
 <script>
     const fromDate = document.getElementById("fromDate");
@@ -1862,20 +2155,34 @@ document.addEventListener("DOMContentLoaded", function () {
     const loader = document.getElementById('loadingIndicator');
 
     // Debounce text input
-    let typingTimer;
-    if(searchInput) {
+    
+    // Instant client-side live search script for PG table
+    const searchInput = document.getElementById("pgSearchInput");
+    const pgTableRows = document.querySelectorAll("#pgTable tbody tr");
+
+    if (searchInput) {
+        // Retain cursor focus and position
         let val = searchInput.value;
         searchInput.focus();
         searchInput.value = '';
         searchInput.value = val;
 
-        searchInput.addEventListener("input", function() {
-            clearTimeout(typingTimer);
-            loader.style.display = 'inline-block';
-            typingTimer = setTimeout(() => { form.submit(); }, 600);
+        searchInput.addEventListener("keyup", function () {
+            const query = searchInput.value.toLowerCase().trim();
+
+            pgTableRows.forEach(row => {
+                // Ignore the empty/no-data state row
+                if (row.cells.length <= 1) return;
+
+                let rowText = row.textContent.toLowerCase();
+                if (rowText.includes(query)) {
+                    row.style.display = ""; // Show matching row instantly
+                } else {
+                    row.style.display = "none"; // Hide non-matching row instantly
+                }
+            });
         });
     }
-
     // Auto submit dropdowns and dates
     autoSubmitElements.forEach(el => {
         el.addEventListener("change", function() {
@@ -1952,9 +2259,61 @@ function forcePGExport(format) {
     // 4. Build the URL
     var exportUrl = "{% url 'export_pg_coliving' %}?" + params.toString();
     
-    // 5.  FORCE OPEN IN A NEW TAB 
+    // 5. 🛑 FORCE OPEN IN A NEW TAB 🛑
     window.open(exportUrl, '_blank');
 }
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<script>
+function toEmbedUrl(url) {
+    if (!url) return '';
+
+    var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i);
+    if (yt) {
+        var origin = encodeURIComponent(window.location.origin);
+        return 'https://www.youtube.com/embed/' + yt[1] + '?rel=0&modestbranding=1&autoplay=1&origin=' + origin;
+    }
+
+    var vimeo = url.match(/vimeo\.com\/(?:video\/|)(\d+)/i);
+    if (vimeo) {
+        return 'https://player.vimeo.com/video/' + vimeo[1] + '?autoplay=1';
+    }
+
+    if (url.indexOf('instagram.com') !== -1 || url.indexOf('instagr.am') !== -1) {
+        var cleanInsta = url.split('?')[0].replace(/\/$/, '');
+        return cleanInsta + '/embed/';
+    }
+
+    if (url.indexOf('facebook.com') !== -1 || url.indexOf('fb.watch') !== -1) {
+        return 'https://www.facebook.com/plugins/video.php?href=' + encodeURIComponent(url) + '&show_text=0&autoplay=1';
+    }
+
+    var gdrive = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+    if (gdrive) {
+        return 'https://drive.google.com/file/d/' + gdrive[1] + '/preview';
+    }
+
+    return url;
+}
+
+function openLinkVideoModal(url) {
+    if (!url) return;
+    var embedUrl = toEmbedUrl(url);
+
+    document.getElementById('linkVideoFrame').src = embedUrl;
+    document.getElementById('linkVideoFallback').href = url;
+    var directBtn = document.getElementById('linkVideoDirectBtn');
+    if (directBtn) directBtn.href = url;
+
+    $('#linkVideoModal').modal('show');
+}
+
+$('#linkVideoModal').on('hidden.bs.modal', function () {
+    document.getElementById('linkVideoFrame').src = '';
+});
+</script>
+
 </body>
 </html>

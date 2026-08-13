@@ -37,10 +37,23 @@ urlpatterns = [
     ######## urls for rental forms for RM ########################
 
     path('residential_rm',views.residential_rm,name="residential_rm"),
+    path('residential_add_rm',views.residential_add_rm,name="residential_add_rm"),
 
     ############# urls for rental edit forms for RM ###################
 
+       
+
     path('residential_rm_edit/<str:pk>',views.residential_rm_edit,name="residential_rm_edit"),
+
+    ############# urls for rental Residential delete  for RM ###################
+
+    path(
+    'rental-residential-rm/delete/<str:pk>/',
+    views.rental_residential_delete_rm,
+    name='rental_residential_delete_rm'
+    ),
+
+    path('rental-residential-rm/bulk-delete/', views.rental_bulk_delete_rm, name='rental_bulk_delete_rm'),
 
  ############# urls for rental view forms for RM ###################
 
@@ -55,21 +68,119 @@ urlpatterns = [
 
     path('residential_download_template_rm/', views.download_residential_template_rm, name='download_residential_template_rm'),
 
-    ########## urls for commercial rent forms for RM ################
+
+    ########## urls Start for Rental commercial Listing Module for RM #####################################
 
     path('commercial_rm_list',views.commercial_rm_list,name="commercial_rm_list"),
-
-    ############# urls for commercial forms for RM ####################
-
     path('commercial_rm',views.commercial_rm,name="commercial_rm"),
+    path('commercial_rental_add_rm', views.commercial_rental_add_rm, name='commercial_rental_add_rm'),
+    
+    path('commercial_rm_edit/<str:pk>', views.commercial_rm_edit, name="commercial_rm_edit"),
+    path('commercial/view_rm/<str:pk>/',  views.commercial_view_rm,   name='commercial_view_rm'),
+    path('commercial_rm/export/', views.export_commercial_rent_rm, name='export_commercial_rent_rm'),
+    path('commercial-rm/import-excel/', views.import_commercial_rental_excel_rm, name='import_commercial_rental_excel_rm'),
+    path('commercial-rm/commercial/download-template/', views.download_commercial_rental12_template_rm, name='download_commercial_rental12_template_rm'),
+    path('commercial-rm/bulk-delete/', views.commercial_bulk_delete_rm, name='commercial_bulk_delete_rm'),
+    path('commercial-rm/delete/<str:pk>/', views.commercial_delete_rm, name='commercial_delete_rm'),
 
-    ########### urls for pg list forms for RM ###########################
+
+
+    ########## urls End for Rental commercial Listing Module for RM ##################################
+
+
+
+
+    ########### urls Start Rental pg listing module for RM ###########################
 
     path('pg_rm_list',views.pg_rm_list,name="pg_rm_list"),
 
-    ########### urls for pg forms for RM ###########################
+  
 
     path('pg_rm',views.pg_rm,name="pg_rm"),
+    path('add-pg-rm/', views.add_pg_rm, name='add_pg_rm'),
+    path('pg-coliving-rm/export/', views.export_pg_coliving_rm, name='export_pg_coliving_rm'),
+    path('pg-rm/edit/<str:pk>/', views.pg_rm_edit, name='pg_rm_edit'),
+    path('pg-coliving-rm/view/<str:pk>/', views.pg_coliving_view_rm, name='pg_coliving_view_rm'),
+
+    path('pg-rm/import-excel/',       views.import_pg_excel_rm,       name='import_pg_excel_rm'),
+    path('pg-rm/pg/download-template/',  views.download_pg_template_rm,  name='download_pg_template_rm'),
+    path('pg-coliving-rm/bulk-delete/', views.pg_bulk_delete_rm, name='pg_bulk_delete_rm'),
+    path(
+    'pg-coliving-rm/delete/<str:pk>/',
+    views.pg_coliving_delete_rm,
+    name='pg_coliving_delete_rm'
+    ),
+
+      ########### urls End Rental pg listing module for RM ###########################
+
+
+
+
+ ################START URL SECTION RESALE INDUSTRIAL PLOT LISTING RM ######################################################
+
+
+
+
+    path('industrial_plot_resale_list_rm',views.industrial_plot_resale_list_rm,name="industrial_plot_resale_list_rm"),
+    path('industrial_plot_resale_rm',views.industrial_plot_resale_rm,name="industrial_plot_resale_rm"),
+    path('industrial-plot-resale-rm/add/', views.industrial_plot_resale_add_rm, name='industrial_plot_resale_add_rm'),
+    path('industrial-plot-rm/edit/<str:pk>/', views.industrial_plot_resale_edit_rm, name='industrial_plot_resale_edit_rm'),
+    path('industrial-plot-rm/view/<str:pk>/', views.industrial_plot_resale_view_rm, name='industrial_plot_resale_view_rm'),
+    path('industrial-plot-rm/delete/<str:pk>/', views.industrial_plot_resale_delete_rm, name='industrial_plot_resale_delete_rm'),
+    path('industrial-plot-rm/bulk-delete/', views.industrial_plot_resale_bulk_delete_rm, name='industrial_plot_resale_bulk_delete_rm'),
+    path('industrial-plot-resale-rm/export/', views.export_industrial_plot_resale_rm, name='export_industrial_plot_resale_rm'),
+
+
+
+ ################END URL SECTION RESALE INDUSTRIAL PLOT LISTING RM ######################################################
+
+    
+ ################Start URL SECTION RESALE Agriculture PLOT LISTING RM ######################################################
+
+
+    path('agricultural_plot_resale_list_rm',views.agricultural_plot_resale_list_rm,name="agricultural_plot_resale_list_rm"),
+
+    path('agricultural_plot_resale_rm',views.agricultural_plot_resale_rm,name="agricultural_plot_resale_rm"),
+
+    path(
+        'agricultural-plot-resale-rm/add/',
+        views.agricultural_plot_resale_add_rm,
+        name='agricultural_plot_resale_add_rm'
+    ),
+
+    path(
+        'agricultural-plot-resale-rm/edit/<str:pk>/',
+        views.agricultural_plot_resale_edit_rm,
+        name='agricultural_plot_resale_edit_rm'
+    ),
+    path(
+        'agricultural-plot-resale-rm/delete/<str:pk>/',
+        views.agricultural_plot_resale_delete_rm,
+        name='agricultural_plot_resale_delete_rm'
+    ),
+
+    # Bulk Delete
+    path(
+        'agricultural-plot-resale-rm/bulk-delete/',
+        views.agricultural_plot_resale_bulk_delete_rm,
+        name='agricultural_plot_resale_bulk_delete_rm'
+    ),
+
+
+    path(
+        'agricultural-plot-resale-rm/export/',
+        views.export_agricultural_plot_resale_rm,
+        name='export_agricultural_plot_resale_rm'
+    ),
+
+    path(
+        'agricultural-plot-resale-rm/view/<str:pk>/',
+        views.agricultural_plot_resale_view_rm,
+        name='agricultural_plot_resale_view_rm'
+    ),
+
+
+   ################End URL SECTION RESALE Agriculture PLOT LISTING RM ######################################################
 
 
     ############## urls for resale property list #########################

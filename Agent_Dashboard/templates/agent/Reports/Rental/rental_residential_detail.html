@@ -1,9 +1,12 @@
 {% include "agent/agent_header.html" %}
+
+
 {% load static %}
+{% load humanize %}
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
     :root {
@@ -35,13 +38,18 @@
     }
 
     /* ============ TOP BREADCRUMB BAR ============ */
+   
     .prop-topbar {
-        background: var(--white);
-        border-bottom: 1px solid var(--border);
-        padding: 10px 0;
-        font-size: 0.8rem;
-        color: var(--muted);
-    }
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+    
     .prop-topbar a { color: var(--primary); text-decoration: none; }
     .prop-topbar .prop-id-badge {
         background: #f1f5ff;
@@ -81,14 +89,14 @@
         padding: 20px 0 0;
         border-bottom: 1px solid var(--border);
     }
+   
     .prop-hero-header h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.6rem;
-        font-weight: 700;
-        color: var(--dark);
-        margin: 0 0 6px;
-        line-height: 1.3;
-    }
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 0 0 6px;
+    line-height: 1.3;
+}
     .prop-hero-location {
         color: var(--muted);
         font-size: 0.85rem;
@@ -200,14 +208,15 @@
     }
 
     /* ============ STICKY NAV ============ */
+   
     .prop-sticky-nav {
-        position: sticky;
-        top: 68px;
-        background: var(--white);
-        border-bottom: 2px solid var(--border);
-        z-index: 990;
-        padding: 0;
-    }
+    position: sticky;
+    top: 44px;
+    background: var(--white);
+    border-bottom: 2px solid var(--border);
+    z-index: 990;
+    padding: 0;
+}
 
     /* 👇 ONLY THIS PART CHANGES 👇 */
     .prop-sticky-nav-inner {
@@ -254,12 +263,10 @@
         gap: 24px;
         align-items: start;
     }
-    @media (max-width: 1100px) {
-        .prop-layout-grid { grid-template-columns: 1fr; }
-        .prop-gallery-grid { grid-template-columns: 1fr; height: 260px; }
-        .prop-gallery-thumb { display: none; }
-        .prop-gallery-main { grid-row: 1; }
-    }
+   
+    @media (max-width: 576px) {
+    .prop-gallery-thumb { display: none; }
+}
 
     /* ============ SECTION CARDS ============ */
     .prop-section {
@@ -613,14 +620,20 @@
         <div class="container-fluid px-4">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center gap-2 flex-wrap">
-                    <a href="{% url 'residential_list' %}"><i class="fas fa-home"></i> Rental Listings</a>
+                    <a href="{% url 'residential_list_agent' %}"><i class="fas fa-home"></i> Rental Listings</a>
                     <span class="text-muted">/</span>
                     <span>{{ property.property_title|truncatechars:40 }}</span>
-                    <span class="prop-id-badge">ID: {{ property.id }}</span>
+                    <span class="prop-id-badge">Property ID: {{ property.id }}</span>
                     <span class="prop-verified-badge"><i class="fas fa-circle-check"></i> System Verified</span>
-                    
+                   
                 </div>
-                <a href="{% url 'residential_list' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:0.78rem; font-weight:600;">
+
+               
+                 
+                    <a href="{% url 'residential_agent_edit' property.id %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:1.100rem; font-weight:600;">
+                    <i class="fas fa-arrow-left"></i> Edit Record
+                </a>
+                <a href="{% url 'residential_list_agent' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:1.100rem; font-weight:600;">
                     <i class="fas fa-arrow-left"></i> Back to Listing
                 </a>
             </div>
@@ -633,21 +646,41 @@
             <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
                 <div style="flex: 1; min-width: 260px;">
                     <h1>{{ property.property_title }}</h1>
-                    <div class="prop-hero-location">
+                    <div class="prop-hero-location" style="font-size:17px; font-weight:bold;">
                         <i class="fas fa-location-dot"></i>
-                        {{ property.locality }}, {{ property.city }}, {{ property.state }}
+                        {{ property.locality_area }}, {{ property.city }}, {{ property.state }}
                     </div>
                 </div>
+              
+
                 <div class="text-end">
-                    <div class="prop-hero-price-tag">₹{{ property.monthly_rent|default:"0" }} <span>/ month</span></div>
-                    <div style="font-size:0.78rem; color: var(--muted); margin-top:4px;">+ ₹{{ property.monthy_maintenance_amount }} maintenance</div>
-                </div>
+    <!-- Rent Badge -->
+    <div class="mb-1">
+        <span class="badge bg-success px-3 py-2">
+            <i class="fas fa-home me-1"></i> Monthly Rent
+        </span>
+    </div>
+
+    <!-- Rent Price -->
+    <div class="prop-hero-price-tag">
+        ₹{{ property.monthly_rent|default:"0"|intcomma }}
+        <span>/ month</span>
+    </div>
+
+    <!-- Maintenance -->
+    <div style="font-size:0.82rem; color: var(--muted); margin-top:4px;">
+        + <strong>₹{{ property.monthy_maintenance_amount|default:"0"|intcomma }}</strong>
+        <strong>Maintenance</strong>
+    </div>
+</div>
             </div>
             <!-- Quick stats chips -->
             <div class="prop-quick-stats">
                 <div class="quick-stat-chip"><i class="fas fa-tags"></i> {{ property.listing_type|default:"Rental" }} / {{ property.category|default:"Residential" }}</div>
                 <div class="quick-stat-chip"><i class="fas fa-bed"></i> {{ property.bhk_type|default:"BHK" }}</div>
                 <div class="quick-stat-chip"><i class="fas fa-bath"></i> {{ property.bathrooms|default:"—" }} Bath</div>
+                <div class="quick-stat-chip"><i class="fas fa-couch"></i> {{ property.balconies|default:"—" }} Balconies</div>
+                
                 <div class="quick-stat-chip"><i class="fas fa-ruler-combined"></i> {{ property.built_up_area|default:"—" }} sq.ft</div>
                 <div class="quick-stat-chip"><i class="fas fa-layer-group"></i> Floor {{ property.floor_number|default:"—" }} of {{ property.total_floors|default:"—" }}</div>
                 <div class="quick-stat-chip"><i class="fas fa-couch"></i> {{ property.furnishing_status|default:"—" }}</div>
@@ -657,272 +690,142 @@
         </div>
     </div>
 
-  <div style="background: #111827;">
+ 
+
+    <div style="background: #111827;">
     <div class="container-fluid px-0">
+
+        <!-- 1. VIDEO PREVIEW SECTION (RM Assisted Link / Manual Upload / Auto Video File) -->
+        {% if selected_video %}
+            {% if selected_video.source == 'rm_assisted' and selected_video.video_url %}
+            <div style="background:#000; position:relative; border-bottom: 2px solid #222; text-align:center; padding: 15px 20px;">
+                {% if selected_video.youtube_thumbnail %}
+                    <a href="{{ selected_video.video_url }}" target="_blank" style="display:inline-block; position:relative; max-width: 100%;">
+                        <img src="{{ selected_video.youtube_thumbnail }}" alt="RM Video Thumbnail" style="width:100%; max-height:280px; object-fit:cover; border-radius: 8px;">
+                        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); border-radius: 8px;">
+                            <i class="fab fa-youtube text-danger" style="font-size: 54px;"></i>
+                        </div>
+                    </a>
+                {% else %}
+                    <div class="p-3 text-white" style="max-width: 600px; margin: 0 auto;">
+                        <div class="p-3 rounded" style="background: #1f2937; border: 1px solid #374151;">
+                            <i class="fas fa-video fa-2x text-primary mb-2"></i>
+                            <h6 class="fw-bold mb-1">RM Assisted Video Link</h6>
+                            <p class="text-muted small text-truncate mb-2">{{ selected_video.video_url }}</p>
+                            <a href="{{ selected_video.video_url }}" target="_blank" class="btn btn-sm btn-primary px-3 py-1 fw-bold" style="font-size: 0.75rem;">
+                                <i class="fas fa-external-link-alt me-1"></i> Open Video Link
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+                <span style="position:absolute; top:20px; right:25px; background:rgba(0,0,0,.75); color:#fff; font-size:0.7rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.2);">
+                    <i class="fas fa-link me-1"></i> RM Assisted Link (Active)
+                </span>
+            </div>
+
+            {% elif selected_video.video %}
+            <div style="background:#000; position:relative; border-bottom: 2px solid #222; text-align: center; padding: 10px 0;">
+                <video controls style="width:100%; max-height:300px; display:block; margin: 0 auto; background:#000;"
+                       poster="{% if images %}{{ images.0.image.url }}{% endif %}">
+                    <source src="{{ selected_video.video.url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <span style="position:absolute; top:18px; right:20px; background:rgba(0,0,0,.75); color:#fff; font-size:0.7rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.2);">
+                    {% if selected_video.source == 'auto' %}
+                        <i class="fas fa-magic me-1"></i> Auto-Generated Walkthrough
+                    {% else %}
+                        <i class="fas fa-video me-1"></i> Property Video Walkthrough
+                    {% endif %}
+                </span>
+            </div>
+            {% endif %}
+        {% endif %}
+
+        <!-- 2. PROP GALLERY GRID WITH PROPER ARRAY SLICE FALLBACKS FOR SIDE THUMBNAILS -->
+      <!-- 2. PROP GALLERY GRID (Direct Sequential Thumbnails: Index 1 and Index 2) -->
         <div class="prop-gallery-grid">
-
-            <!-- Main Gallery -->
+            <!-- Main Large Image / Slideshow Viewer -->
             <div class="prop-gallery-main" id="galMain">
-
                 {% if images %}
-
                     {% for img in images %}
                     <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
-                        <img src="{{ img.image.url }}" alt="Property view {{ forloop.counter }}">
+                        <img src="{{ img.image.url }}" alt="{{ img.category|title }} view {{ forloop.counter }}">
                     </div>
                     {% endfor %}
-
                     <div class="gallery-hud">
                         <div class="gallery-hud-left">
-                            <button class="btn-play-pause" id="playPauseBtn">
-                                <i class="fas fa-pause"></i>
-                            </button>
+                            <button class="btn-play-pause" id="playPauseBtn" type="button"><i class="fas fa-pause"></i></button>
                             <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
                         </div>
-                        <span class="gallery-badge-walkthrough">
-                            <i class="fas fa-play-circle"></i>
-                            AI Video Walkthrough
-                        </span>
+                        <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> AUTO SLIDESHOW ({{ images|length }} IMAGES)</span>
                     </div>
-
                 {% else %}
-
-                   <div class="w-100 h-100 position-relative overflow-hidden">
-
-    <!-- Background -->
-    <div style="
-        position:absolute;
-        inset:0;
-        background:linear-gradient(135deg,#f8fafc,#eef2f7,#e2e8f0);
-    "></div>
-
-    <!-- Watermark -->
-    <div style="
-        position:absolute;
-        inset:0;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        transform:rotate(-30deg);
-        font-size:80px;
-        font-weight:800;
-        color:rgba(37,99,235,.05);
-        letter-spacing:8px;
-        user-select:none;
-        pointer-events:none;
-    ">
-        EstateFlow
-    </div>
-
-    <!-- Main Content -->
-    <div class="w-100 h-100 d-flex align-items-center justify-content-center position-relative">
-
-        <div class="text-center">
-
-            <!-- Icon Circle -->
-            <div style="
-                width:140px;
-                height:140px;
-                border-radius:50%;
-                background:#ffffff;
-                border:2px solid #dbeafe;
-                box-shadow:0 10px 25px rgba(0,0,0,.08);
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                margin:auto;
-            ">
-                <i class="fas fa-building"
-                   style="
-                        font-size:60px;
-                        color:#2563eb;
-                   ">
-                </i>
-            </div>
-
-            <!-- Brand -->
-            <h2 style="
-                margin-top:22px;
-                font-weight:700;
-                color:#1e293b;
-                letter-spacing:.5px;
-            ">
-                EstateFlow
-            </h2>
-
-            <!-- Subtitle -->
-            <p style="
-                color:#64748b;
-                font-size:15px;
-                margin-bottom:6px;
-            ">
-                Property Images Not Available
-            </p>
-
-            <!-- Property Type -->
-            <span style="
-                display:inline-block;
-                background:#dbeafe;
-                color:#1d4ed8;
-                padding:6px 16px;
-                border-radius:20px;
-                font-size:13px;
-                font-weight:600;
-            ">
-                <i class="fas fa-building me-1"></i>
-                Rental Residential Property
-            </span>
-
-        </div>
-
-    </div>
-
-</div>
-
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,#f8fafc,#eef2f7,#e2e8f0);">
+                        <div class="text-center">
+                            <i class="fas fa-building" style="font-size:60px; color:#2563eb;"></i>
+                            <h2 style="margin-top:22px; font-weight:700; color:#1e293b;">EstateFlow</h2>
+                            <p style="color:#64748b; font-size:15px;">Property Images Not Available</p>
+                        </div>
+                    </div>
                 {% endif %}
-
             </div>
 
-            <!-- Thumbnail 1 -->
-         <div class="prop-gallery-thumb"
-     style="background:#0d1117; cursor:pointer;"
-     onclick="setSlide(1)"
-     id="galThumb1">
-
-    {% if images.count > 1 %}
-
-        <img src="{{ images.1.image.url }}"
-             alt="Property thumbnail 2">
-
-    {% else %}
-
-        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center position-relative overflow-hidden"
-             style="background:linear-gradient(135deg,#f8fafc,#eef2f7,#e2e8f0);">
-
-            <!-- Watermark -->
-            <div style="
-                position:absolute;
-                inset:0;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                transform:rotate(-30deg);
-                font-size:18px;
-                font-weight:800;
-                color:rgba(37,99,235,.06);
-                pointer-events:none;
-                user-select:none;">
-                EstateFlow
+            <!-- Right Top Thumbnail Slot (Always Image #2) -->
+            <div class="prop-gallery-thumb" onclick="setSlide(1)" id="galThumb1">
+                {% if images|length > 1 %}
+                    <img src="{{ images.1.image.url }}" alt="Thumbnail 2">
+                {% else %}
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background:#1e2733;">
+                        <i class="fas fa-building text-primary"></i>
+                    </div>
+                {% endif %}
             </div>
 
-            <!-- Building Icon -->
-            <i class="fas fa-building"
-               style="
-                    font-size:20px;
-                    color:#2563eb;
-                    z-index:2;">
-            </i>
-
-            <!-- Brand -->
-            <span style="
-                font-size:9px;
-                font-weight:700;
-                color:#1e293b;
-                margin-top:3px;
-                z-index:2;">
-                EstateFlow
-            </span>
-
+            <!-- Right Bottom Thumbnail Slot (Always Image #3 + More Photos Overlay) -->
+            <div class="prop-gallery-thumb" onclick="setSlide(2)" id="galThumb2">
+                {% if images|length > 2 %}
+                    <img src="{{ images.2.image.url }}" alt="Thumbnail 3">
+                    {% if images|length > 3 %}
+                    <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoLightboxStrip">
+                        <div class="text-center"><span>+{{ images|length|add:"-3" }}</span><small>More Photos</small></div>
+                    </div>
+                    {% endif %}
+                {% elif images|length > 1 %}
+                    <img src="{{ images.1.image.url }}" alt="Thumbnail 2">
+                {% else %}
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background:#1e2733;">
+                        <i class="fas fa-building text-primary"></i>
+                    </div>
+                {% endif %}
+            </div>
         </div>
 
-    {% endif %}
-
-</div>
-
-            <!-- Thumbnail 2 -->
-          <div class="prop-gallery-thumb"
-     style="background:#0d1117; cursor:pointer;"
-     onclick="setSlide(2)"
-     id="galThumb2">
-
-    {% if images.count > 2 %}
-
-        <img src="{{ images.2.image.url }}"
-             alt="Property thumbnail 3">
-
-        {% if images.count > 3 %}
-        <div class="thumb-more-overlay"
-             data-bs-toggle="modal"
-             data-bs-target="#photoLightboxStrip">
-            <div class="text-center">
-                <span>+{{ images.count|add:"-3" }}</span>
-                <small>More Photos</small>
+        <!-- Category Filter Tabs Bar -->
+        {% if grouped_images %}
+        <div style="background:#0d1117; padding:10px 16px;">
+            <div class="d-flex flex-wrap gap-2">
+               <span class="cat-filter-tab active" data-filter="all" style="cursor:pointer; padding:5px 13px; border-radius:20px; background:#2563eb; color:#fff; font-size:.72rem; font-weight:600;">All ({{ images|length }})</span>
+                {% for cat_key, cat_data in grouped_images.items %}
+                <span class="cat-filter-tab" data-filter="{{ cat_key }}" style="cursor:pointer; padding:5px 13px; border-radius:20px; background:#1f2937; color:#cbd5e0; font-size:.72rem; font-weight:600;">{{ cat_data.label }} ({{ cat_data.images|length }})</span>
+                {% endfor %}
             </div>
         </div>
         {% endif %}
 
-    {% else %}
-
-        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center position-relative overflow-hidden"
-             style="background:linear-gradient(135deg,#f8fafc,#eef2f7,#e2e8f0);">
-
-            <!-- Watermark -->
-            <div style="
-                position:absolute;
-                inset:0;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                transform:rotate(-30deg);
-                font-size:18px;
-                font-weight:800;
-                color:rgba(37,99,235,.06);
-                pointer-events:none;
-                user-select:none;">
-                EstateFlow
+        <!-- Bottom Thumbnail Strip Bar -->
+        {% if images %}
+        <div style="background:#0d1117; padding:8px 16px 12px;">
+            <div class="prop-image-strip" id="imageStrip">
+                {% for img in images %}
+                <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}" data-cat="{{ img.category }}" data-slide="{{ forloop.counter0 }}" onclick="setSlide({{ forloop.counter0 }})">
+                    <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
+                </div>
+                {% endfor %}
             </div>
-
-            <!-- Building Icon -->
-            <i class="fas fa-building"
-               style="
-                    font-size:20px;
-                    color:#2563eb;
-                    z-index:2;">
-            </i>
-
-            <!-- Brand -->
-            <span style="
-                font-size:9px;
-                font-weight:700;
-                color:#1e293b;
-                margin-top:3px;
-                z-index:2;">
-                EstateFlow
-            </span>
-
         </div>
+        {% endif %}
 
-    {% endif %}
-
-</div>
-
-        </div>
     </div>
-
-    {% if images %}
-    <div style="background:#0d1117;padding:8px 16px 12px;">
-        <div class="prop-image-strip" id="imageStrip">
-            {% for img in images %}
-            <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}"
-                 data-slide="{{ forloop.counter0 }}"
-                 onclick="setSlide({{ forloop.counter0 }})">
-                <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
 </div>
 
     <!-- STICKY NAV -->
@@ -958,9 +861,17 @@
                             Listed By
                         </div>
                         <div class="spec-grid">
-                         
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Listed By Type</div>
+                                <div class="spec-value">
+                                    {% if property.listed_by_type == 'self' %}Listed by Self
+                                    {% elif property.listed_by_type == 'other' %}Listed for Other User
+                                    {% else %}{{ property.listed_by_type|default:"—" }}{% endif %}
+                                </div>
+                            </div>
                             
-                       
+                           
+                            
                             <div class="spec-item">
                                 <div class="spec-label">Lister ID</div>
                                 <div class="spec-value">{{ property.listed_by_id|default:"—" }}</div>
@@ -1118,78 +1029,98 @@
                         <div class="spec-grid">
                             
                             <!-- Monthly Rent -->
-                            <div class="spec-item highlight-price">
-                                <div class="spec-label">Monthly Rent</div>
-                                <div class="spec-value">₹{{ property.monthly_rent|default:"0" }} / mo</div>
-                            </div>
+                           <div class="spec-item highlight-price">
+    <div class="spec-label">Monthly Rent</div>
+    <div class="spec-value">
+        ₹{{ property.monthly_rent|default:"0"|intcomma }} / mo
+    </div>
+</div>
+
                             
                             <!-- Advance Rent (Formatted with brackets below) -->
-                            <div class="spec-item">
-                                <div class="spec-label">Advance Rent</div>
-                                <div class="spec-value">
-                                    {% if property.get_advance_rent_amount %}
-                                        <div style="font-weight:700; color:#1e293b;">
-                                            ₹{{ property.get_advance_rent_amount|floatformat:"0" }}
-                                        </div>
-                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">
-                                            ({{ property.get_advance_rent_type_label }})
-                                        </div>
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </div>
-                            </div>
+                            <div class="spec-item" style="background: linear-gradient(135deg, #ded7e1, hsl(55, 9%, 74%)); border-color: rgb(153, 150, 146) !important;">
+    <div class="spec-label">Advance Rent</div>
+    <div class="spec-value">
+        {% if property.get_advance_rent_amount %}
+            <div style="font-weight:700; color:#1e293b;">
+                ₹{{ property.get_advance_rent_amount|floatformat:"0"|intcomma }}
+            </div>
+            <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">
+                ({{ property.get_advance_rent_type_label }})
+            </div>
+        {% else %}
+            —
+        {% endif %}
+    </div>
+</div>
 
                             <!-- Security Deposit (Formatted with brackets below) -->
-                            <div class="spec-item highlight-price" style="background: linear-gradient(135deg, #fff7ed, #ffedd5); border-color: #fed7aa !important;">
-                                <div class="spec-label" style="color:#ea580c;">Security Deposit</div>
-                                <div class="spec-value" style="color:#c2410c;">
-                                    {% if property.get_security_deposit_amount %}
-                                        <div style="font-weight:700;">
-                                            ₹{{ property.get_security_deposit_amount|floatformat:"0" }}
-                                        </div>
-                                        <div style="font-size:0.75rem; opacity:0.85; font-weight:500; margin-top:2px;">
-                                            ({{ property.get_security_deposit_type_label }})
-                                        </div>
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </div>
-                            </div>
+                        
+                            <div class="spec-item highlight-price" style="background: linear-gradient(135deg, rgb(235, 250, 21), rgb(251, 236, 28)); border-color: #fed7aa !important;">
+    <div class="spec-label" style="color:#ea580c;">Security Deposit</div>
+    <div class="spec-value" style="color:#c2410c;">
+        {% if property.get_security_deposit_amount %}
+            <div style="font-weight:700;">
+                ₹{{ property.get_security_deposit_amount|floatformat:"0"|intcomma }}
+            </div>
+            <div style="font-size:0.75rem; opacity:0.85; font-weight:500; margin-top:2px;">
+                ({{ property.get_security_deposit_type_label }})
+            </div>
+        {% else %}
+            —
+        {% endif %}
+    </div>
+</div
 
                             <!-- Brokerage / Service Fee (Formatted with brackets below) -->
                             <div class="spec-item">
-                                <div class="spec-label">{{ property.get_brokerage_label|default:"Brokerage" }}</div>
-                                <div class="spec-value">
-                                    {% if property.brokerage_percentage %}
-                                        <div style="font-weight:700; color:#1e293b;">
-                                            ₹{{ property.get_brokerage_amount|floatformat:"0" }}
-                                        </div>
-                                        <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">
-                                            ({{ property.get_brokerage_display_value }})
-                                        </div>
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </div>
+                               
+
+                                  <div class="spec-label">{{ property.get_brokerage_label|default:"Brokerage" }}</div>
+    <div class="spec-value">
+        {% if property.brokerage_percentage %}
+            <div style="font-weight:700; color:#1e293b;">
+                ₹{{ property.get_brokerage_amount|floatformat:"0"|intcomma }}
+            </div>
+            <div style="font-size:0.75rem; color:#64748b; font-weight:500; margin-top:2px;">
+                ({{ property.get_brokerage_display_value }})
+            </div>
+        {% else %}
+            —
+        {% endif %}
+    </div>
                             </div>
 
-                            <!-- Maintenance -->
-                            <div class="spec-item spec-full">
-                                <div class="spec-label">Maintenance Type</div>
-                                <div class="spec-value">{{ property.maintenance_type|default:"—" }}</div>
-                            </div>
-                            {% if property.maintenance_type == 'Extra' %}
-                            <div class="spec-item spec-full">
-                                <div class="spec-label">Monthly Maintenance Amount</div>
-                                <div class="spec-value">₹{{ property.monthy_maintenance_amount|default:property.maintenance_amount|default:"0" }}</div>
-                            </div>
-                            {% endif %}
+                           
+                       <!-- Monthly Maintenance -->
+{% if property.monthy_maintenance_amount or property.maintenance_type %}
+<div class="spec-item spec-full">
+    <div class="spec-label">Monthly Maintenance Amount</div>
+    <div class="spec-value">
+        {% if property.monthy_maintenance_amount and property.monthy_maintenance_amount != "0" %}
+            <span style="font-weight:700; color:#1e293b;">₹{{ property.monthy_maintenance_amount|intcomma }}/ mo</span>
+        {% else %}
+            <span style="font-weight:700; color:#1e293b;">—</span>
+        {% endif %}
+        
+        <span style="font-size:0.8rem; color:var(--muted); font-weight:500; margin-left:4px;">
+            ({{ property.maintenance_type|default:"Included" }})
+        </span>
+    </div>
+</div>
+{% endif %}
 
                             <!-- Total Move In -->
                             <div class="spec-item spec-full" style="background:#f3f4f6;">
-                                <div class="spec-label">Total Move In Cost</div>
-                                <div class="spec-value fw-bold">₹{{ property.total_move_in_cost|default:"—" }}</div>
+                               
+                                  <div class="spec-label"
+         style="font-size:0.95rem; font-weight:600; color:#0f766e; margin-bottom:8px;">
+        Total Move In Cost
+    </div>
+                               <div class="spec-value"
+         style="font-size:2rem; font-weight:800; color:#0f766e; line-height:1.2;">
+        ₹{{ property.total_move_in_cost|default:"0"|intcomma }}
+    </div>
                             </div>
                         </div>
                     </div>
@@ -1214,7 +1145,7 @@
                             </div>
                             <div class="spec-item">
                                 <div class="spec-label">Locality / Area</div>
-                                <div class="spec-value">{{ property.locality|default:"—" }}</div>
+                                <div class="spec-value">{{ property.locality_area|default:"—" }}</div>
                             </div>
                             <div class="spec-item spec-full">
                                 <div class="spec-label">Property Landmark</div>
@@ -1252,34 +1183,56 @@
                     </div>
 
                     <!-- SECTION 7: AMENITIES -->
-                    <div class="prop-section" id="sec-amenities">
-                        <div class="prop-section-title">
-                            <div class="section-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
-                            Amenities & Features
-                        </div>
-                        <div class="sub-section-label">Amenities</div>
-                        <div class="d-flex flex-wrap gap-2 mb-4">
-                            {% for item in amenities_list %}
-                                <div class="amenity-pill"><i class="fas fa-circle-check"></i> {{ item }}</div>
-                            {% empty %}
-                                <div class="empty-state w-100" style="padding:14px;">
-                                    <i class="fas fa-list-check"></i>
-                                    <p>No amenities mapped for this property.</p>
-                                </div>
-                            {% endfor %}
-                        </div>
-                        <div class="sub-section-label">Nearby Facilities</div>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for item in facilities_list %}
-                                <div class="facility-pill"><i class="fas fa-map-pin"></i> {{ item }}</div>
-                            {% empty %}
-                                <div class="empty-state w-100" style="padding:14px;">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <p>No nearby facilities markers toggled.</p>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
+                  <div class="prop-section" id="sec-amenities">
+    <div class="prop-section-title">
+        <div class="section-icon">
+            <i class="fas fa-wand-magic-sparkles"></i>
+        </div>
+        Amenities & Features
+    </div>
+
+    <!-- Amenities -->
+    <div class="sub-section-label d-flex justify-content-between align-items-center">
+        <span>Amenities</span>
+        <span class="badge rounded-pill bg-success" style="font-size:13px;">
+            {{ amenities_list|length }} Amenities
+        </span>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        {% for item in amenities_list %}
+            <div class="amenity-pill">
+                <i class="fas fa-circle-check"></i> {{ item }}
+            </div>
+        {% empty %}
+            <div class="empty-state w-100" style="padding:14px;">
+                <i class="fas fa-list-check"></i>
+                <p>No amenities mapped for this property.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Nearby Facilities -->
+    <div class="sub-section-label d-flex justify-content-between align-items-center">
+        <span>Nearby Facilities</span>
+        <span class="badge rounded-pill bg-primary" style="font-size:13px;">
+            {{ facilities_list|length }} Facilities
+        </span>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2">
+        {% for item in facilities_list %}
+            <div class="facility-pill">
+                <i class="fas fa-map-pin"></i> {{ item }}
+            </div>
+        {% empty %}
+            <div class="empty-state w-100" style="padding:14px;">
+                <i class="fas fa-map-marker-alt"></i>
+                <p>No nearby facilities markers toggled.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
 
                     <!-- SECTION 8: DESCRIPTION -->
                     <div class="prop-section" id="sec-desc">
@@ -1332,30 +1285,37 @@
                             {% endif %}
                         </div>
 
-                        <div class="sub-section-label">Data Uploaded (System Meta)</div>
+                        <div class="sub-section-label">Property Uploaded By (System Meta)</div>
                         <div class="spec-grid mb-4">
-                           
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Name</div>
+                                <div class="spec-value">{{ property.uploaded_by_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Role</div>
+                                <div class="spec-value">{{ property.uploaded_by_role|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Email</div>
+                                <div class="spec-value" style="font-size:0.82rem;">{{ property.uploaded_by_email|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Contact</div>
+                                <div class="spec-value">{{ property.uploaded_by_contact|default:"—" }}</div>
+                            </div>
                             <div class="spec-item spec-full">
                                 <div class="spec-label">Data Uploaded Via</div>
-                                <div class="spec-value" style="font-size:0.8rem; color: var(--muted);">{{ property.upload_file_name|default:"Web_Listing UI Form" }}</div>
+                                <div class="spec-value" style="font-size:0.8rem; color: var(--muted);">{{ property.upload_file_name|default:"Direct Input Entry" }}</div>
                             </div>
                             <div class="spec-item">
                                 <div class="spec-label">System Record Creation Date</div>
                                 <div class="spec-value">{{ property.created_at|date:"d M Y, h:i A" }}</div>
                             </div>
-                            <div class="spec-item">
-                                <div class="spec-label">Soft Delete Status</div>
-                                <div class="spec-value">
-                                    {% if property.is_deleted %}
-                                        <span class="badge-deleted">True — Deleted</span>
-                                    {% else %}
-                                        <span class="badge-active">False — Active</span>
-                                    {% endif %}
-                                </div>
-                            </div>
+                          
                         </div>
 
-                     
+                        <!-- NEW: SYSTEM DUPLICATION ENGINE SUB-SECTION -->
+                      
 
                     </div>
 
@@ -1396,39 +1356,60 @@
                    
 
     <!-- Price card -->
-    <div class="sidebar-price-card">
-        <div class="sidebar-price-header">
-            <div class="sidebar-price-label">Widescreen Price Tag</div>
-            <div class="sidebar-price-amount">₹{{ property.monthly_rent|default:"0" }} <span>/ mo</span></div>
-        </div>
-        <div class="sidebar-price-body">
-            <div class="row g-0">
-                <!-- Deposit Valuation (Updated with brackets) -->
-                <div class="col-6 sidebar-mini-stat" style="border-right: 1px solid var(--border);">
-                    <div class="sidebar-mini-stat-label">Deposit Valuation</div>
-                    <div class="sidebar-mini-stat-val">
-                        ₹{{ property.get_security_deposit_amount|default:"0"|floatformat:"0" }}
-                    </div>
-                    {% if property.get_security_deposit_type_label != "-" %}
-                    <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">
-                        ({{ property.get_security_deposit_type_label }})
-                    </div>
-                    {% endif %}
+  <div class="sidebar-price-card">
+   
+    <div class="sidebar-price-header">
+    <div class="sidebar-price-label">Widescreen Price Tag</div>
+
+    <div class="sidebar-price-amount">
+        ₹{{ property.monthly_rent|default:"0"|intcomma }}
+        <span>/ mo</span>
+
+        {% if property.get_advance_rent_amount %}
+            <span class="advance" style="font-size:12px; color:white; font-weight:bolder;">
+                (
+                ₹{{ property.get_advance_rent_amount|floatformat:"0"|intcomma }}
+                - Advance {{ property.get_advance_rent_type_label }}
+                )
+            </span>
+        {% else %}
+            <span class="advance" style="font-size:12px; color:white; font-weight:bolder;">(—)</span>
+        {% endif %}
+    </div>
+</div>
+
+    <div class="sidebar-price-body">
+        <div class="row g-0">
+
+            <!-- Deposit Valuation -->
+            <div class="col-6 sidebar-mini-stat" style="border-right: 1px solid var(--border);">
+                <div class="sidebar-mini-stat-label">Deposit Valuation</div>
+                <div class="sidebar-mini-stat-val">
+                    ₹{{ property.get_security_deposit_amount|default:"0"|floatformat:"0"|intcomma }}
                 </div>
 
-                <!-- Maintenance Charge (Updated with brackets) -->
-                <div class="col-6 sidebar-mini-stat">
-                    <div class="sidebar-mini-stat-label">Maintenance Charge</div>
-                    <div class="sidebar-mini-stat-val">
-                        ₹{{ property.monthy_maintenance_amount|default:"0"|floatformat:"0" }}
-                    </div>
-                    <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">
-                        ({{ property.maintenance_type|default:"Included" }})
-                    </div>
+                {% if property.get_security_deposit_type_label != "-" %}
+                <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">
+                    ({{ property.get_security_deposit_type_label }})
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Maintenance Charge -->
+            <div class="col-6 sidebar-mini-stat">
+                <div class="sidebar-mini-stat-label">Maintenance Charge</div>
+                <div class="sidebar-mini-stat-val">
+                    ₹{{ property.monthy_maintenance_amount|default:"0"|floatformat:"0"|intcomma }}/mo
+                </div>
+
+                <div style="font-size:0.65rem; color:var(--muted); font-weight:500; margin-top:2px;">
+                    ({{ property.maintenance_type|default:"Included" }})
                 </div>
             </div>
+
         </div>
     </div>
+</div>
 
     <!-- Owner contact card -->
     <div class="sidebar-owner-card">
@@ -1442,23 +1423,32 @@
         </div>
 
         <!-- Masked phone display -->
-        <div class="owner-info-row">
-            <i class="fas fa-phone"></i>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <span class="owner-phone-masked" id="sidebarPhone" data-phone="{{ property.listed_by_contact|default:'' }}">
-                    {% if property.listed_by_contact %}
-                        {% with phone=property.listed_by_contact %}
-                        {{ phone|slice:":2" }}XXXXXX{{ phone|slice:"-2:" }}
-                        {% endwith %}
-                    {% else %}
-                        Not available
-                    {% endif %}
-                </span>
-                {% if property.listed_by_contact %}
-                    <button type="button" class="btn-reveal-phone" onclick="revealPhone('sidebarPhone', '{{ property.listed_by_contact }}')">View Number</button>
-                {% endif %}
-            </div>
-        </div>
+      <div class="owner-info-row">
+    <i class="fas fa-phone"></i>
+
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="owner-phone-masked"
+              id="sidebarPhone"
+              data-phone="{{ property.listed_by_contact|default:'' }}">
+            {% if property.listed_by_contact %}
+                {% with phone=property.listed_by_contact %}
+                    {{ phone|slice:":2" }}XXXXXX{{ phone|slice:"-2:" }}
+                {% endwith %}
+            {% else %}
+                Not available
+            {% endif %}
+        </span>
+
+        {% if property.listed_by_contact %}
+        <button type="button"
+                class="btn-phone-eye"
+                onclick="togglePhone('sidebarPhone', '{{ property.listed_by_contact }}', this)"
+                title="Show/Hide Number">
+            <i class="fas fa-eye"></i>
+        </button>
+        {% endif %}
+    </div>
+</div>
 
         <a href="tel:{{ property.listed_by_contact }}" class="btn-call-primary">
             <i class="fas fa-phone-volume"></i> Call Primary Line
@@ -1477,6 +1467,71 @@
     </div>
 </div>
 
+
+<!-- LIGHTBOX MODAL WITH CATEGORY TABS -->
+<div class="modal fade" id="photoLightboxStrip" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content" style="background:#0d1117; border:none;">
+            <div class="modal-header" style="border-color:#222;">
+                <h5 style="color:#fff;"><i class="fas fa-images"></i> Categorized Property Photos</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                {% if grouped_images %}
+                <div class="d-flex flex-wrap gap-2 mb-4" id="lightboxCategoryFilters">
+                    <button type="button" class="btn modal-cat-tab active-cat-btn" data-filter="all" style="background:#2563eb; color:#fff; font-size:.8rem; font-weight:600; border-radius:20px; padding:6px 14px;">All Photos ({{ images|length }})</button>
+                    {% for cat_key, cat_data in grouped_images.items %}
+                    <button type="button" class="btn modal-cat-tab" data-filter="{{ cat_key }}" style="background:#1f2937; color:#cbd5e0; font-size:.8rem; font-weight:600; border-radius:20px; padding:6px 14px;">{{ cat_data.label }} ({{ cat_data.images|length }})</button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="row g-2" id="lightboxImagesGrid">
+                    {% for img in images %}
+                    <div class="col-4 col-md-3 modal-thumb-item" data-cat="{{ img.category }}">
+                        <div style="position:relative;">
+                            <img src="{{ img.image.url }}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; cursor:pointer;"
+                                 onclick="setSlide({{ forloop.counter0 }}); var m = bootstrap.Modal.getInstance(document.getElementById('photoLightboxStrip')); if(m) m.hide();">
+                            <span style="position:absolute; bottom:6px; left:6px; background:rgba(0,0,0,0.75); color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; text-transform:uppercase;">
+                                {{ img.get_category_display|default:img.category }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Lightbox Category Filtering Script
+document.addEventListener("DOMContentLoaded", function () {
+    const filterButtons = document.querySelectorAll('#lightboxCategoryFilters .modal-cat-tab');
+    const imageItems = document.querySelectorAll('#lightboxImagesGrid .modal-thumb-item');
+
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            filterButtons.forEach(b => {
+                b.style.background = '#1f2937';
+                b.style.color = '#cbd5e0';
+            });
+            this.style.background = '#2563eb';
+            this.style.color = '#fff';
+
+            const selectedCat = this.getAttribute('data-filter');
+
+            imageItems.forEach(item => {
+                if (selectedCat === 'all' || item.getAttribute('data-cat') === selectedCat) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
 <!-- LIGHTBOX MODAL -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1523,29 +1578,40 @@ document.addEventListener("DOMContentLoaded", function () {
 // ============================
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+
+
 <script>
-// ==========================================
-// 1. GLOBAL PHONE REVEAL FUNCTION (Fixed)
-// ==========================================
-function revealPhone(elementId, phone) {
+function togglePhone(elementId, phone, button) {
+
     const el = document.getElementById(elementId);
-    if (el && phone) {
-        // Replace masked text with actual phone number
+
+    const maskedPhone =
+        phone.substring(0, 2) +
+        "XXXXXX" +
+        phone.substring(phone.length - 2);
+
+    if (el.textContent.trim() === maskedPhone) {
+
+        // Show Number
         el.textContent = phone;
-        el.style.color = '#1a56db';
-        el.style.fontWeight = '700';
-        
-        // Remove the "View Number" button after clicking
-        const btn = el.nextElementSibling;
-        if (btn && btn.classList.contains('btn-reveal-phone')) {
-            btn.remove();
-        }
+        el.style.color = "#1a56db";
+        el.style.fontWeight = "700";
+
+        button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        button.title = "Hide Number";
+
+    } else {
+
+        // Hide Number
+        el.textContent = maskedPhone;
+        el.style.color = "";
+        el.style.fontWeight = "";
+
+        button.innerHTML = '<i class="fas fa-eye"></i>';
+        button.title = "Show Number";
     }
 }
-
-
 </script>
-
 
 <script type="application/ld+json">
 {
@@ -1561,4 +1627,31 @@ function revealPhone(elementId, phone) {
     {% endfor %}
   ]
 }
+</script>
+
+
+<script>
+var currentSlideIdx = 0;
+function setSlide(idx) {
+    document.querySelectorAll('.walkthrough-slide').forEach(function (s) { s.classList.remove('active'); });
+    var target = document.querySelector('.walkthrough-slide[data-idx="' + idx + '"]');
+    if (target) target.classList.add('active');
+    document.querySelectorAll('.strip-thumb').forEach(function (t) {
+        t.classList.toggle('active-thumb', t.dataset.slide == idx);
+    });
+    currentSlideIdx = idx;
+}
+
+document.querySelectorAll('.modal-cat-tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+        document.querySelectorAll('.modal-cat-tab').forEach(function (t) {
+            t.style.background = '#1f2937'; t.classList.remove('active');
+        });
+        this.style.background = '#2563eb'; this.classList.add('active');
+        var filter = this.dataset.filter;
+        document.querySelectorAll('.modal-thumb-item').forEach(function (item) {
+            item.style.display = (filter === 'all' || item.dataset.cat === filter) ? '' : 'none';
+        });
+    });
+});
 </script>

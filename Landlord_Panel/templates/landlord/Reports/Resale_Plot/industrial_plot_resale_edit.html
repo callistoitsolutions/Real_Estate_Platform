@@ -1,0 +1,2575 @@
+{% include "landlord/landlord_header.html" %}
+{% load static %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+:root {
+  --primary:       #10b981;
+  --primary-dark:  #06b6d4;
+  --primary-grad:  linear-gradient(135deg,#10b981 0%,#06b6d4 100%);
+  --success-grad:  linear-gradient(135deg,#11998e 0%,#38ef7d 100%);
+  --info-grad:     linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);
+  --dark-grad:     linear-gradient(135deg,#2c3e50 0%,#34495e 100%);
+  --success:#10b981;--muted:#64748b;--border:#e2e8f0;
+  --bg-light:#f8f9fa;--text-dark:#2d3748;
+  --sidebar-width:280px;--topbar-height:70px;
+  --radius-md:12px;--radius-lg:16px;--radius-xl:20px;
+  --shadow-card:0 4px 24px rgba(0,0,0,.07);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#ecfdf5,#cffafe,#f0fdfa);min-height:100vh}
+.main-content{margin-left:var(--sidebar-width);margin-top:var(--topbar-height);padding:28px}
+
+.page-wrapper{display:grid;grid-template-columns:1fr 300px;grid-template-rows:auto auto 1fr;gap:22px;align-items:start;max-width:1600px;margin:0 auto}
+
+.page-header{grid-column:1/-1;background:var(--primary-grad);border-radius:var(--radius-xl);padding:28px 35px;color:#fff;box-shadow:0 8px 32px rgba(16,185,129,.35);position:relative;overflow:hidden}
+.page-header::after{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:rgba(255,255,255,.08);border-radius:50%}
+.page-title{font-size:1.8rem;font-weight:700;margin:0 0 6px}
+.page-subtitle{font-size:.95rem;opacity:.85;margin:0}
+
+.stepper-container{grid-column:1/-1;background:#fff;border-radius:var(--radius-xl);padding:22px 30px;box-shadow:var(--shadow-card)}
+.stepper{display:flex;align-items:center;overflow-x:auto}
+.step-item{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.step-circle{width:46px;height:46px;min-width:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;border:3px solid var(--border);background:#fff;color:var(--muted);transition:all .3s;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.step-circle.active{background:var(--primary-grad);color:#fff;border-color:transparent;transform:scale(1.1);box-shadow:0 4px 16px rgba(16,185,129,.45)}
+.step-circle.done{background:var(--success-grad);color:#fff;border-color:transparent}
+.step-label{font-size:.82rem;font-weight:600;color:var(--muted);white-space:nowrap;transition:color .3s}
+.step-label.active{color:#10b981}.step-label.done{color:var(--success)}
+.step-line{flex:1;height:3px;background:var(--border);margin:0 14px;border-radius:2px;min-width:24px;transition:background .4s}
+.step-line.done{background:var(--success-grad)}
+
+.form-container{grid-column:1/2;background:#fff;border-radius:var(--radius-xl);padding:32px;box-shadow:var(--shadow-card);min-width:0}
+.preview-sidebar{grid-column:2/3;display:flex;flex-direction:column;gap:18px;position:sticky;top:calc(var(--topbar-height) + 20px);align-self:start}
+
+.step-content{display:none}
+.step-content.active{display:block;animation:fadeInUp .35s ease}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.form-section{margin-bottom:26px;border-radius:var(--radius-md);overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.section-header{background:var(--primary-grad);color:#fff;padding:13px 20px;font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:10px}
+.section-header.info-theme{background:var(--info-grad)}
+.section-header.dark-theme{background:var(--dark-grad)}
+.section-header.warn-theme{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+.section-body{background:var(--bg-light);padding:22px 24px;border:2px solid #e9ecef;border-top:none;border-radius:0 0 var(--radius-md) var(--radius-md)}
+
+.form-label{font-weight:600;color:var(--text-dark);margin-bottom:7px;font-size:.88rem;display:flex;align-items:center;gap:5px}
+.required{color:#e74c3c;font-size:1rem}
+.hint-text{font-size:.76rem;color:var(--muted);font-weight:400;margin-top:4px}
+.form-control,.form-select{border:2px solid #e9ecef;border-radius:var(--radius-md);padding:10px 14px;font-size:.92rem;width:100%;transition:border-color .25s,box-shadow .25s;background:#fff;color:var(--text-dark);font-family:inherit}
+.form-control:focus,.form-select:focus{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.15);outline:none}
+.form-control[readonly]{background:#edf2f7;border-color:#cbd5e0;color:#4a5568;font-weight:600;cursor:not-allowed}
+select.form-control,.form-select{appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');background-repeat:no-repeat;background-position:right 12px center;background-size:18px;padding-right:36px}
+textarea.form-control{min-height:100px;resize:vertical;line-height:1.6}
+.input-with-unit{position:relative}
+.input-unit{position:absolute;right:0;top:0;bottom:0;display:flex;align-items:center;padding:0 14px;background:#e9ecef;border:2px solid #e9ecef;border-left:none;border-radius:0 var(--radius-md) var(--radius-md) 0;font-size:.82rem;font-weight:700;color:var(--muted);white-space:nowrap}
+.input-with-unit .form-control{border-radius:var(--radius-md) 0 0 var(--radius-md);padding-right:10px}
+
+.radio-group{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.radio-option{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:#fff;border:2px solid #e9ecef;border-radius:var(--radius-md);cursor:pointer;font-weight:600;font-size:.85rem;color:var(--text-dark);transition:all .2s}
+.radio-option:hover{border-color:#10b981;background:#ecfdf5}
+.radio-option input{accent-color:#10b981;width:16px;height:16px}
+
+.sub-section-title{font-size:.8rem;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:.05em;margin:18px 0 10px;padding-bottom:6px;border-bottom:2px solid #e9ecef}
+
+.step-nav{display:flex;justify-content:space-between;align-items:center;margin-top:26px;gap:12px;padding-top:20px;border-top:2px solid #f0f0f0}
+.btn-step{padding:12px 28px;border-radius:var(--radius-md);font-weight:700;cursor:pointer;font-size:.92rem;display:inline-flex;align-items:center;gap:8px;font-family:inherit;transition:all .3s;border:none}
+.btn-next,.btn-submit{background:var(--primary-grad);color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.35)}
+.btn-next:hover,.btn-submit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(16,185,129,.5)}
+.btn-prev{background:var(--bg-light);color:var(--text-dark);border:2px solid var(--border)!important}
+.btn-prev:hover{background:#e9ecef}
+
+ .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .btn-back {
+        background: #f8f9fa;
+        color: #2d3748;
+        padding: 10px 20px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+    .btn-back:hover {
+        background: var(--dark-grad);
+        color: white;
+        transform: translateY(-2px);
+    }
+.type-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:.78rem;font-weight:700;color:#fff;margin-bottom:14px;background:var(--primary-grad)}
+
+/* ================= PROPERTY IMAGE CATEGORY UPLOAD ================= */
+.img-upload-guide {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border: 2px dashed #34d399; border-radius: 14px;
+    padding: 16px 20px; margin-bottom: 20px;
+}
+.guide-step { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 190px; }
+.guide-step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--primary-grad); color: #fff;
+    font-weight: 800; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; box-shadow: 0 3px 8px rgba(16,185,129,0.35);
+}
+.guide-step-text { font-size: 0.78rem; color: #064e3b; line-height: 1.35; }
+.guide-step-text strong { display: block; font-size: 0.85rem; color: #022c22; }
+.guide-arrow { color: #34d399; font-size: 1rem; display: none; }
+@media (min-width: 900px) { .guide-arrow { display: block; } }
+
+.img-cat-tabs {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 12px; margin-bottom: 20px; counter-reset: catstep;
+}
+.img-cat-tab {
+    position: relative; border: 2px solid #e9ecef; background: #fff; border-radius: 14px;
+    padding: 18px 14px 14px; font-size: 0.85rem; font-weight: 600; color: #4a5568;
+    cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    transition: all 0.25s ease; counter-increment: catstep;
+}
+.img-cat-tab i { font-size: 1.3rem; color: #94a3b8; }
+.img-cat-tab .cat-count {
+    background: #f1f5f9; color: #64748b; border-radius: 20px;
+    padding: 1px 9px; font-size: 0.72rem; font-weight: 700;
+    align-self: flex-end; margin-top: -4px;
+}
+.img-cat-tab.active { background: var(--primary-grad); border-color: transparent; color: #fff; }
+.img-cat-tab.active i { color: #fff; }
+.img-cat-tab.active .cat-count { background: rgba(255,255,255,0.25); color: #fff; }
+.img-cat-tab.has-images:not(.active) { border-color: #10b981; }
+.img-cat-tab::before {
+    content: counter(catstep); position: absolute; top: -8px; left: -8px;
+    width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid #cbd5e0; color: #64748b;
+    font-size: 0.68rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+.img-cat-tab.active::before { border-color: #10b981; color: #10b981; }
+.img-cat-tab.has-images::before { content: "\f00c"; font-family: "Font Awesome 5 Free"; font-weight: 900; background: #10b981; border-color: #10b981; color: #fff; }
+.img-cat-tab:nth-child(1)::after {
+    content: "★ Becomes Cover Photo"; font-size: 0.62rem; font-weight: 700; color: #b45309;
+    background: #fef3c7; padding: 2px 9px; border-radius: 20px; align-self: flex-start; margin-top: 2px;
+}
+.img-cat-tab.active:nth-child(1)::after { color: #fff; background: rgba(255,255,255,0.25); }
+.img-cat-panel { display: none; }
+.img-cat-panel.active { display: block; animation: fadeInUp 0.3s ease; }
+.img-cat-upload-area {
+    border: 3px dashed #cbd5e0; border-radius: 15px; padding: 36px 20px;
+    text-align: center; background: #f8f9fa; cursor: pointer; transition: all 0.3s ease;
+}
+.img-cat-upload-area:hover, .img-cat-upload-area.dragover { border-color: #10b981; background: #ecfdf5; }
+.img-cat-upload-area .upload-icon {
+    width: 60px; height: 60px; border-radius: 50%; background: #d1fae5;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;
+}
+.img-cat-upload-area .upload-icon i { font-size: 1.6rem; color: #10b981; margin: 0; }
+.img-cat-upload-area .upload-text { font-size: 1.05rem; font-weight: 600; color: #4a5568; margin-top: 6px; }
+.img-cat-upload-area .upload-subtext {
+    display: inline-block; margin-top: 8px; padding: 4px 12px; background: #fff;
+    border: 1px solid #e2e8f0; border-radius: 20px; color: #475569; font-size: 0.82rem;
+}
+.img-cat-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-top: 18px; }
+.img-cat-preview-item {
+    position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    aspect-ratio: 1; cursor: grab; border: 2px solid transparent;
+}
+.img-cat-preview-item.dragging { opacity: 0.4; }
+.img-cat-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;}
+.img-cat-preview-item .cover-badge {
+    position: absolute; bottom: 8px; left: 8px; background: linear-gradient(135deg,#f6d365,#fda085); color: #3b2a00;
+    font-size: 0.65rem; font-weight: 800; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 4px;
+}
+.img-cat-preview-item .remove-image {
+    position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: #e74c3c; color: #fff;
+    border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
+}
+.img-cat-preview-item .remove-image:hover { background: #c0392b; }
+.img-total-summary {
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 16px;
+    padding: 16px 22px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+
+
+
+}
+
+
+/* -- Red Cross Remove Button for Existing Images & Videos -- */
+    .existing-img-remove-btn {
+        position: absolute; 
+        top: 8px; 
+        right: 8px; 
+        width: 28px; 
+        height: 28px;
+        background: #e74c3c; 
+        color: #fff; 
+        border-radius: 50%;
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        cursor: pointer; 
+        font-size: 0.8rem; 
+        z-index: 10;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: all 0.2s ease;
+    }
+    .existing-img-remove-btn input { display: none; }
+    .existing-img-remove-btn:hover { background: #c0392b; transform: scale(1.1); }
+
+/* Existing images (already saved on server) */
+.existing-img-item{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:1;border:2px solid var(--border);transition:opacity .2s}
+.existing-img-item img{width:100%;height:100%;object-fit:cover}
+.existing-img-item .existing-remove-btn{position:absolute;top:7px;right:7px;background:#e74c3c;color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-size:.75rem}
+.existing-img-item .existing-tag{position:absolute;bottom:7px;left:7px;background:rgba(15,23,42,.75);color:#fff;font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:20px}
+.existing-img-item.marked-remove{opacity:.35}
+.existing-images-label{font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:4px 0 10px;}
+
+.preview-card{background:linear-gradient(135deg,#2c3e50,#1a252f);border-radius:var(--radius-lg);padding:18px;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.2)}
+.preview-mock{background:#fff;border-radius:var(--radius-md);overflow:hidden;margin-top:14px}
+.preview-image{height:130px;background:linear-gradient(135deg,#d1fae5,#a7f3d0);display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative}
+.preview-badges{position:absolute;top:9px;left:9px;display:flex;gap:5px}
+.preview-badge{font-size:.62rem;font-weight:800;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,.95);color:#0f172a}
+.preview-price{position:absolute;bottom:9px;left:9px;background:rgba(15,23,42,.88);color:#fff;font-size:.88rem;font-weight:800;padding:5px 12px;border-radius:8px}
+.preview-body{background:#fff;padding:14px;color:#0f172a}
+.preview-title{font-size:.88rem;font-weight:800;margin-bottom:5px;line-height:1.4}
+.preview-location{font-size:.75rem;color:var(--muted);margin-bottom:8px}
+.preview-specs{display:flex;gap:12px;font-size:.75rem;color:#475569;font-weight:600;flex-wrap:wrap}
+
+.checklist-card{background:#fff;border-radius:var(--radius-lg);border:2px solid var(--border);padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.checklist-title{font-size:.88rem;font-weight:800;color:var(--text-dark);margin-bottom:14px}
+.checklist-item{display:flex;align-items:center;gap:9px;padding:7px 0;font-size:.82rem;color:var(--muted);border-bottom:1px solid #f0f4f8;transition:color .3s}
+.checklist-item:last-child{border-bottom:none}
+.checklist-item i{font-size:.75rem;width:14px;flex-shrink:0;color:#cbd5e0;transition:color .3s}
+.checklist-item.done{color:var(--success)}
+.checklist-item.done i{color:var(--success)}
+
+.inline-status{padding:12px 16px;border-radius:10px;font-size:.85rem;font-weight:600;display:flex;align-items:center;gap:10px}
+.is-info{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.is-warning{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.is-success{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.is-danger{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+
+/* SEARCHABLE DROPDOWN */
+.search-select{position:relative;width:100%;font-size:.95rem}
+.search-select-control{border:2px solid #e9ecef;border-radius:12px;padding:12px 15px;background:#fff;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:border-color .3s;min-height:48px}
+.search-select-control:hover,.search-select-control:focus{border-color:#10b981;outline:none}
+.search-select.open .search-select-control{border-color:#10b981}
+.search-select-value{color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:1.2em}
+.search-select-value.ss-placeholder{color:#94a3b8}
+.search-select-arrow{color:#64748b;transition:transform .2s;font-size:.8rem;flex-shrink:0;margin-left:8px}
+.search-select.open .search-select-arrow{transform:rotate(180deg)}
+.search-select-panel{display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;background:#fff;border:1px solid #ced4da;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:9999;overflow:hidden}
+.search-select.open .search-select-panel{display:block}
+.search-select-input{width:100%;border:none;border-bottom:2px solid #e9ecef;padding:12px 15px;font-size:.9rem;outline:none;box-sizing:border-box}
+.search-select-input:focus{border-bottom-color:#10b981}
+.search-select-options{max-height:260px;overflow-y:auto}
+.search-select-group-label{padding:8px 15px 4px;font-size:.72rem;font-weight:700;color:#94a3b8;letter-spacing:.05em;text-transform:uppercase;background:#f8f9fa}
+.search-select-option{padding:10px 16px;cursor:pointer;color:#2d3748;font-size:.9rem}
+.search-select-option:hover,.search-select-option.highlighted{background:#ecfdf5;color:#10b981}
+.search-select-option.selected{background:#10b981;color:#fff}
+.search-select-no-results{padding:14px 16px;color:#94a3b8;font-size:.88rem;text-align:center}
+
+.modal-item-label{position: relative;}
+.custom-checkbox{
+  width: 18px;height: 18px;border: 2px solid #cbd5e0;border-radius: 5px;
+  display: inline-flex;align-items: center;justify-content: center;flex-shrink: 0;background: #fff;transition: all .2s ease;
+}
+.custom-checkbox i{font-size: .65rem;color: #fff;opacity: 0;transform: scale(0.5);transition: all .2s ease;}
+.modal-item-label.checked .custom-checkbox{background: #fff;border-color: #fff;}
+.modal-item-label.checked .custom-checkbox i{opacity: 1;transform: scale(1);color: #10b981;}
+
+.selected-items-display{padding:12px;background:#f8f9fa;border:2px dashed #dee2e6;border-radius:10px;min-height:52px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.item-tag{background:#fff;border:1px solid #dee2e6;border-radius:20px;padding:4px 14px;font-size:.82rem;display:inline-flex;align-items:center;gap:5px;font-weight:600}
+.item-tag .remove-btn{cursor:pointer;color:#dc3545;margin-left:4px;font-size:.75rem}
+.modal-content{border-radius:16px;overflow:hidden}
+.modal-header{background:var(--primary-grad);color:#fff;border:none;padding:18px 24px}
+.modal-title{font-weight:700;font-size:1.05rem}
+.btn-close{filter:invert(1)}
+.modal-footer .btn-primary{background:var(--primary-grad);border:none;border-radius:10px;font-weight:700;padding:10px 24px}
+.modal-footer .btn-secondary{border-radius:10px;font-weight:700;padding:10px 24px}
+#modalSearch{border-radius:10px;border:2px solid #e9ecef;padding:10px 14px;font-size:.92rem;width:100%;font-family:inherit}
+#modalSearch:focus{border-color:#10b981;outline:none;box-shadow:0 0 0 3px rgba(16,185,129,.15)}
+.modal-item-label{padding:10px 14px;background:#fff;border-radius:10px;border:2px solid #e9ecef;cursor:pointer;display:flex;align-items:center;gap:9px;font-size:.85rem;font-weight:600;color:var(--text-dark);transition:all .2s;user-select:none}
+.modal-item-label:hover{border-color:#10b981;background:#ecfdf5}
+.modal-item-label.checked{border-color:#10b981;background:var(--primary-grad);color:#fff}
+.modal-items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:4px 2px}
+
+.form-group,.col-md-12,.section-body,.step-content,.row{overflow:visible!important}
+
+@media(max-width:1200px){.page-wrapper{grid-template-columns:1fr}.preview-sidebar{display:none}.form-container{grid-column:1/-1}}
+@media(max-width:992px){.main-content{margin-left:0}}
+@media(max-width:768px){.main-content{padding:16px}.form-container{padding:20px}.step-label{display:none}}
+</style>
+
+<div class="main-content">
+<div class="page-wrapper">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h1 class="page-title"><i class="fas fa-industry" style="margin-right:12px;opacity:.9;"></i>Edit Industrial Plot Listing</h1>
+    <p class="page-subtitle">Update details for {{ property.property_title|default:"this industrial plot" }}</p>
+
+    <button class="btn-back" onclick="history.back();">
+      <i class="fas fa-arrow-left"></i>
+      Back to List
+    </button>
+  </div>
+
+  <!-- STEPPER -->
+  <div class="stepper-container">
+    <div class="stepper">
+      <div class="step-item">
+        <div class="step-circle active" id="sc1">1</div>
+        <div class="step-label active" id="sl1">Plot Details</div>
+        <div class="step-line" id="line1"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle" id="sc2">2</div>
+        <div class="step-label" id="sl2">Infrastructure &a Legal</div>
+        <div class="step-line" id="line2"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle" id="sc3">3</div>
+        <div class="step-label" id="sl3">Amenities & Location</div>
+        <div class="step-line" id="line3"></div>
+      </div>
+      <div class="step-item">
+        <div class="step-circle" id="sc4">4</div>
+        <div class="step-label" id="sl4">Photos & Publish</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM CONTAINER -->
+  <div class="form-container">
+<form action="{% url 'industrial_plot_resale_edit_landlord' property.id %}" method="POST" enctype="multipart/form-data" id="indPlotForm" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="plot_type_main" value="industrial">
+      <input type="hidden" name="property_id" value="{{ property.id }}">
+
+      <!-- ════════════ STEP 1 — PLOT DETAILS ════════════ -->
+      <div class="step-content active" id="step1">
+
+        <div class="form-header">
+          <div class="form-title">🏭 Edit Industrial Plot#{{ property.id }}</div>
+        </div>
+
+        <!-- LISTED BY -->
+      
+        <!-- LISTED BY -->
+ <div class="form-section">
+                            <div class="section-header" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                                <span><i class="fas fa-upload"></i> Listed By</span>
+                            </div>
+                            <div class="section-body">
+                                
+
+                                <div class="row" id="user_data_div">
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label">User Id</label><input type="text" class="form-control" name="listed_by_id" id="listed_by_id" readonly style="background-color:#e9ecef;" value="{{user_obj.user_id}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"> User Name</label><input type="text" class="form-control" name="listed_by_name" id="listed_by_name" readonly style="background-color:#e9ecef;" value="{{user_obj.user_name}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label">User Email</label><input type="email" class="form-control" name="listed_by_email" id="listed_by_email" readonly style="background-color:#e9ecef;" value="{{user_obj.user_email}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label">User Contact</label><input type="text" class="form-control" name="listed_by_contact" id="listed_by_contact" readonly style="background-color:#e9ecef;" value="{{user_obj.user_phone}}"></div></div>
+                                    <div class="col-md-3"><div class="form-group"><label class="form-label"> User Role</label><input type="text" class="form-control" name="listed_by_role" id="listed_by_role" readonly style="background-color:#e9ecef;" value="{{user_obj.user_role}}"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+
+        <!-- BASIC INFO -->
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-warehouse"></i> Basic Industrial Plot Information</div>
+          <div class="section-body">
+            <div class="mb-3">
+              <label class="form-label">Property Title</label>
+              <input type="text" class="form-control" id="property_title" name="property_title" value="{{ property.property_title }}" readonly placeholder="Auto-generated by system">
+              <p class="hint-text">This headline appears on search results and listing page</p>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Plot / Survey Number <span class="required">*</span></label>
+                <input type="text" class="form-control" name="property_no" id="property_no" value="{{ property.property_no }}" placeholder="e.g., MIDC Plot No. B-45, Sector 3" required>
+                <span style="font-size:.75rem;color:red;margin-top:4px;display:block;font-weight:bold;">
+                  <i class="fas fa-info-circle"></i> Required for verification — not shown publicly.
+                </span>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Plot Area <span class="required">*</span></label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" name="plot_area" id="plot_area" value="{{ property.plot_area|floatformat:'0' }}" required min="1" placeholder="e.g., 2000">
+                  <span class="input-unit">sq.m</span>
+                </div>
+                <p class="hint-text">Industrial plots typically measured in square metres (sq.m)</p>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Industrial Plot Type <span class="required">*</span></label>
+                <select class="form-select form-control" name="property_type" id="property_type" required>
+                  <option value="">— Select Industrial Plot Type —</option>
+                  <option value="midc_industrial" {% if property.property_type == "midc_industrial" %}selected{% endif %}>MIDC Plot (Factory / Manufacturing)</option>
+                  <option value="warehouse_logistics" {% if property.property_type == "warehouse_logistics" %}selected{% endif %}>Warehouse / Cold Storage / Logistics Plot</option>
+                  <option value="sez_plot" {% if property.property_type == "sez_plot" %}selected{% endif %}>SEZ Plot (Special Economic Zone)</option>
+                  <option value="it_park_plot" {% if property.property_type == "it_park_plot" %}selected{% endif %}>IT Park / Technology Campus Plot</option>
+                  <option value="private_industrial" {% if property.property_type == "private_industrial" %}selected{% endif %}>Private Industrial Estate Plot</option>
+                  <option value="food_agro_processing" {% if property.property_type == "food_agro_processing" %}selected{% endif %}>Food Processing / Agro Industry Plot</option>
+                  <option value="mini_industrial" {% if property.property_type == "mini_industrial" %}selected{% endif %}>Mini Industrial Plot (Light Industry)</option>
+                  <option value="flatted_factory" {% if property.property_type == "flatted_factory" %}selected{% endif %}>Flatted Factory Unit (Multi-Level Industrial)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ZONE & ESTATE -->
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-file-shield"></i> Industrial Zone, Estate & Authority Details</div>
+          <div class="section-body">
+            <div class="row">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Industrial Zone / Land Use <span class="required">*</span></label>
+                <select class="form-select form-control" name="land_use" id="land_use" required>
+                  <option value="">— Select Zone —</option>
+                  <option value="MIDC_Zone" {% if property.land_use == "MIDC_Zone" %}selected{% endif %}>MIDC Zone (Maharashtra Industrial Dev Corp)</option>
+                  <option value="SEZ_Zone" {% if property.land_use == "SEZ_Zone" %}selected{% endif %}>SEZ Zone (Special Economic Zone)</option>
+                  <option value="Light_Industrial" {% if property.land_use == "Light_Industrial" %}selected{% endif %}>Light Industrial Zone (LI)</option>
+                  <option value="Heavy_Industrial" {% if property.land_use == "Heavy_Industrial" %}selected{% endif %}>Heavy Industrial Zone (HI)</option>
+                  <option value="IT_ITES" {% if property.land_use == "IT_ITES" %}selected{% endif %}>IT / ITES Zone</option>
+                  <option value="Logistics_Hub" {% if property.land_use == "Logistics_Hub" %}selected{% endif %}>Logistics Hub / Multi-Modal Corridor</option>
+                  <option value="Food_Park" {% if property.land_use == "Food_Park" %}selected{% endif %}>Food Park / Agro Processing Zone</option>
+                  <option value="GIDC" {% if property.land_use == "GIDC" %}selected{% endif %}>GIDC (Gujarat Industrial Dev Corp)</option>
+                  <option value="Private_IE" {% if property.land_use == "Private_IE" %}selected{% endif %}>Private Industrial Estate Zone</option>
+                </select>
+                <p class="hint-text">As per development authority classification</p>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Industrial Zone Type <span class="required">*</span></label>
+                <select class="form-select form-control" name="industrial_zone_type" id="industrial_zone_type" required>
+                  <option value="">— Select —</option>
+                  <option value="MIDC" {% if property.industrial_zone_type == "MIDC" %}selected{% endif %}>MIDC (Maharashtra Industrial Dev Corp)</option>
+                  <option value="SEZ" {% if property.industrial_zone_type == "SEZ" %}selected{% endif %}>SEZ (Special Economic Zone)</option>
+                  <option value="Private_Industrial_Estate" {% if property.industrial_zone_type == "Private_Industrial_Estate" %}selected{% endif %}>Private Industrial Estate / Park</option>
+                  <option value="Govt_Industrial_Area" {% if property.industrial_zone_type == "Govt_Industrial_Area" %}selected{% endif %}>Govt Industrial Area / GIDC</option>
+                  <option value="Light_Industrial" {% if property.industrial_zone_type == "Light_Industrial" %}selected{% endif %}>Light Industrial Zone (LI)</option>
+                  <option value="Heavy_Industrial" {% if property.industrial_zone_type == "Heavy_Industrial" %}selected{% endif %}>Heavy Industrial Zone (HI)</option>
+                  <option value="Flatted_Factory" {% if property.industrial_zone_type == "Flatted_Factory" %}selected{% endif %}>Flatted Factory Complex</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Industrial Estate / Park Name</label>
+                <input type="text" class="form-control" name="industrial_estate_name" id="industrial_estate_name" value="{{ property.industrial_estate_name }}" placeholder="e.g., Butibori MIDC, Hingna MIDC, Nagpur SEZ">
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">NA Status / Industrial Conversion <span class="required">*</span></label>
+                <select class="form-select form-control" name="na_status" id="na_status" required>
+                  <option value="">— Select —</option>
+                  <option value="NA_Industrial" {% if property.na_status == "NA_Industrial" %}selected{% endif %}>NA Converted for Industrial Use</option>
+                  <option value="MIDC_Allotted" {% if property.na_status == "MIDC_Allotted" %}selected{% endif %}>MIDC Allotted Land (NA Not Applicable)</option>
+                  <option value="Industrial_Zone" {% if property.na_status == "Industrial_Zone" %}selected{% endif %}>Already in Industrial Zone (NA Not Required)</option>
+                  <option value="NA Applied" {% if property.na_status == "NA Applied" %}selected{% endif %}>NA Applied for Industrial Use</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Industrial Authority / Estate Approval</label>
+                <select class="form-select form-control" name="layout_approval_status" id="layout_approval_status">
+                  <option value="">— Select —</option>
+                  <option value="MIDC_Approved" {% if property.layout_approval_status == "MIDC_Approved" %}selected{% endif %}>MIDC Approved Plot</option>
+                  <option value="SEZ_Approved" {% if property.layout_approval_status == "SEZ_Approved" %}selected{% endif %}>SEZ Board Approved</option>
+                  <option value="Private_Sanctioned" {% if property.layout_approval_status == "Private_Sanctioned" %}selected{% endif %}>Private Industrial Estate — Sanctioned</option>
+                  <option value="Approval_Pending" {% if property.layout_approval_status == "Approval_Pending" %}selected{% endif %}>Authority Approval Pending</option>
+                  <option value="Direct_Sale" {% if property.layout_approval_status == "Direct_Sale" %}selected{% endif %}>Direct Industrial Land Sale</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Permissible FSI / Coverage</label>
+                <select class="form-select form-control" name="industrial_fsi" id="industrial_fsi">
+                  <option value="">— Select —</option>
+                  <option value="0.5" {% if property.industrial_fsi == "0.5" %}selected{% endif %}>0.5 (Low Density)</option>
+                  <option value="1.0" {% if property.industrial_fsi == "1.0" %}selected{% endif %}>1.0 (Standard Industrial)</option>
+                  <option value="1.5" {% if property.industrial_fsi == "1.5" %}selected{% endif %}>1.5</option>
+                  <option value="2.0" {% if property.industrial_fsi == "2.0" %}selected{% endif %}>2.0 (High Density)</option>
+                  <option value="As_per_Authority" {% if property.industrial_fsi == "As_per_Authority" %}selected{% endif %}>As per Authority Norms</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PLOT SPECIFICATIONS -->
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-ruler-combined"></i> Industrial Plot Specifications & Infrastructure</div>
+          <div class="section-body">
+
+            <div class="sub-section-title">Dimensions & Shape</div>
+            <div class="row">
+              <div class="col-md-4">
+                <label class="form-label">Plot Frontage / Width (m)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" name="plot_frontage" id="plot_frontage" value="{{ property.plot_frontage|floatformat:'0' }}" placeholder="e.g., 30" min="1">
+                  <span class="input-unit">m</span>
+                </div>
+                <p class="hint-text">Road-facing width for vehicle / truck access</p>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Depth / Length (m)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" name="plot_depth" id="plot_depth" value="{{ property.plot_depth|floatformat:'0' }}" placeholder="e.g., 80" min="1">
+                  <span class="input-unit">m</span>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Plot Shape</label>
+                <select class="form-select form-control" name="plot_shape" id="plot_shape">
+                  <option value="">— Select Shape —</option>
+                  <option value="Rectangular" {% if property.plot_shape == "Rectangular" %}selected{% endif %}>Rectangular</option>
+                  <option value="Square" {% if property.plot_shape == "Square" %}selected{% endif %}>Square</option>
+                  <option value="L-Shaped" {% if property.plot_shape == "L-Shaped" %}selected{% endif %}>L-Shaped</option>
+                  <option value="Irregular" {% if property.plot_shape == "Irregular" %}selected{% endif %}>Irregular / Odd</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="sub-section-title mt-3">Road Access & Entry</div>
+            <div class="row">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Road Access & Entry <span class="required">*</span></label>
+                <select class="form-select form-control" name="plot_road_facing" id="plot_road_facing" required>
+                  <option value="">— Select —</option>
+                  <option value="NH_SH_Access" {% if property.plot_road_facing == "NH_SH_Access" %}selected{% endif %}>National / State Highway Direct Access</option>
+                  <option value="MIDC_Road" {% if property.plot_road_facing == "MIDC_Road" %}selected{% endif %}>MIDC / Estate Internal Road (Paved)</option>
+                  <option value="Service_Road" {% if property.plot_road_facing == "Service_Road" %}selected{% endif %}>Service / Approach Road</option>
+                  <option value="Railway_Siding" {% if property.plot_road_facing == "Railway_Siding" %}selected{% endif %}>Railway Siding Access Available</option>
+                  <option value="Port_Connectivity" {% if property.plot_road_facing == "Port_Connectivity" %}selected{% endif %}>Port / Waterway Connectivity</option>
+                  <option value="Double_Road" {% if property.plot_road_facing == "Double_Road" %}selected{% endif %}>Corner — Two Road Access</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Road Width (Front of Plot)</label>
+                <select class="form-select form-control" name="road_width" id="road_width">
+                  <option value="">— Select —</option>
+                  <option value="18m" {% if property.road_width == "18m" %}selected{% endif %}>18 m (Standard MIDC Road)</option>
+                  <option value="24m" {% if property.road_width == "24m" %}selected{% endif %}>24 m (Wide MIDC Road)</option>
+                  <option value="30m" {% if property.road_width == "30m" %}selected{% endif %}>30 m</option>
+                  <option value="40m" {% if property.road_width == "40m" %}selected{% endif %}>40 m (Primary Industrial Road)</option>
+                  <option value="NH_width" {% if property.road_width == "NH_width" %}selected{% endif %}>NH / SH Width (Varies)</option>
+                </select>
+                <p class="hint-text">Wide road essential for truck / heavy vehicle movement</p>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Corner Plot?</label>
+                <select class="form-select form-control" name="corner_plot" id="corner_plot">
+                  <option value="no" {% if property.corner_plot == "no" %}selected{% endif %}>No — Single Road Access</option>
+                  <option value="yes" {% if property.corner_plot == "yes" %}selected{% endif %}>Yes — Corner Plot (Two Road Access)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="sub-section-title mt-3">Power & Utilities</div>
+            <div class="row">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Power Supply Available</label>
+                <select class="form-select form-control" name="power_supply" id="power_supply">
+                  <option value="">— Select —</option>
+                  <option value="3Phase_Available" {% if property.power_supply == "3Phase_Available" %}selected{% endif %}>3-Phase Industrial Power (Available)</option>
+                  <option value="3Phase_Connection_Needed" {% if property.power_supply == "3Phase_Connection_Needed" %}selected{% endif %}>3-Phase — Connection Needed</option>
+                  <option value="HT_Line" {% if property.power_supply == "HT_Line" %}selected{% endif %}>High Tension (HT) Line / Substation Nearby</option>
+                  <option value="Single_Phase" {% if property.power_supply == "Single_Phase" %}selected{% endif %}>Single Phase Only</option>
+                  <option value="No_Power" {% if property.power_supply == "No_Power" %}selected{% endif %}>No Power Connection</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Power Load Sanctioned</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" name="power_load_kva" id="power_load_kva" value="{{ property.power_load_kva }}" placeholder="e.g., 200">
+                  <span class="input-unit">KVA</span>
+                </div>
+                <p class="hint-text">Leave blank if not yet sanctioned</p>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Water Supply</label>
+                <select class="form-select form-control" name="industrial_water_supply" id="industrial_water_supply">
+                  <option value="">— Select —</option>
+                  <option value="MIDC_Water" {% if property.industrial_water_supply == "MIDC_Water" %}selected{% endif %}>MIDC / Authority Piped Water</option>
+                  <option value="Municipal_Water" {% if property.industrial_water_supply == "Municipal_Water" %}selected{% endif %}>Municipal / Corporation Water</option>
+                  <option value="Borewell_Available" {% if property.industrial_water_supply == "Borewell_Available" %}selected{% endif %}>Borewell Available on Plot</option>
+                  <option value="Water_Tanker" {% if property.industrial_water_supply == "Water_Tanker" %}selected{% endif %}>Water Tanker Arrangement</option>
+                  <option value="No_Water" {% if property.industrial_water_supply == "No_Water" %}selected{% endif %}>No Water Supply</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Drain / Effluent Facility</label>
+                <select class="form-select form-control" name="effluent_treatment" id="effluent_treatment">
+                  <option value="">— Select —</option>
+                  <option value="Common_ETP" {% if property.effluent_treatment == "Common_ETP" %}selected{% endif %}>Common ETP Available (Estate)</option>
+                  <option value="Individual_ETP_Needed" {% if property.effluent_treatment == "Individual_ETP_Needed" %}selected{% endif %}>Individual ETP to be Set Up</option>
+                  <option value="Drainage_Connected" {% if property.effluent_treatment == "Drainage_Connected" %}selected{% endif %}>Municipal Drainage Connected</option>
+                  <option value="Not_Applicable" {% if property.effluent_treatment == "Not_Applicable" %}selected{% endif %}>Not Applicable (Dry Industry)</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Permissible Industry Type</label>
+                <select class="form-select form-control" name="industry_type_permissible" id="industry_type_permissible">
+                  <option value="">— Select —</option>
+                  <option value="Light_Non_Polluting" {% if property.industry_type_permissible == "Light_Non_Polluting" %}selected{% endif %}>Light Non-Polluting Industry</option>
+                  <option value="Medium_Industry" {% if property.industry_type_permissible == "Medium_Industry" %}selected{% endif %}>Medium Scale Industry</option>
+                  <option value="Heavy_Industry" {% if property.industry_type_permissible == "Heavy_Industry" %}selected{% endif %}>Heavy Industry</option>
+                  <option value="Warehouse_Logistics" {% if property.industry_type_permissible == "Warehouse_Logistics" %}selected{% endif %}>Warehouse / Logistics / Storage</option>
+                  <option value="IT_Electronics" {% if property.industry_type_permissible == "IT_Electronics" %}selected{% endif %}>IT / Electronics / Assembly</option>
+                  <option value="Food_Processing" {% if property.industry_type_permissible == "Food_Processing" %}selected{% endif %}>Food Processing / Agro Industry</option>
+                  <option value="Chemical_Pharma" {% if property.industry_type_permissible == "Chemical_Pharma" %}selected{% endif %}>Chemical / Pharmaceutical</option>
+                  <option value="Any_Industry" {% if property.industry_type_permissible == "Any_Industry" %}selected{% endif %}>Any Industry (As per MIDC Norms)</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Compound Wall / Security Fencing</label>
+                <select class="form-select form-control" name="plot_fencing" id="plot_fencing">
+                  <option value="none" {% if property.plot_fencing == "none" %}selected{% endif %}>No Boundary (Open Industrial Site)</option>
+                  <option value="partial" {% if property.plot_fencing == "partial" %}selected{% endif %}>Partially Fenced</option>
+                  <option value="full_compound" {% if property.plot_fencing == "full_compound" %}selected{% endif %}>Full RCC Compound Wall</option>
+                  <option value="security_fence" {% if property.plot_fencing == "security_fence" %}selected{% endif %}>Industrial Security Fencing (Chain Link / Razor Wire)</option>
+                  <option value="gate_guard" {% if property.plot_fencing == "gate_guard" %}selected{% endif %}>Full Boundary with Gate &amp; Security Post</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Loading / Unloading Facility</label>
+                <select class="form-select form-control" name="loading_dock" id="loading_dock">
+                  <option value="">— Select —</option>
+                  <option value="Loading_Dock_Available" {% if property.loading_dock == "Loading_Dock_Available" %}selected{% endif %}>Loading Dock / Ramp Available</option>
+                  <option value="Open_Ground_Loading" {% if property.loading_dock == "Open_Ground_Loading" %}selected{% endif %}>Open Ground Loading Space</option>
+                  <option value="No_Loading_Facility" {% if property.loading_dock == "No_Loading_Facility" %}selected{% endif %}>No Dedicated Loading Facility</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="sub-section-title mt-3">Current Plot Status</div>
+            <div class="row">
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Current Plot / Shed Status</label>
+                <select class="form-select form-control" name="current_possession_status" id="current_possession_status">
+                  <option value="">— Select —</option>
+                  <option value="Vacant_Ready" {% if property.current_possession_status == "Vacant_Ready" %}selected{% endif %}>Vacant — Ready for Industrial Construction</option>
+                  <option value="Piling_Done" {% if property.current_possession_status == "Piling_Done" %}selected{% endif %}>Piling / Foundation Work Done</option>
+                  <option value="Shed_Available" {% if property.current_possession_status == "Shed_Available" %}selected{% endif %}>Industrial Shed / Structure Available</option>
+                  <option value="Partially_Operational" {% if property.current_possession_status == "Partially_Operational" %}selected{% endif %}>Partially Operational (Equipment to be Removed)</option>
+                  <option value="Fully_Operational" {% if property.current_possession_status == "Fully_Operational" %}selected{% endif %}>Running Unit (Business Sale / Slump Sale)</option>
+                </select>
+                <p class="hint-text">Indicates what buyer gets on possession</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <div></div>
+          <button type="button" class="btn-step btn-next" onclick="goToStep(2)">
+            Move to Next Page <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div><!-- /step1 -->
+
+      <!-- ════════════ STEP 2 — INFRASTRUCTURE & LEGAL ════════════ -->
+      <div class="step-content" id="step2">
+        <div class="form-header"><div class="form-title">🏭 Edit Industrial Plot</div></div>
+
+        <!-- PRICING -->
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-indian-rupee-sign"></i> Pricing Details</div>
+          <div class="section-body">
+            <div class="row">
+              <div class="col-md-6 mt-2">
+                <label class="form-label"> Selling Price <span class="required">*</span></label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" name="selling_price" id="selling_price" value="{{ property.selling_price }}" required min="1" placeholder="e.g., 15000000">
+                  <span class="input-unit">₹</span>
+                </div>
+              </div>
+              <div class="col-md-6 mt-2">
+                <label class="form-label">
+                  <i class="fas fa-calculator" style="color:#11998e"></i> Price per Sq.m
+                  <span style="font-weight:400;font-size:.78rem;color:var(--muted)">(Auto-calculated)</span>
+                </label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" id="plot_price_per_sqft" name="price_per_sqft" value="{{ property.price_per_sqft }}" placeholder="Auto-filled…" readonly>
+                  <span class="input-unit">₹/sq.m</span>
+                </div>
+              </div>
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Is the Price Negotiable?</label>
+                <div class="radio-group">
+                  <label class="radio-option"><input type="radio" name="price_negotiable" value="yes" {% if property.price_negotiable == "yes" %}checked{% endif %}> Yes, Negotiable</label>
+                  <label class="radio-option"><input type="radio" name="price_negotiable" value="no" {% if property.price_negotiable == "no" or not property.price_negotiable %}checked{% endif %}> Fixed Price</label>
+                </div>
+              </div>
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Additional Industrial Charges</label>
+                <select class="form-select form-control" name="additional_charges" id="additional_charges">
+                  <option value="none" {% if property.additional_charges == "none" %}selected{% endif %}>No Additional Charges</option>
+                  <option value="midc_transfer" {% if property.additional_charges == "midc_transfer" %}selected{% endif %}>MIDC Transfer Premium / Charges Extra</option>
+                  <option value="stamp_extra" {% if property.additional_charges == "stamp_extra" %}selected{% endif %}>Stamp Duty &amp; Registration Extra</option>
+                  <option value="development_charges" {% if property.additional_charges == "development_charges" %}selected{% endif %}>Development / Infrastructure Charges Extra</option>
+                  <option value="all_inclusive" {% if property.additional_charges == "all_inclusive" %}selected{% endif %}>All Inclusive (No Extra Cost)</option>
+                </select>
+              </div>
+
+              <!-- BROKERAGE -->
+              <div class="col-md-6 mt-3" id="brokerageSection">
+                <label class="form-label" id="brokerageLabel">Brokerage <span class="required">*</span></label>
+                <select class="form-select form-control" name="brokerage_percentage" id="brokeragePercentage">
+                  <option value="">Select</option>
+                  <option value="No Brokerage" {% if property.brokerage_percentage == "No Brokerage" %}selected{% endif %}>No Brokerage (Direct from Owner)</option>
+                  <option value="1% of amount" {% if property.brokerage_percentage == "1% of amount" %}selected{% endif %}>1% of Sale Value</option>
+                  <option value="1.5% of amount" {% if property.brokerage_percentage == "1.5% of amount" %}selected{% endif %}>1.5% of Sale Value</option>
+                  <option value="2% of amount" {% if property.brokerage_percentage == "2% of amount" %}selected{% endif %}>2% of Sale Value</option>
+                  <option value="Fixed Amount" {% if property.brokerage_percentage == "Fixed Amount" %}selected{% endif %}>Fixed Amount</option>
+                  <option value="Negotiable" {% if property.brokerage_percentage == "Negotiable" %}selected{% endif %}>Negotiable</option>
+                </select>
+              </div>
+              <div class="col-md-6 mt-3" id="manualBrokerageSection" style="display:{% if property.brokerage_percentage == 'Fixed Amount' %}block{% else %}none{% endif %};">
+                <label class="form-label">Enter Fixed Brokerage Amount (₹)</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" name="manual_brokerage" value="{{ property.manual_brokerage }}" placeholder="e.g., 100000">
+                  <span class="input-unit">₹</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEGAL -->
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-shield-halved"></i> Legal, Title & Industrial Authority Details</div>
+          <div class="section-body">
+
+            <div class="sub-section-title">Ownership Details</div>
+            <div class="row">
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Ownership / Tenure Type</label>
+                <select class="form-select form-control" name="ownership_type" id="ownership_type">
+                  <option value="">— Select Ownership —</option>
+                  <option value="midc_lease" {% if property.ownership_type == "midc_lease" %}selected{% endif %}>MIDC Leasehold (99-Year Lease — Transferable)</option>
+                  <option value="freehold" {% if property.ownership_type == "freehold" %}selected{% endif %}>Freehold Industrial Land (Private)</option>
+                  <option value="sez_lease" {% if property.ownership_type == "sez_lease" %}selected{% endif %}>SEZ Developer Lease</option>
+                  <option value="company_owned" {% if property.ownership_type == "company_owned" %}selected{% endif %}>Company / Corporate Asset Sale</option>
+                  <option value="power_of_attorney" {% if property.ownership_type == "power_of_attorney" %}selected{% endif %}>Power of Attorney (POA) Holder</option>
+                </select>
+              </div>
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Primary Title / Ownership Document</label>
+                <select class="form-select form-control" name="ownership_document_type" id="ownership_document_type">
+                  <option value="">— Select Document Type —</option>
+                  <option value="MIDC_Allotment_Letter" {% if property.ownership_document_type == "MIDC_Allotment_Letter" %}selected{% endif %}>MIDC Allotment Letter (Original)</option>
+                  <option value="Transfer_Letter" {% if property.ownership_document_type == "Transfer_Letter" %}selected{% endif %}>MIDC Transfer Letter (Previous Owner)</option>
+                  <option value="Registered Sale Deed" {% if property.ownership_document_type == "Registered Sale Deed" %}selected{% endif %}>Registered Sale Deed</option>
+                  <option value="Conveyance Deed" {% if property.ownership_document_type == "Conveyance Deed" %}selected{% endif %}>Conveyance Deed / Final Deed</option>
+                  <option value="Lease Deed" {% if property.ownership_document_type == "Lease Deed" %}selected{% endif %}>Lease Deed</option>
+                  <option value="SEZ_Allotment" {% if property.ownership_document_type == "SEZ_Allotment" %}selected{% endif %}>SEZ Developer Allotment Letter</option>
+                  <option value="Court Decree" {% if property.ownership_document_type == "Court Decree" %}selected{% endif %}>Court Decree (Legal Settlement)</option>
+                  <option value="Other" {% if property.ownership_document_type == "Other" %}selected{% endif %}>Other (Specify below)</option>
+                </select>
+              </div>
+              <div class="col-md-6 mt-3" id="other_document_type_div" style="display:{% if property.ownership_document_type == 'Other' %}block{% else %}none{% endif %};">
+                <label class="form-label">Specify Other Ownership Document Type</label>
+                <input type="text" class="form-control" name="other_document_type" id="other_document_type" value="{{ property.other_document_type }}" placeholder="Describe your ownership document">
+              </div>
+            </div>
+
+            <div class="sub-section-title mt-3">MIDC / Industrial Authority Compliance</div>
+            <div class="row">
+              <div class="col-md-4 mt-2">
+                <label class="form-label">MIDC / Authority Allotment Letter</label>
+                <select class="form-select form-control" name="midc_allotment" id="midc_allotment">
+                  <option value="Available" {% if property.midc_allotment == "Available" %}selected{% endif %}>Available (Original Allotment)</option>
+                  <option value="Transfer_Letter" {% if property.midc_allotment == "Transfer_Letter" %}selected{% endif %}>Transfer Letter (Previous Owner)</option>
+                  <option value="Not_Available" {% if property.midc_allotment == "Not_Available" %}selected{% endif %}>Not Available</option>
+                  <option value="Not_Applicable" {% if property.midc_allotment == "Not_Applicable" %}selected{% endif %}>Not Applicable (Private Industrial Land)</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">MIDC Transfer / NOC Status</label>
+                <select class="form-select form-control" name="midc_transfer_noc" id="midc_transfer_noc">
+                  <option value="">— Select —</option>
+                  <option value="NOC_Available" {% if property.midc_transfer_noc == "NOC_Available" %}selected{% endif %}>NOC Available from MIDC</option>
+                  <option value="NOC_Applied" {% if property.midc_transfer_noc == "NOC_Applied" %}selected{% endif %}>NOC Application Pending</option>
+                  <option value="Not_Required" {% if property.midc_transfer_noc == "Not_Required" %}selected{% endif %}>NOC Not Required (Private Plot)</option>
+                  <option value="Transfer_Pending" {% if property.midc_transfer_noc == "Transfer_Pending" %}selected{% endif %}>Transfer Pending with Authority</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-2">
+                <label class="form-label">Environmental Clearance (EC)</label>
+                <select class="form-select form-control" name="environmental_clearance" id="environmental_clearance">
+                  <option value="">— Select —</option>
+                  <option value="Not_Required" {% if property.environmental_clearance == "Not_Required" %}selected{% endif %}>Not Required (Below Threshold)</option>
+                  <option value="EC_Obtained" {% if property.environmental_clearance == "EC_Obtained" %}selected{% endif %}>EC Obtained</option>
+                  <option value="EC_Applied" {% if property.environmental_clearance == "EC_Applied" %}selected{% endif %}>EC Application Pending</option>
+                  <option value="EC_Required" {% if property.environmental_clearance == "EC_Required" %}selected{% endif %}>EC Required — Not Yet Applied</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">RERA / Industrial Authority Status</label>
+                <select class="form-select form-control" name="rera_status" id="rera_status">
+                  <option value="">— Select —</option>
+                  <option value="MIDC_Allotted" {% if property.rera_status == "MIDC_Allotted" %}selected{% endif %}>MIDC Plot — Authority Allotted</option>
+                  <option value="SEZ_Registered" {% if property.rera_status == "SEZ_Registered" %}selected{% endif %}>SEZ Registered Unit</option>
+                  <option value="Not Applicable" {% if property.rera_status == "Not Applicable" %}selected{% endif %}>RERA Not Applicable (Industrial)</option>
+                </select>
+                <p class="hint-text">RERA typically does not apply to industrial plots</p>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Title Clarity / Marketability</label>
+                <select class="form-select form-control" name="title_clearance" id="title_clearance">
+                  <option value="">— Select —</option>
+                  <option value="Clear & Marketable Title" {% if property.title_clearance == "Clear & Marketable Title" %}selected{% endif %}>Clear &amp; Marketable Title</option>
+                  <option value="Under Verification" {% if property.title_clearance == "Under Verification" %}selected{% endif %}>Title Under Verification</option>
+                  <option value="Legal Dispute" {% if property.title_clearance == "Legal Dispute" %}selected{% endif %}>Title in Legal Dispute</option>
+                  <option value="Encumbrance Exists" {% if property.title_clearance == "Encumbrance Exists" %}selected{% endif %}>Encumbrance / Charge Exists</option>
+                </select>
+              </div>
+              <div class="col-md-4 mt-3">
+                <label class="form-label">Encumbrance / Charge Status</label>
+                <select class="form-select form-control" name="property_encumbrance_status" id="property_encumbrance_status">
+                  <option value="">— Select —</option>
+                  <option value="No Encumbrance" {% if property.property_encumbrance_status == "No Encumbrance" %}selected{% endif %}>No Encumbrance (Clear EC)</option>
+                  <option value="Mortgaged" {% if property.property_encumbrance_status == "Mortgaged" %}selected{% endif %}>Mortgaged / Hypothecated (Bank / NBFC)</option>
+                  <option value="Under Litigation" {% if property.property_encumbrance_status == "Under Litigation" %}selected{% endif %}>Under Court Litigation</option>
+                  <option value="Government Acquisition Notice" {% if property.property_encumbrance_status == "Government Acquisition Notice" %}selected{% endif %}>Govt Acquisition Notice</option>
+                  <option value="Other Claim Exists" {% if property.property_encumbrance_status == "Other Claim Exists" %}selected{% endif %}>Other Claim / Charge Exists</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="sub-section-title mt-3"> Property Tax & Loan Status</div>
+            <div class="row">
+              <div class="col-md-6 mt-2">
+                <label class="form-label">Industrial Property Tax / Assessment Status</label>
+                <select class="form-select form-control" name="property_tax_status" id="property_tax_status">
+                  <option value="">— Select —</option>
+                  <option value="Fully Paid" {% if property.property_tax_status == "Fully Paid" %}selected{% endif %}>Fully Paid (All Industrial Dues Clear)</option>
+                  <option value="MIDC_Dues_Clear" {% if property.property_tax_status == "MIDC_Dues_Clear" %}selected{% endif %}>MIDC / Authority Dues Clear</option>
+                  <option value="Dues_Pending" {% if property.property_tax_status == "Dues_Pending" %}selected{% endif %}>MIDC / Authority Dues Pending</option>
+                  <option value="Under_Assessment" {% if property.property_tax_status == "Under_Assessment" %}selected{% endif %}>Under Municipal Assessment</option>
+                </select>
+              </div>
+              <div id="tax_due_section" style="display:{% if property.property_tax_status == 'Dues_Pending' %}block{% else %}none{% endif %};" class="col-md-12 mt-0">
+                <div class="row">
+                  <div class="col-md-6 mt-3">
+                    <label class="form-label">Outstanding Tax / Dues Amount (₹)</label>
+                    <div class="input-with-unit">
+                      <input type="number" class="form-control" name="outstanding_tax_amount" value="{{ property.outstanding_tax_amount }}" placeholder="e.g., 50000">
+                      <span class="input-unit">₹</span>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mt-3" id="pending_since_div" style="display:{% if property.property_tax_status == 'Dues_Pending' %}block{% else %}none{% endif %};">
+                    <label class="form-label">Dues Pending Since</label>
+                    <input type="date" class="form-control" name="pending_since" value="{{ property.pending_since|date:'Y-m-d' }}">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Existing Loan / Mortgage on Property</label>
+                <select class="form-select form-control" name="property_loan_status" id="property_loan_status">
+                  <option value="">— Select Loan Status —</option>
+                  <option value="No Active Loan" {% if property.property_loan_status == "No Active Loan" %}selected{% endif %}>No Active Loan (Loan-Free Property)</option>
+                  <option value="Loan Running" {% if property.property_loan_status == "Loan Running" %}selected{% endif %}>Loan Running (To be closed before sale)</option>
+                  <option value="Loan Closed" {% if property.property_loan_status == "Loan Closed" %}selected{% endif %}>Loan Closed (NOC Available)</option>
+                  <option value="Loan Status Not Available" {% if property.property_loan_status == "Loan Status Not Available" %}selected{% endif %}>Not Disclosed</option>
+                </select>
+              </div>
+              <div id="loan_running_section" style="display:{% if property.property_loan_status == 'Loan Running' %}block{% else %}none{% endif %};" class="col-md-12 mt-0">
+                <div class="row">
+                  <div class="col-md-6 mt-3">
+                    <label class="form-label">Lender Bank / NBFC Name</label>
+                    <input type="text" class="form-control" name="financing_bank" value="{{ property.financing_bank }}" placeholder="e.g., HDFC Bank, SBI, ICICI">
+                  </div>
+                  <div class="col-md-6 mt-3">
+                    <label class="form-label">Outstanding Loan Amount (₹)</label>
+                    <div class="input-with-unit">
+                      <input type="number" class="form-control" name="outstanding_loan_amount" value="{{ property.outstanding_loan_amount }}" placeholder="e.g., 5000000">
+                      <span class="input-unit">₹</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group mt-3">
+              <label class="form-label">Industrial Authority / Estate Developer</label>
+              <textarea class="form-control" name="sanctioning_authority" rows="2"
+                placeholder="e.g., MIDC Nagpur, MIDC Butibori, Nagpur SEZ Ltd, Private Industrial Estate, GIDC, CIDCO Industrial">{{ property.sanctioning_authority }}</textarea>
+            </div>
+
+            <div class="inline-status is-warning mt-3">
+              <i class="fas fa-triangle-exclamation"></i>
+              <span style="font-size:.8rem;">For MIDC plots, MIDC transfer NOC is mandatory before registration. Ensure NOC status is correct above.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button type="button" class="btn-step btn-prev" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+          <button type="button" class="btn-step btn-next" onclick="goToStep(3)">  Move to Next Page <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div><!-- /step2 -->
+
+      <!-- ════════════ STEP 3 — AMENITIES & LOCATION ════════════ -->
+      <div class="step-content" id="step3">
+        <div class="form-header"><div class="form-title">🏭 Edit Industrial Plot</div></div>
+
+        <!-- AMENITIES -->
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-star"></i> Industrial Amenities & Nearby Facilities</div>
+          <div class="section-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <label class="form-label mb-0">Amenities <span style="font-weight:400;font-size:.78rem;color:var(--muted)"></span></label>
+              <span class="badge px-3 py-2" id="amenitiesCount" style="font-size:.82rem;background:var(--primary-grad);color:#fff;">0 selected</span>
+            </div>
+            <button type="button" class="btn w-100 mb-3" onclick="openModal('amenities')"
+              style="border-radius:10px;font-weight:700;padding:11px;color:#fff;border:none;background:var(--primary-grad);">
+              <i class="fas fa-plus-circle me-2"></i> Select Amenities &nbsp;<span class="badge bg-light text-dark" id="amenitiesBadge">0</span>
+            </button>
+            <div id="amenitiesDisplay" class="selected-items-display">
+              <p class="text-muted text-center m-0" style="font-size:.85rem;">No amenities selected</p>
+            </div>
+            <div style="display:none;">
+              {% for amenities in ameneties_obj %}
+              <input type="checkbox" name="amenities[]" value="{{ amenities.amenties_name }}" class="amenities-checkbox" data-icon="{{ amenities.amenties_icon }}" {% if amenities.amenties_name in selected_amenities %}checked{% endif %}>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- NEARBY FACILITIES -->
+        <div class="form-section">
+          <div class="section-header info-theme"><i class="fas fa-map-marker-alt"></i>  Nearby Facilities</div>
+          <div class="section-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <label class="form-label mb-0">Nearby Facilities <span style="font-weight:400;font-size:.78rem;color:var(--muted)"></span></label>
+              <span class="badge bg-info text-dark px-3 py-2" id="facilitiesCount" style="font-size:.82rem;">0 selected</span>
+            </div>
+            <button type="button" class="btn btn-success w-100 mb-3" onclick="openModal('facilities')"
+              style="border-radius:10px;font-weight:700;padding:11px;">
+              <i class="fas fa-plus-circle me-2"></i> Select Nearby Facilities &nbsp;<span class="badge bg-light text-dark" id="facilitiesBadge">0</span>
+            </button>
+            <div id="facilitiesDisplay" class="selected-items-display">
+              <p class="text-muted text-center m-0" style="font-size:.85rem;">No facilities selected</p>
+            </div>
+            <div style="display:none;">
+              {% for facilities in facilities_obj %}
+              <input type="checkbox" name="facilities[]" value="{{ facilities.facilities_name }}" class="facilities-checkbox" data-icon="{{ facilities.facilities_icon }}" {% if facilities.facilities_name in selected_facilities %}checked{% endif %}>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-align-left"></i> Add Property Description</div>
+          <div class="section-body">
+            <div class="form-group">
+              <label class="form-label">Property Description</label>
+              <textarea class="form-control" name="user_description" rows="5"
+                placeholder="Describe the industrial plot — estate, connectivity, power availability, water source, existing shed / foundation, type of industry permitted…">{{ property.user_description }}</textarea>
+              <p class="hint-text">Include estate name, power load, water source, road width, industry type, and NOC status for maximum buyer interest.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- LOCATION -->
+        <div class="form-section">
+          <div class="section-header dark-theme"><i class="fas fa-location-dot"></i>Property Location Details</div>
+          <div class="section-body">
+            <div class="row">
+              <div class="col-md-12 mt-2">
+                <label class="form-label">Complete Industrial Plot Address <span class="required">*</span></label>
+                <textarea class="form-control" name="plot_address" rows="2" placeholder="e.g., Plot No. A-12, Sector 1, Bhosari MIDC..." required>{{ property.address }}</textarea>
+              </div>
+
+              <div class="col-md-12 mt-3">
+                <label class="form-label">MIDC Phase / Industrial Area Name <span class="required">*</span></label>
+                <input type="text" class="form-control" name="locality" id="locality" value="{{ property.locality }}" required placeholder="e.g., Bhosari MIDC Phase I">
+                <p class="hint-text">Primary location filter used by buyers</p>
+              </div>
+
+              <div class="col-md-12 mt-2">
+                <label class="form-label">Nearest Highway / Railway / Port Reference</label>
+                <input type="text" class="form-control" name="property_landmark" value="{{ property.property_landmark }}" placeholder="e.g., 2 km from Pune-Nashik Highway">
+              </div>
+
+              <div class="col-md-6 mt-3">
+                <label class="form-label">City / District <span class="required">*</span></label>
+                <input type="text" class="form-control" id="city" name="city" value="{{ property.city }}" placeholder="e.g., Pune" required>
+              </div>
+              <div class="col-md-6 mt-3">
+                <label class="form-label">State <span class="required">*</span></label>
+                <select class="form-select form-control" name="state" id="state" required>
+                  <option value="">Select State</option>
+                  {% for st in "Andhra Pradesh,Arunachal Pradesh,Assam,Bihar,Chhattisgarh,Goa,Gujarat,Haryana,Himachal Pradesh,Jharkhand,Karnataka,Kerala,Madhya Pradesh,Maharashtra,Manipur,Meghalaya,Mizoram,Nagaland,Odisha,Punjab,Rajasthan,Sikkim,Tamil Nadu,Telangana,Tripura,Uttar Pradesh,Uttarakhand,West Bengal,Delhi,Jammu and Kashmir,Ladakh,Puducherry,Chandigarh,Andaman and Nicobar Islands,Lakshadweep,Dadra and Nagar Haveli and Daman and Diu"%}
+                  {% endfor %}
+                  <option value="Andhra Pradesh" {% if property.state == "Andhra Pradesh" %}selected{% endif %}>Andhra Pradesh</option>
+                  <option value="Arunachal Pradesh" {% if property.state == "Arunachal Pradesh" %}selected{% endif %}>Arunachal Pradesh</option>
+                  <option value="Assam" {% if property.state == "Assam" %}selected{% endif %}>Assam</option>
+                  <option value="Bihar" {% if property.state == "Bihar" %}selected{% endif %}>Bihar</option>
+                  <option value="Chhattisgarh" {% if property.state == "Chhattisgarh" %}selected{% endif %}>Chhattisgarh</option>
+                  <option value="Goa" {% if property.state == "Goa" %}selected{% endif %}>Goa</option>
+                  <option value="Gujarat" {% if property.state == "Gujarat" %}selected{% endif %}>Gujarat</option>
+                  <option value="Haryana" {% if property.state == "Haryana" %}selected{% endif %}>Haryana</option>
+                  <option value="Himachal Pradesh" {% if property.state == "Himachal Pradesh" %}selected{% endif %}>Himachal Pradesh</option>
+                  <option value="Jharkhand" {% if property.state == "Jharkhand" %}selected{% endif %}>Jharkhand</option>
+                  <option value="Karnataka" {% if property.state == "Karnataka" %}selected{% endif %}>Karnataka</option>
+                  <option value="Kerala" {% if property.state == "Kerala" %}selected{% endif %}>Kerala</option>
+                  <option value="Madhya Pradesh" {% if property.state == "Madhya Pradesh" %}selected{% endif %}>Madhya Pradesh</option>
+                  <option value="Maharashtra" {% if property.state == "Maharashtra" %}selected{% endif %}>Maharashtra</option>
+                  <option value="Manipur" {% if property.state == "Manipur" %}selected{% endif %}>Manipur</option>
+                  <option value="Meghalaya" {% if property.state == "Meghalaya" %}selected{% endif %}>Meghalaya</option>
+                  <option value="Mizoram" {% if property.state == "Mizoram" %}selected{% endif %}>Mizoram</option>
+                  <option value="Nagaland" {% if property.state == "Nagaland" %}selected{% endif %}>Nagaland</option>
+                  <option value="Odisha" {% if property.state == "Odisha" %}selected{% endif %}>Odisha</option>
+                  <option value="Punjab" {% if property.state == "Punjab" %}selected{% endif %}>Punjab</option>
+                  <option value="Rajasthan" {% if property.state == "Rajasthan" %}selected{% endif %}>Rajasthan</option>
+                  <option value="Sikkim" {% if property.state == "Sikkim" %}selected{% endif %}>Sikkim</option>
+                  <option value="Tamil Nadu" {% if property.state == "Tamil Nadu" %}selected{% endif %}>Tamil Nadu</option>
+                  <option value="Telangana" {% if property.state == "Telangana" %}selected{% endif %}>Telangana</option>
+                  <option value="Tripura" {% if property.state == "Tripura" %}selected{% endif %}>Tripura</option>
+                  <option value="Uttar Pradesh" {% if property.state == "Uttar Pradesh" %}selected{% endif %}>Uttar Pradesh</option>
+                  <option value="Uttarakhand" {% if property.state == "Uttarakhand" %}selected{% endif %}>Uttarakhand</option>
+                  <option value="West Bengal" {% if property.state == "West Bengal" %}selected{% endif %}>West Bengal</option>
+                  <option value="Delhi" {% if property.state == "Delhi" %}selected{% endif %}>Delhi</option>
+                  <option value="Jammu and Kashmir" {% if property.state == "Jammu and Kashmir" %}selected{% endif %}>Jammu and Kashmir</option>
+                  <option value="Ladakh" {% if property.state == "Ladakh" %}selected{% endif %}>Ladakh</option>
+                  <option value="Puducherry" {% if property.state == "Puducherry" %}selected{% endif %}>Puducherry</option>
+                  <option value="Chandigarh" {% if property.state == "Chandigarh" %}selected{% endif %}>Chandigarh</option>
+                  <option value="Andaman and Nicobar Islands" {% if property.state == "Andaman and Nicobar Islands" %}selected{% endif %}>Andaman and Nicobar Islands</option>
+                  <option value="Lakshadweep" {% if property.state == "Lakshadweep" %}selected{% endif %}>Lakshadweep</option>
+                  <option value="Dadra and Nagar Haveli and Daman and Diu" {% if property.state == "Dadra and Nagar Haveli and Daman and Diu" %}selected{% endif %}>Dadra and Nagar Haveli and Daman and Diu</option>
+                </select>
+              </div>
+
+              <div class="col-md-6 mt-3">
+                <label class="form-label">PIN Code</label>
+                <input type="text" class="form-control" name="pincode" value="{{ property.pincode }}" placeholder="e.g., 411026" maxlength="6">
+              </div>
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Google Maps Link <span style="font-weight:400;font-size:.78rem">(Recommended)</span></label>
+                <input type="url" class="form-control" name="google_maps_link" value="{{ property.google_maps_link }}" placeholder="https://maps.google.com/?q=…">
+              </div>
+
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Latitude</label>
+                <input type="text" class="form-control" name="plot_latitude" value="{{ property.latitude }}" placeholder="e.g., 18.6270">
+              </div>
+              <div class="col-md-6 mt-3">
+                <label class="form-label">Longitude</label>
+                <input type="text" class="form-control" name="plot_longitude" value="{{ property.longitude }}" placeholder="e.g., 73.8350">
+              </div>
+            </div>
+            <div class="inline-status is-warning mt-3">
+              <i class="fas fa-triangle-exclamation"></i>
+              <span style="font-size:.8rem;">Accurate MIDC phase / estate name and highway distance significantly improves buyer response rate.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button type="button" class="btn-step btn-prev" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+          <button type="button" class="btn-step btn-next" onclick="goToStep(4)">  Move to Next Page <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div><!-- /step3 -->
+
+      <!-- ════════════ STEP 4 — PHOTOS & PUBLISH ════════════ -->
+      <div class="step-content" id="step4">
+        <div class="form-header"><div class="form-title">🏭 Edit Industrial Plot</div></div>
+
+        <!-- MEDIA & VIDEO UPLOAD -->
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-images"></i> Photos & Media</div>
+          <div class="section-body">
+
+            <div class="img-upload-guide">
+              <div class="guide-step">
+                <div class="guide-step-num">1</div>
+                <div class="guide-step-text"><strong>Pick a category</strong> Tap a tile below</div>
+              </div>
+              <i class="fas fa-arrow-right guide-arrow"></i>
+              <div class="guide-step">
+                <div class="guide-step-num">2</div>
+                <div class="guide-step-text"><strong>Add or remove photos</strong> Click ✖ to remove existing, or upload new ones</div>
+              </div>
+              <i class="fas fa-arrow-right guide-arrow"></i>
+              <div class="guide-step">
+                <div class="guide-step-num">3</div>
+                <div class="guide-step-text"><strong>Cover photo</strong> First photo in Full Plot View is used as cover</div>
+              </div>
+            </div>
+
+            <div class="img-total-summary">
+              <div class="total-count">Total Uploaded: <span id="imgTotalCount">0</span>/25</div>
+              <div id="imgMinNotice" class="min-ok"><i class="fas fa-info-circle"></i> 5+ photos get 3× more inquiries.</div>
+            </div>
+
+            <div class="img-cat-tabs" id="imgCatTabs">
+              <div class="img-cat-tab active" data-cat="full_plot"><i class="fas fa-vector-square"></i> Full Plot View <span class="cat-count" id="count-full_plot">0</span></div>
+              <div class="img-cat-tab" data-cat="main_entrance"><i class="fas fa-door-open"></i> Main Entrance <span class="cat-count" id="count-main_entrance">0</span></div>
+              <div class="img-cat-tab" data-cat="boundary_fencing"><i class="fas fa-border-all"></i> Boundary/Fencing <span class="cat-count" id="count-boundary_fencing">0</span></div>
+              <div class="img-cat-tab" data-cat="road_facing"><i class="fas fa-road"></i> Road Facing <span class="cat-count" id="count-road_facing">0</span></div>
+              <div class="img-cat-tab" data-cat="approach_road"><i class="fas fa-route"></i> Approach Road <span class="cat-count" id="count-approach_road">0</span></div>
+              <div class="img-cat-tab" data-cat="truck_access"><i class="fas fa-truck"></i> Truck Access <span class="cat-count" id="count-truck_access">0</span></div>
+              <div class="img-cat-tab" data-cat="industrial_estate"><i class="fas fa-industry"></i> Estate/Area <span class="cat-count" id="count-industrial_estate">0</span></div>
+              <div class="img-cat-tab" data-cat="electricity_infra"><i class="fas fa-bolt"></i> Power Infra <span class="cat-count" id="count-electricity_infra">0</span></div>
+              <div class="img-cat-tab" data-cat="water_infra"><i class="fas fa-tint"></i> Water Infra <span class="cat-count" id="count-water_infra">0</span></div>
+              <div class="img-cat-tab" data-cat="aerial_drone"><i class="fas fa-drone"></i> Aerial/Drone <span class="cat-count" id="count-aerial_drone">0</span></div>
+              <div class="img-cat-tab" data-cat="layout_site_plan"><i class="fas fa-drafting-compass"></i> Layout/Site Plan <span class="cat-count" id="count-layout_site_plan">0</span></div>
+            </div>
+
+           
+            <div class="img-cat-panels">
+  <!-- Full Plot View -->
+  <div class="img-cat-panel active" data-cat-panel="full_plot">
+    <input type="file" class="img-cat-input" id="imgInput-full_plot" name="plot_images_full_plot[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="full_plot">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Full Plot View" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-full_plot">
+        {% for img in images_by_category.full_plot %}
+        <div class="img-cat-preview-item existing-img-item" data-cat="full_plot" data-img-id="{{ img.id }}" draggable="true">
+            <img src="{{ img.image.url }}">
+            <label class="existing-img-remove-btn" title="Remove this image">
+              <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+
+  <!-- Main Entrance -->
+  <div class="img-cat-panel" data-cat-panel="main_entrance">
+    <input type="file" class="img-cat-input" id="imgInput-main_entrance" name="plot_images_main_entrance[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="main_entrance">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Main Entrance" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-main_entrance">
+        {% for img in images_by_category.main_entrance %}
+        
+        <div class="img-cat-preview-item existing-img-item" data-cat="main_entrance" data-img-id="{{ img.id }}">
+            <img src="{{ img.image.url }}">
+            <label class="existing-img-remove-btn" title="Remove this image">
+              <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+
+  <!-- Boundary/Fencing -->
+  <div class="img-cat-panel" data-cat-panel="boundary_fencing">
+    <input type="file" class="img-cat-input" id="imgInput-boundary_fencing" name="plot_images_boundary_fencing[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="boundary_fencing">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Boundary/Fencing" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-boundary_fencing">
+        {% for img in images_by_category.boundary_fencing %}
+
+
+        <div class="img-cat-preview-item existing-img-item" data-cat="boundary_fencing" data-img-id="{{ img.id }}">
+            <img src="{{ img.image.url }}">
+            <label class="existing-img-remove-btn" title="Remove this image">
+              <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+
+  <!-- Road Facing -->
+  <div class="img-cat-panel" data-cat-panel="road_facing">
+    <input type="file" class="img-cat-input" id="imgInput-road_facing" name="plot_images_road_facing[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="road_facing">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Road Facing" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-road_facing">
+        {% for img in images_by_category.road_facing %}
+       
+
+        <div class="img-cat-preview-item existing-img-item" data-cat="road_facing" data-img-id="{{ img.id }}">
+            <img src="{{ img.image.url }}">
+            <label class="existing-img-remove-btn" title="Remove this image">
+              <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+
+  <!-- Approach Road -->
+  <div class="img-cat-panel" data-cat-panel="approach_road">
+    <input type="file" class="img-cat-input" id="imgInput-approach_road" name="plot_images_approach_road[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="approach_road">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Approach Road" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-approach_road">
+        {% for img in images_by_category.approach_road %}
+    
+
+        <div class="img-cat-preview-item existing-img-item" data-cat="approach_road" data-img-id="{{ img.id }}">
+            <img src="{{ img.image.url }}">
+            <label class="existing-img-remove-btn" title="Remove this image">
+              <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+
+  <!-- Truck Access -->
+  <div class="img-cat-panel" data-cat-panel="truck_access">
+    <input type="file" class="img-cat-input" id="imgInput-truck_access" name="plot_images_truck_access[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="truck_access">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Truck Access" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-truck_access">
+        {% for img in images_by_category.truck_access %}
+      
+
+        <div class="img-cat-preview-item existing-img-item" data-cat="truck_access" data-img-id="{{ img.id }}">
+            <img src="{{ img.image.url }}">
+            <label class="existing-img-remove-btn" title="Remove this image">
+              <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+
+  <!-- Estate / Area -->
+  <div class="img-cat-panel" data-cat-panel="industrial_estate">
+    <input type="file" class="img-cat-input" id="imgInput-industrial_estate" name="plot_images_industrial_estate[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="industrial_estate">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Estate/Area" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-industrial_estate">
+        {% for img in images_by_category.industrial_estate %}
+       
+        <div class="img-cat-preview-item existing-img-item" data-cat="industrial_estate" data-img-id="{{ img.id }}">
+            <img src="{{ img.image.url }}">
+            <label class="existing-img-remove-btn" title="Remove this image">
+              <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+
+  <!-- Power Infra -->
+  <div class="img-cat-panel" data-cat-panel="electricity_infra">
+    <input type="file" class="img-cat-input" id="imgInput-electricity_infra" name="plot_images_electricity_infra[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="electricity_infra">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Power Infra" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-electricity_infra">
+        {% for img in images_by_category.electricity_infra %}
+     
+
+        <div class="img-cat-preview-item existing-img-item" data-cat="electricity_infra" data-img-id="{{ img.id }}">
+            <img src="{{ img.image.url }}">
+            <label class="existing-img-remove-btn" title="Remove this image">
+              <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+
+  <!-- Water Infra -->
+  <div class="img-cat-panel" data-cat-panel="water_infra">
+    <input type="file" class="img-cat-input" id="imgInput-water_infra" name="plot_images_water_infra[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="water_infra">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Water Infra" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-water_infra">
+        {% for img in images_by_category.water_infra %}
+      
+        <div class="img-cat-preview-item existing-img-item" data-cat="water_infra" data-img-id="{{ img.id }}">
+            <img src="{{ img.image.url }}">
+            <label class="existing-img-remove-btn" title="Remove this image">
+              <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+
+  <!-- Aerial / Drone -->
+  <div class="img-cat-panel" data-cat-panel="aerial_drone">
+    <input type="file" class="img-cat-input" id="imgInput-aerial_drone" name="plot_images_aerial_drone[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="aerial_drone">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Aerial/Drone" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-aerial_drone">
+        {% for img in images_by_category.aerial_drone %}
+     
+
+        <div class="img-cat-preview-item existing-img-item" data-cat="aerial_drone" data-img-id="{{ img.id }}">
+            <img src="{{ img.image.url }}">
+            <label class="existing-img-remove-btn" title="Remove this image">
+              <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+
+  <!-- Layout / Site Plan -->
+  <div class="img-cat-panel" data-cat-panel="layout_site_plan">
+    <input type="file" class="img-cat-input" id="imgInput-layout_site_plan" name="plot_images_layout_site_plan[]" accept="image/*" multiple style="display:none;">
+    <div class="img-cat-upload-area" data-cat="layout_site_plan">
+      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+      <div class="upload-text">Click or Drag "Layout/Site Plan" Photos Here</div>
+      <div class="upload-subtext">Drag to reorder thumbnails once uploaded</div>
+    </div>
+    <div class="img-cat-preview" id="imgPreview-layout_site_plan">
+        {% for img in images_by_category.layout_site_plan %}
+
+      
+        <div class="img-cat-preview-item existing-img-item" data-cat="layout_site_plan" data-img-id="{{ img.id }}">
+            <img src="{{ img.image.url }}">
+            <label class="existing-img-remove-btn" title="Remove this image">
+              <input type="checkbox" name="delete_image_ids[]" value="{{ img.id }}" style="display:none;" onclick="return false;">
+              <i class="fas fa-times" onclick="removeExistingImage(this)"></i>
+            </label>
+        </div>
+        {% endfor %}
+    </div>
+  </div>
+</div>
+
+            <!-- Container for remove_images[] hidden inputs -->
+            <div id="removeImagesContainer"></div>
+
+            <!-- Documents -->
+            <div class="row mt-4 pt-3" style="border-top: 1px solid #e9ecef;">
+              <div class="col-md-4">
+                <label class="form-label">MIDC Allotment / Transfer Letter</label>
+                {% if property.encumbrance_cert %}
+                <p class="hint-text"><a href="{{ property.encumbrance_cert.url }}" target="_blank">View current file</a></p>
+                {% endif %}
+                <input type="file" class="form-control" id="encumbrance_cert" name="encumbrance_cert" accept=".pdf,image/*">
+                <p class="hint-text">Upload only if you want to replace the existing document</p>
+              </div>
+             
+            </div>
+
+            <div class="sub-section-title mt-4">Plot Walkthrough Video</div>
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <label class="form-label d-block">Video Option</label>
+                <div class="form-check form-check-inline">
+
+                  
+
+                  <input class="form-check-input" type="radio" name="video_option" id="video_upload" value="upload" {% if uploaded_video or not auto_video and not rm_video %}checked{% endif %}>
+<label class="form-check-label" for="video_upload">Upload Property Video</label>
+</div>
+<div class="form-check form-check-inline">
+  <input class="form-check-input" type="radio" name="video_option" id="video_auto" value="auto" {% if auto_video and not uploaded_video %}checked{% endif %}>
+<label class="form-check-label" for="video_auto">Auto-Generate Slideshow from Photos</label>
+</div>
+<div class="form-check form-check-inline">
+  <input class="form-check-input" type="radio" name="video_option" id="video_rm" value="rm_assisted" {% if rm_video and not uploaded_video and not auto_video %}checked{% endif %}>
+                  <label class="form-check-label" for="video_rm">Video is Large — Share with Our RM</label>
+                </div>
+              </div>
+            </div>
+
+          
+            <div id="videoUploadWrapper">
+    {% if uploaded_video and uploaded_video.video %}
+    <div style="margin-bottom:12px; position:relative;" id="currentVideoBlock">
+        <label class="form-label">Current Uploaded Video</label>
+        <div style="position:relative;">
+            <video src="{{ uploaded_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
+            <button type="button" class="existing-img-remove-btn" style="top:32px; right:8px; width: 30px; height: 30px; position: absolute;" title="Remove this video" onclick="removeCurrentVideo()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <input type="checkbox" name="delete_current_video" id="delete_current_video" value="1" style="display:none;">
+    </div>
+    {% endif %}
+
+    <input type="file" id="videoInput" name="property_video" accept="video/mp4,video/mov,video/avi" style="display:none;">
+    <div class="img-cat-upload-area" id="videoUploadArea" style="background:#f8fafc; border-color:#94a3b8;">
+        <div class="upload-icon" style="background:#e2e8f0;"><i class="fas fa-video" style="color:#64748b;"></i></div>
+        <div class="upload-text">Click to Replace Uploaded Video</div>
+        <div class="upload-subtext">MP4/MOV, max 60 seconds, up to 20MB</div>
+    </div>
+    <video id="videoPreview" controls style="display:none; width:100%; max-height:320px; border-radius:12px; margin-top:15px;"></video>
+</div>
+
+<div id="videoAutoWrapper" style="display:none;">
+    {% if auto_video and auto_video.video %}
+    <div style="margin-bottom:12px;">
+        <label class="form-label">Current Auto-Generated Slideshow</label>
+        <video src="{{ auto_video.video.url }}" controls style="width:100%;max-height:280px;border-radius:12px;background:#000;"></video>
+    </div>
+    {% endif %}
+
+    <div class="alert alert-info" style="background:#f0f4ff; border-left:4px solid #10b981; border-radius:8px; padding:14px 18px; margin-bottom: 15px; border-top:none; border-right:none; border-bottom:none; color: #064e3b;">
+        <i class="fas fa-magic me-2" style="color:#10b981;"></i>
+        We'll auto-create a walkthrough video from your uploaded photos (min. 3 needed).
+    </div>
+
+    <div class="form-check mt-2">
+        <input class="form-check-input" type="checkbox" name="regenerate_slideshow" id="regenerate_slideshow">
+        <label class="form-check-label" for="regenerate_slideshow">Regenerate slideshow using current photos</label>
+    </div>
+</div>
+
+<div id="videoRMWrapper" style="display:none;">
+    <label class="form-label">Published Video Link</label>
+    <input type="url" class="form-control" id="property_video_link" name="property_video_link" value="{{ rm_video.video_url|default:'' }}" placeholder="Paste YouTube / Instagram / Facebook link">
+    <button type="button" class="btn btn-outline-secondary mt-2" id="previewRMLinkBtn" style="border-radius:10px;"><i class="fas fa-eye me-1"></i> Preview Link</button>
+    <div id="rmVideoFrame" style="display:none; margin-top:15px; border-radius:12px; overflow:hidden; aspect-ratio:16/9;">
+        <iframe id="rmVideoEmbed" style="width:100%; height:100%; border:0;" allowfullscreen></iframe>
+    </div>
+</div>
+
+          </div>
+        </div>
+
+        <!-- LISTED ELSEWHERE -->
+        <div class="form-section">
+          <div class="section-body" style="border-radius:12px;border:2px solid #e9ecef;">
+            <div class="row">
+              <div class="col-md-6">
+                <label class="form-label d-block">Is Property Already Listed Elsewhere?</label>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_yes" value="Yes" {% if property.listed_elsewhere == "Yes" %}checked{% endif %}>
+                  <label class="form-check-label" for="listed_yes">Yes</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="listed_elsewhere" id="listed_no" value="No" {% if property.listed_elsewhere == "No" or not property.listed_elsewhere %}checked{% endif %}>
+                  <label class="form-check-label" for="listed_no">No</label>
+                </div>
+              </div>
+              <div class="col-md-6" id="portalField" style="display:{% if property.listed_elsewhere == 'Yes' %}block{% else %}none{% endif %};">
+                <label class="form-label">Portal Name</label>
+                <input type="text" class="form-control" name="portal_name" value="{{ property.portal_name }}" placeholder="Housing, 99acres, MagicBricks, IndiaMART">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+        <div class="form-section">
+    <div class="section-header"><i class="fas fa-check-double"></i> Listing Status & Approval</div>
+    <div class="section-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-toggle-on"></i> Listing Status</label>
+                    <select class="form-select form-control" name="listing_status" id="listing_status">
+                        <option value="">Select Status</option>
+                        <option value="Active" {% if property.listing_status == 'Active' %}selected{% endif %}>Active</option>
+                        <option value="Inactive" {% if property.listing_status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="Sold" {% if property.listing_status == 'Sold' %}selected{% endif %}>Sold</option>
+                        <option value="Rented" {% if property.listing_status == 'Rented' %}selected{% endif %}>Rented</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-clipboard-check"></i> Approval Status</label>
+                    <select class="form-select form-control" name="approval_status" id="approval_status">
+                        <option value="">Select Status</option>
+                        <option value="Pending" {% if property.approval_status == 'Pending' %}selected{% endif %}>Pending</option>
+                        <option value="Approved" {% if property.approval_status == 'Approved' %}selected{% endif %}>Approved</option>
+                        <option value="Rejected" {% if property.approval_status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        <!-- PROPERTY UPLOADED BY -->
+        <div class="form-section">
+          <div class="section-header"><i class="fas fa-upload"></i> Property Uploaded By</div>
+          <div class="section-body">
+           
+            <div class="row">
+                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user"></i> Name</label><input type="text" class="form-control" value="{{ property.uploaded_by_name}}" disabled></div></div>
+                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-envelope"></i> Email</label><input type="email" class="form-control" value="{{ property.uploaded_by_email}}" disabled></div></div>
+                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-phone"></i> Contact</label><input type="text" class="form-control" value="{{ property.uploaded_by_contact}}" disabled></div></div>
+                                <div class="col-md-3"><div class="form-group"><label class="form-label"><i class="fas fa-user-tag"></i> Role</label><input type="text" class="form-control" value="{{ property.uploaded_by_role}}" disabled></div></div>
+                            </div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button type="button" class="btn-step btn-prev" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Previous Page</button>
+          <button type="submit" class="btn-step btn-submit" id="submitBtn"><i class="fas fa-save"></i> Update Property</button>
+        </div>
+      </div><!-- /step4 -->
+
+    </form>
+  </div><!-- /form-container -->
+
+  <!-- PREVIEW SIDEBAR -->
+  <div class="preview-sidebar">
+    <div class="preview-card">
+      <div style="font-size:.82rem;font-weight:600;opacity:.8;margin-bottom:4px;display:flex;align-items:center;gap:7px;"><i class="fas fa-eye"></i> Live Preview</div>
+      <div class="preview-mock">
+        <div class="preview-image" style="background:linear-gradient(135deg,#d1fae5,#a7f3d0);">
+          🏭
+          <div class="preview-badges">
+            <span class="preview-badge">FOR SALE</span>
+            <span class="preview-badge" style="background:#10b981;color:white;">INDUSTRIAL</span>
+          </div>
+          <div class="preview-price" id="p_price">₹ {{ property.selling_price|default:0 }}</div>
+        </div>
+        <div class="preview-body">
+          <div class="preview-title" id="p_title">{{ property.property_title|default:"Industrial Plot Headline" }}</div>
+          <div class="preview-location"><i class="fas fa-map-marker-alt" style="color:#10b981"></i> <span id="p_loc">{{ property.city }}, {{ property.locality }}</span></div>
+          <div class="preview-specs">
+            <span id="p_area">{{ property.plot_area|default:0 }} sq.m</span>
+            <span id="p_cat">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="checklist-card">
+      <div class="checklist-title">📋 Listing Checklist</div>
+      <div class="checklist-item" id="cl-listedby"><i class="fas fa-circle"></i> Listed by filled</div>
+      <div class="checklist-item" id="cl-area"><i class="fas fa-circle"></i> Plot area (sq.m) filled</div>
+      <div class="checklist-item" id="cl-category"><i class="fas fa-circle"></i> Industrial plot type selected</div>
+      <div class="checklist-item" id="cl-zone"><i class="fas fa-circle"></i> Industrial zone set</div>
+      <div class="checklist-item" id="cl-power"><i class="fas fa-circle"></i> Power supply info added</div>
+      <div class="checklist-item" id="cl-road"><i class="fas fa-circle"></i> Road access set</div>
+      <div class="checklist-item" id="cl-price"><i class="fas fa-circle"></i> Selling price set</div>
+      <div class="checklist-item" id="cl-amenities"><i class="fas fa-circle"></i> Amenities selected</div>
+      <div class="checklist-item" id="cl-facilities"><i class="fas fa-circle"></i> Nearby facilities selected</div>
+      <div class="checklist-item" id="cl-loc"><i class="fas fa-circle"></i> City &amp; MIDC area filled</div>
+      <div class="checklist-item" id="cl-images"><i class="fas fa-circle"></i> At least 1 photo uploaded</div>
+    </div>
+  </div>
+
+</div><!-- /page-wrapper -->
+</div><!-- /main-content -->
+
+<!-- AMENITIES / FACILITIES MODAL -->
+<div class="modal fade" id="itemsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-list me-2"></i><span id="modalTitle">Select Items</span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="modalSearch" placeholder="Type to search…" class="mb-3">
+        <div id="modalItemsList" class="modal-items-grid"></div>
+        <p id="modalNoResults" style="display:none;text-align:center;color:var(--muted);padding:20px;">No items match your search</p>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-secondary" onclick="clearAllModal()"><i class="fas fa-times me-1"></i> Clear All</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="applyModal()">
+          <i class="fas fa-check me-1"></i> Apply (<span id="modalSelectedCount">0</span> selected)
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+/* ═══ STATE ═══ */
+let currentStep = 1;
+window.EXISTING_IMAGE_COUNT = {{ existing_image_total|default:0 }};
+let removedImageIds = [];
+
+/* ═══ STEPPER ═══ */
+function goToStep(n) {
+  if (n > currentStep && !validateStep(currentStep)) return;
+  document.getElementById('step' + currentStep).classList.remove('active');
+  document.getElementById('step' + n).classList.add('active');
+  for (let i = 1; i <= 4; i++) {
+    const sc=document.getElementById('sc'+i), sl=document.getElementById('sl'+i), ln=document.getElementById('line'+i);
+    if (!sc) continue;
+    sc.className='step-circle'; sl.className='step-label';
+    if (ln) ln.className='step-line';
+    if (i < n) {
+      sc.classList.add('done'); sl.classList.add('done');
+      sc.innerHTML='<i class="fas fa-check" style="font-size:.65rem"></i>';
+      if (ln) ln.classList.add('done');
+    } else if (i === n) {
+      sc.classList.add('active'); sl.classList.add('active'); sc.textContent=i;
+    } else { sc.textContent=i; }
+  }
+  currentStep=n;
+  document.querySelector('.form-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  updatePreview();
+  if (n===4) setTimeout(syncUploadedByStep4, 80);
+}
+
+function validateStep(step) {
+  const stepEl=document.getElementById('step'+step);
+  const required=stepEl.querySelectorAll('[required]');
+  let missing=[];
+  required.forEach(f => {
+    f.style.borderColor='';
+    if (!f.value.trim()) {
+      const lbl=f.closest('.col-md-4,.col-md-6,.col-md-12,.col-md-3,.form-group')?.querySelector('.form-label')?.textContent.replace('*','').trim();
+      missing.push(lbl||'Required field'); f.style.borderColor='#e74c3c';
+    }
+  });
+  if (missing.length) {
+    Swal.fire({icon:'warning',title:'Please fill required fields',
+      html:`<ul style="text-align:left;display:inline-block;color:#e74c3c;font-weight:600;">${missing.map(f=>`<li>${f}</li>`).join('')}</ul>`,
+      confirmButtonColor:'#10b981'});
+    return false;
+  }
+  return true;
+}
+
+/* ═══ LIVE PREVIEW ═══ */
+function updatePreview() {
+  const area  = document.getElementById('plot_area')?.value || '';
+  const price = document.getElementById('selling_price')?.value || '';
+  const city  = document.getElementById('city')?.value || '';
+  const loc   = document.getElementById('locality')?.value || '';
+  const catEl = document.getElementById('property_type');
+  const catTxt= catEl?.value ? catEl.options[catEl.selectedIndex].text.split('(')[0].trim() : '—';
+
+  let autoTitle='';
+  if (area) autoTitle+=Number(area).toLocaleString('en-IN')+' sq.m ';
+  autoTitle+='Industrial Plot ';
+  if (loc||city) autoTitle+=`@ ${[loc,city].filter(Boolean).join(', ')}`;
+  document.getElementById('property_title').value=autoTitle.trim();
+
+  document.getElementById('p_price').textContent=price?'₹'+parseInt(price).toLocaleString('en-IN'):'₹ 0';
+  document.getElementById('p_area').textContent =area?`${Number(area).toLocaleString('en-IN')} sq.m`:'0 sq.m';
+  document.getElementById('p_cat').textContent  =catEl?.value?catTxt:'Industrial Plot';
+  document.getElementById('p_loc').textContent  =(city||loc)?[city,loc].filter(Boolean).join(', '):'City, MIDC Area';
+
+  const psf=document.getElementById('plot_price_per_sqft');
+  if (price&&area&&parseFloat(area)>0) psf.value=Math.round(parseFloat(price)/parseFloat(area));
+  else psf.value='';
+
+  setCheck('cl-area',  !!area);
+  setCheck('cl-price', !!price);
+  setCheck('cl-loc',   !!city&&!!loc);
+  setCheck('cl-category', !!catEl?.value);
+}
+
+/* ═══ CHECKLIST ═══ */
+function setCheck(id, done) {
+  const el=document.getElementById(id); if(!el) return;
+  el.className='checklist-item'+(done?' done':'');
+  el.querySelector('i').className='fas '+(done?'fa-check-circle':'fa-circle');
+}
+
+/* ═══ EXISTING IMAGE REMOVAL ═══ */
+
+
+
+/* ============================================================
+   CATEGORY-WISE IMAGE UPLOAD LOGIC (unified existing + new, draggable)
+============================================================ */
+const IMG_CATEGORIES = ['full_plot','main_entrance','boundary_fencing','road_facing','approach_road','truck_access','industrial_estate','electricity_infra','water_infra','aerial_drone','layout_site_plan'];
+const IMG_TOTAL_LIMIT = 25;
+window.catFiles = {};
+const catFiles = window.catFiles;
+IMG_CATEGORIES.forEach(function(c) { catFiles[c] = []; });
+
+function syncCategoryInput(cat) {
+    var dt = new DataTransfer();
+    catFiles[cat].forEach(function(file) { dt.items.add(file); });
+    document.getElementById('imgInput-' + cat).files = dt.files;
+}
+
+function refreshCategoryCounts(cat) {
+    var preview = document.getElementById('imgPreview-' + cat);
+    if (!preview) return;
+    var count = preview.querySelectorAll('.img-cat-preview-item').length;
+    var countEl = document.getElementById('count-' + cat);
+    if (countEl) countEl.innerText = count;
+    var tab = document.querySelector('.img-cat-tab[data-cat="' + cat + '"]');
+    if (tab) tab.classList.toggle('has-images', count > 0);
+
+    var total = 0;
+    IMG_CATEGORIES.forEach(function(c) {
+        var p = document.getElementById('imgPreview-' + c);
+        if (p) total += p.querySelectorAll('.img-cat-preview-item').length;
+    });
+    var totalEl = document.getElementById('imgTotalCount');
+    if (totalEl) totalEl.innerText = total;
+    setCheck('cl-images', total > 0);
+}
+
+function totalImageCount() {
+    var total = 0;
+    IMG_CATEGORIES.forEach(function(c) {
+        var p = document.getElementById('imgPreview-' + c);
+        if (p) total += p.querySelectorAll('.img-cat-preview-item').length;
+    });
+    return total;
+}
+
+function updateCoverBadge(cat, preview) {
+    if (!preview) return;
+    preview.querySelectorAll('.cover-badge').forEach(function(b){ b.remove(); });
+    if (cat !== 'full_plot') return;
+    var items = Array.from(preview.children).filter(function(el){
+        return el.classList.contains('img-cat-preview-item');
+    });
+    if (!items.length) return;
+    var badge = document.createElement('span');
+    badge.className = 'cover-badge';
+    badge.innerHTML = '<i class="fas fa-star"></i> Cover';
+    items[0].appendChild(badge);
+}
+
+// Live DOM reorder while dragging — works across existing + new items together
+function attachDragEvents(item, container) {
+    item.addEventListener('dragstart', function() {
+        item.classList.add('dragging');
+    });
+    item.addEventListener('dragend', function() {
+        item.classList.remove('dragging');
+    });
+    item.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        var dragging = container.querySelector('.dragging');
+        if (!dragging || dragging === item) return;
+        var rect = item.getBoundingClientRect();
+        var after = (e.clientX - rect.left) > (rect.width / 2);
+        if (after) { item.after(dragging); } else { item.before(dragging); }
+        var cat = container.id.replace('imgPreview-', '');
+        updateCoverBadge(cat, container);
+    });
+}
+
+function handleCatFiles(cat, files) {
+    var incoming = Array.from(files).filter(function(f) { return f.type.startsWith('image/'); });
+    if (totalImageCount() + incoming.length > IMG_TOTAL_LIMIT) {
+        Swal.fire('Total Limit Reached', 'Maximum ' + IMG_TOTAL_LIMIT + ' images allowed across all categories.', 'warning');
+        incoming = incoming.slice(0, Math.max(0, IMG_TOTAL_LIMIT - totalImageCount()));
+    }
+
+    var preview = document.getElementById('imgPreview-' + cat);
+    if (!preview) return;
+
+    incoming.forEach(function(file) {
+        catFiles[cat].push(file);
+
+        var div = document.createElement('div');
+        div.className = 'img-cat-preview-item new-file-item';
+        div.draggable = true;
+        div._file = file;
+
+        var img = document.createElement('img');
+        div.appendChild(img);
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-image';
+        removeBtn.innerHTML = '✖';
+        removeBtn.onclick = function() { removeCatImage(cat, div); };
+        div.appendChild(removeBtn);
+
+        preview.appendChild(div);
+        attachDragEvents(div, preview);
+
+        var reader = new FileReader();
+        reader.onload = function(e) { img.src = e.target.result; };
+        reader.readAsDataURL(file);
+    });
+
+    refreshCategoryCounts(cat);
+    updateCoverBadge(cat, preview);
+}
+
+window.removeCatImage = function(cat, el) {
+    var file = el._file;
+    catFiles[cat] = catFiles[cat].filter(function(f) { return f !== file; });
+    el.remove();
+    refreshCategoryCounts(cat);
+    updateCoverBadge(cat, document.getElementById('imgPreview-' + cat));
+};
+
+// Builds the final drag-and-drop order (existing + new mixed) and pushes it
+// into hidden inputs + the real file inputs, right before submit.
+function syncImageOrderAndFiles() {
+    document.querySelectorAll('.image-order-input').forEach(function(el){ el.remove(); });
+
+    IMG_CATEGORIES.forEach(function(cat) {
+        var preview = document.getElementById('imgPreview-' + cat);
+        if (!preview) return;
+
+        var children = Array.from(preview.children).filter(function(el) {
+            return el.classList.contains('img-cat-preview-item');
+        });
+
+        var newFilesOrdered = [];
+        var tokens = [];
+
+        children.forEach(function(el) {
+            if (el.classList.contains('existing-img-item')) {
+                tokens.push('existing:' + el.dataset.imgId);
+            } else if (el.classList.contains('new-file-item') && el._file) {
+                tokens.push('new:' + newFilesOrdered.length);
+                newFilesOrdered.push(el._file);
+            }
+        });
+
+        catFiles[cat] = newFilesOrdered;
+        syncCategoryInput(cat);
+
+        tokens.forEach(function(tok) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.className = 'image-order-input';
+            inp.name = 'image_order_' + cat + '[]';
+            inp.value = tok;
+            document.getElementById('indPlotForm').appendChild(inp);
+        });
+    });
+}
+
+function renderAllCategories() {
+    IMG_CATEGORIES.forEach(function(cat) {
+        var preview = document.getElementById('imgPreview-' + cat);
+        if (!preview) return;
+        preview.querySelectorAll('.existing-img-item').forEach(function(item) {
+            attachDragEvents(item, preview);
+        });
+        refreshCategoryCounts(cat);
+        updateCoverBadge(cat, preview);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.img-cat-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var cat = this.dataset.cat;
+            document.querySelectorAll('.img-cat-tab').forEach(function(t) { t.classList.remove('active'); });
+            document.querySelectorAll('.img-cat-panel').forEach(function(p) { p.classList.remove('active'); });
+            this.classList.add('active');
+            var targetPanel = document.querySelector('.img-cat-panel[data-cat-panel="' + cat + '"]');
+            if (targetPanel) targetPanel.classList.add('active');
+        });
+    });
+
+    IMG_CATEGORIES.forEach(function(cat) {
+        var zone = document.querySelector('.img-cat-upload-area[data-cat="' + cat + '"]');
+        var input = document.getElementById('imgInput-' + cat);
+        if (!zone || !input) return;
+
+        zone.addEventListener('click', function() { input.click(); });
+        input.addEventListener('change', function(e) { handleCatFiles(cat, e.target.files); });
+        zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            zone.classList.remove('dragover');
+            handleCatFiles(cat, e.dataTransfer.files);
+        });
+    });
+    renderAllCategories();
+});
+
+/* ============================================================
+   FINAL UNIFIED VIDEO ENGINE & CANVAS PREVIEW
+============================================================ */
+document.addEventListener('DOMContentLoaded', function () {
+    var uploadRadio      = document.getElementById('video_upload');
+    var autoRadio        = document.getElementById('video_auto');
+    var rmRadio          = document.getElementById('video_rm');
+    var uploadWrapper    = document.getElementById('videoUploadWrapper');
+    var autoWrapper      = document.getElementById('videoAutoWrapper');
+    var rmWrapper        = document.getElementById('videoRMWrapper');
+    var videoInput       = document.getElementById('videoInput');
+    var videoArea        = document.getElementById('videoUploadArea');
+    var videoPreview     = document.getElementById('videoPreview');
+
+    var slideshowInterval = null;
+    var canvas = document.getElementById('slideshowCanvas');
+    var ctx = canvas ? canvas.getContext('2d') : null;
+
+
+
+  
+    function getUploadedImages(callback) {
+        var sources = [];
+        if (window.catFiles) {
+            Object.keys(window.catFiles).forEach(function (cat) {
+                if (Array.isArray(window.catFiles[cat])) {
+                    window.catFiles[cat].forEach(function (file) {
+                        if (file instanceof File && file.type.startsWith('image/')) {
+                            sources.push({ type: 'file', data: file });
+                        }
+                    });
+                }
+            });
+        }
+        document.querySelectorAll('.img-cat-preview img').forEach(function (img) {
+            if (img.src) sources.push({ type: 'url', data: img.src });
+        });
+        var uniqueSources = [];
+
+
+        var seen = new Set();
+        sources.forEach(function (s) {
+            var key = s.type === 'file' ? s.data.name + s.data.size : s.data;
+            if (!seen.has(key)) { seen.add(key); uniqueSources.push(s); }
+        });
+
+        if (uniqueSources.length === 0) { callback([]); return; }
+
+        var loadedImages = [];
+        var processed = 0;
+        uniqueSources.forEach(function (srcObj) {
+            var img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function () {
+                loadedImages.push(img);
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+            img.onerror = function () {
+                processed++;
+                if (processed === uniqueSources.length) callback(loadedImages);
+            };
+            img.src = srcObj.type === 'file' ? URL.createObjectURL(srcObj.data) : srcObj.data;
+        });
+    }
+
+    function startAutoSlideshowPreview() {
+        stopAutoSlideshowPreview();
+        var container = document.getElementById('autoSlideshowPreviewContainer');
+        var warning = document.getElementById('autoSlideshowWarning');
+
+        getUploadedImages(function (images) {
+            if (images.length < 3) {
+                if (container) container.style.display = 'none';
+                if (warning) warning.style.display = 'block';
+                return;
+            }
+            if (warning) warning.style.display = 'none';
+            if (container) container.style.display = 'block';
+            runCanvasAnimation(images);
+        });
+    }
+
+    function runCanvasAnimation(images) {
+        if (!ctx || !canvas || images.length === 0) return;
+        var durationPerSlide = 3500, fadeDuration = 800, startTime = null;
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            var elapsed = timestamp - startTime;
+            var progress = (elapsed % durationPerSlide) / durationPerSlide;
+            var index = Math.floor(elapsed / durationPerSlide) % images.length;
+            var nextIndex = (index + 1) % images.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            var slideTime = elapsed % durationPerSlide;
+            var isFading = slideTime > (durationPerSlide - fadeDuration);
+            var fadeOpacity = isFading ? (slideTime - (durationPerSlide - fadeDuration)) / fadeDuration : 0;
+
+            drawCinematicFrame(images[index], progress, 1.0);
+            if (isFading) drawCinematicFrame(images[nextIndex], 0, fadeOpacity);
+            slideshowInterval = requestAnimationFrame(animate);
+        }
+
+        function drawCinematicFrame(img, progress, opacity) {
+            ctx.save();
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = "#0f172a";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            var scale = 1.0 + (progress * 0.08);
+            var hRatio = canvas.width / img.width;
+            var vRatio = canvas.height / img.height;
+            var ratio  = Math.max(hRatio, vRatio) * scale;
+            var baseShiftX = (canvas.width - img.width * ratio) / 2;
+            var centerShiftY = (canvas.height - img.height * ratio) / 2;
+            var panOffsetX = (progress - 0.5) * (canvas.width * 0.04);
+            var centerShiftX = baseShiftX + panOffsetX;
+
+            ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+            ctx.restore();
+        }
+
+        stopAutoSlideshowPreview();
+        slideshowInterval = requestAnimationFrame(animate);
+    }
+
+    function stopAutoSlideshowPreview() {
+        if (slideshowInterval) { cancelAnimationFrame(slideshowInterval); slideshowInterval = null; }
+    }
+
+    function toggleVideoOption() {
+        if (uploadWrapper) uploadWrapper.style.display = uploadRadio && uploadRadio.checked ? 'block' : 'none';
+        if (autoWrapper)   autoWrapper.style.display   = autoRadio && autoRadio.checked   ? 'block' : 'none';
+        if (rmWrapper)     rmWrapper.style.display     = rmRadio && rmRadio.checked     ? 'block' : 'none';
+
+        if (autoRadio && autoRadio.checked) startAutoSlideshowPreview();
+        else stopAutoSlideshowPreview();
+
+        if (rmRadio && rmRadio.checked) renderVideoPreview();
+    }
+
+    if (uploadRadio) uploadRadio.addEventListener('change', toggleVideoOption);
+    if (autoRadio)   autoRadio.addEventListener('change', toggleVideoOption);
+    if (rmRadio)     rmRadio.addEventListener('change', toggleVideoOption);
+
+    if (videoArea && videoInput) {
+        videoArea.addEventListener('click', function () { videoInput.click(); });
+    }
+
+    if (videoInput) {
+        videoInput.addEventListener('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var propTitle    = document.getElementById('property_title')?.value.trim() || 'N/A';
+            var listedByName = document.getElementById('listed_by_name')?.value.trim() || 'N/A';
+            var companyWhatsAppNumber = "917057205423";
+
+            var rawMessage = "Hello Team,\n\nI am trying to upload a video for my industrial plot listing, but the file size exceeds the 20MB limit.\n\n" +
+                             "📌 *Property Details:*\n" +
+                             "• *Title:* " + propTitle + "\n" +
+                             "• *Listed By:* " + listedByName + "\n" +
+                             "• *Video File Name:* " + file.name + "\n" +
+                             "• *File Size:* " + (file.size / (1024 * 1024)).toFixed(1) + " MB\n\n" +
+                             "Please assist me in publishing this video for my listing.";
+            var whatsappUrl = "https://wa.me/" + companyWhatsAppNumber + "?text=" + encodeURIComponent(rawMessage);
+
+            if (file.size > 20 * 1024 * 1024) {
+                videoInput.value = '';
+                if (videoPreview) {
+                    videoPreview.pause();
+                    videoPreview.removeAttribute('src');
+                    videoPreview.load();
+                    videoPreview.style.display = 'none';
+                }
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Video File Too Large',
+                    text: 'This video exceeds the maximum 20MB allowed size. Please share the video with our Relationship Manager.',
+                    showCancelButton: true,
+                    confirmButtonColor: '#25D366',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fab fa-whatsapp me-1"></i> Share',
+                    cancelButtonText: 'Okay',
+                    allowOutsideClick: false
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        window.open(whatsappUrl, '_blank');
+                        if (rmRadio) rmRadio.checked = true;
+                        toggleVideoOption();
+                    }
+                });
+                return;
+            }
+
+            if (videoPreview) {
+                videoPreview.src = URL.createObjectURL(file);
+                videoPreview.style.display = 'block';
+                videoPreview.load();
+                videoPreview.play();
+            }
+        });
+    }
+
+    function renderVideoPreview() {
+        var linkInput = document.getElementById('property_video_link');
+        var frame = document.getElementById('rmVideoFrame');
+        if (!linkInput || !frame) return;
+
+        var url = linkInput.value.trim();
+        if (!url) { frame.style.display = 'none'; return; }
+
+        frame.innerHTML = '<iframe id="rmVideoEmbed" style="width:100%; height:350px; border:0; border-radius:8px;" allowfullscreen></iframe>';
+        var embedIframe = document.getElementById('rmVideoEmbed');
+
+        var ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+        if (ytMatch) {
+            embedIframe.src = 'https://www.youtube.com/embed/' + ytMatch[1];
+            frame.style.display = 'block';
+            return;
+        }
+
+        embedIframe.src = url;
+        frame.style.display = 'block';
+    }
+
+    var linkInputEl = document.getElementById('property_video_link');
+    if (linkInputEl) linkInputEl.addEventListener('input', renderVideoPreview);
+
+    var previewBtn = document.getElementById('previewRMLinkBtn');
+    if (previewBtn) previewBtn.addEventListener('click', renderVideoPreview);
+
+    toggleVideoOption();
+    if (document.getElementById('video_rm')?.checked) renderVideoPreview();
+});
+
+/* ═══ CONDITIONAL TOGGLES ═══ */
+document.addEventListener('change', function(e) {
+  if (e.target.name==='ownership_document_type')
+    document.getElementById('other_document_type_div').style.display=e.target.value==='Other'?'block':'none';
+  if (e.target.id==='property_tax_status') {
+    const v=e.target.value;
+    document.getElementById('tax_due_section').style.display=(v==='Dues_Pending'||v==='Partially Due')?'block':'none';
+    document.getElementById('pending_since_div').style.display=v==='Dues_Pending'?'block':'none';
+  }
+  if (e.target.id==='property_loan_status')
+    document.getElementById('loan_running_section').style.display=e.target.value==='Loan Running'?'block':'none';
+  if (e.target.id==='brokeragePercentage')
+    document.getElementById('manualBrokerageSection').style.display=e.target.value==='Fixed Amount'?'block':'none';
+  if (e.target.name==='plot_road_facing') setCheck('cl-road', !!e.target.value);
+  if (e.target.name==='land_use')         setCheck('cl-zone', !!e.target.value);
+  if (e.target.name==='power_supply')     setCheck('cl-power',!!e.target.value);
+  if (e.target.name==='listed_elsewhere') {
+    document.getElementById('portalField').style.display = e.target.value==='Yes' ? 'block' : 'none';
+  }
+});
+
+['plot_area','selling_price','city','locality'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.addEventListener('input',updatePreview);
+});
+document.getElementById('property_type')?.addEventListener('change',updatePreview);
+
+/* ═══ LISTED BY ═══ */
+function updateBrokerageLabel(role) {
+  const labelEl=document.getElementById('brokerageLabel'); if(!labelEl) return;
+  const r=(role||'').trim().toLowerCase();
+  let txt='Brokerage';
+  if (r==='admin') txt='EstateFlow Service Fee';
+  else if (r==='relationship manager'||r==='landlord') txt='Buyer Service Fee';
+  else if (r==='agent') txt='Brokerage';
+  else if (r==='agency/builder'||r==='builder') txt='Brokerage / Service Fee';
+  labelEl.innerHTML=`${txt} <span class="required">*</span>`;
+}
+
+function Change_Fields() {
+  const checked=document.querySelector('input[name="listed_by_type"]:checked');
+  if (!checked) return;
+  const isSelf=checked.value==='self';
+  const otherWrapper=document.getElementById('listedByOtherWrapper');
+  const hiddenSelect=document.getElementById('assigned_to');
+  if (otherWrapper) otherWrapper.style.display=isSelf?'none':'block';
+  if (hiddenSelect) { hiddenSelect.required=!isSelf; }
+  const admin={
+    id:document.getElementById('selfUserId')?.value||'',
+    name:document.getElementById('selfUserName')?.value||'',
+    email:document.getElementById('selfUserEmail')?.value||'',
+    phone:document.getElementById('selfUserPhone')?.value||'',
+    role:document.getElementById('selfUserRole')?.value||''
+  };
+  const setVal=(id,v)=>{const el=document.getElementById(id);if(el) el.value=v;};
+  if (isSelf) {
+    setVal('listed_by_id',admin.id); setVal('listed_by_name',admin.name);
+    setVal('listed_by_email',admin.email); setVal('listed_by_contact',admin.phone);
+    setVal('listed_by_role',admin.role); updateBrokerageLabel(admin.role);
+  }
+  syncUploadedByStep4();
+  setCheck('cl-listedby',!!document.getElementById('listed_by_name')?.value);
+}
+
+function get_user_data() {
+  const assigned_to=document.getElementById('assigned_to').value;
+  if (!assigned_to) return;
+  $.ajax({
+    method:'POST',url:"{% url 'get_user_data' %}",data:{assigned_to},dataType:'json',
+    success:function(r){
+      const setVal=(id,v)=>{const el=document.getElementById(id);if(el) el.value=v||'';};
+      setVal('listed_by_id',r.user_id); setVal('listed_by_name',r.name);
+      setVal('listed_by_email',r.email); setVal('listed_by_contact',r.phone||r.contact);
+      setVal('listed_by_role',r.role); updateBrokerageLabel(r.role);
+      syncUploadedByStep4(); setCheck('cl-listedby',!!r.name);
+    }
+  });
+}
+
+function syncUploadedByStep4() {
+  const map={upby_name_display:'uploaded_by_name',upby_email_display:'uploaded_by_email',upby_contact_display:'uploaded_by_contact',upby_role_display:'uploaded_by_role'};
+  Object.entries(map).forEach(([toId,fromId])=>{const from=document.getElementById(fromId),to=document.getElementById(toId);if(from&&to) to.value=from.value;});
+}
+
+/* ═══ SEARCHABLE DROPDOWN ═══ */
+(function(){
+  const wrapper=document.getElementById('assignedToSearchSelect'),control=document.getElementById('assignedToControl'),
+        input=document.getElementById('searchTeamMember'),optionsEl=document.getElementById('assignedToOptions'),
+        noResults=document.getElementById('assignedToNoResults'),valueLabel=document.getElementById('assignedToValueLabel'),
+        hiddenSel=document.getElementById('assigned_to'),hiddenRole=document.getElementById('assigned_to_role');
+  if (!wrapper||!hiddenSel) return;
+  let opts=Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-option'));
+  let grpLbls=Array.prototype.slice.call(optionsEl.querySelectorAll('.search-select-group-label'));
+  let hi=-1;
+  function open(){wrapper.classList.add('open');input.value='';filterOpts('');setTimeout(()=>input.focus(),0);}
+  function close(){wrapper.classList.remove('open');hi=-1;}
+  function toggle(){wrapper.classList.contains('open')?close():open();}
+  function selectOpt(opt){
+    const v=opt.getAttribute('data-value'),name=opt.getAttribute('data-name'),
+          role=opt.getAttribute('data-role'),uid=opt.getAttribute('data-uid'),phone=opt.getAttribute('data-phone');
+    hiddenSel.value=v; if(hiddenRole) hiddenRole.value=role;
+    valueLabel.textContent=uid+' — '+name+' — '+role+' — '+phone;
+    valueLabel.classList.remove('ss-placeholder');
+    opts.forEach(o=>o.classList.remove('selected')); opt.classList.add('selected');
+    close(); hiddenSel.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  function filterOpts(q){
+    q=q.trim().toLowerCase(); let any=false; const grpHas={};
+    opts.forEach(function(opt){
+      const hay=opt.getAttribute('data-search')||'',match=hay.indexOf(q)!==-1;
+      opt.style.display=match?'':'none';
+      if(match){any=true;let prev=opt.previousElementSibling;
+        while(prev&&!prev.classList.contains('search-select-group-label')) prev=prev.previousElementSibling;
+        if(prev) grpHas[prev.textContent]=true;}
+    });
+    grpLbls.forEach(lbl=>{lbl.style.display=grpHas[lbl.textContent]?'':'none';});
+    if(noResults) noResults.style.display=any?'none':'block';
+    hi=-1; opts.forEach(o=>o.classList.remove('highlighted'));
+  }
+  function visible(){return opts.filter(o=>o.style.display!=='none');}
+  function moveHi(step){const vis=visible();if(!vis.length) return;
+    vis.forEach(o=>o.classList.remove('highlighted'));
+    hi+=step; if(hi<0) hi=vis.length-1; if(hi>=vis.length) hi=0;
+    vis[hi].classList.add('highlighted');vis[hi].scrollIntoView({block:'nearest'});}
+  control.addEventListener('click',toggle);
+  control.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+  input.addEventListener('input',()=>filterOpts(input.value));
+  input.addEventListener('keydown',function(e){
+    if(e.key==='ArrowDown'){e.preventDefault();moveHi(1);}
+    else if(e.key==='ArrowUp'){e.preventDefault();moveHi(-1);}
+    else if(e.key==='Enter'){e.preventDefault();const vis=visible();if(hi>=0&&vis[hi])selectOpt(vis[hi]);else if(vis.length===1)selectOpt(vis[0]);}
+    else if(e.key==='Escape') close();
+  });
+  opts.forEach(opt=>opt.addEventListener('click',()=>selectOpt(opt)));
+  document.addEventListener('click',e=>{if(!wrapper.contains(e.target)) close();});
+  hiddenSel.addEventListener('change',()=>{if(typeof get_user_data==='function') get_user_data();});
+})();
+
+/* ═══ INIT ═══ */
+document.addEventListener('DOMContentLoaded', function(){
+  updateDisplay('amenities');
+  updateDisplay('facilities');
+  updatePreview();
+  updateBrokerageLabel(document.getElementById('listed_by_role')?.value);
+  syncUploadedByStep4();
+});
+
+/* ═══ SUBMIT ═══ */
+
+document.getElementById('indPlotForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  for(let i=1;i<=4;i++){
+    if(i!==currentStep){
+      for(const f of document.getElementById('step'+i).querySelectorAll('[required]'))
+        if(!f.value.trim()){goToStep(i);return;}
+    }
+  }
+
+  let changedFields = getChangedFieldsHtml_ind();
+  let alertHtml = `<div style="font-size:1rem;color:#4a5568;margin-bottom:15px;">Changes will be reflected immediately on the portal.</div>`;
+  if (changedFields.length > 0) {
+    alertHtml += `<div style="text-align:left;max-height:250px;overflow-y:auto;background:#f8f9fa;padding:15px;border-radius:12px;border:1px solid #e2e8f0;font-size:0.9rem;">
+                    <strong style="color:#2d3748;display:block;margin-bottom:10px;"><i class="fas fa-clipboard-list"></i> Modifications Detected:</strong>
+                    <ul style="margin:0;padding-left:20px;list-style-type:none;">
+                        ${changedFields.join('')}
+                    </ul>
+                  </div>`;
+  } else {
+    alertHtml += `<div style="background:#f8f9fa;padding:15px;border-radius:12px;color:#718096;font-size:0.95rem;">
+                    <i class="fas fa-info-circle"></i> No modifications detected.
+                  </div>`;
+  }
+
+  Swal.fire({
+    title:'Update Industrial Plot Listing?',
+    icon:'question',showCancelButton:true,
+    confirmButtonColor:'#11998e',cancelButtonColor:'#cbd5e0',
+    confirmButtonText:'✓ Yes, Update Now',cancelButtonText:'Review Again',
+    html: alertHtml,
+    width: '600px'
+  }).then(result=>{
+    if(!result.isConfirmed) return;
+    const btn=document.getElementById('submitBtn');
+    btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Updating…';btn.disabled=true;
+
+   Swal.fire({
+      title: 'Saving Changes...',
+      text: 'Updating listing details...',
+      allowOutsideClick: false,
+      didOpen: () => { Swal.showLoading(); }
+    });
+
+    syncImageOrderAndFiles();
+    const formData=new FormData(this);
+
+    fetch(this.getAttribute('action'),{method:'POST',body:formData,headers:{'X-Requested-With':'XMLHttpRequest'}})
+      .then(r=>r.json())
+      .then(data=>{
+        if(data.status==='success'){
+          Swal.fire({icon:'success',title:'✅ Listing Updated!',text:data.message}).then(()=>window.location.reload());
+        } else {
+          Swal.fire({icon:'error',title:'Update Failed',text:data.message});
+          btn.innerHTML='<i class="fas fa-save"></i> Update Property';btn.disabled=false;
+        }
+      })
+      .catch(()=>{
+        Swal.fire({icon:'error',title:'Server Error',text:'Could not reach server. Please try again.'});
+        btn.innerHTML='<i class="fas fa-save"></i> Update Property';btn.disabled=false;
+      });
+  });
+});
+
+
+</script>
+
+<!-- MODAL SCRIPT -->
+<script>
+let currentModalSection=null;
+function openModal(section){
+  currentModalSection=section;
+  const isAmenities=section==='amenities';
+  document.getElementById('modalTitle').textContent=isAmenities?'Select Industrial Site Amenities & Utilities':'Select Connectivity & Nearby Infrastructure';
+  document.getElementById('modalSearch').value='';
+  const container=document.getElementById('modalItemsList'); container.innerHTML='';
+  document.querySelectorAll(`.${section}-checkbox`).forEach(function(cb){
+    const icon=cb.getAttribute('data-icon')||'fas fa-check',val=cb.value,isChecked=cb.checked;
+    const div=document.createElement('div'); div.setAttribute('data-value',val.toLowerCase());
+    const label=document.createElement('label');
+    label.className='modal-item-label'+(isChecked?' checked':'');
+    label.style.cssText=isChecked?'border-color:#10b981;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;':'';
+    label.innerHTML=`
+  <span class="custom-checkbox"><i class="fas fa-check"></i></span>
+  <i class="${icon}"></i> ${val}
+`;
+    label.addEventListener('click',function(){
+      const nowChecked=!cb.checked; cb.checked=nowChecked;
+      if(nowChecked){label.classList.add('checked');label.style.cssText='border-color:#10b981;background:linear-gradient(135deg,#10b981,#06b6d4);color:#fff;';}
+      else{label.classList.remove('checked');label.style.cssText='';}
+      updateModalCount();
+    });
+    div.appendChild(label); container.appendChild(div);
+  });
+  updateModalCount();
+  new bootstrap.Modal(document.getElementById('itemsModal')).show();
+  document.getElementById('modalSearch').oninput=function(){
+    const q=this.value.trim().toLowerCase(); let anyVisible=false;
+    container.querySelectorAll('div[data-value]').forEach(d=>{
+      const match=d.getAttribute('data-value').indexOf(q)!==-1;
+      d.style.display=match?'':'none'; if(match) anyVisible=true;
+    });
+    document.getElementById('modalNoResults').style.display=anyVisible?'none':'block';
+  };
+}
+function updateModalCount(){if(!currentModalSection) return;document.getElementById('modalSelectedCount').textContent=document.querySelectorAll(`.${currentModalSection}-checkbox:checked`).length;}
+function applyModal(){if(currentModalSection) updateDisplay(currentModalSection);}
+function clearAllModal(){
+  if(!currentModalSection) return;
+  document.querySelectorAll(`.${currentModalSection}-checkbox`).forEach(cb=>{cb.checked=false;});
+  document.querySelectorAll('#modalItemsList label').forEach(lbl=>{lbl.classList.remove('checked');lbl.style.cssText='';});
+  updateModalCount();
+}
+function updateDisplay(section){
+  const checked=document.querySelectorAll(`.${section}-checkbox:checked`);
+  const count=checked.length,isAmenities=section==='amenities';
+  const countBadge=document.getElementById(isAmenities?'amenitiesCount':'facilitiesCount');
+  const badgeSpan =document.getElementById(isAmenities?'amenitiesBadge':'facilitiesBadge');
+  const displayEl =document.getElementById(isAmenities?'amenitiesDisplay':'facilitiesDisplay');
+  if(countBadge) countBadge.textContent=count+' selected';
+  if(badgeSpan)  badgeSpan.textContent=count;
+  if(!displayEl) return;
+  displayEl.innerHTML='';
+  if(count===0){
+    displayEl.innerHTML=`<p class="text-muted text-center m-0" style="font-size:.85rem;">No ${section} selected — click the button above</p>`;
+  } else {
+    checked.forEach(function(cb){
+      const icon=cb.getAttribute('data-icon')||'fas fa-check';
+      const tag=document.createElement('span'); tag.className='item-tag';
+      tag.innerHTML=`<i class="${icon}"></i>${cb.value}<span class="remove-btn" onclick="removeItem('${section}','${cb.value}')"><i class="fas fa-times-circle"></i></span>`;
+      displayEl.appendChild(tag);
+    });
+  }
+  if(isAmenities) setCheck('cl-amenities',count>0);
+  else setCheck('cl-facilities',count>0);
+}
+function removeItem(section,name){
+  const cb=Array.from(document.querySelectorAll(`.${section}-checkbox`)).find(c=>c.value===name);
+  if(cb) cb.checked=false; updateDisplay(section);
+}
+</script>
+<script>
+document.getElementById('city').addEventListener('input', function () {
+  this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+});
+
+
+// Function to handle the removal of an existing image block
+window.removeExistingImage = function (iconEl) {
+    var label = iconEl.closest('.existing-img-remove-btn');
+    var checkbox = label ? label.querySelector('input[type="checkbox"]') : null;
+    var tile = iconEl.closest('.existing-img-item');
+
+    if (checkbox) {
+        // Create hidden input to tell Django to delete this image from the DB
+        var hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'delete_image_ids[]';
+        hidden.value = checkbox.value;
+        document.getElementById('indPlotForm').appendChild(hidden);
+    }
+
+    if (tile) tile.remove();
+    renderAllCategories(); // Update the image counts automatically
+};
+
+// Function to handle removal of the existing video
+function removeCurrentVideo() {
+    var deleteCheckbox = document.getElementById('delete_current_video');
+    if (deleteCheckbox) {
+        deleteCheckbox.checked = true; // Tells Django to delete the video
+    }
+    var block = document.getElementById('currentVideoBlock');
+    if (block) {
+        block.style.display = 'none'; // Hides it from the screen
+    }
+}
+</script>
+
+
+<script>
+let initialFormValues_ind = {};
+
+function captureInitialValues_ind() {
+  const editForm = document.getElementById('indPlotForm');
+  if (!editForm) return;
+  const inputs = editForm.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    if (input.name && input.type !== 'file' && input.type !== 'hidden' && !input.readOnly && !input.disabled) {
+      if (input.type === 'checkbox' || input.type === 'radio') {
+        if (input.checked) {
+          if (!initialFormValues_ind[input.name]) initialFormValues_ind[input.name] = [];
+          initialFormValues_ind[input.name].push(input.value);
+        }
+      } else {
+        initialFormValues_ind[input.name] = input.value;
+      }
+    }
+  });
+  const checkRadios = editForm.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+  checkRadios.forEach(input => {
+    if (input.name && !initialFormValues_ind[input.name]) initialFormValues_ind[input.name] = [];
+  });
+}
+
+function getChangedFieldsHtml_ind() {
+  let currentValues = {};
+  let changedFieldsHtml = [];
+  const editForm = document.getElementById('indPlotForm');
+  if (!editForm) return [];
+
+  const inputs = editForm.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    if (input.name && input.type !== 'file' && input.type !== 'hidden' && !input.readOnly && !input.disabled) {
+      if (input.type === 'checkbox' || input.type === 'radio') {
+        if (input.checked) {
+          if (!currentValues[input.name]) currentValues[input.name] = [];
+          currentValues[input.name].push(input.value);
+        }
+      } else {
+        currentValues[input.name] = input.value;
+      }
+    }
+  });
+  const checkRadios = editForm.querySelectorAll('input[type="checkbox"], input[type="radio"]');
+  checkRadios.forEach(input => {
+    if (input.name && !currentValues[input.name]) currentValues[input.name] = [];
+  });
+
+  let allKeys = new Set([...Object.keys(initialFormValues_ind), ...Object.keys(currentValues)]);
+
+  allKeys.forEach(key => {
+    let initial = initialFormValues_ind[key];
+    let current = currentValues[key];
+    let displayKey = key.replace(/\[\]/g, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+    if (Array.isArray(initial) || Array.isArray(current)) {
+      let initArr = initial || [];
+      let currArr = current || [];
+      if (initArr.slice().sort().join(',') !== currArr.slice().sort().join(',')) {
+        changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#f39c12;"><i class="fas fa-edit"></i> <b>${displayKey}</b>:</span> Modified to [${currArr.length > 0 ? currArr.join(', ') : 'None'}]</li>`);
+      }
+    } else {
+      initial = initial || "";
+      current = current || "";
+      if (initial !== current) {
+        if (initial === "" && current !== "") {
+          changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#11998e;"><i class="fas fa-plus-circle"></i> <b>${displayKey}</b>:</span> Newly added as <i>"${current}"</i></li>`);
+        } else if (initial !== "" && current === "") {
+          changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#e74c3c;"><i class="fas fa-minus-circle"></i> <b>${displayKey}</b>:</span> Removed (was <i>"${initial}"</i>)</li>`);
+        } else {
+          changedFieldsHtml.push(`<li style="margin-bottom:6px;"><span style="color:#f39c12;"><i class="fas fa-edit"></i> <b>${displayKey}</b>:</span> Modified from <i>"${initial}"</i> to <i>"${current}"</i></li>`);
+        }
+      }
+    }
+  });
+
+  return changedFieldsHtml;
+}
+
+document.addEventListener('DOMContentLoaded', captureInitialValues_ind);
+</script>

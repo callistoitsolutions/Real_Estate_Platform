@@ -49,6 +49,14 @@ admin.site.register(RentalResidentialProperty)
 admin.site.register(RentalResidentialVideo)
 
 
+########### Register  RentalResidentialImages Table/Modal ###############
+
+admin.site.register(RentalResidentialImage)
+
+########### Register RentalActivityLog Table/Modal ###############
+
+admin.site.register(RentalActivityLog)
+
 ########### Register  CommercialRentalProperty Table/Modal ###############
 
 admin.site.register(CommercialRentalProperty)

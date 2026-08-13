@@ -1,0 +1,1487 @@
+{% include "landlord/landlord_header.html" %}
+{% load static %}
+{% load humanize %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #10b981;
+        --primary-light: #ecfdf5;
+        --primary-dark: #059669;
+        --accent: #06b6d4;
+        --dark: #111827;
+        --mid: #374151;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --surface: #f9fafb;
+        --white: #ffffff;
+        --success: #10b981;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+        --shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+    }
+
+    * { box-sizing: border-box; }
+
+    body, .main-content {
+        font-family: 'DM Sans', sans-serif;
+        background: #f3f4f8;
+        color: var(--dark);
+    }
+
+    .prop-topbar {
+        background: var(--white);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 0;
+        font-size: 0.8rem;
+        color: var(--muted);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+    .prop-topbar a { color: var(--primary); text-decoration: none; }
+    .prop-topbar .prop-id-badge {
+        background: #ecfdf5;
+        color: var(--primary-dark);
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        border: 1px solid #a7f3d0;
+        font-family: monospace;
+    }
+    .prop-verified-badge {
+        background: #ecfeff;
+        color: #0891b2;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        border: 1px solid #a5f3fc;
+    }
+    .badge-duplicate {
+        background: #fef2f2;
+        color: #ef4444;
+        border: 1px solid #fecaca;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .prop-hero-header {
+        background: var(--white);
+        padding: 20px 0 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .prop-hero-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 6px;
+        line-height: 1.3;
+    }
+    .prop-hero-location {
+        color: var(--muted);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .prop-hero-location i { color: var(--primary); }
+    .prop-hero-price-tag {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+        line-height: 1;
+    }
+    .prop-hero-price-tag span { font-size: 0.9rem; color: var(--muted); font-weight: 400; }
+
+    .prop-gallery-grid {
+        display: grid;
+        grid-template-columns: 1.65fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 6px;
+        height: 420px;
+        overflow: hidden;
+        background: var(--dark);
+    }
+    .prop-gallery-main {
+        grid-row: 1 / 3;
+        position: relative;
+        overflow: hidden;
+        background: #0d1117;
+        cursor: pointer;
+    }
+    .prop-gallery-thumb {
+        position: relative;
+        overflow: hidden;
+        background: #1e2733;
+        cursor: pointer;
+    }
+    .prop-gallery-thumb img,
+    .prop-gallery-main .walkthrough-slide img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.4s ease;
+    }
+    .prop-gallery-thumb:hover img { transform: scale(1.05); }
+
+    .walkthrough-slide {
+        position: absolute; inset: 0;
+        opacity: 0; transition: opacity 0.7s ease;
+        display: none;
+    }
+    .walkthrough-slide.active { display: block; opacity: 1; }
+
+    .gallery-hud {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        padding: 20px 16px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        z-index: 10;
+    }
+    .gallery-hud-left { display: flex; align-items: center; gap: 10px; }
+    .btn-play-pause {
+        width: 34px; height: 34px;
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        color: white;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 0.75rem;
+        backdrop-filter: blur(4px);
+        transition: background 0.2s;
+    }
+    .btn-play-pause:hover { background: rgba(255,255,255,0.25); }
+    .gallery-timer { color: rgba(255,255,255,0.7); font-size: 0.72rem; font-family: monospace; }
+    .gallery-badge-walkthrough {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        padding: 4px 9px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        backdrop-filter: blur(4px);
+    }
+
+    .thumb-more-overlay {
+        position: absolute; inset: 0;
+        background: rgba(17,24,39,0.7);
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .thumb-more-overlay:hover { background: rgba(17,24,39,0.85); }
+    .thumb-more-overlay span { color: white; font-size: 1.2rem; font-weight: 700; }
+    .thumb-more-overlay small { display: block; color: rgba(255,255,255,0.6); font-size: 0.7rem; margin-top: 2px; }
+
+    .prop-sticky-nav {
+        position: sticky;
+        top: 44px;
+        background: var(--white);
+        border-bottom: 2px solid var(--border);
+        z-index: 990;
+        padding: 0;
+    }
+    .prop-sticky-nav-inner {
+        display: flex; gap: 0; overflow-x: auto;
+        scrollbar-width: thin; padding-bottom: 5px;
+    }
+    .prop-sticky-nav-inner::-webkit-scrollbar { height: 6px; }
+    .prop-sticky-nav-inner::-webkit-scrollbar-track { background: #f1f1f1; }
+    .prop-sticky-nav-inner::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+
+    .prop-nav-link {
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-decoration: none;
+        padding: 14px 18px;
+        border-bottom: 3px solid transparent;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .prop-nav-link i { font-size: 0.75rem; }
+    .prop-nav-link:hover { color: var(--primary); background: var(--primary-light); }
+    .prop-nav-link.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
+
+    .prop-page-body { padding: 28px 0 60px; }
+    .prop-layout-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+        align-items: start;
+    }
+    @media (max-width: 576px) { .prop-gallery-thumb { display: none; } }
+
+    .prop-section {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin-bottom: 20px;
+        scroll-margin-top: 130px;
+        box-shadow: var(--shadow-sm);
+    }
+    .prop-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 18px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .prop-section-title .section-icon {
+        width: 32px; height: 32px;
+        background: var(--primary-light);
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--primary);
+        font-size: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    .spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .spec-item {
+        padding: 11px 12px;
+        border-bottom: 1px solid #f3f4f6;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .spec-item:nth-child(odd) { border-right: 1px solid #f3f4f6; }
+    .spec-item:last-child, .spec-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+    .spec-label {
+        font-size: 0.72rem; font-weight: 600; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .spec-value { font-size: 0.88rem; font-weight: 600; color: var(--dark); }
+    .spec-full { grid-column: 1 / -1; border-right: none !important; }
+
+    .spec-item.highlight-price {
+        background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+        border-radius: 8px;
+        border: 1px solid #a7f3d0 !important;
+        padding: 14px;
+    }
+    .spec-item.highlight-price .spec-label { color: var(--primary-dark); }
+    .spec-item.highlight-price .spec-value { font-size: 1.1rem; color: var(--primary-dark); }
+
+    .amenity-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--surface); border: 1px solid var(--border);
+        padding: 6px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; color: var(--mid);
+    }
+    .amenity-pill i { color: var(--success); font-size: 0.68rem; }
+    .facility-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: #ecfeff; border: 1px solid #a5f3fc;
+        padding: 6px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 500; color: #0e7490;
+    }
+    .facility-pill i { font-size: 0.68rem; }
+
+    .address-box {
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: var(--radius-sm); padding: 14px; font-size: 0.85rem;
+        color: var(--mid); line-height: 1.6; border-left: 3px solid var(--primary);
+    }
+
+    .desc-body { font-size: 0.88rem; line-height: 1.8; color: #4b5563; }
+
+    .prop-faq .accordion-item { border: 1px solid var(--border); border-radius: var(--radius-sm) !important; margin-bottom: 10px; overflow: hidden; }
+    .prop-faq .accordion-button { font-weight: 600; font-size: 0.88rem; color: var(--dark); background: var(--white); padding: 14px 16px; box-shadow: none; }
+    .prop-faq .accordion-button:not(.collapsed) { background: #ecfdf5; color: var(--primary-dark); border-bottom: 1px solid #a7f3d0; }
+    .prop-faq .accordion-button::after { filter: none; }
+    .prop-faq .accordion-body { font-size: 0.85rem; line-height: 1.75; color: var(--mid); background: var(--white); padding: 14px 16px; }
+
+    .prop-sidebar { position: sticky; top: 130px; display: flex; flex-direction: column; gap: 16px; }
+
+    .sidebar-price-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+    .sidebar-price-header { background: linear-gradient(135deg, #10b981, #06b6d4); padding: 20px 20px 16px; color: white; }
+    .sidebar-price-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.85; font-weight: 600; }
+    .sidebar-price-amount { font-size: 2.1rem; font-weight: 700; line-height: 1.1; margin: 4px 0 0; }
+    .sidebar-price-amount span { font-size: 0.85rem; opacity: 0.75; font-weight: 400; }
+    .sidebar-price-body { padding: 16px 20px; }
+    .sidebar-mini-stat { text-align: center; padding: 10px 0; }
+    .sidebar-mini-stat-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 600; }
+    .sidebar-mini-stat-val { font-size: 0.95rem; font-weight: 700; color: var(--dark); margin-top: 3px; }
+
+    .sidebar-owner-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); }
+    .owner-avatar {
+        width: 46px; height: 46px; background: linear-gradient(135deg, var(--primary), var(--accent));
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        color: white; font-weight: 700; font-size: 1.1rem; flex-shrink: 0;
+    }
+    .owner-name { font-size: 0.9rem; font-weight: 700; color: var(--dark); }
+    .owner-email { font-size: 0.75rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+    .owner-phone-masked { font-size: 0.82rem; color: var(--mid); font-weight: 500; font-family: monospace; }
+    .btn-reveal-phone {
+        font-size: 0.73rem; color: var(--primary-dark); border: 1px solid #a7f3d0; background: var(--primary-light);
+        padding: 2px 8px; border-radius: 4px; cursor: pointer; font-weight: 600; transition: all 0.2s;
+    }
+    .btn-reveal-phone:hover { background: var(--primary); color: white; border-color: var(--primary); }
+    .btn-call-primary {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        background: linear-gradient(135deg, #10b981, #06b6d4); color: white; border: none;
+        border-radius: var(--radius-sm); padding: 12px; font-size: 0.9rem; font-weight: 700;
+        width: 100%; cursor: pointer; text-decoration: none; margin-top: 14px; transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+    }
+    .btn-call-primary:hover { background: linear-gradient(135deg, #059669, #0891b2); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(16,185,129,0.4); color: white; }
+
+    .owner-info-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 0.8rem; }
+    .owner-info-row:last-child { border: none; padding-bottom: 0; }
+    .owner-info-row i { color: var(--muted); width: 14px; text-align: center; flex-shrink: 0; }
+    .owner-info-row span { color: var(--mid); }
+
+    .sidebar-divider { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 600; margin-bottom: 10px; }
+
+    .prop-image-strip { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0 0; scrollbar-width: thin; }
+    .prop-image-strip::-webkit-scrollbar { height: 4px; }
+    .prop-image-strip::-webkit-scrollbar-track { background: #f1f1f1; }
+    .prop-image-strip::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+    .strip-thumb { flex-shrink: 0; width: 72px; height: 54px; border-radius: 5px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
+    .strip-thumb.active-thumb { border-color: var(--primary); }
+    .strip-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .prop-quick-stats { display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 0; border-top: 1px solid var(--border); margin-top: 12px; }
+    .quick-stat-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; color: var(--mid); }
+    .quick-stat-chip i { color: var(--primary); font-size: 0.72rem; }
+
+    .empty-state { text-align: center; padding: 24px; background: var(--surface); border-radius: var(--radius-sm); border: 1px dashed var(--border); }
+    .empty-state i { font-size: 1.5rem; color: #d1d5db; margin-bottom: 8px; display: block; }
+    .empty-state p { font-size: 0.8rem; color: var(--muted); margin: 0; }
+
+    .sub-section-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); margin-bottom: 12px; margin-top: 18px; }
+    .sub-section-label:first-child { margin-top: 0; }
+
+    .desc-highlight { background: #f0fdfa; border-left: 3px solid var(--primary); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 14px 16px; margin-bottom: 16px; font-size: 0.88rem; color: var(--mid); line-height: 1.8; }
+
+    .doc-link-card {
+        display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--surface);
+        border: 1px solid var(--border); border-radius: var(--radius-sm); text-decoration: none; color: var(--mid);
+        font-size: 0.82rem; font-weight: 600; transition: all .15s;
+    }
+    .doc-link-card:hover { border-color: var(--primary); background: var(--primary-light); color: var(--primary-dark); }
+    .doc-link-card i { font-size: 1.1rem; color: var(--primary); }
+    .doc-link-card.disabled { opacity: .5; pointer-events: none; }
+</style>
+
+<div class="main-content">
+
+    <!-- TOP BAR -->
+    <div class="prop-topbar">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <a href="{% url 'agricultural_plot_resale_list_landlord' %}"><i class="fas fa-tractor"></i> Agricultural Plot Listings</a>
+                    <span class="text-muted">/</span>
+                    <span>{{ plot.property_title|truncatechars:40|default:"Unnamed Agricultural Plot" }}</span>
+                    <span class="prop-id-badge">Property ID: {{ plot.id }}</span>
+                    <span class="prop-verified-badge"><i class="fas fa-circle-check"></i> System Verified</span>
+                    {% if plot.is_duplicate %}
+                    <span class="badge-duplicate"><i class="fas fa-clone"></i> Duplicate Flagged ({{ plot.duplicate_count }} linked)</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'agricultural_plot_resale_edit_landlord' plot.id %}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" style="font-size:1.100rem; font-weight:600;">
+                        <i class="fas fa-edit"></i> Edit Record
+                    </a>
+                    <a href="{% url 'agricultural_plot_resale_list_landlord' %}" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1" style="font-size:1.100rem; font-weight:600;">
+                        <i class="fas fa-arrow-left"></i> Back to Listing
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HERO HEADER -->
+    <div class="prop-hero-header">
+        <div class="container-fluid px-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 pt-3">
+                <div style="flex: 1; min-width: 260px;">
+                    <h1>{{ plot.property_title|default:"Agricultural Plot Resale" }}</h1>
+                    <div class="prop-hero-location" style="font-size:17px; font-weight:bold;">
+                        <i class="fas fa-location-dot"></i>
+                        {{ plot.locality|default:"—" }}, {{ plot.city|default:"—" }}, {{ plot.state|default:"—" }}
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <div class="mb-1">
+                        <span class="badge bg-success px-3 py-2">
+                            <i class="fas fa-tag me-1"></i> Resale Price
+                        </span>
+                    </div>
+
+                    <div class="prop-hero-price-tag">
+                        ₹{{ plot.selling_price|default:"0"|intcomma }}
+                    </div>
+
+                    <div style="font-size:0.82rem; color: var(--muted); margin-top:4px;">
+                        {% if price_per_unit %}
+                            ₹{{ price_per_unit|intcomma }} <strong>/ {{ plot.agr_area_unit|default:"acre" }}</strong>
+                        {% endif %}
+                        &nbsp; Negotiable: <strong>{{ plot.price_negotiable|upper|default:"NO" }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick stats chips -->
+            <div class="prop-quick-stats">
+                <div class="quick-stat-chip"><i class="fas fa-tags"></i> {{ plot.listing_type|default:"Resale" }} / {{ plot.category|default:"Agricultural" }} /{{ plot.subcategory|default:"Plot" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-vector-square"></i> {{ plot.plot_area|default:"—" }} {{ plot.agr_area_unit|default:"acre" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-seedling"></i> {{ plot.current_crop|default:"—" }}</div>
+                <div class="quick-stat-chip"><i class="fas fa-road"></i> {{ plot.plot_road_facing|default:"—" }}</div>
+                {% if plot.corner_plot|lower == 'yes' %}
+                <div class="quick-stat-chip"><i class="fas fa-vector-square"></i> Corner Plot</div>
+                {% endif %}
+                <div class="quick-stat-chip"><i class="fas fa-map-pin"></i> {{ plot.current_possession_status|default:"—" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GALLERY SECTION -->
+    <div style="background: #111827;">
+        <div class="container-fluid px-0">
+
+            <!-- 1. VIDEO PREVIEW SECTION (RM Assisted Link / Manual Upload / Auto Video File) -->
+            {% if selected_video %}
+                {% if selected_video.source == 'rm_assisted' and selected_video.video_url %}
+                <div style="background:#000; position:relative; border-bottom: 2px solid #222; text-align:center; padding: 15px 20px;">
+                    {% if selected_video.youtube_thumbnail %}
+                        <a href="{{ selected_video.video_url }}" target="_blank" style="display:inline-block; position:relative; max-width: 100%;">
+                            <img src="{{ selected_video.youtube_thumbnail }}" alt="RM Video Thumbnail" style="width:100%; max-height:280px; object-fit:cover; border-radius: 8px;">
+                            <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); border-radius: 8px;">
+                                <i class="fab fa-youtube text-danger" style="font-size: 54px;"></i>
+                            </div>
+                        </a>
+                    {% else %}
+                        <div class="p-3 text-white" style="max-width: 600px; margin: 0 auto;">
+                            <div class="p-3 rounded" style="background: #1f2937; border: 1px solid #374151;">
+                                <i class="fas fa-video fa-2x text-primary mb-2"></i>
+                                <h6 class="fw-bold mb-1">RM Assisted Video Link</h6>
+                                <p class="text-muted small text-truncate mb-2">{{ selected_video.video_url }}</p>
+                                <a href="{{ selected_video.video_url }}" target="_blank" class="btn btn-sm btn-primary px-3 py-1 fw-bold" style="font-size: 0.75rem;">
+                                    <i class="fas fa-external-link-alt me-1"></i> Open Video Link
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <span style="position:absolute; top:20px; right:25px; background:rgba(0,0,0,.75); color:#fff; font-size:0.7rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.2);">
+                        <i class="fas fa-link me-1"></i> RM Assisted Link (Active)
+                    </span>
+                </div>
+
+                {% elif selected_video.video %}
+                <div style="background:#000; position:relative; border-bottom: 2px solid #222; text-align: center; padding: 10px 0;">
+                    <video controls style="width:100%; max-height:300px; display:block; margin: 0 auto; background:#000;"
+                           poster="{% if images %}{{ images.0.image.url }}{% endif %}">
+                        <source src="{{ selected_video.video.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                    <span style="position:absolute; top:18px; right:20px; background:rgba(0,0,0,.75); color:#fff; font-size:0.7rem; font-weight:600; padding:4px 10px; border-radius:20px; border:1px solid rgba(255,255,255,0.2);">
+                        {% if selected_video.source == 'auto' %}
+                            <i class="fas fa-magic me-1"></i> Auto-Generated Walkthrough
+                        {% else %}
+                            <i class="fas fa-video me-1"></i> Property Video Walkthrough
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+            {% endif %}
+
+            <!-- 2. PROP GALLERY GRID -->
+            <div class="prop-gallery-grid">
+                <!-- Main Large Image / Slideshow Viewer -->
+                <div class="prop-gallery-main" id="galMain">
+                    {% if images %}
+                        {% for img in images %}
+                        <div class="walkthrough-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
+                            <img src="{{ img.image.url }}" alt="{{ img.category|title }} view {{ forloop.counter }}" style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#photoLightboxStrip">
+                        </div>
+                        {% endfor %}
+                        <div class="gallery-hud">
+                            <div class="gallery-hud-left">
+                                <button class="btn-play-pause" id="playPauseBtn" type="button"><i class="fas fa-pause"></i></button>
+                                <span class="gallery-timer" id="galTimer">00:00 / 00:00</span>
+                            </div>
+                            <span class="gallery-badge-walkthrough"><i class="fas fa-play-circle"></i> AUTO SLIDESHOW ({{ images|length }} IMAGES)</span>
+                        </div>
+                    {% else %}
+                        <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="background:#ecfdf5;">
+                            <i class="fas fa-tractor" style="font-size:55px; color:var(--primary); margin-bottom:12px;"></i>
+                            <h2 style="font-size:1.5rem; font-weight:700; color:var(--dark); margin:0; letter-spacing:0.5px;">EstateFlow</h2>
+                            <p style="font-size:0.9rem; color:var(--muted); margin-top:5px;">Plot Images Not Available</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Right Top Thumbnail Slot (Always Image #2) -->
+                <div class="prop-gallery-thumb" onclick="setSlide(1)" id="galThumb1" style="background: #ecfdf5; border-left: 3px solid #fff;">
+                    {% if images|length > 1 %}
+                        <img src="{{ images.1.image.url }}" alt="Thumbnail 2">
+                    {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-tractor text-primary" style="font-size: 24px; opacity: 0.7;"></i>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Right Bottom Thumbnail Slot (Always Image #3 + More Photos Overlay) -->
+                <div class="prop-gallery-thumb" onclick="setSlide(2)" id="galThumb2" style="background: #ecfdf5; border-left: 3px solid #fff; border-top: 3px solid #fff;">
+                    {% if images|length > 2 %}
+                        <img src="{{ images.2.image.url }}" alt="Thumbnail 3">
+                        {% if images|length > 3 %}
+                        <div class="thumb-more-overlay" data-bs-toggle="modal" data-bs-target="#photoLightboxStrip">
+                            <div class="text-center"><span>+{{ images|length|add:"-3" }}</span><small>More Photos</small></div>
+                        </div>
+                        {% endif %}
+                    {% elif images|length > 1 %}
+                        <img src="{{ images.1.image.url }}" alt="Thumbnail 2">
+                    {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                            <i class="fas fa-tractor text-primary" style="font-size: 24px; opacity: 0.7;"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Category Filter Tabs Bar -->
+            {% if grouped_images %}
+            <div style="background:#0d1117; padding:10px 16px;">
+                <div class="d-flex flex-wrap gap-2">
+                   <span class="cat-filter-tab active" data-filter="all" style="cursor:pointer; padding:5px 13px; border-radius:20px; background:#10b981; color:#fff; font-size:.72rem; font-weight:600;">All ({{ images|length }})</span>
+                    {% for cat_key, cat_data in grouped_images.items %}
+                    <span class="cat-filter-tab" data-filter="{{ cat_key }}" style="cursor:pointer; padding:5px 13px; border-radius:20px; background:#1f2937; color:#cbd5e0; font-size:.72rem; font-weight:600;">{{ cat_data.label }} ({{ cat_data.images|length }})</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Bottom Thumbnail Strip Bar -->
+            {% if images %}
+            <div style="background:#0d1117; padding:8px 16px 12px;">
+                <div class="prop-image-strip" id="imageStrip">
+                    {% for img in images %}
+                    <div class="strip-thumb {% if forloop.first %}active-thumb{% endif %}" data-cat="{{ img.category }}" data-slide="{{ forloop.counter0 }}" onclick="setSlide({{ forloop.counter0 }})">
+                        <img src="{{ img.image.url }}" alt="Thumb {{ forloop.counter }}">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- STICKY NAV -->
+    <div class="prop-sticky-nav">
+        <div class="container-fluid px-4">
+            <div class="prop-sticky-nav-inner" id="propNavTabs">
+                <a href="#sec-listed" class="prop-nav-link active" data-target="sec-listed"><i class="fas fa-user-tie"></i> Listed By</a>
+                <a href="#sec-basic" class="prop-nav-link" data-target="sec-basic"><i class="fas fa-layer-group"></i>Basic Agricultural Land Information</a>
+                <a href="#sec-revenue" class="prop-nav-link" data-target="sec-revenue"><i class="fas fa-file-shield"></i> Revenue Classification & Legal Status</a>
+                <a href="#sec-specs" class="prop-nav-link" data-target="sec-specs"><i class="fas fa-ruler-combined"></i> Land Specifications & Agricultural Details</a>
+                <a href="#sec-pricing" class="prop-nav-link" data-target="sec-pricing"><i class="fas fa-indian-rupee-sign"></i> Pricing Details</a>
+                <a href="#sec-legal" class="prop-nav-link" data-target="sec-legal"><i class="fas fa-shield-halved"></i>Legal, Title & Approval Details</a>
+                <a href="#sec-amenities" class="prop-nav-link" data-target="sec-amenities"><i class="fas fa-wand-magic-sparkles"></i> Amenities & Nearby Facilities</a>
+                <a href="#sec-desc" class="prop-nav-link" data-target="sec-desc"><i class="fas fa-align-left"></i> Property Descriptions</a>
+                <a href="#sec-location" class="prop-nav-link" data-target="sec-location"><i class="fas fa-map-location-dot"></i> Location Details</a>
+
+                <a href="#sec-meta" class="prop-nav-link" data-target="sec-meta"><i class="fas fa-database"></i> Media & Meta</a>
+                <a href="#sec-faqs" class="prop-nav-link" data-target="sec-faqs"><i class="fas fa-comments-question"></i> FAQs</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN BODY -->
+    <div class="prop-page-body">
+        <div class="container-fluid px-4">
+            <div class="prop-layout-grid">
+
+                <!-- LEFT COLUMN -->
+                <div>
+
+                    <!-- SECTION 1: LISTED BY -->
+                    <div class="prop-section" id="sec-listed">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-user-tie"></i></div>
+                            Listed By
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Listed By Type</div>
+                                <div class="spec-value">
+                                    {% if plot.listed_by_type == 'self' %}Listed by Self
+                                    {% elif plot.listed_by_type == 'other' %}Listed for Other User
+                                    {% else %}{{ plot.listed_by_type|default:"—" }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By ID</div>
+                                <div class="spec-value">{{ plot.listed_by_id|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By Name</div>
+                                <div class="spec-value">{{ plot.listed_by_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By Email</div>
+                                <div class="spec-value" style="font-size:0.85rem;">{{ plot.listed_by_email|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Listed By Contact</div>
+                                <div class="spec-value">{{ plot.listed_by_contact|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Listed By Role</div>
+                                <div class="spec-value">{{ plot.listed_by_role|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: BASIC INFO -->
+                    <div class="prop-section" id="sec-basic">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-layer-group"></i></div>
+                         Basic Agricultural Land Information
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Property Title</div>
+                                <div class="spec-value">{{ plot.property_title|default:"—" }}</div>
+                            </div>
+
+                              <div class="spec-item">
+                                <div class="spec-label">Gat / Gut / Khasra / Survey Number</div>
+                                <div class="spec-value">{{ plot.property_no|default:"—" }}</div>
+                            </div>
+
+                              <div class="spec-item">
+                                <div class="spec-label">Land Area (acre)</div>
+                                <div class="spec-value">{{ plot.plot_area|default:"—" }} {{ plot.agr_area_unit|default:"acre" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Agricultural Land Type</div>
+                                <div class="spec-value text-capitalize">{{ plot.property_type|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: REVENUE CLASSIFICATION & LAND USE -->
+                    <div class="prop-section" id="sec-revenue">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-file-shield"></i></div>
+                       Revenue Classification & Legal Status
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Revenue / Land Classification</div>
+                                <div class="spec-value">{{ plot.land_use|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">NA Status / Conversion</div>
+                                <div class="spec-value">{{ plot.na_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Revenue / Panchayat Sanction</div>
+                                <div class="spec-value">{{ plot.layout_approval_status|default:"—" }}</div>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <!-- SECTION 4: SPECIFICATIONS & FARM INFRASTRUCTURE -->
+                    <div class="prop-section" id="sec-specs">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-ruler-combined"></i></div>
+                          Land Specifications & Agricultural Details
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label"> Frontage / Width (ft)</div>
+                                <div class="spec-value">{{ plot.plot_frontage|default:"—" }} ft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Depth / Length (ft)</div>
+                                <div class="spec-value">{{ plot.plot_depth|default:"—" }} ft</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Plot Shape</div>
+                                <div class="spec-value">{{ plot.plot_shape|default:"—" }}</div>
+                            </div>
+                              <div class="spec-item">
+                                <div class="spec-label">Road / Track Access to Land</div>
+                                <div class="spec-value">{{ plot.plot_road_facing|default:"—" }}</div>
+                            </div>
+
+                             <div class="spec-item">
+                                <div class="spec-label">Access Road / Track Width</div>
+                                <div class="spec-value">{{ plot.road_width|default:"—" }}</div>
+                            </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">Corner Plot (Two Road Access)?</div>
+                                <div class="spec-value">{% if plot.corner_plot|lower == "yes" %}<i class="fas fa-check text-success"></i> Yes{% else %}<i class="fas fa-times text-danger"></i> No{% endif %}</div>
+                            </div>
+
+                             <div class="spec-item">
+                                <div class="spec-label">Land Measurement Unit </div>
+                                <div class="spec-value">{{ plot.agr_area_unit|default:"—" }}</div>
+                            </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">Soil Type</div>
+                                <div class="spec-value">{{ plot.soil_type|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Current Crop / Plantation</div>
+                                <div class="spec-value">{{ plot.current_crop|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Irrigation / Water Source</div>
+                                <div class="spec-value">{{ plot.irrigation_source|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Electricity on Land</div>
+                                <div class="spec-value">{{ plot.agr_electricity|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Distance from Nearest Highway / Road</div>
+                                <div class="spec-value">{{ plot.highway_distance|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Land Level / Topography</div>
+                                <div class="spec-value">{{ plot.land_topography|default:"—" }}</div>
+                            </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">Is Land Under Any Government Scheme?</div>
+                                <div class="spec-value">{{ plot.govt_scheme|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Land Demarcation / Boundary</div>
+                                <div class="spec-value">{{ plot.plot_fencing|default:"—" }}</div>
+                            </div>
+
+                             <div class="spec-item">
+                                <div class="spec-label">Current Land Use / Occupancy</div>
+                                <div class="spec-value">{{ plot.current_possession_status|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 5: PRICING -->
+                    <div class="prop-section" id="sec-pricing">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-indian-rupee-sign"></i></div>
+                            Pricing Details
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item highlight-price">
+                                <div class="spec-label">Selling Price</div>
+                                <div class="spec-value">₹{{ plot.selling_price|default:"0"|intcomma }}</div>
+                            </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">{{ rate_label|default:"Rate per Acre" }}</div>
+                                <div class="spec-value">{% if price_per_unit %}₹{{ price_per_unit|intcomma }}{% else %}—{% endif %}</div>
+                            </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">Is the Price Negotiable</div>
+                                <div class="spec-value">{{ plot.price_negotiable|upper|default:"—" }}</div>
+                            </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">Transaction / Transfer Charges</div>
+                                <div class="spec-value">{{ plot.additional_charges|default:"—" }}</div>
+                            </div>
+
+                            <div class="spec-item spec-full" style="background: linear-gradient(135deg, #f0fdfa, #ecfeff); border-color: #a5f3fc !important;">
+                                <div class="spec-label" style="color:#0e7490;">{{ plot.get_brokerage_label|default:"Brokerage" }}</div>
+                                <div class="spec-value" style="color:#0e7490;">
+                                    {% if plot.manual_brokerage %}
+                                        ₹{{ plot.manual_brokerage|floatformat:"0"|intcomma }}
+                                        <span style="font-size:0.75rem; font-weight:500;"> (Fixed Amount)</span>
+                                    {% elif plot.brokerage_percentage %}
+                                        {{ plot.get_brokerage_display_value }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 6: LEGAL & REVENUE COMPLIANCE -->
+                    <div class="prop-section" id="sec-legal">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-shield-halved"></i></div>
+                     Legal, Title & Approval Details
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Ownership / Tenure Type</div>
+                                <div class="spec-value">{{ plot.ownership_type|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Primary Title / Ownership Document</div>
+                                <div class="spec-value">{{ plot.ownership_document_type|default:plot.other_document_type|default:"—" }}</div>
+                            </div>
+
+                              <div class="spec-item">
+                                <div class="spec-label">Specify Other Ownership Document Type</div>
+                                <div class="spec-value">{{ plot.other_document_type|default:plot.other_document_type|default:"—" }}</div>
+                            </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">RERA / Revenue Department Status</div>
+                                <div class="spec-value">{{ plot.rera_status|default:"—" }}</div>
+                            </div>
+
+                            <div class="spec-item">
+                                <div class="spec-label">Title Clarity / Marketability</div>
+                                <div class="spec-value">{{ plot.title_clearance|default:"—" }}</div>
+                            </div>
+
+                             <div class="spec-item">
+                                <div class="spec-label">Encumbrance / Charge Status</div>
+                                <div class="spec-value">{{ plot.property_encumbrance_status|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">7/12 Utara (Satbara) Available?</div>
+                                <div class="spec-value">{{ plot.satbara_available|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">8A Khate Utara (Land Record) Available?</div>
+                                <div class="spec-value">{{ plot.khate_utara|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Section 63 / 63-A Clearance (Non-Agriculturist Purchase)?</div>
+                                <div class="spec-value">{{ plot.section63_clearance|default:"—" }}</div>
+                            </div>
+                            
+                            
+                           
+                            <div class="spec-item">
+                                <div class="spec-label">Land Revenue / Khajana Status</div>
+                                <div class="spec-value">{{ plot.property_tax_status|default:"—" }}</div>
+                            </div>
+
+                            {% if plot.outstanding_tax_amount %}
+                            <div class="spec-item">
+                                <div class="spec-label">Outstanding Tax Amount (₹)</div>
+                                <div class="spec-value">₹{{ plot.outstanding_tax_amount|intcomma }}</div>
+                            </div>
+                            {% if plot.pending_since %}
+                            <div class="spec-item">
+                                <div class="spec-label">Tax Dues Pending Since</div>
+                                <div class="spec-value">{{ plot.pending_since|date:"F j, Y" }}</div>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+
+                            <div class="spec-item">
+                                <div class="spec-label">Existing Loan / Mortgage on Property</div>
+                                <div class="spec-value">{{ plot.property_loan_status|default:"—" }}</div>
+                            </div>
+                            {% if plot.property_loan_status|lower == "loan running" %}
+                            <div class="spec-item">
+                                <div class="spec-label">Lender Bank / NBFC Name</div>
+                                <div class="spec-value">{{ plot.financing_bank|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Existing Loan Outstanding Loan Amount (₹)</div>
+                                <div class="spec-value">{% if plot.outstanding_loan_amount %}₹{{ plot.outstanding_loan_amount|intcomma }}{% else %}—{% endif %}</div>
+                            </div>
+                            {% endif %}
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Revenue Authority / Talathi / Tehsil Office</div>
+                                <div class="spec-value">{{ plot.sanctioning_authority|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                     <div class="prop-section" id="sec-amenities">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
+                           Amenities & Nearby Facilities
+                        </div>
+
+                        <div class="sub-section-label d-flex justify-content-between align-items-center">
+                            <span> Amenities</span>
+                            {% if amenities_list %}
+                            <span class="badge rounded-pill bg-success" style="font-size:13px;">{{ amenities_list|length }} Amenities</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            {% if amenities_list %}
+                                {% for item in amenities_list %}
+                                    <div class="amenity-pill"><i class="fas fa-circle-check"></i> {{ item }}</div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-state w-100" style="padding:14px;">
+                                    <i class="fas fa-list-check"></i>
+                                    <p>No amenities mapped for this plot.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="sub-section-label d-flex justify-content-between align-items-center">
+                            <span> Nearby Facilities</span>
+                            {% if facilities_list %}
+                            <span class="badge rounded-pill bg-info text-dark" style="font-size:13px;">{{ facilities_list|length }} Facilities</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% if facilities_list %}
+                                {% for item in facilities_list %}
+                                    <div class="facility-pill"><i class="fas fa-map-pin"></i> {{ item }}</div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-state w-100" style="padding:14px;">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <p>No nearby facilities mapped for this plot.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                     <div class="prop-section" id="sec-desc">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-align-left"></i></div>
+                            Property Descriptions
+                        </div>
+                        <div class="desc-body">
+                            <div class="sub-section-label">User Provided Description</div>
+                            {% if plot.user_description %}
+                                <div class="desc-highlight">{{ plot.user_description|safe }}</div>
+                            {% else %}
+                                <p class="mb-4 text-muted">No custom description provided by user.</p>
+                            {% endif %}
+
+                            <div class="sub-section-label">System Property Summary</div>
+                            {% if plot.property_summary %}
+                                <p class="mb-4">{{ plot.property_summary }}</p>
+                            {% else %}
+                                <p class="mb-4 text-muted">Not generated.</p>
+                            {% endif %}
+
+                            <div class="sub-section-label">System Detailed Description</div>
+                            {% if plot.property_description %}
+                                <div class="desc-highlight">{{ plot.property_description|safe }}</div>
+                            {% else %}
+                                <p class="text-muted">Not generated.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- SECTION 7: LOCATION -->
+                    <div class="prop-section" id="sec-location">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-map-location-dot"></i></div>
+                          Location Details
+                        </div>
+                        <div class="mt-2 mb-4">
+                            <div class="spec-label mb-2">Complete Land Location / Revenue Address </div>
+                            <div class="address-box">
+                                <i class="fas fa-map-pin text-primary me-2"></i>
+                                {{ plot.address|default:"No address provided." }}
+                            </div>
+                        </div>
+                        <div class="spec-grid">
+                            <div class="spec-item">
+                                <div class="spec-label">Village / Mouza / Taluka Name</div>
+                                <div class="spec-value">{{ plot.locality|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Nearest Village / Highway / City Landmark</div>
+                                <div class="spec-value">{{ plot.property_landmark|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">City / District</div>
+                                <div class="spec-value">{{ plot.city|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">State</div>
+                                <div class="spec-value">{{ plot.state|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Pincode</div>
+                                <div class="spec-value" style="font-family:monospace;">{{ plot.pincode|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Google Maps Link</div>
+                                <div class="spec-value">
+                                    {% if plot.google_maps_link %}
+                                    <a href="{{ plot.google_maps_link }}" target="_blank" style="color:var(--primary); text-decoration:underline;">View on Map <i class="fas fa-external-link-alt"></i></a>
+                                    {% else %}—{% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Latitude</div>
+                                <div class="spec-value">{{ plot.latitude|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Longitude</div>
+                                <div class="spec-value">{{ plot.longitude|default:"—" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 10: MEDIA & UPLOAD META -->
+                    <div class="prop-section" id="sec-meta">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-database"></i></div>
+                            Media, Documents & Upload Meta-Data
+                        </div>
+
+                        <div class="sub-section-label">Documents on File</div>
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            <a href="{% if plot.encumbrance_cert %}{{ plot.encumbrance_cert.url }}{% else %}#{% endif %}"
+                               target="_blank" class="doc-link-card {% if not plot.encumbrance_cert %}disabled{% endif %}">
+                                <i class="fas fa-file-pdf"></i> >Upload Satbara (7/12) and Khate Utara (8A)
+                            </a>
+                          
+                          
+                        </div>
+
+                        <div class="sub-section-label">Listing Portals</div>
+                        <div class="spec-grid mb-4">
+                            <div class="spec-item">
+                                <div class="spec-label">Is Property Already Listed Elsewhere?</div>
+                                <div class="spec-value">{{ plot.listed_elsewhere|default:"No" }}</div>
+                            </div>
+                            {% if plot.listed_elsewhere == 'Yes' %}
+                            <div class="spec-item">
+                                <div class="spec-label">Portal Name</div>
+                                <div class="spec-value">{{ plot.portal_name|default:"—" }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="sub-section-label">Property Uploaded By (System Meta)</div>
+                        <div class="spec-grid mb-4">
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Name</div>
+                                <div class="spec-value">{{ plot.uploaded_by_name|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Role</div>
+                                <div class="spec-value">{{ plot.uploaded_by_role|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Email</div>
+                                <div class="spec-value" style="font-size:0.82rem;">{{ plot.uploaded_by_email|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Uploader Contact</div>
+                                <div class="spec-value">{{ plot.uploaded_by_contact|default:"—" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Data Uploaded Via</div>
+                                <div class="spec-value" style="font-size:0.8rem; color: var(--muted);">
+                                    {% if plot.upload_file_name %}{{ plot.upload_file_name }}{% else %}Web UI Listing Form{% endif %}
+                                    {% if plot.upload_file %}
+                                        &middot; <a href="{{ plot.upload_file.url }}" target="_blank">Download Source File</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">System Record Creation Date</div>
+                                <div class="spec-value">{{ plot.created_at|date:"d M Y, h:i A" }}</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Last Updated</div>
+                                <div class="spec-value">{{ plot.updated_at|date:"d M Y, h:i A"|default:"—" }}</div>
+                            </div>
+                        </div>
+
+                        <!-- DUPLICATION ENGINE -->
+                        <div class="sub-section-label">System Duplication Engine</div>
+                        <div class="spec-grid" style="background: #fdfdfd; border-radius: 8px;">
+                            <div class="spec-item">
+                                <div class="spec-label">Is Duplicate?</div>
+                                <div class="spec-value">
+                                    {% if plot.is_duplicate %}
+                                        <span class="text-danger fw-bold"><i class="fas fa-exclamation-circle"></i> Yes, Flagged</span>
+                                    {% else %}
+                                        <span class="text-success fw-bold"><i class="fas fa-check-circle"></i> Original</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-label">Total Exact Matches</div>
+                                <div class="spec-value">{{ plot.duplicate_count|default:"1" }}</div>
+                            </div>
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Property Fingerprint (Key)</div>
+                                <div class="spec-value" style="font-family:monospace; font-size:0.75rem; word-break: break-all; color: var(--muted);">{{ plot.property_unique_key|default:"Not Generated" }}</div>
+                            </div>
+                            {% if plot.duplicate_group_id %}
+                            <div class="spec-item spec-full">
+                                <div class="spec-label">Duplicate Group ID</div>
+                                <div class="spec-value" style="font-family:monospace; font-size:0.75rem; word-break: break-all;">{{ plot.duplicate_group_id }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- SECTION 11: FAQs -->
+                    <div class="prop-section" id="sec-faqs">
+                        <div class="prop-section-title">
+                            <div class="section-icon"><i class="fas fa-comments-question"></i></div>
+                            Frequently Asked Questions (FAQs)
+                        </div>
+                        <div class="accordion prop-faq" id="faqAccordion">
+                            {% for faq in plot.faqs.all|slice:":7" %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="faqHead{{ faq.id }}">
+                                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faqBody{{ faq.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+                                            {{ faq.question }}
+                                        </button>
+                                    </h2>
+                                    <div id="faqBody{{ faq.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#faqAccordion">
+                                        <div class="accordion-body">{{ faq.answer }}</div>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="empty-state">
+                                    <i class="fas fa-database"></i>
+                                    <p>No FAQ matrices cached for this entry ID.</p>
+                                    <p style="font-size:0.72rem; margin-top:4px;">Re-save this listing in your Admin panel to generate auto FAQs.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT SIDEBAR -->
+                <div class="prop-sidebar">
+
+                    <!-- Price card -->
+                    <div class="sidebar-price-card">
+                        <div class="sidebar-price-header">
+                            <div class="sidebar-price-label">Resale Price</div>
+                            <div class="sidebar-price-amount">
+                                ₹{{ plot.selling_price|default:"0"|intcomma }}
+                                {% if price_per_unit %}
+                                    <span class="advance" style="font-size:12px; color:white; font-weight:bolder; display:block; margin-top:5px;">
+                                        (₹{{ price_per_unit|intcomma }} / {{ plot.agr_area_unit|default:"acre" }})
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="sidebar-price-body">
+                            <div class="row g-0">
+                                <div class="col-6 sidebar-mini-stat" style="border-right: 1px solid var(--border);">
+                                    <div class="sidebar-mini-stat-label">Plot Area</div>
+                                    <div class="sidebar-mini-stat-val">{{ plot.plot_area|default:"—" }} {{ plot.agr_area_unit|default:"acre" }}</div>
+                                </div>
+                                <div class="col-6 sidebar-mini-stat">
+                                    <div class="sidebar-mini-stat-label">{{ plot.get_brokerage_label|default:"Brokerage" }}</div>
+                                    <div class="sidebar-mini-stat-val">{{ plot.get_brokerage_display_value|default:"—" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Owner contact card -->
+                    <div class="sidebar-owner-card">
+                        <div class="sidebar-divider">Listed By Details</div>
+                        <div class="d-flex align-items-center gap-12 mb-3" style="gap:12px;">
+                            <div class="owner-avatar">{{ plot.listed_by_name|slice:":1"|upper|default:"U" }}</div>
+                            <div style="min-width:0;">
+                                <div class="owner-name">{{ plot.listed_by_name|default:"Undisclosed Identity" }}</div>
+                                <div class="owner-email"><i class="fas fa-envelope me-1"></i>{{ plot.listed_by_email|default:"No email logged" }}</div>
+                                <div style="font-size:0.7rem; color:var(--primary-dark); font-weight:600; margin-top:2px;">{{ plot.listed_by_role|default:"User" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="owner-info-row">
+                            <i class="fas fa-phone"></i>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="owner-phone-masked" id="sidebarPhone" data-phone="{{ plot.listed_by_contact|default:'' }}">
+                                    {% if plot.listed_by_contact %}
+                                        {{ plot.listed_by_contact|slice:":2" }}XXXXXX{{ plot.listed_by_contact|slice:"-2:" }}
+                                    {% else %}
+                                        Not available
+                                    {% endif %}
+                                </span>
+                                {% if plot.listed_by_contact %}
+                                <button type="button" class="btn-phone-eye btn-reveal-phone px-2" onclick="togglePhone('sidebarPhone', '{{ plot.listed_by_contact }}', this)" title="Show/Hide Number">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <a href="tel:{{ plot.listed_by_contact }}" class="btn-call-primary">
+                            <i class="fas fa-phone-volume"></i> Call Primary Line
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LIGHTBOX MODAL WITH CATEGORY TABS -->
+<div class="modal fade" id="photoLightboxStrip" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content" style="background:#0d1117; border:none;">
+            <div class="modal-header" style="border-color:#222;">
+                <h5 style="color:#fff;"><i class="fas fa-images"></i> Categorized Property Photos</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                {% if grouped_images %}
+                <div class="d-flex flex-wrap gap-2 mb-4" id="lightboxCategoryFilters">
+                    <button type="button" class="btn modal-cat-tab active-cat-btn" data-filter="all" style="background:#10b981; color:#fff; font-size:.8rem; font-weight:600; border-radius:20px; padding:6px 14px;">All Photos ({{ images|length }})</button>
+                    {% for cat_key, cat_data in grouped_images.items %}
+                    <button type="button" class="btn modal-cat-tab" data-filter="{{ cat_key }}" style="background:#1f2937; color:#cbd5e0; font-size:.8rem; font-weight:600; border-radius:20px; padding:6px 14px;">{{ cat_data.label }} ({{ cat_data.images|length }})</button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="row g-2" id="lightboxImagesGrid">
+                    {% for img in images %}
+                    <div class="col-4 col-md-3 modal-thumb-item" data-cat="{{ img.category }}">
+                        <div style="position:relative;">
+                            <img src="{{ img.image.url }}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; cursor:pointer;"
+                                 onclick="setSlide({{ forloop.counter0 }}); var m = bootstrap.Modal.getInstance(document.getElementById('photoLightboxStrip')); if(m) m.hide();">
+                            <span style="position:absolute; bottom:6px; left:6px; background:rgba(0,0,0,0.75); color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; text-transform:uppercase;">
+                                {{ img.get_category_display|default:img.category }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Lightbox Category Filtering Script
+document.addEventListener("DOMContentLoaded", function () {
+    const filterButtons = document.querySelectorAll('#lightboxCategoryFilters .modal-cat-tab');
+    const imageItems = document.querySelectorAll('#lightboxImagesGrid .modal-thumb-item');
+
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            filterButtons.forEach(b => {
+                b.style.background = '#1f2937';
+                b.style.color = '#cbd5e0';
+            });
+            this.style.background = '#10b981';
+            this.style.color = '#fff';
+
+            const selectedCat = this.getAttribute('data-filter');
+
+            imageItems.forEach(item => {
+                if (selectedCat === 'all' || item.getAttribute('data-cat') === selectedCat) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. WALKTHROUGH ENGINE
+    const slides = document.querySelectorAll('.walkthrough-slide');
+    const stripThumbs = document.querySelectorAll('.strip-thumb');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const galTimer = document.getElementById('galTimer');
+    const INTERVAL = 4000;
+
+    let currentSlide = 0;
+    let isPlaying = true;
+    let ticker = null;
+    let startTime = Date.now();
+    const totalDuration = slides.length * INTERVAL;
+
+    function fmt(ms) {
+        const s = Math.floor(ms / 1000);
+        const m = Math.floor(s / 60);
+        return `${String(m).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
+    }
+
+    window.setSlide = function(idx) {
+        slides.forEach(s => s.classList.remove('active'));
+        stripThumbs.forEach(t => t.classList.remove('active-thumb'));
+        currentSlide = (idx + slides.length) % slides.length;
+        if (slides[currentSlide]) slides[currentSlide].classList.add('active');
+        const activeThumb = document.querySelector(`.strip-thumb[data-slide="${currentSlide}"]`);
+
+        if (activeThumb) {
+            activeThumb.classList.add('active-thumb');
+            const stripContainer = document.getElementById('imageStrip');
+            if (stripContainer) {
+                const scrollLeftPos = activeThumb.offsetLeft - (stripContainer.clientWidth / 2) + (activeThumb.clientWidth / 2);
+                stripContainer.scrollTo({ left: scrollLeftPos, behavior: 'smooth' });
+            }
+        }
+        startTime = Date.now();
+    };
+
+    function tickTimer() {
+        if (!isPlaying || !galTimer) return;
+        const elapsed = (currentSlide * INTERVAL) + ((Date.now() - startTime) % INTERVAL);
+        const capped = Math.min(elapsed, totalDuration);
+        galTimer.textContent = `${fmt(capped)} / ${fmt(totalDuration)}`;
+        requestAnimationFrame(tickTimer);
+    }
+
+    function autoAdvance() {
+        ticker = setInterval(() => { setSlide(currentSlide + 1); }, INTERVAL);
+    }
+
+    if (slides.length > 0) {
+        stripThumbs.forEach(t => {
+            if (t.dataset.slide !== undefined) {
+                t.addEventListener('click', function() { setSlide(parseInt(this.dataset.slide)); });
+            }
+        });
+
+        if (playPauseBtn) {
+            playPauseBtn.addEventListener('click', function () {
+                if (isPlaying) {
+                    clearInterval(ticker);
+                    isPlaying = false;
+                    this.innerHTML = '<i class="fas fa-play"></i>';
+                } else {
+                    autoAdvance();
+                    isPlaying = true;
+                    this.innerHTML = '<i class="fas fa-pause"></i>';
+                    requestAnimationFrame(tickTimer);
+                }
+            });
+        }
+
+        setSlide(0);
+        autoAdvance();
+        requestAnimationFrame(tickTimer);
+    }
+
+    // 2. STICKY NAV + SCROLL SPY
+    const navLinks = document.querySelectorAll('.prop-nav-link');
+    const sections = document.querySelectorAll('.prop-section[id]');
+
+    function updateActiveNav() {
+        let activeId = null;
+        const scrollY = window.scrollY || document.documentElement.scrollTop;
+
+        sections.forEach(sec => {
+            const top = sec.getBoundingClientRect().top + scrollY - 160;
+            if (scrollY >= top) activeId = sec.id;
+        });
+
+        if (activeId) {
+            navLinks.forEach(l => {
+                l.classList.toggle('active', l.getAttribute('data-target') === activeId);
+            });
+        }
+    }
+
+    window.addEventListener('scroll', updateActiveNav, { passive: true });
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.getElementById(this.getAttribute('data-target'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                navLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+            }
+        });
+    });
+
+    updateActiveNav();
+
+    // 3. HORIZONTAL SCROLL FIX FOR NAV
+    const navTabs = document.getElementById('propNavTabs');
+    if (navTabs) {
+        navTabs.addEventListener('wheel', function(e) {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                this.scrollLeft += e.deltaY;
+            }
+        });
+    }
+});
+
+// 4. PHONE REVEAL TOGGLE
+function togglePhone(elementId, phone, button) {
+    const el = document.getElementById(elementId);
+    if (!el || !phone) return;
+
+    const maskedPhone = phone.substring(0, 2) + "XXXXXX" + phone.substring(phone.length - 2);
+
+    if (el.textContent.trim() === maskedPhone) {
+        el.textContent = phone;
+        el.style.color = "#059669";
+        el.style.fontWeight = "700";
+        button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        button.title = "Hide Number";
+    } else {
+        el.textContent = maskedPhone;
+        el.style.color = "";
+        el.style.fontWeight = "";
+        button.innerHTML = '<i class="fas fa-eye"></i>';
+        button.title = "Show Number";
+    }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for faq in plot.faqs.all|slice:":7" %}
+    {
+      "@type": "Question",
+      "name": "{{ faq.question|escapejs }}",
+      "acceptedAnswer": { "@type": "Answer", "text": "{{ faq.answer|escapejs }}" }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
